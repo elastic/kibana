@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -46,7 +46,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   'data-test-subj': dataTestSubj,
 }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
-
+  const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
     query: buildEntityFlyoutPreviewQuery(fieldName, name),
     sort: [],
@@ -71,8 +71,8 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     () => (
       <div
         css={css`
-          margin-top: 4px;
-          margin-bottom: 4px;
+          margin-top: ${euiTheme.size.xs};
+          margin-bottom: ${euiTheme.size.xs};
         `}
       >
         <PreviewLink
@@ -86,7 +86,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
         </PreviewLink>
       </div>
     ),
-    [totalFindings, fieldName, name, scopeId, isPreview, dataTestSubj]
+    [totalFindings, fieldName, name, scopeId, isPreview, dataTestSubj, euiTheme.size]
   );
 
   if (!hasMisconfigurationFindings) return null;

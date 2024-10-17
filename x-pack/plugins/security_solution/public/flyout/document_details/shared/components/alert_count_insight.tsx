@@ -67,15 +67,17 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
 
   const data = useMemo(() => (getIsAlertsBySeverityData(items) ? items : []), [items]);
 
-  const alertStats = useMemo(() => {
-    return data
-      .map((item) => ({
-        key: item.key,
-        count: item.value,
-        color: getSeverityColor(item.key),
-      }))
-      .sort((a, b) => SEVERITIES.indexOf(a.key) - SEVERITIES.indexOf(b.key));
-  }, [data]);
+  const alertStats = useMemo(
+    () =>
+      data
+        .map((item) => ({
+          key: item.key,
+          count: item.value,
+          color: getSeverityColor(item.key),
+        }))
+        .sort((a, b) => SEVERITIES.indexOf(a.key) - SEVERITIES.indexOf(b.key)),
+    [data]
+  );
 
   const totalAlertCount = useMemo(() => data.reduce((acc, item) => acc + item.value, 0), [data]);
 

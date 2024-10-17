@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
@@ -41,6 +41,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { euiTheme } = useEuiTheme();
   const { data } = useVulnerabilitiesPreview({
     query: buildEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
@@ -82,8 +83,8 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     () => (
       <div
         css={css`
-          margin-top: 4px;
-          margin-bottom: 4px;
+          margin-top: ${euiTheme.size.xs};
+          margin-bottom: ${euiTheme.size.xs};
         `}
       >
         <PreviewLink
@@ -97,7 +98,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
         </PreviewLink>
       </div>
     ),
-    [totalVulnerabilities, hostName, scopeId, isPreview, dataTestSubj]
+    [totalVulnerabilities, hostName, scopeId, isPreview, dataTestSubj, euiTheme.size]
   );
 
   if (!hasVulnerabilitiesFindings) return null;
