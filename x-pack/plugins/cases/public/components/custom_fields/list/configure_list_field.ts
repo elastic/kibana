@@ -6,8 +6,8 @@
  */
 import type { CustomFieldFactory } from '../types';
 import type {
-  CaseCustomFieldText,
-  TextCustomFieldConfiguration,
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration,
 } from '../../../../common/types/domain';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
@@ -18,12 +18,12 @@ import { View } from './view';
 import { Configure } from './configure';
 import { Create } from './create';
 
-export const configureTextCustomFieldFactory: CustomFieldFactory<
-  CaseCustomFieldText,
-  TextCustomFieldConfiguration
+export const configureListCustomFieldFactory: CustomFieldFactory<
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration
 > = () => ({
-  id: CustomFieldTypes.TEXT,
-  label: i18n.TEXT_LABEL,
+  id: CustomFieldTypes.LIST,
+  label: i18n.LIST_LABEL,
   getEuiTableColumn,
   build: () => ({
     Configure,
@@ -32,4 +32,13 @@ export const configureTextCustomFieldFactory: CustomFieldFactory<
     Create,
   }),
   convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
+  getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
+  convertValueToDisplayText: (
+    value: string | null,
+    configuration: ListCustomFieldConfiguration
+  ) => {
+    if (!value) return '';
+    const option = configuration.options.find((opt) => opt.key === value);
+    return option?.label ?? '';
+  },
 });

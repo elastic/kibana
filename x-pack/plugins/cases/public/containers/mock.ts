@@ -1158,6 +1158,8 @@ export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
   { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
+  { type: CustomFieldTypes.LIST, key: 'test_key_5', value: 'option_1' },
+  { type: CustomFieldTypes.LIST, key: 'test_key_6', value: null },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
@@ -1177,6 +1179,27 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
   },
   { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
+  {
+    type: CustomFieldTypes.LIST,
+    key: 'test_key_5',
+    label: 'My test label 5',
+    required: true,
+    defaultValue: 'option_1',
+    options: [
+      { key: 'option_1', label: 'Option 1' },
+      { key: 'option_2', label: 'Option 2' },
+    ],
+  },
+  {
+    type: CustomFieldTypes.LIST,
+    key: 'test_key_6',
+    label: 'My test label 6',
+    required: false,
+    options: [
+      { key: 'option_1', label: 'Option 1' },
+      { key: 'option_2', label: 'Option 2' },
+    ],
+  },
 ];
 
 export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [

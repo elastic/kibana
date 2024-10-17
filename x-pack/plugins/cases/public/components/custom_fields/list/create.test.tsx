@@ -9,22 +9,20 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { TextCustomFieldConfiguration } from '../../../../common/types/domain';
+import type { ListCustomFieldConfiguration } from '../../../../common/types/domain';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/193026
-describe.skip('Create ', () => {
+describe('Create', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  // required text custom field with a default value
-  const customFieldConfiguration = customFieldsConfigurationMock[0] as TextCustomFieldConfiguration;
+  // required list custom field with a default value
+  const customFieldConfiguration = customFieldsConfigurationMock[4] as ListCustomFieldConfiguration;
 
   it('renders correctly with default values', async () => {
     render(
@@ -36,12 +34,12 @@ describe.skip('Create ', () => {
     expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
 
     expect(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
+      await screen.findByTestId(`${customFieldConfiguration.key}-list-create-custom-field`)
     ).toHaveValue(customFieldConfiguration.defaultValue as string);
   });
 
   it('renders correctly with optional fields', async () => {
-    const optionalField = customFieldsConfigurationMock[2] as TextCustomFieldConfiguration; // optional text custom field
+    const optionalField = customFieldsConfigurationMock[5] as ListCustomFieldConfiguration; // optional list custom field
 
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -50,7 +48,7 @@ describe.skip('Create ', () => {
     );
 
     expect(await screen.findByText(optionalField.label)).toBeInTheDocument();
-    expect(await screen.findByTestId(`${optionalField.key}-text-create-custom-field`)).toHaveValue(
+    expect(await screen.findByTestId(`${optionalField.key}-list-create-custom-field`)).toHaveValue(
       ''
     );
   });
@@ -67,7 +65,7 @@ describe.skip('Create ', () => {
     );
 
     expect(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
+      await screen.findByTestId(`${customFieldConfiguration.key}-list-create-custom-field`)
     ).toHaveValue('');
   });
 
@@ -81,7 +79,7 @@ describe.skip('Create ', () => {
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('disables the text when loading', async () => {
+  it('disables the select field when loading', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create isLoading={true} customFieldConfiguration={customFieldConfiguration} />
@@ -89,7 +87,7 @@ describe.skip('Create ', () => {
     );
 
     expect(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
+      await screen.findByTestId(`${customFieldConfiguration.key}-list-create-custom-field`)
     ).toHaveAttribute('disabled');
   });
 
@@ -100,13 +98,15 @@ describe.skip('Create ', () => {
       </FormTestComponent>
     );
 
-    const textCustomField = await screen.findByTestId(
-      `${customFieldConfiguration.key}-text-create-custom-field`
+    const listCustomField = await screen.findByTestId(
+      `${customFieldConfiguration.key}-list-create-custom-field`
     );
 
-    await userEvent.clear(textCustomField);
-    await userEvent.click(textCustomField);
-    await userEvent.paste('this is a sample text!');
+    await userEvent.selectOptions(
+      listCustomField,
+      await screen.getByRole('option', { name: 'Option 2' })
+    );
+
     await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
@@ -114,7 +114,7 @@ describe.skip('Create ', () => {
       expect(onSubmit).toHaveBeenCalledWith(
         {
           customFields: {
-            [customFieldConfiguration.key]: 'this is a sample text!',
+            [customFieldConfiguration.key]: 'option_2',
           },
         },
         true
@@ -122,75 +122,20 @@ describe.skip('Create ', () => {
     });
   });
 
-  it('shows error when text is too long', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Create isLoading={false} customFieldConfiguration={customFieldConfiguration} />
-      </FormTestComponent>
-    );
-
-    const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
-
-    await userEvent.click(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
-    );
-    await userEvent.paste(sampleText);
-
-    await userEvent.click(await screen.findByText('Submit'));
-
-    expect(
-      await screen.findByText(
-        `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
-      )
-    ).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({}, false);
-    });
-  });
-
-  it('shows error when text is too long and field is optional', async () => {
+  it('shows error when selection is required but is empty', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create
           isLoading={false}
-          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          customFieldConfiguration={{
+            ...customFieldConfiguration,
+            defaultValue: undefined,
+            required: true,
+          }}
         />
       </FormTestComponent>
     );
 
-    const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
-
-    await userEvent.click(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
-    );
-    await userEvent.paste(sampleText);
-    await userEvent.click(await screen.findByText('Submit'));
-
-    expect(
-      await screen.findByText(
-        `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
-      )
-    ).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({}, false);
-    });
-  });
-
-  it('shows error when text is required but is empty', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Create
-          isLoading={false}
-          customFieldConfiguration={{ ...customFieldConfiguration, required: true }}
-        />
-      </FormTestComponent>
-    );
-
-    await userEvent.clear(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
-    );
     await userEvent.click(await screen.findByText('Submit'));
 
     expect(
@@ -202,15 +147,14 @@ describe.skip('Create ', () => {
     });
   });
 
-  it('does not show error when text is not required but is empty', async () => {
+  it('does not show error when selection is not required but is empty', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create
           isLoading={false}
           customFieldConfiguration={{
-            key: customFieldConfiguration.key,
-            type: customFieldConfiguration.type,
-            label: customFieldConfiguration.label,
+            ...customFieldConfiguration,
+            defaultValue: undefined,
             required: false,
           }}
         />

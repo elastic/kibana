@@ -8,7 +8,11 @@
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
 import { UserRt } from '../user/v1';
-import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
+import {
+  CustomFieldTextTypeRt,
+  CustomFieldToggleTypeRt,
+  CustomFieldListTypeRt,
+} from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -51,9 +55,28 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+export const ListCustomFieldOptionRt = rt.strict({
+  label: rt.string,
+  key: rt.string,
+});
+
+export const ListCustomFieldConfigurationRt = rt.intersection([
+  rt.strict({ type: CustomFieldListTypeRt }),
+  CustomFieldConfigurationWithoutTypeRt,
+  rt.strict({
+    options: rt.array(ListCustomFieldOptionRt),
+  }),
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
+
 export const CustomFieldConfigurationRt = rt.union([
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
+  ListCustomFieldConfigurationRt,
 ]);
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
@@ -151,3 +174,8 @@ export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
+export type ListCustomFieldOption = rt.TypeOf<typeof ListCustomFieldOptionRt>;
+
+export type TextCustomFieldConfiguration = rt.TypeOf<typeof TextCustomFieldConfigurationRt>;
+export type ListCustomFieldConfiguration = rt.TypeOf<typeof ListCustomFieldConfigurationRt>;
+export type ToggleCustomFieldConfiguration = rt.TypeOf<typeof ToggleCustomFieldConfigurationRt>;

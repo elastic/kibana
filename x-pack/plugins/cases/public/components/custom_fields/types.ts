@@ -15,30 +15,31 @@ import type {
   CaseUICustomField,
 } from '../../containers/types';
 
-export interface CustomFieldType<T extends CaseUICustomField> {
+export interface CustomFieldType<T extends CaseUICustomField, I = CasesConfigurationUICustomField> {
   Configure: React.FC;
   View: React.FC<{
     customField?: T;
+    configuration?: I;
   }>;
   Edit: React.FC<{
     customField?: T;
-    customFieldConfiguration: CasesConfigurationUICustomField;
+    customFieldConfiguration: I;
     onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
   }>;
   Create: React.FC<{
-    customFieldConfiguration: CasesConfigurationUICustomField;
+    customFieldConfiguration: I;
     isLoading: boolean;
     setAsOptional?: boolean;
     setDefaultValue?: boolean;
   }>;
 }
 
-export interface CustomFieldFactoryFilterOption {
+export interface CustomFieldFactoryFilterOption<T extends CaseUICustomField> {
   key: string;
   label: string;
-  value: boolean | null;
+  value: T['value'];
 }
 
 export type CustomFieldEuiTableColumn = Pick<
@@ -48,14 +49,18 @@ export type CustomFieldEuiTableColumn = Pick<
   render: (customField: CaseCustomField) => React.ReactNode;
 };
 
-export type CustomFieldFactory<T extends CaseUICustomField> = () => {
+export type CustomFieldFactory<
+  T extends CaseUICustomField,
+  I = CasesConfigurationUICustomField
+> = () => {
   id: string;
   label: string;
-  getEuiTableColumn: (params: { label: string }) => CustomFieldEuiTableColumn;
-  build: () => CustomFieldType<T>;
-  filterOptions?: CustomFieldFactoryFilterOption[];
+  getEuiTableColumn: (params: I) => CustomFieldEuiTableColumn;
+  build: () => CustomFieldType<T, I>;
+  getFilterOptions?: (configuration: I) => Array<CustomFieldFactoryFilterOption<T>>;
   getDefaultValue?: () => string | boolean | null;
   convertNullToEmpty?: (value: string | boolean | null) => string;
+  convertValueToDisplayText?: (value: T['value'], configuration: I) => string;
 };
 
 export type CustomFieldBuilderMap = {

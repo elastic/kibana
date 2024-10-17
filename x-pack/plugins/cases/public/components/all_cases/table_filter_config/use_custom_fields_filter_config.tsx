@@ -96,9 +96,11 @@ export const useCustomFieldsFilterConfig = ({
     return { customFieldsFilterConfig: [] };
   }
 
-  for (const { key: fieldKey, type, label: buttonLabel } of customFields ?? []) {
+  for (const customFieldConfiguration of customFields ?? []) {
+    const { key: fieldKey, type, label: buttonLabel } = customFieldConfiguration;
     if (customFieldsBuilder[type]) {
-      const { filterOptions: customFieldOptions } = customFieldsBuilder[type]();
+      const { getFilterOptions } = customFieldsBuilder[type]();
+      const customFieldOptions = getFilterOptions?.(customFieldConfiguration);
 
       if (customFieldOptions) {
         customFieldsFilterConfig.push(
