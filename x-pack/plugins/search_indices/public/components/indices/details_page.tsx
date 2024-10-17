@@ -206,7 +206,7 @@ export const SearchIndexDetailsPage = () => {
                     <EuiFlexItem>
                       <EuiButtonEmpty
                         isLoading={isDocumentsLoading}
-                        data-test-subj="useInPlaygroundLink"
+                        data-test-subj="viewInDiscoverLink"
                         onClick={navigateToDiscover}
                       >
                         <FormattedMessage
