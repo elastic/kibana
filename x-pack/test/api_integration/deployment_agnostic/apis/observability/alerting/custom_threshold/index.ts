@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Slo - Burn rate rule', () => {
-    loadTestFile(require.resolve('./burn_rate_rule'));
-    loadTestFile(require.resolve('./custom_threshold'));
+  describe('Custom Threshold rule', () => {
+    loadTestFile(require.resolve('./avg_pct_fired'));
   });
 }
