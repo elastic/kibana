@@ -329,6 +329,8 @@ module.exports = {
     '@kbn/imports/no_boundary_crossing': 'error',
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
+    '@kbn/eslint/no_deprecated_authz_config': 'error',
+
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
