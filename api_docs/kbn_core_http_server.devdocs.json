@@ -4618,6 +4618,10 @@
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/documents.ts"
               },
               {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/list.ts"
+              },
+              {
                 "plugin": "licenseManagement",
                 "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
@@ -5942,6 +5946,10 @@
                 "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
@@ -6501,7 +6509,7 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.ts"
               },
               {
                 "plugin": "actions",
@@ -7216,6 +7224,10 @@
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/parse_csv.ts"
               },
               {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/create.ts"
+              },
+              {
                 "plugin": "licenseManagement",
                 "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_basic_route.ts"
               },
@@ -7652,6 +7664,14 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
               },
@@ -7753,26 +7773,6 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get_global_execution_kpi.test.ts"
               },
               {
@@ -7810,6 +7810,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/update_flapping_settings.test.ts"
+              },
+              {
+                "plugin": "encryptedSavedObjects",
+                "path": "x-pack/plugins/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -8038,6 +8042,26 @@
               {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -9912,6 +9936,10 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/delete.ts"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/delete.ts"
               },
               {
                 "plugin": "logstash",
@@ -13364,6 +13392,26 @@
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.httpResource",
+            "type": "CompoundType",
+            "tags": [
+              "note",
+              "note",
+              "default"
+            ],
+            "label": "httpResource",
+            "description": [
+              "\nWhether this endpoint is being used to serve generated or static HTTP resources\nlike JS, CSS or HTML. _Do not set to `true` for HTTP APIs._\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -15190,7 +15238,7 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get_attack_discovery.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16001,10 +16049,6 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/cancel_attack_discovery.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/update_route.ts"
               },
               {
@@ -16672,7 +16716,11 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post_attack_discovery.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/cancel/cancel_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",
