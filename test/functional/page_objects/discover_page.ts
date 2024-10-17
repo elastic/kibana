@@ -164,7 +164,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickNewSearchButton() {
     await this.testSubjects.click('discoverNewButton');
-    await this.testSubjects.click('breadcrumb first last'); // cancel tooltips
+    await this.testSubjects.moveMouseTo('toggleNavButton'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
 
