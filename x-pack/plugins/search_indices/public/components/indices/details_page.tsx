@@ -13,6 +13,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   useEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -63,6 +64,12 @@ export const SearchIndexDetailsPage = () => {
       await playgroundLocator.navigate({ 'default-index': index.name });
     }
   }, [share, index]);
+  const navigateToDiscover = useCallback(async () => {
+    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (discoverLocator && indexName) {
+      await discoverLocator.navigate({ dataViewSpec: { title: indexName } });
+    }
+  }, [share, indexName]);
 
   const [isDocumentsExists, setDocumentsExists] = useState<boolean>(false);
   const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
@@ -194,8 +201,36 @@ export const SearchIndexDetailsPage = () => {
             bottomBorder={false}
             rightSideItems={[
               <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem>
-                  {!isDocumentsExists ? (
+                {isDocumentsExists ? (
+                  <>
+                    <EuiFlexItem>
+                      <EuiButtonEmpty
+                        isLoading={isDocumentsLoading}
+                        data-test-subj="useInPlaygroundLink"
+                        onClick={navigateToDiscover}
+                      >
+                        <FormattedMessage
+                          id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
+                          defaultMessage="View in Discover"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiButton
+                        isLoading={isDocumentsLoading}
+                        data-test-subj="useInPlaygroundLink"
+                        onClick={navigateToPlayground}
+                        fill
+                      >
+                        <FormattedMessage
+                          id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
+                          defaultMessage="Search in Playground"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </>
+                ) : (
+                  <EuiFlexItem>
                     <EuiButtonEmpty
                       href={docLinks.links.apiReference}
                       target="_blank"
@@ -205,29 +240,11 @@ export const SearchIndexDetailsPage = () => {
                     >
                       <FormattedMessage
                         id="xpack.searchIndices.indexAction.ApiReferenceButtonLabel"
-                        defaultMessage="{buttonLabel}"
-                        values={{
-                          buttonLabel: isDocumentsLoading ? 'Loading' : 'API Reference',
-                        }}
+                        defaultMessage="API Reference"
                       />
                     </EuiButtonEmpty>
-                  ) : (
-                    <EuiButtonEmpty
-                      isLoading={isDocumentsLoading}
-                      iconType="launch"
-                      data-test-subj="useInPlaygroundLink"
-                      onClick={navigateToPlayground}
-                    >
-                      <FormattedMessage
-                        id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
-                        defaultMessage="{buttonLabel}"
-                        values={{
-                          buttonLabel: isDocumentsLoading ? 'Loading' : 'Use in Playground',
-                        }}
-                      />
-                    </EuiButtonEmpty>
-                  )}
-                </EuiFlexItem>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem>
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
