@@ -20,8 +20,15 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
-    actions: { upgradeAllRules, upgradeRules },
+    state: {
+      ruleUpgradeInfos,
+      hasRulesToUpgrade,
+      loadingRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      isPrebuiltRulesCustomizationEnabled,
+    },
+    actions: { upgradeRules },
   } = useUpgradePrebuiltRulesTableContext();
   const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
   const canUserEditRules = canUserCRUD && !isUserDataLoading;
@@ -31,9 +38,21 @@ export const UpgradePrebuiltRulesTableButtons = ({
 
   const isRuleUpgrading = loadingRules.length > 0;
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
+  const isAllSelectedRulesHaveConflicts =
+    isPrebuiltRulesCustomizationEnabled &&
+    selectedRules.every((rule) => rule.diff.num_fields_with_conflicts > 0);
+  const isAllRulesHaveConflicts =
+    isPrebuiltRulesCustomizationEnabled &&
+    ruleUpgradeInfos.every((rule) => rule.diff.num_fields_with_conflicts > 0);
   const upgradeSelectedRules = useCallback(
     () => upgradeRules(selectedRules.map((rule) => rule.rule_id)),
     [selectedRules, upgradeRules]
+  );
+
+  const upgradeAllRules = useCallback(
+    // Upgrade all rules, ignoring filter and selction
+    () => upgradeRules(ruleUpgradeInfos.map((rule) => rule.rule_id)),
+    [ruleUpgradeInfos, upgradeRules]
   );
 
   return (
@@ -42,7 +61,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={upgradeSelectedRules}
-            disabled={!canUserEditRules || isRequestInProgress}
+            disabled={!canUserEditRules || isRequestInProgress || isAllSelectedRulesHaveConflicts}
             data-test-subj="upgradeSelectedRulesButton"
           >
             <>
@@ -57,7 +76,12 @@ export const UpgradePrebuiltRulesTableButtons = ({
           fill
           iconType="plusInCircle"
           onClick={upgradeAllRules}
-          disabled={!canUserEditRules || !hasRulesToUpgrade || isRequestInProgress}
+          disabled={
+            !canUserEditRules ||
+            !hasRulesToUpgrade ||
+            isRequestInProgress ||
+            isAllRulesHaveConflicts
+          }
           data-test-subj="upgradeAllRulesButton"
         >
           {i18n.UPDATE_ALL}

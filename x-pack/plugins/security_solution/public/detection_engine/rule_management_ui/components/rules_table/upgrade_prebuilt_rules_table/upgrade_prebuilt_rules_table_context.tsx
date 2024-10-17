@@ -9,6 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine';
 import type { RulesUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
@@ -21,10 +22,7 @@ import type {
   RuleSignatureId,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
-import {
-  usePerformUpgradeAllRules,
-  usePerformUpgradeSpecificRules,
-} from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
+import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
@@ -32,12 +30,17 @@ import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import { TabContentPadding } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
+import { UpgradeConflictsModal } from '../../../../../detections/components/modals/upgrade_conflicts_modal';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 
 export interface UpgradePrebuiltRulesTableState {
+  /**
+   * Rule upgrade state (all rules available for upgrade)
+   */
+  ruleUpgradeInfos: RuleUpgradeInfoForReview[];
   /**
    * Rule upgrade state after applying `filterOptions`
    */
@@ -90,7 +93,6 @@ export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
-  upgradeAllRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   openRulePreview: (ruleId: string) => void;
 }
@@ -144,18 +146,38 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
   // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
-  const [isUpgradeModalVisible, showUpgradeModal, hideUpgradeModal] = useBoolState(false);
+  const [isLegacyMLJobsModalVisible, showLegacyMLJobsModal, hideLegacyMLJobsModal] =
+    useBoolState(false);
+  // Wrapper to add confirmation modal for rules that have conflicts in their fields
+  const [isConflictsModalVisible, showConflictsModal, hideConflictsModal] = useBoolState(false);
+
   const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
   const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
 
-  const [confirmUpgrade, handleUpgradeConfirm, handleUpgradeCancel] = useAsyncConfirmation({
-    onInit: showUpgradeModal,
-    onFinish: hideUpgradeModal,
-  });
+  const [confirmLegacyMLJobs, handleLegacyMLJobsConfirm, handleLegacyMLJobsCancel] =
+    useAsyncConfirmation({
+      onInit: showLegacyMLJobsModal,
+      onFinish: hideLegacyMLJobsModal,
+    });
 
-  const shouldConfirmUpgrade = legacyJobsInstalled.length > 0;
+  const [confirmConflictsUpgrade, handleConflictsConfirm, handleConflictsCancel] =
+    useAsyncConfirmation({
+      onInit: showConflictsModal,
+      onFinish: hideConflictsModal,
+    });
 
-  const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
+  const shouldConfirmMLJobs = legacyJobsInstalled.length > 0;
+  const getRulesWithConflicts = useCallback(
+    (ruleIds?: RuleSignatureId[]) => {
+      // If no rules are selected (update all rules case), then check all rules
+      const rulesSelectedForUpgrade = ruleIds ?? Object.keys(rulesUpgradeState);
+      const rulesToUpgrade = rulesSelectedForUpgrade.map((ruleId) => rulesUpgradeState[ruleId]);
+
+      return rulesToUpgrade.filter((rule) => rule.diff.num_fields_with_conflicts > 0);
+    },
+    [rulesUpgradeState]
+  );
+
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
 
   const upgradeRules = useCallback(
@@ -169,31 +191,35 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       }));
       setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
       try {
-        if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
+        if (shouldConfirmMLJobs && !(await confirmLegacyMLJobs())) {
           return;
         }
-        await upgradeSpecificRulesRequest(rulesToUpgrade);
+
+        const rulesWithConflicts = getRulesWithConflicts(ruleIds);
+        if (rulesWithConflicts.length > 0 && !(await confirmConflictsUpgrade())) {
+          return;
+        }
+
+        const ruleIdsWithConflicts = rulesWithConflicts.map((rule) => rule.rule_id);
+        const rulesToUpgradeWithNoConflicts = rulesToUpgrade.filter(
+          (rule) => !ruleIdsWithConflicts.includes(rule.rule_id)
+        );
+        await upgradeSpecificRulesRequest(rulesToUpgradeWithNoConflicts);
       } finally {
         setLoadingRules((prev) =>
           prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id))
         );
       }
     },
-    [confirmUpgrade, shouldConfirmUpgrade, rulesUpgradeState, upgradeSpecificRulesRequest]
+    [
+      confirmLegacyMLJobs,
+      confirmConflictsUpgrade,
+      shouldConfirmMLJobs,
+      getRulesWithConflicts,
+      rulesUpgradeState,
+      upgradeSpecificRulesRequest,
+    ]
   );
-
-  const upgradeAllRules = useCallback(async () => {
-    // Unselect all rules so that the table doesn't show the "bulk actions" bar
-    setLoadingRules((prev) => [...prev, ...ruleUpgradeInfos.map((r) => r.rule_id)]);
-    try {
-      if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
-        return;
-      }
-      await upgradeAllRulesRequest();
-    } finally {
-      setLoadingRules([]);
-    }
-  }, [confirmUpgrade, ruleUpgradeInfos, shouldConfirmUpgrade, upgradeAllRulesRequest]);
 
   const ruleActionsFactory = useCallback(
     (rule: RuleResponse, closeRulePreview: () => void) => (
@@ -300,16 +326,16 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     () => ({
       reFetchRules: refetch,
       upgradeRules,
-      upgradeAllRules,
       setFilterOptions,
       openRulePreview,
     }),
-    [refetch, upgradeRules, upgradeAllRules, openRulePreview]
+    [refetch, upgradeRules, openRulePreview]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
     return {
       state: {
+        ruleUpgradeInfos,
         rulesUpgradeState,
         hasRulesToUpgrade: isFetched && ruleUpgradeInfos.length > 0,
         filterOptions,
@@ -343,11 +369,17 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
-        {isUpgradeModalVisible && (
+        {isLegacyMLJobsModalVisible && (
           <MlJobUpgradeModal
             jobs={legacyJobsInstalled}
-            onCancel={handleUpgradeCancel}
-            onConfirm={handleUpgradeConfirm}
+            onCancel={handleLegacyMLJobsCancel}
+            onConfirm={handleLegacyMLJobsConfirm}
+          />
+        )}
+        {isConflictsModalVisible && (
+          <UpgradeConflictsModal
+            onCancel={handleConflictsCancel}
+            onConfirm={handleConflictsConfirm}
           />
         )}
         {children}
