@@ -9765,7 +9765,7 @@
       }
     },
     "/api/fleet/agent_policies/outputs": {
-      "get": {
+      "post": {
         "description": "Get list of outputs associated with agent policies",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0",
         "parameters": [
@@ -9778,6 +9778,16 @@
               "enum": [
                 "2023-10-31"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
               "type": "string"
             }
           }
