@@ -35,7 +35,7 @@ export const useGridLayoutEvents = ({
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) return;
+      if (!interactionEvent$.value || interactionEvent$.value.type === 'drop') return;
       e.preventDefault();
       e.stopPropagation();
 
@@ -68,8 +68,7 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-
-      gridLayoutStateManager.updateDraggedElement(previewRect);
+      gridLayoutStateManager.draggingPosition$.next(previewRect);
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -95,12 +94,12 @@ export const useGridLayoutEvents = ({
       const hasChangedGridRow = targetRowIndex !== lastRowIndex;
 
       // re-render when the target row changes
-      // if (hasChangedGridRow) {
-      //   interactionEvent$.next({
-      //     ...interactionEvent,
-      //     targetRowIndex,
-      //   });
-      // }
+      if (hasChangedGridRow) {
+        interactionEvent$.next({
+          ...interactionEvent,
+          targetRowIndex,
+        });
+      }
 
       // calculate the requested grid position
       const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
@@ -159,6 +158,7 @@ export const useGridLayoutEvents = ({
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
 
+        console.log('GRID LAYOUT.NEXT');
         gridLayout$.next(nextLayout);
       }
     };

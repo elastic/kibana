@@ -31,7 +31,7 @@ export interface GridRowData {
   };
 }
 
-export type GridLayoutData = GridRowData[];
+export type GridLayoutData = GridRowData[]; // make this array of behaviour subjects?
 
 export interface GridSettings {
   gutterSize: number;
@@ -47,12 +47,15 @@ export interface GridSettings {
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
 export interface GridLayoutStateManager {
-  updateDraggedElement: (rect: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  }) => void;
+  draggingPosition$: BehaviorSubject<
+    | {
+        top: number;
+        left: number;
+        bottom: number;
+        right: number;
+      }
+    | undefined
+  >;
 
   gridDimensions$: BehaviorSubject<ObservedSize>;
   gridLayout$: BehaviorSubject<GridLayoutData>;

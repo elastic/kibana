@@ -11,9 +11,15 @@ import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { forwardRef, useMemo, useRef } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef } from 'react';
+import { combineLatest } from 'rxjs';
 import { GridPanel } from './grid_panel';
-import { GridRowData, PanelInteractionEvent, RuntimeGridSettings } from './types';
+import {
+  GridLayoutStateManager,
+  GridRowData,
+  PanelInteractionEvent,
+  RuntimeGridSettings,
+} from './types';
 
 const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
 const getGridBackgroundCSS = (settings: RuntimeGridSettings) => {
@@ -37,6 +43,7 @@ export const GridRow = forwardRef<
     runtimeSettings: RuntimeGridSettings;
     renderPanelContents: (panelId: string) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
+    gridLayoutStateManager: GridLayoutStateManager;
   }
 >(
   (
@@ -49,12 +56,14 @@ export const GridRow = forwardRef<
       toggleIsCollapsed,
       renderPanelContents,
       setInteractionEvent,
+      gridLayoutStateManager,
     },
     gridRef
   ) => {
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
     const isGridTargeted = activePanelId && targetRowIndex === rowIndex;
     const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+    const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
@@ -63,6 +72,60 @@ export const GridRow = forwardRef<
       }, 0);
       return maxRow || 1;
     }, [rowData]);
+
+    useEffect(() => {
+      const onLayoutChangeSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.draggingPosition$,
+      ]).subscribe(([gridLayout, draggingPosition]) => {
+        const currentRow = gridLayout[rowIndex];
+        Object.keys(currentRow.panels).forEach((key) => {
+          const panel = currentRow.panels[key];
+          const panelRef = panelRefs.current[key];
+          if (!panelRef) return;
+
+          if (panel.id === activePanelId && draggingPosition) {
+            // if the current panel is being dragged, render it with a fixed position
+            panelRef.style.position = 'fixed';
+            panelRef.style.left = `${draggingPosition.left}px`;
+            panelRef.style.top = `${draggingPosition.top}px`;
+            panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+            panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+
+            // undo any "lock to grid" styles
+            panelRef.style.gridColumnStart = ``;
+            panelRef.style.gridColumnEnd = ``;
+            panelRef.style.gridRowStart = ``;
+            panelRef.style.gridRowEnd = ``;
+
+            if (dragPreviewRef.current) {
+              // update the position of the drag preview
+              dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
+              dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+              dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
+              dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            }
+          } else {
+            // if the panel is not being dragged, undo any dragging styles
+            panelRef.style.position = '';
+            panelRef.style.left = ``;
+            panelRef.style.top = ``;
+            panelRef.style.width = ``;
+            panelRef.style.height = ``;
+
+            // and render the panel locked to the grid
+            panelRef.style.gridColumnStart = `${panel.column + 1}`;
+            panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+            panelRef.style.gridRowStart = `${panel.row + 1}`;
+            panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+          }
+        });
+      });
+
+      return () => {
+        onLayoutChangeSubscription.unsubscribe();
+      };
+    }, [gridLayoutStateManager, activePanelId, rowData.panels, rowIndex]);
 
     return (
       <>
@@ -110,16 +173,29 @@ export const GridRow = forwardRef<
                 panelData={panelData}
                 activePanelId={activePanelId}
                 renderPanelContents={renderPanelContents}
-                setInteractionEvent={(partialInteractionEvent) => {
-                  if (partialInteractionEvent) {
-                    setInteractionEvent({
-                      ...partialInteractionEvent,
-                      targetRowIndex: rowIndex,
-                    });
-                    return;
-                  }
-                  setInteractionEvent();
+                interactionStart={(type, e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const panelRef = panelRefs.current[panelData.id];
+                  if (!panelRef) return;
+
+                  console.log('interactionStart');
+
+                  const panelRect = panelRef.getBoundingClientRect();
+                  setInteractionEvent({
+                    type,
+                    id: panelData.id,
+                    panelDiv: panelRef,
+                    targetRowIndex: rowIndex,
+                    mouseOffsets: {
+                      top: e.clientY - panelRect.top,
+                      left: e.clientX - panelRect.left,
+                      right: e.clientX - panelRect.right,
+                      bottom: e.clientY - panelRect.bottom,
+                    },
+                  });
                 }}
+                ref={(element) => (panelRefs.current[panelData.id] = element)}
               />
             ))}
 
@@ -131,15 +207,6 @@ export const GridRow = forwardRef<
                   border-radius: ${euiThemeVars.euiBorderRadius};
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
                   transition: opacity 100ms linear;
-
-                  grid-column-start: ${rowData.panels[activePanelId].column + 1};
-                  grid-column-end: ${rowData.panels[activePanelId].column +
-                  1 +
-                  rowData.panels[activePanelId].width};
-                  grid-row-start: ${rowData.panels[activePanelId].row + 1};
-                  grid-row-end: ${rowData.panels[activePanelId].row +
-                  1 +
-                  rowData.panels[activePanelId].height};
                 `}
               />
             )}
