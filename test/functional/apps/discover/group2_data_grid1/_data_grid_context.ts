@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const security = getService('security');
-  const find = getService('find');
 
   describe('discover data grid context tests', () => {
     before(async () => {
