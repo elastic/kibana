@@ -36,7 +36,7 @@ const getDisplayName = (name, imported) => {
     displayName = name.split('.').pop() || name;
   }
 
-  return displayName.replace('$', '.');
+  return displayName.replace(/^\$/g, '.');
 };
 
 /**
