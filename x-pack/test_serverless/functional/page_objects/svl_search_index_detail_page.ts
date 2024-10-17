@@ -23,15 +23,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectUseInPlaygroundLinkExists() {
       await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
     },
-    async expectBackToIndicesButtonExists() {
-      await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
-    },
-    async clickBackToIndicesButton() {
-      await testSubjects.click('backToIndicesButton');
-    },
-    async expectBackToIndicesButtonRedirectsToListPage() {
-      await testSubjects.existOrFail('indicesList');
-    },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
       expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).to.be(
@@ -192,6 +183,34 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('documentMetadataButton');
       await testSubjects.click('documentMetadataButton');
       await testSubjects.missingOrFail('deleteDocumentButton');
+    },
+    async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
+      const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+      await indexList[indexOfRow].click();
+      await retry.waitFor('index details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+      });
+    },
+
+    async expectSearchIndexDetailsTabsExists() {
+      await testSubjects.existOrFail('dataTab');
+      await testSubjects.existOrFail('mappingsTab');
+      await testSubjects.existOrFail('settingsTab');
+    },
+
+    async expectBreadcrumbNavigationWithIndexName(indexName: string) {
+      await testSubjects.existOrFail('euiBreadcrumb');
+      expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
+    },
+
+    async clickOnIndexManagementBreadcrumb() {
+      const breadcrumbs = await testSubjects.findAll('breadcrumb');
+      for (const breadcrumb of breadcrumbs) {
+        if ((await breadcrumb.getVisibleText()) === 'Index Management') {
+          await breadcrumb.click();
+          return;
+        }
+      }
     },
   };
 }

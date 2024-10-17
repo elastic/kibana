@@ -60,6 +60,9 @@ export interface MappedTypes {
   mappedTypeWithOneInlineProp: {
     [key in 'prop3']: number;
   };
+  mappedTypeWithLiteralTemplates: {
+    [key in MappedTypeProps | `templated_prop/${string}`]: number;
+  };
 }
 
 export type RecordWithKnownProps = Record<MappedTypeProps, number>;

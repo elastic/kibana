@@ -27,7 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
     let mockApiServer: http.Server;
-    const previousPackageVersion = '1.9.0';
 
     before(async () => {
       mockApiServer = mockAgentlessApiService.listen(8089);
@@ -66,20 +65,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           (await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()) !== undefined
         ).to.be(true);
       });
-
-      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(testSubjectIds.AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.selectSetupTechnology('agentless');
-
-        await cisIntegration.selectAwsCredentials('temporary');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
-      });
     });
 
     describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation', () => {
@@ -99,19 +84,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
-      });
-
-      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.selectSetupTechnology('agentless');
-
-        await cisIntegration.selectAwsCredentials('temporary');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
     });
 

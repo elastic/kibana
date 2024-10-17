@@ -18,10 +18,11 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardContainerFactory } from '..';
-import { DASHBOARD_CONTAINER_TYPE, DashboardCreationOptions } from '../..';
-import { embeddableService } from '../../services/kibana_services';
+import { DashboardCreationOptions } from '../..';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardRenderer } from './dashboard_renderer';
+
+jest.mock('../embeddable/dashboard_container_factory', () => ({}));
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;
@@ -38,7 +39,10 @@ describe('dashboard renderer', () => {
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockDashboardFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockDashboardFactory);
     setPresentationPanelMocks();
   });
 
@@ -46,7 +50,6 @@ describe('dashboard renderer', () => {
     await act(async () => {
       mountWithIntl(<DashboardRenderer />);
     });
-    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith(DASHBOARD_CONTAINER_TYPE);
     expect(mockDashboardFactory.create).toHaveBeenCalled();
   });
 
@@ -103,7 +106,10 @@ describe('dashboard renderer', () => {
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockErrorEmbeddable),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockDashboardFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockDashboardFactory);
 
     let wrapper: ReactWrapper;
     await act(async () => {
@@ -125,7 +131,10 @@ describe('dashboard renderer', () => {
     const mockErrorFactory = {
       create: jest.fn().mockReturnValue(mockErrorEmbeddable),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockErrorFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockErrorFactory);
 
     // render the dashboard - it should run into an error and render the error embeddable.
     let wrapper: ReactWrapper;
@@ -146,7 +155,10 @@ describe('dashboard renderer', () => {
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockSuccessFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockSuccessFactory);
 
     // update the saved object id to trigger another dashboard load.
     await act(async () => {
@@ -175,7 +187,10 @@ describe('dashboard renderer', () => {
     const mockErrorFactory = {
       create: jest.fn().mockReturnValue(mockErrorEmbeddable),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockErrorFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockErrorFactory);
 
     // render the dashboard - it should run into an error and render the error embeddable.
     let wrapper: ReactWrapper;
@@ -238,7 +253,10 @@ describe('dashboard renderer', () => {
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockSuccessFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockSuccessFactory);
 
     let wrapper: ReactWrapper;
     await act(async () => {
@@ -263,7 +281,10 @@ describe('dashboard renderer', () => {
     const mockUseMarginFalseFactory = {
       create: jest.fn().mockReturnValue(mockUseMarginFalseEmbeddable),
     } as unknown as DashboardContainerFactory;
-    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockUseMarginFalseFactory);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
+      .fn()
+      .mockReturnValue(mockUseMarginFalseFactory);
 
     let wrapper: ReactWrapper;
     await act(async () => {
