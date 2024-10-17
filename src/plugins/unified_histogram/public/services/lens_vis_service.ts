@@ -23,6 +23,8 @@ import type {
   Suggestion,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  PieVisualizationState,
+  XYState,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
@@ -74,6 +76,19 @@ interface Services {
 interface LensVisServiceParams {
   services: Services;
   lensSuggestionsApi: LensSuggestionsApi;
+}
+
+export enum ChartType {
+  XY = 'XY',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heat map',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tag cloud',
+  Waffle = 'Waffle',
+  Table = 'Table',
 }
 
 export class LensVisService {
@@ -252,6 +267,7 @@ export class LensVisService {
       const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
         queryParams,
         breakdownField,
+        preferredVisAttributes: externalVisContext?.attributes,
       });
       if (histogramSuggestionForESQL) {
         // In case if histogram suggestion, we want to empty the array and push the new suggestion
@@ -463,9 +479,11 @@ export class LensVisService {
   private getHistogramSuggestionForESQL = ({
     queryParams,
     breakdownField,
+    preferredVisAttributes,
   }: {
     queryParams: QueryParams;
     breakdownField?: DataViewField;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
     const { dataView, query, timeRange, columns } = queryParams;
     const breakdownColumn = breakdownField?.name
@@ -510,7 +528,25 @@ export class LensVisService {
       if (breakdownColumn) {
         context.textBasedColumns.push(breakdownColumn);
       }
-      const suggestions = this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
+      let preferredChartType = preferredVisAttributes
+        ? preferredVisAttributes?.visualizationType
+        : undefined;
+
+      if (preferredChartType === 'lnsXY') {
+        preferredChartType = (preferredVisAttributes?.state?.visualization as XYState)
+          ?.preferredSeriesType;
+      }
+      if (preferredChartType === 'lnsPie') {
+        preferredChartType = (preferredVisAttributes?.state?.visualization as PieVisualizationState)
+          ?.shape;
+      }
+      const suggestions =
+        this.lensSuggestionsApi(
+          context,
+          dataView,
+          ['lnsDatatable'],
+          preferredChartType as ChartType
+        ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
         const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
