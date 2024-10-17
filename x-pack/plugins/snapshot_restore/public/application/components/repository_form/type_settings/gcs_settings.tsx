@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSwitch,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
@@ -49,6 +56,19 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
     });
   };
 
+  const disableToolTip = (component: ReactElement): ReactElement => {
+    return isManagedRepository ? (
+      <EuiToolTip
+        content="This field is disabled because you are editing a managed repository."
+        display="block"
+      >
+        {component}
+      </EuiToolTip>
+    ) : (
+      component
+    );
+  };
+
   return (
     <Fragment>
       {/* Client field */}
@@ -82,17 +102,19 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
-          <EuiFieldText
-            defaultValue={client || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                client: e.target.value,
-              });
-            }}
-            data-test-subj="clientInput"
-            disabled={isManagedRepository}
-          />
+          {disableToolTip(
+            <EuiFieldText
+              defaultValue={client || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  client: e.target.value,
+                });
+              }}
+              data-test-subj="clientInput"
+              disabled={isManagedRepository}
+            />
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -127,17 +149,19 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
         >
-          <EuiFieldText
-            defaultValue={bucket || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                bucket: e.target.value,
-              });
-            }}
-            data-test-subj="bucketInput"
-            disabled={isManagedRepository}
-          />
+          {disableToolTip(
+            <EuiFieldText
+              defaultValue={bucket || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  bucket: e.target.value,
+                });
+              }}
+              data-test-subj="bucketInput"
+              disabled={isManagedRepository}
+            />
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -172,17 +196,19 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
-          <EuiFieldText
-            defaultValue={basePath || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                basePath: e.target.value,
-              });
-            }}
-            data-test-subj="basePathInput"
-            disabled={isManagedRepository}
-          />
+          {disableToolTip(
+            <EuiFieldText
+              defaultValue={basePath || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  basePath: e.target.value,
+                });
+              }}
+              data-test-subj="basePathInput"
+              disabled={isManagedRepository}
+            />
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
