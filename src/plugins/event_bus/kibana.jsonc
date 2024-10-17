@@ -1,6 +1,6 @@
 {
   "type": "plugin",
-  "id": "@kbn/event-bus",
+  "id": "@kbn/event-bus-plugin",
   "owner": "@elastic/ml-ui",
   "description": "A synchronous global stateful event bus",
   "plugin": {
