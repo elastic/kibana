@@ -9,8 +9,17 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import { BuildingBlock } from '../../../../rule_about_section';
+import type { BuildingBlockObject } from '../../../../../../../../../common/api/detection_engine';
 
-export function BuildingBlockReadOnly() {
+interface BuildingBlockReadOnlyProps {
+  buildingBlock?: BuildingBlockObject;
+}
+
+export function BuildingBlockReadOnly({ buildingBlock }: BuildingBlockReadOnlyProps) {
+  if (!buildingBlock || !buildingBlock.type) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

@@ -49,7 +49,7 @@ export function CommonRuleFieldReadOnly({
     case 'author':
       return <AuthorReadOnly author={finalDiffableRule.author} />;
     case 'building_block':
-      return <BuildingBlockReadOnly />;
+      return <BuildingBlockReadOnly buildingBlock={finalDiffableRule.building_block} />;
     case 'description':
       return <DescriptionReadOnly description={finalDiffableRule.description} />;
     case 'exceptions_list':

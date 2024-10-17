@@ -8,6 +8,12 @@
 import React from 'react';
 import { FieldFormWrapper } from './field_form_wrapper';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import {
+  BuildingBlockEdit,
+  buildingBlockSchema,
+  buildingBlockDeserializer,
+  buildingBlockSerializer,
+} from './fields/building_block';
 import { DescriptionEdit, descriptionSchema } from './fields/description';
 import {
   FalsePositivesEdit,
@@ -31,6 +37,15 @@ interface CommonRuleFieldEditProps {
 
 export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
+    case 'building_block':
+      return (
+        <FieldFormWrapper
+          component={BuildingBlockEdit}
+          fieldFormSchema={buildingBlockSchema}
+          serializer={buildingBlockSerializer}
+          deserializer={buildingBlockDeserializer}
+        />
+      );
     case 'description':
       return <FieldFormWrapper component={DescriptionEdit} fieldFormSchema={descriptionSchema} />;
     case 'false_positives':
