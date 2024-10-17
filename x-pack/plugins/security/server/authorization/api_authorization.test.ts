@@ -194,6 +194,12 @@ describe('initAPIAuthorization', () => {
           return mockCheckPrivileges;
         });
 
+        mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+          expect(request.headers).toMatchObject(headers);
+
+          return { globally: () => kibanaPrivilegesResponse };
+        });
+
         await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
         expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
