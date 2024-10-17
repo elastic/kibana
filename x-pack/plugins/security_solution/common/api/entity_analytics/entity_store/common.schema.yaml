@@ -38,6 +38,7 @@ components:
         - started
         - stopped
         - updating
+        - error
 
     IndexPattern:
       type: string

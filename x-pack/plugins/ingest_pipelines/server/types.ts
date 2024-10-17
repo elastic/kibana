@@ -19,6 +19,7 @@ export interface RouteDependencies {
   router: IRouter;
   config: {
     isSecurityEnabled: () => boolean;
+    enableManageProcessors: boolean;
   };
   lib: {
     handleEsError: typeof handleEsError;

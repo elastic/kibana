@@ -235,7 +235,7 @@ const convertMovingAvgOrDerivativeToColumns = (
   if (!pipelineAgg) {
     return null;
   }
-  const metaValue = Number(meta?.replace(']', ''));
+  const metaValue = Number(meta?.replace(/\]/g, ''));
   const subMetricField = subFunctionMetric.field;
   const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
   // support nested aggs with formula

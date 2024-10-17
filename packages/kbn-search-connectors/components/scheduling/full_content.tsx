@@ -29,6 +29,7 @@ export interface ConnectorContentSchedulingProps {
   dataTelemetryIdPrefix: string;
   hasPlatinumLicense?: boolean;
   hasSyncTypeChanges: boolean;
+  isDisabled?: boolean;
   setHasChanges: (hasChanges: boolean) => void;
   setHasSyncTypeChanges: (state: boolean) => void;
   type: SyncJobType;
@@ -104,6 +105,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
   setHasSyncTypeChanges,
   hasPlatinumLicense = false,
   hasSyncTypeChanges,
+  isDisabled,
   type,
   updateConnectorStatus,
   updateScheduling,
@@ -120,7 +122,9 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
     !connector.configuration.use_document_level_security?.value;
 
   const isEnableSwitchDisabled =
-    type === SyncJobType.ACCESS_CONTROL && (!hasPlatinumLicense || isDocumentLevelSecurityDisabled);
+    (type === SyncJobType.ACCESS_CONTROL &&
+      (!hasPlatinumLicense || isDocumentLevelSecurityDisabled)) ||
+    Boolean(isDisabled);
 
   return (
     <>
@@ -217,7 +221,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
               <ConnectorCronEditor
                 hasSyncTypeChanges={hasSyncTypeChanges}
                 setHasSyncTypeChanges={setHasSyncTypeChanges}
-                disabled={isGated}
+                disabled={isGated || Boolean(isDisabled)}
                 scheduling={scheduling[type]}
                 onReset={() => {
                   setScheduling({

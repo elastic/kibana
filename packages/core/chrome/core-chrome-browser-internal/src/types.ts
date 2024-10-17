@@ -9,8 +9,8 @@
 
 import type {
   ChromeStart,
+  ChromeBreadcrumb,
   SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
@@ -87,6 +87,9 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setSideNavComponent(component: SideNavComponent | null): void;
 
+    /** Get an Observable of the current project breadcrumbs */
+    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+
     /**
      * Set project breadcrumbs
      * @param breadcrumbs
@@ -95,7 +98,7 @@ export interface InternalChromeStart extends ChromeStart {
      * Use {@link ServerlessPluginStart.setBreadcrumbs} to set project breadcrumbs.
      */
     setBreadcrumbs(
-      breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
+      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
 

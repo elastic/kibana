@@ -18,7 +18,7 @@ export enum EntitySource {
   CSV_UPLOAD = 'CSV upload',
   EVENTS = 'Events',
 }
-
+// TODO Fix the Entity Source field before using it
 export const EntitySourceFilter: React.FC<SourceFilterProps> = ({ selectedItems, onChange }) => {
   return (
     <MultiselectFilter<EntitySource>

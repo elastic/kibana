@@ -806,6 +806,7 @@ components:
         - started
         - stopped
         - updating
+        - error
       type: string
     Entity:
       oneOf:

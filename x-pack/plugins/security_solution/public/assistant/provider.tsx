@@ -142,6 +142,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    userProfile,
   } = useKibana().services;
   const basePath = useBasePath();
 
@@ -225,6 +226,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
+      userProfileService={userProfile}
     >
       {children}
     </ElasticAssistantProvider>

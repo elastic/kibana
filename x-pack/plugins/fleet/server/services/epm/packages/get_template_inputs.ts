@@ -8,8 +8,14 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
 import { dump } from 'js-yaml';
+import yamlDoc from 'yaml';
 
-import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
+import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
+
+import {
+  getStreamsForInputType,
+  packageToPackagePolicy,
+} from '../../../../common/services/package_to_package_policy';
 import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
 import { appContextService } from '../../app_context';
 import type {
@@ -17,6 +23,10 @@ import type {
   NewPackagePolicy,
   PackagePolicyInput,
   TemplateAgentPolicyInput,
+  RegistryVarsEntry,
+  RegistryStream,
+  PackagePolicyConfigRecordEntry,
+  RegistryInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
@@ -26,6 +36,18 @@ import { getPackageInfo } from '.';
 import { getPackageAssetsMap } from './get';
 
 type Format = 'yml' | 'json';
+
+type PackageWithInputAndStreamIndexed = Record<
+  string,
+  RegistryInput & {
+    streams: Record<
+      string,
+      RegistryStream & {
+        data_stream: { type: string; dataset: string };
+      }
+    >;
+  }
+>;
 
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
 export const templatePackagePolicyToFullInputStreams = (
@@ -38,7 +60,7 @@ export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs.forEach((input) => {
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
-      id: input.policy_template ? `${input.type}-${input.policy_template}` : `${input.type}`,
+      id: input.policy_template ? `${input.policy_template}-${input.type}` : `${input.type}`,
       type: input.type,
       ...getFullInputStreams(input, true),
     };
@@ -81,22 +103,53 @@ export async function getTemplateInputs(
   prerelease?: boolean,
   ignoreUnverified?: boolean
 ) {
-  const packageInfoMap = new Map<string, PackageInfo>();
-  let packageInfo: PackageInfo;
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgName,
+    pkgVersion,
+    prerelease,
+    ignoreUnverified,
+  });
 
-  if (packageInfoMap.has(pkgName)) {
-    packageInfo = packageInfoMap.get(pkgName)!;
-  } else {
-    packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName,
-      pkgVersion,
-      prerelease,
-      ignoreUnverified,
-    });
-  }
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
+
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
+
+  const indexedInputsAndStreams = buildIndexedPackage(packageInfo);
+
+  if (format === 'yml') {
+    // Add a placeholder <VAR_NAME> to all variables without default value
+    for (const inputWithStreamIds of inputsWithStreamIds) {
+      const inputId = inputWithStreamIds.policy_template
+        ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
+        : inputWithStreamIds.type;
+
+      const packageInput = indexedInputsAndStreams[inputId];
+      if (!packageInput) {
+        continue;
+      }
+
+      for (const [inputVarKey, inputVarValue] of Object.entries(inputWithStreamIds.vars ?? {})) {
+        const varDef = packageInput.vars?.find((_varDef) => _varDef.name === inputVarKey);
+        if (varDef) {
+          addPlaceholderIfNeeded(varDef, inputVarValue);
+        }
+      }
+      for (const stream of inputWithStreamIds.streams) {
+        const packageStream = packageInput.streams[stream.id];
+        if (!packageStream) {
+          continue;
+        }
+        for (const [streamVarKey, streamVarValue] of Object.entries(stream.vars ?? {})) {
+          const varDef = packageStream.vars?.find((_varDef) => _varDef.name === streamVarKey);
+          if (varDef) {
+            addPlaceholderIfNeeded(varDef, streamVarValue);
+          }
+        }
+      }
+    }
+  }
+
   const assetsMap = await getPackageAssetsMap({
     logger: appContextService.getLogger(),
     packageInfo,
@@ -128,7 +181,146 @@ export async function getTemplateInputs(
         sortKeys: _sortYamlKeys,
       }
     );
-    return yaml;
+    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo));
   }
+
   return { inputs: [] };
+}
+
+function getPlaceholder(varDef: RegistryVarsEntry) {
+  return `<${varDef.name.toUpperCase()}>`;
+}
+
+function addPlaceholderIfNeeded(
+  varDef: RegistryVarsEntry,
+  varValue: PackagePolicyConfigRecordEntry
+) {
+  const placeHolder = `<${varDef.name.toUpperCase()}>`;
+  if (varDef && !varValue.value && varDef.type !== 'yaml') {
+    varValue.value = placeHolder;
+  } else if (varDef && varValue.value && varValue.value.length === 0 && varDef.type === 'text') {
+    varValue.value = [placeHolder];
+  }
+}
+
+function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStreamIndexed {
+  return (
+    packageInfo.policy_templates?.reduce<PackageWithInputAndStreamIndexed>(
+      (inputsAcc, policyTemplate) => {
+        const inputs = getNormalizedInputs(policyTemplate);
+
+        inputs.forEach((packageInput) => {
+          const inputId = `${policyTemplate.name}-${packageInput.type}`;
+
+          const streams = getStreamsForInputType(
+            packageInput.type,
+            packageInfo,
+            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
+              ? policyTemplate.data_streams
+              : []
+          ).reduce<
+            Record<
+              string,
+              RegistryStream & {
+                data_stream: { type: string; dataset: string };
+              }
+            >
+          >((acc, stream) => {
+            const streamId = `${packageInput.type}-${stream.data_stream.dataset}`;
+            acc[streamId] = {
+              ...stream,
+            };
+            return acc;
+          }, {});
+
+          inputsAcc[inputId] = {
+            ...packageInput,
+            streams,
+          };
+        });
+        return inputsAcc;
+      },
+      {}
+    ) ?? {}
+  );
+}
+
+function addCommentsToYaml(
+  yaml: string,
+  packageIndexInputAndStreams: PackageWithInputAndStreamIndexed
+) {
+  const doc = yamlDoc.parseDocument(yaml);
+  // Add input and streams comments
+  const yamlInputs = doc.get('inputs');
+  if (yamlDoc.isCollection(yamlInputs)) {
+    yamlInputs.items.forEach((inputItem) => {
+      if (!yamlDoc.isMap(inputItem)) {
+        return;
+      }
+      const inputIdNode = inputItem.get('id', true);
+      if (!yamlDoc.isScalar(inputIdNode)) {
+        return;
+      }
+      const inputId = inputIdNode.value as string;
+      const pkgInput = packageIndexInputAndStreams[inputId];
+      if (pkgInput) {
+        inputItem.commentBefore = ` ${pkgInput.title}${
+          pkgInput.description ? `: ${pkgInput.description}` : ''
+        }`;
+
+        yamlDoc.visit(inputItem, {
+          Scalar(key, node) {
+            if (node.value) {
+              const val = node.value.toString();
+              for (const varDef of pkgInput.vars ?? []) {
+                const placeholder = getPlaceholder(varDef);
+                if (val.includes(placeholder)) {
+                  node.comment = ` ${varDef.title}${
+                    varDef.description ? `: ${varDef.description}` : ''
+                  }`;
+                }
+              }
+            }
+          },
+        });
+
+        const yamlStreams = inputItem.get('streams');
+        if (!yamlDoc.isCollection(yamlStreams)) {
+          return;
+        }
+        yamlStreams.items.forEach((streamItem) => {
+          if (!yamlDoc.isMap(streamItem)) {
+            return;
+          }
+          const streamIdNode = streamItem.get('id', true);
+          if (yamlDoc.isScalar(streamIdNode)) {
+            const streamId = streamIdNode.value as string;
+            const pkgStream = pkgInput.streams[streamId];
+            if (pkgStream) {
+              streamItem.commentBefore = ` ${pkgStream.title}${
+                pkgStream.description ? `: ${pkgStream.description}` : ''
+              }`;
+              yamlDoc.visit(streamItem, {
+                Scalar(key, node) {
+                  if (node.value) {
+                    const val = node.value.toString();
+                    for (const varDef of pkgStream.vars ?? []) {
+                      const placeholder = getPlaceholder(varDef);
+                      if (val.includes(placeholder)) {
+                        node.comment = ` ${varDef.title}${
+                          varDef.description ? `: ${varDef.description}` : ''
+                        }`;
+                      }
+                    }
+                  }
+                },
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  return doc.toString();
 }

@@ -56,13 +56,13 @@ export async function testPipeline(
 
 export async function createJSONInput(
   processors: ESProcessorItem[],
-  formattedSamples: string[],
+  samples: string[],
   client: IScopedClusterClient
 ): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
   const pipeline = {
     processors: [...processors, createRemoveProcessor()],
     on_failure: [createPassthroughFailureProcessor()],
   };
-  const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);
+  const { pipelineResults, errors } = await testPipeline(samples, pipeline, client);
   return { pipelineResults, errors };
 }

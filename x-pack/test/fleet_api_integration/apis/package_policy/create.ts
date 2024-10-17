@@ -642,6 +642,24 @@ export default function (providerContext: FtrProviderContext) {
       expect(body.item.inputs[0].enabled).to.eql(false);
     });
 
+    it('should return 400 for content packages', async function () {
+      const response = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'content-pkg-policy',
+          description: '',
+          namespace: 'default',
+          policy_ids: [],
+          package: {
+            name: 'good_content',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(response.body.message).to.eql('Cannot create policy for content only packages');
+    });
+
     describe('input only packages', () => {
       it('should default dataset if not provided for input only pkg', async function () {
         await supertest

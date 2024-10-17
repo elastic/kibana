@@ -27,6 +27,7 @@ import type {
   ChromeNavLink,
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
@@ -354,6 +355,17 @@ export class ChromeService {
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
     };
 
+    const setClassicBreadcrumbs = (
+      newBreadcrumbs: ChromeBreadcrumb[],
+      { project }: ChromeSetBreadcrumbsParams = {}
+    ) => {
+      breadcrumbs$.next(newBreadcrumbs);
+      if (project) {
+        const { value: projectValue, absolute = false } = project;
+        setProjectBreadcrumbs(projectValue ?? [], { absolute });
+      }
+    };
+
     const setProjectHome = (homeHref: string) => {
       validateChromeStyle();
       projectNavigation.setProjectHome(homeHref);
@@ -507,9 +519,7 @@ export class ChromeService {
 
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbs$.next(newBreadcrumbs);
-      },
+      setBreadcrumbs: setClassicBreadcrumbs,
 
       getBreadcrumbsAppendExtension$: () => breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$)),
 
@@ -586,6 +596,7 @@ export class ChromeService {
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+        getBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$.bind(projectNavigation),
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,

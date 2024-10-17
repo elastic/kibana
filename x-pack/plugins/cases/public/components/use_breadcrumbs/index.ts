@@ -29,34 +29,48 @@ function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): string[] {
   return breadcrumbs.map(({ text }) => text?.toString() ?? '').reverse();
 }
 
-const useApplyBreadcrumbs = () => {
-  const {
-    chrome: { docTitle, setBreadcrumbs },
-    application: { navigateToUrl },
-  } = useKibana().services;
+const useGetBreadcrumbsWithNavigation = () => {
+  const { navigateToUrl } = useKibana().services.application;
+
   return useCallback(
-    (breadcrumbs: ChromeBreadcrumb[]) => {
-      docTitle.change(getTitleFromBreadcrumbs(breadcrumbs));
-      setBreadcrumbs(
-        breadcrumbs.map((breadcrumb) => {
-          const { href, onClick } = breadcrumb;
-          return {
-            ...breadcrumb,
-            ...(href && !onClick
-              ? {
-                  onClick: (event) => {
-                    if (event) {
-                      event.preventDefault();
-                    }
-                    navigateToUrl(href);
-                  },
-                }
-              : {}),
-          };
-        })
-      );
+    (breadcrumbs: ChromeBreadcrumb[]): ChromeBreadcrumb[] => {
+      return breadcrumbs.map((breadcrumb) => {
+        const { href, onClick } = breadcrumb;
+        if (!href || onClick) {
+          return breadcrumb;
+        }
+        return {
+          ...breadcrumb,
+          onClick: (event) => {
+            if (event) {
+              event.preventDefault();
+            }
+            navigateToUrl(href);
+          },
+        };
+      });
     },
-    [docTitle, setBreadcrumbs, navigateToUrl]
+    [navigateToUrl]
+  );
+};
+
+const useApplyBreadcrumbs = () => {
+  const { docTitle, setBreadcrumbs } = useKibana().services.chrome;
+  const getBreadcrumbsWithNavigation = useGetBreadcrumbsWithNavigation();
+
+  return useCallback(
+    (
+      leadingRawBreadcrumbs: ChromeBreadcrumb[],
+      trailingRawBreadcrumbs: ChromeBreadcrumb[] = []
+    ) => {
+      const leadingBreadcrumbs = getBreadcrumbsWithNavigation(leadingRawBreadcrumbs);
+      const trailingBreadcrumbs = getBreadcrumbsWithNavigation(trailingRawBreadcrumbs);
+      const allBreadcrumbs = [...leadingBreadcrumbs, ...trailingBreadcrumbs];
+
+      docTitle.change(getTitleFromBreadcrumbs(allBreadcrumbs));
+      setBreadcrumbs(allBreadcrumbs, { project: { value: trailingBreadcrumbs } });
+    },
+    [docTitle, setBreadcrumbs, getBreadcrumbsWithNavigation]
   );
 };
 
@@ -103,9 +117,8 @@ export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
         text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
       },
-      titleBreadcrumb,
     ];
-    applyBreadcrumbs(casesBreadcrumbs);
+    applyBreadcrumbs(casesBreadcrumbs, [titleBreadcrumb]);
     KibanaServices.get().serverless?.setBreadcrumbs([titleBreadcrumb]);
   }, [caseTitle, appTitle, getAppUrl, applyBreadcrumbs]);
 };

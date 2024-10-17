@@ -50,7 +50,7 @@ describe('Users Table Component', () => {
       );
 
       expect(getByTestId('table-allUsers-loading-false')).toBeInTheDocument();
-      expect(getAllByRole('columnheader').length).toBe(3);
+      expect(getAllByRole('columnheader').length).toBe(4);
       expect(getByText(userName)).toBeInTheDocument();
     });
 
@@ -108,7 +108,7 @@ describe('Users Table Component', () => {
         </TestProviders>
       );
 
-      expect(getAllByRole('columnheader').length).toBe(4);
+      expect(getAllByRole('columnheader').length).toBe(5);
       expect(getByText('Critical')).toBeInTheDocument();
     });
 
@@ -142,7 +142,7 @@ describe('Users Table Component', () => {
         </TestProviders>
       );
 
-      expect(getAllByRole('columnheader').length).toBe(3);
+      expect(getAllByRole('columnheader').length).toBe(4);
       expect(queryByText('Critical')).not.toBeInTheDocument();
     });
   });
