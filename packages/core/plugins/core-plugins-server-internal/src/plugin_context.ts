@@ -225,6 +225,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      getDeprecatedRoutes: deps.http.getDeprecatedRoutes,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
         ContextName extends keyof Omit<Context, 'resolve'>

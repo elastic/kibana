@@ -230,7 +230,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   /**
    * @public
    */
-  getRoutes: () => Array<VersionedRouterRoute<unknown, unknown, unknown, Ctx>>;
+  getRoutes: () => VersionedRouterRoute[];
 }
 
 /** @public */
@@ -365,15 +365,10 @@ export interface VersionedRoute<
   ): VersionedRoute<Method, Ctx>;
 }
 
-export interface VersionedRouterRoute<
-  P = unknown,
-  Q = unknown,
-  B = unknown,
-  Ctx extends RqCtx = RqCtx
-> {
+export interface VersionedRouterRoute<P = unknown, Q = unknown, B = unknown> {
   method: string;
   path: string;
   options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
-  handlers: Array<{ fn: RequestHandler<P, Q, B, Ctx>; options: AddVersionOpts<P, Q, B> }>;
+  handlers: Array<{ fn: RequestHandler<P, Q, B>; options: AddVersionOpts<P, Q, B> }>;
   isVersioned: true;
 }

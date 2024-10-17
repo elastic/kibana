@@ -236,6 +236,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
             : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
           /** Below is added for introspection */
           validationSchemas: route.validate,
+          // @ts-ignore using isVersioned: false in the type instead of boolean
+          // for typeguarding between versioned and unversioned RouterRoute types
           isVersioned: internalOptions.isVersioned,
         });
       };
@@ -247,11 +249,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.patch = buildMethod('patch');
   }
 
-  public static on(event: RouterEvents, cb: (req: CoreKibanaRequest) => void) {
+  public static on(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
     Router.ee.on(event, cb);
   }
 
-  public static off(event: RouterEvents, cb: (req: CoreKibanaRequest) => void) {
+  public static off(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
     Router.ee.off(event, cb);
   }
 

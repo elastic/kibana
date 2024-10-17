@@ -84,7 +84,6 @@ export class DeprecationsService
 
     registerApiDeprecationsInfo({
       deprecationsFactory: this.deprecationsFactory,
-      logger: this.logger,
       http,
       coreUsageData,
     });

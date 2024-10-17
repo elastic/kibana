@@ -25,9 +25,10 @@ import type {
   RouteSecurityGetter,
   RouteSecurity,
   RouteMethod,
+  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { HandlerResolutionStrategy, Method, Options, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import { validate } from './validate';
 import {
