@@ -11,6 +11,7 @@ import {
   fieldOperatorToIngestProcessor,
 } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention_definition';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { applyIngestProcessorToDoc } from '../utils/ingest';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
@@ -26,31 +27,8 @@ export default ({ getService }: FtrProviderContext) => {
     docSource: any
   ): Promise<any> => {
     const step = fieldOperatorToIngestProcessor(operator, { enrichField: 'historical' });
-    const doc = {
-      _index: 'index',
-      _id: 'id',
-      _source: docSource,
-    };
 
-    const res = await es.ingest.simulate({
-      pipeline: {
-        description: 'test',
-        processors: [step],
-      },
-      docs: [doc],
-    });
-
-    const firstDoc = res.docs?.[0];
-
-    // @ts-expect-error error is not in the types
-    const error = firstDoc?.error;
-    if (error) {
-      log.error('Full painless error below: ');
-      log.error(JSON.stringify(error, null, 2));
-      throw new Error('Painless error running pipelie see logs for full detail : ' + error?.type);
-    }
-
-    return firstDoc?.doc?._source;
+    return applyIngestProcessorToDoc([step], docSource, es, log);
   };
 
   describe('@ess @serverless @skipInServerlessMKI Entity store - Field Retention Pipeline Steps', () => {
@@ -90,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         expectArraysMatchAnyOrder(resultDoc.test_field, ['foo']);
       });
 
-      it('should take from history if latest field doesnt have maxLength values', async () => {
+      it("should take from history if latest field doesn't have maxLength values", async () => {
         const op: FieldRetentionOperator = {
           operation: 'collect_values',
           field: 'test_field',
