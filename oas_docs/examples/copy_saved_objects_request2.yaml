@@ -1,0 +1,12 @@
+summary: Copy without createNewCopies
+description: >
+  Copy a dashboard with the my-dashboard ID, including all references from the default space to the marketing space.
+  In this example, the dashboard has a reference to a visualization and that has a reference to a data view.
+value:
+  objects:
+    - type: dashboard
+      id: my-dashboard
+  spaces:
+    - marketing
+  includeReferences: true
+  createNewCopies: false
