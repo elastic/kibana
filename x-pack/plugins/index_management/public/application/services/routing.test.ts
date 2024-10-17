@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { getIndexDetailsLink, getIndexListUri } from './routing';
+import { getIndexDetailsLink, getIndexListUri, navigateToIndexDetailsPage } from './routing';
+import { applicationServiceMock, scopedHistoryMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { ExtensionsService } from '../../services/extensions_service';
+import { IndexDetailsSection } from '../../../common/constants';
 
 describe('routing', () => {
   describe('index details link', () => {
+    const application = applicationServiceMock.createStartContract();
+    const http = httpServiceMock.createSetupContract();
+
+    const history = scopedHistoryMock.create();
     it('adds the index name to the url', () => {
       const indexName = 'testIndex';
       const url = getIndexDetailsLink(indexName, '');
@@ -25,6 +32,34 @@ describe('routing', () => {
       const tab = 'dynamic-tab';
       const url = getIndexDetailsLink('testIndex', '', tab);
       expect(url).toContain(`tab=${tab}`);
+    });
+    it('renders default index details route without extensionService indexDetailsPageRoute ', () => {
+      const extensionService = {
+        indexDetailsPageRoute: null,
+      } as ExtensionsService;
+      navigateToIndexDetailsPage('testIndex', '', extensionService, application, http, history);
+      expect(history.push).toHaveBeenCalledTimes(1);
+      expect(application.navigateToUrl).toHaveBeenCalledTimes(0);
+    });
+
+    it('renders route from extensionService indexDetailsPageRoute with tab id', () => {
+      const extensionService = {
+        indexDetailsPageRoute: {
+          renderRoute: (indexName: string, detailsTabId?: string) => {
+            return `test_url/${detailsTabId}`;
+          },
+        },
+      } as ExtensionsService;
+      navigateToIndexDetailsPage(
+        'testIndex',
+        '',
+        extensionService,
+        application,
+        http,
+        history,
+        IndexDetailsSection.Settings
+      );
+      expect(application.navigateToUrl).toHaveBeenCalledTimes(1);
     });
   });
 

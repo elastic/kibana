@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { ApplicationStart } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
-
+import { ExtensionsService } from '../../services/extensions_service';
+import { IndexDetailsSection } from '../../../common/constants';
 export const getTemplateListLink = () => `/templates`;
 
 export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
@@ -77,4 +81,22 @@ export const getComponentTemplatesLink = (usedByTemplateName?: string) => {
     url = `${url}?filter=${encodeURIComponent(filter)}`;
   }
   return url;
+};
+export const navigateToIndexDetailsPage = (
+  indexName: string,
+  indicesListURLParams: string,
+  extensionsService: ExtensionsService,
+  application: ApplicationStart,
+  http: HttpSetup,
+  history: ScopedHistory,
+  tabId?: IndexDetailsSection
+) => {
+  if (!extensionsService.indexDetailsPageRoute) {
+    history.push(
+      getIndexDetailsLink(indexName, indicesListURLParams, IndexDetailsSection.Overview)
+    );
+  } else {
+    const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
+    application.navigateToUrl(http.basePath.prepend(`${route}`));
+  }
 };
