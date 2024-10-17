@@ -3651,6 +3651,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-security-posture-storybook-config@link:x-pack/packages/kbn-cloud-security-posture/storybook/config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
