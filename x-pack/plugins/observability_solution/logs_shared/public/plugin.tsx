@@ -6,6 +6,10 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
+import { AllSummaryColumnProps } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column';
+import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
 import {
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
@@ -20,6 +24,13 @@ import {
   LogsSharedClientSetupDeps,
   LogsSharedClientStartDeps,
 } from './types';
+
+const LazySummaryColumn = dynamic(
+  () =>
+    import(
+      '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column'
+    )
+);
 
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
@@ -61,6 +72,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       logsDataAccess,
       observabilityAIAssistant,
       share,
+      fieldFormats,
     } = plugins;
 
     const logViews = this.logViews.start({
@@ -76,6 +88,14 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       search: data.search.search,
       uiSettings: settings,
       share,
+      dataViews,
+      fieldFormats,
+      columns: {
+        SummaryColumn: (props: Omit<AllSummaryColumnProps, 'core' | 'share'>) => {
+          return <LazySummaryColumn {...props} share={share} core={core} />;
+        },
+        LogLevelCell: getLogLevelBadgeCell('log.level'),
+      },
     });
 
     if (!observabilityAIAssistant) {

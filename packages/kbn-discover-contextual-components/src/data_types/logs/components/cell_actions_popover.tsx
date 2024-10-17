@@ -24,7 +24,9 @@ import {
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -109,30 +111,32 @@ export function CellActionsPopover({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiPopoverFooter>
-        <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
-          <EuiButtonEmpty
-            key="addToFilterAction"
-            size="s"
-            iconType="plusInCircle"
-            aria-label={actionFilterForText(value)}
-            onClick={makeFilterHandlerByOperator('+')}
-            data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
-          >
-            {filterForText}
-          </EuiButtonEmpty>
-          <EuiButtonEmpty
-            key="removeFromFilterAction"
-            size="s"
-            iconType="minusInCircle"
-            aria-label={actionFilterOutText(value)}
-            onClick={makeFilterHandlerByOperator('-')}
-            data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
-          >
-            {filterOutText}
-          </EuiButtonEmpty>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
+      {onFilter ? (
+        <EuiPopoverFooter>
+          <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
+            <EuiButtonEmpty
+              key="addToFilterAction"
+              size="s"
+              iconType="plusInCircle"
+              aria-label={actionFilterForText(value)}
+              onClick={makeFilterHandlerByOperator('+')}
+              data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
+            >
+              {filterForText}
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              key="removeFromFilterAction"
+              size="s"
+              iconType="minusInCircle"
+              aria-label={actionFilterOutText(value)}
+              onClick={makeFilterHandlerByOperator('-')}
+              data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
+            >
+              {filterOutText}
+            </EuiButtonEmpty>
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
+      ) : null}
       <EuiPopoverFooter>
         <EuiCopy textToCopy={value}>
           {(copy) => (
@@ -156,6 +160,8 @@ export function CellActionsPopover({
 export interface FieldBadgeWithActionsProps
   extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
   icon?: EuiBadgeProps['iconType'];
+  core?: CoreStart;
+  share?: SharePluginStart;
 }
 
 export function FieldBadgeWithActions({

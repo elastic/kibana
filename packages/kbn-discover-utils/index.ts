@@ -52,13 +52,13 @@ export {
   getLogLevelCoalescedValue,
   getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
-  LogLevelBadge,
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  LogLevelBadge,
 } from './src';
 
 export type { LogsContextService } from './src';

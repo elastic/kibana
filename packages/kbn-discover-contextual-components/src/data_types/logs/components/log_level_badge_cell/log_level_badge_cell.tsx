@@ -9,8 +9,8 @@
 
 import type { CSSObject } from '@emotion/react';
 import React from 'react';
-import { LogLevelBadge } from '@kbn/discover-utils';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table/src/types';
+import { LogLevelBadge } from '@kbn/discover-utils/src/data_types/logs/components/log_level_badge';
 
 const dataTestSubj = 'logLevelBadgeCell';
 const badgeCss: CSSObject = { marginTop: '-4px' };
@@ -32,3 +32,5 @@ export const getLogLevelBadgeCell =
       />
     );
   };
+
+export type LogLevelBadgeCell = ReturnType<typeof getLogLevelBadgeCell>;

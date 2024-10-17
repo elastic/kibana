@@ -11,17 +11,16 @@ import React from 'react';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { EuiLink } from '@elastic/eui';
 import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-settings-ids';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from './cell_actions_popover';
 
 const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';
 
 export function ServiceNameBadgeWithActions(props: FieldBadgeWithActionsProps) {
-  const { share, core } = useDiscoverServices();
-  const canViewApm = core.application.capabilities.apm?.show || false;
+  const { share, core } = props;
+  const canViewApm = core?.application.capabilities.apm?.show || false;
   const isEntityCentricExperienceSettingEnabled = canViewApm
-    ? core.uiSettings.get(OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE)
+    ? core?.uiSettings.get(OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE)
     : false;
 
   const derivedPropsForEntityExperience = isEntityCentricExperienceSettingEnabled
