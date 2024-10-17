@@ -45,8 +45,8 @@ describe('useFetchNotes', () => {
     expect(typeof result.current.onLoad).toBe('function');
   });
 
-  it('should not dispatch action when securitySolutionNotesEnabled is false', () => {
-    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('should not dispatch action when securitySolutionNotesDisabled is true', () => {
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const { result } = renderHook(() => useFetchNotes());
 
     result.current.onLoad([{ _id: '1' }]);
@@ -84,13 +84,13 @@ describe('useFetchNotes', () => {
     expect(firstOnLoad).toBe(secondOnLoad);
   });
 
-  it('should update onLoad when securitySolutionNotesEnabled changes', () => {
-    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  it('should update onLoad when securitySolutionNotesDisabled changes', () => {
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { result, rerender } = renderHook(() => useFetchNotes());
 
     const firstOnLoad = result.current.onLoad;
 
-    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     rerender();
     const secondOnLoad = result.current.onLoad;
 
