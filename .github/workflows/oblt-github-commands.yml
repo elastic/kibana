@@ -18,6 +18,9 @@ permissions:
 jobs:
   comment-if-oblt-member:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
         with:
