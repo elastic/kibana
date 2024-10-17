@@ -45631,7 +45631,7 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ">) => any"
+              ">) => string | number | boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
             "deprecated": false,

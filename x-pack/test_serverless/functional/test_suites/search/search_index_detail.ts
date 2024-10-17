@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esDeleteAllIndices(indexName);
     });
 
-    describe('index details page overview', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/194704
+    describe.skip('index details page overview', () => {
       before(async () => {
         await es.indices.create({ index: indexName });
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
