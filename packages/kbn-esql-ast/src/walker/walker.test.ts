@@ -342,7 +342,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'string',
+              literalType: 'keyword',
               name: '"foo"',
             },
             {
@@ -600,27 +600,27 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"a"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"b"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"c"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"d"',
               },
               {
                 type: 'literal',
-                literalType: 'string',
+                literalType: 'keyword',
                 name: '"e"',
               },
             ]);
