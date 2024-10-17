@@ -51,6 +51,9 @@
         },
         {
           "id": "kibGitHub"
+        },
+        {
+          "id": "kibThirdPartyDependencies"
         }
       ]
     },
@@ -275,6 +278,10 @@
         {
           "id": "kibDevReactKibanaContext",
           "label": "Kibana React Contexts"
+        },
+        {
+          "id": "kibDevDocsChromeRecentlyAccessed",
+          "label": "Recently Viewed"
         }
       ]
     },

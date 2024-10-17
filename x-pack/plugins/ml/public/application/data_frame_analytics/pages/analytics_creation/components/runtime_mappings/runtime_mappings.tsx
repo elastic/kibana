@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getCombinedRuntimeMappings, isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
@@ -66,8 +65,6 @@ const RUNTIME_FIELDS_LABEL_TEXT = i18n.translate(
 );
 
 const { useXJsonMode } = XJson;
-const xJsonMode = new XJsonMode();
-export type XJsonModeType = ReturnType<typeof XJsonMode>;
 
 interface Props {
   actions: CreateAnalyticsFormProps['actions'];
@@ -176,7 +173,6 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                   }
                   setAdvancedRuntimeMappingsConfig={setAdvancedRuntimeMappingsConfig}
                   convertToJson={convertToJson}
-                  xJsonMode={xJsonMode}
                 />
               </>
             )}

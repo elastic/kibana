@@ -43,6 +43,9 @@ export const PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID =
 export const ENTITIES_DETAILS_TEST_ID = `${PREFIX}EntitiesDetails` as const;
 export const USER_DETAILS_TEST_ID = `${PREFIX}UsersDetails` as const;
 export const USER_DETAILS_LINK_TEST_ID = `${USER_DETAILS_TEST_ID}TitleLink` as const;
+export const USER_DETAILS_ALERT_COUNT_TEST_ID = `${USER_DETAILS_TEST_ID}AlertCount` as const;
+export const USER_DETAILS_MISCONFIGURATIONS_TEST_ID =
+  `${USER_DETAILS_TEST_ID}Misconfigurations` as const;
 export const USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID =
   `${USER_DETAILS_TEST_ID}RelatedHostsTable` as const;
 export const USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID =
@@ -53,6 +56,11 @@ export const USER_DETAILS_INFO_TEST_ID = 'user-overview' as const;
 
 export const HOST_DETAILS_TEST_ID = `${PREFIX}HostsDetails` as const;
 export const HOST_DETAILS_LINK_TEST_ID = `${HOST_DETAILS_TEST_ID}TitleLink` as const;
+export const HOST_DETAILS_ALERT_COUNT_TEST_ID = `${HOST_DETAILS_TEST_ID}AlertCount` as const;
+export const HOST_DETAILS_MISCONFIGURATIONS_TEST_ID =
+  `${HOST_DETAILS_TEST_ID}Misconfigurations` as const;
+export const HOST_DETAILS_VULNERABILITIES_TEST_ID =
+  `${HOST_DETAILS_TEST_ID}Vulnerabilities` as const;
 export const HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID =
   `${HOST_DETAILS_TEST_ID}RelatedUsersTable` as const;
 export const HOST_DETAILS_RELATED_USERS_LINK_TEST_ID =
@@ -125,12 +133,6 @@ export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_I
 
 /* Notes */
 
-export const NOTES_LOADING_TEST_ID = `${PREFIX}NotesLoading` as const;
-export const NOTES_COMMENT_TEST_ID = `${PREFIX}NotesComment` as const;
-export const ADD_NOTE_LOADING_TEST_ID = `${PREFIX}AddNotesLoading` as const;
-export const ADD_NOTE_MARKDOWN_TEST_ID = `${PREFIX}AddNotesMarkdown` as const;
-export const ADD_NOTE_BUTTON_TEST_ID = `${PREFIX}AddNotesButton` as const;
-export const NOTE_AVATAR_TEST_ID = `${PREFIX}NoteAvatar` as const;
-export const DELETE_NOTE_BUTTON_TEST_ID = `${PREFIX}DeleteNotesButton` as const;
+export const ATTACH_TO_TIMELINE_CALLOUT_TEST_ID = `${PREFIX}AttachToTimelineCallout` as const;
 export const ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID = `${PREFIX}AttachToTimelineCheckbox` as const;
-export const OPEN_TIMELINE_BUTTON_TEST_ID = `${PREFIX}OpenTimelineButton` as const;
+export const SAVE_TIMELINE_BUTTON_TEST_ID = `${PREFIX}SaveTimelineButton` as const;

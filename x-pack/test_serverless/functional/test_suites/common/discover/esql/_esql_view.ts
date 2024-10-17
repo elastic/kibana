@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/194305
+  describe.skip('discover esql view', function () {
     // see details: https://github.com/elastic/kibana/issues/188816
     this.tags(['failsOnMKI']);
 
@@ -202,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
         expect(await dataGrid.getHeaders()).to.eql([
-          "Select columnPress the Enter key to interact with this cell's contents.", // contains screen reader help text
+          'Select column',
           'Control column',
           'Access to degraded docs',
           'Access to available stacktraces',

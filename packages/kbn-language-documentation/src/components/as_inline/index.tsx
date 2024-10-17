@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useMemo, useEffect, ComponentProps } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiScrollBarStyles, EuiSpacer } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
@@ -43,7 +43,9 @@ function DocumentationInline({ searchInDescription, height }: DocumentationInlin
     return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
   }, [documentationSections, searchText, searchInDescription]);
 
-  const onNavigationChange = useCallback((selectedOptions) => {
+  const onNavigationChange = useCallback<
+    NonNullable<ComponentProps<typeof DocumentationNavigation>>['onNavigationChange']
+  >((selectedOptions) => {
     setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
     if (selectedOptions.length) {
       const scrollToElement = scrollTargets.current[selectedOptions[0].label];

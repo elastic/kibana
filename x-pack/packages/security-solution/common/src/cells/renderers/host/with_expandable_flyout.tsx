@@ -23,7 +23,7 @@ export type HostCellWithFlyoutRendererProps = PropsWithChildren<DataGridCellValu
 const HostCellWithFlyoutRendererComp = React.memo(function HostCellWithFlyoutRendererComp(
   props: HostCellWithFlyoutRendererProps
 ) {
-  const hostName = getFieldValue(props.row, 'host.name');
+  const hostName = getFieldValue(props.row, 'host.name') as string;
 
   const { openFlyout } = useExpandableFlyoutApi();
 

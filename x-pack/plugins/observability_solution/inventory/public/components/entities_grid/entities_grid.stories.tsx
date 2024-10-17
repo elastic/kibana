@@ -9,9 +9,9 @@ import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 import { Meta, Story } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { EntitiesGrid } from '.';
 import { EntityType } from '../../../common/entities';
-import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '../../../common/es_fields/entities';
 import { entitiesMock } from './mock/entities_mock';
 
 const stories: Meta<{}> = {
@@ -40,7 +40,7 @@ export const Example: Story<{}> = () => {
   );
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         {`Entity filter: ${selectedEntityType || 'N/A'}`}
         <EuiLink

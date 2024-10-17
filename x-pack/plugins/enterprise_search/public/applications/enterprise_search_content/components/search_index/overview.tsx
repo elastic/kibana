@@ -88,7 +88,7 @@ export const SearchIndexOverview: React.FC = () => {
                       >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.connectorClient',
-                          { defaultMessage: 'connector client' }
+                          { defaultMessage: 'self-managed connector' }
                         )}
                       </EuiLink>
                     ),

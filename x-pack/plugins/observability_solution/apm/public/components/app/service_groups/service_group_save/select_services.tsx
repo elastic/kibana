@@ -54,6 +54,7 @@ interface Props {
   onSaveClick: (serviceGroup: StagedServiceGroup) => void;
   onEditGroupDetailsClick: () => void;
   isLoading: boolean;
+  titleId?: string;
 }
 
 export function SelectServices({
@@ -63,6 +64,7 @@ export function SelectServices({
   onSaveClick,
   onEditGroupDetailsClick,
   isLoading,
+  titleId,
 }: Props) {
   const [kuery, setKuery] = useState(serviceGroup?.kuery || '');
   const [stagedKuery, setStagedKuery] = useState(serviceGroup?.kuery || '');
@@ -117,7 +119,7 @@ export function SelectServices({
     <Container>
       <EuiModalHeader>
         <div>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={titleId}>
             {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.title', {
               defaultMessage: 'Select services',
             })}

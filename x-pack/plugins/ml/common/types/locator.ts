@@ -56,7 +56,9 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
   | typeof ML_PAGES.OVERVIEW
   | typeof ML_PAGES.CALENDARS_MANAGE
+  | typeof ML_PAGES.CALENDARS_DST_MANAGE
   | typeof ML_PAGES.CALENDARS_NEW
+  | typeof ML_PAGES.CALENDARS_DST_NEW
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
@@ -247,6 +249,14 @@ export type CalendarEditUrlState = MLPageState<
   }
 >;
 
+export type CalendarDstEditUrlState = MLPageState<
+  typeof ML_PAGES.CALENDARS_DST_EDIT,
+  {
+    calendarId: string;
+    globalState?: MlCommonGlobalState;
+  }
+>;
+
 export type FilterEditUrlState = MLPageState<
   typeof ML_PAGES.FILTER_LISTS_EDIT,
   {
@@ -277,6 +287,7 @@ export type MlLocatorState =
   | DataFrameAnalyticsUrlState
   | DataFrameAnalyticsExplorationUrlState
   | CalendarEditUrlState
+  | CalendarDstEditUrlState
   | FilterEditUrlState
   | MlGenericUrlState
   | NotificationsUrlState

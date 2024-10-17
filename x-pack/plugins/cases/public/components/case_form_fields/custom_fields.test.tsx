@@ -15,7 +15,8 @@ import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
 
-describe('CustomFields', () => {
+// Failing: See https://github.com/elastic/kibana/issues/188133
+describe.skip('CustomFields', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 

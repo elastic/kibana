@@ -13,7 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "update_by_query",
+        "auto_calculate_default_ech_capacity": false,
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -75,7 +75,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "update_by_query",
+        "auto_calculate_default_ech_capacity": false,
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -135,7 +135,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "update_by_query",
+        "auto_calculate_default_ech_capacity": false,
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,

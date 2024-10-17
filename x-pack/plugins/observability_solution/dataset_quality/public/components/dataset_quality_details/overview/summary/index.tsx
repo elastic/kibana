@@ -26,7 +26,6 @@ export default function Summary() {
   const {
     isSummaryPanelLoading,
     totalDocsCount,
-    sizeInBytesAvailable,
     sizeInBytes,
     isUserAllowedToSeeSizeInBytes,
     totalServicesCount,
@@ -41,14 +40,12 @@ export default function Summary() {
           value={totalDocsCount}
           isLoading={isSummaryPanelLoading}
         />
-        {sizeInBytesAvailable && (
-          <PanelIndicator
-            label={overviewPanelDocumentsIndicatorSize}
-            value={sizeInBytes}
-            isLoading={isSummaryPanelLoading}
-            userHasPrivilege={isUserAllowedToSeeSizeInBytes}
-          />
-        )}
+        <PanelIndicator
+          label={overviewPanelDocumentsIndicatorSize}
+          value={sizeInBytes}
+          isLoading={isSummaryPanelLoading}
+          userHasPrivilege={isUserAllowedToSeeSizeInBytes}
+        />
       </Panel>
       <Panel title={overviewPanelTitleResources}>
         <PanelIndicator

@@ -27,7 +27,7 @@ const nameHeader = 'kbn-name';
 const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
-const internalProductHeader = 'x-elastic-internal-origin';
+const internalOriginHeader = 'x-elastic-internal-origin';
 const internalProductQueryParam = 'elasticInternalOrigin';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
@@ -50,6 +50,7 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
       'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
     },
     xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+    restrictInternalApis: false,
   },
 };
 
@@ -279,30 +280,30 @@ describe('core lifecycle handlers', () => {
         .expect(400);
     });
 
-    it('accepts requests with the internal product header to internal routes', async () => {
+    it('accepts requests with the internal origin header to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .query({ myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product header to public routes', async () => {
+    it('accepts requests with the internal origin header to public routes', async () => {
       await supertest(innerServer.listener)
         .get(testPublicRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .query({ myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product query param to internal routes', async () => {
+    it('accepts requests with the internal origin query param to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product query param to public routes', async () => {
+    it('accepts requests with the internal origin query param to public routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
@@ -315,10 +316,12 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
   let server: HttpService;
   let innerServer: HttpServerSetup['server'];
   let router: IRouter;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
+    logger = loggerMock.create();
     const configService = createConfigService({ server: { restrictInternalApis: true } });
-    server = createHttpService({ configService });
+    server = createHttpService({ configService, logger });
 
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
@@ -349,16 +352,20 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
       await server.start();
     });
 
-    it('request requests without the internal product header to internal routes', async () => {
+    it('rejects requests without the internal product header to internal routes', async () => {
       const result = await supertest(innerServer.listener).get(testInternalRoute).expect(400);
       expect(result.body.error).toBe('Bad Request');
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
     it('accepts requests with the internal product header to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .expect(200, 'ok()');
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
   });
 });
@@ -418,8 +425,8 @@ describe('core lifecycle handlers with no strict client version check', () => {
       .set(KIBANA_BUILD_NR_HEADER, '12345')
       .expect(500, /nok/);
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const [[message]] = logger.warn.mock.calls;
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    const message = logger.warn.mock.calls[1][0];
     expect(message).toMatch(
       /^Client build \(12345\) is newer than this Kibana server build \(1234\)/
     );
@@ -430,8 +437,8 @@ describe('core lifecycle handlers with no strict client version check', () => {
       .set(KIBANA_BUILD_NR_HEADER, '123')
       .expect(500, /nok/);
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const [[message]] = logger.warn.mock.calls;
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    const message = logger.warn.mock.calls[1][0];
     expect(message).toMatch(
       /^Client build \(123\) is older than this Kibana server build \(1234\)/
     );

@@ -81,9 +81,14 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
       </EuiFlexGroup>
       <HoverActionPopover value={value} field={field} anchorPosition="downCenter" display="block">
-        <EuiCodeBlock overflowHeight={100} paddingSize="s" isCopyable language="txt" fontSize="s">
-          {value}
-        </EuiCodeBlock>
+        <EuiCodeBlock
+          overflowHeight={100}
+          paddingSize="s"
+          isCopyable
+          language="txt"
+          fontSize="s"
+          dangerouslySetInnerHTML={{ __html: value }}
+        />
       </HoverActionPopover>
     </EuiFlexGroup>
   );

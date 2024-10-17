@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
 * <<release-notes-8.15.1>>
 * <<release-notes-8.15.0>>
@@ -73,6 +74,47 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+
+include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.15.3]]
+== {kib} 8.15.3
+
+The 8.15.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.15.3]]
+=== Bug fixes
+Alerting::
+* Fixes a storage configuration error that could prevent the Stack Management > Alerts page from loading correctly ({kibana-pull}194785[#194785]).
+* Fixes a bug preventing certain alerts with Role visibility set to "Stack Rules" from being shown on the Stack Management page ({kibana-pull}194615[#194615]).
+* Fixes an issue where rules created from Discover before version 8.11.0 could no longer be accessed after upgrading ({kibana-pull}192321[#192321]).
+Dashboards::
+* Fixes an issue where the `embed=true` parameter was missing when sharing a dashboard with the Embed code option ({kibana-pull}194366[#194366]).
+Discover::
+* Fixes an issue with the document viewer panel not opening in focus mode ({kibana-pull}191039[#191039]).
+Elastic Observability solution::
+* Fixes the OpenTelemetry guided onboarding for MacOS with x86_64 architectures ({kibana-pull}194915[#194915]).
+* Fixes a bug where the SLO creation form was allowing multiple values for timestamp fields ({kibana-pull}194311[#194311]).
+Elastic Search solution::
+* Fixes a bug with the https://www.elastic.co/guide/en/enterprise-search/8.15/connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected ({kibana-pull}195567[#195567]).
+Elastic Security solution::
+For the Elastic Security 8.15.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Automatic Import no longer asks the LLM to map fields to reserved ECS fields ({kibana-pull}195168[#195168]).
+* Automatic Import no longer returns an "Invalid ECS field" message when the ECS mapping slightly differs from the expected format. For example `date_format` instead of `date_formats` ({kibana-pull}195167[#195167]).
+* Fixes an issue that was causing the Grok processor to return non-ECS compatible fields when processing structured or unstructured syslog samples in Automatic Import ({kibana-pull}194727[#194727]).
+* Fixes the integrationName when uploading a new version of an existing integration using a ZIP upload ({kibana-pull}194298[#194298]).
+* Fixes a bug that caused the Deploy step of Automatic Import to fail after a pipeline was edited and saved ({kibana-pull}194203[#194203]).
+* Fixes an issue in the Kibana Management > Roles page where users could not sort the table by clicking the column headers ({kibana-pull}194196[#194196]).
+Lens & Visualizations::
+* Fixes an issue where the legend label truncation setting wasn't working properly for heat maps in Lens ({kibana-pull}195928[#195928]).
+Machine Learning::
+* Fixes an issue preventing Anomaly swim lane panels from updating on query changes ({kibana-pull}195090[#195090]).
+* Fixes an issue that could cause the "rows per page" option to disappear from the Anomaly timeline view in the Anomaly Explorer ({kibana-pull}194531[#194531]).
+* Fixes an issue causing screen flickering on the Results Explorer and Analytics Map pages when no jobs are available ({kibana-pull}193890[#193890]).
+
+
 [[release-notes-8.15.2]]
 == {kib} 8.15.2
 
@@ -118,6 +160,7 @@ Machine Learning::
 * Fixes unnecessary ML services initialization during plugin setup ({kibana-pull}193153[#193153]).
 * Fixes link to anomaly detection wizard from pattern analysis in Discover ({kibana-pull}192375[#192375]).
 * Fixes an issue with the `http_endpoint` input config loading incorrectly in an Automatic Import workflow ({kibana-pull}191964[#191964]).
+
 
 [[release-notes-8.15.1]]
 == {kib} 8.15.1
@@ -241,7 +284,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.15.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-184036]]
 .Adds rate limiting to install by upload endpoint.
 [%collapsible]
 ====
@@ -660,7 +702,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.14.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-182074]]
 .Renamed an advanced setting to enable {esql}.
 [%collapsible]
 ====
@@ -1111,7 +1152,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.13.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-176879]]
 .Removes conditional topics for Kafka outputs
 [%collapsible]
 ====
@@ -1120,7 +1160,6 @@ The Kafka output no longer supports conditional topics. For more information, re
 ====
 
 [discrete]
-[[breaking-176443]]
 .Most Fleet installed integrations are now read-only and labelled with a *Managed* tag in the Kibana UI
 [%collapsible]
 ====
@@ -1136,7 +1175,6 @@ For more information, refer to ({kibana-pull}172393[#172393]).
 ====
 
 [discrete]
-[[breaking-174674]]
 .Removes `is_nan`, `is_finite`, and `is_infinite` functions from {esql}
 [%collapsible]
 ====
@@ -1512,7 +1550,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.12.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-172224]]
 .New SLO architecture
 [%collapsible]
 ====
@@ -1536,7 +1573,6 @@ Be aware that when installing a new SLO (or after resetting an SLO), we install 
 ====
 
 [discrete]
-[[breaking-170635]]
 .A new sub-feature privilege to control user access to the cases settings
 [%collapsible]
 ====
@@ -1920,21 +1956,21 @@ Before you upgrade to 8.11.0, review the breaking changes, then mitigate the imp
 
 
 [discrete]
-[[breaking-167085]]
 .Improve config output validation for default output.
 [%collapsible]
 ====
 *Details* +
 Improve config output validation to not allow to defining multiple default outputs in {kib} configuration. For more information, refer to ({kibana-pull}167085[#167085]).
 ====
+
 [discrete]
-[[breaking-161806]]
 .Convert filterQuery to KQL.
 [%collapsible]
 ====
 *Details* +
 Converts `filterQuery` to a KQL query string. For more information, refer to ({kibana-pull}161806[#161806]).
 ====
+
 [float]
 [[deprecations-8.11.0]]
 === Deprecations
@@ -2264,7 +2300,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.10.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-162665]]
 .New summary search capabilities cause existing SLOs to stop working
 [%collapsible]
 ====
@@ -2342,7 +2377,6 @@ DELETE .slo-observability.sli-v1*
 ====
 
 [discrete]
-[[breaking-162506]]
 .Get case metrics APIs now internal
 [%collapsible]
 ====
@@ -2351,7 +2385,6 @@ The get case metrics APIs are now internal. For more information, refer to ({kib
 ====
 
 [discrete]
-[[breaking-162492]]
 .Case limits
 [%collapsible]
 ====
@@ -2373,7 +2406,6 @@ For the full list, refer to {kib-issue}146945[#146945].
 ====
 
 [discrete]
-[[breaking-159041]]
 .`addProcessorDefinition` is removed
 [%collapsible]
 ====
@@ -2382,7 +2414,6 @@ The function `addProcessorDefinition` is removed from the Console plugin start c
 ====
 
 [discrete]
-[[breaking-162288]]
 .The Download CSV endpoint has changed.
 [%collapsible]
 ====
@@ -2699,7 +2730,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.9.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-159118]]
 .Hide Uptime app if no data is available
 [%collapsible]
 ====
@@ -2709,7 +2739,6 @@ For synthetic monitoring, we now recommend to use the new Synthetics app. For mo
 ====
 
 [discrete]
-[[breaking-159012]]
 .Remove synthetics pattern from Uptime settings
 [%collapsible]
 ====
@@ -3282,7 +3311,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.8.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-155470]]
 .Removes legacy project monitor API
 [%collapsible]
 ====
@@ -3294,7 +3322,6 @@ In 8.8.0 and later, an error appears when you use the project monitor API.
 ====
 
 [discrete]
-[[breaking-147985]]
 .Changes the privileges for alerts and cases
 [%collapsible]
 ====
@@ -3799,7 +3826,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.7.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-149482]]
 .Removes the fields list sampling setting
 [%collapsible]
 ====
@@ -3811,7 +3837,6 @@ In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the 
 ====
 
 [discrete]
-[[breaking-146990]]
 .Removes the legacy pie chart visualization setting
 [%collapsible]
 ====
@@ -3823,7 +3848,6 @@ In 7.14.0 and later, the new aggregation-based pie chart visualization is availa
 ====
 
 [discrete]
-[[breaking-147616]]
 .Removes the current_upgrades endpoint
 [%collapsible]
 ====
@@ -3835,7 +3859,6 @@ When you upgrade to 8.7.0, use the `/action_status` endpoint.
 ====
 
 [discrete]
-[[breaking-147199]]
 .Removes the preconfiguration API route
 [%collapsible]
 ====
@@ -4298,7 +4321,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.6.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-143081]]
 .Changes the `histogram:maxBars` default setting
 [%collapsible]
 ====
@@ -4314,7 +4336,6 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 ====
 
 [discrete]
-[[breaking-158338]]
 .CSV reports use PIT instead of Scroll
 [%collapsible]
 ====
@@ -4742,7 +4763,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.5.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-141757]]
 .Updates bulk action API to return actionId instead of agent success
 [%collapsible]
 ====
@@ -4754,7 +4774,6 @@ When you use `FleetBulkResponse`, you now receive only `actionId` responses.
 ====
 
 [discrete]
-[[breaking-139431]]
 .Removes filter validation for ad-hoc data views
 [%collapsible]
 ====
@@ -4766,7 +4785,6 @@ Filters associated with unknown data views now display a warning message instead
 ====
 
 [discrete]
-[[breaking-138677]]
 .Removes the `package_policies` field from the agent policy saved object
 [%collapsible]
 ====
@@ -5240,7 +5258,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-135669]]
 .xpack.agents.* are uneditable in UI when defined in kibana.yml
 [%collapsible]
 ====
@@ -5254,7 +5271,6 @@ To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.
 ====
 
 [discrete]
-[[breaking-134336]]
 .Removes the legacy charts library
 [%collapsible]
 ====
@@ -5831,7 +5847,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-129581]]
 .Removes Quandl and Graphite integrations
 [%collapsible]
 ====
@@ -5845,7 +5860,6 @@ To leave your feedback about the removal of `.quandl` and `.graphite`, go to the
 ====
 
 [discrete]
-[[breaking-134855]]
 .Makes Osquery All with All base privilege
 [%collapsible]
 ====
@@ -6822,7 +6836,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-121435]]
 .Removes legacy CSV export type
 [%collapsible]
 ====
@@ -6834,7 +6847,6 @@ If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-gene
 ====
 
 [discrete]
-[[breaking-121369]]
 .Removes legacy PDF shim
 [%collapsible]
 ====
@@ -7186,7 +7198,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.0.0, review the breaking change, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-123754]]
 .Removes the `console.ssl` setting
 [%collapsible]
 ====
@@ -7314,7 +7325,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-122722]]
 .Removes the ability to use `elasticsearch.username: elastic` in production
 [%collapsible]
 ====
@@ -7396,7 +7406,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-118854]]
 .Splits package policy `upgrade` endpoint for Fleet
 [%collapsible]
 ====
@@ -7432,7 +7441,6 @@ The endpoint is now split into two separate endpoints:
 ====
 
 [discrete]
-[[breaking-119945]]
 .Removes APM jobs from Machine Learning
 [%collapsible]
 ====
@@ -7444,7 +7452,6 @@ When you upgrade to 8.0.0, you are unable to create and view the APM Node.js and
 ====
 
 [discrete]
-[[breaking-118300]]
 .Fails migrations for unknown types
 [%collapsible]
 ====
@@ -7456,7 +7463,6 @@ To complete the migration, re enable plugins or delete documents from the index 
 ====
 
 [discrete]
-[[breaking-116821]]
 .Removes deprecated config fields from Logs and Metrics APIs and saved objects
 [%collapsible]
 ====
@@ -7487,7 +7493,6 @@ To review the breaking changes in previous versions, refer to the following:
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
 [discrete]
-[[deprecation-120689]]
 .Renames the `autocreate` data view APM setting
 [%collapsible]
 ====
@@ -7499,7 +7504,6 @@ To automatically create data views in APM, use `xpack.apm.autoCreateApmDataView`
 ====
 
 [discrete]
-[[deprecation-119494]]
 .Updates Fleet API to improve consistency
 [%collapsible]
 ====
@@ -7696,7 +7700,6 @@ To review the breaking changes in previous versions, refer to the following:
 ==== Alerting
 
 [discrete]
-[[breaking-114558]]
 .Removes `xpack.task_manager.index`
 [%collapsible]
 ====
@@ -7708,7 +7711,6 @@ Before you upgrade to 8.0.0, remove `xpack.task_manager.index` from kibana.yml.
 ====
 
 [discrete]
-[[breaking-113461]]
 .Removes ability to remove plugins
 [%collapsible]
 ====
@@ -7724,7 +7726,6 @@ Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
 ==== Lens & visualizations
 
 [discrete]
-[[breaking-113516]]
 .Removes display options from legacy gauge
 [%collapsible]
 ====
@@ -7736,7 +7737,6 @@ When you create aggregation-based gauge visualizations, the *Display warnings* o
 ====
 
 [discrete]
-[[breaking-112643]]
 .Removes settings from visEditors plugins
 [%collapsible]
 ====
@@ -7781,7 +7781,6 @@ Before you upgrade, make the following changes in kibana.yml:
 ====
 
 [discrete]
-[[breaking-111704]]
 .Removes dimming opacity setting
 [%collapsible]
 ====
@@ -7793,7 +7792,6 @@ When you upgrade to 8.0.0, you are no longer able to configure the dimming opact
 ====
 
 [discrete]
-[[breaking-110985]]
 .Removes Less stylesheet support
 [%collapsible]
 ====
@@ -7805,7 +7803,6 @@ Existing less stylesheets are automatically converted to CSS stylesheets.
 ====
 
 [discrete]
-[[breaking-110571]]
 .Disables the input string mode
 [%collapsible]
 ====
@@ -7827,7 +7824,6 @@ To use index patterns and {es} indices in *TSVB* visualizations:
 ==== Logs
 
 [discrete]
-[[breaking-115974]]
 .Removes deprecated alias config entries
 [%collapsible]
 ====
@@ -7839,7 +7835,6 @@ Before you upgrade, remove the settings from kibana.yml, then configure the sett
 ====
 
 [discrete]
-[[breaking-61302]]
 .Removes configurable fields in settings
 [%collapsible]
 ====
@@ -7855,7 +7850,6 @@ Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-refere
 ==== Machine learning
 
 [discrete]
-[[breaking-115444]]
 .Grants access to machine learning features when base privileges are used
 [%collapsible]
 ====
@@ -7871,7 +7865,6 @@ If you do not want to grant users privileges to machine learning features, updat
 ==== Maps
 
 [discrete]
-[[breaking-116184]]
 .Removes proxyElasticMapsServiceInMaps
 [%collapsible]
 ====
@@ -7887,7 +7880,6 @@ Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>,
 ==== Operations
 
 [discrete]
-[[breaking-111535]]
 .Removes environment variables
 [%collapsible]
 ====
@@ -7903,7 +7895,6 @@ Replace the `CONFIG_PATH` environment variable with `KBN_PATH_CONF`, and replace
 ==== Platform
 
 [discrete]
-[[breaking-114379]]
 .Removes supports for csp.rules configuration
 [%collapsible]
 ====
@@ -7915,7 +7906,6 @@ Configuring the default `csp.script_src`, `csp.workers_src`, and `csp.style_src`
 ====
 
 [discrete]
-[[breaking-113653]]
 .Changes and removes deprecated core settings and deprecated settings from core plugins
 [%collapsible]
 ====
@@ -7949,7 +7939,6 @@ For more information, refer to {kibana-pull}113653[#113653].
 ====
 
 [discrete]
-[[breaking-113495]]
 .Removes `enabled` settings from plugins
 [%collapsible]
 ====
@@ -7966,7 +7955,6 @@ Before you upgrade to 8.0.0:
 ====
 
 [discrete]
-[[breaking-113367]]
 .Removes `--plugin-dir` cli option
 [%collapsible]
 ====
@@ -7978,7 +7966,6 @@ Before you upgrade to 8.0.0, remove `plugins.scanDirs` from kibana.yml.
 ====
 
 [discrete]
-[[breaking-113296]]
 .Removes support for `optimize.*` settings
 [%collapsible]
 ====
@@ -8012,7 +7999,6 @@ To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to 
 ====
 
 [discrete]
-[[breaking-113173]]
 .Removes `so/server/es` settings
 [%collapsible]
 ====
@@ -8031,7 +8017,6 @@ Before you upgrade to 8.0.0., remove these settings from kibana.yml.
 ====
 
 [discrete]
-[[breaking-113068]]
 .Adds requirement for inline scripting
 [%collapsible]
 ====
@@ -8043,7 +8028,6 @@ Enable {ref}/modules-scripting-security.html[inline scripting].
 ====
 
 [discrete]
-[[breaking-112773]]
 .Removes `kibana.index` settings
 [%collapsible]
 ====
@@ -8055,7 +8039,6 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 ====
 
 [discrete]
-[[breaking-112305]]
 .Removes legacy logging
 [%collapsible]
 ====
@@ -8071,7 +8054,6 @@ Use the new <<logging-configuration,logging system configuration>>.
 ==== Reporting
 
 [discrete]
-[[breaking-114216]]
 .Removes reporting settings
 [%collapsible]
 ====
@@ -8097,7 +8079,6 @@ Before you upgrade to 8.0.0, remove the settings from kibana.yml.
 ==== REST API
 
 [discrete]
-[[breaking-114730]]
 .Removes `/api/settings`
 [%collapsible]
 ====
@@ -8113,7 +8094,6 @@ Use `/api/stats`.
 ==== Security
 
 [discrete]
-[[breaking-116191]]
 .Removes legacy audit logger
 [%collapsible]
 ====
@@ -8200,7 +8180,6 @@ Breaking changes can prevent your application from optimal operation and perform
 To review the breaking changes in the previous version, refer to <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>.
 
 [discrete]
-[[breaking-110830]]
 .Changes the `GET /api/status` default behavior
 [%collapsible]
 ====
@@ -8212,7 +8191,6 @@ To retrieve the {kib} status in the previous format, use `GET /api/status?v7form
 ====
 
 [discrete]
-[[breaking-110738]]
 .Removes support for legacy exports
 [%collapsible]
 ====
@@ -8224,7 +8202,6 @@ Using the user interface to import saved objects is restricted to `.ndjson` form
 ====
 
 [discrete]
-[[breaking-109896]]
 .Removes `map.regionmap.*`
 [%collapsible]
 ====
@@ -8242,7 +8219,6 @@ If you have maps that use `map.regionmap` layers:
 ====
 
 [discrete]
-[[breaking-109798]]
 .Removes `kibana.defaultAppId`
 [%collapsible]
 ====
@@ -8254,7 +8230,6 @@ When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To con
 ====
 
 [discrete]
-[[breaking-109350]]
 .Removes `courier:batchSearches`
 [%collapsible]
 ====
@@ -8266,7 +8241,6 @@ When you upgrade, the `courier:batchSearches` setting will no longer be availabl
 ====
 
 [discrete]
-[[breaking-108111]]
 .Removes `xpack.task_manager.index`
 [%collapsible]
 ====
@@ -8278,7 +8252,6 @@ When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
 ====
 
 [discrete]
-[[breaking-108103]]
 .Removes dashboard-only mode
 [%collapsible]
 ====
@@ -8290,7 +8263,6 @@ To grant users access to only dashboards, create a new role, then assign only th
 ====
 
 [discrete]
-[[breaking-105979]]
 .Removes `xpack.maps.showMapVisualizationTypes`
 [%collapsible]
 ====
@@ -8343,7 +8315,6 @@ Breaking changes can prevent your application from optimal operation and perform
 ==== Enterprise Search changes
 
 [discrete]
-[[breaking-106307]]
 .Required security plugin in 8.0
 [%collapsible]
 ====
@@ -8359,7 +8330,6 @@ Enable X-Pack Security.
 ==== Index pattern changes
 
 [discrete]
-[[breaking-35173]]
 .Removed support for time-based interval index patterns
 [%collapsible]
 ====
@@ -8375,7 +8345,6 @@ You must migrate your time_based index patterns to a wildcard pattern. For examp
 ==== Operations changes
 
 [discrete]
-[[breaking-93835]]
 .Removed platform from archive root directory
 [%collapsible]
 ====
@@ -8387,7 +8356,6 @@ To use the new folder, update the configuration management tools and automation.
 ====
 
 [discrete]
-[[breaking-90511]]
 .Removed default support for TLS v1.0 and v1.1
 [%collapsible]
 ====
@@ -8399,7 +8367,6 @@ To enable support, set `--tls-min-1.0` in the `node.options` configuration file.
 ====
 
 [discrete]
-[[breaking-74424]]
 .Removed support for sysv init
 [%collapsible]
 ====
@@ -8411,7 +8378,6 @@ If your installation uses .deb or .rpm packages with SysV, migrate to systemd.
 ====
 
 [discrete]
-[[breaking-42353]]
 .Disabled response logging as a default
 [%collapsible]
 ====
@@ -8447,7 +8413,6 @@ logging:
 ==== Reporting changes
 
 [discrete]
-[[breaking-52539]]
 .Legacy job parameters are no longer supported
 [%collapsible]
 ====
@@ -8463,7 +8428,6 @@ If you use POST URL snippets to automatically generate PDF reports, regenerate t
 ==== Security changes
 
 [discrete]
-[[breaking-47929]]
 .Removed `/api/security/v1/saml` route
 [%collapsible]
 ====
@@ -8475,7 +8439,6 @@ Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 
 ====
 
 [discrete]
-[[breaking-41700]]
 .Reject legacy browsers by default
 [%collapsible]
 ====
@@ -8491,7 +8454,6 @@ To enable support for legacy browsers, set `csp.strict: false` in kibana.yml. To
 ==== Settings changes
 
 [discrete]
-[[breaking-106061]]
 .Use new session timeout defaults
 [%collapsible]
 ====
@@ -8506,7 +8468,6 @@ Use the following default values:
 ====
 
 [discrete]
-[[breaking-87114]]
 .Removed support for setting `server.host` to '0'
 [%collapsible]
 ====
@@ -8518,7 +8479,6 @@ You are now unable to use `0` as the `server.host`.
 ====
 
 [discrete]
-[[breaking-38657]]
 .Removed `xpack.security.public` and `xpack.security.authProviders`
 [%collapsible]
 ====
@@ -8530,7 +8490,6 @@ Use the `xpack.security.authc.saml.realm` and `xpack.security.authc.providers` s
 ====
 
 [discrete]
-[[breaking-22696]]
 .Removed useUTC deprecation
 [%collapsible]
 ====
@@ -8542,7 +8501,6 @@ The default timezone is UTC. To change the timezone, set `logging.timezone: fals
 ====
 
 [discrete]
-[[breaking-32049]]
 .Removed environment variables `CONFIG_PATH` and `DATA_PATH`
 [%collapsible]
 ====
@@ -8560,7 +8518,6 @@ Use the environment variable `KBN_PATH_CONF` instead of `CONFIG_PATH`.  Use the 
 The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0. Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
 [discrete]
-[[deprecation-74424]]
 .Removed support for SysV init
 [%collapsible]
 ====
@@ -8572,7 +8529,6 @@ If your system doesn't have `service` aliased to use kibana.service, use `system
 ====
 
 [discrete]
-[[deprecation-33603]]
 .Removed `xpack:defaultAdminEmail` setting
 [%collapsible]
 ====

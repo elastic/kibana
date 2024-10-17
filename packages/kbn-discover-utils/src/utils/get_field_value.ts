@@ -9,7 +9,10 @@
 
 import { DataTableRecord } from '../types';
 
-export const getFieldValue = (record: DataTableRecord, field: string) => {
+export const getFieldValue = <TRecord extends DataTableRecord, TField extends string>(
+  record: TRecord,
+  field: TField & keyof TRecord['flattened']
+): TRecord['flattened'][TField] => {
   const value = record.flattened[field];
   return Array.isArray(value) ? value[0] : value;
 };

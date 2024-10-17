@@ -33,6 +33,7 @@
     "@kbn/discover-utils",
     "@kbn/visualization-utils",
     "@kbn/search-types",
+    "@kbn/data-view-utils",
   ],
   "exclude": [
     "target/**/*",

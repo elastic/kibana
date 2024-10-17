@@ -59,7 +59,6 @@ export const FieldDescription = <T extends SettingType>({
          * Justification for dangerouslySetInnerHTML:
          * Setting description may contain formatting and links to documentation.
          */
-        /* @ts-expect-error upgrade typescript v5.1.6 */
         dangerouslySetInnerHTML={{ __html: content || '' }} // eslint-disable-line react/no-danger
       />
     );

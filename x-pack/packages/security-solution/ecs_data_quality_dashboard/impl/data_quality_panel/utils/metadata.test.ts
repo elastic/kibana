@@ -17,6 +17,7 @@ import {
   getPartitionedFieldMetadata,
   getSortedPartitionedFieldMetadata,
   isMappingCompatible,
+  isTypeInSameFamily,
 } from './metadata';
 import { EcsFlatTyped } from '../constants';
 import {
@@ -633,5 +634,37 @@ describe('getMappingsProperties', () => {
         indexName: 'foozle',
       })
     ).toBeNull();
+  });
+});
+
+describe('isTypeInSameFamily', () => {
+  test('it returns false when ecsExpectedType is undefined', () => {
+    expect(isTypeInSameFamily({ ecsExpectedType: undefined, type: 'keyword' })).toBe(false);
+  });
+
+  const expectedFamilyMembers: {
+    [key: string]: string[];
+  } = {
+    constant_keyword: ['keyword', 'wildcard'], // `keyword` and `wildcard` in the same family as `constant_keyword`
+    keyword: ['constant_keyword', 'wildcard'],
+    match_only_text: ['text'],
+    text: ['match_only_text'],
+    wildcard: ['keyword', 'constant_keyword'],
+  };
+
+  const ecsExpectedTypes = Object.keys(expectedFamilyMembers);
+
+  ecsExpectedTypes.forEach((ecsExpectedType) => {
+    const otherMembersOfSameFamily = expectedFamilyMembers[ecsExpectedType];
+
+    otherMembersOfSameFamily.forEach((type) =>
+      test(`it returns true for ecsExpectedType '${ecsExpectedType}' when given '${type}', a type in the same family`, () => {
+        expect(isTypeInSameFamily({ ecsExpectedType, type })).toBe(true);
+      })
+    );
+
+    test(`it returns false for ecsExpectedType '${ecsExpectedType}' when given 'date', a type NOT in the same family`, () => {
+      expect(isTypeInSameFamily({ ecsExpectedType, type: 'date' })).toBe(false);
+    });
   });
 });

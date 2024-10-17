@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/193400
-  describe.skip('extension getAdditionalCellActions', () => {
+  describe('extension getAdditionalCellActions', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
@@ -95,7 +94,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('data view mode', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/193367
+    describe.skip('data view mode', () => {
       it('should render additional cell actions for logs data source', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,

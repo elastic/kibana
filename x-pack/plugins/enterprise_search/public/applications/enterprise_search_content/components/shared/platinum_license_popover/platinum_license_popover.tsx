@@ -64,7 +64,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
             'xpack.enterpriseSearch.content.newIndex.selectConnector.upgradeContent',
             {
               defaultMessage:
-                'Connector clients sending data to a self-managed Elasticsearch instance require at least a Platinum license.',
+                'Self-managed connectors sending data to a self-managed Elasticsearch instance require at least a Platinum license.',
             }
           )}
         </p>
@@ -72,7 +72,12 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
       <EuiPopoverFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="popout" target="_blank" href={docLinks.licenseManagement}>
+            <EuiButton
+              data-test-subj="enterpriseSearchPlatinumLicensePopoverSubscriptionPlansButton"
+              iconType="popout"
+              target="_blank"
+              href={docLinks.licenseManagement}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.newIndex.selectConnector.subscriptionButtonLabel',
                 {
@@ -83,6 +88,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchPlatinumLicensePopoverManageLicenseButton"
               iconType="wrench"
               iconSide="right"
               onClick={() =>
