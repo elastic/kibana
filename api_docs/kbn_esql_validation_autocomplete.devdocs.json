@@ -3658,7 +3658,7 @@
               "\nThis is useful to identify the suggestion type and apply different styles to it."
             ],
             "signature": [
-              "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Function\" | \"Method\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
+              "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Method\" | \"Function\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
@@ -4225,7 +4225,7 @@
         "label": "ItemKind",
         "description": [],
         "signature": [
-          "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Function\" | \"Method\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
+          "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Method\" | \"Function\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
         "deprecated": false,
