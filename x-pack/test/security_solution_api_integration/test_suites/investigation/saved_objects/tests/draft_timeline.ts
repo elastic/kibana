@@ -6,21 +6,21 @@
  */
 
 import expect from '@kbn/expect';
+import { TIMELINE_DRAFT_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
-import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
-
-export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('Draft timeline - Saved Objects', () => {
-    before(() => kibanaServer.savedObjects.cleanStandardList());
-    after(() => kibanaServer.savedObjects.cleanStandardList());
+    before(async () => (supertest = await utils.createSuperTest()));
 
     describe('Clean draft timelines', () => {
       it('returns a draft timeline if none exists', async () => {
         const response = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns a draft timeline template if none exists', async () => {
         const response = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns a cleaned draft timeline if another one already exists', async () => {
         const response = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(noteIds).to.have.length(1, 'should have one note');
 
         const cleanDraftTimelineRequest = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
