@@ -35,6 +35,7 @@ export const GridPanel = ({
 
   const interactionStart = useCallback(
     (type: 'drag' | 'resize', e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      console.log('panelRef.current', panelRef.current);
       if (!panelRef.current) return;
       e.preventDefault();
       e.stopPropagation();
@@ -88,7 +89,6 @@ export const GridPanel = ({
           css={css`
             opacity: 0;
             display: flex;
-            cursor: move;
             position: absolute;
             align-items: center;
             justify-content: center;
@@ -100,8 +100,13 @@ export const GridPanel = ({
             border: 1px solid ${euiThemeVars.euiBorderColor};
             background-color: ${euiThemeVars.euiColorEmptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+            &:hover {
+              cursor: grab;
+            }
           `}
-          onMouseDown={(e) => interactionStart('drag', e)}
+          onMouseDown={(e) => {
+            interactionStart('drag', e);
+          }}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>

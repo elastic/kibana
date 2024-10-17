@@ -9,6 +9,14 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+
+export interface GridLayoutApi {
+  addNewPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
+  getPanelCount: () => number;
+  removePanel: (panelId: string) => void;
+  serializeState: () => void;
+}
+
 export interface GridCoordinate {
   column: number;
   row: number;
@@ -97,4 +105,12 @@ export interface PanelInteractionEvent {
     right: number;
     bottom: number;
   };
+}
+
+// TODO: Remove from Dashboard app
+export enum PanelPlacementStrategy {
+  /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
+  placeAtTop = 'placeAtTop',
+  /** Look for the smallest y and x value where the default panel will fit. */
+  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
 }
