@@ -18201,13 +18201,20 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: query
-          name: ids
-          required: false
-          schema:
-            items:
-              type: string
-            type: array
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: list of package policy ids
+                  items:
+                    type: string
+                  type: array
+              required:
+                - ids
       responses:
         '200':
           content:
