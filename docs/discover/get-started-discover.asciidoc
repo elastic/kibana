@@ -1,14 +1,9 @@
 == Get started with Discover
 
-This tutorial shows you how to use *Discover* to search large amounts of
-data and understand what’s going on at any given time.
+Learn how to use *Discover* to:
 
-You’ll learn to:
-
-- **Select** data for your exploration, set a time range for that data,
-search it with the {kib} Query Language, and filter the results.
-- **Explore** the details of your data, view individual documents, and create tables
-that summarize the contents of the data.
+- **Select** and **filter** your {es} data.
+- **Explore** the fields and content of that data in depth.
 - **Present** your findings in a visualization.
 
 At the end of this tutorial, you’ll be ready to start exploring with your own
@@ -16,8 +11,8 @@ data in *Discover*.
 
 *Prerequisites:*
 
-- If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
-- You must have data in {es}.  This tutorial uses the
+- If you don’t already have {kib}, https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[start a free trial] on Elastic Cloud.
+- You must have data in {es}. Examples on this page use the
 <<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
 - You should have an understanding of {ref}/documents-indices.html[{es} documents and indices]
 and <<kibana-concepts-analysts, {kib} concepts>>.
@@ -29,7 +24,7 @@ and <<kibana-concepts-analysts, {kib} concepts>>.
 
 Tell {kib} where to find the data you want to explore, and then specify the time range in which to view that data.
 
-. Open the main menu, and select **Discover**.
+. Find **Discover** in the navigation menu or by using the <<kibana-navigation-search,global search bar>>.
 
 . Select the data you want to work with.
 +
@@ -49,7 +44,7 @@ For details, refer to <<data-views, Create a data view.>>
 +
 The range selection is based on the default time field in your data.
 If you are using the sample data, this value was set when you added the data.
-If you  are using your own data, and it does not have a time field, the range selection is not available.
+If you are using your own data, and it does not have a time field, the range selection is not available.
 
 . To view the count of documents for a given time in the specified range,
 click and drag the mouse over the chart.
@@ -58,17 +53,22 @@ click and drag the mouse over the chart.
 [[explore-fields-in-your-data]]
 === Explore the fields in your data
 
-**Discover** includes a table
+**Discover** provides utilities designed to help you make sense of your data:
+
+* a list of all the fields extracted from the data.
+* a table
 that shows all the documents that match your search.
 By default, the document table includes a column for the time field and a column that lists all other fields in the document.
-You’ll modify the document table to display your fields of interest.
+You can modify the document table to display your fields of interest.
 
-. In the sidebar, enter `ma` in the search field to find the `manufacturer` field.
+. In the sidebar, check the available fields. It's very common to have hundreds of fields. Use the search at the top of that sidebar to look for specific terms in the field names.
++
+In this example, we've entered `ma` in the search field to find the `manufacturer` field.
 +
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 +
-NOTE: You can use wildcards in field searches.  For example, `goe*dest` finds `geo.dest` and `geo.src.dest`.
+TIP: You can use wildcards in field searches.  For example, `goe*dest` finds `geo.dest` and `geo.src.dest`.
 
 . In the *Available fields* list, click `manufacturer` to view its most popular values.
 +
