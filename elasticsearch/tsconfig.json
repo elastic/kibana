@@ -1,0 +1,35 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "pretty": true,
+    "noEmitOnError": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "newLine": "lf",
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true,
+    "useDefineForClassFields": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "importHelpers": true,
+    "outDir": "target/types",
+    "lib": [
+      "esnext"
+    ]
+  },
+  "formatCodeOptions": {
+    "identSize": 2,
+    "tabSize": 2
+  },
+  "exclude": [
+    "target/**/*"
+  ],
+  "include": [
+    "./src/**/*.ts"
+  ]
+}
