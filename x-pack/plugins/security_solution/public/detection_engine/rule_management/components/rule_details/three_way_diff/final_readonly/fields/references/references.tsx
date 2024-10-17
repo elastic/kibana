@@ -16,6 +16,10 @@ interface ReferencesReadOnlyProps {
 }
 
 export function ReferencesReadOnly({ references }: ReferencesReadOnlyProps) {
+  if (references.length === 0) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[
