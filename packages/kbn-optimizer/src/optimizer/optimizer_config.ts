@@ -72,7 +72,7 @@ const pickMaxWorkerCount = (dist: boolean) => {
   const isUseMaxAvailableResources = !!process.env.KBN_OPTIMIZER_USE_MAX_AVAILABLE_RESOURCES;
   const minWorkers = 2;
   const { cpuCount, totalMemory, freeMemory } = getSystemInfo();
-  const maxWorkers = cpuCount - 1;
+  const maxWorkers = Math.max(cpuCount - 1, minWorkers);
 
   // In case we get this env var set, just use max workers and avoid any kind of
   // resource balance according to memory and cpu
