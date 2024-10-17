@@ -185,6 +185,23 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
+  toESQL: (column, columnId, indexPattern, layer) => {
+    if (column.params?.emptyAsNull === false || column.timeShift) return;
+
+    const field = indexPattern.getFieldByName(column.sourceField);
+    let esql = '';
+    if (!field || field?.type === 'document') {
+      esql = `COUNT(*)`;
+    } else {
+      esql = `COUNT(${field.name})`;
+    }
+    if (column.filter) {
+      if (column.filter.language === 'kquery') return undefined;
+      return undefined; // esql += ` WHERE QSTR("${column.filter.query}")`;
+    }
+
+    return esql;
+  },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {

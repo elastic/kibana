@@ -196,6 +196,10 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
+  toESQL: (column, columnId) => {
+    if (column.timeShift) return;
+    return `PERCENTILE(${column.sourceField}, ${column.params.percentile})`;
+  },
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
       'aggSinglePercentile',
