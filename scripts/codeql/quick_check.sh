@@ -51,11 +51,11 @@ docker run $PLATFORM_FLAG --rm -v "$SRC_DIR":/workspace/source-code \
     "codeql database create /workspace/shared/codeql-db --language=javascript --source-root=/workspace/source-code --overwrite"
 
 echo "Analyzing a CodeQL database: $DATABASE_PATH"
-# Step 3: Run the Docker container to analyze the CodeQL database.
+# Step 2: Run the Docker container to analyze the CodeQL database.
 docker run $PLATFORM_FLAG --rm -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
     "codeql database analyze --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif /workspace/shared/codeql-db javascript-security-and-quality.qls"
 
-# Step 4: Print summary of SARIF results
+# Step 3: Print summary of SARIF results
 echo "Analysis complete. Results saved to $QUERY_OUTPUT"
 if command -v jq &> /dev/null; then
     vulnerabilities=$(jq -r '.runs[] | select(.results | length > 0)' "$QUERY_OUTPUT")
