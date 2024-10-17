@@ -19,7 +19,7 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { GroupSelector } from './group_selector';
 
-export function UngroupedInventoryPage() {
+export function UngroupedInventoryView() {
   const { pagination, setPagination } = useInventoryPageViewContext();
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {

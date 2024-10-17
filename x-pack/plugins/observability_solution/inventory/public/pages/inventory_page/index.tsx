@@ -6,16 +6,17 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { decode, encode } from '@kbn/rison';
-import { UngroupedInventoryPage } from '../../components/grouped_inventory/ungrouped';
-import { GroupedInventoryPage } from '../../components/grouped_inventory/grouped';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { GroupedInventoryView } from '../../components/grouped_inventory';
+import { UngroupedInventoryView } from '../../components/grouped_inventory/ungrouped_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { InventoryPageViewContextProvider } from '../../context/inventory_page_view_provider';
 
-const DEFAULT_VIEW = 'type';
+const DEFAULT_GROUPING = ENTITY_TYPE;
 
 export interface InventoryState {
-  grouping?: string;
+  groupBy?: string;
   pagination?: Record<string, number>;
 }
 
@@ -48,7 +49,7 @@ export function InventoryPage() {
   }, [inventoryState]);
 
   const setGrouping = useCallback(
-    (kind: string) => setInventoryState((state) => ({ ...state, grouping: kind })),
+    (field: string) => setInventoryState((state) => ({ ...state, groupBy: field })),
     []
   );
   const setPagination = useCallback(
@@ -61,16 +62,16 @@ export function InventoryPage() {
   );
 
   // If state or grouping itself is `undefined`, fallback to the default view
-  const activeView = inventoryState?.grouping || DEFAULT_VIEW;
+  const currentGrouping = inventoryState?.groupBy || DEFAULT_GROUPING;
 
   return (
     <InventoryPageViewContextProvider
-      grouping={activeView}
+      grouping={currentGrouping}
       pagination={inventoryState?.pagination}
       setGrouping={setGrouping}
       setPagination={setPagination}
     >
-      {activeView === 'none' ? <UngroupedInventoryPage /> : <GroupedInventoryPage />}
+      {currentGrouping === 'none' ? <UngroupedInventoryView /> : <GroupedInventoryView />}
     </InventoryPageViewContextProvider>
   );
 }
