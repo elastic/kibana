@@ -27,7 +27,7 @@ export const registerFunctions: (isServerless: boolean) => RegistrationCallback 
   If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results
   returned to you, before executing the same tool or another tool again if needed.
 
-  The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability, which can be found in the ${
+  The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the ${
     isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`,

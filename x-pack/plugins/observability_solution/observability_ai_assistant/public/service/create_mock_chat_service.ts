@@ -29,7 +29,7 @@ export const createMockChatService = (): MockedChatService => {
         content: 'system',
       },
     }),
-    getScope: jest.fn(),
+    getScopes: jest.fn(),
   };
   return mockChatService;
 };

@@ -50,7 +50,7 @@ export class AIAssistantManagementSelectionPlugin
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'Observability AI Assistant scope',
+          defaultMessage: 'AI Assistant for Observability and Search visibility',
         }),
         category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
@@ -58,7 +58,7 @@ export class AIAssistantManagementSelectionPlugin
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              '<em>[technical preview]</em> Whether to show the Observability AI Assistant menu item in Observability, everywhere, or nowhere.',
+              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
             values: {
               em: (chunks) => `<em>${chunks}</em>`,
             },
@@ -77,7 +77,7 @@ export class AIAssistantManagementSelectionPlugin
         optionLabels: {
           [AIAssistantType.Default]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability only (default)' }
+            { defaultMessage: 'Observability and Search only (default)' }
           ),
           [AIAssistantType.Observability]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',

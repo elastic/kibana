@@ -27,7 +27,7 @@ interface ConversationViewProps {
   navigateToConversation: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
-  scope?: AssistantScope;
+  scopes?: AssistantScope[];
 }
 
 export const ConversationView: React.FC<ConversationViewProps> = ({
@@ -35,7 +35,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   navigateToConversation,
   getConversationHref,
   newConversationHref,
-  scope,
+  scopes,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -61,10 +61,10 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   );
 
   useEffect(() => {
-    if (scope) {
-      service.setScope(scope);
+    if (scopes) {
+      service.setScopes(scopes);
     }
-  }, [scope, service]);
+  }, [scopes, service]);
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 

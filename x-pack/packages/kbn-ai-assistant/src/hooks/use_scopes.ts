@@ -8,8 +8,8 @@
 import { useObservable } from 'react-use/lib';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
-export const useScope = () => {
+export const useScopes = () => {
   const service = useAIAssistantAppService();
-  const scope = useObservable(service.scope$);
-  return scope || 'all';
+  const scopes = useObservable(service.scope$);
+  return scopes || ['all'];
 };

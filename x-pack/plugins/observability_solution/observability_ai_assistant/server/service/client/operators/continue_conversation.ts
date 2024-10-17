@@ -138,7 +138,7 @@ function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
   disableFunctions,
-  scope,
+  scopes,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
@@ -147,14 +147,14 @@ function getFunctionDefinitions({
     | {
         except: string[];
       };
-  scope: AssistantScope;
+  scopes: AssistantScope[];
 }) {
   if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
   let systemFunctions = functionClient
-    .getFunctions({ scope })
+    .getFunctions({ scopes })
     .map((fn) => fn.definition)
     .filter(
       (def) =>
@@ -187,7 +187,7 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
-  scope,
+  scopes,
   useSimulatedFunctionCalling,
 }: {
   messages: Message[];
@@ -205,7 +205,7 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
-  scope: AssistantScope;
+  scopes: AssistantScope[];
   useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
@@ -216,12 +216,12 @@ export function continueConversation({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
-    scope,
+    scopes,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(scope),
+      applicationInstructions: functionClient.getInstructions(scopes),
       userInstructions,
       adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
@@ -350,7 +350,7 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
-              scope,
+              scopes,
               useSimulatedFunctionCalling,
             });
           })
