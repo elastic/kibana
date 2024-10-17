@@ -13,7 +13,7 @@ source .buildkite/scripts/common/util.sh
 
 export JOB=kibana-security-solution-chrome
 
-buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
+buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'true'
 
 source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 

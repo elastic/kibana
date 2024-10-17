@@ -32,6 +32,14 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverUnload', { archiveName: 'overview' });
   });
 
+  it('Expected failure', { tags: ['@testhere'] }, () => {
+    expandHostStats();
+
+    HOST_STATS.forEach((stat) => {
+      cy.get(stat.domId).should('have.text', 'a random text to fail the test');
+    });
+  });
+
   it('Host stats render with correct values', () => {
     expandHostStats();
 
