@@ -38697,6 +38697,10 @@ paths:
           schema:
             nullable: true
             type: string
+        - in: query
+          name: associatedFilter
+          schema:
+            $ref: '#/components/schemas/Security_Timeline_API_AssociatedFilterType'
       responses:
         '200':
           content:
@@ -58185,6 +58189,14 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Timeline_API_AssociatedFilterType:
+      description: Filter notes based on their association with a document or saved object.
+      enum:
+        - document_only
+        - saved_object_only
+        - document_and_saved_object
+        - orphan
+      type: string
     Security_Timeline_API_BareNote:
       type: object
       properties:
