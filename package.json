@@ -1444,6 +1444,7 @@
     "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
     "@kbn/import-locator": "link:packages/kbn-import-locator",
     "@kbn/import-resolver": "link:packages/kbn-import-resolver",
+    "@kbn/inventory-e2e": "link:x-pack/plugins/observability_solution/inventory/e2e",
     "@kbn/jest-serializers": "link:packages/kbn-jest-serializers",
     "@kbn/journeys": "link:packages/kbn-journeys",
     "@kbn/json-ast": "link:packages/kbn-json-ast",
