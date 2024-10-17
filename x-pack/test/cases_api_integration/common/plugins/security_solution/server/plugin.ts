@@ -122,15 +122,15 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               groupType: 'independent',
               privileges: [
                 {
-                  id: 'create_comment',
                   name: 'Add comments to cases',
+                  id: 'create_comment',
                   includeIn: 'all',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
                   cases: {
                     createComment: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
                   },
                   ui: [],
                 },
@@ -145,8 +145,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               groupType: 'independent',
               privileges: [
                 {
-                  id: 'case_reopen',
                   name: 'Re-open closed cases',
+                  id: 'case_reopen',
                   includeIn: 'all',
                   savedObject: {
                     all: [],

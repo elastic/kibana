@@ -121,8 +121,8 @@ export const getCasesSubFeaturesMapV2 = ({
             ),
             includeIn: 'all',
             savedObject: {
-              all: [],
-              read: [],
+              all: [...savedObjects.files],
+              read: [...savedObjects.files],
             },
             cases: {
               createComment: [APP_ID],

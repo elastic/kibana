@@ -134,8 +134,8 @@ export const getCasesFeatureV2 = (
               ),
               includeIn: 'all',
               savedObject: {
-                all: [],
-                read: [],
+                all: [...filesSavedObjectTypes],
+                read: [...filesSavedObjectTypes],
               },
               cases: {
                 createComment: [observabilityFeatureId],

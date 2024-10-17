@@ -150,8 +150,8 @@ export const getCasesKibanaFeatureV2 = (): KibanaFeatureConfig => {
                 }),
                 includeIn: 'all',
                 savedObject: {
-                  all: [],
-                  read: [],
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
                 },
                 cases: {
                   createComment: [APP_ID],
