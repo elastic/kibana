@@ -6391,7 +6391,7 @@
     },
     "/api/fleet/agent-status": {
       "get": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
         "parameters": [
           {
@@ -6449,6 +6449,7 @@
     },
     "/api/fleet/agent_download_sources": {
       "get": {
+        "deprecated": false,
         "description": "List agent binary download sources",
         "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources#0",
         "parameters": [
@@ -6558,6 +6559,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create agent binary download source",
         "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources#1",
         "parameters": [
@@ -6699,6 +6701,7 @@
     },
     "/api/fleet/agent_download_sources/{sourceId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete agent binary download source by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#2",
         "parameters": [
@@ -6784,6 +6787,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get agent binary download source by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#0",
         "parameters": [
@@ -6886,6 +6890,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update agent binary download source by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#1",
         "parameters": [
@@ -7035,6 +7040,7 @@
     },
     "/api/fleet/agent_policies": {
       "get": {
+        "deprecated": false,
         "description": "List agent policies",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies#0",
         "parameters": [
@@ -7861,6 +7867,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create an agent policy",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies#1",
         "parameters": [
@@ -8856,6 +8863,7 @@
     },
     "/api/fleet/agent_policies/_bulk_get": {
       "post": {
+        "deprecated": false,
         "description": "Bulk get agent policies",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F_bulk_get#0",
         "parameters": [
@@ -9643,6 +9651,7 @@
     },
     "/api/fleet/agent_policies/delete": {
       "post": {
+        "deprecated": false,
         "description": "Delete agent policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Fdelete#0",
         "parameters": [
@@ -9748,6 +9757,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
+        "deprecated": false,
         "description": "Get an agent policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#0",
         "parameters": [
@@ -10499,6 +10509,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update an agent policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#1",
         "parameters": [
@@ -11506,6 +11517,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/copy": {
       "post": {
+        "deprecated": false,
         "description": "Copy an agent policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fcopy#0",
         "parameters": [
@@ -12291,6 +12303,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
+        "deprecated": false,
         "description": "Download an agent policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fdownload#0",
         "parameters": [
@@ -12408,6 +12421,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/full": {
       "get": {
+        "deprecated": false,
         "description": "Get a full agent policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Ffull#0",
         "parameters": [
@@ -12910,6 +12924,7 @@
     },
     "/api/fleet/agent_status": {
       "get": {
+        "deprecated": false,
         "description": "Get agent status summary",
         "operationId": "%2Fapi%2Ffleet%2Fagent_status#0",
         "parameters": [
@@ -13064,6 +13079,7 @@
     },
     "/api/fleet/agent_status/data": {
       "get": {
+        "deprecated": false,
         "description": "Get incoming agent data",
         "operationId": "%2Fapi%2Ffleet%2Fagent_status%2Fdata#0",
         "parameters": [
@@ -13180,6 +13196,7 @@
     },
     "/api/fleet/agents": {
       "get": {
+        "deprecated": false,
         "description": "List agents",
         "operationId": "%2Fapi%2Ffleet%2Fagents#0",
         "parameters": [
@@ -14119,6 +14136,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "List agents by action ids",
         "operationId": "%2Fapi%2Ffleet%2Fagents#1",
         "parameters": [
@@ -14222,6 +14240,7 @@
     },
     "/api/fleet/agents/action_status": {
       "get": {
+        "deprecated": false,
         "description": "Get agent action status",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Faction_status#0",
         "parameters": [
@@ -14458,6 +14477,7 @@
     },
     "/api/fleet/agents/actions/{actionId}/cancel": {
       "post": {
+        "deprecated": false,
         "description": "Cancel agent action",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Factions%2F%7BactionId%7D%2Fcancel#0",
         "parameters": [
@@ -14600,6 +14620,7 @@
     },
     "/api/fleet/agents/available_versions": {
       "get": {
+        "deprecated": false,
         "description": "Get available agent versions",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Favailable_versions#0",
         "parameters": [
@@ -14672,6 +14693,7 @@
     },
     "/api/fleet/agents/bulk_reassign": {
       "post": {
+        "deprecated": false,
         "description": "Bulk reassign agents",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_reassign#0",
         "parameters": [
@@ -14790,6 +14812,7 @@
     },
     "/api/fleet/agents/bulk_request_diagnostics": {
       "post": {
+        "deprecated": false,
         "description": "Bulk request diagnostics from agents",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_request_diagnostics#0",
         "parameters": [
@@ -14909,6 +14932,7 @@
     },
     "/api/fleet/agents/bulk_unenroll": {
       "post": {
+        "deprecated": false,
         "description": "Bulk unenroll agents",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_unenroll#0",
         "parameters": [
@@ -15033,6 +15057,7 @@
     },
     "/api/fleet/agents/bulk_update_agent_tags": {
       "post": {
+        "deprecated": false,
         "description": "Bulk update agent tags",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_update_agent_tags#0",
         "parameters": [
@@ -15159,6 +15184,7 @@
     },
     "/api/fleet/agents/bulk_upgrade": {
       "post": {
+        "deprecated": false,
         "description": "Bulk upgrade agents",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_upgrade#0",
         "parameters": [
@@ -15293,6 +15319,7 @@
     },
     "/api/fleet/agents/files/{fileId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete file uploaded by agent",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D#0",
         "parameters": [
@@ -15384,6 +15411,7 @@
     },
     "/api/fleet/agents/files/{fileId}/{fileName}": {
       "get": {
+        "deprecated": false,
         "description": "Get file uploaded by agent",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D%2F%7BfileName%7D#0",
         "parameters": [
@@ -15460,6 +15488,7 @@
     },
     "/api/fleet/agents/setup": {
       "get": {
+        "deprecated": false,
         "description": "Get agent setup info",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fsetup#0",
         "parameters": [
@@ -15561,6 +15590,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Initiate agent setup",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Fsetup#1",
         "parameters": [
@@ -15661,6 +15691,7 @@
     },
     "/api/fleet/agents/tags": {
       "get": {
+        "deprecated": false,
         "description": "List agent tags",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2Ftags#0",
         "parameters": [
@@ -15750,6 +15781,7 @@
     },
     "/api/fleet/agents/{agentId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete agent by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#2",
         "parameters": [
@@ -15838,6 +15870,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get agent by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#0",
         "parameters": [
@@ -16303,6 +16336,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update agent by ID",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#1",
         "parameters": [
@@ -16793,6 +16827,7 @@
     },
     "/api/fleet/agents/{agentId}/actions": {
       "post": {
+        "deprecated": false,
         "description": "Create agent action",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Factions#0",
         "parameters": [
@@ -17010,6 +17045,7 @@
     },
     "/api/fleet/agents/{agentId}/reassign": {
       "post": {
+        "deprecated": false,
         "description": "Reassign agent",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#1",
         "parameters": [
@@ -17106,7 +17142,7 @@
         ]
       },
       "put": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
         "parameters": [
           {
@@ -17165,6 +17201,7 @@
     },
     "/api/fleet/agents/{agentId}/request_diagnostics": {
       "post": {
+        "deprecated": false,
         "description": "Request agent diagnostics",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Frequest_diagnostics#0",
         "parameters": [
@@ -17274,6 +17311,7 @@
     },
     "/api/fleet/agents/{agentId}/unenroll": {
       "post": {
+        "deprecated": false,
         "description": "Unenroll agent",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Funenroll#0",
         "parameters": [
@@ -17336,6 +17374,7 @@
     },
     "/api/fleet/agents/{agentId}/upgrade": {
       "post": {
+        "deprecated": false,
         "description": "Upgrade agent",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fupgrade#0",
         "parameters": [
@@ -17443,6 +17482,7 @@
     },
     "/api/fleet/agents/{agentId}/uploads": {
       "get": {
+        "deprecated": false,
         "description": "List agent uploads",
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fuploads#0",
         "parameters": [
@@ -17563,6 +17603,7 @@
     },
     "/api/fleet/check-permissions": {
       "get": {
+        "deprecated": false,
         "description": "Check permissions",
         "operationId": "%2Fapi%2Ffleet%2Fcheck-permissions#0",
         "parameters": [
@@ -17648,6 +17689,7 @@
     },
     "/api/fleet/data_streams": {
       "get": {
+        "deprecated": false,
         "description": "List data streams",
         "operationId": "%2Fapi%2Ffleet%2Fdata_streams#0",
         "parameters": [
@@ -17806,7 +17848,7 @@
     },
     "/api/fleet/enrollment-api-keys": {
       "get": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#0",
         "parameters": [
           {
@@ -17853,7 +17895,7 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#1",
         "parameters": [
           {
@@ -17910,7 +17952,7 @@
     },
     "/api/fleet/enrollment-api-keys/{keyId}": {
       "delete": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1",
         "parameters": [
           {
@@ -17949,7 +17991,7 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0",
         "parameters": [
           {
@@ -17980,6 +18022,7 @@
     },
     "/api/fleet/enrollment_api_keys": {
       "get": {
+        "deprecated": false,
         "description": "List enrollment API keys",
         "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys#0",
         "parameters": [
@@ -18168,6 +18211,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create enrollment API key",
         "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys#1",
         "parameters": [
@@ -18314,6 +18358,7 @@
     },
     "/api/fleet/enrollment_api_keys/{keyId}": {
       "delete": {
+        "deprecated": false,
         "description": "Revoke enrollment API key by ID by marking it as inactive",
         "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#1",
         "parameters": [
@@ -18402,6 +18447,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get enrollment API key by ID",
         "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#0",
         "parameters": [
@@ -18515,6 +18561,7 @@
     },
     "/api/fleet/epm/bulk_assets": {
       "post": {
+        "deprecated": false,
         "description": "Bulk get assets",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fbulk_assets#0",
         "parameters": [
@@ -18666,6 +18713,7 @@
     },
     "/api/fleet/epm/categories": {
       "get": {
+        "deprecated": false,
         "description": "List package categories",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fcategories#0",
         "parameters": [
@@ -18815,6 +18863,7 @@
     },
     "/api/fleet/epm/custom_integrations": {
       "post": {
+        "deprecated": false,
         "description": "Create custom integration",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fcustom_integrations#0",
         "parameters": [
@@ -19097,6 +19146,7 @@
     },
     "/api/fleet/epm/data_streams": {
       "get": {
+        "deprecated": false,
         "description": "List data streams",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fdata_streams#0",
         "parameters": [
@@ -19223,6 +19273,7 @@
     },
     "/api/fleet/epm/packages": {
       "get": {
+        "deprecated": false,
         "description": "List packages",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages#0",
         "parameters": [
@@ -20292,6 +20343,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Install package by upload",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages#1",
         "parameters": [
@@ -20554,6 +20606,7 @@
     },
     "/api/fleet/epm/packages/_bulk": {
       "post": {
+        "deprecated": false,
         "description": "Bulk install packages",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F_bulk#0",
         "parameters": [
@@ -20978,6 +21031,7 @@
     },
     "/api/fleet/epm/packages/installed": {
       "get": {
+        "deprecated": false,
         "description": "Get installed packages",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2Finstalled#0",
         "parameters": [
@@ -21219,6 +21273,7 @@
     },
     "/api/fleet/epm/packages/limited": {
       "get": {
+        "deprecated": false,
         "description": "Get limited package list",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2Flimited#0",
         "parameters": [
@@ -21298,6 +21353,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/stats": {
       "get": {
+        "deprecated": false,
         "description": "Get package stats",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2Fstats#0",
         "parameters": [
@@ -21384,6 +21440,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete package",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#3",
         "parameters": [
@@ -21646,6 +21703,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get package",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#0",
         "parameters": [
@@ -22910,6 +22968,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Install package from registry",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#2",
         "parameters": [
@@ -23205,6 +23264,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update package settings",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#1",
         "parameters": [
@@ -24454,6 +24514,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
       "post": {
+        "deprecated": false,
         "description": "Authorize transforms",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Ftransforms%2Fauthorize#0",
         "parameters": [
@@ -24598,6 +24659,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
       "get": {
+        "deprecated": false,
         "description": "Get package file",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2F%7BfilePath*%7D#0",
         "parameters": [
@@ -24680,7 +24742,7 @@
     },
     "/api/fleet/epm/packages/{pkgkey}": {
       "delete": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
         "parameters": [
           {
@@ -24738,7 +24800,7 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
         "parameters": [
           {
@@ -24800,7 +24862,7 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
         "parameters": [
           {
@@ -24884,7 +24946,7 @@
         "tags": []
       },
       "put": {
-        "deprecated": true,
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
         "parameters": [
           {
@@ -24943,6 +25005,7 @@
     },
     "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
+        "deprecated": false,
         "description": "Get inputs template",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Ftemplates%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Finputs#0",
         "parameters": [
@@ -25112,6 +25175,7 @@
     },
     "/api/fleet/epm/verification_key_id": {
       "get": {
+        "deprecated": false,
         "description": "Get a package signature verification key ID",
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fverification_key_id#0",
         "parameters": [
@@ -25182,6 +25246,7 @@
     },
     "/api/fleet/fleet_server_hosts": {
       "get": {
+        "deprecated": false,
         "description": "List Fleet Server hosts",
         "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts#0",
         "parameters": [
@@ -25300,6 +25365,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create Fleet Server host",
         "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts#1",
         "parameters": [
@@ -25459,6 +25525,7 @@
     },
     "/api/fleet/fleet_server_hosts/{itemId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete Fleet Server host by ID",
         "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#1",
         "parameters": [
@@ -25544,6 +25611,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get Fleet Server host by ID",
         "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#0",
         "parameters": [
@@ -25655,6 +25723,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update Fleet Server host by ID",
         "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#2",
         "parameters": [
@@ -25813,6 +25882,7 @@
     },
     "/api/fleet/health_check": {
       "post": {
+        "deprecated": false,
         "description": "Check Fleet Server health",
         "operationId": "%2Fapi%2Ffleet%2Fhealth_check#0",
         "parameters": [
@@ -25949,6 +26019,7 @@
     },
     "/api/fleet/kubernetes": {
       "get": {
+        "deprecated": false,
         "description": "Get full K8s agent manifest",
         "operationId": "%2Fapi%2Ffleet%2Fkubernetes#0",
         "parameters": [
@@ -26042,6 +26113,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
+        "deprecated": false,
         "operationId": "%2Fapi%2Ffleet%2Fkubernetes%2Fdownload#0",
         "parameters": [
           {
@@ -26150,6 +26222,7 @@
     },
     "/api/fleet/logstash_api_keys": {
       "post": {
+        "deprecated": false,
         "description": "Generate Logstash API key",
         "operationId": "%2Fapi%2Ffleet%2Flogstash_api_keys#0",
         "parameters": [
@@ -26229,6 +26302,7 @@
     },
     "/api/fleet/message_signing_service/rotate_key_pair": {
       "post": {
+        "deprecated": false,
         "description": "Rotate fleet message signing key pair",
         "operationId": "%2Fapi%2Ffleet%2Fmessage_signing_service%2Frotate_key_pair#0",
         "parameters": [
@@ -26342,6 +26416,7 @@
     },
     "/api/fleet/outputs": {
       "get": {
+        "deprecated": false,
         "description": "List outputs",
         "operationId": "%2Fapi%2Ffleet%2Foutputs#0",
         "parameters": [
@@ -27472,6 +27547,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create output",
         "operationId": "%2Fapi%2Ffleet%2Foutputs#1",
         "parameters": [
@@ -29656,6 +29732,7 @@
     },
     "/api/fleet/outputs/{outputId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete output by ID",
         "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#2",
         "parameters": [
@@ -29766,6 +29843,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get output by ID",
         "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#0",
         "parameters": [
@@ -30889,6 +30967,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update output by ID",
         "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#1",
         "parameters": [
@@ -33057,6 +33136,7 @@
     },
     "/api/fleet/outputs/{outputId}/health": {
       "get": {
+        "deprecated": false,
         "description": "Get latest output health",
         "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D%2Fhealth#0",
         "parameters": [
@@ -33145,6 +33225,7 @@
     },
     "/api/fleet/package_policies": {
       "get": {
+        "deprecated": false,
         "description": "List package policies",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies#0",
         "parameters": [
@@ -33860,6 +33941,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create package policy",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies#1",
         "parameters": [
@@ -35134,6 +35216,7 @@
     },
     "/api/fleet/package_policies/_bulk_get": {
       "post": {
+        "deprecated": false,
         "description": "Bulk get package policies",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F_bulk_get#0",
         "parameters": [
@@ -35832,6 +35915,7 @@
     },
     "/api/fleet/package_policies/delete": {
       "post": {
+        "deprecated": false,
         "description": "Bulk delete package policies",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fdelete#0",
         "parameters": [
@@ -36036,6 +36120,7 @@
     },
     "/api/fleet/package_policies/upgrade": {
       "post": {
+        "deprecated": false,
         "description": "Upgrade package policy to a newer package version",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade#0",
         "parameters": [
@@ -36161,6 +36246,7 @@
     },
     "/api/fleet/package_policies/upgrade/dryrun": {
       "post": {
+        "deprecated": false,
         "description": "Dry run package policy upgrade",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade%2Fdryrun#0",
         "parameters": [
@@ -37347,6 +37433,7 @@
     },
     "/api/fleet/package_policies/{packagePolicyId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete package policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#2",
         "parameters": [
@@ -37440,6 +37527,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get package policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#0",
         "parameters": [
@@ -38106,6 +38194,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update package policy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#1",
         "parameters": [
@@ -39380,6 +39469,7 @@
     },
     "/api/fleet/proxies": {
       "get": {
+        "deprecated": false,
         "description": "List proxies",
         "operationId": "%2Fapi%2Ffleet%2Fproxies#0",
         "parameters": [
@@ -39512,6 +39602,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create proxy",
         "operationId": "%2Fapi%2Ffleet%2Fproxies#1",
         "parameters": [
@@ -39699,6 +39790,7 @@
     },
     "/api/fleet/proxies/{itemId}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete proxy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#2",
         "parameters": [
@@ -39784,6 +39876,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get proxy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#1",
         "parameters": [
@@ -39909,6 +40002,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update proxy by ID",
         "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#0",
         "parameters": [
@@ -40099,7 +40193,7 @@
     },
     "/api/fleet/service-tokens": {
       "post": {
-        "deprecated": true,
+        "deprecated": false,
         "description": "Create a service token",
         "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
         "parameters": [
@@ -40133,6 +40227,7 @@
     },
     "/api/fleet/service_tokens": {
       "post": {
+        "deprecated": false,
         "description": "Create a service token",
         "operationId": "%2Fapi%2Ffleet%2Fservice_tokens#0",
         "parameters": [
@@ -40233,6 +40328,7 @@
     },
     "/api/fleet/settings": {
       "get": {
+        "deprecated": false,
         "description": "Get settings",
         "operationId": "%2Fapi%2Ffleet%2Fsettings#0",
         "parameters": [
@@ -40384,6 +40480,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update settings",
         "operationId": "%2Fapi%2Ffleet%2Fsettings#1",
         "parameters": [
@@ -40601,6 +40698,7 @@
     },
     "/api/fleet/setup": {
       "post": {
+        "deprecated": false,
         "description": "Initiate Fleet setup",
         "operationId": "%2Fapi%2Ffleet%2Fsetup#0",
         "parameters": [
@@ -40720,6 +40818,7 @@
     },
     "/api/fleet/uninstall_tokens": {
       "get": {
+        "deprecated": false,
         "description": "List metadata for latest uninstall tokens per agent policy",
         "operationId": "%2Fapi%2Ffleet%2Funinstall_tokens#0",
         "parameters": [
@@ -40869,6 +40968,7 @@
     },
     "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
       "get": {
+        "deprecated": false,
         "description": "Get one decrypted uninstall token by its ID",
         "operationId": "%2Fapi%2Ffleet%2Funinstall_tokens%2F%7BuninstallTokenId%7D#0",
         "parameters": [
@@ -40977,6 +41077,7 @@
     },
     "/api/spaces/space": {
       "get": {
+        "deprecated": false,
         "description": "Get all spaces",
         "operationId": "%2Fapi%2Fspaces%2Fspace#0",
         "parameters": [
@@ -41052,6 +41153,7 @@
         ]
       },
       "post": {
+        "deprecated": false,
         "description": "Create a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace#1",
         "parameters": [
@@ -41133,6 +41235,7 @@
     },
     "/api/spaces/space/{id}": {
       "delete": {
+        "deprecated": false,
         "description": "Delete a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
         "parameters": [
@@ -41174,6 +41277,7 @@
         ]
       },
       "get": {
+        "deprecated": false,
         "description": "Get a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
         "parameters": [
@@ -41205,6 +41309,7 @@
         ]
       },
       "put": {
+        "deprecated": false,
         "description": "Update a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
         "parameters": [
