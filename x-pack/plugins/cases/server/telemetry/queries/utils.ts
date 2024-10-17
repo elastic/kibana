@@ -78,7 +78,7 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
 });
 
 export const getUniqueAlertCommentsCountQuery = () => ({
-  uniqueAlertCommentsCount: {
+  additionalAggsResult: {
     cardinality: {
       field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
     },
@@ -134,7 +134,7 @@ export const getCountsAndMaxData = async ({
   savedObjectsClient,
   savedObjectType,
   filter,
-  additionalAggs = {},
+  additionalAggs,
 }: {
   savedObjectsClient: TelemetrySavedObjectsClient;
   savedObjectType: string;
@@ -146,7 +146,7 @@ export const getCountsAndMaxData = async ({
     {
       counts: Buckets;
       references: MaxBucketOnCaseAggregation['references'];
-      uniqueAlertCommentsCount: { value: number };
+      additionalAggsResult: Record<string, unknown>;
     }
   >({
     page: 0,
