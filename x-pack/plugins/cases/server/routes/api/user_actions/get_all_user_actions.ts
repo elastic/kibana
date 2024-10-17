@@ -30,6 +30,7 @@ export const getUserActionsRoute = createCasesRoute({
     description: `Returns all user activity for a case.`,
     // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
     tags: ['oas-tag:cases'],
+    // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Repalce {RouteDeprecationInfo}
     deprecated: true,
   },
   handler: async ({ context, request, response }) => {

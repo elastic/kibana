@@ -109,7 +109,7 @@ interface AvailableCorrectiveActions {
   markAsResolved: boolean;
 }
 const getQuickResolveButtonLabel = (
-  deprecationResolutionState?: DeprecationResolutionState,
+  deprecationResolutionState: DeprecationResolutionState | undefined,
   avilableCorrectiveActions: AvailableCorrectiveActions
 ) => {
   if (deprecationResolutionState?.resolveDeprecationStatus === 'in_progress') {

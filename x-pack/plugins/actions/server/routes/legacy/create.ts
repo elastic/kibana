@@ -38,6 +38,7 @@ export const createActionRoute = (
         access: 'public',
         summary: `Create a connector`,
         tags: ['oas-tag:connectors'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Repalce {RouteDeprecationInfo}
         deprecated: true,
       },
       validate: {
