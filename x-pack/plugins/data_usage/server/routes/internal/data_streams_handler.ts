@@ -32,10 +32,8 @@ export const getDataStreamsHandler = (
 ): RequestHandler<never, DataStreamsRequestQuery, unknown, DataUsageRequestHandlerContext> => {
   const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
 
-  return async (context, request, response) => {
+  return async (context, _, response) => {
     logger.debug('Retrieving user data streams');
-
-    const { selected } = request.query;
 
     try {
       const core = await context.core;
@@ -48,7 +46,6 @@ export const getDataStreamsHandler = (
         .map((stat) => ({
           name: stat.name,
           storageSizeBytes: stat.size_in_bytes ?? 0,
-          selected: selected.length ? selected.includes(stat.name) : true,
         }));
 
       return response.ok({

@@ -9,10 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const DataStreamsRequestSchema = {
   query: schema.object({
-    selected: schema.oneOf([
-      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-      schema.string(),
-    ]),
+    selected: schema.arrayOf(schema.string(), { defaultValue: [] }),
   }),
 };
 
@@ -24,7 +21,7 @@ export const DataStreamsResponseSchema = {
       schema.object({
         name: schema.string(),
         storageSizeBytes: schema.number(),
-        selected: schema.boolean(),
+        // selected: schema.boolean(),
       })
     ),
 };

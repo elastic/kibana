@@ -8,7 +8,6 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { DataStreamsRequestQuery } from '../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../common';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
@@ -23,13 +22,15 @@ const PAGING_PARAMS = Object.freeze({
   all: 10000,
 });
 
-const formatSelected = (selected: string | string[] | undefined): string[] =>
-  typeof selected === 'string' ? [selected] : selected || [];
-
-export const useGetDataUsageDataStreams = (
-  query: DataStreamsRequestQuery,
-  options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>
-): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
+export const useGetDataUsageDataStreams = ({
+  selectedDataStreams,
+  options = {
+    enabled: false,
+  },
+}: {
+  selectedDataStreams?: string[];
+  options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>;
+}): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
   const http = useKibanaContextForPlugin().services.http;
 
   return useQuery<GetDataUsageDataStreamsResponse, IHttpFetchError>({
@@ -41,9 +42,7 @@ export const useGetDataUsageDataStreams = (
         DATA_USAGE_DATA_STREAMS_API_ROUTE,
         {
           version: '1',
-          query: {
-            selected: formatSelected(query.selected),
-          },
+          // query: {},
         }
       );
 
@@ -58,7 +57,7 @@ export const useGetDataUsageDataStreams = (
             selected: ds.selected,
           };
 
-          if (query.selected?.includes(ds.name)) {
+          if (selectedDataStreams?.includes(ds.name)) {
             acc.selected.push({ ...item, selected: true });
           } else {
             acc.rest.push({ ...item, selected: false });
@@ -70,8 +69,8 @@ export const useGetDataUsageDataStreams = (
       );
 
       let selectedDataStreamsCount = 0;
-      if (query.selected) {
-        selectedDataStreamsCount = query.selected.length;
+      if (selectedDataStreams) {
+        selectedDataStreamsCount = selectedDataStreams.length;
       }
 
       return [

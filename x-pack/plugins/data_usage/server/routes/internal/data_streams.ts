@@ -25,7 +25,7 @@ export const registerDataStreamsRoute = (
         {
           version: '1',
           validate: {
-            request: DataStreamsRequestSchema,
+            request: {},
             response: {
               200: DataStreamsResponseSchema,
             },

@@ -81,8 +81,8 @@ export const useChartsFilter = ({
           key: filterOption,
           label: filterOption,
           append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
-          checked: !!filterOptions.selectedOptions?.length
-            ? filterOptions.selectedOptions.includes(filterOption)
+          checked: selectedDataStreamsFromUrl
+            ? selectedDataStreamsFromUrl.includes(filterOption)
               ? 'on'
               : undefined
             : 'on',
