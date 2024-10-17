@@ -18,6 +18,7 @@ import { AssetsSynthtraceEsClient } from '../lib/assets/assets_synthtrace_es_cli
 import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 import { RunOptions } from './utils/parse_run_cli_flags';
+import { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
 
 interface EsClients {
   apmEsClient: ApmSynthtraceEsClient;
