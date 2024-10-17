@@ -23,6 +23,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import { getESQLForLayer } from './to_esql';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
@@ -168,201 +169,14 @@ function getExpressionForLayer(
 
     const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
-    let canUseESQL = esAggEntries.every(([colId, col]) => {
-      const def = operationDefinitionMap[col.operationType];
-      return (
-        def.toESQL !== undefined &&
-        def.toESQL(
-          {
-            ...col,
-            timeShift: resolveTimeShift(
-              col.timeShift,
-              absDateRange,
-              histogramBarsTarget,
-              hasDateHistogram
-            ),
-          },
-          colId,
-          indexPattern,
-          layer,
-          uiSettings,
-          dateRange,
-          data
-        ) !== undefined
-      );
-    });
 
-    let esql = '';
-    let partialRows = true;
+    // esql mode variables
+    const canUseESQL = true; // read from a setting
+    const esqlLayer =
+      canUseESQL &&
+      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant, data);
 
-    if (canUseESQL) {
-      esql = `FROM ${indexPattern.title} | `;
-      esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
-      const metrics = esAggEntries
-        .filter(([id, col]) => !col.isBucketed)
-        .map(([colId, col], index) => {
-          const def = operationDefinitionMap[col.operationType];
-          const aggId = String(index);
-          const wrapInFilter = Boolean(def.filterable && col.filter?.query);
-          const wrapInTimeFilter =
-            def.canReduceTimeRange &&
-            !hasDateHistogram &&
-            col.reducedTimeRange &&
-            indexPattern.timeFieldName;
-
-          const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-            ? `bucket_${index + (col.isBucketed ? 0 : 1)}_${aggId}`
-            : `bucket_${index}_${aggId}`;
-
-          esAggsIdMap[esAggsId] = [
-            {
-              ...col,
-              id: colId,
-              label: col.customLabel
-                ? col.label
-                : operationDefinitionMap[col.operationType].getDefaultLabel(
-                    col,
-                    layer.columns,
-                    indexPattern
-                  ),
-            },
-          ];
-
-          let metricESQL =
-            `${esAggsId} = ` +
-            def.toESQL!(
-              {
-                ...col,
-                timeShift: resolveTimeShift(
-                  col.timeShift,
-                  absDateRange,
-                  histogramBarsTarget,
-                  hasDateHistogram
-                ),
-              },
-              wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
-              indexPattern,
-              layer,
-              uiSettings,
-              dateRange,
-              data
-              // orderedColumnIds,
-              // operationDefinitionMap
-            );
-
-          if (wrapInFilter || wrapInTimeFilter) {
-            const conditions: string[] = [];
-            if (wrapInFilter) {
-              if (col.filter?.language === 'kquery') {
-                canUseESQL = false;
-              }
-              canUseESQL = false; // conditions.push(`QSTR("${col.filter?.query}")`);
-            }
-            if (wrapInTimeFilter) {
-              canUseESQL = false;
-            }
-            if (conditions.length) {
-              metricESQL += ` WHERE ${conditions.join(' AND ')}`;
-            }
-          }
-
-          return metricESQL;
-        });
-
-      esql += 'STATS ' + metrics.join(', ');
-
-      const buckets = esAggEntries
-        .filter(([id, col]) => col.isBucketed)
-        .map(([colId, col], index) => {
-          const def = operationDefinitionMap[col.operationType];
-          const aggId = String(index);
-          const wrapInFilter = Boolean(def.filterable && col.filter?.query);
-          const wrapInTimeFilter =
-            def.canReduceTimeRange &&
-            !hasDateHistogram &&
-            col.reducedTimeRange &&
-            indexPattern.timeFieldName;
-
-          let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-            ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
-            : `col_${index}_${aggId}`;
-
-          if (col.operationType === 'date_histogram') {
-            esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
-          }
-
-          esAggsIdMap[esAggsId] = [
-            {
-              ...col,
-              id: colId,
-              label: col.customLabel
-                ? col.label
-                : operationDefinitionMap[col.operationType].getDefaultLabel(
-                    col,
-                    layer.columns,
-                    indexPattern
-                  ),
-            },
-          ];
-
-          if (col.operationType === 'date_histogram') {
-            const column = col as DateHistogramIndexPatternColumn;
-            if (
-              column.params?.dropPartials &&
-              // set to false when detached from time picker
-              (indexPattern.timeFieldName ===
-                indexPattern.getFieldByName(column.sourceField)?.name ||
-                !column.params?.ignoreTimeRange)
-            ) {
-              partialRows = false;
-            }
-          }
-
-          return (
-            `${esAggsId} = ` +
-            def.toESQL!(
-              {
-                ...col,
-                timeShift: resolveTimeShift(
-                  col.timeShift,
-                  absDateRange,
-                  histogramBarsTarget,
-                  hasDateHistogram
-                ),
-              },
-              wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
-              indexPattern,
-              layer,
-              uiSettings,
-              dateRange,
-              data
-              // orderedColumnIds,
-              // operationDefinitionMap
-            )
-          );
-        });
-
-      if (buckets) {
-        esql += ` BY ${buckets.join(', ')}`;
-
-        const sorts = esAggEntries
-          .filter(([id, col]) => col.isBucketed)
-          .map(([colId, col], index) => {
-            const aggId = String(index);
-            let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-              ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
-              : `col_${index}_${aggId}`;
-
-            if (col.operationType === 'date_histogram') {
-              esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
-            }
-
-            return `${esAggsId} ASC`;
-          });
-
-        esql += ` | SORT ${sorts.join(', ')}`;
-      }
-    } else {
+    if (!esqlLayer) {
       esAggEntries.forEach(([colId, col], index) => {
         const def = operationDefinitionMap[col.operationType];
         if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -452,34 +266,37 @@ function getExpressionForLayer(
           aggExpressionToEsAggsIdMap.set(expressionBuilder, esAggsId);
         }
       });
-    }
 
-    if (window.ELASTIC_LENS_DELAY_SECONDS) {
-      aggs.push(
-        buildExpression({
-          type: 'expression',
-          chain: [
-            buildExpressionFunction('aggShardDelay', {
-              id: 'the-delay',
-              enabled: true,
-              schema: 'metric',
-              delay: `${window.ELASTIC_LENS_DELAY_SECONDS}s`,
-            }).toAst(),
-          ],
-        })
+      if (window.ELASTIC_LENS_DELAY_SECONDS) {
+        aggs.push(
+          buildExpression({
+            type: 'expression',
+            chain: [
+              buildExpressionFunction('aggShardDelay', {
+                id: 'the-delay',
+                enabled: true,
+                schema: 'metric',
+                delay: `${window.ELASTIC_LENS_DELAY_SECONDS}s`,
+              }).toAst(),
+            ],
+          })
+        );
+      }
+
+      const allOperations = uniq(
+        esAggEntries.map(([_, column]) => operationDefinitionMap[column.operationType])
       );
-    }
 
-    const allOperations = uniq(
-      esAggEntries.map(([_, column]) => operationDefinitionMap[column.operationType])
-    );
+      // De-duplicate aggs for supported operations
+      const dedupedResult = dedupeAggs(
+        aggs,
+        esAggsIdMap,
+        aggExpressionToEsAggsIdMap,
+        allOperations
+      );
+      aggs = dedupedResult.aggs;
 
-    // De-duplicate aggs for supported operations
-    const dedupedResult = dedupeAggs(aggs, esAggsIdMap, aggExpressionToEsAggsIdMap, allOperations);
-    aggs = dedupedResult.aggs;
-
-    const updatedEsAggsIdMap: Record<string, OriginalColumn[]> = {};
-    if (!canUseESQL) {
+      const updatedEsAggsIdMap: Record<string, OriginalColumn[]> = {};
       esAggsIdMap = dedupedResult.esAggsIdMap;
 
       // Apply any operation-specific custom optimizations
@@ -535,10 +352,10 @@ function getExpressionForLayer(
           counter++;
         });
       });
+
+      esAggsIdMap = updatedEsAggsIdMap;
     } else {
-      Object.keys(esAggsIdMap).forEach((k) => {
-        updatedEsAggsIdMap[k] = esAggsIdMap[k];
-      });
+      esAggsIdMap = esqlLayer.esAggsIdMap;
     }
 
     const columnsWithFormatters = columnEntries.filter(
@@ -658,11 +475,11 @@ function getExpressionForLayer(
       )
       .filter((field): field is string => Boolean(field));
 
-    const dataAST = canUseESQL
+    const dataAST = esqlLayer
       ? buildExpressionFunction('esql', {
-          query: esql,
+          query: esqlLayer.esql,
           timeField: allDateHistogramFields[0],
-          partialRows,
+          partialRows: esqlLayer.partialRows,
           ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
         }).toAst()
       : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
@@ -690,7 +507,7 @@ function getExpressionForLayer(
           type: 'function',
           function: 'lens_map_to_columns',
           arguments: {
-            idMap: [JSON.stringify(updatedEsAggsIdMap)],
+            idMap: [JSON.stringify(esAggsIdMap)],
           },
         },
         ...expressions,
