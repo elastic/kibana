@@ -748,7 +748,7 @@ describe('#getQueryParams', () => {
         nestedFieldMappings = createMappings({ registry });
       });
 
-      it('supports nested files', () => {
+      it('supports nested fields', () => {
         const result = getQueryParams({
           registry,
           search: 'foo',
