@@ -78,7 +78,7 @@ Adding an `access` tag to routes that leverage the Saved Objects Service would b
 
 
 ### Configuring authorization on routes
-**Before Migration:**
+**Before migration:**
 ```ts
 router.get({
   path: '/api/path',
@@ -89,7 +89,7 @@ router.get({
 }, handler);
 ```
 
-**After Migration:**
+**After migration:**
 ```ts
 router.get({
   path: '/api/path',
@@ -127,7 +127,7 @@ router.get({
 
 ### Classic router security configuration examples
 
-**Example 1: All privileges required**
+**Example 1: All privileges required.**
 Requires `<privilege_1>` AND `<privilege_2>` to access the route.
 ```ts
 router.get({
@@ -141,7 +141,7 @@ router.get({
 }, handler);
 ```
 
-**Example 2: Any privileges required**
+**Example 2: Any privileges required.**
 Requires `<privilege_1>` OR `<privilege_2>` to access the route.
 ```ts
 router.get({
@@ -155,7 +155,7 @@ router.get({
 }, handler);
 ```
 
-**Example 3: Complex configuration**
+**Example 3: Complex configuration.**
 Requires `<privilege_1>` AND `<privilege_2>` AND (`<privilege_3>` OR `<privilege_4>`) to access the route.
 ```ts
 router.get({
@@ -172,7 +172,7 @@ router.get({
 ### Versioned router security configuration examples
 Different security configurations can be applied to each version when using the Versioned Router. This allows your authorization needs to evolve in lockstep with your API.
 
-**Example 1: Default and custom version security**
+**Example 1: Default and custom version security.**
 
 1. **Default configuration**: Applies to versions without specific authorization, requires `<privilege_1>`.
 
@@ -207,7 +207,7 @@ router.versioned
   }, handlerV2);
 ```
 
-**Example 2: Multiple versions with different security requirements**
+**Example 2: Multiple versions with different security requirements.**
 1. **Default Configuration**: Applies to versions without specific authorization, requires `<privilege_1>`.
 
 2. **Version 1**: Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
