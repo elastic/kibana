@@ -27,8 +27,9 @@ export const useGetDataUsageMetrics = (
     queryKey: ['get-data-usage-metrics', body],
     ...options,
     keepPreviousData: true,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       return http.post<UsageMetricsResponseSchemaBody>(DATA_USAGE_METRICS_API_ROUTE, {
+        signal,
         version: '1',
         body: JSON.stringify({
           from: body.from,
