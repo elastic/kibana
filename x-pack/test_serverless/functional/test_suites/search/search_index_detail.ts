@@ -53,6 +53,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
 
+      it.skip('should show api key', async () => {
+        await pageObjects.svlApiKeys.deleteAPIKeys();
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+      });
+
       it('should have quick stats', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectQuickStats();
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
@@ -71,6 +79,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
       });
 
+      it('should have breadcrumb navigation', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectBreadcrumbNavigationWithIndexName(
+          indexName
+        );
+        await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
+        await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+      });
+
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
         await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
@@ -87,13 +104,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.openConsoleCodeExample();
         await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
-      });
-
-      // Failing: See https://github.com/elastic/kibana/issues/194673
-      it.skip('should show api key', async () => {
-        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
       });
 
       describe('With data', () => {
