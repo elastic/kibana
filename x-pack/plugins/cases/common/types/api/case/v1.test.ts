@@ -114,9 +114,14 @@ const basicCase: Case = {
       value: true,
     },
     {
-      key: 'second_custom_field_key',
+      key: 'third_custom_field_key',
       type: CustomFieldTypes.TEXT,
       value: 'www.example.com',
+    },
+    {
+      key: 'fourth_custom_field_key',
+      type: CustomFieldTypes.NUMBER,
+      value: 3,
     },
   ],
 };
@@ -148,6 +153,11 @@ describe('CasePostRequestRt', () => {
         key: 'second_custom_field_key',
         type: CustomFieldTypes.TOGGLE,
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: CustomFieldTypes.NUMBER,
+        value: 3,
       },
     ],
   };

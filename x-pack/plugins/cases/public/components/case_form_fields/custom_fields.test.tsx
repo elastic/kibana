@@ -78,7 +78,7 @@ describe.skip('CustomFields', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findAllByTestId('form-optional-field-label')).toHaveLength(2);
+    expect(await screen.findAllByTestId('form-optional-field-label')).toHaveLength(4);
   });
 
   it('should not set default value when in edit mode', async () => {
@@ -115,12 +115,14 @@ describe.skip('CustomFields', () => {
 
     const customFields = customFieldsWrapper.querySelectorAll('.euiFormRow');
 
-    expect(customFields).toHaveLength(4);
+    expect(customFields).toHaveLength(6);
 
     expect(customFields[0]).toHaveTextContent('My test label 1');
     expect(customFields[1]).toHaveTextContent('My test label 2');
     expect(customFields[2]).toHaveTextContent('My test label 3');
     expect(customFields[3]).toHaveTextContent('My test label 4');
+    expect(customFields[4]).toHaveTextContent('My test label 5');
+    expect(customFields[5]).toHaveTextContent('My test label 6');
   });
 
   it('should update the custom fields', async () => {
@@ -132,6 +134,7 @@ describe.skip('CustomFields', () => {
 
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
+    const numberField = customFieldsConfigurationMock[5];
 
     await userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
@@ -139,6 +142,10 @@ describe.skip('CustomFields', () => {
     );
     await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+    );
+    await userEvent.type(
+      await screen.findByTestId(`${numberField.key}-${numberField.type}-create-custom-field`),
+      '4'
     );
 
     await userEvent.click(await screen.findByText('Submit'));
@@ -152,6 +159,8 @@ describe.skip('CustomFields', () => {
             [customFieldsConfigurationMock[1].key]: customFieldsConfigurationMock[1].defaultValue,
             [textField.key]: 'hello',
             [toggleField.key]: true,
+            [customFieldsConfigurationMock[4].key]: customFieldsConfigurationMock[4].defaultValue,
+            [numberField.key]: '4',
           },
         },
         true

@@ -517,6 +517,7 @@ describe('Create case', () => {
 
       const textField = customFieldsConfigurationMock[0];
       const toggleField = customFieldsConfigurationMock[1];
+      const numberField = customFieldsConfigurationMock[4];
 
       expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
@@ -532,6 +533,14 @@ describe('Create case', () => {
         await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
       );
 
+      const numberCustomField = await screen.findByTestId(
+        `${numberField.key}-${numberField.type}-create-custom-field`
+      );
+
+      await user.clear(numberCustomField);
+      await user.click(numberCustomField);
+      await user.paste('678');
+
       await user.click(await screen.findByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
@@ -544,6 +553,8 @@ describe('Create case', () => {
             { ...customFieldsMock[1], value: false }, // toggled the default
             customFieldsMock[2],
             { ...customFieldsMock[3], value: false },
+            { ...customFieldsMock[4], value: 678 },
+            customFieldsMock[5],
             {
               key: 'my_custom_field_key',
               type: CustomFieldTypes.TEXT,

@@ -6,8 +6,16 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
-import { CaseCustomFieldTextWithValidationValueRt, CustomFieldPutRequestRt } from './v1';
+import {
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_LONG_NUMBER_LIMIT,
+  MIN_LONG_NUMBER_LIMIT,
+} from '../../../constants';
+import {
+  CaseCustomFieldTextWithValidationValueRt,
+  CustomFieldPutRequestRt,
+  CaseCustomFieldNumberWithValidationValueRt,
+} from './v1';
 
 describe('Custom Fields', () => {
   describe('CaseCustomFieldTextWithValidationValueRt', () => {
@@ -98,6 +106,32 @@ describe('Custom Fields', () => {
           })
         )
       ).toContain('The value field cannot be an empty string.');
+    });
+  });
+
+  describe('CaseCustomFieldNumberWithValidationValueRt', () => {
+    const numberCustomFieldValueType = CaseCustomFieldNumberWithValidationValueRt({
+      fieldName: 'value',
+    });
+    it('should decode number correctly', () => {
+      const query = numberCustomFieldValueType.decode(123);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: 123,
+      });
+    });
+
+    it('should not be more than MAX_LONG_NUMBER_LIMIT', () => {
+      expect(
+        PathReporter.report(numberCustomFieldValueType.decode(MAX_LONG_NUMBER_LIMIT * 2))[0]
+      ).toContain(`The value field cannot be more than ${MAX_LONG_NUMBER_LIMIT}.`);
+    });
+
+    it('should not be less than MIN_LONG_NUMBER_LIMIT', () => {
+      expect(
+        PathReporter.report(numberCustomFieldValueType.decode(MIN_LONG_NUMBER_LIMIT * 2))[0]
+      ).toContain(`The value field cannot be less than ${MIN_LONG_NUMBER_LIMIT}.`);
     });
   });
 });
