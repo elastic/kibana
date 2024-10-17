@@ -484,7 +484,7 @@ function maybeQuote(value: any) {
     if (value.match(/^\{.*\}$/)) {
       return value;
     }
-    return `"${value.replace(/"/g, '\\"')}"`;
+    return `"${value.replace(/[\\"]/g, '\\$&')}"`;
   }
   return value;
 }
