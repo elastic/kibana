@@ -44,6 +44,7 @@ describe('Key rotation routes', () => {
 
     it('correctly defines route.', () => {
       expect(routeConfig.options).toEqual({
+        access: 'public',
         tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
         summary: `Rotate a key for encrypted saved objects`,
         description: `If a saved object cannot be decrypted using the primary encryption key, Kibana attempts to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
@@ -81,6 +82,25 @@ describe('Key rotation routes', () => {
       expect(() => queryValidator.validate({ type: 100 })).toThrowErrorMatchingInlineSnapshot(
         `"[type]: expected value of type [string] but got [number]"`
       );
+    });
+
+    it('defines route as internal when build flavor is serverless', () => {
+      const routeParamsMock = routeDefinitionParamsMock.create(
+        { keyRotation: { decryptionOnlyKeys: ['b'.repeat(32)] } },
+        'serverless'
+      );
+      defineKeyRotationRoutes(routeParamsMock);
+      const [config] = routeParamsMock.router.post.mock.calls.find(
+        ([{ path }]) => path === '/api/encrypted_saved_objects/_rotate_key'
+      )!;
+
+      expect(config.options).toEqual({
+        access: 'internal',
+        tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
+        summary: `Rotate a key for encrypted saved objects`,
+        description: `If a saved object cannot be decrypted using the primary encryption key, Kibana attempts to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
+        NOTE: Bulk key rotation can consume a considerable amount of resources and hence only user with a superuser role can trigger it.`,
+      });
     });
 
     it('returns 400 if decryption only keys are not specified.', async () => {

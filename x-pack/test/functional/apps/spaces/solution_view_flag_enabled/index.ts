@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function spacesApp({ loadTestFile }: FtrProviderContext) {
   describe('Spaces app (with solution view)', function spacesAppTestSuite() {
     loadTestFile(require.resolve('./create_edit_space'));
+    loadTestFile(require.resolve('./solution_tour'));
   });
 }
