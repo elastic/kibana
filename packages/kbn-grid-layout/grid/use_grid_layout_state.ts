@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 import {
+  ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
@@ -37,15 +38,7 @@ export const useGridLayoutState = ({
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
-    const draggingPosition$ = new BehaviorSubject<
-      | {
-          top: number;
-          left: number;
-          bottom: number;
-          right: number;
-        }
-      | undefined
-    >(undefined);
+    const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
     const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
       columnPixelWidth: 0,
@@ -55,11 +48,11 @@ export const useGridLayoutState = ({
       rowRefs,
       panelRefs,
       gridLayout$,
+      activePanel$,
       dragPreviewRef,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
-      draggingPosition$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -83,8 +76,8 @@ export const useGridLayoutState = ({
      */
     const onLayoutChangeSubscription = combineLatest([
       gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.draggingPosition$,
-    ]).subscribe(([gridLayout, draggingPosition]) => {
+      gridLayoutStateManager.activePanel$,
+    ]).subscribe(([gridLayout, activePanel]) => {
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
       const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
@@ -107,7 +100,8 @@ export const useGridLayoutState = ({
           if (!panelRef) return;
 
           const isResize = currentInteractionEvent?.type === 'resize';
-          if (panel.id === currentInteractionEvent?.id && draggingPosition) {
+          if (panel.id === activePanel?.id && activePanel.position) {
+            const { position: draggingPosition } = activePanel;
             if (isResize) {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               panelRef.style.width = `${Math.max(

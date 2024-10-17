@@ -13,6 +13,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { GridPanel } from './grid_panel';
 import {
@@ -39,7 +40,6 @@ export const GridRow = forwardRef<
     rowIndex: number;
     rowData: GridRowData;
     toggleIsCollapsed: () => void;
-    activePanelId: string | undefined;
     targetRowIndex: number | undefined;
     runtimeSettings: RuntimeGridSettings;
     renderPanelContents: (panelId: string) => React.ReactNode;
@@ -51,7 +51,6 @@ export const GridRow = forwardRef<
     {
       rowData,
       rowIndex,
-      activePanelId,
       targetRowIndex,
       runtimeSettings,
       toggleIsCollapsed,
@@ -61,8 +60,10 @@ export const GridRow = forwardRef<
     },
     gridRef
   ) => {
+    const activePanel = useStateFromPublishingSubject(gridLayoutStateManager.activePanel$);
+
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
-    const isGridTargeted = activePanelId && targetRowIndex === rowIndex;
+    const isGridTargeted = activePanel?.id && targetRowIndex === rowIndex;
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
@@ -116,7 +117,7 @@ export const GridRow = forwardRef<
               <GridPanel
                 key={panelData.id}
                 panelData={panelData}
-                activePanelId={activePanelId}
+                activePanelId={activePanel?.id}
                 renderPanelContents={renderPanelContents}
                 interactionStart={(type, e) => {
                   e.preventDefault();
@@ -147,7 +148,7 @@ export const GridRow = forwardRef<
               />
             ))}
 
-            {activePanelId && rowData.panels[activePanelId] && (
+            {activePanel?.id && rowData.panels[activePanel.id] && (
               <div
                 ref={gridLayoutStateManager.dragPreviewRef}
                 css={css`
@@ -156,14 +157,14 @@ export const GridRow = forwardRef<
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
                   transition: opacity 100ms linear;
 
-                  grid-column-start: ${rowData.panels[activePanelId].column + 1};
-                  grid-column-end: ${rowData.panels[activePanelId].column +
+                  grid-column-start: ${rowData.panels[activePanel.id].column + 1};
+                  grid-column-end: ${rowData.panels[activePanel.id].column +
                   1 +
-                  rowData.panels[activePanelId].width};
-                  grid-row-start: ${rowData.panels[activePanelId].row + 1};
-                  grid-row-end: ${rowData.panels[activePanelId].row +
+                  rowData.panels[activePanel.id].width};
+                  grid-row-start: ${rowData.panels[activePanel.id].row + 1};
+                  grid-row-end: ${rowData.panels[activePanel.id].row +
                   1 +
-                  rowData.panels[activePanelId].height};
+                  rowData.panels[activePanel.id].height};
                 `}
               />
             )}
