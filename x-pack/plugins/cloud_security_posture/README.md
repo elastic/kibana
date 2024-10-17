@@ -81,6 +81,8 @@ Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x
 ```bash
 yarn cypress:open:serverless
 yarn cypress:open:ess
+yarn cypress:cloud_security_posture:run:serverless
+yarn cypress:cloud_security_posture:run:ess
 ```
 
 #### Run **FTR tests (integration or e2e) for development**
@@ -127,9 +129,19 @@ run ess e2e tests:
 yarn cypress:open:ess
 ```
 
+run ess Cloud Security Posture e2e tests:
+```bash
+yarn cypress:cloud_security_posture:run:ess
+```
+
 run serverless e2e tests:
 ```bash
 yarn cypress:open:serverless
+```
+
+run serverless Cloud Security Posture e2e tests:
+```bash
+yarn cypress:cloud_security_posture:run:serverless
 ```
 
 Unlike FTR where we have to set server and runner separately, Cypress handles everything in 1 go, so just running the above the script is enough to get it running
