@@ -9,10 +9,7 @@
 
 import React from 'react';
 
-import { transparentize } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
@@ -49,7 +46,6 @@ export const GridLayout = ({
           {gridLayout.map((rowData, rowIndex) => {
             return (
               <GridRow
-                gridLayoutStateManager={gridLayoutStateManager}
                 rowData={rowData}
                 key={rowData.title}
                 rowIndex={rowIndex}
@@ -57,6 +53,7 @@ export const GridLayout = ({
                 activePanelId={interactionEvent?.id}
                 renderPanelContents={renderPanelContents}
                 targetRowIndex={interactionEvent?.targetRowIndex}
+                gridLayoutStateManager={gridLayoutStateManager}
                 toggleIsCollapsed={() => {
                   const currentLayout = gridLayoutStateManager.gridLayout$.value;
                   currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
@@ -76,18 +73,6 @@ export const GridLayout = ({
           })}
         </div>
       </GridHeightSmoother>
-
-      {interactionEvent?.id && (
-        <div
-          ref={gridLayoutStateManager.dragPreviewRef}
-          css={css`
-            pointer-events: none;
-            border-radius: ${euiThemeVars.euiBorderRadius};
-            background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
-            transition: opacity 100ms linear;
-          `}
-        />
-      )}
       {/* <GridOverlay
         interactionEvent={interactionEvent}
         gridLayoutStateManager={gridLayoutStateManager}

@@ -146,6 +146,28 @@ export const GridRow = forwardRef<
                 }}
               />
             ))}
+
+            {activePanelId && rowData.panels[activePanelId] && (
+              <div
+                ref={gridLayoutStateManager.dragPreviewRef}
+                css={css`
+                  z-index: 1000;
+                  pointer-events: none;
+                  border-radius: ${euiThemeVars.euiBorderRadius};
+                  background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+                  transition: opacity 100ms linear;
+
+                  grid-column-start: ${rowData.panels[activePanelId].column + 1};
+                  grid-column-end: ${rowData.panels[activePanelId].column +
+                  1 +
+                  rowData.panels[activePanelId].width};
+                  grid-row-start: ${rowData.panels[activePanelId].row + 1};
+                  grid-row-end: ${rowData.panels[activePanelId].row +
+                  1 +
+                  rowData.panels[activePanelId].height};
+                `}
+              />
+            )}
           </div>
         )}
       </>
