@@ -27,7 +27,7 @@ jest.mock('os', () => {
     },
     freemem() {
       return 20000000000;
-    }
+    },
   };
 });
 
@@ -49,9 +49,9 @@ jest.mock('v8', () => {
         number_of_detached_contexts: 0,
         total_global_handles_size: 8192,
         used_global_handles_size: 3296,
-        external_memory: 2209666
-      }
-    }
+        external_memory: 2209666,
+      };
+    },
   };
 });
 
