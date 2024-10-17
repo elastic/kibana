@@ -24,6 +24,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useGetNavigationUrlParamsFindings } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
@@ -115,7 +116,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     };
 
     const navToFindings = useNavigateFindings();
-
+    const navUrlParams = useGetNavigationUrlParamsFindings();
     const navToFindingsByRuleAndResourceId = (ruleId: string, resourceId: string) => {
       navToFindings({ 'rule.id': ruleId, 'resource.id': resourceId });
     };
@@ -170,6 +171,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     return (
       <>
         <EuiPanel hasShadow={false}>
+          <EuiLink href={navUrlParams({ [fieldName]: queryName }, ['rule.name'])} target="_blank" />
           <EuiLink
             onClick={() => {
               uiMetricService.trackUiMetric(
