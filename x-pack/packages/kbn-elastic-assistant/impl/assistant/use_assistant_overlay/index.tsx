@@ -96,7 +96,6 @@ export const useAssistantOverlay = (
     filter: `title: ${conversationTitle}`,
     isAssistantEnabled,
   });
-  console.log('THIS ONE', conversations);
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);

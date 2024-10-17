@@ -175,7 +175,6 @@ export const useCurrentConversation = ({
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
       const allConversations = await refetchCurrentUserConversations();
-      console.log('handleOnConversationSelected', { cId, cTitle, allConversations });
 
       // This is a default conversation that has not yet been initialized
       // add the default connector config
@@ -183,10 +182,8 @@ export const useCurrentConversation = ({
         const updatedConvo = await initializeDefaultConversationWithConnector(
           allConversations.data[cTitle]
         );
-        console.log('if updatedConvo', updatedConvo);
         setCurrentConversationId(updatedConvo.id);
       } else if (allConversations?.data?.[cId]) {
-        console.log('else cId', cId);
         setCurrentConversationId(cId);
       }
     },
@@ -219,7 +216,6 @@ export const useCurrentConversation = ({
       // we do not retrieve the full conversation object in `conversations`,
       // so fetch the full conversation object
       const nextConversation = (await getConversation(nConversation.id)) ?? nConversation;
-      console.log('useEffect updateConversation', { nConversation, nextConversation });
 
       setCurrentConversation((prev) => {
         if (deepEqual(prev, nextConversation)) return prev;
@@ -272,7 +268,6 @@ export const useCurrentConversation = ({
 
     const newConversation = await createConversation({
       title: NEW_CHAT,
-      isDefault: false,
       ...(currentConversation?.apiConfig != null &&
       currentConversation?.apiConfig?.actionTypeId != null
         ? {

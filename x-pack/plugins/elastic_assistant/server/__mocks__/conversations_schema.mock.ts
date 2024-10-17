@@ -147,6 +147,7 @@ export const getConversationMock = (
       name: 'elastic',
     },
   ],
+  isDefault: false,
 });
 
 export const getQueryConversationParams = (
@@ -163,6 +164,7 @@ export const getQueryConversationParams = (
         },
         category: 'assistant',
         excludeFromLastConversationStorage: false,
+        isDefault: false,
         messages: [
           {
             content: 'test content',

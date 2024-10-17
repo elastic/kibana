@@ -42,28 +42,33 @@ const getMockConversationContent = (): Partial<ConversationCreateProps> => ({
 
 /**
  * Developer script for creating conversations.
- * cd x-pack/plugins/elastic_assistant/scripts && node ./create_conversations --count=100
+ * cd x-pack/plugins/elastic_assistant/scripts && node ./create_conversations
  */
 export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
-const NODE = `http://elastic:changeme@127.0.0.1:9200`;
-const KIBANA = `http://elastic:changeme@localhost:5601/kbn`;
+
 const requestHeaders = {
   'kbn-xsrf': 'xxx',
   'Content-Type': 'application/json',
-  // 'kbn-version': '1',
-  // 'elastic-api-version': '1',
-  // 'x-elastic-internal-product': 'Kibana',
 };
 export const create = async () => {
   const logger = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
   });
-  const argv = yargs(process.argv.slice(2)).parse();
-  const esUrl = argv.node ?? NODE;
-  const kibanaUrl = removeTrailingSlash(argv.kibana ?? KIBANA);
-  const count = argv.count ?? 100;
-  logger.info(`Elasticsearch Node: ${esUrl}`);
+  const argv = yargs(process.argv.slice(2))
+    .option('count', {
+      type: 'number',
+      description: 'Number of conversations to create',
+      default: 100,
+    })
+    .option('kibana', {
+      type: 'string',
+      description: 'Kibana url including auth',
+      default: `http://elastic:changeme@localhost:5601/kbn`,
+    })
+    .parse();
+  const kibanaUrl = removeTrailingSlash(argv.kibana);
+  const count = Number(argv.count);
   logger.info(`Kibana URL: ${kibanaUrl}`);
   const connectorsApiUrl = `${kibanaUrl}/api/actions/connectors`;
   const conversationsCreateUrl = `${kibanaUrl}${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}`;

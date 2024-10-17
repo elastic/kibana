@@ -40,7 +40,6 @@ export const mergeBaseWithPersistedConversations = (
   baseConversations: Record<string, Conversation>,
   conversationsData: FetchConversationsResponse
 ): Record<string, Conversation> => {
-  console.log('fetch response', conversationsData?.data);
   return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
     Record<string, Conversation>
   >((transformed, conversation) => {

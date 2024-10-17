@@ -92,7 +92,7 @@ export const transformToCreateScheme = (
         }
       : undefined,
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    is_default: isDefault,
+    is_default: isDefault ?? false,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
       content: message.content,

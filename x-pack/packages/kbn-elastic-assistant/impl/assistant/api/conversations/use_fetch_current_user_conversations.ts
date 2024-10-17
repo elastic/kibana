@@ -43,8 +43,10 @@ export interface UseFetchCurrentUserConversationsParams {
  */
 const query = {
   page: 1,
-  per_page: 20,
-  // ensure default conversations are fetched first
+  // TODO optimize with pagination
+  // https://github.com/elastic/kibana/issues/192714
+  per_page: 5000,
+  // ensure default conversations are fetched first to avoid recreating them
   sort_field: 'is_default',
   sort_order: 'desc',
 };
@@ -59,9 +61,8 @@ export const useFetchCurrentUserConversations = ({
   isAssistantEnabled,
   fields,
   filter,
-}: UseFetchCurrentUserConversationsParams) => {
-  console.log('filter', filter);
-  return useQuery(
+}: UseFetchCurrentUserConversationsParams) =>
+  useQuery(
     fields && fields.length ? [...CONVERSATIONS_QUERY_KEYS, fields] : CONVERSATIONS_QUERY_KEYS,
     async () =>
       http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
@@ -82,4 +83,3 @@ export const useFetchCurrentUserConversations = ({
       enabled: isAssistantEnabled,
     }
   );
-};
