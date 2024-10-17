@@ -33,8 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esDeleteAllIndices(indexName);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/194704
-    describe.skip('index details page overview', () => {
+    describe('index details page overview', () => {
       before(async () => {
         await es.indices.create({ index: indexName });
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
@@ -54,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
 
-      it('should show api key', async () => {
+      it.skip('should show api key', async () => {
         await pageObjects.svlApiKeys.deleteAPIKeys();
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
