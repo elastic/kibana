@@ -108,7 +108,7 @@ export const EntityStoreManagementPage = () => {
     const errorMessage = assetCriticalityPrivilegesError?.body.message ?? (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-        defaultMessage="The don't have privileges to access Asset Criticality feature. Contact your administrator for further assistance."
+        defaultMessage="Privileges to access the Asset Criticality feature are missing for your user. Contact your administrator for further assistance."
       />
     );
 
