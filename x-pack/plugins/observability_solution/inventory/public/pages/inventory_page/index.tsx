@@ -4,105 +4,74 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting } from '@elastic/eui';
-import React from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityColumnIds, EntityType } from '../../../common/entities';
-import { EntitiesGrid } from '../../components/entities_grid';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
+import React, { useCallback, useEffect, useState } from 'react';
+import { decode, encode } from '@kbn/rison';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { GroupedInventoryView } from '../../components/grouped_inventory';
+import { UngroupedInventoryView } from '../../components/grouped_inventory/ungrouped_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useKibana } from '../../hooks/use_kibana';
+import { InventoryPageViewContextProvider } from '../../context/inventory_page_view_provider';
+
+const DEFAULT_GROUPING = ENTITY_TYPE;
+
+export interface InventoryState {
+  groupBy?: string;
+  pagination?: Record<string, number>;
+}
 
 export function InventoryPage() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
-  const {
-    services: { inventoryAPIClient },
-  } = useKibana();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex, kuery, entityTypes } = query;
-
   const inventoryRoute = useInventoryRouter();
 
-  const {
-    value = { entities: [] },
-    loading,
-    refresh,
-  } = useInventoryAbortableAsync(
-    ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
-        params: {
-          query: {
-            sortDirection,
-            sortField,
-            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
-            kuery,
-          },
-        },
-        signal,
-      });
-    },
-    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
+  const { view } = query;
+  const [inventoryState, setInventoryState] = useState<InventoryState | undefined>(() =>
+    view ? (decode(view) as InventoryState) : undefined
   );
 
-  useEffectOnce(() => {
-    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refresh();
-        } else {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
+  useEffect(() => {
+    if (inventoryState) {
+      const encodedView = encode(inventoryState);
+
+      if (encodedView !== view) {
+        inventoryRoute.replace('/', {
+          path: {},
+          query: {
+            ...query,
+            view: encodedView,
+          },
+        });
       }
-    );
-    return () => {
-      searchBarContentSubscription.unsubscribe();
-    };
-  });
+    }
+    // Only run the effect on a change for `inventoryState`. Other deps cause this to refire too many times.
+    // Probably a better way of doing this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inventoryState]);
 
-  function handlePageChange(nextPage: number) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: { ...query, pageIndex: nextPage },
-    });
-  }
+  const setGrouping = useCallback(
+    (field: string) => setInventoryState((state) => ({ ...state, groupBy: field })),
+    []
+  );
+  const setPagination = useCallback(
+    (group: string, nextPage: number) =>
+      setInventoryState((state) => ({
+        ...state,
+        pagination: { ...state?.pagination, [group]: nextPage },
+      })),
+    []
+  );
 
-  function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        sortField: sorting.id as EntityColumnIds,
-        sortDirection: sorting.direction,
-      },
-    });
-  }
-
-  function handleTypeFilter(entityType: EntityType) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        // Override the current entity types
-        entityTypes: [entityType],
-      },
-    });
-  }
+  // If state or grouping itself is `undefined`, fallback to the default view
+  const currentGrouping = inventoryState?.groupBy || DEFAULT_GROUPING;
 
   return (
-    <EntitiesGrid
-      entities={value.entities}
-      loading={loading}
-      sortDirection={sortDirection}
-      sortField={sortField}
-      onChangePage={handlePageChange}
-      onChangeSort={handleSortChange}
-      pageIndex={pageIndex}
-      onFilterByType={handleTypeFilter}
-    />
+    <InventoryPageViewContextProvider
+      grouping={currentGrouping}
+      pagination={inventoryState?.pagination}
+      setGrouping={setGrouping}
+      setPagination={setPagination}
+    >
+      {currentGrouping === 'none' ? <UngroupedInventoryView /> : <GroupedInventoryView />}
+    </InventoryPageViewContextProvider>
   );
 }
