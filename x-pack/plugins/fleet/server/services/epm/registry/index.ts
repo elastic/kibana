@@ -397,7 +397,7 @@ export async function getPackageFieldsMetadata(
   }
 }
 
-function ensureContentType(archivePath: string) {
+export function ensureContentType(archivePath: string) {
   const contentType = mime.lookup(archivePath);
 
   if (!contentType) {

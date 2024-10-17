@@ -103,9 +103,12 @@ import { installIndexTemplatesAndPipelines } from './install_index_template_pipe
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { installPackageWithStream } from './stream_based_package_installation/install_package_with_stream';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+
+const PACKAGES_FOR_STREAM_INSTALL = ['security_detection_engine'];
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -883,6 +886,17 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
     } = args;
+
+    const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
+    if (PACKAGES_FOR_STREAM_INSTALL.includes(pkgName)) {
+      logger.debug(`Kicking off stream-based installation of ${pkgkey}`);
+      return await installPackageWithStream({
+        pkgName,
+        pkgVersion,
+        spaceId,
+        savedObjectsClient,
+      });
+    }
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
 
