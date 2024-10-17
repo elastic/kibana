@@ -38,7 +38,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
+      'agent.name',
       'service.environment',
       'service.name',
       'service.namespace',
