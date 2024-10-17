@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const utils = EntityStoreUtils(getService);
 
-  // TODO: unskip once permissions issue is resolved
+    // Failing: See https://github.com/elastic/kibana/issues/196526
   describe.skip('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
