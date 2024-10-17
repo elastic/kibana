@@ -64,27 +64,29 @@ export const DashboardAppNoDataPage = ({
   }, [lensService]);
 
   const onTryESQL = useCallback(async () => {
-    const { dataViews } = dataService;
-    const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-    const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
-    const esqlQuery = getInitialESQLQuery(dataView);
-    const abortController = new AbortController();
-    const columns = await getESQLQueryColumns({
-      esqlQuery,
-      search: dataService.search.search,
-      signal: abortController.signal,
-      timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
-    });
-
-    const context = {
-      dataViewSpec: dataView?.toSpec(false),
-      fieldName: '',
-      textBasedColumns: columns,
-      query: { esql: esqlQuery },
-    };
-
     if (lensHelpersAsync.value) {
-      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView, []);
+      const { dataViews } = dataService;
+      const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
+      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+      const esqlQuery = getInitialESQLQuery(dataView);
+      const abortController = new AbortController();
+
+      const columns = await getESQLQueryColumns({
+        esqlQuery,
+        search: dataService.search.search,
+        signal: abortController.signal,
+        timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
+      });
+
+      // lens suggestions api context
+      const context = {
+        dataViewSpec: dataView?.toSpec(false),
+        fieldName: '',
+        textBasedColumns: columns,
+        query: { esql: esqlQuery },
+      };
+
+      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
       if (chartSuggestions?.length) {
         const [suggestion] = chartSuggestions;
 
@@ -112,6 +114,7 @@ export const DashboardAppNoDataPage = ({
       }
     }
   }, [lensHelpersAsync.value]);
+
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
       importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
