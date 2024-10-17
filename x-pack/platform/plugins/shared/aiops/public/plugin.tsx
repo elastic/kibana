@@ -48,6 +48,10 @@ export class AiopsPlugin
             // eslint-disable-next-line no-console
             console.log('AIOps Received updated search query:', action);
           });
+
+          pluginStart.eventBus.dispatch({ type: 'search/setSearchQuery', payload: 'test1' });
+          pluginStart.eventBus.dispatch({ type: 'search/setSearchQuery', payload: 'test1' });
+          pluginStart.eventBus.dispatch({ type: 'search/setSearchQuery', payload: 'test2' });
         }
       }
     });
