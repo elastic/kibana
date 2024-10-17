@@ -9,7 +9,7 @@ import { AlertingFrameworkHealth } from '../../../../../../types';
 import type { HealthFrameworkResponseBodyV1 } from '../../../../../../../common/routes/framework/apis/health';
 
 export const transformHealthBodyResponse = (
-  frameworkHealth: AlertingFrameworkHealth // TODO: check for this type in the ruleClient equivalent
+  frameworkHealth: AlertingFrameworkHealth
 ): HealthFrameworkResponseBodyV1 => ({
   is_sufficiently_secure: frameworkHealth.isSufficientlySecure,
   has_permanent_encryption_key: frameworkHealth.hasPermanentEncryptionKey,
