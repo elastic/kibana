@@ -11,6 +11,7 @@ import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql
 import {
   ENTITIES_LATEST_ALIAS,
   EntityGroup,
+  EntityType,
   MAX_NUMBER_OF_ENTITIES,
   defaultEntityTypes,
 } from '../../../common/entities';
@@ -20,15 +21,17 @@ export async function getEntityGroupsBy({
   inventoryEsClient,
   field,
   kuery,
+  entityTypes,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   field: string;
   kuery?: string;
+  entityTypes?: EntityType[];
 }) {
   const groups = await inventoryEsClient.esql('get_entities_groups', {
     query: `
         FROM ${ENTITIES_LATEST_ALIAS}
-        | ${getEntityTypesWhereClause(defaultEntityTypes)}
+        | ${getEntityTypesWhereClause(entityTypes ?? defaultEntityTypes)}
         | ${getEntityDefinitionIdWhereClause()}
         | STATS count = COUNT(*) by ${field}
         | SORT ${field} asc
