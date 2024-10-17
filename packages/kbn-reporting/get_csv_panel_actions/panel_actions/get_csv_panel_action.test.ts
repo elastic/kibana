@@ -64,7 +64,7 @@ describe('GetCsvReportPanelAction', () => {
       enablePanelActionDownload: false,
     };
 
-    apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
+    apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0', false);
     jest.spyOn(apiClient, 'createReportingJob');
 
     mockLicenseState = 'valid';

@@ -34,7 +34,12 @@ const mockJobsFound: Job[] = [
 ].map((j) => new Job(j as ReportApiJSON)); // prettier-ignore
 
 const coreSetup = coreMock.createSetup();
-const jobQueueClientMock = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
+const jobQueueClientMock = new ReportingAPIClient(
+  coreSetup.http,
+  coreSetup.uiSettings,
+  '7.15.0',
+  false
+);
 jobQueueClientMock.findForJobIds = async () => mockJobsFound;
 jobQueueClientMock.getInfo = () =>
   Promise.resolve({ content: 'this is the completed report data' } as unknown as Job);

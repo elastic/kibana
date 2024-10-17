@@ -41,7 +41,7 @@ describe('ReportingPanelContent', () => {
           return 'Mars';
       }
     });
-    apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0-test');
+    apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0-test', false);
   });
 
   const { getStartServices } = coreMock.createSetup();
