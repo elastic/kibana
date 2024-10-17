@@ -21,5 +21,6 @@
     "@kbn/product-doc-common",
     "@kbn/inference-plugin",
     "@kbn/product-doc-base-plugin",
+    "@kbn/logging-mocks",
   ]
 }
