@@ -168,7 +168,7 @@ function getExpressionForLayer(
 
     const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
-    const canUseESQL = esAggEntries.every(([colId, col]) => {
+    let canUseESQL = esAggEntries.every(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
       return (
         def.toESQL !== undefined &&
@@ -193,6 +193,7 @@ function getExpressionForLayer(
     });
 
     let esql = '';
+    let partialRows = true;
 
     if (canUseESQL) {
       esql = `FROM ${indexPattern.title} | `;
@@ -227,7 +228,7 @@ function getExpressionForLayer(
             },
           ];
 
-          return (
+          let metricESQL =
             `${esAggsId} = ` +
             def.toESQL!(
               {
@@ -247,8 +248,25 @@ function getExpressionForLayer(
               data
               // orderedColumnIds,
               // operationDefinitionMap
-            )
-          );
+            );
+
+          if (wrapInFilter || wrapInTimeFilter) {
+            const conditions: string[] = [];
+            if (wrapInFilter) {
+              if (col.filter?.language === 'kquery') {
+                canUseESQL = false;
+              }
+              canUseESQL = false; // conditions.push(`QSTR("${col.filter?.query}")`);
+            }
+            if (wrapInTimeFilter) {
+              canUseESQL = false;
+            }
+            if (conditions.length) {
+              metricESQL += ` WHERE ${conditions.join(' AND ')}`;
+            }
+          }
+
+          return metricESQL;
         });
 
       esql += 'STATS ' + metrics.join(', ');
@@ -265,9 +283,13 @@ function getExpressionForLayer(
             col.reducedTimeRange &&
             indexPattern.timeFieldName;
 
-          const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+          let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
             ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
             : `col_${index}_${aggId}`;
+
+          if (col.operationType === 'date_histogram') {
+            esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
+          }
 
           esAggsIdMap[esAggsId] = [
             {
@@ -282,6 +304,19 @@ function getExpressionForLayer(
                   ),
             },
           ];
+
+          if (col.operationType === 'date_histogram') {
+            const column = col as DateHistogramIndexPatternColumn;
+            if (
+              column.params?.dropPartials &&
+              // set to false when detached from time picker
+              (indexPattern.timeFieldName ===
+                indexPattern.getFieldByName(column.sourceField)?.name ||
+                !column.params?.ignoreTimeRange)
+            ) {
+              partialRows = false;
+            }
+          }
 
           return (
             `${esAggsId} = ` +
@@ -309,6 +344,23 @@ function getExpressionForLayer(
 
       if (buckets) {
         esql += ` BY ${buckets.join(', ')}`;
+
+        const sorts = esAggEntries
+          .filter(([id, col]) => col.isBucketed)
+          .map(([colId, col], index) => {
+            const aggId = String(index);
+            let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+              ? `col_${index + (col.isBucketed ? 0 : 1)}-${aggId}`
+              : `col_${index}_${aggId}`;
+
+            if (col.operationType === 'date_histogram') {
+              esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
+            }
+
+            return `${esAggsId} ASC`;
+          });
+
+        esql += ` | SORT ${sorts.join(', ')}`;
       }
     } else {
       esAggEntries.forEach(([colId, col], index) => {
@@ -609,6 +661,9 @@ function getExpressionForLayer(
     const dataAST = canUseESQL
       ? buildExpressionFunction('esql', {
           query: esql,
+          timeField: allDateHistogramFields[0],
+          partialRows,
+          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
         }).toAst()
       : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
           index: buildExpression([

@@ -122,6 +122,15 @@ export const filtersOperation: OperationDefinition<
     };
   },
 
+  toESQL: (column, columnId, indexPattern) => {
+    const validFilters = column.params.filters?.filter((f: Filter) =>
+      isQueryValid(f.input, indexPattern)
+    );
+    if (validFilters.some((filter) => filter.input.language === 'kquery')) return undefined;
+
+    return undefined;
+  },
+
   toEsAggsFn: (column, columnId, indexPattern) => {
     const validFilters = column.params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)

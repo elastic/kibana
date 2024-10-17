@@ -189,11 +189,18 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
+    let esql = '';
     if (!field || field?.type === 'document') {
-      return `COUNT(*)`;
+      esql = `COUNT(*)`;
     } else {
-      return `COUNT(${field.name})`;
+      esql = `COUNT(${field.name})`;
     }
+    if (column.filter) {
+      if (column.filter.language === 'kquery') return undefined;
+      return undefined; // esql += ` WHERE QSTR("${column.filter.query}")`;
+    }
+
+    return esql;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);

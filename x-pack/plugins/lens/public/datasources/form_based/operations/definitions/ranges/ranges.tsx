@@ -139,9 +139,13 @@ export const rangeOperation: OperationDefinition<
     };
   },
   toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
+    if (column.params?.includeEmptyRows || column.params.type === MODES.Range) return;
+
     const maxBarsDefaultValue =
       (uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS) - MIN_HISTOGRAM_BARS) / 2;
-    return `BUCKET(${column.sourceField}, ${maxBarsDefaultValue})`;
+    const maxBars =
+      column.params.maxBars === AUTO_BARS ? maxBarsDefaultValue : column.params.maxBars;
+    return `BUCKET(${column.sourceField}, ${maxBars})`;
   },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;

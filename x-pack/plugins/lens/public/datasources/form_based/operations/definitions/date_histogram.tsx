@@ -147,11 +147,6 @@ export const dateHistogramOperation: OperationDefinition<
     const usedField = indexPattern.getFieldByName(column.sourceField);
     let timeZone: string | undefined;
     let interval = column.params?.interval ?? autoInterval;
-    const dropPartials = Boolean(
-      column.params?.dropPartials &&
-        // set to false when detached from time picker
-        (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
-    );
 
     if (
       usedField &&
@@ -162,12 +157,12 @@ export const dateHistogramOperation: OperationDefinition<
       timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
     }
 
-    if (timeZone || dropPartials || column.params?.includeEmptyRows) return;
-
-    // todo: add auto interval calculation and conversion from dropdown values
-    console.log('interval', interval);
+    if (timeZone || column.params?.includeEmptyRows) return;
 
     function mapToEsqlInterval(_interval: string) {
+      if (_interval !== 'm' && _interval.endsWith('m')) {
+        return _interval.replace('m', ' minutes');
+      }
       switch (_interval) {
         case '1M':
           return '1 month';

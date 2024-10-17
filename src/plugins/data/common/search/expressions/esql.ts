@@ -58,6 +58,8 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
+  partialRows?: boolean;
+  ignoreGlobalFilters?: boolean;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -140,10 +142,32 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
+      partialRows: {
+        types: ['boolean'],
+        default: false,
+        help: i18n.translate('data.search.esql.partialRows.help', {
+          defaultMessage: 'Whether to return rows that only contain partial data',
+        }),
+      },
+      ignoreGlobalFilters: {
+        types: ['boolean'],
+        default: false,
+        help: i18n.translate('data.search.esql.ignoreGlobalFilters.help', {
+          defaultMessage: 'Whether to ignore or use global query and filters',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
+      {
+        query,
+        /* timezone, */ timeField,
+        locale,
+        titleForInspector,
+        descriptionForInspector,
+        ignoreGlobalFilters,
+        partialRows,
+      },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -201,7 +225,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               : undefined;
 
             const filters = [
-              ...(input.filters ?? []),
+              ...(ignoreGlobalFilters ? [] : input.filters ?? []),
               ...(timeFilter ? [timeFilter] : []),
               ...(delayFilter ? [delayFilter] : []),
             ];
@@ -325,6 +349,31 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const columnNames = allColumns?.map(({ name }) => name);
 
           const rows = body.values.map((row) => zipObject(columnNames, row));
+
+          if (partialRows === false) {
+            const timeFilter =
+              input?.timeRange &&
+              getTime(undefined, input.timeRange, {
+                fieldName: timeField,
+              });
+
+            if (rows.length && timeFilter) {
+              let start = new Date(rows[0][timeField!]);
+              const from = new Date(timeFilter.query.range[timeField].gte);
+              const last = new Date(rows[rows.length - 1][timeField!]);
+              const to = new Date(timeFilter.query.range[timeField].lte);
+
+              const step =
+                new Date(rows[rows.length - 1][timeField!]) -
+                new Date(rows[rows.length - 2][timeField!]);
+              const end = new Date(last.getTime() + step);
+              while (from > start) {
+                rows.shift();
+                start = new Date(rows[0][timeField!]);
+              }
+              if (end > to) rows.pop();
+            }
+          }
 
           return {
             type: 'datatable',
