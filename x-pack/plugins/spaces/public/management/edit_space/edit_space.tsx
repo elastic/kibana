@@ -146,10 +146,18 @@ export const EditSpace: FC<PageProps> = ({
       setIsLoadingRoles(false);
     };
 
-    if (!state.roles.size && !state.fetchRolesError) {
+    if (isRoleManagementEnabled && !state.roles.size && !state.fetchRolesError) {
       getRoles();
     }
-  }, [dispatch, invokeClient, spaceId, state.roles, state.fetchRolesError, logger]);
+  }, [
+    dispatch,
+    invokeClient,
+    spaceId,
+    logger,
+    state.roles,
+    state.fetchRolesError,
+    isRoleManagementEnabled,
+  ]);
 
   useEffect(() => {
     const _getFeatures = async () => {
@@ -172,7 +180,7 @@ export const EditSpace: FC<PageProps> = ({
     return null;
   }
 
-  if (isLoadingSpace || isLoadingFeatures || isLoadingRoles) {
+  if (isLoadingSpace || isLoadingFeatures || (isRoleManagementEnabled && isLoadingRoles)) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>

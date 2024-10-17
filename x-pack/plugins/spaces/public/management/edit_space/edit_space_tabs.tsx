@@ -26,7 +26,7 @@ export interface EditSpaceTab {
 
 export interface GetTabsProps {
   space: Space;
-  rolesCount: number;
+  rolesCount?: number;
   isRoleManagementEnabled: boolean;
   features: KibanaFeature[];
   history: ScopedHistory;
@@ -102,7 +102,7 @@ export const getTabs = ({
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {rolesCount}
+          {rolesCount ?? 0}
         </EuiNotificationBadge>
       ),
       content: (
