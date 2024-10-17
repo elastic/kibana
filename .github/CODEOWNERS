@@ -1021,6 +1021,13 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
+# Observability Entities Team (@elastic/obs-entities)
+/x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
+/x-pack/packages/kbn-entities-schema @elastic/obs-entities
+/x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+/x-pack/plugins/entity_manager @elastic/obs-entities
+/x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
+
 # Data Discovery
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
@@ -1392,7 +1399,9 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /x-pack/plugins/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 
 # AppEx Platform Services Security
-x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test/api_integration/apis/es  @elastic/kibana-security
+
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
@@ -1500,6 +1509,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
+/x-pack/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/painless_lab/ @elastic/kibana-management
@@ -1899,6 +1909,7 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/x-pack/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_selection.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/index.ts @elastic/appex-sharedux
 packages/react @elastic/appex-sharedux
