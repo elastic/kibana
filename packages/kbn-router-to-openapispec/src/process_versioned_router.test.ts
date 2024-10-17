@@ -8,10 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreVersionedRouter,
-  VersionedRouterRoute,
-} from '@kbn/core-http-router-server-internal';
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
 import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
@@ -20,6 +17,7 @@ import {
   extractVersionedResponses,
   extractVersionedRequestBodies,
 } from './process_versioned_router';
+import { VersionedRouterRoute } from '@kbn/core-http-server';
 
 let oasConverter: OasConverter;
 beforeEach(() => {
@@ -151,9 +149,9 @@ describe('processVersionedRouter', () => {
 const createTestRoute: () => VersionedRouterRoute = () => ({
   path: '/foo',
   method: 'get',
+  isVersioned: true,
   options: {
     access: 'public',
-    deprecated: true,
     discontinued: 'discontinued versioned router',
     options: { body: { access: ['application/test+json'] } as any },
   },

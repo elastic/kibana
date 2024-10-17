@@ -239,6 +239,7 @@ describe('generateOpenApiDocument', () => {
                 routes: [
                   {
                     method: 'get',
+                    isVersioned: true,
                     path: '/test',
                     options: { access: 'public' },
                     handlers: [

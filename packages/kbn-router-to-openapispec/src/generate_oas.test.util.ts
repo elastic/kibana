@@ -60,10 +60,10 @@ export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
 export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   method: 'get',
   path: '/bar',
+  isVersioned: true,
   options: {
     summary: 'versioned route',
     access: 'public',
-    deprecated: true,
     discontinued: 'route discontinued version or date',
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],

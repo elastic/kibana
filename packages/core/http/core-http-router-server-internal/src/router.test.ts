@@ -50,7 +50,11 @@ describe('Router', () => {
           path: '/',
           validate: { body: validation, query: validation, params: validation },
           options: {
-            deprecated: true,
+            deprecated: {
+              documentationUrl: 'https://fake-url.com',
+              reason: { type: 'remove' },
+              severity: 'warning',
+            },
             discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
@@ -68,7 +72,11 @@ describe('Router', () => {
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
         options: {
-          deprecated: true,
+          deprecated: {
+            documentationUrl: 'https://fake-url.com',
+            reason: { type: 'remove' },
+            severity: 'warning',
+          },
           discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
@@ -85,7 +93,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok(),
-        { isVersioned: true }
+        { isVersioned: true, events: false }
       );
       router.get(
         {
