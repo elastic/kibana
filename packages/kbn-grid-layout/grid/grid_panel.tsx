@@ -79,12 +79,8 @@ export const GridPanel = forwardRef<
               cursor: grab;
             }
           `}
-          onMouseDown={(e) => {
-            interactionStart('drag', e);
-          }}
-          onMouseUp={(e) => {
-            interactionStart('drop', e);
-          }}
+          onMouseDown={(e) => interactionStart('drag', e)}
+          onMouseUp={(e) => interactionStart('drop', e)}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>
@@ -92,9 +88,7 @@ export const GridPanel = forwardRef<
         <div
           className="resizeHandle"
           onMouseDown={(e) => interactionStart('resize', e)}
-          onMouseUp={(e) => {
-            interactionStart('drop', e);
-          }}
+          onMouseUp={(e) => interactionStart('drop', e)}
           css={css`
             right: 0;
             bottom: 0;
