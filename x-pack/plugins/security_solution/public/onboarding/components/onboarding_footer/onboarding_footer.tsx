@@ -8,10 +8,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
-import { footerItems } from './footer_items';
+import { useFooterItems } from './footer_items';
 
 export const OnboardingFooter = React.memo(() => {
   const styles = useFooterStyles();
+  const footerItems = useFooterItems();
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" className={styles}>
       {footerItems.map((item) => (
