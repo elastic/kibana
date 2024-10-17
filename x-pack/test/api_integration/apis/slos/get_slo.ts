@@ -349,38 +349,38 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // not possible for now to reliably fix this
-    it.skip('gets slos instances', async () => {
-      const createResponse = await createSLO();
-      const id = createResponse.body.id;
-
-      await retry.tryForTime(
-        400 * 1000,
-        async () => {
-          const response = await supertestAPI
-            .get(`/api/observability/slos`)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(200);
-          const res = response.body.results;
-          expect(res.length).toEqual(3);
-          const groups = res.map((r: any) => r.groupings.tags);
-
-          expect(groups.sort()).toEqual(['1', '2', '3']);
-
-          const instanceResponse = await supertestAPI
-            .get(`/internal/observability/slos/${id}/_instances`)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(200);
-
-          // expect 3 instances to be created
-          expect(instanceResponse.body.groupBy).toEqual('tags');
-          expect(instanceResponse.body.instances.sort()).toEqual(['1', '2', '3']);
-        },
-        onFailure,
-        10 * 1000
-      );
-    });
+    // it.skip('gets slos instances', async () => {
+    //   const createResponse = await createSLO();
+    //   const id = createResponse.body.id;
+    //
+    //   await retry.tryForTime(
+    //     400 * 1000,
+    //     async () => {
+    //       const response = await supertestAPI
+    //         .get(`/api/observability/slos`)
+    //         .set('kbn-xsrf', 'true')
+    //         .send()
+    //         .expect(200);
+    //       const res = response.body.results;
+    //       expect(res.length).toEqual(3);
+    //       const groups = res.map((r: any) => r.groupings.tags);
+    //
+    //       expect(groups.sort()).toEqual(['1', '2', '3']);
+    //
+    //       const instanceResponse = await supertestAPI
+    //         .get(`/internal/observability/slos/${id}/_instances`)
+    //         .set('kbn-xsrf', 'true')
+    //         .send()
+    //         .expect(200);
+    //
+    //       // expect 3 instances to be created
+    //       expect(instanceResponse.body.groupBy).toEqual('tags');
+    //       expect(instanceResponse.body.instances.sort()).toEqual(['1', '2', '3']);
+    //     },
+    //     onFailure,
+    //     10 * 1000
+    //   );
+    // });
 
     it('gets slo definitions', async () => {
       const createResponse = await createSLO();
