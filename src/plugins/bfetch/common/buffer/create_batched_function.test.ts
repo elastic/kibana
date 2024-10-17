@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createBatchedFunction } from '../create_batched_function';
+import { createBatchedFunction } from './create_batched_function';
 
 describe('createBatchedFunction', () => {
   test('calls onCall every time fn is called, calls onBatch once flushOnMaxItems reached', async () => {

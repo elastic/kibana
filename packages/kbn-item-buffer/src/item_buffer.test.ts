@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ItemBuffer } from '../item_buffer';
-import { runItemBufferTests } from './run_item_buffer_tests';
+import { ItemBuffer } from './item_buffer';
+import { runItemBufferTests } from './__test__/run_item_buffer_tests';
 
 runItemBufferTests(ItemBuffer);

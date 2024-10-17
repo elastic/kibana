@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ItemBufferParams } from './item_buffer';
-import { TimedItemBufferParams, TimedItemBuffer } from './timed_item_buffer';
+import type { ItemBufferParams, TimedItemBufferParams } from '@kbn/item-buffer';
+import { TimedItemBuffer } from '@kbn/item-buffer';
 
 type Fn = (...args: any) => any;
 

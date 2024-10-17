@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimedItemBuffer } from '../timed_item_buffer';
-import { runItemBufferTests } from './run_item_buffer_tests';
+import { TimedItemBuffer } from './timed_item_buffer';
+import { runItemBufferTests } from './__test__/run_item_buffer_tests';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
