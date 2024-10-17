@@ -196,9 +196,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
-export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
-
 /** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
@@ -518,3 +515,8 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+
+/*
+ * Whether it is a Jest environment
+ */
+export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
