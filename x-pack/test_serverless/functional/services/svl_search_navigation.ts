@@ -19,7 +19,7 @@ export function SvlSearchNavigationServiceProvider({
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
-        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
+        await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
       });
     },
     async navigateToGettingStartedPage() {
