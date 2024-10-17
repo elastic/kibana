@@ -17,6 +17,7 @@ interface UseStatefulRowRendererArgs {
 
 export function useStatefulRowRenderer(args: UseStatefulRowRendererArgs) {
   const { data, rowRenderers } = args;
+
   const rowRenderer = useMemo(() => getRowRenderer({ data, rowRenderers }), [data, rowRenderers]);
 
   const result = useMemo(

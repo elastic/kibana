@@ -51,7 +51,14 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
   return result.body;
 };
 
-export const keyToOmitList = ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type'];
+export const keyToOmitList = [
+  'created_at',
+  'updated_at',
+  'id',
+  'config_id',
+  'form_monitor_type',
+  'spaceId',
+];
 
 export const omitMonitorKeys = (monitor: any) => {
   return omit(transformPublicKeys(monitor), keyToOmitList);

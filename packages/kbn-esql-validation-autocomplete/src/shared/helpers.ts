@@ -46,7 +46,7 @@ import {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { isNumericDecimalType } from './esql_types';
+import { compareTypesWithLiterals, isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import type { EditorContext } from '../autocomplete/types';
@@ -473,7 +473,7 @@ export function checkFunctionArgMatchesDefinition(
     const lowerArgType = argType?.toLowerCase();
     const lowerArgCastType = arg.castType?.toLowerCase();
     return (
-      lowerArgType === lowerArgCastType ||
+      compareTypesWithLiterals(lowerArgCastType, lowerArgType) ||
       // for valid shorthand casts like 321.12::int or "false"::bool
       (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
     );

@@ -135,7 +135,7 @@
                   },
                   "<",
                   "RequestLog",
-                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"subscribe\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
+                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -335,7 +335,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"subscribe\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"report\" | ",
+                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | ",
                   "HTTP_METHODS",
                   " | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\") => void> | undefined; setUrl?: ",
                   {

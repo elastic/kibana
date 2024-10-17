@@ -9547,6 +9547,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | where 1::string==\"keyword\"",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval trim(\"23\"::double)",
       "error": [
         "Argument of [trim] must be [keyword], found value [\"23\"::double] type [double]"
