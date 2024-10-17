@@ -12,7 +12,7 @@ import type { Subject } from 'rxjs';
 import type { KibanaEvent } from './event_bus';
 
 export interface EventBusPluginSetup {
-  eventBus: Subject<KibanaEvent>;
+  eventBus$: Subject<KibanaEvent>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EventBusPluginStart {}

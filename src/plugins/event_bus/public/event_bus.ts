@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface KibanaEvent {
   type: string;
@@ -15,15 +15,18 @@ export interface KibanaEvent {
 }
 
 // Create a Subject to act as an event bus
-export const eventBus = new Subject<KibanaEvent>();
+export const eventBus$ = new BehaviorSubject<KibanaEvent>({
+  type: 'init',
+  payload: null,
+});
 
 // Any part of the app can publish an event
 function publishEvent(event: KibanaEvent) {
-  eventBus.next(event);
+  eventBus$.next(event);
 }
 
 // Plugins or components can subscribe to events
-eventBus.subscribe((event) => {
+eventBus$.subscribe((event) => {
   if (event.type === 'search-query-updated') {
     // eslint-disable-next-line no-console
     console.log('Received updated search query:', event.payload);
