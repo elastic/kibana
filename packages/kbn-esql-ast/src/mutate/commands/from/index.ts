@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as sources from './sources';
 import * as metadata from './metadata';
 
-export { metadata };
+export { sources, metadata };

@@ -11,6 +11,7 @@ import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndicatorPathReadOnly } from './threat_indicator_path';
 import { mockThreatMatchRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: ThreatIndicatorPathReadOnly,
@@ -24,7 +25,9 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly fieldName="threat_indicator_path" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="threat_indicator_path" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 

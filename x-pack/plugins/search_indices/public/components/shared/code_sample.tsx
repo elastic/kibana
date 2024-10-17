@@ -54,6 +54,11 @@ export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeS
               paddingSize="m"
               isCopyable
               transparentBackground
+              css={{
+                '*::selection': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                },
+              }}
             >
               {code}
             </EuiCodeBlock>

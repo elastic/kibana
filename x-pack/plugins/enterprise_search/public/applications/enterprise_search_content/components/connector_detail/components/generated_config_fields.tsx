@@ -36,7 +36,7 @@ import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
   connector: Connector;
-  generateApiKey: () => void;
+  generateApiKey?: () => void;
   isGenerateLoading: boolean;
 }
 
@@ -93,7 +93,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   };
 
   const onConfirm = () => {
-    generateApiKey();
+    if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
   };
 
@@ -222,16 +222,18 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                         <EuiFlexItem>
                           <EuiCode>{apiKey?.encoded}</EuiCode>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                            size="xs"
-                            iconType="refresh"
-                            isLoading={isGenerateLoading}
-                            onClick={refreshButtonClick}
-                            disabled={!connector.index_name}
-                          />
-                        </EuiFlexItem>
+                        {generateApiKey && (
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                              size="xs"
+                              iconType="refresh"
+                              isLoading={isGenerateLoading}
+                              onClick={refreshButtonClick}
+                              disabled={!connector.index_name}
+                            />
+                          </EuiFlexItem>
+                        )}
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             size="xs"
@@ -245,16 +247,18 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   </EuiCopy>
                 </EuiFlexItem>
               ) : (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                    size="xs"
-                    iconType="refresh"
-                    isLoading={isGenerateLoading}
-                    onClick={refreshButtonClick}
-                    disabled={!connector.index_name}
-                  />
-                </EuiFlexItem>
+                generateApiKey && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                      size="xs"
+                      iconType="refresh"
+                      isLoading={isGenerateLoading}
+                      onClick={refreshButtonClick}
+                      disabled={!connector.index_name}
+                    />
+                  </EuiFlexItem>
+                )
               )}
             </EuiFlexGroup>
           </EuiFlexItem>

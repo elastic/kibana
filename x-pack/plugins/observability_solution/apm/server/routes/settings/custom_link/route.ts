@@ -75,7 +75,7 @@ const createCustomLinkRoute = createApmServerRoute({
   params: t.type({
     body: payloadRt,
   }),
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  options: { tags: ['access:apm', 'access:apm_settings_write'] },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const licensingContext = await context.licensing;
@@ -105,7 +105,7 @@ const updateCustomLinkRoute = createApmServerRoute({
     body: payloadRt,
   }),
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   handler: async (resources): Promise<void> => {
     const { params, context } = resources;
@@ -136,7 +136,7 @@ const deleteCustomLinkRoute = createApmServerRoute({
     }),
   }),
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   handler: async (resources): Promise<{ result: string }> => {
     const { context, params } = resources;

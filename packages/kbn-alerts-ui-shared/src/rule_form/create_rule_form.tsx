@@ -12,7 +12,7 @@ import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
-import { DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
+import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
@@ -24,6 +24,7 @@ import {
 } from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
+  getAvailableRuleTypes,
   getInitialConsumer,
   getInitialMultiConsumer,
   getInitialSchedule,
@@ -42,7 +43,8 @@ export interface CreateRuleFormProps {
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
-  returnUrl: string;
+  onCancel?: () => void;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -56,7 +58,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
-    returnUrl,
+    onCancel,
+    onSubmit,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
@@ -64,8 +67,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
-    onSuccess: ({ name }) => {
+    onSuccess: ({ name, id }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
+      onSubmit?.(id);
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(
@@ -86,6 +90,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const {
     isInitialLoading,
     ruleType,
+    ruleTypes,
     ruleTypeModel,
     uiConfig,
     healthCheckError,
@@ -153,7 +158,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     <div data-test-subj="createRuleForm">
       <RuleFormStateProvider
         initialRuleFormState={{
-          formData: GET_DEFAULT_FORM_DATA({
+          formData: getDefaultFormData({
             ruleTypeId,
             name: `${ruleType.name} rule`,
             consumer: getInitialConsumer({
@@ -174,6 +179,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
+          availableRuleTypes: getAvailableRuleTypes({
+            consumer,
+            ruleTypes,
+            ruleTypeRegistry,
+          }).map(({ ruleType: rt }) => rt),
           validConsumers,
           flappingSettings,
           canShowConsumerSelection,
@@ -185,7 +195,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           }),
         }}
       >
-        <RulePage isEdit={false} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
+        <RulePage isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

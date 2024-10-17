@@ -19,6 +19,7 @@ import {
   createNewChat,
   selectConversation,
   assertMessageSent,
+  assertConversationTitle,
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
@@ -145,18 +146,16 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    // This test is flakey due to the issue linked below and will be skipped until it is fixed
-    it.skip('Only allows one conversation called "New chat" at a time', () => {
+    it('Correctly titles new conversations, and only allows one conversation called "New chat" at a time', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
       assertNewConversation(false, 'New chat');
       assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
-      // TODO fix bug with new chat and error message
-      // https://github.com/elastic/kibana/issues/191025
-      // assertMessageSent('hello');
-      assertErrorResponse();
+      assertMessageSent('hello');
+      assertConversationTitle('Unexpected API Error:  - Connection error.');
+      updateConversationTitle('New chat');
       selectConversation('Welcome');
       createNewChat();
       assertErrorToastShown('Error creating conversation with title New chat');

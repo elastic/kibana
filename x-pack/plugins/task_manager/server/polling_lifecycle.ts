@@ -14,7 +14,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, TaskManagerConfig } from './config';
 
 import {
   TaskMarkRunning,
@@ -44,6 +44,7 @@ import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
 import { TaskPartitioner } from './lib/task_partitioner';
+import { TaskPoller } from './polling/task_poller';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -86,7 +87,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
+  private poller: TaskPoller<string, TimedFillPoolResult>;
+
   public pool: TaskPool;
+
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
 
@@ -137,7 +141,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.pool = new TaskPool({
       logger,
-      strategy: config.claim_strategy,
+      strategy: config.claim_strategy!,
       capacity$: capacityConfiguration$,
       definitions: this.definitions,
     });
@@ -145,7 +149,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.taskClaiming = new TaskClaiming({
       taskStore,
-      strategy: config.claim_strategy,
+      strategy: config.claim_strategy!,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
@@ -170,7 +174,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
     }
 
-    const poller = createTaskPoller<string, TimedFillPoolResult>({
+    this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: pollIntervalConfiguration$,
@@ -192,17 +196,17 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       work: this.pollForWork,
     });
 
-    this.subscribeToPoller(poller.events$);
+    this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable) {
         // start polling for work
-        poller.start();
+        this.poller.start();
       } else if (!areESAndSOAvailable) {
         this.logger.info(
           `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
         );
-        poller.stop();
+        this.poller.stop();
         this.pool.cancelRunningTasks();
       }
     });
@@ -210,6 +214,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   public get events(): Observable<TaskLifecycleEvent> {
     return this.events$;
+  }
+
+  public stop() {
+    this.poller.stop();
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {
@@ -230,7 +238,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       usageCounter: this.usageCounter,
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
-      strategy: this.config.claim_strategy,
+      strategy: this.config.claim_strategy!,
       getPollInterval: () => this.currentPollInterval,
     });
   };

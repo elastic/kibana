@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { useMemo } from 'react';
 import { hasCapabilities } from '../../../../common/lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';

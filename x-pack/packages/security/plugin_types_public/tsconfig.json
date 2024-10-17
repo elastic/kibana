@@ -14,6 +14,5 @@
     "@kbn/core-user-profile-common",
     "@kbn/security-plugin-types-common",
     "@kbn/core-security-common",
-    "@kbn/security-authorization-core"
   ]
 }

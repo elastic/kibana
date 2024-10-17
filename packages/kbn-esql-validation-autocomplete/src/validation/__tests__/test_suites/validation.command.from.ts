@@ -18,7 +18,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors('f', [
-            "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}",
+            "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}",
           ]);
           await expectErrors('from ', [
             "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
@@ -56,12 +56,6 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('fRoM in*ex', []);
             await expectErrors('fRoM ind*ex', []);
             await expectErrors('fRoM *,-.*', []);
-            await expectErrors('fRoM remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
-            await expectErrors('fRoM remote-*:indexes', ['Unknown index [remote-*:indexes]']);
-            await expectErrors('fRoM remote-ccs:indexes', ['Unknown index [remote-ccs:indexes]']);
-            await expectErrors('fRoM a_index, remote-ccs:indexes', [
-              'Unknown index [remote-ccs:indexes]',
-            ]);
             await expectErrors('fRoM .secret_index', []);
             await expectErrors('from my-index', []);
           });
@@ -149,16 +143,6 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
                 await expectErrors(
                   `from index ${setWrapping('METADATA _id, _source')}`,
                   [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
-                  ['Unknown index [remote-ccs:indexes]'],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from *:indexes ${setWrapping('METADATA _id')}`,
-                  ['Unknown index [*:indexes]'],
                   addBracketsWarning()
                 );
               });

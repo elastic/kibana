@@ -23,6 +23,8 @@ import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
+import { useEntitySummary } from '../hooks/use_entity_summary';
+import { isMetricsSignal } from '../utils/get_data_stream_types';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -34,7 +36,10 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
-
+  const { dataStreams } = useEntitySummary({
+    entityType: asset.type,
+    entityId: asset.id,
+  });
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
@@ -79,6 +84,8 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     }
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
+  const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
+
   return (
     <InfraPageTemplate
       onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
@@ -86,7 +93,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
-        ) : asset.type === 'host' ? (
+        ) : showPageTitleWithPopover ? (
           <PageTitleWithPopover name={asset.name} />
         ) : (
           asset.name

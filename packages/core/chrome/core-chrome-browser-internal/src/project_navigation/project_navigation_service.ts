@@ -11,7 +11,6 @@ import { InternalApplicationStart } from '@kbn/core-application-browser-internal
 import type {
   ChromeNavLinks,
   SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
@@ -80,7 +79,7 @@ export class ProjectNavigationService {
   );
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
-    breadcrumbs: ChromeProjectBreadcrumb[];
+    breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
@@ -153,7 +152,7 @@ export class ProjectNavigationService {
         return this.customProjectSideNavComponent$.asObservable();
       },
       setProjectBreadcrumbs: (
-        breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
+        breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
         params?: Partial<ChromeSetProjectBreadcrumbsParams>
       ) => {
         this.projectBreadcrumbs$.next({
@@ -161,7 +160,7 @@ export class ProjectNavigationService {
           params: { absolute: false, ...params },
         });
       },
-      getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
+      getProjectBreadcrumbs$: (): Observable<ChromeBreadcrumb[]> => {
         return combineLatest([
           this.projectBreadcrumbs$,
           this.activeNodes$,

@@ -128,6 +128,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
+            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -363,6 +364,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ignoreFieldsStandard.forEach((field) => {
               ignoreFieldsObject[field] = true;
             });
+            const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
             const wrapHits = wrapHitsFactory({
               ignoreFields: ignoreFieldsObject,
               ignoreFieldsRegexes,
@@ -373,6 +375,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alertTimestampOverride,
               publicBaseUrl,
               ruleExecutionLogger,
+              intendedTimestamp,
             });
 
             const wrapSequences = wrapSequencesFactory({
@@ -384,6 +387,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               publicBaseUrl,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              intendedTimestamp,
             });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
@@ -427,6 +431,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
                     experimentalFeatures,
+                    intendedTimestamp,
                   },
                 });
 

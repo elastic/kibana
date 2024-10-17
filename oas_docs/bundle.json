@@ -5077,6 +5077,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Mute all alerts",
@@ -5124,6 +5133,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Unmute all alerts",
@@ -40978,7 +40996,28 @@
     "/api/security/role": {
       "get": {
         "operationId": "%2Fapi%2Fsecurity%2Frole#0",
-        "parameters": [],
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {},
         "summary": "Get all roles",
         "tags": [
@@ -41050,6 +41089,14 @@
             "schema": {
               "minLength": 1,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ],

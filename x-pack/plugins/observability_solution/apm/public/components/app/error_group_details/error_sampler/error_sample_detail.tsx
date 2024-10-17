@@ -29,14 +29,14 @@ import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
+import { AT_TIMESTAMP, ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
@@ -111,8 +111,7 @@ export function ErrorSampleDetails({
   const loadingErrorData = isPending(errorFetchStatus);
   const isLoading = loadingErrorSamplesData || loadingErrorData;
 
-  const isSucceded =
-    errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && errorFetchStatus === FETCH_STATUS.SUCCESS;
+  const isSucceeded = isSuccess(errorSamplesFetchStatus) && isSuccess(errorFetchStatus);
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -137,7 +136,7 @@ export function ErrorSampleDetails({
     });
   }, [error, transaction, uiActions]);
 
-  if (!error && errorSampleIds?.length === 0 && isSucceded) {
+  if (!error && errorSampleIds?.length === 0 && isSucceeded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -160,7 +159,7 @@ export function ErrorSampleDetails({
   const status = error.http?.response?.status_code;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
-  const isUnhandled = error.error.exception?.[0].handled === false;
+  const isUnhandled = error.error.exception?.[0]?.handled === false;
 
   const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
@@ -348,14 +347,22 @@ export function ErrorSampleDetailTabContent({
   error,
   currentTab,
 }: {
-  error: APMError;
+  error: {
+    service: {
+      language?: {
+        name?: string;
+      };
+    };
+    [AT_TIMESTAMP]: string;
+    error: Pick<APMError['error'], 'id' | 'log' | 'stack_trace' | 'exception'>;
+  };
   currentTab: ErrorTab;
 }) {
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
   const logStackframes = error?.error.log?.stacktrace;
   const isPlaintextException =
-    !!error?.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+    !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
       return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
@@ -363,7 +370,7 @@ export function ErrorSampleDetailTabContent({
       return isPlaintextException ? (
         <PlaintextStacktrace
           message={exceptions[0].message}
-          type={exceptions[0].type}
+          type={exceptions[0]?.type}
           stacktrace={error?.error.stack_trace}
           codeLanguage={codeLanguage}
         />

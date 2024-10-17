@@ -24,7 +24,7 @@ describe('registerTranslationsRoute', () => {
       1,
       expect.objectContaining({
         path: '/translations/{locale}.json',
-        options: { access: 'public', authRequired: false },
+        options: { access: 'public', authRequired: false, httpResource: true },
       }),
       expect.any(Function)
     );
@@ -32,7 +32,7 @@ describe('registerTranslationsRoute', () => {
       2,
       expect.objectContaining({
         path: '/translations/XXXX/{locale}.json',
-        options: { access: 'public', authRequired: false },
+        options: { access: 'public', authRequired: false, httpResource: true },
       }),
       expect.any(Function)
     );

@@ -321,13 +321,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize(
-      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
-        timestamp: Date.now(),
-        result: getESQLSources(...args),
-      }),
-      ({ esql }) => esql
-    );
+    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
+      timestamp: Date.now(),
+      result: getESQLSources(...args),
+    }));
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);

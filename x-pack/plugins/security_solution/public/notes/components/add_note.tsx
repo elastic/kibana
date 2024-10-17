@@ -25,6 +25,7 @@ import {
   ReqStatus,
   selectCreateNoteError,
   selectCreateNoteStatus,
+  userClosedCreateErrorToast,
 } from '../store/notes.slice';
 import { MarkdownEditor } from '../../common/components/markdown_editor';
 
@@ -87,7 +88,7 @@ export const AddNote = memo(
         createNote({
           note: {
             timelineId: timelineId || '',
-            eventId,
+            eventId: eventId || '',
             note: editorValue,
           },
         })
@@ -101,14 +102,19 @@ export const AddNote = memo(
       setEditorValue('');
     }, [dispatch, editorValue, eventId, telemetry, timelineId, onNoteAdd]);
 
+    const resetError = useCallback(() => {
+      dispatch(userClosedCreateErrorToast());
+    }, [dispatch]);
+
     // show a toast if the create note call fails
     useEffect(() => {
       if (createStatus === ReqStatus.Failed && createError) {
-        addErrorToast(null, {
+        addErrorToast(createError, {
           title: CREATE_NOTE_ERROR,
         });
+        resetError();
       }
-    }, [addErrorToast, createError, createStatus]);
+    }, [addErrorToast, createError, createStatus, resetError]);
 
     const buttonDisabled = useMemo(
       () => disableButton || editorValue.trim().length === 0 || isMarkdownInvalid,

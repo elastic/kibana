@@ -23,15 +23,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectUseInPlaygroundLinkExists() {
       await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
     },
-    async expectBackToIndicesButtonExists() {
-      await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
-    },
-    async clickBackToIndicesButton() {
-      await testSubjects.click('backToIndicesButton');
-    },
-    async expectBackToIndicesButtonRedirectsToListPage() {
-      await testSubjects.existOrFail('indicesList');
-    },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
       expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).to.be(

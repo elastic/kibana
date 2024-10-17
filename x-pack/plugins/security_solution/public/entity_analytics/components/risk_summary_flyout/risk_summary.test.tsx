@@ -27,53 +27,12 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
-
 describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table with alerts only', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <FlyoutRiskSummary
-          riskScoreData={mockHostRiskScoreState}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-
-    // Alerts
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
-    );
-
-    // Context
-    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_2_count}`
-    );
-
-    // Result row doesn't exist if alerts are the only category
-    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
-    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
-  });
-
   it('renders risk summary table with context and totals', () => {
-    mockUseUiSetting.mockReturnValue([true]);
-
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary

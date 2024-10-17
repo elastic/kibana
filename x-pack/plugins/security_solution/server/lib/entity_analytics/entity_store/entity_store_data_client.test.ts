@@ -13,17 +13,22 @@ import {
 import { EntityStoreDataClient } from './entity_store_data_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { AppClient } from '../../..';
 
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
-  const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
   const dataClient = new EntityStoreDataClient({
-    esClient: esClientMock,
+    clusterClient: clusterClientMock,
     logger: loggerMock,
     namespace: 'default',
     soClient: mockSavedObjectClient,
     kibanaVersion: '9.0.0',
+    dataViewsService: {} as DataViewsService,
+    appClient: {} as AppClient,
   });
 
   const defaultSearchParams = {

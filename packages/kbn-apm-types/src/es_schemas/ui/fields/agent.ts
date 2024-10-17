@@ -14,5 +14,5 @@ export type { ElasticAgentName, OpenTelemetryAgentName, AgentName } from '@kbn/e
 export interface Agent {
   ephemeral_id?: string;
   name: AgentName;
-  version: string;
+  version?: string;
 }

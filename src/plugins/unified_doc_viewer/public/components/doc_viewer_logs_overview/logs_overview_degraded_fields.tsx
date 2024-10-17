@@ -270,12 +270,11 @@ const DatasetQualityLink = React.memo(
     urlService: BrowserUrlService;
     dataStream: string | undefined;
   }) => {
-    if (!dataStream) {
-      return null;
-    }
     const locator = urlService.locators.get<DataQualityDetailsLocatorParams>(
       DATA_QUALITY_DETAILS_LOCATOR_ID
     );
+
+    if (!locator || !dataStream) return null;
 
     const datasetQualityUrl = locator?.getRedirectUrl({ dataStream });
 

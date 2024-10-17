@@ -6210,7 +6210,7 @@
             "label": "longMessage",
             "description": [],
             "signature": [
-              "React.ReactNode | ((closePopover: () => void) => React.ReactNode)"
+              "React.ReactNode | ((closePopover?: (() => void) | undefined) => React.ReactNode)"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,

@@ -127,7 +127,10 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async selectAggAndField(identifier: string, isIdentifierKeptInField: boolean) {
-      await comboBox.set('mlJobWizardAggSelection > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlJobWizardAggSelection > comboBoxInput',
+        identifier
+      );
       await this.assertAggAndFieldSelection(isIdentifierKeptInField ? [identifier] : []);
     },
 

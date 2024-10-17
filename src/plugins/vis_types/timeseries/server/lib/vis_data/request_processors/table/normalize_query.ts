@@ -26,9 +26,7 @@ const hasSiblingPipelineAggregation = (aggs: Record<string, unknown> = {}) =>
  */
 export const normalizeQuery: TableRequestProcessorsFunction = () => {
   return () => (doc) => {
-    const series = get(doc, 'aggs.pivot.aggs') as Array<{
-      aggs: Record<string, unknown>;
-    }>;
+    const series = get(doc, 'aggs.pivot.aggs');
     const normalizedSeries = {};
 
     forEach(series, (value, seriesId) => {

@@ -53,6 +53,7 @@ You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - You can add as many processor objects as you need to cover all the unique combinations that was detected.
 - If conditions should always use a ? character when accessing nested fields, in case the field might not always be available, see example processors above.
+- You can access nested dictionaries with the ctx.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
 - When an if condition is not needed the argument it should not be included in that specific object of your response.
 - When using a range based if condition like > 0, you first need to check that the field is not null, for example: ctx.somefield?.production != null && ctx.somefield?.production > 0
 - If no good match is found for any of the pipeline results, then respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
@@ -110,6 +111,7 @@ You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - You can use as many processor objects as you need to add all relevant ECS categories and types combinations.
 - If conditions should always use a ? character when accessing nested fields, in case the field might not always be available, see example processors above.
+- You can access nested dictionaries with the ctx.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
 - When an if condition is not needed the argument should not be used for the processor object.
 - If updates are needed you respond with the initially provided array of processors.
 - If an update removes the last remaining processor object you respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
@@ -159,6 +161,7 @@ You ALWAYS follow these guidelines when writing your response:
 - If the error complains about having event.type or event.category not in the allowed values , fix the corresponding append processors to use the allowed values mentioned in the error.
 - If the error is about event.type not compatible with any event.category, please refer to the 'compatible_types' in the context to fix the corresponding append processors to use valid combination of event.type and event.category
 - If resolving the validation removes the last remaining processor object, respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
+- Reminder: you can access nested dictionaries with the ctx.field?.another_field syntax, but it's not possible to access elements of an array. Never use brackets in an if statement.
 - Do not respond with anything except the complete updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.
 </guidelines>
 

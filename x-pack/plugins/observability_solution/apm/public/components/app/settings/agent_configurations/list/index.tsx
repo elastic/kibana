@@ -39,7 +39,7 @@ interface Props {
 
 export function AgentConfigurationList({ status, configurations, refetch }: Props) {
   const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const canSave = core.application.capabilities.apm['settings:save'];
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(null);
 

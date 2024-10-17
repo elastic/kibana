@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -52,15 +53,17 @@ import {
   isSystemEntry,
   isKnowledgeBaseEntryCreateProps,
   isKnowledgeBaseEntryResponse,
+  isGlobalEntry,
 } from './helpers';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
-import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
+import { DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
 import { KnowledgeBaseConfig } from '../../assistant/types';
 import {
   isKnowledgeBaseSetup,
   useKnowledgeBaseStatus,
 } from '../../assistant/api/knowledge_base/use_knowledge_base_status';
+import { CANCEL_BUTTON_TEXT } from '../../assistant/assistant_header/translations';
 
 interface Params {
   dataViews: DataViewsContract;
@@ -69,12 +72,15 @@ interface Params {
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
+    assistantAvailability: { hasManageGlobalKnowledgeBase },
     http,
     toasts,
   } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({ http });
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
+
+  const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
 
   // Only needed for legacy settings management
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
@@ -123,24 +129,28 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     useState<Partial<DocumentEntry | IndexEntry | KnowledgeBaseEntryCreateProps>>();
 
   // CRUD API accessors
-  const { mutate: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
+  const { mutateAsync: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
     http,
     toasts,
   });
-  const { mutate: updateEntries, isLoading: isUpdatingEntries } = useUpdateKnowledgeBaseEntries({
-    http,
-    toasts,
-  });
-  const { mutate: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
+  const { mutateAsync: updateEntries, isLoading: isUpdatingEntries } =
+    useUpdateKnowledgeBaseEntries({
+      http,
+      toasts,
+    });
+  const { mutateAsync: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
     http,
     toasts,
   });
   const isModifyingEntry = isCreatingEntry || isUpdatingEntries || isDeletingEntries;
 
   // Flyout Save/Cancel Actions
-  const onSaveConfirmed = useCallback(() => {
+  const onSaveConfirmed = useCallback(async () => {
     if (isKnowledgeBaseEntryResponse(selectedEntry)) {
-      updateEntries([selectedEntry]);
+      await updateEntries([selectedEntry]);
+      closeFlyout();
+    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
+      await createEntry(selectedEntry);
       closeFlyout();
     } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
       createEntry(selectedEntry);
@@ -166,19 +176,19 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const columns = useMemo(
     () =>
       getColumns({
-        onEntryNameClicked: ({ id }: KnowledgeBaseEntryResponse) => {
-          const entry = entries.data.find((e) => e.id === id);
-          setSelectedEntry(entry);
-          openFlyout();
-        },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isSystemEntry(entry);
+          return (
+            !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
+          );
         },
-        onDeleteActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
-          deleteEntry({ ids: [id] });
+        // Add delete popover
+        onDeleteActionClicked: (item: KnowledgeBaseEntryResponse) => {
+          setDeleteKBItem(item);
         },
         isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isSystemEntry(entry);
+          return (
+            !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
+          );
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);
@@ -186,7 +196,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
       }),
-    [deleteEntry, entries.data, getColumns, openFlyout]
+    [entries.data, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
   );
 
   // Refresh button
@@ -214,6 +224,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           <EuiFlexItem>
             <EuiButton
               color={'text'}
+              data-test-subj={'refresh-entries'}
               isDisabled={isFetchingEntries}
               onClick={handleRefreshTable}
               iconType={'refresh'}
@@ -251,6 +262,24 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       : i18n.NEW_INDEX_FLYOUT_TITLE;
   }, [selectedEntry]);
 
+  const sorting = {
+    sort: {
+      field: 'name',
+      direction: 'desc' as const,
+    },
+  };
+
+  const handleCancelDeleteEntry = useCallback(() => {
+    setDeleteKBItem(null);
+  }, [setDeleteKBItem]);
+
+  const handleDeleteEntry = useCallback(async () => {
+    if (deleteKBItem?.id) {
+      await deleteEntry({ ids: [deleteKBItem?.id] });
+      setDeleteKBItem(null);
+    }
+  }, [deleteEntry, deleteKBItem, setDeleteKBItem]);
+
   if (!enableKnowledgeBaseByDefault) {
     return (
       <>
@@ -266,13 +295,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </>
     );
   }
-
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'desc' as const,
-    },
-  };
 
   return (
     <>
@@ -298,9 +320,10 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
             {!isFetched ? (
-              <EuiLoadingSpinner size="l" />
+              <EuiLoadingSpinner data-test-subj="spinning" size="l" />
             ) : isKbSetup ? (
               <EuiInMemoryTable
+                data-test-subj="knowledge-base-entries-table"
                 columns={columns}
                 items={entries.data ?? []}
                 search={search}
@@ -344,7 +367,13 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry) || isModifyingEntry} // TODO: KB-RBAC disable for global entries if user doesn't have global RBAC
+        saveButtonDisabled={
+          !isKnowledgeBaseEntryCreateProps(selectedEntry) ||
+          (selectedEntry.users != null &&
+            !selectedEntry.users.length &&
+            !hasManageGlobalKnowledgeBase)
+        }
+        saveButtonLoading={isModifyingEntry}
       >
         <>
           {selectedEntry?.type === DocumentEntryType.value ? (
@@ -353,6 +382,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>
               }
+              hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
             />
           ) : (
             <IndexEntryEditor
@@ -361,10 +391,27 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
+              hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
             />
           )}
         </>
       </Flyout>
+      {deleteKBItem && (
+        <EuiConfirmModal
+          data-test-subj="delete-entry-confirmation"
+          title={i18n.DELETE_ENTRY_CONFIRMATION_TITLE(deleteKBItem.name)}
+          onCancel={handleCancelDeleteEntry}
+          onConfirm={handleDeleteEntry}
+          cancelButtonText={CANCEL_BUTTON_TEXT}
+          confirmButtonText={DELETE}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          confirmButtonDisabled={isModifyingEntry}
+          isLoading={isModifyingEntry}
+        >
+          <p>{i18n.DELETE_ENTRY_CONFIRMATION_CONTENT}</p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 });

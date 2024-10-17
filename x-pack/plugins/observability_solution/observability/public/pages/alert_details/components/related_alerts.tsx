@@ -6,13 +6,34 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { ALERT_END, ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_END,
+  ALERT_GROUP,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_UUID,
+  TAGS,
+} from '@kbn/rule-data-utils';
 import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
+import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
+import {
+  getRelatedAlertKuery,
+  getSharedFields,
+} from '../../../../common/utils/alerting/get_related_alerts_query';
 import { TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
@@ -30,25 +51,25 @@ import {
   Provider,
   useAlertSearchBarStateContainer,
 } from '../../../components/alert_search_bar/containers';
-import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
+import { RELATED_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
+import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 
 const ALERTS_PER_PAGE = 50;
 const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
 const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
 
 interface Props {
-  alert: TopAlert;
-  kuery: string;
+  alert?: TopAlert<ObservabilityFields>;
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
 const DEFAULT_FILTERS: Filter[] = [];
 
-export function InternalRelatedAlerts({ alert, kuery }: Props) {
+export function InternalRelatedAlerts({ alert }: Props) {
   const kibanaServices = useKibana().services;
   const {
     http,
@@ -62,9 +83,14 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const alertStart = alert.fields[ALERT_START];
-  const alertEnd = alert.fields[ALERT_END];
-  const alertId = alert.fields[ALERT_UUID];
+  const alertStart = alert?.fields[ALERT_START];
+  const alertEnd = alert?.fields[ALERT_END];
+  const alertId = alert?.fields[ALERT_UUID];
+  const tags = alert?.fields[TAGS];
+  const groups = alert?.fields[ALERT_GROUP];
+  const ruleId = alert?.fields[ALERT_RULE_UUID];
+  const sharedFields = getSharedFields(alert?.fields);
+  const kuery = getRelatedAlertKuery({ tags, groups, ruleId, sharedFields });
 
   const defaultQuery = useRef<Query[]>([
     { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
@@ -78,6 +104,8 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertStart, alertEnd]);
+
+  if (!kuery || !alert) return <EmptyState />;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -103,7 +131,7 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
             to={alertSearchBarStateProps.rangeTo}
             globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
             globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
-            groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+            groupingId={RELATED_ALERTS_TABLE_CONFIG_ID}
             defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
             getAggregationsByGroupingField={getAggregationsByGroupingField}
             renderGroupPanel={renderGroupPanel}
@@ -122,7 +150,7 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
                 <AlertsStateTable
                   id={ALERTS_TABLE_ID}
                   featureIds={observabilityAlertFeatureIds}
-                  configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                  configurationId={RELATED_ALERTS_TABLE_CONFIG_ID}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   showAlertStatusWithFlapping
                   initialPageSize={ALERTS_PER_PAGE}
@@ -135,6 +163,50 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+const heights = {
+  tall: 490,
+  short: 250,
+};
+const panelStyle = {
+  maxWidth: 500,
+};
+
+function EmptyState() {
+  return (
+    <EuiPanel color="subdued" data-test-subj="relatedAlertsTabEmptyState">
+      <EuiFlexGroup style={{ height: heights.tall }} alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={true} style={panelStyle}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <EuiTitle>
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.observability.pages.alertDetails.relatedAlerts.empty.title"
+                        defaultMessage="Problem loading related alerts"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.observability.pages.alertDetails.relatedAlerts.empty.description"
+                      defaultMessage="Due to an unexpected error, no related alerts can be found."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }
 

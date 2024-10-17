@@ -71,6 +71,7 @@ export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
+export const DEFAULT_MAX_UNASSOCIATED_NOTES = 1000 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -123,6 +124,8 @@ export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
+export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
+  `/entity_analytics_entity_store` as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -193,12 +196,12 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
-export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
-
 /** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
+
+/** This Kibana Advances setting allows users to define the maximum amount of unassociated notes (notes without a `timelineId`) */
+export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
@@ -510,3 +513,8 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+
+/*
+ * Whether it is a Jest environment
+ */
+export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
