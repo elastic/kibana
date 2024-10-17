@@ -9,16 +9,19 @@ import React from 'react';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { Field, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { RuleName } from '../../../../../../../../common/api/detection_engine';
+import type { RuleDescription } from '../../../../../../../../common/api/detection_engine';
 
-export const nameSchema = { name: schema.name } as FormSchema<{ name: RuleName }>;
+export const descriptionSchema = { description: schema.description } as FormSchema<{
+  description: RuleDescription;
+}>;
 
 const componentProps = {
   euiFieldProps: {
     fullWidth: true,
+    compressed: true,
   },
 };
 
-export function NameEdit(): JSX.Element {
-  return <UseField path="name" component={Field} componentProps={componentProps} />;
+export function DescriptionEdit(): JSX.Element {
+  return <UseField path="description" component={Field} componentProps={componentProps} />;
 }

@@ -16,6 +16,10 @@ interface SetupReadOnlyProps {
 }
 
 export function SetupReadOnly({ setup }: SetupReadOnlyProps) {
+  if (!setup) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

@@ -9,16 +9,17 @@ import React from 'react';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { Field, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { RuleName } from '../../../../../../../../common/api/detection_engine';
+import type { RuleTagArray } from '../../../../../../../../common/api/detection_engine';
 
-export const nameSchema = { name: schema.name } as FormSchema<{ name: RuleName }>;
+export const tagsSchema = { tags: schema.tags } as FormSchema<{ name: RuleTagArray }>;
 
 const componentProps = {
   euiFieldProps: {
     fullWidth: true,
+    placeholder: '',
   },
 };
 
-export function NameEdit(): JSX.Element {
-  return <UseField path="name" component={Field} componentProps={componentProps} />;
+export function TagsEdit(): JSX.Element {
+  return <UseField path="tags" component={Field} componentProps={componentProps} />;
 }
