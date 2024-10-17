@@ -41,6 +41,7 @@ export const QuerySchema = schema.object({
       defaultValue: false,
     })
   ),
+  showFromAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
@@ -56,6 +57,7 @@ export const OverviewStatusSchema = schema.object({
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
+  showFromAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
@@ -88,6 +90,7 @@ export const getMonitors = async (
     projects,
     schedules,
     monitorQueryIds,
+    showFromAllSpaces,
   } = context.request.query;
 
   const { filtersStr } = await getMonitorFilters({
@@ -101,7 +104,7 @@ export const getMonitors = async (
     context,
   });
 
-  const findParams = {
+  return context.savedObjectsClient.find({
     type: syntheticsMonitorType,
     perPage,
     page,
@@ -112,9 +115,8 @@ export const getMonitors = async (
     filter: filtersStr,
     searchAfter,
     fields,
-  };
-
-  return context.savedObjectsClient.find(findParams);
+    ...(showFromAllSpaces && { namespaces: ['*'] }),
+  });
 };
 
 interface Filters {
