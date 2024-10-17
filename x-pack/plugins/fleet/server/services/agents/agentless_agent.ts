@@ -332,7 +332,7 @@ class AgentlessAgentService {
       }
     } else if (error.request) {
       // The request was made but no response was received
-      const requestErrorMessage = ERROR_HANDLING_MESSAGES.unhandled_response[action];
+      const requestErrorMessage = ERROR_HANDLING_MESSAGES.request_error[action];
       logger.error(
         `${requestErrorMessage.log} ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
