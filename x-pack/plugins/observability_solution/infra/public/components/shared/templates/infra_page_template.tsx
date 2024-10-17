@@ -42,6 +42,7 @@ export const InfraPageTemplate = ({
   const { remoteClustersExist } = source?.status ?? {};
 
   const { data, status } = useFetcher(async (callApi) => {
+    if (!onboardingFlow) return;
     return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
       method: 'GET',
       query: {
