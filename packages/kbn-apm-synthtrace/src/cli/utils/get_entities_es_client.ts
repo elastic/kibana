@@ -8,12 +8,12 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { AssetsSynthtraceEsClient } from '../../lib/assets/assets_synthtrace_es_client';
+import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 import { getEsClientTlsSettings } from './ssl';
 
-export function getAssetsEsClient({
+export function getEntitiesEsClient({
   target,
   logger,
   concurrency,
@@ -26,7 +26,7 @@ export function getAssetsEsClient({
     tls: getEsClientTlsSettings(target),
   });
 
-  return new AssetsSynthtraceEsClient({
+  return new EntitiesSynthtraceEsClient({
     client,
     logger,
     concurrency,
