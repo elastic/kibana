@@ -11,15 +11,19 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import {
+  DataViewLazy,
+  DataViewsPublicPluginStart,
+  DataViewField,
+} from '@kbn/data-views-plugin/public';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
 import { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
+  fields: DataViewField[];
   filterFilter: string;
   fieldWildcardMatcher: Function;
-  onAddOrRemoveFilter?: Function;
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
 }
 
@@ -95,7 +99,7 @@ export class SourceFiltersTable extends Component<
   };
 
   deleteFilter = async () => {
-    const { indexPattern, onAddOrRemoveFilter, saveIndexPattern } = this.props;
+    const { indexPattern, saveIndexPattern } = this.props;
     const { filterToDelete, filters } = this.state;
 
     indexPattern.sourceFilters = filters.filter((filter) => {
@@ -105,26 +109,18 @@ export class SourceFiltersTable extends Component<
     this.setState({ isSaving: true });
     await saveIndexPattern(indexPattern);
 
-    if (onAddOrRemoveFilter) {
-      onAddOrRemoveFilter();
-    }
-
     this.updateFilters();
     this.setState({ isSaving: false });
     this.hideDeleteConfirmationModal();
   };
 
   onAddFilter = async (value: string) => {
-    const { indexPattern, onAddOrRemoveFilter, saveIndexPattern } = this.props;
+    const { indexPattern, saveIndexPattern } = this.props;
 
     indexPattern.sourceFilters = [...(indexPattern.sourceFilters || []), { value }];
 
     this.setState({ isSaving: true });
     await saveIndexPattern(indexPattern);
-
-    if (onAddOrRemoveFilter) {
-      onAddOrRemoveFilter();
-    }
 
     this.updateFilters();
     this.setState({ isSaving: false });
@@ -152,7 +148,7 @@ export class SourceFiltersTable extends Component<
   };
 
   render() {
-    const { indexPattern, fieldWildcardMatcher } = this.props;
+    const { fieldWildcardMatcher, fields } = this.props;
     const { isSaving, filterToDelete } = this.state;
     const filteredFilters = this.getFilteredFilters(this.state, this.props);
 
@@ -162,8 +158,8 @@ export class SourceFiltersTable extends Component<
         <AddFilter onAddFilter={this.onAddFilter} />
         <EuiSpacer size="l" />
         <Table
+          fields={fields}
           isSaving={isSaving}
-          indexPattern={indexPattern}
           items={filteredFilters}
           fieldWildcardMatcher={fieldWildcardMatcher}
           deleteFilter={this.startDeleteFilter}
