@@ -121,6 +121,7 @@ export async function mountApp({
     const formatUnsavedFilters = routeProps.match.params.unsavedFilters
       ? (getDashboardUnsavedFilters(routeProps.match.params.unsavedFilters) as Filter[])
       : undefined;
+    console.log(formatUnsavedFilters);
     return (
       <DashboardApp
         history={routeProps.history}

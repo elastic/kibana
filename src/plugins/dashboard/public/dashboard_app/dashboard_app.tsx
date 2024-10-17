@@ -52,7 +52,11 @@ import {
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
+import {
+  loadAndRemoveDashboardState,
+  startSyncingExpandedPanelState,
+  startSyncingUnsavedFiltersState,
+} from './url/url_utils';
 
 export interface DashboardAppProps {
   history: History;
@@ -172,6 +176,15 @@ export function DashboardApp({
     if (!dashboardApi) return;
     const { stopWatchingExpandedPanel } = startSyncingExpandedPanelState({ dashboardApi, history });
     return () => stopWatchingExpandedPanel();
+  }, [dashboardApi, history]);
+
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const { stopWatchingUnsavedFilters } = startSyncingUnsavedFiltersState({
+      dashboardApi,
+      history,
+    });
+    return () => stopWatchingUnsavedFilters();
   }, [dashboardApi, history]);
 
   /**

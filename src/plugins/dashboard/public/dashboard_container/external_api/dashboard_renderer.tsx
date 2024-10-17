@@ -63,7 +63,7 @@ export function DashboardRenderer({
     if (dashboardContainer) {
       dashboardContainer.locator = locator;
     }
-  }, [dashboardContainer, locator, unsavedFilters]);
+  }, [dashboardContainer, locator]);
 
   useEffect(() => {
     /**
