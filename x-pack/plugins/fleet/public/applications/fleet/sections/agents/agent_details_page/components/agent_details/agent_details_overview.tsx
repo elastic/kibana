@@ -218,13 +218,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
                 defaultMessage: 'Output for integrations',
               }),
-              description: agentPolicy ? <AgentPolicyOutputsSummary outputs={outputs} /> : '-',
+              description: outputs ? <AgentPolicyOutputsSummary outputs={outputs} /> : '-',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
                 defaultMessage: 'Output for monitoring',
               }),
-              description: agentPolicy ? (
+              description: outputs ? (
                 <AgentPolicyOutputsSummary outputs={outputs} isMonitoring={true} />
               ) : (
                 '-'

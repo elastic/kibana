@@ -130,10 +130,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   // get the policyIds of the agents shown on the page
   const policyIds = useMemo(() => {
-    return agentsShown.map((agent) => agent.policy_id);
+    return agentsShown.map((agent) => agent?.policy_id ?? '');
   }, [agentsShown]);
   const allOutputs = useGetListOutputsForPolicies({
-    ids: !!policyIds ? policyIds : [],
+    ids: policyIds,
   });
 
   const noItemsMessage =

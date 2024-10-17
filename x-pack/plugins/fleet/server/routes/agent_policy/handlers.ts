@@ -712,12 +712,13 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
 
 export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof GetListAgentPolicyOutputsRequestSchema.query>
+  undefined,
+  TypeOf<typeof GetListAgentPolicyOutputsRequestSchema.body>
 > = async (context, request, response) => {
   try {
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
-    const { ids } = request.query;
+    const { ids } = request.body;
 
     if (!ids) {
       return response.ok({

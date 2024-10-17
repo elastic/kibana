@@ -11,88 +11,89 @@ import React from 'react';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { TestRenderer } from '../../../../../../mock';
 
-import type { AgentPolicy, Output } from '../../../../types';
-import { createAgentPolicyMock } from '../../../../../../../common/mocks';
+import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
 
 import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
 
 describe('MultipleAgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;
-  const outputs: Output[] = [
-    {
-      id: 'elasticsearch1',
-      name: 'Elasticsearch1',
-      type: 'elasticsearch',
-      is_default: false,
-      is_default_monitoring: false,
-      hosts: ['http://test.io:449'],
+  const outputsForPolicy: OutputsForAgentPolicy = {
+    agentPolicyId: 'policy-1',
+    monitoring: {
+      output: {
+        id: 'elasticsearch1',
+        name: 'Elasticsearch1',
+      },
     },
-    {
-      id: 'logstash1',
-      name: 'Logstash 1',
-      type: 'logstash',
-      is_default: true,
-      is_default_monitoring: true,
-      hosts: ['http://test.io:449'],
+    data: {
+      output: {
+        id: 'elasticsearch1',
+        name: 'Elasticsearch1',
+      },
     },
-    {
-      id: 'remote_es1',
-      name: 'Remote ES',
-      type: 'remote_elasticsearch',
-      is_default: false,
-      is_default_monitoring: false,
-      hosts: ['http://test.io:449', 'http://test.io:448', 'http://test.io:447'],
-    },
-  ];
+  };
+  const data = {
+    data: {
+      output: {
+        id: 'elasticsearch1',
+        name: 'Elasticsearch1',
+      },
+      integrations: [
+        {
+          id: 'remote_es1',
+          name: 'Remote ES',
+          pkgName: 'ngnix',
+          integrationPolicyName: 'Nginx-1',
+        },
 
-  const render = (agentPolicy: AgentPolicy, monitoring?: boolean) =>
+        {
+          id: 'logstash',
+          name: 'Logstash-1',
+          pkgName: 'apache',
+          integrationPolicyName: 'Apache-1',
+        },
+      ],
+    },
+  };
+
+  const render = (outputs?: OutputsForAgentPolicy, isMonitoring?: boolean) =>
     testRenderer.render(
-      <AgentPolicyOutputsSummary
-        agentPolicy={agentPolicy}
-        outputs={outputs}
-        monitoring={monitoring}
-      />
+      <AgentPolicyOutputsSummary outputs={outputs} isMonitoring={isMonitoring} />
     );
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  test('it should render the host associated with the default output when the agent policy does not have custom outputs', async () => {
-    const mockAgentPolicy = createAgentPolicyMock();
-    const results = render(mockAgentPolicy);
-    expect(results.container.textContent).toBe('http://test.io:449');
+  test('it should render the name associated with the default output when the agent policy does not have custom outputs', async () => {
+    const results = render(outputsForPolicy);
+    expect(results.container.textContent).toBe('Elasticsearch1');
     expect(results.queryByTestId('outputNameLink')).toBeInTheDocument();
-    expect(results.queryByTestId('outputHostsNumberBadge')).not.toBeInTheDocument();
+    expect(results.queryByTestId('outputsIntegrationsNumberBadge')).not.toBeInTheDocument();
   });
 
-  test('it should render the first host name and the badge when there are multiple hosts', async () => {
-    const agentPolicy = createAgentPolicyMock({
-      data_output_id: 'remote_es1',
-      monitoring_output_id: 'remote_es1',
-    });
-    const results = render(agentPolicy);
+  test('it should render the first output name and the badge when there are multiple outputs associated with integrations', async () => {
+    const results = render({ ...outputsForPolicy, ...data });
 
     expect(results.queryByTestId('outputNameLink')).toBeInTheDocument();
-    expect(results.queryByTestId('outputHostsNumberBadge')).toBeInTheDocument();
+    expect(results.queryByTestId('outputsIntegrationsNumberBadge')).toBeInTheDocument();
 
     await act(async () => {
-      fireEvent.click(results.getByTestId('outputHostsNumberBadge'));
+      fireEvent.click(results.getByTestId('outputsIntegrationsNumberBadge'));
     });
-    expect(results.queryByTestId('outputHostsPopover')).toBeInTheDocument();
-    expect(results.queryByTestId('output-host-0')?.textContent).toContain('http://test.io:449');
-    expect(results.queryByTestId('output-host-1')?.textContent).toContain('http://test.io:448');
-    expect(results.queryByTestId('output-host-2')?.textContent).toContain('http://test.io:447');
+    expect(results.queryByTestId('outputPopover')).toBeInTheDocument();
+    expect(results.queryByTestId('output-integration-0')?.textContent).toContain(
+      'Nginx-1: Remote ES'
+    );
+    expect(results.queryByTestId('output-integration-1')?.textContent).toContain(
+      'Apache-1: Logstash-1'
+    );
   });
 
   test('it should not render the badge when monitoring is true', async () => {
-    const agentPolicy = createAgentPolicyMock({
-      data_output_id: 'remote_es1',
-      monitoring_output_id: 'remote_es1',
-    });
-    const results = render(agentPolicy, true);
+    const results = render({ ...outputsForPolicy, ...data }, true);
 
     expect(results.queryByTestId('outputNameLink')).toBeInTheDocument();
-    expect(results.queryByTestId('outputHostsNumberBadge')).not.toBeInTheDocument();
+    expect(results.queryByTestId('outputsIntegrationsNumberBadge')).not.toBeInTheDocument();
   });
 });

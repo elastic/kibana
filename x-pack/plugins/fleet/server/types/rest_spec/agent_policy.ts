@@ -153,7 +153,9 @@ export const GetAgentPolicyOutputsRequestSchema = {
 };
 
 export const GetListAgentPolicyOutputsRequestSchema = {
-  query: schema.object({
-    ids: schema.maybe(schema.arrayOf(schema.string())),
+  body: schema.object({
+    ids: schema.arrayOf(schema.string(), {
+      meta: { description: 'list of package policy ids' },
+    }),
   }),
 };

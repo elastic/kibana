@@ -268,9 +268,7 @@ export interface MinimalOutput {
   name?: string;
   id?: string;
 }
-export interface IntegrationsOutput {
-  name?: string;
-  id?: string | null;
+export interface IntegrationsOutput extends MinimalOutput {
   pkgName?: string;
   integrationPolicyName?: string;
 }

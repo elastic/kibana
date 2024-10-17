@@ -205,19 +205,20 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
   });
 };
 
-export const useGetListOutputsForPolicies = (query?: GetListAgentPolicyOutputsRequest['query']) => {
+export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsRequest['body']) => {
   return useRequest<GetListAgentPolicyOutputsResponse>({
     path: agentPolicyRouteService.getListOutputsPath(),
     method: 'get',
-    query,
+    body: JSON.stringify(body),
     version: API_VERSIONS.public.v1,
   });
 };
 
-export const useGetInfoOutputsForPolicy = (agentPolicyId: string) => {
-  return useRequest<GetAgentPolicyOutputsResponse>({
-    path: agentPolicyRouteService.getInfoOutputsPath(agentPolicyId),
+export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) => {
+  return useConditionalRequest<GetAgentPolicyOutputsResponse>({
+    path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : undefined,
     method: 'get',
+    shouldSendRequest: !!agentPolicyId,
     version: API_VERSIONS.public.v1,
-  });
+  } as SendConditionalRequestConfig);
 };

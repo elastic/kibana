@@ -106,7 +106,7 @@ export interface GetListAgentPolicyOutputsResponse {
 }
 
 export interface GetListAgentPolicyOutputsRequest {
-  query: {
-    ids?: string;
+  body: {
+    ids?: string[];
   };
 }
