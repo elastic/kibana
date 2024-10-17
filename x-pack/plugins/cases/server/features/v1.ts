@@ -14,6 +14,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APP_ID, FEATURE_ID, FEATURE_ID_V2 } from '../../common/constants';
 import { createUICapabilities, getApiTags } from '../../common';
+import { CASES_DELETE_SUB_PRIVILEGE_ID, CASES_SETTINGS_SUB_PRIVILEGE_ID } from './constants';
 
 /**
  * The order of appearance in the feature privilege page
