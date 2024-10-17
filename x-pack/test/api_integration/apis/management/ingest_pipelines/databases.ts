@@ -62,7 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('List', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/196765
+    describe.skip('List', () => {
       it('returns existing databases', async () => {
         const { body } = await supertest.get(url).set('kbn-xsrf', 'xxx').expect(200);
         expect(body).to.eql([
