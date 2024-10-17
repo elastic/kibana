@@ -11,6 +11,7 @@ import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic
 import { PaletteRegistry, getFallbackDataBounds } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import { getOriginalId } from '@kbn/transpose-helpers';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
@@ -20,7 +21,6 @@ import {
   findMinMaxByColumnId,
   shouldColorByTerms,
 } from '../../../shared_components';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -94,7 +94,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
     : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
   const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
 
   const activePalette = column?.palette ?? {

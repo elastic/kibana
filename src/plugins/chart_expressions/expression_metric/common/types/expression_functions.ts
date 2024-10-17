@@ -12,6 +12,8 @@ import { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import {
   Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
@@ -64,7 +66,8 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   typeof EXPRESSION_METRIC_NAME,
   MetricInput,
   MetricArguments,
-  ExpressionValueRender<MetricVisRenderConfig>
+  ExpressionValueRender<MetricVisRenderConfig>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export interface TrendlineArguments {

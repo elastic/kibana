@@ -12,8 +12,14 @@ import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../../common/types';
-import { TableInspectorAdapter } from '../../editor_frame_service/types';
+
+export interface CSVSharingData {
+  title: string;
+  datatables: Datatable[];
+  csvEnabled: boolean;
+}
 
 declare global {
   interface Window {
@@ -26,25 +32,21 @@ declare global {
 }
 
 async function downloadCSVs({
-  activeData,
   title,
+  datatables,
   formatFactory,
   uiSettings,
-  columnsSorting,
 }: {
-  title: string;
-  activeData: TableInspectorAdapter;
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
-  columnsSorting?: string[];
-}) {
-  if (!activeData) {
+} & Pick<CSVSharingData, 'title' | 'datatables'>) {
+  if (datatables.length === 0) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
       window.ELASTIC_LENS_CSV_CONTENT = undefined;
     }
     return;
   }
-  const datatables = Object.values(activeData);
+
   const content = datatables.reduce<Record<string, { content: string; type: string }>>(
     (memo, datatable, i) => {
       // skip empty datatables
@@ -57,7 +59,6 @@ async function downloadCSVs({
             quoteValues: uiSettings.get('csv:quoteValues', true),
             formatFactory,
             escapeFormulaValues: false,
-            columnsSorting,
           }),
           type: exporters.CSV_MIME_TYPE,
         };
@@ -66,18 +67,19 @@ async function downloadCSVs({
     },
     {}
   );
+
   if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
     window.ELASTIC_LENS_CSV_CONTENT = content;
   }
+
   if (content) {
     downloadMultipleAs(content);
   }
 }
 
-function getWarnings(activeData: TableInspectorAdapter) {
+function getWarnings(datatables: Datatable[]) {
   const messages: string[] = [];
-  if (activeData) {
-    const datatables = Object.values(activeData);
+  if (datatables.length > 0) {
     const formulaDetected = datatables.some((datatable) => {
       return tableHasFormulas(datatable.columns, datatable.rows);
     });
@@ -109,12 +111,8 @@ export const downloadCsvShareProvider = ({
       return [];
     }
 
-    const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
-      title: string;
-      activeData: TableInspectorAdapter;
-      csvEnabled: boolean;
-      columnsSorting?: string[];
-    };
+    // TODO fix sharingData types
+    const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
 
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
@@ -136,9 +134,8 @@ export const downloadCsvShareProvider = ({
       downloadCSVs({
         title,
         formatFactory: formatFactoryFn(),
-        activeData,
+        datatables,
         uiSettings,
-        columnsSorting,
       });
 
     return [
@@ -164,7 +161,7 @@ export const downloadCsvShareProvider = ({
             }
           : {
               isDisabled: !csvEnabled,
-              warnings: getWarnings(activeData),
+              warnings: getWarnings(datatables),
               helpText: (
                 <FormattedMessage
                   id="xpack.lens.application.csvPanelContent.generationDescription"
