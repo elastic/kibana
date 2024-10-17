@@ -157,7 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         await packageApi.installPackage({
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-          pkg: 'synthetics',
+          pkg: syntheticsDataset,
         });
         await synthtrace.index([
           timerange(start, end)
@@ -182,7 +182,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await synthtrace.clean();
         await packageApi.uninstallPackage({
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-          pkg: 'synthetics',
+          pkg: syntheticsDataset,
         });
       });
 
