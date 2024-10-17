@@ -9780,19 +9780,30 @@
               ],
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "ids",
-            "required": false,
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "ids": {
+                    "description": "list of package policy ids",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
