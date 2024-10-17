@@ -10,7 +10,7 @@ import type { FleetConfigType } from '../../config';
 export { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
 export const isAgentlessApiEnabled = () => {
-  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
+  const cloudSetup = appContextService.getCloud();
   const isHosted = cloudSetup?.isCloudEnabled || cloudSetup?.isServerlessEnabled;
   return Boolean(isHosted && appContextService.getConfig()?.agentless?.enabled);
 };
