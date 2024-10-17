@@ -26,7 +26,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
   debounce?: number;
   expression: string | ExpressionAstExpression;
   hasCustomErrorRenderer?: boolean;
-  onData$?<TData, TInspectorAdapters>(
+  onData$?<TData, TInspectorAdapters extends unknown>(
     data: TData,
     adapters?: TInspectorAdapters,
     partial?: boolean
@@ -186,6 +186,12 @@ export function useExpressionRenderer(
     }
 
     errorRenderHandlerRef.current = null;
+    return () => {
+      // when the error is fixed, call again the done() handler to kick off a new clean rendering
+      if (!error && hasHandledErrorRef.current) {
+        errorRenderHandlerRef.current?.done();
+      }
+    };
   }, [error, hasCustomErrorRenderer]);
 
   return {

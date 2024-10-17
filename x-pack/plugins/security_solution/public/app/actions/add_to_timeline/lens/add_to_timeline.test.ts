@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { createAddToTimelineLensAction, getInvestigatedValue } from './add_to_timeline';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -16,6 +15,9 @@ import type { DataProvider } from '../../../../../common/types';
 import { TimelineId, EXISTS_OPERATOR } from '../../../../../common/types';
 import { addProvider } from '../../../../timelines/store/actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { LensApi } from '@kbn/lens-plugin/public';
+import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
@@ -29,16 +31,32 @@ const store = {
   dispatch: mockDispatch,
 } as unknown as SecurityAppStore;
 
-class MockEmbeddable {
-  public type;
-  constructor(type: string) {
-    this.type = type;
-  }
-  getFilters() {}
-  getQuery() {}
-}
+const getMockLensApi = (
+  { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
+): LensApi =>
+  getLensApiMock({
+    timeRange$: new BehaviorSubject<TimeRange | undefined>({ from, to }),
+    getViewUnderlyingDataArgs: jest.fn(() => ({
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: { from: 'now-7d', to: 'now' },
+      filters: [],
+      query: undefined,
+      columns: [],
+    })),
+    saveToLibrary: jest.fn(async () => 'saved-id'),
+  });
 
-const lensEmbeddable = new MockEmbeddable(LENS_EMBEDDABLE_TYPE) as unknown as IEmbeddable;
+const getMockEmbeddable = (type: string): IEmbeddable =>
+  ({
+    type,
+    filters$: new BehaviorSubject<Filter[] | undefined>([]),
+    query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
+      query: 'test',
+      language: 'kuery',
+    }),
+  } as unknown as IEmbeddable);
+
+const lensEmbeddable = getMockLensApi();
 
 const columnMeta = {
   field: 'user.name',
@@ -85,7 +103,7 @@ describe('createAddToTimelineLensAction', () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          embeddable: new MockEmbeddable('not_lens') as unknown as IEmbeddable,
+          embeddable: getMockEmbeddable('not_lens') as unknown as IEmbeddable,
         })
       ).toEqual(false);
     });

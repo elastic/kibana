@@ -8,7 +8,6 @@
  */
 
 import React, { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
-import type { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
@@ -29,7 +28,7 @@ export function ChartConfigPanel({
   services,
   visContext,
   lensAdapters,
-  lensEmbeddableOutput$,
+  dataLoading$,
   currentSuggestionContext,
   isFlyoutVisible,
   setIsFlyoutVisible,
@@ -42,7 +41,7 @@ export function ChartConfigPanel({
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
@@ -108,7 +107,7 @@ export function ChartConfigPanel({
           updateSuggestion={updateSuggestion}
           updatePanelState={updatePanelState}
           lensAdapters={lensAdapters}
-          output$={lensEmbeddableOutput$}
+          dataLoading$={dataLoading$}
           displayFlyoutHeader
           closeFlyout={() => {
             setIsFlyoutVisible(false);
@@ -141,7 +140,7 @@ export function ChartConfigPanel({
     isFlyoutVisible,
     setIsFlyoutVisible,
     lensAdapters,
-    lensEmbeddableOutput$,
+    dataLoading$,
     currentSuggestionType,
   ]);
 

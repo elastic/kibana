@@ -5,9 +5,8 @@
  * 2.0.
  */
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import type { Observable } from 'rxjs';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { TypedLensByValueInput } from '../../../react_embeddable/types';
 
 export interface LensChartLoadEvent {
   /**
@@ -15,9 +14,9 @@ export interface LensChartLoadEvent {
    */
   adapters: Partial<DefaultInspectorAdapters>;
   /**
-   * Observable of the lens embeddable output
+   * Observable to track embeddable loading state
    */
-  embeddableOutput$?: Observable<EmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
 }
 
 export interface InlineEditLensEmbeddableContext {

@@ -14,7 +14,7 @@ import type {
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
@@ -198,6 +198,10 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     bucketSpan: string,
     layerIndex?: number
   ) {
+    // @TODO: ask ML team to check if ES|QL query here is ok
+    if (isOfAggregateQueryType(chartInfo.query)) {
+      throw new Error('Cannot create job, query is of aggregate type');
+    }
     const compatibleLayers = chartInfo.layers.filter(isCompatibleLayer);
 
     const selectedLayer =

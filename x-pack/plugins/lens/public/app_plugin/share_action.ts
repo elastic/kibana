@@ -11,7 +11,7 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
 import type { LensAppState } from '../state_management';
 import type { LensAppServices } from './types';
-import type { Document } from '../persistence/saved_object_store';
+import type { LensDocument } from '../persistence/saved_object_store';
 import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
 import { getEditPath } from '../../common/constants';
@@ -23,7 +23,7 @@ interface ShareableConfiguration
   > {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  currentDoc: Document | undefined;
+  currentDoc: LensDocument | undefined;
   adHocDataViews?: DataViewSpec[];
 }
 
@@ -37,7 +37,7 @@ export const DEFAULT_LENS_LAYOUT_DIMENSIONS = {
 
 function getShareURLForSavedObject(
   { application, data }: Pick<LensAppServices, 'application' | 'data'>,
-  currentDoc: Document | undefined
+  currentDoc: LensDocument | undefined
 ) {
   return new URL(
     `${application.getUrlForApp('lens', { absolute: true })}${
@@ -89,7 +89,7 @@ export function getLocatorParams(
   const serializableDatasourceStates = datasourceStates as LensAppState['datasourceStates'] &
     SerializableRecord;
 
-  const snapshotParams = {
+  const snapshotParams: LensAppLocatorParams = {
     filters,
     query,
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),

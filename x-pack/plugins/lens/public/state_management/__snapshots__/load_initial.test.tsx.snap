@@ -28,7 +28,6 @@ Object {
     "persistedDoc": Object {
       "exactMatchDoc": Object {
         "attributes": Object {
-          "expression": "definitely a valid expression",
           "references": Array [
             Object {
               "id": "1",
@@ -39,7 +38,10 @@ Object {
           "savedObjectId": "1234",
           "state": Object {
             "datasourceStates": Object {
-              "testDatasource": "datasource",
+              "testDatasource": Object {
+                "isLoading": false,
+                "state": Object {},
+              },
             },
             "filters": Array [
               Object {
@@ -53,7 +55,10 @@ Object {
                 },
               },
             ],
-            "query": "kuery",
+            "query": Object {
+              "language": "kuery",
+              "query": "test",
+            },
             "visualization": Object {},
           },
           "title": "An extremely cool default document!",

@@ -6,12 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import React from 'react';
 import { of } from 'rxjs';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { Plugin } from '.';
+import { createTopNav } from './top_nav_menu';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
+
+// mock mountPointPortal
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
+  return {
+    ...original,
+    MountPointPortal: jest.fn(({ children }) => children),
+  };
+});
 
 const createSetupContract = (): jest.Mocked<Setup> => {
   const setupContract = {
@@ -21,12 +32,21 @@ const createSetupContract = (): jest.Mocked<Setup> => {
   return setupContract;
 };
 
+export const unifiedSearchMock = {
+  ui: {
+    SearchBar: () => <div className="searchBar" />,
+    AggregateQuerySearchBar: () => <div className="searchBar" />,
+  },
+} as unknown as UnifiedSearchPublicPluginStart;
+
 const createStartContract = (): jest.Mocked<Start> => {
   const startContract = {
     ui: {
-      TopNavMenu: jest.fn(),
-      createTopNavWithCustomContext: jest.fn().mockImplementation(() => jest.fn()),
-      AggregateQueryTopNavMenu: jest.fn(),
+      TopNavMenu: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [])),
+      AggregateQueryTopNavMenu: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [])),
+      createTopNavWithCustomContext: jest
+        .fn()
+        .mockImplementation(createTopNav(unifiedSearchMock, [])),
     },
     addSolutionNavigation: jest.fn(),
     isSolutionNavEnabled$: of(false),
