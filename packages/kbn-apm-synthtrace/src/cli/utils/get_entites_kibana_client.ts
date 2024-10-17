@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EntitiesSynthtraceKibanaClient } from '../../lib/apm/client/entities_synthtrace_kibana_client';
+import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
 import { Logger } from '../../lib/utils/create_logger';
 
 export function getEntitiesKibanaClient({ target, logger }: { target: string; logger: Logger }) {
