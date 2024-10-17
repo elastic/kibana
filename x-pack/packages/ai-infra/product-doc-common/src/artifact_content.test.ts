@@ -9,14 +9,15 @@ import { isArtifactContentFilePath } from './artifact_content';
 
 describe('isArtifactContentFilePath', () => {
   it('returns true for filenames matching the pattern', () => {
-    expect(isArtifactContentFilePath('content-0.ndjson')).toEqual(true);
-    expect(isArtifactContentFilePath('content-007.ndjson')).toEqual(true);
-    expect(isArtifactContentFilePath('content-9042.ndjson')).toEqual(true);
+    expect(isArtifactContentFilePath('content/content-0.ndjson')).toEqual(true);
+    expect(isArtifactContentFilePath('content/content-007.ndjson')).toEqual(true);
+    expect(isArtifactContentFilePath('content/content-9042.ndjson')).toEqual(true);
   });
 
   it('returns false for filenames not matching the pattern', () => {
-    expect(isArtifactContentFilePath('content-0')).toEqual(false);
-    expect(isArtifactContentFilePath('content.ndjson')).toEqual(false);
-    expect(isArtifactContentFilePath('content-9042.json')).toEqual(false);
+    expect(isArtifactContentFilePath('content-0.ndjson')).toEqual(false);
+    expect(isArtifactContentFilePath('content/content-0')).toEqual(false);
+    expect(isArtifactContentFilePath('content/content.ndjson')).toEqual(false);
+    expect(isArtifactContentFilePath('content/content-9042.json')).toEqual(false);
   });
 });

@@ -116,37 +116,14 @@ describe('fetchArtifactVersions', () => {
   it('throws an error if the response is truncated', async () => {
     mockResponse(createResponse({ artifactNames: [], truncated: true }));
 
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
-      "Unhandled error. (Error: bucket content is truncated, cannot retrieve all versions
-          at /Users/pgayvallet/DEV/workspaces/elastic/kibana/x-pack/plugins/ai_infra/product_doc_base/server/services/package_installer/steps/fetch_artifact_versions.ts:29:15
-          at Parser.<anonymous> (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/xml2js/lib/parser.js:308:18)
-          at Parser.emit (node:events:519:28)
-          at SAXParser.onclosetag (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/xml2js/lib/parser.js:266:26)
-          at emit (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/sax/lib/sax.js:625:35)
-          at emitNode (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/sax/lib/sax.js:630:5)
-          at closeTag (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/sax/lib/sax.js:890:7)
-          at SAXParser.write (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/sax/lib/sax.js:1437:13)
-          at Parser.Object.<anonymous>.exports.Parser.Parser.parseString (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/xml2js/lib/parser.js:327:31)
-          at Parser.parseString (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/xml2js/lib/parser.js:5:59)
-          at Object.<anonymous>.exports.parseString (/Users/pgayvallet/DEV/workspaces/elastic/kibana/node_modules/xml2js/lib/parser.js:373:19)
-          at /Users/pgayvallet/DEV/workspaces/elastic/kibana/x-pack/plugins/ai_infra/product_doc_base/server/services/package_installer/steps/fetch_artifact_versions.ts:22:16
-          at new Promise (<anonymous>)
-          at fetchArtifactVersions (/Users/pgayvallet/DEV/workspaces/elastic/kibana/x-pack/plugins/ai_infra/product_doc_base/server/services/package_installer/steps/fetch_artifact_versions.ts:21:10)
-          at processTicksAndRejections (node:internal/process/task_queues:95:5)
-          at Object.<anonymous> (/Users/pgayvallet/DEV/workspaces/elastic/kibana/x-pack/plugins/ai_infra/product_doc_base/server/services/package_installer/steps/fetch_artifact_versions.test.ts:119:5))"
-    `);
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError(
+      /bucket content is truncated/
+    );
   });
 
   it('throws an error if the response is not valid xml', async () => {
     mockResponse('some plain text');
 
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
-      "Non-whitespace before first tag.
-      Line: 0
-      Column: 1
-      Char: s"
-    `);
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError();
   });
 });

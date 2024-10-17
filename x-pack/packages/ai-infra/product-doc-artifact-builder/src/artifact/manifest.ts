@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ArtifactManifest } from '@kbn/product-doc-common';
+import type { ArtifactManifest, ProductName } from '@kbn/product-doc-common';
 
 export const getArtifactManifest = ({
   productName,
   stackVersion,
 }: {
-  productName: string;
+  productName: ProductName;
   stackVersion: string;
 }): ArtifactManifest => {
   return {
