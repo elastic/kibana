@@ -60,7 +60,7 @@ export const DashboardAppNoDataPage = ({
   );
 
   const lensHelpersAsync = useAsync(() => {
-    return lensService.stateHelperApi();
+    return lensService?.stateHelperApi() ?? Promise.resolve(null);
   }, [lensService]);
 
   const onTryESQL = useCallback(async () => {

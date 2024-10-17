@@ -41,7 +41,7 @@ export let fieldFormatService: FieldFormatsStart;
 export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
 export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
-export let lensService: LensPublicStart;
+export let lensService: LensPublicStart | undefined;
 export let presentationUtilService: PresentationUtilPluginStart;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let screenshotModeService: ScreenshotModePluginStart;
