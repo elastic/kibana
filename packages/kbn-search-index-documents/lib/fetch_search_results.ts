@@ -18,7 +18,8 @@ export const fetchSearchResults = async (
   indexName: string,
   query?: string,
   from: number = 0,
-  size: number = DEFAULT_DOCS_PER_PAGE
+  size: number = DEFAULT_DOCS_PER_PAGE,
+  trackTotalHits: boolean = false
 ): Promise<Paginate<SearchHit>> => {
   const result = await fetchWithPagination(
     async () =>
@@ -27,6 +28,7 @@ export const fetchSearchResults = async (
         index: indexName,
         size,
         ...(!!query ? { q: escapeLuceneChars(query) } : {}),
+        track_total_hits: trackTotalHits,
       }),
     from,
     size

@@ -40,6 +40,15 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await quickStatsDocumentElem.click();
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0b');
     },
+
+    async expectQuickStatsToHaveDocumentCount(count: number) {
+      const quickStatsElem = await testSubjects.find('quickStats');
+      const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
+        'QuickStatsDocumentCount'
+      );
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain(`Document count\n${count}`);
+    },
+
     async expectQuickStatsAIMappings() {
       await testSubjects.existOrFail('quickStats', { timeout: 2000 });
       const quickStatsElem = await testSubjects.find('quickStats');
