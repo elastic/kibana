@@ -103,8 +103,12 @@ const configurationFormSchema: FormSchema = {
           // If project level data retention is enabled, we need to enforce the global max retention
           const { globalMaxRetention, enableProjectLevelRetentionChecks } = customData.value as any;
           if (enableProjectLevelRetentionChecks) {
-            const currentValue = `${value}${formData.timeUnit}`;
-            if (globalMaxRetention && isRetentionBiggerThan(currentValue, globalMaxRetention)) {
+            if (
+              value &&
+              formData.timeUnit &&
+              globalMaxRetention &&
+              isRetentionBiggerThan(`${value}${formData.timeUnit}`, globalMaxRetention)
+            ) {
               return {
                 message: i18n.translate(
                   'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
@@ -258,11 +262,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
-  // Whenever the formData changes, we need to re-validate the dataRetention field
-  // as it depends on the timeUnit field.
+  // Whenever the dataRetention or timeUnit field changes, we need to re-validate
+  // the dataRetention field
   useEffect(() => {
     form.validateFields(['dataRetention']);
-  }, [formData, form]);
+  }, [formData.dataRetention, formData.timeUnit, form]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
