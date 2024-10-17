@@ -154,7 +154,14 @@ afterAll(() => {
   consoleDebugMock.mockRestore();
 });
 
-describe('When on the package policy create page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/196463
+// FLAKY: https://github.com/elastic/kibana/issues/196464
+// FLAKY: https://github.com/elastic/kibana/issues/196465
+// FLAKY: https://github.com/elastic/kibana/issues/196466
+// FLAKY: https://github.com/elastic/kibana/issues/196467
+// FLAKY: https://github.com/elastic/kibana/issues/196468
+// FLAKY: https://github.com/elastic/kibana/issues/196469
+describe.skip('When on the package policy create page', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

@@ -15,10 +15,12 @@ const createClientMock = (): jest.Mocked<AgentClient> => ({
   getAgentStatusForAgentPolicy: jest.fn(),
   listAgents: jest.fn(),
   getLatestAgentAvailableVersion: jest.fn(),
+  getByIds: jest.fn(async (..._) => []),
 });
 
 const createServiceMock = (): DeeplyMockedKeys<AgentService> => ({
   asInternalUser: createClientMock(),
+  asInternalScopedUser: jest.fn().mockReturnValue(createClientMock()),
   asScoped: jest.fn().mockReturnValue(createClientMock()),
 });
 

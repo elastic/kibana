@@ -10,7 +10,6 @@ import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } 
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -32,7 +31,6 @@ import {
   useTimelineFullScreen,
   useGlobalFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { detectionsTimelineIds } from '../../../../containers/helpers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
@@ -273,18 +271,8 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     [globalFullScreen, scopeId, timelineFullScreen]
   );
 
-  const sourcererScope = useMemo(() => {
-    if (isActiveTimeline(scopeId)) {
-      return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(scopeId as TableId)) {
-      return SourcererScopeName.detections;
-    } else {
-      return SourcererScopeName.default;
-    }
-  }, [scopeId]);
-
-  const { selectedPatterns } = useSourcererDataView(sourcererScope);
-  const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const openAlertDetailsFlyout = useCallback(
@@ -294,7 +282,7 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
           id: DocumentDetailsRightPanelKey,
           params: {
             id: eventId,
-            indexName: eventDetailsIndex,
+            indexName: alertsIndex,
             scopeId,
           },
         },
@@ -304,7 +292,7 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
         panel: 'right',
       });
     },
-    [openFlyout, eventDetailsIndex, scopeId, telemetry]
+    [openFlyout, alertsIndex, scopeId, telemetry]
   );
 
   const sessionViewComponent = useMemo(() => {

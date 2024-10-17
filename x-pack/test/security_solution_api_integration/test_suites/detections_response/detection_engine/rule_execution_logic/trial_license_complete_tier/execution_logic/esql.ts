@@ -14,6 +14,7 @@ import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/comm
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import {
   getPreviewAlerts,
   previewRule,
@@ -25,6 +26,7 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import {
   deleteAllRules,
@@ -1428,6 +1430,12 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [doc1], interval, id });
       });
 
+      afterEach(async () => {
+        await setAdvancedSettings(supertest, {
+          [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
       it('should not return requests property when not enabled', async () => {
         const { logs } = await previewRule({
           supertest,
@@ -1461,6 +1469,35 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests).toHaveProperty('1.duration', expect.any(Number));
         expect(requests![1].request).toContain(
           'POST /ecs_compliant/_search?ignore_unavailable=true'
+        );
+      });
+      it('should not return requests with any data tier filter', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests![0].request).not.toContain('data_frozen');
+      });
+      it('should return requests with included data tiers filters from advanced settings', async () => {
+        await setAdvancedSettings(supertest, {
+          [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: ['data_frozen'],
+        });
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests![0].request).toMatch(
+          /"must_not":\s*\[\s*{\s*"terms":\s*{\s*"_tier":\s*\[\s*"data_frozen"\s*\]/
         );
       });
     });

@@ -1503,6 +1503,18 @@ The following rule action variables have been deprecated. Use the recommended va
 For more information, refer to ({kibana-pull}161136[#161136]).
 ====
 
+// Discover
+
+[discrete]
+[[deprecation-search-sessions]]
+.[Discover] <<search-sessions,Search sessions>> are deprecated in 8.15.0 and will be removed in a future version. (8.15)
+[%collapsible]
+====
+*Details* +
+Search sessions are now deprecated and will be removed in a future version. By default, queries that take longer than 10 minutes (the default for the advanced setting `search:timeout`) will be canceled. To allow queries to run longer, consider increasing `search:timeout` or setting it to `0` which will allow queries to continue running as long as a user is waiting on-screen for results.
+====
+
+
 // General settings
 
 [discrete]
