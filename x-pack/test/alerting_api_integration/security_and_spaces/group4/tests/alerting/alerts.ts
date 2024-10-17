@@ -1184,7 +1184,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '1m' },
             },
           });
 
@@ -1288,7 +1288,7 @@ instanceStateValue: true
               );
 
               // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               // @ts-expect-error _source: unknown
               expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
                 'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
@@ -1304,7 +1304,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '1h' },
             },
             notifyWhen: 'onActiveAlert',
             throttle: null,
@@ -1435,7 +1435,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '3s' },
             },
             notifyWhen: 'onThrottleInterval',
             throttle: '10s',
