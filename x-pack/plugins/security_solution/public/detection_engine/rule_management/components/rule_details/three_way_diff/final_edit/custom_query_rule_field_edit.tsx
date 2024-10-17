@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { UpgradeableCustomQueryFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { FieldFormWrapper } from './field_form_wrapper';
 import {
   KqlQueryEdit,
@@ -13,7 +14,7 @@ import {
   kqlQuerySerializer,
   kqlQueryDeserializer,
 } from './fields/kql_query';
-import type { UpgradeableCustomQueryFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { DataSourceEdit, dataSourceSchema } from './fields/data_source';
 
 interface CustomQueryRuleFieldEditProps {
   fieldName: UpgradeableCustomQueryFields;
@@ -30,6 +31,8 @@ export function CustomQueryRuleFieldEdit({ fieldName }: CustomQueryRuleFieldEdit
           deserializer={kqlQueryDeserializer}
         />
       );
+    case 'data_source':
+      return <FieldFormWrapper component={DataSourceEdit} ruleFieldFormSchema={dataSourceSchema} />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }
