@@ -27,7 +27,6 @@ Cypress.Commands.add('loginAsSuperUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    // cy.session(username, () => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
     cy.log(`Logging in as ${username} on ${kibanaUrl}`);
     cy.visit('/');
@@ -44,7 +43,6 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
-      // });
     });
     cy.visit('/');
   }
