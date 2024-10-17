@@ -49,12 +49,17 @@ export default function ({ getService }: FtrProviderContext) {
   describe('task manager metrics', () => {
     describe('task claim', () => {
       it('should increment task claim success/total counters', async () => {
-        // counters are reset every 30 seconds, so wait until the start of a
-        // fresh counter cycle to make sure values are incrementing
+        // reset metrics counter
+        await getMetrics(true);
+        const metricsResetTime = Date.now();
+        // we've resetted the metrics and have 30 seconds before they reset again
+        // wait for the first set of metrics to be returned after the reset
         const initialMetrics = (
           await getMetrics(
             false,
-            (metrics) => (metrics?.metrics?.task_claim?.value.total || 0) >= 1
+            (metrics) =>
+              !!metrics?.metrics?.task_claim?.timestamp &&
+              new Date(metrics?.metrics?.task_claim?.timestamp).getTime() > metricsResetTime
           )
         ).metrics;
         expect(initialMetrics).not.to.be(null);
