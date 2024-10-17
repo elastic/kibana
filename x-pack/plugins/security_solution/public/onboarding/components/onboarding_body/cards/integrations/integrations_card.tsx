@@ -13,23 +13,21 @@ import { CenteredLoadingSpinner } from '../../../../../common/components/centere
 import type { IntegrationCardMetadata } from './types';
 
 export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> = React.memo(
-  ({ checkCompleteMetadata }) => {
-    if (!checkCompleteMetadata) {
+  ({ checkCompleteMetadata, checkCompleteError }) => {
+    if (!checkCompleteMetadata && !checkCompleteError) {
       return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
     }
-    const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
 
     return (
       <OnboardingCardContentPanel>
         <IntegrationsCardGridTabs
-          isAgentRequired={isAgentRequired}
-          installedIntegrationsCount={installedIntegrationsCount}
+          isAgentRequired={checkCompleteMetadata?.isAgentRequired}
+          installedIntegrationsCount={checkCompleteMetadata?.installedIntegrationsCount}
         />
       </OnboardingCardContentPanel>
     );
   }
 );
 IntegrationsCard.displayName = 'IntegrationsCard';
-
 // eslint-disable-next-line import/no-default-export
 export default IntegrationsCard;

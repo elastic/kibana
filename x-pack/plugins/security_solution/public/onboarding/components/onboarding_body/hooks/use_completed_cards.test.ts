@@ -11,6 +11,7 @@ import { useCompletedCards } from './use_completed_cards';
 import type { OnboardingGroupConfig } from '../../../types';
 import type { OnboardingCardId } from '../../../constants';
 import { mockReportCardComplete } from '../../__mocks__/onboarding_context_mocks';
+import { useToasts } from '../../../../common/lib/kibana';
 
 const defaultStoredCompletedCardIds: OnboardingCardId[] = [];
 const mockSetStoredCompletedCardIds = jest.fn();
@@ -24,6 +25,13 @@ jest.mock('../../../hooks/use_stored_state', () => ({
 }));
 
 jest.mock('../../onboarding_context');
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...original,
+    useToasts: jest.fn(),
+  };
+});
 
 const cardComplete = {
   id: 'card-completed' as OnboardingCardId,
@@ -62,6 +70,14 @@ const cardMetadata = {
     .fn()
     .mockResolvedValue({ isComplete: true, metadata: { custom: 'metadata' } }),
 };
+const mockUseToast = useToasts as jest.Mock;
+const mockAddError = jest.fn();
+const mockError = new Error('Failed to check complete');
+const cardCheckCompleteFailed = {
+  id: 'card-failed' as OnboardingCardId,
+  title: 'card failed',
+  checkComplete: jest.fn().mockRejectedValue(mockError),
+};
 
 const mockCardsGroupConfig = [
   {
@@ -74,9 +90,70 @@ const mockCardsGroupConfig = [
   },
 ] as unknown as OnboardingGroupConfig[];
 
+const mockFailureCardsGroupConfig = [
+  {
+    title: 'Group 1',
+    cards: [cardCheckCompleteFailed],
+  },
+] as unknown as OnboardingGroupConfig[];
+
 describe('useCompletedCards Hook', () => {
   beforeEach(() => {
+    mockUseToast.mockReturnValue({
+      addError: mockAddError,
+    });
     jest.clearAllMocks();
+  });
+
+  describe('when checkComplete functions are rejected', () => {
+    let renderResult: RenderHookResult<
+      OnboardingGroupConfig[],
+      ReturnType<typeof useCompletedCards>
+    >;
+    beforeEach(async () => {
+      renderResult = renderHook(useCompletedCards, { initialProps: mockFailureCardsGroupConfig });
+      await act(async () => {
+        await waitFor(() => {
+          expect(mockSetStoredCompletedCardIds).toHaveBeenCalledTimes(0); // number of completed cards
+        });
+      });
+    });
+
+    describe('when a the auto check is called', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          renderResult.result.current.checkCardComplete(cardCheckCompleteFailed.id);
+        });
+      });
+
+      it('should set the correct completed card ids', async () => {
+        expect(mockSetStoredCompletedCardIds).not.toHaveBeenCalled();
+      });
+
+      it('should return the correct completed state', () => {
+        expect(renderResult.result.current.isCardComplete(cardCheckCompleteFailed.id)).toEqual(
+          false
+        );
+      });
+
+      it('should return checkCompleteError', () => {
+        expect(
+          renderResult.result.current.getCardCheckCompleteResult(cardCheckCompleteFailed.id)
+            ?.checkCompleteError
+        ).toEqual(mockError);
+      });
+
+      it('should show an error toast', () => {
+        expect(mockAddError).toHaveBeenCalledWith(mockError, {
+          title: `Failed to retrieve the completion status for ${cardCheckCompleteFailed.title}`,
+        });
+      });
+
+      it('should not report the completed card', async () => {
+        expect(mockReportCardComplete).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('when checkComplete functions are resolved', () => {
