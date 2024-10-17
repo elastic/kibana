@@ -16,14 +16,12 @@ export const DATABASE_TYPE_OPTIONS = [
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.maxmindDatabaseType', {
       defaultMessage: 'MaxMind',
     }),
-    'data-test-subj': 'maxMindOption',
   },
   {
     value: 'ipinfo',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.ipinfoDatabaseType', {
       defaultMessage: 'IPInfo',
     }),
-    'data-test-subj': 'ipInfoOption',
   },
 ];
 export const GEOIP_NAME_OPTIONS = [
@@ -32,14 +30,12 @@ export const GEOIP_NAME_OPTIONS = [
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.anonymousIPDatabaseName', {
       defaultMessage: 'GeoIP2 Anonymous IP',
     }),
-    'data-test-subj': 'geoIpAnonymousOption',
   },
   {
     value: 'GeoIP2-City',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.cityDatabaseName', {
       defaultMessage: 'GeoIP2 City',
     }),
-    'data-test-subj': 'geoIpCityOption',
   },
   {
     value: 'GeoIP2-Connection-Type',
@@ -49,35 +45,30 @@ export const GEOIP_NAME_OPTIONS = [
         defaultMessage: 'GeoIP2 Connection Type',
       }
     ),
-    'data-test-subj': 'geoIpConnectionOption',
   },
   {
     value: 'GeoIP2-Country',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.countryDatabaseName', {
       defaultMessage: 'GeoIP2 Country',
     }),
-    'data-test-subj': 'geoIpCountryOption',
   },
   {
     value: 'GeoIP2-Domain',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.domainDatabaseName', {
       defaultMessage: 'GeoIP2 Domain',
     }),
-    'data-test-subj': 'geoIpDomainOption',
   },
   {
     value: 'GeoIP2-Enterprise',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.enterpriseDatabaseName', {
       defaultMessage: 'GeoIP2 Enterprise',
     }),
-    'data-test-subj': 'geoIpEnterpriseOption',
   },
   {
     value: 'GeoIP2-ISP',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.ispDatabaseName', {
       defaultMessage: 'GeoIP2 ISP',
     }),
-    'data-test-subj': 'geoIpIspOption',
   },
 ];
 export const IPINFO_NAME_OPTIONS = [
@@ -86,21 +77,18 @@ export const IPINFO_NAME_OPTIONS = [
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.freeAsnDatabaseName', {
       defaultMessage: 'Free IP to ASN',
     }),
-    'data-test-subj': 'asnOption',
   },
   {
     value: 'country',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.freeCountryDatabaseName', {
       defaultMessage: 'Free IP to Country',
     }),
-    'data-test-subj': 'countryOption',
   },
   {
     value: 'standard_asn',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.asnDatabaseName', {
       defaultMessage: 'ASN',
     }),
-    'data-test-subj': 'standardAsnOption',
   },
   {
     value: 'standard_location',
@@ -110,7 +98,6 @@ export const IPINFO_NAME_OPTIONS = [
         defaultMessage: 'IP Geolocation',
       }
     ),
-    'data-test-subj': 'locationOption',
   },
   {
     value: 'standard_privacy',
@@ -120,7 +107,6 @@ export const IPINFO_NAME_OPTIONS = [
         defaultMessage: 'Privacy Detection',
       }
     ),
-    'data-test-subj': 'privacyOption',
   },
 ];
 
