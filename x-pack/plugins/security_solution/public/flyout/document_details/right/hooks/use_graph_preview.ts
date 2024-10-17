@@ -33,7 +33,7 @@ export interface UseGraphPreviewResult {
   /**
    * Array of actor entity IDs associated with the alert
    */
-  actorsIds: string[];
+  actorIds: string[];
 
   /**
    * Action associated with the event
@@ -57,9 +57,9 @@ export const useGraphPreview = ({
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
-  const actorsIds = getFieldArray(getFieldsData('actor.entity.id'));
+  const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
   const action = get(['event', 'action'], ecsData);
-  const isAuditLog = (actorsIds?.length ?? 0) > 0 && action?.length > 0 && eventIds?.length > 0;
+  const isAuditLog = actorIds.length > 0 && action?.length > 0 && eventIds.length > 0;
 
-  return { eventIds, actorsIds, action, isAuditLog };
+  return { eventIds, actorIds, action, isAuditLog };
 };

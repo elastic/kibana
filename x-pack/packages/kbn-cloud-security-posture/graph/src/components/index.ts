@@ -13,4 +13,5 @@ export type {
   GroupNodeViewModel,
   LabelNodeViewModel,
   EntityNodeViewModel,
+  NodeProps,
 } from './types';

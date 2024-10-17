@@ -14,7 +14,7 @@ import { GroupStyleOverride, NODE_HEIGHT, NODE_WIDTH } from '../node/styles';
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
   edges: Array<Edge<EdgeViewModel>>
-) => {
+): { nodes: Array<Node<NodeViewModel>> } => {
   const nodesById: { [key: string]: Node<NodeViewModel> } = {};
   const graphOpts = {
     compound: true,
@@ -58,7 +58,7 @@ export const layoutGraph = (
 
   Dagre.layout(g);
 
-  nodes.forEach((node) => {
+  const layoutedNodes = nodes.map((node) => {
     const dagreNode = g.node(node.data.id);
 
     // We are shifting the dagre node position (anchor=center center) to the top left
@@ -68,20 +68,34 @@ export const layoutGraph = (
 
     // For grouped nodes, we want to keep the original position relative to the parent
     if (node.data.shape === 'label' && node.data.parentId) {
-      node.position = nodesById[node.data.id].position;
+      return {
+        ...node,
+        position: nodesById[node.data.id].position,
+      };
     } else if (node.data.shape === 'group') {
-      node.position = { x, y };
-      node.style = GroupStyleOverride({
-        width: dagreNode.width,
-        height: dagreNode.height,
-      });
+      return {
+        ...node,
+        position: { x, y },
+        style: GroupStyleOverride({
+          width: dagreNode.width,
+          height: dagreNode.height,
+        }),
+      };
     } else if (node.data.shape === 'label') {
-      node.position = { x, y };
+      return {
+        ...node,
+        position: { x, y },
+      };
     } else {
       // Align nodes to labels by shifting the node position by it's label height
-      node.position = { x, y: y + (dagreNode.height - NODE_HEIGHT) / 2 };
+      return {
+        ...node,
+        position: { x, y: y + (dagreNode.height - NODE_HEIGHT) / 2 },
+      };
     }
   });
+
+  return { nodes: layoutedNodes };
 };
 
 const layoutGroupChildren = (

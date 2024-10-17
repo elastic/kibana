@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback } from 'react';
 import {
   Background,
   Controls,
@@ -67,29 +67,36 @@ const edgeTypes = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest }) => {
-  const [layoutCalled, setLayoutCalled] = useState(false);
+  const layoutCalled = useRef(false);
   const [isGraphLocked, setIsGraphLocked] = useState(interactive);
   const { initialNodes, initialEdges } = useMemo(
     () => processGraph(nodes, edges, isGraphLocked),
     [nodes, edges, isGraphLocked]
   );
 
-  const [nodesState, _setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodesState, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  if (!layoutCalled) {
-    layoutGraph(nodesState, edgesState);
-    setLayoutCalled(true);
+  if (!layoutCalled.current) {
+    const { nodes: layoutedNodes } = layoutGraph(nodesState, edgesState);
+    setNodes(layoutedNodes);
+    layoutCalled.current = true;
   }
 
   const onInteractiveStateChange = useCallback(
     (interactiveStatus: boolean): void => {
       setIsGraphLocked(interactiveStatus);
-      nodesState.forEach((node) => {
-        node.data.interactive = interactiveStatus;
-      });
+      setNodes((prevNodes) =>
+        prevNodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            interactive: interactiveStatus,
+          },
+        }))
+      );
     },
-    [nodesState]
+    [setNodes]
   );
 
   return (
@@ -99,6 +106,15 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         fitView={true}
         onInit={(xyflow) => {
           window.requestAnimationFrame(() => xyflow.fitView());
+
+          // When the graph is not initialized as interactive, we need to fit the view on resize
+          if (!interactive) {
+            const resizeObserver = new ResizeObserver(() => {
+              xyflow.fitView();
+            });
+            resizeObserver.observe(document.querySelector('.react-flow') as Element);
+            return () => resizeObserver.disconnect();
+          }
         }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
