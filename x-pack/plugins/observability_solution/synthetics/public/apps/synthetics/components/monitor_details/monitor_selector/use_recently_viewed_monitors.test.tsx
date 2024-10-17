@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -94,13 +95,10 @@ describe('useRecentlyViewedMonitors', () => {
         </WrappedHelper>
       );
     };
-    const { result, waitForValueToChange, rerender } = renderHook(
-      () => useRecentlyViewedMonitors(),
-      {
-        wrapper: WrapperWithState,
-      }
-    );
-    await waitForValueToChange(() => persistedIds);
+    const { result, rerender } = renderHook(() => useRecentlyViewedMonitors(), {
+      wrapper: WrapperWithState,
+    });
+    await waitFor(() => persistedIds);
 
     // Sets the current monitor as well as updated information
     expect(setPersistedIdsMock).toHaveBeenCalledWith([currentMonitorQueryId, monitorQueryId3]);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
@@ -42,7 +43,7 @@ describe('usePrivateLocationsAPI', () => {
     } as any,
   ]);
   it('returns expected results after data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -53,22 +54,22 @@ describe('usePrivateLocationsAPI', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        loading: false,
-        privateLocations: [],
-      })
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          loading: false,
+          privateLocations: [],
+        })
+      )
     );
   });
 
   it('adds location on submit', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     act(() => {
       result.current.onSubmit({
@@ -81,35 +82,35 @@ describe('usePrivateLocationsAPI', () => {
       });
     });
 
-    await waitForNextUpdate();
-
-    expect(addAPI).toHaveBeenCalledWith({
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      label: 'new',
-      agentPolicyId: 'newPolicy',
+    await waitFor(() => {
+      expect(addAPI).toHaveBeenCalledWith({
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        label: 'new',
+        agentPolicyId: 'newPolicy',
+      });
+      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+      expect(dispatch).toBeCalledWith(getServiceLocations());
     });
-    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
-    expect(dispatch).toBeCalledWith(getServiceLocations());
   });
 
   it('deletes location on delete', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     act(() => {
       result.current.onDelete('Test');
     });
 
-    await waitForNextUpdate();
-
-    expect(deletedAPI).toHaveBeenLastCalledWith('Test');
-    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
-    expect(dispatch).toBeCalledWith(getServiceLocations());
+    await waitFor(() => {
+      expect(deletedAPI).toHaveBeenLastCalledWith('Test');
+      expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+      expect(dispatch).toBeCalledWith(getServiceLocations());
+    });
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { act } from '@testing-library/react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
