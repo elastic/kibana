@@ -245,7 +245,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized`);
+      logger.info(`Entity store initialized for ${entityType}`);
 
       return updated;
     } catch (err) {
@@ -362,6 +362,7 @@ export class EntityStoreDataClient {
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient: this.esClient,
+        logger,
       });
 
       if (deleteData) {
