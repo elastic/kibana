@@ -19,6 +19,8 @@ import {
 import { getIdentityFieldForEntityType } from '../utils';
 import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
+import { removeFieldByValueSteps } from './ingest_processor_steps/remove_field_by_value_steps';
+import { CRITICALITY_VALUES } from '../../asset_criticality/constants';
 
 const getPlatformPipelineId = (definition: EntityDefinition) => {
   return `${definition.id}-latest@platform`;
@@ -80,6 +82,7 @@ const buildIngestPipeline = ({
     ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
       enrichField: ENRICH_FIELD,
     }),
+    ...removeFieldByValueSteps([{ field: 'asset.criticality', value: CRITICALITY_VALUES.DELETED }]),
     ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${entityType}.risk`]),
     removeEntityDefinitionFieldsStep(),
     ...(!debugMode

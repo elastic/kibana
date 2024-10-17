@@ -10,3 +10,4 @@ export { getDotExpanderSteps } from './get_dot_expander_steps';
 export { getRemoveEmptyFieldSteps } from './get_remove_empty_field_steps';
 export { removeEntityDefinitionFieldsStep } from './remove_entity_definition_fields_step';
 export { retentionDefinitionToIngestProcessorSteps } from './retention_definition_to_ingest_processor_steps';
+export { removeFieldByValueSteps } from './remove_field_by_value_steps';
