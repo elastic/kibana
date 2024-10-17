@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createSLO } from './fixtures/slo';
-import { GetSLOInstances, SLORepository } from '.';
-import { createSLORepositoryMock } from './mocks';
+import { GetSLOInstances } from '.';
+import { createSloContextMock, SLOContextMock } from './mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('Get SLO Instances', () => {
-  let repositoryMock: jest.Mocked<SLORepository>;
-  let esClientMock: ElasticsearchClientMock;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    repositoryMock = createSLORepositoryMock();
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    contextMock = createSloContextMock();
   });
 
   it("returns an empty response when the SLO has no 'groupBy' defined", async () => {
     const slo = createSLO({ groupBy: ALL_VALUE });
-    repositoryMock.findById.mockResolvedValue(slo);
+    contextMock.repository.findById.mockResolvedValue(slo);
 
-    const service = new GetSLOInstances(repositoryMock, esClientMock);
+    const service = new GetSLOInstances(contextMock);
 
     const result = await service.execute(slo.id);
 
@@ -33,8 +30,8 @@ describe('Get SLO Instances', () => {
 
   it("returns all instances of a SLO defined with a 'groupBy'", async () => {
     const slo = createSLO({ id: 'slo-id', revision: 2, groupBy: 'field.to.host' });
-    repositoryMock.findById.mockResolvedValue(slo);
-    esClientMock.search.mockResolvedValue({
+    contextMock.repository.findById.mockResolvedValue(slo);
+    contextMock.esClient.search.mockResolvedValue({
       took: 100,
       timed_out: false,
       _shards: {
@@ -57,7 +54,7 @@ describe('Get SLO Instances', () => {
       },
     });
 
-    const service = new GetSLOInstances(repositoryMock, esClientMock);
+    const service = new GetSLOInstances(contextMock);
 
     const result = await service.execute(slo.id);
 
@@ -65,6 +62,6 @@ describe('Get SLO Instances', () => {
       groupBy: 'field.to.host',
       instances: ['host-aaa', 'host-bbb', 'host-ccc'],
     });
-    expect(esClientMock.search.mock.calls[0]).toMatchSnapshot();
+    expect(contextMock.esClient.search.mock.calls[0]).toMatchSnapshot();
   });
 });

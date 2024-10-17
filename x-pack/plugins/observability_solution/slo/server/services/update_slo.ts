@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, Logger, IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
+import { SloRouteContext } from '../types';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -29,16 +30,22 @@ import { createTempSummaryDocument } from './summary_transform_generator/helpers
 import { TransformManager } from './transform_manager';
 
 export class UpdateSLO {
+  private esClient: ElasticsearchClient;
+  private repository: SLORepository;
+  private logger: Logger;
+  private spaceId: string;
+  private basePath: IBasePath;
   constructor(
-    private repository: SLORepository,
+    private context: SloRouteContext,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
-    private scopedClusterClient: IScopedClusterClient,
-    private logger: Logger,
-    private spaceId: string,
-    private basePath: IBasePath
-  ) {}
+    private summaryTransformManager: TransformManager
+  ) {
+    this.esClient = this.context.esClient;
+    this.repository = this.context.repository;
+    this.logger = this.context.logger;
+    this.spaceId = this.context.spaceId;
+    this.basePath = this.context.basePath;
+  }
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
@@ -79,13 +86,13 @@ export class UpdateSLO {
       try {
         await retryTransientEsErrors(
           () =>
-            this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+            this.context.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
               getSLOPipelineTemplate(updatedSlo)
             ),
           { logger: this.logger }
         );
         rollbackOperations.push(() =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
             { id: getSLOPipelineId(updatedSlo.id, updatedSlo.revision) },
             { ignore: [404] }
           )
@@ -93,7 +100,7 @@ export class UpdateSLO {
 
         await retryTransientEsErrors(
           () =>
-            this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+            this.context.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
               getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
             ),
           { logger: this.logger }
@@ -127,13 +134,13 @@ export class UpdateSLO {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+          this.context.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
             getSLOPipelineTemplate(updatedSlo)
           ),
         { logger: this.logger }
       );
       rollbackOperations.push(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+        this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: getSLOPipelineId(updatedSlo.id, updatedSlo.revision) },
           { ignore: [404] }
         )
@@ -147,13 +154,13 @@ export class UpdateSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+          this.context.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
             getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
           ),
         { logger: this.logger }
       );
       rollbackOperations.push(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+        this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: getSLOSummaryPipelineId(updatedSlo.id, updatedSlo.revision) },
           { ignore: [404] }
         )
@@ -215,12 +222,12 @@ export class UpdateSLO {
       await this.summaryTransformManager.stop(originalSummaryTransformId);
       await this.summaryTransformManager.uninstall(originalSummaryTransformId);
 
-      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+      await this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOSummaryPipelineId(originalSlo.id, originalSlo.revision) },
         { ignore: [404] }
       );
 
-      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+      await this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOPipelineId(originalSlo.id, originalSlo.revision) },
         { ignore: [404] }
       );
