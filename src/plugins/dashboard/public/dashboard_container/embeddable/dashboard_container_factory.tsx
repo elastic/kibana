@@ -80,6 +80,7 @@ export class DashboardContainerFactoryDefinition
         dashboardCreationStartTime,
         savedObjectId
       );
+      dashboard?.setFilters(initialInput.filters || []);
       return dashboard;
     } catch (e) {
       return new ErrorEmbeddable(e, { id: e.id });

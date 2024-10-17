@@ -16,6 +16,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import type { Filter } from '@kbn/es-query';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardItem } from '../../../common/content_management';
 import {
@@ -89,7 +90,7 @@ export const useDashboardListingTable = ({
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
-  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
+  goToDashboard: (dashboardId?: string, viewMode?: ViewMode, unsavedFilters?: Filter[]) => void;
   headingId?: string;
   initialFilter?: string;
   urlStateEnabled?: boolean;
