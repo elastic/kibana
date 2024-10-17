@@ -291,5 +291,5 @@ export const validateRouteSpaceName = async (routeContext: RouteContext) => {
     }
   }
 
-  return { spaceId, invalidResponse: undefined };
+  return { invalidResponse: undefined };
 };

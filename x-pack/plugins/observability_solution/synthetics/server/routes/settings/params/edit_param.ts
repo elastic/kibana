@@ -35,7 +35,6 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         value: schema.maybe(schema.string()),
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
-        share_across_spaces: schema.maybe(schema.boolean()),
       }),
     },
   },
@@ -65,7 +64,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       };
 
       // value from data since we aren't using encrypted client
-      const { value } = data;
+      const { value } = existingParam.attributes;
       const {
         id: responseId,
         attributes: { key, tags, description },
