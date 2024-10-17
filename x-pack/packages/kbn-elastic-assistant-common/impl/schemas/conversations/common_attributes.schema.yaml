@@ -189,6 +189,7 @@ components:
         isDefault:
           description: Is default conversation.
           type: boolean
+          default: 1
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean

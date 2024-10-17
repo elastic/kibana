@@ -52,7 +52,15 @@ export const findDocuments = async <TSearchSchema>({
   let sort: Sort | undefined;
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
-    sort = [{ [sortField]: ascOrDesc }];
+    sort = [
+      { [sortField]: ascOrDesc },
+      {
+        // secondary sort by updated_at
+        updated_at: {
+          order: 'desc',
+        },
+      },
+    ];
   } else {
     sort = {
       updated_at: {
@@ -67,7 +75,7 @@ export const findDocuments = async <TSearchSchema>({
         track_total_hits: true,
         sort,
       },
-      _source: true,
+      _source: fields && fields.length ? fields : true,
       from: (page - 1) * perPage,
       ignore_unavailable: true,
       index,

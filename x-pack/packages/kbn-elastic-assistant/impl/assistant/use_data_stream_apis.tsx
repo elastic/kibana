@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { FetchConversationsResponse, useFetchPrompts } from './api';
-import {
-  Conversation,
-  mergeBaseWithPersistedConversations,
-  useFetchCurrentUserConversations,
-} from '../..';
+import { useFetchPrompts } from './api';
+import { Conversation, useFetchCurrentUserConversations } from '../..';
 
 interface Props {
   baseConversations: Record<string, Conversation>;
@@ -51,11 +47,7 @@ export const useDataStreamApis = ({
   isAssistantEnabled,
 }: Props): DataStreamApis => {
   const [isStreaming, setIsStreaming] = useState(false);
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
-  );
+
   const {
     data: conversations,
     isLoading: isLoadingCurrentUserConversations,
@@ -63,9 +55,10 @@ export const useDataStreamApis = ({
     isFetched: isFetchedCurrentUserConversations,
   } = useFetchCurrentUserConversations({
     http,
-    onFetch: onFetchedConversations,
+    baseConversations,
     refetchOnWindowFocus: !isStreaming,
     isAssistantEnabled,
+    fields: ['title', 'is_default', 'updated_at'],
   });
 
   const {
@@ -87,6 +80,7 @@ export const useDataStreamApis = ({
     }
     return [];
   }, [allPrompts, isLoadingPrompts]);
+
   return {
     allPrompts,
     allSystemPrompts,

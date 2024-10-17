@@ -61,6 +61,10 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const userFilter = currentUser?.username
             ? `name: "${currentUser?.username}"`
             : `id: "${currentUser?.profile_uid}"`;
+          console.log('query.per_page', query.per_page);
+          console.log('query.sort_field', query.sort_field);
+          console.log('query.sort_order', query.sort_order);
+          console.log('query', query);
           const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
             page: query.page,

@@ -21,11 +21,7 @@ import { ConversationStreamingSwitch } from '../conversation_settings/conversati
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import {
-  FetchConversationsResponse,
-  useFetchCurrentUserConversations,
-  useFetchPrompts,
-} from '../../api';
+import { useFetchCurrentUserConversations, useFetchPrompts } from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useConversationDeleted } from '../conversation_settings/use_conversation_deleted';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -37,7 +33,6 @@ import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_conte
 import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { DEFAULT_PAGE_SIZE } from '../../settings/const';
 import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
-import { mergeBaseWithPersistedConversations } from '../../helpers';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 interface Props {
   connectors: AIConnector[] | undefined;
@@ -66,12 +61,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     toasts,
   } = useAssistantContext();
 
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
-  );
-
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
 
   const {
@@ -80,8 +69,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     refetch: refetchConversations,
   } = useFetchCurrentUserConversations({
     http,
-    onFetch: onFetchedConversations,
+    baseConversations,
     isAssistantEnabled,
+    fields: ['title', 'is_default', 'updated_at', 'api_config'],
   });
 
   const refetchAll = useCallback(() => {
