@@ -716,19 +716,19 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/helpers/handle_graph_error/index.tsx"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/helpers/handle_graph_error/index.tsx"
               },
               {
                 "plugin": "elasticAssistant",
@@ -1257,38 +1257,6 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.test.ts"
               },
               {
                 "plugin": "apm",
