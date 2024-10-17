@@ -9,5 +9,4 @@ import { TypeOf } from '@kbn/config-schema';
 import { findRulesOptionsSchema, findRulesParamsSchema } from '../schemas';
 
 export type FindRulesOptions = TypeOf<typeof findRulesOptionsSchema>;
-
 export type FindRulesParams = TypeOf<typeof findRulesParamsSchema>;

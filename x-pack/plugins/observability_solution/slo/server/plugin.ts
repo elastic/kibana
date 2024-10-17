@@ -15,7 +15,7 @@ import {
   Logger,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
@@ -33,6 +33,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
@@ -47,7 +48,7 @@ import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings'
 export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
 
 export interface PluginSetup {
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
@@ -58,7 +59,7 @@ export interface PluginSetup {
 }
 
 export interface PluginStart {
-  alerting: PluginStartContract;
+  alerting: AlertingServerStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
@@ -82,6 +83,11 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
 
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
+    const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
+    }));
+
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.slo.featureRegistry.linkSloTitle', {
@@ -92,7 +98,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: sloRuleTypes,
+      alerting: alertingFeatures,
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -104,10 +110,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           },
           alerting: {
             rule: {
-              all: sloRuleTypes,
+              all: alertingFeatures,
             },
             alert: {
-              all: sloRuleTypes,
+              all: alertingFeatures,
             },
           },
           ui: ['read', 'write'],
@@ -122,10 +128,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           },
           alerting: {
             rule: {
-              read: sloRuleTypes,
+              read: alertingFeatures,
             },
             alert: {
-              read: sloRuleTypes,
+              read: alertingFeatures,
             },
           },
           ui: ['read'],

@@ -117,7 +117,8 @@ const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
-  filterConsumers?: string[];
+  ruleTypeIds?: string[];
+  consumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -159,7 +160,8 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
-  filterConsumers,
+  ruleTypeIds,
+  consumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -272,6 +274,7 @@ export const RulesList = ({
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
     : filters.types;
+
   const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
 
   const computedFilter = useMemo(() => {
@@ -285,7 +288,8 @@ export const RulesList = ({
 
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
-    filterConsumers,
+    ruleTypeIds,
+    consumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -298,7 +302,8 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
-      filterConsumers,
+      ruleTypeIds,
+      consumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,
@@ -771,7 +776,7 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={filterConsumers} />
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={ruleTypeIds} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

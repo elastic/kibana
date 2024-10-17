@@ -9,8 +9,12 @@ import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
+import {
+  findRulesInternalRequestQuerySchemaV1,
+  findRulesRequestQuerySchemaV1,
+} from '../../../../../common/routes/rule/apis/find';
 import type {
+  FindRulesInternalRequestQueryV1,
   FindRulesRequestQueryV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
@@ -22,6 +26,7 @@ import {
 } from '../../../../types';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
+import { transformFindRulesInternalBody } from './transforms/transform_find_rules_body/v1';
 
 interface BuildFindRulesRouteParams {
   licenseState: ILicenseState;
@@ -38,86 +43,91 @@ const buildFindRulesRoute = ({
   excludeFromPublicApi = false,
   usageCounter,
 }: BuildFindRulesRouteParams) => {
-  router.get(
-    {
-      path,
-      options: {
-        access: 'public',
-        summary: 'Get information about rules',
-        tags: ['oas-tag:alerting'],
-      },
-      validate: {
-        request: {
-          query: findRulesRequestQuerySchemaV1,
+  if (path !== INTERNAL_ALERTING_API_FIND_RULES_PATH) {
+    router.get(
+      {
+        path,
+        options: {
+          access: 'public',
+          summary: 'Get information about rules',
+          tags: ['oas-tag:alerting'],
         },
-        response: {
-          200: {
-            body: () => ruleResponseSchemaV1,
-            description: 'Indicates a successful call.',
+        validate: {
+          request: {
+            query: findRulesRequestQuerySchemaV1,
           },
-          400: {
-            description: 'Indicates an invalid schema or parameters.',
-          },
-          403: {
-            description: 'Indicates that this call is forbidden.',
+          response: {
+            200: {
+              body: () => ruleResponseSchemaV1,
+              description: 'Indicates a successful call.',
+            },
+            400: {
+              description: 'Indicates an invalid schema or parameters.',
+            },
+            403: {
+              description: 'Indicates that this call is forbidden.',
+            },
           },
         },
       },
-    },
-    router.handleLegacyErrors(
-      verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+      router.handleLegacyErrors(
+        verifyAccessAndContext(licenseState, async function (context, req, res) {
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
 
-        const query: FindRulesRequestQueryV1 = req.query;
+          const query: FindRulesRequestQueryV1 = req.query;
 
-        trackLegacyTerminology(
-          [query.search, query.search_fields, query.sort_field].filter(Boolean) as string[],
-          usageCounter
-        );
+          trackLegacyTerminology(
+            [query.search, query.search_fields, query.sort_field].filter(Boolean) as string[],
+            usageCounter
+          );
 
-        const options = transformFindRulesBodyV1({
-          ...query,
-          has_reference: query.has_reference || undefined,
-          search_fields: searchFieldsAsArray(query.search_fields),
-        });
-
-        if (req.query.fields) {
-          usageCounter?.incrementCounter({
-            counterName: `alertingFieldsUsage`,
-            counterType: 'alertingFieldsUsage',
-            incrementBy: 1,
+          const options = transformFindRulesBodyV1({
+            ...query,
+            has_reference: query.has_reference || undefined,
+            search_fields: searchFieldsAsArray(query.search_fields),
           });
-        }
 
-        const findResult = await rulesClient.find({
-          options,
-          excludeFromPublicApi,
-          includeSnoozeData: true,
-        });
+          if (req.query.fields) {
+            usageCounter?.incrementCounter({
+              counterName: `alertingFieldsUsage`,
+              counterType: 'alertingFieldsUsage',
+              incrementBy: 1,
+            });
+          }
 
-        const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+          const findResult = await rulesClient.find({
+            options,
+            excludeFromPublicApi,
+            includeSnoozeData: true,
+          });
 
-        return res.ok({
-          body: responseBody,
-        });
-      })
-    )
-  );
+          const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
+            transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+
+          return res.ok({
+            body: responseBody,
+          });
+        })
+      )
+    );
+  }
+
   if (path === INTERNAL_ALERTING_API_FIND_RULES_PATH) {
     router.post(
       {
         path,
         options: { access: 'internal' },
         validate: {
-          body: findRulesRequestQuerySchemaV1,
+          body: findRulesInternalRequestQuerySchemaV1,
         },
       },
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
 
-          const body: FindRulesRequestQueryV1 = req.body;
+          const body: FindRulesInternalRequestQueryV1 = req.body;
 
           trackLegacyTerminology(
             [req.body.search, req.body.search_fields, req.body.sort_field].filter(
@@ -126,7 +136,7 @@ const buildFindRulesRoute = ({
             usageCounter
           );
 
-          const options = transformFindRulesBodyV1({
+          const options = transformFindRulesInternalBody({
             ...body,
             has_reference: body.has_reference || undefined,
             search_fields: searchFieldsAsArray(body.search_fields),

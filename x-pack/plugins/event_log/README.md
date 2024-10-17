@@ -45,7 +45,8 @@ alias used to deal with rolled over indices from ILM.  With the data stream,
 there's a little less set up, and the bulk writing is slightly different.
 
 The default data stream / alias name is `.kibana-event-log-ds`.
-To search across all versions' event logs, use `.kibana-event-log-*`; 
+To search across all versions' event logs, use `rrrrrrrrrrrrrrrrrrrrr 
+
 it will search over data streams and aliases as expected.
 
 The event log indices are controlled by ILM.  The ILM policy is initially created
@@ -249,21 +250,21 @@ Collects event information from the event log for the selected saved object by t
 
 Params:
 
-|Property|Description|Type|
-|---|---|---|
-|type|The type of the saved object whose events you're trying to get.|string|
-|id|The id of the saved object.|string|
+| Property | Description                                                     | Type   |
+| -------- | --------------------------------------------------------------- | ------ |
+| type     | The type of the saved object whose events you're trying to get. | string |
+| id       | The id of the saved object.                                     | string |
 
 Query:
 
-|Property|Description|Type|
-|---|---|---|
-|page|The page number.|number|
-|per_page|The number of events to return per page.|number|
-|sort|Array of sort fields and order for the response. Each sort object specifies `sort_field` and `sort_order` where `sort_order` is either `asc` or `desc`.|object|
-|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
-|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
-|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+| Property | Description                                                                                                                                             | Type   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| page     | The page number.                                                                                                                                        | number |
+| per_page | The number of events to return per page.                                                                                                                | number |
+| sort     | Array of sort fields and order for the response. Each sort object specifies `sort_field` and `sort_order` where `sort_order` is either `asc` or `desc`. | object |
+| filter   | A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.                                            | string |
+| start    | The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.  | string |
+| end      | The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.   | string |
 
 Response body:
 
@@ -275,27 +276,27 @@ Collects event information from the event log for the selected saved object by t
 
 Params:
 
-|Property|Description|Type|
-|---|---|---|
-|type|The type of the saved object whose events you're trying to get.|string|
+| Property | Description                                                     | Type   |
+| -------- | --------------------------------------------------------------- | ------ |
+| type     | The type of the saved object whose events you're trying to get. | string |
 
 Query:
 
-|Property|Description|Type|
-|---|---|---|
-|page|The page number.|number|
-|per_page|The number of events to return per page.|number|
-|sort|Array of sort fields and order for the response. Each sort object specifies `sort_field` and `sort_order` where `sort_order` is either `asc` or `desc`.|object|
-|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
-|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
-|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+| Property | Description                                                                                                                                             | Type   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| page     | The page number.                                                                                                                                        | number |
+| per_page | The number of events to return per page.                                                                                                                | number |
+| sort     | Array of sort fields and order for the response. Each sort object specifies `sort_field` and `sort_order` where `sort_order` is either `asc` or `desc`. | object |
+| filter   | A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.                                            | string |
+| start    | The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.  | string |
+| end      | The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.   | string |
 
 Request Body:
 
-|Property|Description|Type|
-|---|---|---|
-|ids|The array ids of the saved object.|string array|
-|legacyIds|The array legacy ids of the saved object. This filter applies to the rules creted in Kibana versions before 8.0.0.|string array|
+| Property  | Description                                                                                                        | Type         |
+| --------- | ------------------------------------------------------------------------------------------------------------------ | ------------ |
+| ids       | The array ids of the saved object.                                                                                 | string array |
+| legacyIds | The array legacy ids of the saved object. This filter applies to the rules creted in Kibana versions before 8.0.0. | string array |
 
 Response body:
 

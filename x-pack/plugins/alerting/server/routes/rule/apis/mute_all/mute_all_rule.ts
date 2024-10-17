@@ -51,7 +51,8 @@ export const muteAllRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const params: MuteAllRuleRequestParamsV1 = req.params;
         trackDeprecatedRouteUsage('muteAll', usageCounter);
         try {

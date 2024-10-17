@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import {
   createLifecycleExecutor,
   IRuleDataClient,
@@ -14,7 +14,7 @@ import {
 
 type LifecycleRuleExecutorCreator = ReturnType<typeof createLifecycleExecutor>;
 export interface RulesServiceSetupDeps {
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
 }
 

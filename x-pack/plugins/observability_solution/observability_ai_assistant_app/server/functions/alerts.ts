@@ -16,6 +16,7 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '@kbn/observability-plugin/common/constants';
 import { FunctionRegistrationParameters } from '.';
 
 const defaultFields = [
@@ -59,15 +60,6 @@ const OMITTED_ALERT_FIELDS = [
   'kibana.space_ids',
   'kibana.alert.time_range',
   'kibana.version',
-] as const;
-
-const DEFAULT_FEATURE_IDS = [
-  'apm',
-  'infrastructure',
-  'logs',
-  'uptime',
-  'slo',
-  'observability',
 ] as const;
 
 export function registerAlertsFunction({
@@ -182,7 +174,7 @@ export function registerAlertsFunction({
       const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
 
       const response = await alertsClient.find({
-        featureIds: DEFAULT_FEATURE_IDS as unknown as string[],
+        ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
         query: {
           bool: {
             filter: [

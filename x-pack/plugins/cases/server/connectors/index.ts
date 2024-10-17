@@ -9,7 +9,7 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
-import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CasesClient } from '../client';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
@@ -25,7 +25,7 @@ export function registerConnectorTypes({
   isServerlessSecurity,
 }: {
   actions: ActionsPluginSetupContract;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   core: CoreSetup;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   getSpaceId: (request?: KibanaRequest) => string;

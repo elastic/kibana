@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useKibana } from '../../common/lib/kibana';
 import {
   mockedAlertSummaryResponse,
@@ -18,7 +17,7 @@ jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('useLoadAlertSummary', () => {
-  const featureIds: ValidFeatureId[] = ['apm'];
+  const ruleTypeIds: string[] = ['apm'];
   const mockedPostAPI = jest.fn();
 
   beforeAll(() => {
@@ -36,7 +35,7 @@ describe('useLoadAlertSummary', () => {
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
-        featureIds,
+        ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
       })
     );
@@ -72,7 +71,7 @@ describe('useLoadAlertSummary', () => {
 
     const { waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
-        featureIds,
+        ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
         filter,
       })
@@ -84,7 +83,7 @@ describe('useLoadAlertSummary', () => {
       fixed_interval: fixedInterval,
       gte: utcFrom,
       lte: utcTo,
-      featureIds,
+      ruleTypeIds,
       filter: [filter],
     });
     expect(mockedPostAPI).toHaveBeenCalledWith(
@@ -101,7 +100,7 @@ describe('useLoadAlertSummary', () => {
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
-        featureIds,
+        ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
       })
     );
