@@ -4,47 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiAccordion, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { GroupSelector } from './group_selector';
+import { InventoryGroupAccordion } from './inventory_group_accordion';
 import { groupCountCss, groupingContainerCss } from './styles';
-import { InventoryGroupPanel } from './inventory_group_panel';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
-import { GroupedGridWrapper } from './grouped_grid_wrapper';
-import { EntityGroup } from '../../../common/entities';
 
 export interface GroupedInventoryPageProps {
   setGroupSelected: (selected: string) => void;
-}
-
-function InventoryGroupAccordion({ group, groupBy }: { group: EntityGroup; groupBy: string }) {
-  const field = group[groupBy];
-  const id = `inventory-group-${groupBy}-${field}`;
-  const [load, setLoad] = useState(false);
-
-  return (
-    <>
-      <EuiAccordion
-        className="inventoryGroupAccordion"
-        data-test-subj={id}
-        id={id}
-        buttonContent={<InventoryGroupPanel field={field} entities={group.count} />}
-        buttonElement="div"
-        buttonProps={{ paddingSize: 'm' }}
-        paddingSize="m"
-        onToggle={() => setLoad(true)}
-      >
-        {load && <GroupedGridWrapper field={field} />}
-      </EuiAccordion>
-      <EuiSpacer size="s" />
-    </>
-  );
 }
 
 export function GroupedInventoryPage() {
@@ -124,7 +98,7 @@ export function GroupedInventoryPage() {
       <EuiSpacer size="m" />
       {value.groups.map((group) => (
         <InventoryGroupAccordion
-          key={`${group}-${group[value.groupBy]}`}
+          key={`${value.groupBy}-${group[value.groupBy]}`}
           group={group}
           groupBy={value.groupBy}
         />
