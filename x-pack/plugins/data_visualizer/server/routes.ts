@@ -69,7 +69,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
   router.versioned
     .get({
-      path: '/internal/data_visualizer/inference_services',
+      path: '/internal/data_visualizer/inference_endpoints',
       access: 'internal',
       options: {
         tags: ['access:fileUpload:analyzeFile'],
@@ -86,8 +86,18 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           const { endpoints } = await esClient.asCurrentUser.inference.get({
             inference_id: '_all',
           });
+          const { trained_model_stats: stats } =
+            await esClient.asCurrentUser.ml.getTrainedModelsStats();
 
-          return response.ok({ body: endpoints });
+          const deployedInferenceEndpoints = endpoints.filter((endpoint) => {
+            const modelId = endpoint.service_settings.model_id;
+            // Check to see if there is a started deployment which
+            // matches the model ID
+            const modelStats = stats.find((stat) => modelId === stat.deployment_stats?.model_id);
+            return modelStats?.deployment_stats?.state === 'started';
+          });
+
+          return response.ok({ body: deployedInferenceEndpoints });
         } catch (e) {
           return response.customError(wrapError(e));
         }
