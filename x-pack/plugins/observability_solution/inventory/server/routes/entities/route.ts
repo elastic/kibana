@@ -7,6 +7,7 @@
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
 import { joinByKey } from '@kbn/observability-utils/array/join_by_key';
@@ -104,7 +105,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
 export const groupEntitiesByRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/group_by/{field}',
   params: t.intersection([
-    t.type({ path: t.type({ field: t.string }) }),
+    t.type({ path: t.type({ field: t.literal(ENTITY_TYPE) }) }),
     t.partial({
       query: t.partial({
         kuery: t.string,

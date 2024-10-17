@@ -8,6 +8,7 @@ import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -21,7 +22,7 @@ export interface GroupedInventoryPageProps {
   setGroupSelected: (selected: string) => void;
 }
 
-export function GroupedInventoryPage() {
+export function GroupedInventoryView() {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
@@ -31,12 +32,12 @@ export function GroupedInventoryPage() {
   const { query } = useInventoryParams('/');
   const { kuery, entityTypes } = query;
 
-  const { value = { groupBy: '', groups: [] }, refresh } = useInventoryAbortableAsync(
+  const { value = { groupBy: ENTITY_TYPE, groups: [] }, refresh } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
         params: {
           path: {
-            field: 'entity.type',
+            field: ENTITY_TYPE,
           },
           query: {
             kuery,
