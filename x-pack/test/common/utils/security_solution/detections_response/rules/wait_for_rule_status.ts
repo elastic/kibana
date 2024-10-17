@@ -57,6 +57,7 @@ export const waitForRuleStatus = async (
         .expect(200);
 
       // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+      console.log('rule status response', JSON.stringify(response.body, null, 2));
       const rule = response.body;
       const ruleStatus = rule?.execution_summary?.last_execution.status;
       const ruleStatusDate = rule?.execution_summary?.last_execution.date;

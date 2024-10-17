@@ -205,6 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(ruleResponse.execution_summary.last_execution.message.includes('missing')).toEqual(
         true
       );
+      console.log('ruleResponse', JSON.stringify(ruleResponse, null, 2));
 
       const metricsResponse = await getMetricsWithRetry(
         request,
@@ -334,7 +335,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched alert with criticality_level', async () => {
-        const { previewId } = await previewRule({ supertest, rule });
+        const previewResponse = await previewRule({ supertest, rule });
+        const { previewId } = previewResponse;
+
+        console.log('previewResponse', JSON.stringify(previewResponse, null, 2));
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
         expect(previewAlerts).toHaveLength(1);
