@@ -20,10 +20,10 @@ import {
 import { DocumentToExpressionReturnType } from '../../async_services';
 import { LensDocument } from '../../persistence';
 import {
-  AddUserMessages,
   GetCompatibleCellValueActions,
   IndexPatternMap,
   IndexPatternRef,
+  UserMessage,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
@@ -60,7 +60,8 @@ interface GetExpressionRendererPropsParams {
   onData: ExpressionWrapperProps['onData$'];
   logError: (type: 'runtime' | 'validation') => void;
   api: LensApi;
-  addUserMessages: AddUserMessages;
+  addUserMessages: (messages: UserMessage[]) => void;
+  updateBlockingErrors: (error: Error) => void;
 }
 
 async function getExpressionFromDocument(
@@ -144,6 +145,7 @@ export async function getExpressionRendererParams(
     logError,
     api,
     addUserMessages,
+    updateBlockingErrors,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -176,7 +178,7 @@ export async function getExpressionRendererParams(
     addUserMessages([getSearchContextIncompatibleMessage()]);
   }
 
-  if (expression) {
+  if (expression && services.spaces) {
     const params: ExpressionWrapperProps = {
       expression,
       syncColors,
@@ -197,6 +199,7 @@ export async function getExpressionRendererParams(
       ExpressionRenderer: expressionRenderer,
       addUserMessages,
       onRuntimeError: (error: Error) => {
+        updateBlockingErrors(error);
         logError('runtime');
       },
       abortController,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type {
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
@@ -20,7 +21,8 @@ export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
     PublishesSavedObjectId &
     PublishesDataViews &
-    PublishesDataLoading;
+    PublishesDataLoading &
+    PublishesBlockingError;
   serialize: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
   comparators: StateComparators<
     Pick<LensRuntimeState, 'attributes' | 'savedObjectId' | 'abortController'>
@@ -53,7 +55,7 @@ export function initializeStateManagement(
   // This is the way to communicate to the embeddable panel to render a blocking error with the
   // default panel error component - i.e. cannot find a Lens SO type of thing.
   // For Lens specific errors, we use a Lens specific error component.
-  const [blockingError$] = buildObservableVariable<string | undefined>(undefined);
+  const [blockingError$] = buildObservableVariable<Error | undefined>(undefined);
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,

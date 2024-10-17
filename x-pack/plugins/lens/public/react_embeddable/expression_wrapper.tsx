@@ -17,7 +17,7 @@ import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/co
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { LensInspector } from '../lens_inspector_service';
-import { AddUserMessages } from '../types';
+import { UserMessage } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -40,7 +40,7 @@ export interface ExpressionWrapperProps {
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;
-  addUserMessages: AddUserMessages;
+  addUserMessages: (messages: UserMessage[]) => void;
   onRuntimeError: (error: Error) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;

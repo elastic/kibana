@@ -17,7 +17,7 @@ import {
 } from './types';
 
 import { ExpressionWrapper } from './expression_wrapper';
-import { loadEmbeddableData, hasExpressionParamsToRender } from './data_loader';
+import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState, getViewMode } from './helper';
 import { UserMessages } from './user_messages/container';
 import { useMessages } from './user_messages/use_messages';
@@ -178,7 +178,7 @@ export const createLensEmbeddableFactory = (
 
       return {
         api,
-        Component: () => {
+        Component: function LensEmbeddable() {
           const [
             // Pick up updated params from the observable
             expressionParams,
@@ -193,7 +193,7 @@ export const createLensEmbeddableFactory = (
           );
           const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(parentApi) === 'edit');
 
-          const [blockingErrors, warningOrErrors, infoMessages] = useMessages(internalApi);
+          const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
           // On unmount call all the cleanups
           useEffect(() => {
@@ -207,22 +207,6 @@ export const createLensEmbeddableFactory = (
               dashboardConfig.cleanup();
             };
           }, []);
-
-          // Anything that can go wrong should show the error panel together with all the messages
-          if (
-            !services.spaces ||
-            !hasExpressionParamsToRender(expressionParams) ||
-            blockingErrors.length
-          ) {
-            return (
-              <UserMessages
-                blockingErrors={blockingErrors}
-                warningOrErrors={warningOrErrors}
-                infoMessages={infoMessages}
-                canEdit={canEdit}
-              />
-            );
-          }
 
           // Publish the data attributes only if avaialble/visible
           const title = !api.hidePanelTitle?.getValue()
@@ -241,9 +225,8 @@ export const createLensEmbeddableFactory = (
               {...description}
               data-shared-item
             >
-              <ExpressionWrapper {...expressionParams} />
+              {expressionParams == null ? null : <ExpressionWrapper {...expressionParams} />}
               <UserMessages
-                blockingErrors={blockingErrors}
                 warningOrErrors={warningOrErrors}
                 infoMessages={infoMessages}
                 canEdit={canEdit}

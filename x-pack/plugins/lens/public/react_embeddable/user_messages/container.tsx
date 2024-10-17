@@ -19,13 +19,15 @@ export function UserMessages({
   canEdit,
 }: {
   canEdit: boolean;
-  blockingErrors: UserMessage[];
+  blockingErrors?: UserMessage[];
   warningOrErrors: UserMessage[];
   infoMessages: UserMessage[];
 }) {
   return (
     <>
-      <VisualizationErrorPanel errors={blockingErrors} canEdit={canEdit} />
+      {blockingErrors ? (
+        <VisualizationErrorPanel errors={blockingErrors} canEdit={canEdit} />
+      ) : null}
       <div
         css={css({
           position: 'absolute',

@@ -18,7 +18,6 @@ import { BehaviorSubject, type Subscription, distinctUntilChanged, skip } from '
 import fastIsEqual from 'fast-deep-equal';
 import { getEditPath } from '../../common/constants';
 import type {
-  ExpressionWrapperProps,
   GetStateType,
   LensApi,
   LensInternalApi,
@@ -28,17 +27,13 @@ import type {
 import { getExpressionRendererParams } from './expressions/expression_params';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
-import { buildUserMessagesHelpers } from './user_messages/methods';
+import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
-import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
+import type { SharingSavedObjectProps } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
 import { getViewMode } from './helper';
 import { getUsedDataViews } from './expressions/update_data_views';
-
-const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
-  'visualization',
-  'visualizationOnEmbeddable',
-];
+import { addLog } from './logger';
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -59,14 +54,14 @@ export function loadEmbeddableData(
     ? parentApi
     : ({} as LensPublicCallbacks);
 
-  // Some convenience user messages methods
+  // Some convenience api for the user messaging
   const {
     getUserMessages,
-    addUserMessage,
-    updateMessages,
+    addUserMessages,
     updateBlockingErrors,
     updateWarnings,
     resetMessages,
+    updateMessages,
   } = buildUserMessagesHelpers(
     api,
     internalApi,
@@ -80,12 +75,8 @@ export function loadEmbeddableData(
   const onRenderComplete = () => {
     internalApi.dispatchRenderComplete();
 
-    internalApi.updateMessages(getUserMessages('embeddableBadge'));
-    const blockingMessages = getUserMessages(blockingMessageDisplayLocations, {
-      severity: 'error',
-    });
-    internalApi.updateBlockingMessages(blockingMessages);
-    updateBlockingErrors(blockingMessages);
+    updateMessages(getUserMessages('embeddableBadge'));
+    updateBlockingErrors();
   };
 
   const unifiedSearch$ = new BehaviorSubject<
@@ -98,10 +89,20 @@ export function loadEmbeddableData(
     searchSessionId: undefined,
   });
 
-  async function reload() {
+  async function reload(
+    // make reload easier to debug
+    sourceId:
+      | 'attributes'
+      | 'savedObjectId'
+      | 'overrides'
+      | 'disableTriggers'
+      | 'viewMode'
+      | 'searchContext'
+  ) {
+    addLog(`Embeddable reload reason: ${sourceId}`);
     resetMessages();
     // reset the render on reload
-    internalApi.dispatchRenderStart();
+    // internalApi.dispatchRenderStart();
     // notify about data loading
     internalApi.updateDataLoading(true);
 
@@ -143,6 +144,7 @@ export function loadEmbeddableData(
       onLoad?.(false, adapters, api.dataLoading);
 
       updateWarnings();
+      updateBlockingErrors();
     };
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
@@ -171,12 +173,13 @@ export function loadEmbeddableData(
         searchSessionId,
         abortController: internalApi.expressionAbortController$.getValue(),
         getExecutionContext,
-        logError: getLogError(getExecutionContext, onRenderComplete),
-        addUserMessage,
+        logError: getLogError(getExecutionContext),
+        addUserMessages,
         onRender,
         onData,
         handleEvent,
         disableTriggers,
+        updateBlockingErrors,
       }),
       getUsedDataViews(
         currentState.attributes.references,
@@ -219,22 +222,30 @@ export function loadEmbeddableData(
         searchSessionId,
       });
 
-      reload();
+      reload('searchContext');
     }),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
-    internalApi.attributes$.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
-    api.savedObjectId.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
-    internalApi.overrides$.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
-    internalApi.disableTriggers$.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
+    internalApi.attributes$
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
+      .subscribe(() => reload('attributes')),
+    api.savedObjectId
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
+      .subscribe(() => reload('savedObjectId')),
+    internalApi.overrides$
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
+      .subscribe(() => reload('overrides')),
+    internalApi.disableTriggers$
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
+      .subscribe(() => reload('disableTriggers')),
   ];
   if (apiPublishesViewMode(parentApi)) {
     subscriptions.push(
       parentApi.viewMode.subscribe(() => {
         // only reload if drilldowns are set
         if (getState().enhancements?.dynamicActions) {
-          reload();
+          reload('viewMode');
         }
       })
     );
@@ -247,10 +258,4 @@ export function loadEmbeddableData(
       }
     },
   };
-}
-
-export function hasExpressionParamsToRender(
-  params: Partial<ExpressionWrapperProps>
-): params is ExpressionWrapperProps {
-  return params.expression != null;
 }

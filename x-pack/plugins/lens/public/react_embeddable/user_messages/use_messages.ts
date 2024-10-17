@@ -10,13 +10,10 @@ import { useMemo } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LensInternalApi } from '../types';
 
-export function useMessages({ messages$, blockingMessages$ }: LensInternalApi) {
+export function useMessages({ messages$ }: LensInternalApi) {
   const latestMessages = useStateFromPublishingSubject(messages$);
-  const latestBlockingMessages = useStateFromPublishingSubject(blockingMessages$);
-  const [warningOrErrorMessages, infoMessages] = useMemo(
+  return useMemo(
     () => partition(latestMessages, ({ severity }) => severity !== 'info'),
     [latestMessages]
   );
-
-  return [latestBlockingMessages, warningOrErrorMessages, infoMessages];
 }

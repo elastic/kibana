@@ -18,10 +18,12 @@ import type {
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasSupportedTriggers,
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
+  PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishingSubject,
   SerializedTitles,
@@ -68,7 +70,6 @@ import type {
   XYState,
 } from '../async_services';
 import type {
-  AddUserMessages,
   DatasourceMap,
   IndexPatternMap,
   IndexPatternRef,
@@ -338,6 +339,8 @@ export type LensApi = Simplify<
   DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
+    // for blocking errors leverage the embeddable panel UI
+    PublishesBlockingError &
     // This is used by dashboard/container to show filters/queries on the panel
     PublishesUnifiedSearch &
     // Let the container know the loading state
@@ -375,16 +378,14 @@ export type LensInternalApi = Simplify<
       dispatchRenderComplete: () => void;
       updateRenderCount: () => void;
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
-      expressionParams$: PublishingSubject<Partial<ExpressionWrapperProps>>;
-      updateExpressionParams: (newParams: Partial<ExpressionWrapperProps>) => void;
+      expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
+      updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
       expressionAbortController$: PublishingSubject<AbortController | undefined>;
       updateAbortController: (newAbortController: AbortController | undefined) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
       messages$: PublishingSubject<UserMessage[]>;
-      blockingMessages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
-      updateBlockingMessages: (newMessages: UserMessage[]) => void;
       resetAllMessages: () => void;
     }
 >;
@@ -410,7 +411,7 @@ export interface ExpressionWrapperProps {
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;
-  addUserMessages: AddUserMessages;
+  addUserMessages: (messages: UserMessage[]) => void;
   onRuntimeError: (error: Error) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;

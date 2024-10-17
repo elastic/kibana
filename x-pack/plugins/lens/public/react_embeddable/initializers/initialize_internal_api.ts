@@ -22,9 +22,7 @@ export function initializeInternalApi(
   parentApi: unknown
 ): LensInternalApi {
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
-  const [expressionParams$] = buildObservableVariable<Partial<ExpressionWrapperProps>>({
-    expression: '',
-  });
+  const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
   if (apiHasAbortController(parentApi)) {
     expressionAbortController$.next(parentApi.abortController);
@@ -38,7 +36,6 @@ export function initializeInternalApi(
 
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const messages$ = new BehaviorSubject<UserMessage[]>([]);
-  const blockingMessages$ = new BehaviorSubject<UserMessage[]>([]);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
@@ -56,7 +53,7 @@ export function initializeInternalApi(
     updateRenderCount: () => renderCount$.next(renderCount$.getValue() + 1),
     dispatchRenderStart: () => hasRenderCompleted$.next(false),
     dispatchRenderComplete: () => hasRenderCompleted$.next(true),
-    updateExpressionParams: (newParams: Partial<ExpressionWrapperProps>) =>
+    updateExpressionParams: (newParams: ExpressionWrapperProps | null) =>
       expressionParams$.next(newParams),
     updateDataLoading: (newDataLoading: boolean | undefined) => dataLoading$.next(newDataLoading),
     updateOverrides: (overrides: LensOverrides['overrides']) => overrides$.next(overrides),
@@ -65,12 +62,9 @@ export function initializeInternalApi(
       expressionAbortController$.next(abortController),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     messages$,
-    blockingMessages$,
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
-    updateBlockingMessages: (newMessages: UserMessage[]) => blockingMessages$.next(newMessages),
     resetAllMessages: () => {
       messages$.next([]);
-      blockingMessages$.next([]);
     },
   };
 }
