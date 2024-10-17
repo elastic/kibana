@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView, SortDirection } from '@kbn/data-plugin/common';
@@ -14,12 +14,27 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
-import { useKibanaVersion, useStartServices } from '../../../../../../hooks';
+import {
+  sendGetAgentStatusRuntimeField,
+  useKibanaVersion,
+  useStartServices,
+} from '../../../../../../hooks';
 
 export function useExportCSV() {
   const startServices = useStartServices();
   const { notifications, http, uiSettings } = startServices;
   const kibanaVersion = useKibanaVersion();
+  const [runtimeFields, setRuntimeFields] = useState<string>(
+    'emit(doc["active"].value == false ? "unenrolled" : "online")'
+  );
+
+  useEffect(() => {
+    const getRuntimeFields = async () => {
+      const resp = await sendGetAgentStatusRuntimeField();
+      if (resp.data) setRuntimeFields(resp.data);
+    };
+    getRuntimeFields();
+  }, []);
 
   // TODO pass columns from Agent list UI
   const columns = [
@@ -39,7 +54,7 @@ export function useExportCSV() {
           type: 'keyword',
           // TODO all statuses, needs a new API to get the runtime field script from backend
           script: {
-            source: 'emit(doc["active"].value == false ? "unenrolled" : "online")',
+            source: runtimeFields,
           },
         },
       },
@@ -60,11 +75,22 @@ export function useExportCSV() {
       },
       // TODO pass query from Agent list UI
       query: {
-        range: {
-          last_checkin: {
-            format: 'strict_date_optional_time',
-            gte: '2024-10-15T08:44:13.937Z',
-          },
+        bool: {
+          filter: [
+            {
+              range: {
+                last_checkin: {
+                  format: 'strict_date_optional_time',
+                  gte: '2024-10-15T08:44:13.937Z',
+                },
+              },
+            },
+            {
+              term: {
+                active: true,
+              },
+            },
+          ],
         },
       },
     },

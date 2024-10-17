@@ -79,6 +79,7 @@ import {
   deleteAgentUploadFileHandler,
   postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
+  getAgentStatusRuntimeFieldHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -834,5 +835,30 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       getAvailableVersionsHandler
+    );
+
+  router.versioned
+    .get({
+      path: '/api/fleet/agents/status_runtime_field',
+      fleetAuthz: {
+        fleet: { readAgents: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => schema.string(),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getAgentStatusRuntimeFieldHandler
     );
 };
