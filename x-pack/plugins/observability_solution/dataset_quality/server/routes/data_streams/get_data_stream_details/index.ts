@@ -29,8 +29,6 @@ export async function getDataStreamSettings({
   esClient: ElasticsearchClient;
   dataStream: string;
 }): Promise<DataStreamSettings> {
-  throwIfInvalidDataStreamParams(dataStream);
-
   const [createdOn, [dataStreamInfo], datasetUserPrivileges] = await Promise.all([
     getDataStreamCreatedOn(esClient, dataStream),
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
