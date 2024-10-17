@@ -24,10 +24,16 @@ interface Options {
   entityType: EntityType;
   namespace: string;
   fieldHistoryLength: number;
+  indexPatterns: string[];
 }
 
 export const getUnitedEntityDefinition = memoize(
-  ({ entityType, namespace, fieldHistoryLength }: Options): UnitedEntityDefinition => {
+  ({
+    entityType,
+    namespace,
+    fieldHistoryLength,
+    indexPatterns,
+  }: Options): UnitedEntityDefinition => {
     const unitedDefinition = unitedDefinitionBuilders[entityType](fieldHistoryLength);
 
     unitedDefinition.fields.push(
@@ -40,10 +46,9 @@ export const getUnitedEntityDefinition = memoize(
     return new UnitedEntityDefinition({
       ...unitedDefinition,
       namespace,
+      indexPatterns,
     });
-  },
-  ({ entityType, namespace, fieldHistoryLength }: Options) =>
-    `${entityType}-${namespace}-${fieldHistoryLength}`
+  }
 );
 
 export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>

@@ -68,6 +68,7 @@ export const RuleActionsAlertsFilter = ({
     () => onChange(state ? undefined : query),
     [state, query, onChange]
   );
+
   const updateQuery = useCallback(
     (update: Partial<AlertsFilter['query']>) => {
       setQuery({
