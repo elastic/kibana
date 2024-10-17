@@ -107,6 +107,7 @@ export const DataUsageMetrics = () => {
     },
     {
       retry: false,
+      enabled: !!metricsFilters.dataStreams.length,
     }
   );
 
