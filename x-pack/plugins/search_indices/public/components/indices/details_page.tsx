@@ -248,7 +248,7 @@ export const SearchIndexDetailsPage = () => {
                 <EuiFlexItem>
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
-                    navigateToPlayground={navigateToPlayground}
+                    showApiReference={isDocumentsExists}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,
