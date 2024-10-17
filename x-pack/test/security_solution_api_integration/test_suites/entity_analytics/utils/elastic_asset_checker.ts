@@ -46,15 +46,30 @@ export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getSe
     }
   };
 
-  const expectEnrichPolicyStatus = async (policyId: string, exists: boolean) => {
-    try {
-      await es.enrich.getPolicy({ name: policyId });
-      if (!exists) {
-        throw new Error(`Expected enrich policy ${policyId} to not exist, but it does`);
-      }
-    } catch (e) {
-      if (exists) {
-        throw new Error(`Expected enrich policy ${policyId} to exist, but it does not: ${e}`);
+  const expectEnrichPolicyStatus = async (
+    policyId: string,
+    exists: boolean,
+    attempts: number = 5,
+    delayMs: number = 2000
+  ) => {
+    let currentAttempt = 1;
+    while (currentAttempt <= attempts) {
+      try {
+        await es.enrich.getPolicy({ name: policyId });
+        if (!exists) {
+          throw new Error(`Expected enrich policy ${policyId} to not exist, but it does`);
+        }
+        return; // Enrich policy exists, exit the loop
+      } catch (e) {
+        if (currentAttempt === attempts) {
+          if (exists) {
+            throw new Error(`Expected enrich policy ${policyId} to exist, but it does not: ${e}`);
+          } else {
+            return; // Enrich policy does not exist, exit the loop
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        currentAttempt++;
       }
     }
   };
@@ -65,17 +80,32 @@ export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getSe
   const expectEnrichPolicyNotFound = async (policyId: string, attempts: number = 5) =>
     expectEnrichPolicyStatus(policyId, false);
 
-  const expectComponentTemplatStatus = async (templateName: string, exists: boolean) => {
-    try {
-      await es.cluster.getComponentTemplate({ name: templateName });
-      if (!exists) {
-        throw new Error(`Expected component template ${templateName} to not exist, but it does`);
-      }
-    } catch (e) {
-      if (exists) {
-        throw new Error(
-          `Expected component template ${templateName} to exist, but it does not: ${e}`
-        );
+  const expectComponentTemplatStatus = async (
+    templateName: string,
+    exists: boolean,
+    attempts: number = 5,
+    delayMs: number = 2000
+  ) => {
+    let currentAttempt = 1;
+    while (currentAttempt <= attempts) {
+      try {
+        await es.cluster.getComponentTemplate({ name: templateName });
+        if (!exists) {
+          throw new Error(`Expected component template ${templateName} to not exist, but it does`);
+        }
+        return; // Component template exists, exit the loop
+      } catch (e) {
+        if (currentAttempt === attempts) {
+          if (exists) {
+            throw new Error(
+              `Expected component template ${templateName} to exist, but it does not: ${e}`
+            );
+          } else {
+            return; // Component template does not exist, exit the loop
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        currentAttempt++;
       }
     }
   };
@@ -86,15 +116,32 @@ export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getSe
   const expectComponentTemplateNotFound = async (templateName: string) =>
     expectComponentTemplatStatus(templateName, false);
 
-  const expectIngestPipelineStatus = async (pipelineId: string, exists: boolean) => {
-    try {
-      await es.ingest.getPipeline({ id: pipelineId });
-      if (!exists) {
-        throw new Error(`Expected ingest pipeline ${pipelineId} to not exist, but it does`);
-      }
-    } catch (e) {
-      if (exists) {
-        throw new Error(`Expected ingest pipeline ${pipelineId} to exist, but it does not: ${e}`);
+  const expectIngestPipelineStatus = async (
+    pipelineId: string,
+    exists: boolean,
+    attempts: number = 5,
+    delayMs: number = 2000
+  ) => {
+    let currentAttempt = 1;
+    while (currentAttempt <= attempts) {
+      try {
+        await es.ingest.getPipeline({ id: pipelineId });
+        if (!exists) {
+          throw new Error(`Expected ingest pipeline ${pipelineId} to not exist, but it does`);
+        }
+        return; // Ingest pipeline exists, exit the loop
+      } catch (e) {
+        if (currentAttempt === attempts) {
+          if (exists) {
+            throw new Error(
+              `Expected ingest pipeline ${pipelineId} to exist, but it does not: ${e}`
+            );
+          } else {
+            return; // Ingest pipeline does not exist, exit the loop
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        currentAttempt++;
       }
     }
   };
@@ -105,6 +152,25 @@ export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getSe
   const expectIngestPipelineNotFound = async (pipelineId: string) =>
     expectIngestPipelineStatus(pipelineId, false);
 
+  const expectIndexStatus = async (indexName: string, exists: boolean) => {
+    try {
+      await es.indices.get({ index: indexName });
+      if (!exists) {
+        throw new Error(`Expected index ${indexName} to not exist, but it does`);
+      }
+    } catch (e) {
+      if (exists) {
+        throw new Error(`Expected index ${indexName} to exist, but it does not: ${e}`);
+      }
+    }
+  };
+
+  const expectEntitiesIndexExists = async (entityType: string, namespace: string) =>
+    expectIndexStatus(`.entities.v1.latest.security_${entityType}_${namespace}`, true);
+
+  const expectEntitiesIndexNotFound = async (entityType: string, namespace: string) =>
+    expectIndexStatus(`.entities.v1.latest.security_${entityType}_${namespace}`, false);
+
   return {
     expectComponentTemplateExists,
     expectComponentTemplateNotFound,
@@ -112,6 +178,8 @@ export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getSe
     expectEnrichPolicyNotFound,
     expectIngestPipelineExists,
     expectIngestPipelineNotFound,
+    expectEntitiesIndexExists,
+    expectEntitiesIndexNotFound,
     expectTransformExists,
     expectTransformNotFound,
   };

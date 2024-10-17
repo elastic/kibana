@@ -7,6 +7,8 @@
 
 import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
+import { getEntitiesIndexName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/utils';
+import _ from 'lodash';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
@@ -26,6 +28,8 @@ export const EntityStoreUtils = (
     expectComponentTemplateNotFound,
     expectIngestPipelineExists,
     expectIngestPipelineNotFound,
+    expectEntitiesIndexExists,
+    expectEntitiesIndexNotFound,
   } = elasticAssetCheckerFactory(getService);
 
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
@@ -68,6 +72,54 @@ export const EntityStoreUtils = (
     expect(res.status).to.eql(200);
   };
 
+  const initEntityEngineForEntityTypeAndWait = async (entityType: EntityType) => {
+    await initEntityEngineForEntityType(entityType);
+
+    let attempts = 10;
+    let lastBody: any = null;
+    const delayMs = 2000;
+
+    while (attempts > 0) {
+      const { body } = await api.getEntityEngine({ params: { entityType } }, namespace).expect(200);
+      lastBody = body;
+      if (body.status === 'started') {
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      attempts--;
+    }
+
+    throw new Error(
+      `Engine for entity type ${entityType} did not start after multiple attempts, last status: ${JSON.stringify(
+        lastBody
+      )}`
+    );
+  };
+
+  const initEntityEngineForEntityTypesAndWait = async (entityTypes: EntityType[]) => {
+    await Promise.all(entityTypes.map((entityType) => initEntityEngineForEntityType(entityType)));
+
+    let attempts = 10;
+    let lastBody: any = null;
+    const delayMs = 2000;
+
+    while (attempts > 0) {
+      const { body } = await api.listEntityEngines(namespace).expect(200);
+      lastBody = body;
+      if (body.engines.every((engine: any) => engine.status === 'started')) {
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      attempts--;
+    }
+
+    throw new Error(
+      `Engines did not start after multiple attempts, last status: ${JSON.stringify(lastBody)}`
+    );
+  };
+
   const expectTransformStatus = async (
     transformId: string,
     exists: boolean,
@@ -101,6 +153,7 @@ export const EntityStoreUtils = (
     await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_${namespace}_v1`);
     await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
+    await expectEntitiesIndexExists(entityType, namespace);
   };
 
   const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
@@ -108,13 +161,87 @@ export const EntityStoreUtils = (
     await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_${namespace}_v1`);
     await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);
+    await expectEntitiesIndexNotFound(entityType, namespace);
+  };
+
+  const scheduleTransformNow = async (entityType: EntityType) => {
+    const transformId = `entities-v1-latest-security_${entityType}_${namespace}`;
+
+    await es.transform.scheduleNowTransform({
+      transform_id: transformId,
+    });
+  };
+
+  const waitForEntity = async ({
+    name,
+    entityType,
+    expectedFields,
+    attempts = 5,
+    delayMs = 2000,
+  }: {
+    name: string;
+    entityType: EntityType;
+    expectedFields: string[];
+    attempts?: number;
+    delayMs?: number;
+  }) => {
+    let currentAttempt = 1;
+    let entity: any;
+    while (currentAttempt <= attempts) {
+      try {
+        const res = await es.search({
+          index: getEntitiesIndexName(entityType, namespace),
+          body: {
+            query: {
+              match: {
+                'entity.name': name,
+              },
+            },
+          },
+        });
+
+        if (res?.hits?.hits?.[0]?._source) {
+          entity = res.hits.hits[0]._source;
+
+          if (expectedFields.length > 0) {
+            if (expectedFields.every((field) => _.has(entity, field))) {
+              return entity;
+            }
+          } else {
+            return entity;
+          }
+        }
+      } catch (e) {
+        if (currentAttempt === attempts) {
+          throw new Error(`Failed to get entity ${name} of type ${entityType}: ${e}`);
+        }
+        scheduleTransformNow(entityType);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        currentAttempt++;
+      }
+    }
+
+    if (!entity) {
+      throw new Error(`Failed to get entity ${name} of type ${entityType}`);
+    }
+
+    if (expectedFields.length > 0) {
+      throw new Error(
+        `Failed to get entity ${name} of type ${entityType} with expected fields: ${expectedFields.join(
+          ', '
+        )}, last entity found: ${JSON.stringify(entity)}`
+      );
+    }
   };
 
   return {
     cleanEngines,
     initEntityEngineForEntityType,
+    initEntityEngineForEntityTypeAndWait,
+    initEntityEngineForEntityTypesAndWait,
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
+    waitForEntity,
   };
 };
