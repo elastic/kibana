@@ -182,7 +182,7 @@ function getExpressionForLayer(
     const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
     const esqlLayer =
       canUseESQL &&
-      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
+      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant, data);
 
     if (!esqlLayer) {
       esAggEntries.forEach(([colId, col], index) => {
@@ -487,7 +487,7 @@ function getExpressionForLayer(
       ? buildExpressionFunction('esql', {
           query: esqlLayer.esql,
           timeField: allDateHistogramFields[0],
-          partialRows,
+          partialRows: esqlLayer.partialRows,
           ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
         }).toAst()
       : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
