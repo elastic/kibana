@@ -9,7 +9,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { SearchRow } from './search_row';
-import { SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
+import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
+import { AssociatedFilter } from '../../../common/notes/constants';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 
 jest.mock('../../common/components/user_profiles/use_suggest_users');
@@ -38,6 +39,7 @@ describe('SearchRow', () => {
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USER_SELECT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ASSOCIATED_NOT_SELECT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should call the correct action when entering a value in the search bar', async () => {
@@ -59,6 +61,15 @@ describe('SearchRow', () => {
 
     const option = await screen.findByText('test');
     fireEvent.click(option);
+
+    expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should call the correct action when select a value in the associated note dropdown', async () => {
+    const { getByTestId } = render(<SearchRow />);
+
+    const associatedNoteSelect = getByTestId(ASSOCIATED_NOT_SELECT_TEST_ID);
+    await userEvent.selectOptions(associatedNoteSelect, [AssociatedFilter.documentOnly]);
 
     expect(mockDispatch).toHaveBeenCalled();
   });
