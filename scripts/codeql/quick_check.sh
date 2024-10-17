@@ -58,35 +58,41 @@ docker run $PLATFORM_FLAG --rm -v "${DATABASE_PATH}":/workspace/shared $DOCKER_I
 # Step 4: Print summary of SARIF results
 echo "Analysis complete. Results saved to $QUERY_OUTPUT"
 if command -v jq &> /dev/null; then
-    echo "${yellow}${bold}Summary of SARIF results:${reset}"
-    jq -r '
-      .runs[] |
-      .results[] as $result |
-      .tool.driver.rules[] as $rule |
-      select($rule.id == $result.ruleId) |
-      "Rule: \($result.ruleId)\nMessage: \($result.message.text)\nFile: \($result.locations[].physicalLocation.artifactLocation.uri)\nLine: \($result.locations[].physicalLocation.region.startLine)\nSecurity Severity: \($rule.properties."problem.severity" // "N/A")\n"' "$QUERY_OUTPUT" |
-    while IFS= read -r line; do
-        case "$line" in
-            Rule:*)
-                echo "${red}${bold}$line${reset}"
-                ;;
-            Message:*)
-                echo "${green}$line${reset}"
-                ;;
-            File:*)
-                echo "${blue}$line${reset}"
-                ;;
-            Line:*)
-                echo "${yellow}$line${reset}"
-                ;;
-            Security\ Severity:*)
-                echo "${yellow}$line${reset}"
-                ;;
-            *)
-                echo "$line"
-                ;;
-        esac
-    done
+    vulnerabilities=$(jq -r '.runs[] | select(.results | length > 0)' "$QUERY_OUTPUT")
+
+    if [[ -z "$vulnerabilities" ]]; then
+        echo "${blue}${bold}No vulnerabilities found in the SARIF results.${reset}"
+    else
+        echo "${yellow}${bold}Summary of SARIF results:${reset}"
+        jq -r '
+          .runs[] |
+          .results[] as $result |
+          .tool.driver.rules[] as $rule |
+          select($rule.id == $result.ruleId) |
+          "Rule: \($result.ruleId)\nMessage: \($result.message.text)\nFile: \($result.locations[].physicalLocation.artifactLocation.uri)\nLine: \($result.locations[].physicalLocation.region.startLine)\nSecurity Severity: \($rule.properties."problem.severity" // "N/A")\n"' "$QUERY_OUTPUT" |
+        while IFS= read -r line; do
+            case "$line" in
+                Rule:*)
+                    echo "${red}${bold}$line${reset}"
+                    ;;
+                Message:*)
+                    echo "${green}$line${reset}"
+                    ;;
+                File:*)
+                    echo "${blue}$line${reset}"
+                    ;;
+                Line:*)
+                    echo "${yellow}$line${reset}"
+                    ;;
+                Security\ Severity:*)
+                    echo "${yellow}$line${reset}"
+                    ;;
+                *)
+                    echo "$line"
+                    ;;
+            esac
+        done
+    fi
 else
     echo "${red}${bold}Please install jq to display a summary of the SARIF results.${reset}"
     echo "${bold}You can view the full results in the SARIF file using a SARIF viewer.${reset}"
