@@ -62,11 +62,10 @@ export class EntityClient {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
   }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asInternalUser,
       includeState: true,
     });
 
@@ -90,21 +89,24 @@ export class EntityClient {
       definition,
       definitionUpdate,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      clusterClient: this.options.clusterClient,
       logger: this.options.logger,
     });
 
     if (shouldRestartTransforms) {
-      await startTransforms(secondaryAuthClient, updatedDefinition, this.options.logger);
+      await startTransforms(
+        this.options.clusterClient.asSecondaryAuthUser,
+        updatedDefinition,
+        this.options.logger
+      );
     }
     return updatedDefinition;
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asInternalUser,
       soClient: this.options.soClient,
     });
 
@@ -116,7 +118,7 @@ export class EntityClient {
 
     await uninstallEntityDefinition({
       definition,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asSecondaryAuthUser,
       soClient: this.options.soClient,
       logger: this.options.logger,
     });
@@ -148,7 +150,7 @@ export class EntityClient {
     builtIn?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
+      esClient: this.options.clusterClient.asInternalUser,
       soClient: this.options.soClient,
       page,
       perPage,

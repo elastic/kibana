@@ -14,11 +14,13 @@ export async function deleteIndices(
   definition: EntityDefinition,
   logger: Logger
 ) {
+  const index = generateLatestIndexName(definition);
   try {
-    const index = generateLatestIndexName(definition);
     await esClient.indices.delete({ index, ignore_unavailable: true });
   } catch (e) {
-    logger.error(`Unable to remove entity definition index [${definition.id}}]`);
+    logger.error(
+      `Unable to remove entity definition index ${index} for definition [${definition.id}]`
+    );
     throw e;
   }
 }
