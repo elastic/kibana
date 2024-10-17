@@ -96,6 +96,12 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAPI
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
         .set('kbn-xsrf', 'true')
+        .send({})
+        .expect(400);
+
+      await supertestAPI
+        .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
+        .set('kbn-xsrf', 'true')
         .send(expectedUpdatedParam)
         .expect(200);
 
@@ -134,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           key: 'testUpdated',
         })
-        .expect(400);
+        .expect(200);
 
       await supertestAPI
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)

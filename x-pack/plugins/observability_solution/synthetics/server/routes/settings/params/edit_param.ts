@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
 import { validateRouteSpaceName } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
@@ -30,8 +31,8 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       params: RequestParamsSchema,
       body: schema.object({
-        key: schema.string(),
-        value: schema.string(),
+        key: schema.maybe(schema.string()),
+        value: schema.maybe(schema.string()),
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
         share_across_spaces: schema.maybe(schema.boolean()),
@@ -39,14 +40,24 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async (routeContext) => {
-    const { savedObjectsClient, request, response } = routeContext;
+    const { savedObjectsClient, request, response, spaceId, server } = routeContext;
     const { invalidResponse } = await validateRouteSpaceName(routeContext);
     if (invalidResponse) return invalidResponse;
 
-    const { id } = request.params;
+    const { id: paramId } = request.params;
     const data = request.body as SyntheticsParamRequest;
+    if (isEmpty(data)) {
+      return response.badRequest({ body: { message: 'Request body cannot be empty' } });
+    }
+    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+
     try {
-      const existingParam = await savedObjectsClient.get<SyntheticsParams>(syntheticsParamType, id);
+      const existingParam =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
+          syntheticsParamType,
+          paramId,
+          { namespace: spaceId }
+        );
 
       const newParam = {
         ...existingParam.attributes,
@@ -61,7 +72,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         namespaces,
       } = (await savedObjectsClient.update<SyntheticsParams>(
         syntheticsParamType,
-        id,
+        paramId,
         newParam
       )) as SavedObject<SyntheticsParams>;
 
