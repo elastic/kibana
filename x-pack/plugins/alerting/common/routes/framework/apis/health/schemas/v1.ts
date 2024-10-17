@@ -7,19 +7,42 @@
 
 import { schema } from '@kbn/config-schema';
 
-const alertingFrameworkHealthSchema = schema.object({
+const alertingFrameworkHealthSchemaObject = {
   status: schema.oneOf([schema.literal('ok'), schema.literal('warn'), schema.literal('error')]),
   timestamp: schema.string(),
-});
+};
 
 export const healthFrameworkResponseBodySchema = schema.object({
-  is_sufficiently_secure: schema.boolean(),
-  has_permanent_encryption_key: schema.boolean(),
-  alerting_framework_health: schema.object({
-    decryption_health: alertingFrameworkHealthSchema,
-    execution_health: alertingFrameworkHealthSchema,
-    read_health: alertingFrameworkHealthSchema,
+  is_sufficiently_secure: schema.boolean({
+    meta: {
+      description: 'If false, security is enabled but TLS is not.',
+    },
   }),
+  has_permanent_encryption_key: schema.boolean({
+    meta: {
+      description:
+        'If false, the encrypted saved object plugin does not have a permanent encryption key.',
+    },
+  }),
+  alerting_framework_health: schema.object(
+    {
+      decryption_health: schema.object(alertingFrameworkHealthSchemaObject, {
+        meta: { description: 'The timestamp and status of the alert decryption.' },
+      }),
+      execution_health: schema.object(alertingFrameworkHealthSchemaObject, {
+        meta: { description: 'The timestamp and status of the alert execution.' },
+      }),
+      read_health: schema.object(alertingFrameworkHealthSchemaObject, {
+        meta: { description: 'The timestamp and status of the alert reading events.' },
+      }),
+    },
+    {
+      meta: {
+        description:
+          'Three substates identify the health of the alerting framework: decryptionHealth, executionHealth, and readHealth.',
+      },
+    }
+  ),
 });
 
 export const healthFrameworkResponseSchema = schema.object({

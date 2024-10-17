@@ -7,6 +7,7 @@
 
 import { IRouter } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { healthFrameworkResponseSchemaV1 } from '../../../../../common/routes/framework/apis/health';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
@@ -30,7 +31,18 @@ export const healthRoute = (
         summary: `Get the alerting framework health`,
         tags: ['oas-tag:alerting'],
       },
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          200: {
+            body: () => healthFrameworkResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          401: {
+            description: 'Authorization information is missing or invalid.',
+          },
+        },
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
