@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { createActionRoute, bodySchema } from './create';
+import { createConnectorRoute } from './create';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { omit } from 'lodash';
-import { actionsClientMock } from '../actions_client/actions_client.mock';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { createConnectorRequestBodySchemaV1 } from '../../../../common/routes/connector/apis/create';
 
-jest.mock('./verify_access_and_context', () => ({
+jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -22,12 +23,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('createActionRoute', () => {
+describe('createConnectorRoute', () => {
   it('creates an action with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createActionRoute(router, licenseState);
+    createConnectorRoute(router, licenseState);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -103,7 +104,7 @@ describe('createActionRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createActionRoute(router, licenseState);
+    createConnectorRoute(router, licenseState);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -144,7 +145,7 @@ describe('createActionRoute', () => {
       throw new Error('OMG');
     });
 
-    createActionRoute(router, licenseState);
+    createConnectorRoute(router, licenseState);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -182,8 +183,8 @@ describe('createActionRoute', () => {
       config: { foo: ' ' },
       secrets: {},
     };
-    expect(() => bodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
-      `"[config.foo]: value '' is not valid"`
-    );
+    expect(() =>
+      createConnectorRequestBodySchemaV1.validate(body)
+    ).toThrowErrorMatchingInlineSnapshot(`"[config.foo]: value '' is not valid"`);
   });
 });

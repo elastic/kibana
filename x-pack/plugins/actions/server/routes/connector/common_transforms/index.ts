@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { transformGetConnectorResponse } from './transform_connector_response/latest';
+export { transformConnectorResponse } from './transform_connector_response/latest';
 
-export { transformGetConnectorResponse as transformGetConnectorResponseV1 } from './transform_connector_response/v1';
+export { transformConnectorResponse as transformConnectorResponseV1 } from './transform_connector_response/v1';
