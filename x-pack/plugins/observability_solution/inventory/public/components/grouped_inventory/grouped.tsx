@@ -6,7 +6,7 @@
  */
 import { EuiAccordion, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
@@ -26,6 +26,7 @@ export interface GroupedInventoryPageProps {
 function InventoryGroupAccordion({ group, groupBy }: { group: EntityGroup; groupBy: string }) {
   const field = group[groupBy];
   const id = `inventory-group-${groupBy}-${field}`;
+  const [load, setLoad] = useState(false);
 
   return (
     <>
@@ -37,8 +38,9 @@ function InventoryGroupAccordion({ group, groupBy }: { group: EntityGroup; group
         buttonElement="div"
         buttonProps={{ paddingSize: 'm' }}
         paddingSize="m"
+        onToggle={() => setLoad(true)}
       >
-        <GroupedGridWrapper entityType={field} />
+        {load && <GroupedGridWrapper field={field} />}
       </EuiAccordion>
       <EuiSpacer size="s" />
     </>
@@ -120,7 +122,11 @@ export function GroupedInventoryPage() {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {value.groups.map((group) => (
-        <InventoryGroupAccordion key={group[value.groupBy]} group={group} groupBy={value.groupBy} />
+        <InventoryGroupAccordion
+          key={`${group}-${group[value.groupBy]}`}
+          group={group}
+          groupBy={value.groupBy}
+        />
       ))}
     </div>
   );

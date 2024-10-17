@@ -10,27 +10,27 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import { EntityColumnIds, EntityType } from '../../../common/entities';
+import type { EntityColumnIds, EntityType } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
 
 interface Props {
-  entityType?: EntityType;
+  field?: string;
 }
 
-export function GroupedGridWrapper({ entityType }: Props) {
+export function GroupedGridWrapper({ field }: Props) {
   const { pagination, setPagination } = useInventoryPageViewContext();
+  const { query } = useInventoryParams('/');
+  const { sortField, sortDirection, kuery } = query;
+  const inventoryRoute = useInventoryRouter();
+  const pageIndex = (field ? pagination?.[field] : pagination?.none) ?? 0;
+
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-
-  const { query } = useInventoryParams('/');
-  const { kuery, sortField, sortDirection } = query;
-  const inventoryRoute = useInventoryRouter();
-  const pageIndex = (entityType ? pagination?.[entityType] : pagination?.none) ?? 0;
 
   useEffectOnce(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
@@ -61,18 +61,18 @@ export function GroupedGridWrapper({ entityType }: Props) {
           query: {
             sortDirection,
             sortField,
-            entityTypes: entityType?.length ? JSON.stringify([entityType]) : undefined,
+            entityTypes: field?.length ? JSON.stringify([field]) : undefined,
             kuery,
           },
         },
         signal,
       });
     },
-    [entityType, inventoryAPIClient, kuery, sortDirection, sortField]
+    [field, inventoryAPIClient, kuery, sortDirection, sortField]
   );
 
   function handlePageChange(nextPage: number) {
-    setPagination(entityType ?? 'none', nextPage);
+    setPagination(field ?? 'none', nextPage);
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
