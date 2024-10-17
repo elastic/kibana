@@ -9,6 +9,8 @@ import { uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { Script } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
@@ -46,6 +48,7 @@ import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics'
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
+import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -378,6 +381,20 @@ export const getAgentDataHandler: RequestHandler<
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
+
+export const getAgentStatusRuntimeFieldHandler: RequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const runtimeFields = await buildAgentStatusRuntimeField();
+
+    return response.ok({ body: (runtimeFields.status.script as Script)!.source! });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
 
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   try {
