@@ -66,6 +66,7 @@ export function GroupedInventoryPage() {
           },
           query: {
             kuery,
+            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
           },
         },
         signal,
