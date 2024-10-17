@@ -39,14 +39,14 @@ export interface GroupSelectionProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   docLinks: DocLinksStart;
-  toggleGroups: (flag: boolean) => void;
-  showExperimental: boolean;
+  showMainDialog: (flag: boolean) => void;
+  tab: 'recommended' | 'legacy';
+  setTab: (tab: 'recommended' | 'legacy') => void;
 }
 
 interface VisCardProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visType: BaseVisType | VisTypeAlias;
-  showExperimental?: boolean | undefined;
   shouldStretch?: boolean;
 }
 
@@ -82,7 +82,7 @@ const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj
   },
 ];
 
-function GroupSelection(props: GroupSelectionProps) {
+function GroupSelection({ tab = 'recommended', setTab, ...props }: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
   const promotedVisGroups = useMemo(
     () =>
@@ -114,8 +114,6 @@ function GroupSelection(props: GroupSelectionProps) {
     visType: { ...tsvbType[0], icon: 'visualizeApp' },
     onVisTypeSelected: props.onVisTypeSelected,
   };
-
-  const [tab, setTab] = React.useState(tabs[0].id);
 
   return (
     <>
@@ -169,7 +167,7 @@ function GroupSelection(props: GroupSelectionProps) {
                     description: i18n.translate(
                       'visualizations.newVisWizard.aggBasedGroupDescription',
                       {
-                        defaultMessage: 'Legacy library for creating charts based on aggregations.',
+                        defaultMessage: 'Craft charts using basic aggregations.',
                       }
                     ),
                     icon: 'indexPatternApp',
@@ -178,7 +176,7 @@ function GroupSelection(props: GroupSelectionProps) {
                     }),
                   }}
                   onVisTypeSelected={() => {
-                    props.toggleGroups(false);
+                    props.showMainDialog(false);
                   }}
                 />
               }
@@ -211,6 +209,7 @@ const ModalFooter = ({ visualizeGuideLink }: { visualizeGuideLink: string }) => 
       <EuiDescriptionList
         className="visNewVisDialogGroupSelection__footerDescriptionList"
         type="responsiveColumn"
+        compressed
       >
         <EuiDescriptionListTitle className="visNewVisDialogGroupSelection__footerDescriptionListTitle">
           <FormattedMessage

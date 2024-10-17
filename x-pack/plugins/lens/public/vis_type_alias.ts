@@ -22,7 +22,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
     defaultMessage:
-      'Easily create a variety of visualizations by dragging and dropping fields. Smart suggestions guide you toward building visualizations that follow best practices and effectively communicate your data.',
+      'Create visualizations using an intuitive drag-and-drop interface. Smart suggestions help you follow best practices and find the chart types that best match your data.',
   }),
   order: 60,
   icon: 'lensApp',
