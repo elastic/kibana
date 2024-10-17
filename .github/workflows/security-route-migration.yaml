@@ -1,0 +1,58 @@
+name: ESLint no_deprecated_authz_config
+
+on:
+  # push:
+  #   branches:
+  #     - authz-migration-workflow
+  workflow_dispatch:
+    inputs:
+      route_type:
+        description: 'Choose route type (authorized/unauthorized)'
+        required: true
+        default: 'authorized'
+        type: choice
+        options:
+          - authorized
+          - unauthorized
+
+jobs:
+  eslint-autofix:
+    name: Run no_deprecated_authz_config rule
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      security-events: write
+
+    env:
+      ROUTE_TYPE: ${{ github.event.inputs.route_type }}
+      GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+      with:
+        ref: ${{ matrix.branch }}
+
+    - name: setup node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+
+    - name: Set GitHub name and email
+      run: |
+        git config --global user.name 'kibanamachine'
+        git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+
+    - name: yarn kbn bootstrap
+      run: |
+        yarn kbn bootstrap --no-validate --no-vscode
+
+    - name: Install GitHub CLI
+      run: sudo apt-get install gh -y
+
+    # - name: Authenticate with GitHub CLI
+    #   run: gh auth login
+    - name: Run ESLint Autofix Script
+      run: node scripts/eslint-security-route.js
+
