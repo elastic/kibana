@@ -8,6 +8,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ProductName } from '@kbn/product-doc-common';
+import { getSourceNamesFromProductName, getProductNameFromSource } from '../artifact/product_name';
 
 /** the list of fields to import from the source cluster */
 const fields = [
@@ -27,7 +29,7 @@ const fields = [
 export interface ExtractedDocument {
   content_title: string;
   content_body: string;
-  product_name: string;
+  product_name: ProductName;
   root_type: string;
   slug: string;
   url: string;
@@ -43,7 +45,7 @@ const convertHit = (hit: SearchHit<any>): ExtractedDocument => {
   return {
     content_title: source.content_title,
     content_body: source.content_body,
-    product_name: source.product_name,
+    product_name: getProductNameFromSource(source.product_name),
     root_type: 'documentation',
     slug: source.slug,
     url: source.url,
@@ -65,7 +67,7 @@ export const extractDocumentation = async ({
   client: Client;
   index: string;
   stackVersion: string;
-  productName: string;
+  productName: ProductName;
   log: ToolingLog;
 }) => {
   log.info(`Starting to extract documents from source cluster`);
@@ -76,7 +78,7 @@ export const extractDocumentation = async ({
     query: {
       bool: {
         must: [
-          { term: { product_name: productName } },
+          { terms: { product_name: getSourceNamesFromProductName(productName) } },
           { term: { version: stackVersion } },
           { exists: { field: 'ai_fields.ai_summary' } },
         ],
