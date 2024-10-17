@@ -16,62 +16,25 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useCallback, useRef } from 'react';
+import React, { forwardRef } from 'react';
 import { GridPanelData, PanelInteractionEvent } from './types';
 
-export const GridPanel = ({
-  activePanelId,
-  panelData,
-  renderPanelContents,
-  setInteractionEvent,
-}: {
-  panelData: GridPanelData;
-  activePanelId: string | undefined;
-  renderPanelContents: (panelId: string) => React.ReactNode;
-  setInteractionEvent: (interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex'>) => void;
-}) => {
-  const panelRef = useRef<HTMLDivElement>(null);
+export const GridPanel = forwardRef<
+  HTMLDivElement,
+  {
+    panelData: GridPanelData;
+    activePanelId: string | undefined;
+    renderPanelContents: (panelId: string) => React.ReactNode;
+    interactionStart: (
+      type: PanelInteractionEvent['type'],
+      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => void;
+  }
+>(({ activePanelId, panelData, renderPanelContents, interactionStart }, panelRef) => {
   const thisPanelActive = activePanelId === panelData.id;
 
-  const interactionStart = useCallback(
-    (type: PanelInteractionEvent['type'], e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      // console.log('panelRef.current', panelRef.current);
-      e.preventDefault();
-      e.stopPropagation();
-      if (!panelRef.current) return;
-
-      console.log('interactionStart');
-
-      const panelRect = panelRef.current.getBoundingClientRect();
-      setInteractionEvent({
-        type,
-        id: panelData.id,
-        panelDiv: panelRef.current,
-        mouseOffsets: {
-          top: e.clientY - panelRect.top,
-          left: e.clientX - panelRect.left,
-          right: e.clientX - panelRect.right,
-          bottom: e.clientY - panelRect.bottom,
-        },
-      });
-    },
-    [panelData.id, setInteractionEvent]
-  );
-
-  const panelGridPosition = css`
-    grid-column-start: ${panelData.column + 1};
-    grid-column-end: ${panelData.column + 1 + panelData.width};
-    grid-row-start: ${panelData.row + 1};
-    grid-row-end: ${panelData.row + 1 + panelData.height};
-  `;
-
   return (
-    <div
-      ref={panelRef}
-      css={css`
-        ${thisPanelActive ? 'position: fixed;' : panelGridPosition}
-      `}
-    >
+    <div ref={panelRef}>
       <EuiPanel
         hasShadow={false}
         hasBorder={true}
@@ -95,7 +58,8 @@ export const GridPanel = ({
           className="dragHandle"
           css={css`
             opacity: 0;
-            &:active {
+            &:active,
+            &:hover {
               opacity: 1 !important;
             }
             display: flex;
@@ -118,11 +82,6 @@ export const GridPanel = ({
           onMouseDown={(e) => {
             console.log('on mouse down', e);
             interactionStart('drag', e);
-
-            // e.target.addEventListener('mouseup', () => {
-            //   console.log('MOUSE UP TWO');
-            //   e.target.removeEventListener('mouseup');
-            // });
           }}
           onMouseUp={(e) => {
             console.log('on mouse up', e);
@@ -169,4 +128,4 @@ export const GridPanel = ({
       </EuiPanel>
     </div>
   );
-};
+});

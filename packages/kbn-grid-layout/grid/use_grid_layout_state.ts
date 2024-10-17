@@ -36,6 +36,15 @@ export const useGridLayoutState = ({
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
+    const draggingPosition$ = new BehaviorSubject<
+      | {
+          top: number;
+          left: number;
+          bottom: number;
+          right: number;
+        }
+      | undefined
+    >(undefined);
     const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
       columnPixelWidth: 0,
@@ -48,20 +57,7 @@ export const useGridLayoutState = ({
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
-      updateDraggedElement: (draggedRect: {
-        top: number;
-        bottom: number;
-        left: number;
-        right: number;
-      }) => {
-        const element = interactionEvent$.value?.panelDiv;
-        if (!element) return;
-
-        element.style.left = `${draggedRect.left}px`;
-        element.style.top = `${draggedRect.top}px`;
-        element.style.width = `${draggedRect.right - draggedRect.left}px`;
-        element.style.height = `${draggedRect.bottom - draggedRect.top}px`;
-      },
+      draggingPosition$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

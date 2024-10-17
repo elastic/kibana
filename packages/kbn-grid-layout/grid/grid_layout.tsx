@@ -10,14 +10,10 @@
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { transparentize } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 export const GridLayout = ({
   getCreationOptions,
@@ -31,8 +27,8 @@ export const GridLayout = ({
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
-  const [gridLayout, runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
-    gridLayoutStateManager.gridLayout$,
+  const [runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
+    // gridLayoutStateManager.gridLayout$,
     gridLayoutStateManager.runtimeSettings$,
     gridLayoutStateManager.interactionEvent$
   );
@@ -45,9 +41,10 @@ export const GridLayout = ({
             setDimensionsRef(divElement);
           }}
         >
-          {gridLayout.map((rowData, rowIndex) => {
+          {gridLayoutStateManager.gridLayout$.value.map((rowData, rowIndex) => {
             return (
               <GridRow
+                gridLayoutStateManager={gridLayoutStateManager}
                 rowData={rowData}
                 key={rowData.title}
                 rowIndex={rowIndex}
@@ -61,8 +58,8 @@ export const GridLayout = ({
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
-                  // console.log('nextInteractionEvent', nextInteractionEvent);
                   if (nextInteractionEvent?.type === 'drop') {
+                    gridLayoutStateManager.draggingPosition$.next(undefined);
                     gridLayoutStateManager.interactionEvent$.next(undefined);
                   } else {
                     gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
