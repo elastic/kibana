@@ -19,9 +19,9 @@ import {
   DashboardContainerInput,
   DashboardPanelMap,
   SharedDashboardState,
-  convertSavedPanelsToPanelMap,
+  convertPanelsArrayToPanelMap,
 } from '../../../common';
-import { SavedDashboardPanel } from '../../../common/content_management';
+import type { DashboardPanel } from '../../../server/content_management';
 import { DashboardApi } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
@@ -32,11 +32,11 @@ import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
  * We no longer support loading panels from a version older than 7.3 in the URL.
  * @returns whether or not there is a panel in the URL state saved with a version before 7.3
  */
-export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
+export const isPanelVersionTooOld = (panels: DashboardPanel[]) => {
   for (const panel of panels) {
     if (
       !panel.gridData ||
-      !panel.embeddableConfig ||
+      !panel.panelConfig ||
       (panel.version && semverSatisfies(panel.version, '<7.3'))
     )
       return true;
@@ -58,7 +58,7 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
     return undefined;
   }
 
-  return convertSavedPanelsToPanelMap(appStateInUrl.panels);
+  return convertPanelsArrayToPanelMap(appStateInUrl.panels);
 }
 
 /**

@@ -17,7 +17,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';
-import { DashboardItem } from '../../../common/content_management';
+import type { DashboardItem } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,

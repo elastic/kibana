@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  serviceDefinition,
-  dashboardSavedObjectSchema,
-  controlGroupInputSchema,
-  dashboardAttributesSchema,
-} from './cm_services';
+export type {
+  ControlGroupInputSavedObjectAttributes,
+  DashboardSavedObjectAttributes,
+  GridData,
+  SavedDashboardPanel,
+} from './latest';
+export { dashboardSavedObjectSchema } from './latest';

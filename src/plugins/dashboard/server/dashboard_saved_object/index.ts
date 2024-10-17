@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createDashboardSavedObjectType } from './dashboard_saved_object';
+export {
+  createDashboardSavedObjectType,
+  DASHBOARD_SAVED_OBJECT_ID,
+} from './dashboard_saved_object';
+export type {
+  ControlGroupInputSavedObjectAttributes,
+  DashboardSavedObjectAttributes,
+  GridData,
+  SavedDashboardPanel,
+} from './schema';

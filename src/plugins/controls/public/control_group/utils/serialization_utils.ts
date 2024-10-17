@@ -10,39 +10,46 @@
 import { omit } from 'lodash';
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import type { ControlGroupRuntimeState, ControlGroupSerializedState } from '../../../common';
+import type {
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelsState,
+} from '../../../common';
 import { parseReferenceName } from '../../controls/data_controls/reference_name_utils';
 
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState => {
-  const panels = JSON.parse(state.rawState.panelsJSON);
-  const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
+  const { controls } = state.rawState;
+
+  const controlsMap: ControlPanelsState = {};
+  controls.forEach(({ id, ...rest }) => {
+    controlsMap![id] = rest;
+  });
 
   /** Inject data view references into each individual control */
   const references = state.references ?? [];
   references.forEach((reference) => {
     const referenceName = reference.name;
     const { controlId } = parseReferenceName(referenceName);
-    if (panels[controlId]) {
-      panels[controlId].dataViewId = reference.id;
+    if (controlsMap[controlId]) {
+      controlsMap[controlId].dataViewId = reference.id;
     }
   });
 
-  /** Flatten the state of each panel by removing `explicitInput` */
-  const flattenedPanels = Object.keys(panels).reduce((prev, panelId) => {
-    const currentPanel = panels[panelId];
-    const currentPanelExplicitInput = panels[panelId].explicitInput;
+  /** Flatten the state of each control by removing `controlConfig` */
+  const flattenedControls = Object.keys(controlsMap).reduce((prev, controlId) => {
+    const currentControl = controlsMap[controlId];
+    const currentControlExplicitInput = controlsMap[controlId].controlConfig;
     return {
       ...prev,
-      [panelId]: { ...omit(currentPanel, 'explicitInput'), ...currentPanelExplicitInput },
+      [controlId]: { ...omit(currentControl, 'controlConfig'), ...currentControlExplicitInput },
     };
   }, {});
 
   return {
-    ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
-    initialChildControlState: flattenedPanels,
-    ignoreParentSettings,
+    ...omit(state.rawState, ['controlStyle', 'showApplySelections']),
+    initialChildControlState: flattenedControls,
     autoApplySelections:
       typeof state.rawState.showApplySelections === 'boolean'
         ? !state.rawState.showApplySelections
