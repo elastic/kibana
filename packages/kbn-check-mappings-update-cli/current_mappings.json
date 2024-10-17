@@ -3556,6 +3556,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-privates-locations-multiple": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "color": {
