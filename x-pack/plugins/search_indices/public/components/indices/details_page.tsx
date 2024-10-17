@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { ApiKeyForm } from '@kbn/search-api-keys-components';
+import { useNavigateToDiscover } from '../../hooks/use_navigate_to_discover';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
@@ -64,12 +65,7 @@ export const SearchIndexDetailsPage = () => {
       await playgroundLocator.navigate({ 'default-index': index.name });
     }
   }, [share, index]);
-  const navigateToDiscover = useCallback(async () => {
-    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
-    if (discoverLocator && indexName) {
-      await discoverLocator.navigate({ dataViewSpec: { title: indexName } });
-    }
-  }, [share, indexName]);
+  const navigateToDiscover = useNavigateToDiscover(indexName);
 
   const [hasDocuments, setHasDocuments] = useState<boolean>(false);
   const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
