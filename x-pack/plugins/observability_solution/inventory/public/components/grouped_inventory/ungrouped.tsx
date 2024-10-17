@@ -115,7 +115,7 @@ export function UngroupedInventoryPage() {
           />
         </EuiFlexItem>
         <EuiFlexItem grow />
-        <EuiFlexItem grow={false} className="">
+        <EuiFlexItem grow={false}>
           <GroupSelector />
         </EuiFlexItem>
       </EuiFlexGroup>

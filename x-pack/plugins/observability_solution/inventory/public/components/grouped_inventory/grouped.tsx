@@ -14,7 +14,7 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { GroupSelector } from './group_selector';
 import { InventoryGroupAccordion } from './inventory_group_accordion';
-import { groupCountCss, groupingContainerCss } from './styles';
+import { groupCountCss } from './styles';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 
 export interface GroupedInventoryPageProps {
@@ -70,7 +70,7 @@ export function GroupedInventoryPage() {
   });
 
   return (
-    <div css={groupingContainerCss}>
+    <>
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <span css={groupCountCss}>
@@ -91,7 +91,7 @@ export function GroupedInventoryPage() {
           </span>
         </EuiFlexItem>
         <EuiFlexItem grow />
-        <EuiFlexItem grow={false} className="">
+        <EuiFlexItem grow={false}>
           <GroupSelector />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -103,6 +103,6 @@ export function GroupedInventoryPage() {
           groupBy={value.groupBy}
         />
       ))}
-    </div>
+    </>
   );
 }
