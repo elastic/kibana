@@ -16,6 +16,7 @@ import supertest from 'supertest';
 import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFips } from 'crypto';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
@@ -29,6 +30,21 @@ import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-s
 import { Root } from '@kbn/core-root-server-internal';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
+
+interface XPackSettings {
+  xpack?: {
+    reporting?: {
+      enabled?: boolean;
+    };
+    security?: {
+      experimental?: {
+        fipsMode?: {
+          enabled?: boolean;
+        };
+      };
+    };
+  };
+}
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -79,6 +95,23 @@ export function createRootWithSettings(
     pkg
   );
 
+  if (getFips() === 1) {
+    settings = {
+      ...settings,
+
+      xpack: {
+        ...settings.xpack,
+        security: {
+          experimental: {
+            fipsMode: {
+              enabled: true,
+            },
+          },
+        },
+      },
+    };
+  }
+
   return new Root(
     {
       getConfig$: () => new BehaviorSubject(defaultsDeep({}, settings, DEFAULTS_SETTINGS)),
@@ -125,6 +158,25 @@ export function createRootWithCorePlugins(
   cliArgs: Partial<CliArgs> = {},
   customKibanaVersion?: string
 ) {
+  let xpackSettings = {} as XPackSettings;
+
+  // createRootWithSettings sets default value to "true", so undefined should be treated as "true".
+  const isExplicitlyNotOss = cliArgs.oss === false;
+
+  if (isExplicitlyNotOss) {
+    xpackSettings = { xpack: {} };
+    if (isExplicitlyNotOss) {
+      xpackSettings = {
+        ...xpackSettings,
+        xpack: {
+          ...xpackSettings.xpack,
+          // reporting loads headless browser, that prevents Node.js process from exiting and causes test flakiness
+          reporting: { enabled: false },
+        },
+      };
+    }
+  }
+
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
@@ -151,17 +203,7 @@ export function createRootWithCorePlugins(
       },
     },
     server: { restrictInternalApis: true },
-    // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
-    ...(cliArgs.oss === false
-      ? {
-          // reporting loads headless browser, that prevents nodejs process from exiting and causes test flakiness
-          xpack: {
-            reporting: {
-              enabled: false,
-            },
-          },
-        }
-      : {}),
+    ...xpackSettings,
   };
 
   return createRootWithSettings(
@@ -239,7 +281,13 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = settings.es?.license ?? 'basic';
+  let license = settings.es?.license ?? 'basic';
+
+  // Set license to 'trial' if Node is running in FIPS mode
+  if (getFips() === 1) {
+    license = 'trial';
+  }
+
   const usersToBeAdded = settings.users ?? [];
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
