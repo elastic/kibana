@@ -20,6 +20,7 @@ import type { Entity } from '../../../../../common/api/entity_analytics/entity_s
 import type { CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import { isUserEntity } from '../helpers';
+import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -86,6 +87,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         />
       ),
       sortable: true,
+      truncateText: { lines: 2 },
       render: (_: string, record: Entity) => {
         return (
           <span>
@@ -94,7 +96,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           </span>
         );
       },
-      width: '30%',
+      width: '25%',
     },
     {
       field: 'entity.source',
@@ -104,7 +106,8 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           defaultMessage="Source"
         />
       ),
-      width: '10%',
+      width: '25%',
+      truncateText: { lines: 2 },
       render: (source: string | undefined) => {
         if (source != null) {
           return <span>{source}</span>;
@@ -124,7 +127,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '10%',
       render: (criticality: CriticalityLevels) => {
         if (criticality != null) {
-          return criticality;
+          return <span>{CRITICALITY_LEVEL_TITLE[criticality]}</span>;
         }
 
         return getEmptyTagValue();
@@ -173,7 +176,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       },
     },
     {
-      field: 'entity.lastSeenTimestamp',
+      field: '@timestamp',
       name: (
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStore.entitiesList.lastUpdateColumn.title"
@@ -184,7 +187,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (lastUpdate: string) => {
         return <FormattedRelativePreferenceDate value={lastUpdate} />;
       },
-      width: '25%',
+      width: '15%',
     },
   ];
 };
