@@ -9033,7 +9033,7 @@ const caseDefinition: FunctionDefinition = {
         },
       ],
       minParams: 2,
-      returnType: 'any',
+      returnType: 'unknown',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],

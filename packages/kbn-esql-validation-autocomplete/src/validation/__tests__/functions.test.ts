@@ -100,12 +100,12 @@ describe('function validation', () => {
 
           // straight call
           await expectErrors('FROM a_index | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
           ]);
 
           // assignment
           await expectErrors('FROM a_index | EVAL var = TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
           ]);
 
           // nested function
@@ -115,7 +115,7 @@ describe('function validation', () => {
 
           // inline cast
           await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
-            'Argument of [test] must be [integer], found value [1::DOUBLE] type [DOUBLE]',
+            'Argument of [test] must be [integer], found value [1::DOUBLE] type [double]',
           ]);
 
           // field
@@ -125,13 +125,13 @@ describe('function validation', () => {
 
           // variables
           await expectErrors('FROM a_index | EVAL var1 = 1. | EVAL TEST(var1)', [
-            'Argument of [test] must be [integer], found value [var1] type [decimal]',
+            'Argument of [test] must be [integer], found value [var1] type [double]',
           ]);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1.1) | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
           ]);
         });
 
@@ -190,7 +190,7 @@ describe('function validation', () => {
 
           await expectErrors('ROW "a" IN ("a", "b", "c")', []);
           await expectErrors('ROW "a" IN (1, "b", "c")', [
-            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, string, string)]',
+            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, keyword, keyword)]',
           ]);
         });
       });
@@ -238,9 +238,9 @@ describe('function validation', () => {
         // double, double, double
         await expectErrors('FROM a_index | EVAL TEST(1., 1., 1.)', []);
         await expectErrors('FROM a_index | EVAL TEST("", "", "")', [
-          'Argument of [test] must be [double], found value [""] type [string]',
-          'Argument of [test] must be [double], found value [""] type [string]',
-          'Argument of [test] must be [double], found value [""] type [string]',
+          'Argument of [test] must be [double], found value [""] type [keyword]',
+          'Argument of [test] must be [double], found value [""] type [keyword]',
+          'Argument of [test] must be [double], found value [""] type [keyword]',
         ]);
 
         // int, int
@@ -260,7 +260,7 @@ describe('function validation', () => {
         // date
         await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
         await expectErrors('FROM a_index | EVAL TEST(1.)', [
-          'Argument of [test] must be [date], found value [1.] type [decimal]',
+          'Argument of [test] must be [date], found value [1.] type [double]',
         ]);
       });
     });
@@ -721,5 +721,7 @@ describe('function validation', () => {
       //   'No nested aggregation functions.',
       // ]);
     });
+
+    // @TODO — test function aliases
   });
 });
