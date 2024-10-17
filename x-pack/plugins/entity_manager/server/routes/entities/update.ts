@@ -69,12 +69,12 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
   handler: async ({ context, response, params, logger }) => {
     const core = await context.core;
     const soClient = core.savedObjects.client;
-    const esClient = core.elasticsearch.client.asCurrentUser;
+    const clusterClient = core.elasticsearch.client;
 
     try {
       const installedDefinition = await findEntityDefinitionById({
         soClient,
-        esClient,
+        esClient: clusterClient.asCurrentUser,
         id: params.path.id,
       });
 
@@ -97,15 +97,15 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
       }
 
       const updatedDefinition = await reinstallEntityDefinition({
+        clusterClient,
         soClient,
-        esClient,
         logger,
         definition: installedDefinition,
         definitionUpdate: params.body,
       });
 
       if (!params.query.installOnly) {
-        await startTransforms(esClient, updatedDefinition, logger);
+        await startTransforms(clusterClient.asSecondaryAuthUser, updatedDefinition, logger);
       }
 
       return response.ok({ body: updatedDefinition });

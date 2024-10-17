@@ -6,7 +6,7 @@
  */
 
 import semver from 'semver';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
@@ -29,6 +29,7 @@ import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { EntityDefinitionWithState } from './types';
 import { stopLatestTransform, stopTransforms } from './stop_transforms';
 import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
+import { deleteIndices } from './delete_index';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -90,28 +91,32 @@ export async function installEntityDefinition({
 }
 
 export async function installBuiltInEntityDefinitions({
-  esClient,
+  clusterClient,
   soClient,
   logger,
   definitions,
-}: Omit<InstallDefinitionParams, 'definition'> & {
+}: Omit<InstallDefinitionParams, 'definition' | 'esClient'> & {
+  clusterClient: IScopedClusterClient;
   definitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
 
-  logger.debug(`Starting installation of ${definitions.length} built-in definitions`);
+  logger.info(`Checking installation of ${definitions.length} built-in definitions`);
   const installPromises = definitions.map(async (builtInDefinition) => {
     const installedDefinition = await findEntityDefinitionById({
-      esClient,
       soClient,
+      esClient: clusterClient.asInternalUser,
       id: builtInDefinition.id,
       includeState: true,
     });
 
     if (!installedDefinition) {
+      // clean data from previous installation
+      await deleteIndices(clusterClient.asCurrentUser, builtInDefinition, logger);
+
       return await installEntityDefinition({
         definition: builtInDefinition,
-        esClient,
+        esClient: clusterClient.asSecondaryAuthUser,
         soClient,
         logger,
       });
@@ -127,15 +132,16 @@ export async function installBuiltInEntityDefinitions({
       return installedDefinition;
     }
 
-    logger.debug(
+    logger.info(
       `Detected failed or outdated installation of definition [${installedDefinition.id}] v${installedDefinition.version}, installing v${builtInDefinition.version}`
     );
     return await reinstallEntityDefinition({
       soClient,
-      esClient,
+      clusterClient,
       logger,
       definition: installedDefinition,
       definitionUpdate: builtInDefinition,
+      deleteData: true,
     });
   });
 
@@ -150,14 +156,8 @@ async function install({
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
-  logger.debug(
-    () =>
-      `Installing definition ${definition.id} v${definition.version}\n${JSON.stringify(
-        definition,
-        null,
-        2
-      )}`
-  );
+  logger.info(`Installing definition ${definition.id} v${definition.version}`);
+  logger.debug(() => JSON.stringify(definition, null, 2));
 
   logger.debug(`Installing index templates for definition ${definition.id}`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
@@ -177,13 +177,16 @@ async function install({
 
 // stop and delete the current transforms and reinstall all the components
 export async function reinstallEntityDefinition({
-  esClient,
+  clusterClient,
   soClient,
   definition,
   definitionUpdate,
   logger,
-}: InstallDefinitionParams & {
+  deleteData = false,
+}: Omit<InstallDefinitionParams, 'esClient'> & {
+  clusterClient: IScopedClusterClient;
   definitionUpdate: EntityDefinitionUpdate;
+  deleteData?: boolean;
 }): Promise<EntityDefinition> {
   try {
     const updatedDefinition = mergeEntityDefinitionUpdate(definition, definitionUpdate);
@@ -202,12 +205,16 @@ export async function reinstallEntityDefinition({
     });
 
     logger.debug(`Deleting transforms for definition ${definition.id} v${definition.version}`);
-    await stopAndDeleteTransforms(esClient, definition, logger);
+    await stopAndDeleteTransforms(clusterClient.asSecondaryAuthUser, definition, logger);
+
+    if (deleteData) {
+      await deleteIndices(clusterClient.asCurrentUser, definition, logger);
+    }
 
     return await install({
-      esClient,
       soClient,
       logger,
+      esClient: clusterClient.asSecondaryAuthUser,
       definition: updatedDefinition,
     });
   } catch (err) {

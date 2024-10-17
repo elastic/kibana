@@ -119,9 +119,9 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-      const esClient = core.elasticsearch.client.asSecondaryAuthUser;
+      const clusterClient = core.elasticsearch.client;
       const installedDefinitions = await installBuiltInEntityDefinitions({
-        esClient,
+        clusterClient,
         soClient,
         logger,
         definitions: builtInDefinitions,
@@ -130,7 +130,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       if (!params.query.installOnly) {
         await Promise.all(
           installedDefinitions.map((installedDefinition) =>
-            startTransforms(esClient, installedDefinition, logger)
+            startTransforms(clusterClient.asSecondaryAuthUser, installedDefinition, logger)
           )
         );
       }
