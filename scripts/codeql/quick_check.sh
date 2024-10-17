@@ -40,6 +40,11 @@ if [[ "$ARCH" == "arm64" ]]; then
     PLATFORM_FLAG="--platform linux/amd64"
 fi
 
+cleanup_database() {
+  echo "Deleting contents of $CODEQL_DIR."
+  rm -rf "$CODEQL_DIR"/*
+}
+
 SRC_DIR="$(cd "$(dirname "$SRC_DIR")"; pwd)/$(basename "$SRC_DIR")"
 CODEQL_DIR="$(cd "$(dirname "$CODEQL_DIR")"; pwd)/$(basename "$CODEQL_DIR")"
 DATABASE_PATH="$(cd "$(dirname "$DATABASE_PATH")"; pwd)/$(basename "$DATABASE_PATH")"
@@ -50,10 +55,22 @@ docker run $PLATFORM_FLAG --rm -v "$SRC_DIR":/workspace/source-code \
     -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
     "codeql database create /workspace/shared/codeql-db --language=javascript --source-root=/workspace/source-code --overwrite"
 
+if [ $? -ne 0 ]; then
+  echo "CodeQL database creation failed."
+  cleanup_database
+  exit 1
+fi
+
 echo "Analyzing a CodeQL database: $DATABASE_PATH"
 # Step 2: Run the Docker container to analyze the CodeQL database.
 docker run $PLATFORM_FLAG --rm -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
     "codeql database analyze --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif /workspace/shared/codeql-db javascript-security-and-quality.qls"
+
+if [ $? -ne 0 ]; then
+  echo "CodeQL database analysis failed."
+  cleanup_database
+  exit 1
+fi
 
 # Step 3: Print summary of SARIF results
 echo "Analysis complete. Results saved to $QUERY_OUTPUT"
