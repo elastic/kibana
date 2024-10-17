@@ -88,7 +88,19 @@ export const useGridLayoutState = ({
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
       const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
-      gridLayout.forEach((currentRow, rowIndex) => {
+      for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
+        if (currentInteractionEvent && rowIndex !== currentInteractionEvent.targetRowIndex) {
+          /**
+           * If there is an interraction event happning but the current row is not being targetted, it
+           * does not need to be re-rendered; so, skip setting the panel styles of this row.
+           * Note that if there is **no** interaction event, then this is the initial render so the styles
+           * of every panel should be initialized.
+           */
+          continue;
+        }
+
+        // re-render the targetted row
+        const currentRow = gridLayout[rowIndex];
         Object.keys(currentRow.panels).forEach((key) => {
           const panel = currentRow.panels[key];
           const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
@@ -141,7 +153,7 @@ export const useGridLayoutState = ({
             panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
           }
         });
-      });
+      }
     });
 
     return () => {
