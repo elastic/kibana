@@ -10,6 +10,7 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { v4 } from 'uuid';
 import type {
   ActionConnector,
   Attachment,
@@ -22,6 +23,7 @@ import type {
   ConnectorMappingTarget,
   CustomFieldsConfiguration,
   ExternalService,
+  ObservablePatchType,
   User,
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
@@ -38,6 +40,7 @@ import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
 import * as i18n from './translations';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -506,3 +509,28 @@ export const normalizeCreateCaseRequest = (
     customFieldsConfiguration,
   }),
 });
+
+export const updateObservables = (
+  originalCase: CaseSavedObjectTransformed,
+  updatedDt: string,
+  observables?: ObservablePatchType[]
+) => {
+  if (typeof observables === 'undefined') {
+    return {};
+  }
+
+  return {
+    observables: observables.map((observable) => {
+      const originalObservable = originalCase.attributes.observables.find(
+        (_observable) => _observable.id === observable.id
+      );
+
+      return {
+        ...observable,
+        createdAt: originalObservable?.createdAt ?? updatedDt,
+        updatedAt: updatedDt,
+        id: observable.id ?? v4(),
+      };
+    }),
+  };
+};

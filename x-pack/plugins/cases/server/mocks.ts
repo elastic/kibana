@@ -150,6 +150,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       title: 'Super Bad Security Issue',
       status: CaseStatuses.open,
       tags: ['defacement'],
+      observables: [],
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
@@ -202,6 +203,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       settings: {
         syncAlerts: true,
       },
+      observables: [],
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -245,6 +247,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       settings: {
         syncAlerts: true,
       },
+      observables: [],
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -292,6 +295,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       settings: {
         syncAlerts: true,
       },
+      observables: [],
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,

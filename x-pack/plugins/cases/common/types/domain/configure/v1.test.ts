@@ -113,6 +113,7 @@ describe('configure', () => {
         username: 'lknope',
         email: 'leslie.knope@elastic.co',
       },
+      observableTypes: [],
     };
 
     it('has expected attributes in request', () => {
@@ -180,6 +181,12 @@ describe('configure', () => {
       version: 'WzQ3LDFd',
       id: 'case-id',
       error: null,
+      observableTypes: [
+        {
+          key: '8498cd52-e311-4467-9073-c6056960e2ca',
+          label: 'Email',
+        },
+      ],
     };
 
     it('has expected attributes in request', () => {
