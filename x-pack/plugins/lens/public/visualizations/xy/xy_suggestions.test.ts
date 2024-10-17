@@ -633,7 +633,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       layers: [
         {
           accessors: ['price'],
@@ -691,7 +691,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       layers: [
         {
           layerId: 'first',
@@ -823,7 +823,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       preferredSeriesType: 'line',
       layers: [
         {
@@ -858,7 +858,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
@@ -908,7 +908,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
@@ -967,7 +967,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -1006,7 +1006,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       layers: [
         {
           accessors: ['price'],
@@ -1043,7 +1043,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
@@ -1089,7 +1089,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
@@ -1136,7 +1136,7 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
-      fittingFunction: 'None',
+      fittingFunction: 'Linear',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },

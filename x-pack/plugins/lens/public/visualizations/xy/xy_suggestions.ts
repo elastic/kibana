@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+
 import type {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -573,7 +574,7 @@ function buildSuggestion({
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
-    fittingFunction: currentState?.fittingFunction || 'None',
+    fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
     xTitle: currentState?.xTitle,
