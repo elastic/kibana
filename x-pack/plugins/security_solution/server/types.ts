@@ -20,6 +20,7 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -57,6 +58,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
+  getInferenceClient: InferenceServerStart['getClient'];
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
