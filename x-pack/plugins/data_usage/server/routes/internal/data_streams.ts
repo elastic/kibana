@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamsRequestSchema, DataStreamsResponseSchema } from '../../../common/rest_types';
+import { DataStreamsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
 import { DataUsageContext, DataUsageRouter } from '../../types';
 

@@ -164,7 +164,7 @@ export const DataUsageMetrics = () => {
       <FlexItemWithCss>
         <ChartFilters
           dateRangePickerState={dateRangePickerState}
-          isDataLoading={isFetching}
+          isDataLoading={isFetchingDataStreams}
           onClick={refetchDataUsageMetrics}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}

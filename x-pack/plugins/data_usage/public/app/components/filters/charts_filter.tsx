@@ -46,7 +46,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       appendOptions,
       selectedOptions,
       onChangeFilterOptions,
-      isFilterLoading,
+      isFilterLoading = false,
     },
     'data-test-subj': dataTestSubj,
   }) => {

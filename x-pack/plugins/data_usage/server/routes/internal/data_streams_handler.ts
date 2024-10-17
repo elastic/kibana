@@ -6,7 +6,6 @@
  */
 
 import { type ElasticsearchClient, RequestHandler } from '@kbn/core/server';
-import { DataStreamsRequestQuery } from '../../../common/rest_types';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 
@@ -29,7 +28,7 @@ const getMeteringStats = (client: ElasticsearchClient) => {
 
 export const getDataStreamsHandler = (
   dataUsageContext: DataUsageContext
-): RequestHandler<never, DataStreamsRequestQuery, unknown, DataUsageRequestHandlerContext> => {
+): RequestHandler<never, never, unknown, DataUsageRequestHandlerContext> => {
   const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
 
   return async (context, _, response) => {
