@@ -10,13 +10,14 @@ import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
 
 const GROUP_LABELS: Record<string, string> = {
   none: i18n.translate('xpack.inventory.groupedInventoryPage.noneLabel', {
     defaultMessage: 'None',
   }),
-  type: i18n.translate('xpack.inventory.groupedInventoryPage.typeLabel', {
+  [ENTITY_TYPE]: i18n.translate('xpack.inventory.groupedInventoryPage.typeLabel', {
     defaultMessage: 'Type',
   }),
 };
@@ -49,9 +50,9 @@ export function GroupSelector() {
         },
         {
           'data-test-subj': 'panel-type',
-          name: GROUP_LABELS.type,
-          icon: isGroupSelected('type') ? 'check' : 'empty',
-          onClick: () => onGroupChange('type'),
+          name: GROUP_LABELS[ENTITY_TYPE],
+          icon: isGroupSelected(ENTITY_TYPE) ? 'check' : 'empty',
+          onClick: () => onGroupChange(ENTITY_TYPE),
         },
       ],
     },
