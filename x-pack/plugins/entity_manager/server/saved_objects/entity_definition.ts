@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelUnsafeTransformFn,
+} from '@kbn/core-saved-objects-server';
 import { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
@@ -33,6 +37,20 @@ export const backfillInstalledComponents: SavedObjectModelDataBackfillFn<
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
   ];
   return savedObject;
+};
+
+const removeOptionalIdentityFields: SavedObjectModelUnsafeTransformFn<
+  EntityDefinition,
+  EntityDefinition
+> = (savedObject) => {
+  // Doing only this may break displayNameTemplates
+  savedObject.attributes.identityFields = savedObject.attributes.identityFields.filter(
+    (identityField) => identityField.optional === false
+  );
+
+  return {
+    document: savedObject as SavedObjectModelTransformationDoc<EntityDefinition>,
+  };
 };
 
 export const entityDefinition: SavedObjectsType = {
@@ -94,6 +112,14 @@ export const entityDefinition: SavedObjectsType = {
         {
           type: 'data_backfill',
           backfillFn: backfillInstalledComponents,
+        },
+      ],
+    },
+    '4': {
+      changes: [
+        {
+          type: 'unsafe_transform',
+          transformFn: removeOptionalIdentityFields,
         },
       ],
     },
