@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/194305
+  describe.skip('discover esql view', function () {
     // see details: https://github.com/elastic/kibana/issues/188816
     this.tags(['failsOnMKI']);
 
