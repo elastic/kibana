@@ -76,8 +76,6 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/presentation-publishing",
     "@kbn/alerts-ui-shared",
-    "@kbn/data-views-plugin",
-    "@kbn/inspector-plugin",
     "@kbn/cloud-plugin",
   ],
   "exclude": [
