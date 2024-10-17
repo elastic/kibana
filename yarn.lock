@@ -5774,7 +5774,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-bus@link:src/plugins/event_bus":
+"@kbn/event-bus-plugin@link:src/plugins/event_bus":
   version "0.0.0"
   uid ""
 

@@ -539,7 +539,7 @@
     "@kbn/event-annotation-components": "link:src/platform/packages/shared/kbn-event-annotation-components",
     "@kbn/event-annotation-listing-plugin": "link:src/platform/plugins/private/event_annotation_listing",
     "@kbn/event-annotation-plugin": "link:src/platform/plugins/private/event_annotation",
-    "@kbn/event-bus": "link:src/plugins/event_bus",
+    "@kbn/event-bus-plugin": "link:src/plugins/event_bus",
     "@kbn/event-log-fixture-plugin": "link:x-pack/platform/test/plugin_api_integration/plugins/event_log",
     "@kbn/event-log-plugin": "link:x-pack/platform/plugins/shared/event_log",
     "@kbn/event-stacktrace": "link:x-pack/platform/packages/shared/kbn-event-stacktrace",

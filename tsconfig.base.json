@@ -958,8 +958,8 @@
       "@kbn/event-annotation-listing-plugin/*": ["src/platform/plugins/private/event_annotation_listing/*"],
       "@kbn/event-annotation-plugin": ["src/platform/plugins/private/event_annotation"],
       "@kbn/event-annotation-plugin/*": ["src/platform/plugins/private/event_annotation/*"],
-      "@kbn/event-bus": ["src/plugins/event_bus"],
-      "@kbn/event-bus/*": ["src/plugins/event_bus/*"],
+      "@kbn/event-bus-plugin": ["src/plugins/event_bus"],
+      "@kbn/event-bus-plugin/*": ["src/plugins/event_bus/*"],
       "@kbn/event-log-fixture-plugin": [
         "x-pack/platform/test/plugin_api_integration/plugins/event_log"
       ],
