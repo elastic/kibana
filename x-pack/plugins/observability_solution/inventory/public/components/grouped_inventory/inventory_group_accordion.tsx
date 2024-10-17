@@ -5,10 +5,17 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { InventoryGroupPanel } from './inventory_group_panel';
 import { GroupedGridWrapper } from './grouped_grid_wrapper';
 import { EntityGroup } from '../../../common/entities';
+import { InventoryPanelBadge } from './inventory_panel_badge';
+
+const ENTITIES_COUNT_BADGE = i18n.translate(
+  'xpack.inventory.inventoryGroupPanel.entitiesBadgeLabel',
+  { defaultMessage: 'Entities' }
+);
 
 export interface InventoryGroupAccordionProps {
   group: EntityGroup;
@@ -22,18 +29,31 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
 
   return (
     <>
-      <EuiAccordion
-        className="inventoryGroupAccordion"
-        data-test-subj={id}
-        id={id}
-        buttonContent={<InventoryGroupPanel field={field} entities={group.count} />}
-        buttonElement="div"
-        buttonProps={{ paddingSize: 'm' }}
-        paddingSize="m"
-        onToggle={() => setLoad(true)}
-      >
-        {load && <GroupedGridWrapper field={field} />}
-      </EuiAccordion>
+      <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
+        <EuiAccordion
+          className="inventoryGroupAccordion"
+          data-test-subj={id}
+          id={id}
+          buttonContent={<InventoryGroupPanel field={field} />}
+          buttonElement="div"
+          extraAction={
+            <InventoryPanelBadge
+              data-test-subj="inventory-panel-badge-entities-count"
+              name={ENTITIES_COUNT_BADGE}
+              value={group.count}
+            />
+          }
+          buttonProps={{ paddingSize: 'm' }}
+          paddingSize="m"
+          onToggle={() => setLoad(true)}
+        >
+          {load && (
+            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+              <GroupedGridWrapper field={field} />
+            </EuiPanel>
+          )}
+        </EuiAccordion>
+      </EuiPanel>
       <EuiSpacer size="s" />
     </>
   );

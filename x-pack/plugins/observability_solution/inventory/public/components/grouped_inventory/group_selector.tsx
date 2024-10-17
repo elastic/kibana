@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { StyledContextMenu, StyledEuiButtonEmpty } from './styles';
 import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
 
 const GROUP_LABELS: Record<string, string> = {
@@ -27,6 +27,7 @@ export interface GroupedSelectorProps {
 }
 
 export function GroupSelector() {
+  const { euiTheme } = useEuiTheme();
   const { grouping, setGrouping } = useInventoryPageViewContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onGroupChange = (selected: string) => {
@@ -61,8 +62,18 @@ export function GroupSelector() {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const button = (
-    <StyledEuiButtonEmpty
+    <EuiButtonEmpty
       data-test-subj="group-selector-dropdown"
+      css={css`
+        font-weight: 'normal';
+
+        .euiButtonEmpty__text {
+          max-width: 300px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      `}
       flush="both"
       iconSide="right"
       iconSize="s"
@@ -76,7 +87,7 @@ export function GroupSelector() {
         defaultMessage={`Group entities by: {grouping}`}
         values={{ grouping: GROUP_LABELS[grouping] }}
       />
-    </StyledEuiButtonEmpty>
+    </EuiButtonEmpty>
   );
 
   return (
@@ -87,7 +98,20 @@ export function GroupSelector() {
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <StyledContextMenu
+      <EuiContextMenu
+        css={css`
+          width: 250px;
+          & .euiContextMenuItem__text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .euiContextMenuItem {
+            border-bottom: ${euiTheme.border.thin};
+          }
+          .euiContextMenuItem:last-child {
+            border: none;
+          }
+        `}
         data-test-subj="entitiesGroupByContextMnue"
         initialPanelId="firstPanel"
         panels={panels}
