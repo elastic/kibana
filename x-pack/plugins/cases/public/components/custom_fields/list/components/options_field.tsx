@@ -57,7 +57,7 @@ const OptionsFieldComponent = ({ field, idAria, maxOptions, ...rest }: Props) =>
   const [freshOption, setFreshOption] = useState<OptionsFieldOption | null>(null);
 
   const currentOptions: OptionsFieldOption[] = useMemo(() => {
-    const parsedValue = field.value ?? INITIAL_OPTIONS;
+    const parsedValue = field.value || INITIAL_OPTIONS;
     if (freshOption) parsedValue.push(freshOption);
     return Array.isArray(parsedValue) ? parsedValue : INITIAL_OPTIONS;
   }, [field.value, freshOption]);
@@ -183,7 +183,7 @@ const OptionsFieldComponent = ({ field, idAria, maxOptions, ...rest }: Props) =>
             ))}
           </EuiDroppable>
         </EuiDragDropContext>
-        {maxOptions && currentOptions.length < maxOptions && (
+        {(!maxOptions || currentOptions.length < maxOptions) && (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButtonEmpty
