@@ -119,7 +119,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
         METRIC_TYPE.CLICK,
         NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
       );
-
       navToFindings({ [queryField]: name }, ['rule.name']);
     };
 
