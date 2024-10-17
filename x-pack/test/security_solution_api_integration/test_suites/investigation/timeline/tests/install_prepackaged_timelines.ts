@@ -6,19 +6,23 @@
  */
 
 import expect from '@kbn/expect';
-
 import { TIMELINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
-import { deleteAllTimelines } from '../utils';
+import { deleteTimelines } from '../../utils/timelines';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
-  const supertest = getService('supertest');
-  const es = getService('es');
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('install_prepackaged_timelines', () => {
+    before(async () => {
+      supertest = await utils.createSuperTest();
+    });
+
     describe('creating prepackaged rules', () => {
       afterEach(async () => {
-        await deleteAllTimelines(es);
+        await deleteTimelines(supertest);
       });
 
       it('should contain timelines_installed, and timelines_updated', async () => {
