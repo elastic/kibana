@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -76,6 +77,14 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
   },
 });
 
+export const getUniqueAlertCommentsCountQuery = () => ({
+  additionalAggsResult: {
+    cardinality: {
+      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+    },
+  },
+});
+
 export const getReferencesAggregationQuery = ({
   savedObjectType,
   referenceType,
@@ -125,14 +134,20 @@ export const getCountsAndMaxData = async ({
   savedObjectsClient,
   savedObjectType,
   filter,
+  additionalAggs,
 }: {
   savedObjectsClient: TelemetrySavedObjectsClient;
   savedObjectType: string;
   filter?: KueryNode;
+  additionalAggs?: { additionalAggsResult: estypes.AggregationsAggregationContainer };
 }) => {
   const res = await savedObjectsClient.find<
     unknown,
-    { counts: Buckets; references: MaxBucketOnCaseAggregation['references'] }
+    {
+      counts: Buckets;
+      references: MaxBucketOnCaseAggregation['references'];
+      additionalAggsResult: { value: number };
+    }
   >({
     page: 0,
     perPage: 0,
@@ -142,6 +157,7 @@ export const getCountsAndMaxData = async ({
     aggs: {
       ...getCountsAggregationQuery(savedObjectType),
       ...getMaxBucketOnCaseAggregationQuery(savedObjectType),
+      ...(additionalAggs || {}),
     },
   });
 
@@ -153,6 +169,7 @@ export const getCountsAndMaxData = async ({
       total: res.total,
       ...getCountsFromBuckets(countsBuckets),
       maxOnACase,
+      ...(additionalAggs && { additionalAggsResult: res.aggregations?.additionalAggsResult }),
     },
   };
 };
