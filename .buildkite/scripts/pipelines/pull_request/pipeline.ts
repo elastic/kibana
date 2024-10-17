@@ -20,8 +20,8 @@ if (!prConfig) {
 }
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
-const REQUIRED_PATHS = prConfig.always_require_ci_on_changed.map((r) => new RegExp(r, 'i'));
-const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new RegExp(r, 'i'));
+const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
+const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
 const getPipeline = (filename: string, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();

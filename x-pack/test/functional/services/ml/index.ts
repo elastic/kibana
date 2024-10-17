@@ -134,6 +134,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
   const jobWizardRecognizer = MachineLearningJobWizardRecognizerProvider(context, commonUI);
@@ -143,13 +144,15 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     customUrls,
     commonFieldStatsFlyout
   );
-  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context);
+  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context, commonUI);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
 

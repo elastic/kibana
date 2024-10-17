@@ -12,4 +12,6 @@ export const PLUGIN_NAME = 'searchIndices';
 export const START_APP_ID: SearchStart = 'elasticsearchStart';
 export const INDICES_APP_ID: SearchIndices = 'elasticsearchIndices';
 
+export const GLOBAL_EMPTY_STATE_FEATURE_FLAG_ID = 'searchIndices:globalEmptyStateEnabled';
+
 export type { IndicesStatusResponse, UserStartPrivilegesResponse } from './types';

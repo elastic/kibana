@@ -24,7 +24,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates-v1.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

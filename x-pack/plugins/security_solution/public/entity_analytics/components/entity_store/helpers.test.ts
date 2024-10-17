@@ -14,8 +14,13 @@ import type {
 describe('isUserEntity', () => {
   it('should return true if the record is a UserEntity', () => {
     const userEntity: UserEntity = {
+      '@timestamp': '2021-08-02T14:00:00.000Z',
       user: {
         name: 'test_user',
+      },
+      entity: {
+        name: 'test_user',
+        source: ['logs-test'],
       },
     };
 
@@ -24,8 +29,13 @@ describe('isUserEntity', () => {
 
   it('should return false if the record is not a UserEntity', () => {
     const nonUserEntity: Entity = {
+      '@timestamp': '2021-08-02T14:00:00.000Z',
       host: {
         name: 'test_host',
+      },
+      entity: {
+        name: 'test_host',
+        source: ['logs-test'],
       },
     };
 

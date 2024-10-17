@@ -240,6 +240,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
               defaultMessage: 'No report generated',
             })}
             color="danger"
+            css={{ overflowWrap: 'break-word' }}
           >
             {errored}
           </EuiCallOut>
@@ -254,6 +255,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
               defaultMessage: 'Report contains warnings',
             })}
             color="warning"
+            css={{ overflowWrap: 'break-word' }}
           >
             {warnings}
           </EuiCallOut>
