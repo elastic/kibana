@@ -30,6 +30,12 @@ import {
 import { NameEdit, nameSchema } from './fields/name';
 import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
 import { TagsEdit, tagsSchema } from './fields/tags';
+import {
+  MaxSignalsEdit,
+  maxSignalsDeserializer,
+  maxSignalsSchema,
+  maxSignalsSerializer,
+} from './fields/max_signals';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -64,6 +70,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={investigationFieldsSchema}
           serializer={investigationFieldsSerializer}
           deserializer={investigationFieldsDeserializer}
+        />
+      );
+    case 'max_signals':
+      return (
+        <FieldFormWrapper
+          component={MaxSignalsEdit}
+          fieldFormSchema={maxSignalsSchema}
+          serializer={maxSignalsSerializer}
+          deserializer={maxSignalsDeserializer}
         />
       );
     case 'name':
