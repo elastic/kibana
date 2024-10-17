@@ -131,7 +131,7 @@ export type TestBed = Awaited<ReturnType<typeof setup>>;
 export const setup = async (props?: Partial<Props>) => {
   const uiSettingsClient = coreMock.createSetup().uiSettings;
   const httpService = httpServiceMock.createSetupContract();
-  const reportingAPIClient = new ReportingAPIClient(httpService, uiSettingsClient, 'x.x.x');
+  const reportingAPIClient = new ReportingAPIClient(httpService, uiSettingsClient, 'x.x.x', false);
 
   jest
     .spyOn(reportingAPIClient, 'list')
