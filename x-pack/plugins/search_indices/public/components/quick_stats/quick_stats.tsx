@@ -68,7 +68,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDo
   const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
   const vectorFieldCount =
     mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
-  console.log(indexDocuments);
+  const docCount = indexDocuments?.results._meta.page.total ?? 0;
 
   return (
     <EuiPanel
@@ -92,13 +92,13 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDo
               defaultMessage: 'Document count',
             })}
             data-test-subj="QuickStatsDocumentCount"
-            secondaryTitle={<EuiI18nNumber value={index.documents ?? 0} />}
+            secondaryTitle={<EuiI18nNumber value={docCount ?? 0} />}
             stats={[
               {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.totalTitle', {
                   defaultMessage: 'Total',
                 }),
-                description: <EuiI18nNumber value={index.documents ?? 0} />,
+                description: <EuiI18nNumber value={docCount ?? 0} />,
               },
               {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {
