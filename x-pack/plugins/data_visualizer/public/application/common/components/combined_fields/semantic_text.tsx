@@ -185,7 +185,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
       <EuiFormRow
         label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.inferenceLabel', {
-          defaultMessage: 'Inference endpoints',
+          defaultMessage: 'Inference endpoint',
         })}
       >
         <EuiSelect
