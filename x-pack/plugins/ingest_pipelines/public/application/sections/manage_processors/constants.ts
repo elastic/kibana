@@ -20,7 +20,7 @@ export const DATABASE_TYPE_OPTIONS = [
   {
     value: 'ipinfo',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.ipinfoDatabaseType', {
-      defaultMessage: 'IPInfo',
+      defaultMessage: 'IPinfo',
     }),
   },
 ];
@@ -153,7 +153,7 @@ export const getTypeLabel = (type: GeoipDatabase['type']): string => {
     }
     case 'ipinfo': {
       return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeIpinfoLabel', {
-        defaultMessage: 'IPInfo',
+        defaultMessage: 'IPinfo',
       });
     }
     case 'web': {
