@@ -114,11 +114,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
-   */
-  assistantNaturalLanguageESQLTool: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -137,11 +132,6 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
-
-  /**
-   * enables logging requests during rule preview
-   */
-  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
@@ -231,11 +221,6 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -246,9 +231,10 @@ export const allowedExperimentalValues = Object.freeze({
   dataIngestionHubEnabled: false,
 
   /**
-   * Enables the new Entity Store engine routes
+   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
+   * can be disabled if necessary in a given environment.
    */
-  entityStoreEnabled: false,
+  entityStoreDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
