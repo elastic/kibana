@@ -1274,7 +1274,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 
 # Presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
-/x-pack/test/accessibility/apps/group3/enterprise_search.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_links.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_controls.ts  @elastic/kibana-presentation
@@ -1914,6 +1913,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 
 # Ent. Search design
 /x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design
+/x-pack/test/accessibility/apps/group3/enterprise_search.ts @elastic/search-design
 
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
