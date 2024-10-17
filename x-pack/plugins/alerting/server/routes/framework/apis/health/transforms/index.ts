@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { transformHealthResponse } from './transform_health_response/latest';
-export { transformHealthResponse as transformHealthResponseV1 } from './transform_health_response/v1';
+export { transformHealthBodyResponse } from './transform_health_response/latest';
+export { transformHealthBodyResponse as transformHealthBodyResponseV1 } from './transform_health_response/v1';
