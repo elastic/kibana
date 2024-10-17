@@ -35790,12 +35790,6 @@ paths:
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting
         limits the number of saved objects which may be exported.
-
-
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       operationId: exportSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
@@ -35854,6 +35848,7 @@ paths:
       summary: Export saved objects
       tags:
         - saved objects
+      x-state: Technical preview
   /api/saved_objects/_import:
     post:
       description: >
@@ -35864,12 +35859,6 @@ paths:
         on the same major, or the next major. Exported saved objects are not
         backwards compatible and cannot be imported into an older version of
         Kibana.
-
-
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       operationId: importSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
@@ -35988,6 +35977,7 @@ paths:
               -X POST api/saved_objects/_import?createNewCopies=true
               -H "kbn-xsrf: true"
               --form file=@file.ndjson
+      x-state: Technical preview
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
       description: >-
