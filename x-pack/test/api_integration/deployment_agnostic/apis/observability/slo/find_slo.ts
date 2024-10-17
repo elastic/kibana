@@ -48,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
       await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
       await sloApi.deleteAllSLOs(adminRoleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     it('searches SLOs', async () => {
@@ -61,7 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const sloId2 = createResponse2.id;
 
       // search SLOs
-      await retry.tryForTime(360 * 1000, async () => {
+      await retry.tryForTime(180 * 1000, async () => {
         let response = await supertestWithoutAuth
           .get(`/api/observability/slos`)
           .set(adminRoleAuthc.apiKeyHeader)

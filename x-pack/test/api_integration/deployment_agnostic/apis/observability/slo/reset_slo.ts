@@ -46,6 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
       await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
       await sloApi.deleteAllSLOs(adminRoleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     it('resets the related resources', async () => {
