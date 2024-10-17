@@ -16,7 +16,7 @@ import { CspClientPluginStartDeps } from '../types';
 import { encodeQuery } from '../utils/query_utils';
 import { NavFilter, createFilter } from './use_navigate_findings';
 import { useDataView } from './use_data_view';
-import { findingsNavigation } from '../constants/navigation';
+import { findingsNavigationBase } from '../constants/navigation';
 
 export const useGetNavigationUrlParams = (
   pathname: string,
@@ -46,8 +46,8 @@ export const useGetNavigationUrlParams = (
 
 export const useGetNavigationUrlParamsFindings = () => {
   const { data } = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
-  return useGetNavigationUrlParams(findingsNavigation.findings_default.path, data?.id);
+  return useGetNavigationUrlParams(findingsNavigationBase.findings_default.path, data?.id);
 };
 
 export const useGetNavigationUrlParamsVulnerabilities = () =>
-  useGetNavigationUrlParams(findingsNavigation.vulnerabilities.path);
+  useGetNavigationUrlParams(findingsNavigationBase.vulnerabilities.path);

@@ -7,20 +7,17 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiIcon, EuiPanel, EuiLink, EuiText, EuiBasicTable } from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiLink, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
 import type { CspFinding, CspFindingResult } from '@kbn/cloud-security-posture-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
-  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
-  NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -115,19 +112,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       }
     };
 
-    const navToFindings = useNavigateFindings();
     const navUrlParams = useGetNavigationUrlParamsFindings();
-    const navToFindingsByRuleAndResourceId = (ruleId: string, resourceId: string) => {
-      navToFindings({ 'rule.id': ruleId, 'resource.id': resourceId });
-    };
-
-    const navToFindingsByName = (name: string, queryField: 'host.name' | 'user.name') => {
-      uiMetricService.trackUiMetric(
-        METRIC_TYPE.CLICK,
-        NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
-      );
-      navToFindings({ [queryField]: name }, ['rule.name']);
-    };
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
@@ -136,9 +121,9 @@ export const MisconfigurationFindingsDetailsTable = memo(
         width: '5%',
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <EuiLink
-            onClick={() => {
-              navToFindingsByRuleAndResourceId(rule?.id, finding?.resource?.id);
-            }}
+            href={navUrlParams({ 'rule.id': rule?.id, 'resource.id': finding?.resource?.id })}
+            external={false}
+            target="_blank"
           >
             <EuiIcon type={'popout'} />
           </EuiLink>
@@ -171,15 +156,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
     return (
       <>
         <EuiPanel hasShadow={false}>
-          <EuiLink href={navUrlParams({ [fieldName]: queryName }, ['rule.name'])} target="_blank" />
           <EuiLink
-            onClick={() => {
-              uiMetricService.trackUiMetric(
-                METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
-              );
-              navToFindingsByName(queryName, fieldName);
-            }}
+            href={navUrlParams({ [fieldName]: queryName }, ['rule.name'])}
+            target="_blank"
+            external={false}
           >
             {i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
