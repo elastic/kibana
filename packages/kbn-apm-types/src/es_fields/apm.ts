@@ -191,6 +191,9 @@ export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 
+export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
+export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
+
 // Metadata
 export const TIER = '_tier';
 export const INDEX = '_index';
