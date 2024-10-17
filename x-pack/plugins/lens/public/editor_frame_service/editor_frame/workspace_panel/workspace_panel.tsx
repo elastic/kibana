@@ -676,13 +676,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
-  hasDynamicError: boolean;
+  hasRequestError: boolean;
+  setHasRequestError: (state: boolean) => void;
   setIsRenderComplete: (state: boolean) => void;
-  setDynamicError: (state: boolean) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
 } {
   const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
-  const [hasDynamicError, setDynamicError] = useState(false);
+  const [hasRequestError, setHasRequestError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -691,7 +691,7 @@ function useReportingState(errors: UserMessage[]): {
     }
   }, [isRenderComplete, errors]);
 
-  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+  return { isRenderComplete, setIsRenderComplete, hasRequestError, setHasRequestError, nodeRef };
 }
 
 const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
@@ -734,14 +734,14 @@ export const VisualizationWrapper = ({
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
-  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+  const { isRenderComplete, hasRequestError, setIsRenderComplete, setHasRequestError, nodeRef } =
     useReportingState(errors);
 
   const onRenderHandler = useCallback(() => {
-    setDynamicError(false);
+    setHasRequestError(false);
     setIsRenderComplete(true);
     onRender$();
-  }, [onRender$, setDynamicError, setIsRenderComplete]);
+  }, [onRender$, setHasRequestError, setIsRenderComplete]);
 
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -770,7 +770,7 @@ export const VisualizationWrapper = ({
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
+      data-render-error={hasRequestError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -800,7 +800,7 @@ export const VisualizationWrapper = ({
             <WorkspaceErrors
               errors={visibleErrorMessages}
               title={dataLoadingErrorTitle}
-              onRender={() => setDynamicError(true)}
+              onRender={() => setHasRequestError(true)}
             />
           );
         }}
