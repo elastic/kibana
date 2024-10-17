@@ -27,6 +27,7 @@ import {
   type CoreStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
@@ -120,6 +121,7 @@ export interface DashboardStartDependencies {
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  lens: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
