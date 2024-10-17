@@ -22,7 +22,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
 import {
-  DataView,
+  DataViewLazy,
   DataViewSpec,
   Form,
   useForm,
@@ -69,7 +69,7 @@ export interface Props {
    */
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
-  editData?: DataView;
+  editData?: DataViewLazy;
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;

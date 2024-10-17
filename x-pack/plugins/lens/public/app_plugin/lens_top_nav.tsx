@@ -949,14 +949,15 @@ export const LensTopNavMenu = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
+      onSave: async (dataViewLazy) => {
+        if (dataViewLazy.id) {
+          const dataView = await data.dataViews.toDataView(dataViewLazy);
           if (isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
                 newDatasourceId: 'formBased',
                 visualizationId: visualization?.activeId,
-                currentIndexPatternId: dataView?.id,
+                currentIndexPatternId: dataViewLazy?.id,
               })
             );
           }
@@ -972,6 +973,7 @@ export const LensTopNavMenu = ({
     dispatchChangeIndexPattern,
     isOnTextBasedMode,
     visualization?.activeId,
+    data.dataViews,
   ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
