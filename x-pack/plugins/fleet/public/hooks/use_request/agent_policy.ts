@@ -208,7 +208,7 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
 export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsRequest['body']) => {
   return useRequest<GetListAgentPolicyOutputsResponse>({
     path: agentPolicyRouteService.getListOutputsPath(),
-    method: 'get',
+    method: 'post',
     body: JSON.stringify(body),
     version: API_VERSIONS.public.v1,
   });

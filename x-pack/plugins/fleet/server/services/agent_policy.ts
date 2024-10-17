@@ -1827,7 +1827,7 @@ class AgentPolicyService {
               );
             }
           }
-          return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id };
+          return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id ?? '' };
         },
         {
           concurrency: 20,

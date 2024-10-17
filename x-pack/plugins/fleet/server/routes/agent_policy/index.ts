@@ -398,7 +398,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   router.versioned
-    .get({
+    .post({
       path: AGENT_POLICY_API_ROUTES.LIST_OUTPUTS_PATTERN,
       fleetAuthz: (authz) => {
         return authz.fleet.readAgentPolicies && authz.fleet.readSettings;
