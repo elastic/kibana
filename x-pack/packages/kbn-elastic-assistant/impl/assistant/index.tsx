@@ -115,7 +115,11 @@ const AssistantComponent: React.FC<Props> = ({
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({
+    http,
+    baseConversations,
+    isAssistantEnabled,
+  });
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({

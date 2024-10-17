@@ -11,21 +11,24 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
+import { mergeBaseWithPersistedConversations } from '../../helpers';
 import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;
-  perPage: number;
+  per_page: number;
   total: number;
   data: Conversation[];
 }
 
 export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
-  onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
+  baseConversations?: Record<string, Conversation>;
   signal?: AbortSignal | undefined;
   refetchOnWindowFocus?: boolean;
   isAssistantEnabled: boolean;
+  fields?: string[];
+  filter?: string;
 }
 
 /**
@@ -40,36 +43,42 @@ export interface UseFetchCurrentUserConversationsParams {
  */
 const query = {
   page: 1,
-  perPage: 100,
+  // TODO optimize with pagination
+  // https://github.com/elastic/kibana/issues/192714
+  per_page: 5000,
+  // ensure default conversations are fetched first to avoid recreating them
+  sort_field: 'is_default',
+  sort_order: 'desc',
 };
 
-export const CONVERSATIONS_QUERY_KEYS = [
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  query.page,
-  query.perPage,
-  API_VERSIONS.public.v1,
-];
+export const CONVERSATIONS_QUERY_KEYS = [ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND];
 
 export const useFetchCurrentUserConversations = ({
   http,
-  onFetch,
+  baseConversations = {},
   signal,
   refetchOnWindowFocus = true,
   isAssistantEnabled,
+  fields,
+  filter,
 }: UseFetchCurrentUserConversationsParams) =>
   useQuery(
-    CONVERSATIONS_QUERY_KEYS,
+    fields && fields.length ? [...CONVERSATIONS_QUERY_KEYS, fields] : CONVERSATIONS_QUERY_KEYS,
     async () =>
       http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
-        query,
+        query: {
+          ...query,
+          ...(fields && fields.length ? { fields } : {}),
+          ...(filter && filter.length ? { filter } : {}),
+        },
         signal,
       }),
     {
-      select: (data) => onFetch(data),
+      select: (data) => mergeBaseWithPersistedConversations(baseConversations, data),
       keepPreviousData: true,
-      initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      initialData: { ...query, total: 0, data: [] },
       refetchOnWindowFocus,
       enabled: isAssistantEnabled,
     }

@@ -61,6 +61,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const userFilter = currentUser?.username
             ? `name: "${currentUser?.username}"`
             : `id: "${currentUser?.profile_uid}"`;
+
           const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
             page: query.page,

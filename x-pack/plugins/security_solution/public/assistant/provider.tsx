@@ -14,7 +14,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
   bulkUpdateConversations,
-  getUserConversations,
+  getUserConversationsExist,
   getPrompts,
   bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
@@ -158,10 +158,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
         assistantAvailability.isAssistantEnabled &&
         assistantAvailability.hasAssistantPrivilege
       ) {
-        const res = await getUserConversations({
+        const userConversationsExist = await getUserConversationsExist({
           http,
         });
-        if (res.total === 0) {
+        if (!userConversationsExist) {
           await createConversations(notifications, http, storage);
         }
       }

@@ -194,7 +194,7 @@ export const ConversationResponse = z.object({
   /**
    * Is default conversation.
    */
-  isDefault: z.boolean().optional(),
+  isDefault: z.boolean().optional().default(false),
   /**
    * excludeFromLastConversationStorage.
    */
