@@ -678,16 +678,6 @@ export const performInstallSpecificRules = async (
     }),
   });
 
-export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeResponseBody> =>
-  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
-    method: 'POST',
-    version: '1',
-    body: JSON.stringify({
-      mode: 'ALL_RULES',
-      pick_version: 'TARGET',
-    }),
-  });
-
 export const performUpgradeSpecificRules = async (
   rules: UpgradeSpecificRulesRequest['rules']
 ): Promise<PerformRuleUpgradeResponseBody> =>
