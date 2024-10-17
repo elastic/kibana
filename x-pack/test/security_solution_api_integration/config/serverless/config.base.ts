@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
@@ -32,6 +34,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           '--serverless=security',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(options.kbnTestServerArgs || []),
+          `--plugin-path=${path.resolve(
+            __dirname,
+            '../../../../../test/analytics/plugins/analytics_ftr_helpers'
+          )}`,
         ],
         env: {
           ...svlSharedConfig.get('kbnTestServer.env'),
