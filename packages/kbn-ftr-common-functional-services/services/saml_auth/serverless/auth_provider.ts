@@ -34,8 +34,18 @@ const getDefaultServerlessRole = (projectType: string) => {
   }
 };
 
+const isRoleManagementExplicitlyEnabled = (args: string[]): boolean => {
+  const roleManagementArg = args.find((arg) =>
+    arg.startsWith('--xpack.security.roleManagementEnabled=')
+  );
+
+  // Return true if the value is explicitly set to 'true', otherwise false
+  return roleManagementArg?.split('=')[1] === 'true' || false;
+};
+
 export class ServerlessAuthProvider implements AuthProvider {
   private readonly projectType: string;
+  private readonly roleManagementEnabled: boolean;
   private readonly rolesDefinitionPath: string;
 
   constructor(config: Config) {
@@ -44,6 +54,10 @@ export class ServerlessAuthProvider implements AuthProvider {
       const match = arg.match(/--serverless[=\s](\w+)/);
       return acc + (match ? match[1] : '');
     }, '') as ServerlessProjectType;
+
+    // Indicates whether role management was explicitly enabled using
+    // the `--xpack.security.roleManagementEnabled=true` flag.
+    this.roleManagementEnabled = isRoleManagementExplicitlyEnabled(kbnServerArgs);
 
     if (!isServerlessProjectType(this.projectType)) {
       throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
@@ -70,7 +84,9 @@ export class ServerlessAuthProvider implements AuthProvider {
   }
 
   isCustomRoleEnabled() {
-    return projectTypesWithCustomRolesEnabled.includes(this.projectType);
+    return (
+      projectTypesWithCustomRolesEnabled.includes(this.projectType) || this.roleManagementEnabled
+    );
   }
 
   getCustomRole() {
