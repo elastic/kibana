@@ -60,8 +60,11 @@ export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
+
+  dragPreviewRef: React.MutableRefObject<HTMLDivElement | null>;
+  rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
+  panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
 }
 
 /**

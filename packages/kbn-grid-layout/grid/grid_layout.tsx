@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
+
+import { transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
@@ -27,8 +32,8 @@ export const GridLayout = ({
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
-  const [runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
-    // gridLayoutStateManager.gridLayout$,
+  const [gridLayout, runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
+    gridLayoutStateManager.gridLayout$,
     gridLayoutStateManager.runtimeSettings$,
     gridLayoutStateManager.interactionEvent$
   );
@@ -41,7 +46,7 @@ export const GridLayout = ({
             setDimensionsRef(divElement);
           }}
         >
-          {gridLayoutStateManager.gridLayout$.value.map((rowData, rowIndex) => {
+          {gridLayout.map((rowData, rowIndex) => {
             return (
               <GridRow
                 gridLayoutStateManager={gridLayoutStateManager}
@@ -71,6 +76,18 @@ export const GridLayout = ({
           })}
         </div>
       </GridHeightSmoother>
+
+      {interactionEvent?.id && (
+        <div
+          ref={gridLayoutStateManager.dragPreviewRef}
+          css={css`
+            pointer-events: none;
+            border-radius: ${euiThemeVars.euiBorderRadius};
+            background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+            transition: opacity 100ms linear;
+          `}
+        />
+      )}
       {/* <GridOverlay
         interactionEvent={interactionEvent}
         gridLayoutStateManager={gridLayoutStateManager}
