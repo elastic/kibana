@@ -22,7 +22,6 @@ import {
   readLog,
   clearLog,
   currentVersion,
-  nextMinor,
 } from '../kibana_migrator_test_kit';
 import {
   BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
