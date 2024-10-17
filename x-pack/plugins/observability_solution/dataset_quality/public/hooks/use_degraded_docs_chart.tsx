@@ -174,16 +174,20 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 
   const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
 
-  return {
-    attributes,
-    dataView,
-    breakdown: {
+  const breakdown = useMemo(() => {
+    return {
       dataViewField: breakdownDataViewField,
       fieldSupportsBreakdown: breakdownDataViewField
         ? fieldSupportsBreakdown(breakdownDataViewField)
         : true,
       onChange: handleBreakdownFieldChange,
-    },
+    };
+  }, [breakdownDataViewField, handleBreakdownFieldChange]);
+
+  return {
+    attributes,
+    dataView,
+    breakdown,
     extraActions,
     isChartLoading,
     onChartLoading: handleChartLoading,
