@@ -105,11 +105,12 @@ describe('GroupSelection', () => {
     return render(
       <I18nProvider>
         <GroupSelection
+          tab="recommended"
+          setTab={jest.fn()}
           visTypesRegistry={visTypesRegistry(_visTypes)}
           docLinks={docLinks as DocLinksStart}
-          toggleGroups={jest.fn()}
+          showMainDialog={jest.fn()}
           onVisTypeSelected={jest.fn()}
-          showExperimental={true}
           {...overrideProps}
         />
       </I18nProvider>
@@ -137,9 +138,9 @@ describe('GroupSelection', () => {
     };
     renderGroupSelectionComponent({
       visTypesRegistry: visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[]),
+      tab: 'legacy',
     });
 
-    await userEvent.click(screen.getByRole('tab', { name: /legacy/i }));
     expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
   });
 
@@ -149,19 +150,18 @@ describe('GroupSelection', () => {
       title: 'Vis3',
       stage: 'production',
       group: VisGroups.TOOLS,
+
       ...defaultVisTypeParams,
     };
     renderGroupSelectionComponent({
+      tab: 'legacy',
       visTypesRegistry: visTypesRegistry([..._visTypes, toolsVisType] as BaseVisType[]),
     });
-
-    expect(screen.queryByTestId('visType-vis3')).toBeNull();
-    await userEvent.click(screen.getByRole('tab', { name: /legacy/i }));
     expect(screen.getByTestId('visType-vis3')).toHaveTextContent('Vis3');
   });
 
-  it('should call the toggleGroups if the aggBased group card is clicked', async () => {
-    const toggleGroups = jest.fn();
+  it('should call the showMainDialog if the aggBased group card is clicked', async () => {
+    const showMainDialog = jest.fn();
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',
@@ -170,13 +170,13 @@ describe('GroupSelection', () => {
       ...defaultVisTypeParams,
     };
     renderGroupSelectionComponent({
-      toggleGroups,
+      showMainDialog,
       visTypesRegistry: visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[]),
+      tab: 'legacy',
     });
 
-    await userEvent.click(screen.getByRole('tab', { name: /legacy/i }));
     await userEvent.click(screen.getByRole('button', { name: /Aggregation-based/i }));
-    expect(toggleGroups).toHaveBeenCalled();
+    expect(showMainDialog).toHaveBeenCalled();
   });
 
   it('should only show promoted visualizations in recommended tab', () => {

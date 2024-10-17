@@ -26,7 +26,7 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
     defaultMessage: 'Markdown text',
   }),
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Legacy tool for adding text or images to dashboards.',
+    defaultMessage: 'Add custom text or images to dashboards.',
   }),
   order: 30,
   toExpressionAst,
