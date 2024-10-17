@@ -44,7 +44,7 @@ const PatternLabelComponent: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-      {showResult(resultOpts) && (
+      {indices != null && indices > 0 && showResult(resultOpts) && (
         <EuiFlexItem grow={false}>
           <IndexResultBadge
             incompatible={resultOpts.incompatible}

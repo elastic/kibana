@@ -24,7 +24,6 @@
     "@kbn/core-execution-context-browser",
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core",
     "@kbn/data-plugin",

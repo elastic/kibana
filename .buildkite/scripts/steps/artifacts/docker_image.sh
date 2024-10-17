@@ -126,15 +126,15 @@ steps:
       env:
         CONTAINER: "$KIBANA_IMAGE"
     soft_fail: true
-  - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
+  - label: ":serverless::argo: Run synthetics tests and update kibana image tag to ${GIT_ABBREV_COMMIT} for kibana-controller"
     branches: main
-    trigger: gpctl-promote-with-e2e-tests
+    trigger: gpctl-promote-after-serverless-devenv-synthetics
     build:
       env:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
-        DRY_RUN: "${DRY_RUN:-false}"
+        GPCTL_PROMOTE_DRY_RUN: ${DRY_RUN:-false}
 EOF
 
 else

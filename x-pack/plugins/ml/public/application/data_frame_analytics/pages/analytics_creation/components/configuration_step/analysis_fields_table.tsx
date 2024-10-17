@@ -21,9 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
-import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
-import { FieldStatsInfoButton } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import {
+  useFieldStatsTrigger,
+  FieldStatsInfoButton,
+  type FieldForStats,
+} from '@kbn/ml-field-stats-flyout';
+
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 

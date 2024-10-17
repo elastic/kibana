@@ -20,7 +20,7 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
+import { TimeUnitChar, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
@@ -153,7 +153,7 @@ export const createMetricThresholdExecutor =
       groups,
       thresholds,
     }) => {
-      const { uuid, start } = alertsClient.report({
+      const { uuid } = alertsClient.report({
         id,
         actionGroup,
       });
@@ -170,13 +170,7 @@ export const createMetricThresholdExecutor =
         },
         context: {
           ...contextWithoutAlertDetailsUrl,
-          alertDetailsUrl: await getAlertUrl(
-            uuid,
-            spaceId,
-            start ?? startedAt.toISOString(),
-            alertsLocator,
-            libs.basePath.publicBaseUrl
-          ),
+          alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
         },
       });
     };
@@ -456,13 +450,7 @@ export const createMetricThresholdExecutor =
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       recoveredAlert.alert.setContext({
-        alertDetailsUrl: await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          libs.basePath.publicBaseUrl
-        ),
+        alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],

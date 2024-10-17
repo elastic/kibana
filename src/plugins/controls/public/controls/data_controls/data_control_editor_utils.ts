@@ -10,6 +10,7 @@
 import { memoize } from 'lodash';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { asyncMap } from '@kbn/std';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import { isDataControlFactory, type DataControlFieldRegistry } from './types';
 
@@ -23,7 +24,7 @@ export const getDataControlFieldRegistry = memoize(
 const loadFieldRegistryFromDataView = async (
   dataView: DataView
 ): Promise<DataControlFieldRegistry> => {
-  const controlFactories = getAllControlTypes().map((controlType) =>
+  const controlFactories = await asyncMap(getAllControlTypes(), async (controlType) =>
     getControlFactory(controlType)
   );
   const fieldRegistry: DataControlFieldRegistry = {};

@@ -84,6 +84,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should be able to select multiple rows holding Shift key', async () => {
+      expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(false);
+
+      // select 1 row
+      await dataGrid.selectRow(1);
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(1);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(1);
+      });
+
+      // select 3 more
+      await dataGrid.selectRow(4, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(4);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(4);
+      });
+
+      // deselect index 3 and 4
+      await dataGrid.selectRow(3, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(2);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(2);
+      });
+
+      // select from index 3 to 0
+      await dataGrid.selectRow(0, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(4);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(4);
+      });
+
+      // select from both pages
+      await testSubjects.click('pagination-button-1');
+      await retry.try(async () => {
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(0);
+      });
+
+      await dataGrid.selectRow(2, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(3);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(8);
+      });
+    });
+
     it('should be able to bulk select rows', async () => {
       expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(false);
       expect(await testSubjects.getAttribute('selectAllDocsOnPageToggle', 'title')).to.be(

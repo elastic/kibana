@@ -30,7 +30,8 @@ const rewriteBodyRes = ({ ruleTypeId, alerts, ...rest }: AlertSummary) => ({
 export const getAlertInstanceSummaryRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
@@ -40,6 +41,7 @@ export const getAlertInstanceSummaryRoute = (
         query: querySchema,
       },
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Get an alert summary',
         tags: ['oas-tag:alerting'],
         deprecated: true,

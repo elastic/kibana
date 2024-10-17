@@ -8,28 +8,28 @@
  */
 
 import React from 'react';
+import { merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
 import {
-  apiCanAccessViewMode,
-  apiPublishesPartialUnifiedSearch,
-  apiHasUniqueId,
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
-  getViewModeSubject,
   HasParentApi,
-  PublishesUnifiedSearch,
   HasUniqueId,
   PublishesDataViews,
+  PublishesUnifiedSearch,
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  apiPublishesPartialUnifiedSearch,
+  getInheritedViewMode,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import { merge } from 'rxjs';
-import { pluginServices } from '../services/plugin_services';
-import { FiltersNotificationPopover } from './filters_notification_popover';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
+import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationPopover } from './filters_notification_popover';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -58,18 +58,12 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 2;
 
-  private settingsService;
-
-  constructor() {
-    ({ settings: this.settingsService } = pluginServices.getServices());
-  }
-
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-      uiSettings: this.settingsService.uiSettings,
+      uiSettings: coreServices.uiSettings,
     });
 
     return (

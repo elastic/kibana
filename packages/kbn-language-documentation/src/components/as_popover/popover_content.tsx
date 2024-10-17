@@ -24,7 +24,7 @@ import {
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import type { LanguageDocumentationSections } from '../../types';
 
-import './documentation.scss';
+import '../shared/documentation.scss';
 
 interface DocumentationProps {
   language: string;

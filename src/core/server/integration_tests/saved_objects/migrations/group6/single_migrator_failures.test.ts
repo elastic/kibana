@@ -15,32 +15,18 @@ import {
   startElasticsearch,
   defaultKibanaIndex,
   defaultKibanaTaskIndex,
-  getKibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 import '../jest_matchers';
 import { getElasticsearchClientWrapperFactory } from '../elasticsearch_client_wrapper';
 import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
 import {
-  baselineIndexTypesMap,
-  getReindexingBaselineTypes,
+  getRelocatingMigratorTestKit,
+  kibanaSplitIndex,
 } from '../kibana_migrator_test_kit.fixtures';
 
-export const logFilePathFirstRun = join(__dirname, 'dot_kibana_split_1st_run.test.log');
-export const logFilePathSecondRun = join(__dirname, 'dot_kibana_split_2nd_run.test.log');
-
-const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
-const tasksToNewIndex = getReindexingBaselineTypes(true).map((type) => {
-  if (type.name !== 'task' && type.name !== 'simple') {
-    return type;
-  }
-
-  // relocate 'simple' and 'task' objects to a new index (forces reindex)
-  return {
-    ...type,
-    indexPattern: kibanaSplitIndex,
-  };
-});
+export const logFilePathFirstRun = join(__dirname, 'single_migrator_failures_1st_run.test.log');
+export const logFilePathSecondRun = join(__dirname, 'single_migrator_failures_2nd_run.test.log');
 
 describe('split .kibana index into multiple system indices', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -65,18 +51,7 @@ describe('split .kibana index into multiple system indices', () => {
         errorDelaySeconds: delaySeconds,
       });
 
-      return await getKibanaMigratorTestKit({
-        types: tasksToNewIndex,
-        logFilePath,
-        kibanaVersion: nextMinor,
-        defaultIndexTypesMap: baselineIndexTypesMap,
-        clientWrapperFactory,
-        settings: {
-          migrations: {
-            discardUnknownObjects: nextMinor,
-          },
-        },
-      });
+      return await getRelocatingMigratorTestKit({ logFilePath, clientWrapperFactory });
     };
 
     beforeEach(async () => {
@@ -241,16 +216,8 @@ describe('split .kibana index into multiple system indices', () => {
     });
 
     afterEach(async () => {
-      const { runMigrations: secondRun } = await getKibanaMigratorTestKit({
+      const { runMigrations: secondRun } = await getRelocatingMigratorTestKit({
         logFilePath: logFilePathSecondRun,
-        types: tasksToNewIndex,
-        kibanaVersion: nextMinor,
-        defaultIndexTypesMap: baselineIndexTypesMap,
-        settings: {
-          migrations: {
-            discardUnknownObjects: nextMinor,
-          },
-        },
       });
 
       const results = await secondRun();

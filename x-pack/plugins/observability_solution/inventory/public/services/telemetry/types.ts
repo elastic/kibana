@@ -12,7 +12,7 @@ export interface TelemetryServiceSetupParams {
 }
 
 export interface InventoryAddDataParams {
-  view: 'add_data_button';
+  view: 'add_data_button' | 'empty_state';
   journey?: 'add_data' | 'associate_existing_service_logs';
 }
 

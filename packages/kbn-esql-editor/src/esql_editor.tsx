@@ -40,6 +40,8 @@ import {
   parseErrors,
   parseWarning,
   useDebounceWithOptions,
+  onKeyDownResizeHandler,
+  onMouseDownResizeHandler,
   type MonacoMessage,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
@@ -47,16 +49,12 @@ import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
-  EDITOR_MAX_HEIGHT,
-  EDITOR_MIN_HEIGHT,
+  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
 
 import './overwrite.scss';
-
-const KEYCODE_ARROW_UP = 38;
-const KEYCODE_ARROW_DOWN = 40;
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -101,6 +99,11 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [editorHeight, setEditorHeight] = useState(
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
+  // the resizable container is the container that holds the history component or the inline docs
+  // they are never open simultaneously
+  const [resizableContainerHeight, setResizableContainerHeight] = useState(
+    RESIZABLE_CONTAINER_INITIAL_HEIGHT
+  );
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   const [timePickerDate, setTimePickerDate] = useState(moment());
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
@@ -108,6 +111,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
@@ -129,7 +133,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     warnings: [],
   });
   const hideHistoryComponent = hideQueryHistory;
-
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -248,51 +251,56 @@ export const ESQLEditor = memo(function ESQLEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback<
-    React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
-  >(
-    (mouseDownEvent) => {
-      function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
-        return e && 'pageY' in e;
-      }
-      const startSize = editorHeight;
-      const startPosition = isMouseEvent(mouseDownEvent)
-        ? mouseDownEvent?.pageY
-        : mouseDownEvent?.touches[0].pageY;
-
-      function onMouseMove(mouseMoveEvent: MouseEvent) {
-        const height = startSize - startPosition + mouseMoveEvent.pageY;
-        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
-        setEditorHeight(validatedHeight);
-      }
-      function onMouseUp() {
-        document.body.removeEventListener('mousemove', onMouseMove);
-      }
-
-      document.body.addEventListener('mousemove', onMouseMove);
-      document.body.addEventListener('mouseup', onMouseUp, { once: true });
+  const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
+    (
+      mouseDownEvent,
+      firstPanelHeight,
+      setFirstPanelHeight,
+      secondPanelHeight,
+      setSecondPanelHeight
+    ) => {
+      onMouseDownResizeHandler(
+        mouseDownEvent,
+        firstPanelHeight,
+        setFirstPanelHeight,
+        secondPanelHeight,
+        setSecondPanelHeight
+      );
     },
-    [editorHeight]
+    []
   );
 
-  const onKeyDownResizeHandler = useCallback<
-    React.ComponentProps<typeof ResizableButton>['onKeyDownResizeHandler']
-  >(
-    (keyDownEvent) => {
-      let height = editorHeight;
-      if (
-        keyDownEvent.keyCode === KEYCODE_ARROW_UP ||
-        keyDownEvent.keyCode === KEYCODE_ARROW_DOWN
-      ) {
-        const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
-        height = height + step;
-        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
-        setEditorHeight(validatedHeight);
-      }
+  const onKeyDownResize = useCallback<typeof onKeyDownResizeHandler>(
+    (
+      keyDownEvent,
+      firstPanelHeight,
+      setFirstPanelHeight,
+      secondPanelHeight,
+      setSecondPanelHeight
+    ) => {
+      onKeyDownResizeHandler(
+        keyDownEvent,
+        firstPanelHeight,
+        setFirstPanelHeight,
+        secondPanelHeight,
+        setSecondPanelHeight
+      );
     },
-    [editorHeight]
+    []
   );
+
+  const resizableContainerButton = useMemo(() => {
+    return (
+      <ResizableButton
+        onMouseDownResizeHandler={(mouseDownEvent) =>
+          onMouseDownResize(mouseDownEvent, editorHeight, setEditorHeight, undefined, undefined)
+        }
+        onKeyDownResizeHandler={(keyDownEvent) =>
+          onKeyDownResize(keyDownEvent, editorHeight, setEditorHeight, undefined, undefined)
+        }
+      />
+    );
+  }, [onMouseDownResize, editorHeight, onKeyDownResize]);
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
@@ -313,13 +321,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize(
-      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
-        timestamp: Date.now(),
-        result: getESQLSources(...args),
-      }),
-      ({ esql }) => esql
-    );
+    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
+      timestamp: Date.now(),
+      result: getESQLSources(...args),
+    }));
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -711,6 +716,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     });
 
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+
+                    // Auto-focus the editor and move the cursor to the end.
+                    editor.focus();
+                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
                   }}
                 />
               </div>
@@ -718,6 +727,28 @@ export const ESQLEditor = memo(function ESQLEditor({
           </div>
         </EuiOutsideClickDetector>
       </EuiFlexGroup>
+      {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
+        <ResizableButton
+          onMouseDownResizeHandler={(mouseDownEvent) => {
+            onMouseDownResize(
+              mouseDownEvent,
+              editorHeight,
+              setEditorHeight,
+              resizableContainerHeight,
+              setResizableContainerHeight
+            );
+          }}
+          onKeyDownResizeHandler={(keyDownEvent) =>
+            onKeyDownResize(
+              keyDownEvent,
+              editorHeight,
+              setEditorHeight,
+              resizableContainerHeight,
+              setResizableContainerHeight
+            )
+          }
+        />
+      )}
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
         styles={{
@@ -736,14 +767,13 @@ export const ESQLEditor = memo(function ESQLEditor({
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
         setIsHistoryOpen={toggleHistory}
+        isLanguageComponentOpen={isLanguageComponentOpen}
+        setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
+        resizableContainerButton={resizableContainerButton}
+        resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
-      />
-      <ResizableButton
-        onMouseDownResizeHandler={onMouseDownResizeHandler}
-        onKeyDownResizeHandler={onKeyDownResizeHandler}
-        editorIsInline={editorIsInline}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

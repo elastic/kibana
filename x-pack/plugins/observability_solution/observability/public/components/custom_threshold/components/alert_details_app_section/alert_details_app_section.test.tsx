@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -77,7 +76,6 @@ jest.mock('../../../../utils/kibana_react', () => ({
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
-  const mockedSetAlertSummaryFields = jest.fn();
 
   const renderComponent = (
     alert: Partial<CustomThresholdAlert> = {},
@@ -89,7 +87,6 @@ describe('AlertDetailsAppSection', () => {
           <AlertDetailsAppSection
             alert={buildCustomThresholdAlert(alert, alertFields)}
             rule={buildCustomThresholdRule()}
-            setAlertSummaryFields={mockedSetAlertSummaryFields}
           />
         </QueryClientProvider>
       </IntlProvider>
@@ -104,28 +101,7 @@ describe('AlertDetailsAppSection', () => {
     const result = renderComponent();
 
     expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(6);
-    expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
-  });
-
-  it('should render additional alert summary fields', async () => {
-    renderComponent();
-
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
-    expect(mockedSetAlertSummaryFields).toBeCalledWith([
-      {
-        label: 'Related logs',
-        value: (
-          <span>
-            <EuiLink
-              data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
-              href="/view-in-app-url"
-            >
-              View related logs
-            </EuiLink>
-          </span>
-        ),
-      },
-    ]);
+    expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
   });
 
   it('should render annotations', async () => {
@@ -144,22 +120,33 @@ describe('AlertDetailsAppSection', () => {
     const result = renderComponent();
 
     expect(result.getByTestId('chartTitle-0').textContent).toBe(
-      'Equation result for count (all documents)'
+      'Equation result for count (host.name: host-1)'
     );
+    expect((result.getByTestId('viewLogs-0') as any).href).toBe('http://localhost/view-in-app-url');
+
     expect(result.getByTestId('chartTitle-1').textContent).toBe(
       'Equation result for max (system.cpu.user.pct)'
     );
+    expect((result.getByTestId('viewLogs-1') as any).href).toBe('http://localhost/view-in-app-url');
+
     expect(result.getByTestId('chartTitle-2').textContent).toBe(
       'Equation result for min (system.memory.used.pct)'
     );
+    expect((result.getByTestId('viewLogs-2') as any).href).toBe('http://localhost/view-in-app-url');
+
     expect(result.getByTestId('chartTitle-3').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct...'
     );
+    expect((result.getByTestId('viewLogs-3') as any).href).toBe('http://localhost/view-in-app-url');
+
     expect(result.getByTestId('chartTitle-4').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
+    expect((result.getByTestId('viewLogs-4') as any).href).toBe('http://localhost/view-in-app-url');
+
     expect(result.getByTestId('chartTitle-5').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
+    expect((result.getByTestId('viewLogs-5') as any).href).toBe('http://localhost/view-in-app-url');
   });
 });

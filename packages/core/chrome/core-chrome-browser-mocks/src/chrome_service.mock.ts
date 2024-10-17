@@ -54,6 +54,10 @@ const createStartContractMock = () => {
     sideNav: {
       getIsCollapsed$: jest.fn(),
       setIsCollapsed: jest.fn(),
+      getPanelSelectedNode$: jest.fn(),
+      setPanelSelectedNode: jest.fn(),
+      getIsFeedbackBtnVisible$: jest.fn(),
+      setIsFeedbackBtnVisible: jest.fn(),
     },
     getBreadcrumbsAppendExtension$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
@@ -80,6 +84,7 @@ const createStartContractMock = () => {
       initNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
+      getBreadcrumbs$: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),

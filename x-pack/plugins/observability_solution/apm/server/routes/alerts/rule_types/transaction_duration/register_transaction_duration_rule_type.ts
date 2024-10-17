@@ -140,7 +140,7 @@ export function registerTransactionDurationRuleType({
       >
     ) => {
       const { params: ruleParams, services, spaceId, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -184,6 +184,7 @@ export function registerTransactionDurationRuleType({
         body: {
           track_total_hits: false,
           size: 0,
+          _source: false as const,
           query: {
             bool: {
               filter: [
@@ -221,6 +222,7 @@ export function registerTransactionDurationRuleType({
 
       const response = await alertingEsClient({
         scopedClusterClient,
+        uiSettingsClient,
         params: searchParams,
       });
 

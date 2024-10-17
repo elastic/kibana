@@ -29,6 +29,7 @@ export const bulkDisableRulesRoute = ({
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_disable`,
+      options: { access: 'internal' },
       validate: {
         body: bulkDisableRulesRequestBodySchemaV1,
       },

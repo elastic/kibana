@@ -20,6 +20,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
+import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
 
 const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
@@ -253,7 +254,11 @@ export class SpacesClient implements ISpacesClient {
       color: savedObject.attributes.color,
       initials: savedObject.attributes.initials,
       imageUrl: savedObject.attributes.imageUrl,
-      disabledFeatures: savedObject.attributes.disabledFeatures ?? [],
+      disabledFeatures: withSpaceSolutionDisabledFeatures(
+        this.features.getKibanaFeatures(),
+        savedObject.attributes.disabledFeatures ?? [],
+        !this.isServerless ? savedObject.attributes.solution : undefined
+      ),
       _reserved: savedObject.attributes._reserved,
       ...(!this.isServerless ? { solution: savedObject.attributes.solution } : {}),
     } as v1.Space;

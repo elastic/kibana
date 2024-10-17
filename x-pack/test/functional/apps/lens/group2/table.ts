@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
       // Remove the sorting
       await retry.try(async () => {
-        await lens.changeTableSortingBy(0, 'none');
+        await lens.changeTableSortingBy(0, 'descending');
         await lens.waitForVisualization();
         expect(await lens.isDatatableHeaderSorted(0)).to.eql(false);
       });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
 
       await retry.try(async () => {
-        await lens.changeTableSortingBy(4, 'none');
+        await lens.changeTableSortingBy(4, 'descending');
         await lens.waitForVisualization();
         expect(await lens.isDatatableHeaderSorted(0)).to.eql(false);
       });

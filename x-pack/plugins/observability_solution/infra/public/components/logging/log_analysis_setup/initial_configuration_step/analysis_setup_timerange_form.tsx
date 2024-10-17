@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiTitle,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormControlLayout,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiTitle, EuiText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
@@ -107,21 +100,15 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           label={startTimeLabel}
         >
           <EuiFlexGroup gutterSize="s">
-            <EuiFormControlLayout
-              clear={
-                startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined
-              }
-              isDisabled={disabled}
-            >
-              <FixedDatePicker
-                disabled={disabled}
-                showTimeSelect
-                selected={startTimeValue}
-                onChange={(date) => setStartTime(selectedDateToParam(date))}
-                placeholder={startTimeDefaultDescription}
-                maxDate={now}
-              />
-            </EuiFormControlLayout>
+            <FixedDatePicker
+              disabled={disabled}
+              showTimeSelect
+              selected={startTimeValue}
+              onChange={(date) => setStartTime(selectedDateToParam(date))}
+              onClear={() => setStartTime(undefined)}
+              placeholder={startTimeDefaultDescription}
+              maxDate={now}
+            />
           </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow
@@ -131,22 +118,18 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           label={endTimeLabel}
         >
           <EuiFlexGroup gutterSize="s">
-            <EuiFormControlLayout
-              clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
-              isDisabled={disabled}
-            >
-              <FixedDatePicker
-                disabled={disabled}
-                showTimeSelect
-                selected={endTimeValue}
-                onChange={(date) => setEndTime(selectedDateToParam(date))}
-                placeholder={endTimeDefaultDescription}
-                openToDate={now}
-                minDate={startTimeValue}
-                minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
-                maxTime={moment().hour(23).minutes(59)}
-              />
-            </EuiFormControlLayout>
+            <FixedDatePicker
+              disabled={disabled}
+              showTimeSelect
+              selected={endTimeValue}
+              onChange={(date) => setEndTime(selectedDateToParam(date))}
+              onClear={() => setEndTime(undefined)}
+              placeholder={endTimeDefaultDescription}
+              openToDate={now}
+              minDate={startTimeValue}
+              minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
+              maxTime={moment().hour(23).minutes(59)}
+            />
           </EuiFlexGroup>
         </EuiFormRow>
       </EuiFlexItem>

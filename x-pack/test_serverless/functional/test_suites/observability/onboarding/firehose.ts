@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
-  // Failing: See https://github.com/elastic/kibana/issues/193294
+  // FLAKY: https://github.com/elastic/kibana/issues/193294
   describe.skip('Onboarding Firehose Quickstart Flow', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin(); // Onboarding requires admin role
@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await (await testSubjects.find('createCloudFormationOptionAWSCLI')).click();
+      await (await testSubjects.find('createCloudFormationOptionAWSCLI', 20000)).click();
       await testSubjects.existOrFail('observabilityOnboardingFirehoseCreateStackCommand');
     });
 

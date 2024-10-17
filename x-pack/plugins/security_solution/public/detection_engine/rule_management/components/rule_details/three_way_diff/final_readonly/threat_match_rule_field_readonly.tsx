@@ -13,6 +13,10 @@ import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
 import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
 import { ThreatMappingReadOnly } from './fields/threat_mapping/threat_mapping';
 import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
+import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { ThreatLanguageReadOnly } from './fields/threat_language/threat_language';
 
 interface ThreatMatchRuleFieldReadOnlyProps {
   fieldName: keyof DiffableThreatMatchFields;
@@ -24,6 +28,13 @@ export function ThreatMatchRuleFieldReadOnly({
   finalDiffableRule,
 }: ThreatMatchRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
     case 'kql_query':
@@ -42,6 +53,8 @@ export function ThreatMatchRuleFieldReadOnly({
           threatIndicatorPath={finalDiffableRule.threat_indicator_path}
         />
       );
+    case 'threat_language':
+      return <ThreatLanguageReadOnly threatLanguage={finalDiffableRule.threat_language} />;
     case 'threat_mapping':
       return <ThreatMappingReadOnly threatMapping={finalDiffableRule.threat_mapping} />;
     case 'threat_query':
@@ -52,8 +65,8 @@ export function ThreatMatchRuleFieldReadOnly({
         />
       );
     case 'type':
-      return null;
+      return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

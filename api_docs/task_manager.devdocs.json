@@ -134,7 +134,15 @@
                 "section": "def-server.TaskManagerStartContract",
                 "text": "TaskManagerStartContract"
               },
-              ", unknown>, plugins: { usageCollection?: ",
+              ", unknown>, plugins: { cloud?: ",
+              {
+                "pluginId": "cloud",
+                "scope": "server",
+                "docId": "kibCloudPluginApi",
+                "section": "def-server.CloudSetup",
+                "text": "CloudSetup"
+              },
+              " | undefined; usageCollection?: ",
               {
                 "pluginId": "usageCollection",
                 "scope": "server",
@@ -196,6 +204,27 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "taskManager",
+                    "id": "def-server.TaskManagerPlugin.setup.$2.cloud",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "cloud",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "cloud",
+                        "scope": "server",
+                        "docId": "kibCloudPluginApi",
+                        "section": "def-server.CloudSetup",
+                        "text": "CloudSetup"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
                   {
                     "parentPluginId": "taskManager",
                     "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
@@ -667,15 +696,8 @@
               "\nlist of failed tasks and errors caused failure"
             ],
             "signature": [
-              "{ type: string; id: string; error: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
-              "; }[]"
+              "ErrorOutput",
+              "[]"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,

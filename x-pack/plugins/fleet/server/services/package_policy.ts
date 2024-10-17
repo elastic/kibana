@@ -105,7 +105,12 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
-import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
+import {
+  getPackageInfo,
+  getInstallation,
+  ensureInstalledPackage,
+  getInstallationObject,
+} from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
@@ -228,6 +233,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const basePkgInfo =
+      options?.packageInfo ??
+      (packagePolicy.package
+        ? await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          })
+        : undefined);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -240,7 +256,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Creating new package policy`);
 
     this.keepPolicyIdInSync(packagePolicy);
-    await preflightCheckPackagePolicy(soClient, packagePolicy);
+    await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -443,6 +459,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   }> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     for (const packagePolicy of packagePolicies) {
+      const basePkgInfo = packagePolicy.package
+        ? await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          })
+        : undefined;
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
@@ -453,7 +478,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       this.keepPolicyIdInSync(packagePolicy);
-      await preflightCheckPackagePolicy(soClient, packagePolicy);
+      await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     }
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
@@ -1439,12 +1464,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
-    if (agentlessAgentPolicies.length > 0) {
-      for (const agentPolicyId of agentlessAgentPolicies) {
-        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
-      }
-    }
-
     if (!options?.skipUnassignFromAgentPolicies) {
       let uniquePolicyIdsR = [
         ...new Set(
@@ -1874,9 +1893,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger?: Logger
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
+    const pkgInstallObj = await getInstallationObject({
+      savedObjectsClient: soClient,
+      pkgName,
+      logger: options?.logger,
+    });
+    let pkgInstall = pkgInstallObj?.attributes;
+    if (!pkgInstall && options?.installMissingPackage) {
+      const esClient = await appContextService.getInternalUserESClient();
+      const result = await ensureInstalledPackage({
+        esClient,
+        pkgName,
+        savedObjectsClient: soClient,
+      });
+      if (result.package) {
+        pkgInstall = result.package;
+      }
+    }
     if (pkgInstall) {
       const packageInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -2066,7 +2101,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = (
       await appContextService
@@ -2132,7 +2171,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             soClient,
             esClient,
             packagePolicy.id,
-            getPackagePolicyUpdate(packagePolicy)
+            getPackagePolicyUpdate(packagePolicy),
+            {
+              force: options?.force,
+            }
           );
         },
         {
@@ -2993,8 +3035,7 @@ async function validateIsNotHostedPolicy(
     throw new AgentPolicyNotFoundError('Agent policy not found');
   }
 
-  const isManagedPolicyWithoutServerlessSupport =
-    agentPolicy.is_managed && !agentPolicy.supports_agentless && !force;
+  const isManagedPolicyWithoutServerlessSupport = agentPolicy.is_managed && !force;
 
   if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(

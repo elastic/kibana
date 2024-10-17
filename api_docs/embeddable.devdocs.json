@@ -1000,7 +1000,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO, any>>(type: string, explicitInput: Partial<EEI>, attributes?: unknown) => Promise<E | ",
+              "<EEI, EEO, any>>(type: string, explicitInput: Partial<EEI>, attributes?: unknown) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1008,7 +1008,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | E>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -7502,7 +7502,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
@@ -7992,27 +7992,27 @@
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
           },
           {
             "plugin": "canvas",
@@ -8069,7 +8069,7 @@
             "section": "def-public.EmbeddableRendererProps",
             "text": "EmbeddableRendererProps"
           },
-          "<I>) => JSX.Element"
+          "<I>) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
         "deprecated": false,
@@ -8111,7 +8111,7 @@
         "label": "EmbeddableRoot",
         "description": [],
         "signature": [
-          "({ embeddable, loading, error, input }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ embeddable, loading, error, input }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
         "deprecated": false,
@@ -8120,12 +8120,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableRoot.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ embeddable, loading, error, input }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
@@ -9019,7 +9019,7 @@
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<SerializedState>) => void) | undefined; }) => JSX.Element"
+          "<SerializedState>) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -10322,7 +10322,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10330,7 +10330,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -10443,7 +10443,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10451,7 +10451,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | undefined>"
+              " | TEmbeddable | undefined>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -14511,10 +14511,6 @@
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/plugin.tsx"
             }
           ],
           "children": [
@@ -14871,24 +14867,20 @@
           "trackAdoption": false,
           "references": [
             {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+            },
+            {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
             },
             {
               "plugin": "investigateApp",
@@ -14896,10 +14888,6 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
-            },
-            {
-              "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
             },
             {
@@ -14912,19 +14900,23 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             }
           ],
           "children": [
@@ -15024,15 +15016,15 @@
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/services/kibana/embeddables.ts"
+              "path": "x-pack/plugins/canvas/public/components/workpad_header/editor_menu/editor_menu.tsx"
             },
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             },
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             }
           ],
           "children": [],

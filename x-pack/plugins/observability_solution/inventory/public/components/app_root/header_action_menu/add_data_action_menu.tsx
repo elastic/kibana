@@ -15,26 +15,18 @@ import {
   EuiIcon,
   EuiPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
   ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { InventoryAddDataParams } from '../../../services/telemetry/types';
-
-const addDataTitle = i18n.translate('xpack.inventory.addDataContextMenu.link', {
-  defaultMessage: 'Add data',
-});
-const addDataItem = i18n.translate('xpack.inventory.add.apm.agent.button.', {
-  defaultMessage: 'Add data',
-});
-
-const associateServiceLogsItem = i18n.translate('xpack.inventory.associate.service.logs.button', {
-  defaultMessage: 'Associate existing service logs',
-});
-
-const ASSOCIATE_LOGS_LINK = 'https://ela.st/new-experience-associate-service-logs';
+import {
+  ASSOCIATE_LOGS_LINK,
+  addDataItem,
+  addDataTitle,
+  associateServiceLogsItem,
+} from '../../shared/add_data_buttons/buttons';
 
 export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);

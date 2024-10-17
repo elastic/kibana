@@ -17,7 +17,7 @@ import {
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
 } from '../actions';
-import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
+import type { FavoriteTimelineResponse } from '../../../../common/api/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
@@ -49,7 +49,7 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
           timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
         });
 
-        const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);
+        const response: FavoriteTimelineResponse = get('data.persistFavorite', result);
 
         if (response.code === 403) {
           store.dispatch(showCallOutUnauthorizedMsg());

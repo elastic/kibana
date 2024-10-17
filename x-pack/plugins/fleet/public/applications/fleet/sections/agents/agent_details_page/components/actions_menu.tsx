@@ -71,7 +71,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             onClick={() => {
               setIsReassignFlyoutOpen(true);
             }}
-            disabled={!agent.active && !agentPolicy}
+            disabled={(!agent.active && !agentPolicy) || agentPolicy?.supports_agentless === true}
             key="reassignPolicy"
           >
             <FormattedMessage

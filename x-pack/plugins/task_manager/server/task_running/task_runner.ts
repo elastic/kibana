@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, omit } from 'lodash';
+import { flow, identity, omit } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
@@ -49,6 +49,7 @@ import {
   FailedRunResult,
   FailedTaskResult,
   isFailedRunResult,
+  PartialConcreteTaskInstance,
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
@@ -97,6 +98,10 @@ export interface TaskRunning<Stage extends TaskRunningStage, Instance> {
 
 export interface Updatable {
   update(doc: ConcreteTaskInstance, options: { validate: boolean }): Promise<ConcreteTaskInstance>;
+  partialUpdate(
+    partialDoc: PartialConcreteTaskInstance,
+    options: { validate: boolean; doc: ConcreteTaskInstance }
+  ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
 }
 
@@ -556,18 +561,21 @@ export class TaskManagerRunner implements TaskRunner {
         });
   }
 
-  private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
+  private async releaseClaimAndIncrementAttempts(): Promise<
+    Result<PartialConcreteTaskInstance, Error>
+  > {
     return promiseResult(
-      this.bufferedTaskStore.update(
+      this.bufferedTaskStore.partialUpdate(
         {
-          ...taskWithoutEnabled(this.instance.task),
+          id: this.instance.task.id,
+          version: this.instance.task.version,
           status: TaskStatus.Idle,
           attempts: this.instance.task.attempts + 1,
           startedAt: null,
           retryAt: null,
           ownerId: null,
         },
-        { validate: false }
+        { validate: false, doc: this.instance.task }
       )
     );
   }
@@ -679,20 +687,22 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
+
+      const partialTask = {
+        ...fieldUpdates,
+        // reset fields that track the lifecycle of the concluded `task run`
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+        id: this.instance.task.id,
+        version: this.instance.task.version,
+      };
+
       this.instance = asRan(
-        await this.bufferedTaskStore.update(
-          defaults(
-            {
-              ...fieldUpdates,
-              // reset fields that track the lifecycle of the concluded `task run`
-              startedAt: null,
-              retryAt: null,
-              ownerId: null,
-            },
-            taskWithoutEnabled(this.instance.task)
-          ),
-          { validate: shouldValidate }
-        )
+        await this.bufferedTaskStore.partialUpdate(partialTask, {
+          validate: shouldValidate,
+          doc: this.instance.task,
+        })
       );
     }
 

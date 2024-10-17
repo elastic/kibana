@@ -26,6 +26,7 @@ import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { LogsDeprecationCallout } from '../../../components/logs_deprecation_callout';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -45,7 +46,6 @@ import {
   useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
 import { type ParsedQuery } from '../../../observability_logs/log_stream_query_state';
-import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
@@ -234,7 +234,7 @@ export const StreamPageLogsContent = React.memo<{
 
   return (
     <>
-      <LogsDeprecationCallout />
+      <LogsDeprecationCallout page="stream" />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />

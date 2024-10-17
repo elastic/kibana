@@ -13,6 +13,11 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
 import { NotFoundError } from '../../../../errors';
 import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
 import { SimpleMemCache } from './simple_mem_cache';
@@ -513,8 +518,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         );
       }
 
+      this.sendActionCreationTelemetry(doc);
+
       return doc;
     } catch (err) {
+      this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(
           `Failed to create action request document: ${err.message}`,
@@ -707,6 +716,58 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         return pendingRequests;
       },
     });
+  }
+
+  protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+        responseActions: {
+          actionId: actionRequest.EndpointActions.action_id,
+          agentType: this.agentType,
+          command: actionRequest.EndpointActions.data.command,
+          isAutomated: this.options.isAutomated ?? false,
+        },
+      });
+  }
+
+  protected sendActionCreationErrorTelemetry(
+    command: ResponseActionsApiCommandNames,
+    error: Error
+  ): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+        responseActions: {
+          agentType: this.agentType,
+          command,
+          error: error.message,
+        },
+      });
+  }
+
+  protected sendActionResponseTelemetry(responseList: LogsEndpointActionResponse[]): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    for (const response of responseList) {
+      this.options.endpointService
+        .getTelemetryService()
+        .reportEvent(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: response.EndpointActions.action_id,
+            agentType: this.agentType,
+            actionStatus: response.error ? 'failed' : 'successful',
+            command: response.EndpointActions.data.command,
+          },
+        });
+    }
   }
 
   public async isolate(

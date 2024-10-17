@@ -21,21 +21,22 @@ import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/a
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
+  createIngestPipelineSchema,
+  curatedModelsParamsSchema,
+  curatedModelsQuerySchema,
   deleteTrainedModelQuerySchema,
   getInferenceQuerySchema,
   inferTrainedModelBody,
   inferTrainedModelQuery,
   modelAndDeploymentIdSchema,
+  modelDownloadsQuery,
   modelIdSchema,
   optionalModelIdSchema,
   pipelineSimulateBody,
   putTrainedModelQuerySchema,
-  threadingParamsSchema,
+  threadingParamsBodySchema,
+  threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
-  createIngestPipelineSchema,
-  modelDownloadsQuery,
-  curatedModelsParamsSchema,
-  curatedModelsQuerySchema,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -534,22 +535,27 @@ export function trainedModelsRoutes(
         validate: {
           request: {
             params: modelIdSchema,
-            query: threadingParamsSchema,
+            query: threadingParamsQuerySchema,
+            body: threadingParamsBodySchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
+
+          // TODO use mlClient.startTrainedModelDeployment when esClient is updated
           const body = await mlClient.startTrainedModelDeployment(
             {
               model_id: modelId,
               ...(request.query ? request.query : {}),
+              ...(request.body ? request.body : {}),
             },
             {
               maxRetries: 0,
             }
           );
+
           return response.ok({
             body,
           });
@@ -584,6 +590,7 @@ export function trainedModelsRoutes(
             deployment_id: deploymentId,
             ...request.body,
           });
+
           return response.ok({
             body,
           });

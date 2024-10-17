@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
-import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
@@ -107,11 +107,10 @@ const getDetailsList = (
     description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
-      defaultMessage: 'Source',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle', {
+      defaultMessage: 'Vendor',
     }),
-    description:
-      getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
+    description: getVendorName(data) || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {

@@ -204,7 +204,13 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const columns = useMemo(
     () =>
-      getColumns({ isActionsDisabled: isTableLoading, onEditActionClicked, onDeleteActionClicked }),
+      getColumns({
+        isActionsDisabled: isTableLoading,
+        onEditActionClicked,
+        onDeleteActionClicked,
+        isDeleteEnabled: (prompt: PromptResponse) => prompt.isDefault !== true,
+        isEditEnabled: () => true,
+      }),
     [getColumns, isTableLoading, onEditActionClicked, onDeleteActionClicked]
   );
   const systemPromptListItems = useMemo(

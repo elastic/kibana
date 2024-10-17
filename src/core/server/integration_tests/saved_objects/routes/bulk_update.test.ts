@@ -97,6 +97,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'visualization',
@@ -127,6 +128,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
 
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'visualization',
@@ -167,6 +169,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'hidden-from-http',
@@ -183,6 +186,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/_bulk_update')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           type: 'visualization',

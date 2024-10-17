@@ -98,7 +98,10 @@
     "@kbn/security-solution-common",
     "@kbn/router-utils",
     "@kbn/management-settings-ids",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/react-hooks",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/esql-ast"
   ],
   "exclude": [
     "target/**/*"

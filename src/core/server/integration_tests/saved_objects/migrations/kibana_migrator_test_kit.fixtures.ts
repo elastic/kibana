@@ -10,6 +10,7 @@
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 import {
   currentVersion,
   defaultKibanaIndex,
@@ -141,6 +142,40 @@ export const getReindexingBaselineTypes = (filterDeprecated: boolean) =>
                   createdAt: { type: 'date' },
                 },
               },
+              {
+                type: 'unsafe_transform',
+                transformFn: (doc) => {
+                  if (doc.attributes.value % 100 === 0) {
+                    throw new Error(
+                      `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
+                    );
+                  }
+                  return { document: doc };
+                },
+              },
+            ],
+          },
+        },
+      };
+    } else if (type.name === 'task') {
+      return {
+        ...type,
+        mappings: {
+          properties: {
+            ...type.mappings.properties,
+            lastRun: { type: 'date' },
+          },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  lastRun: { type: 'date' },
+                },
+              },
             ],
           },
         },
@@ -233,6 +268,7 @@ interface GetMutatedMigratorParams {
   filterDeprecated?: boolean;
   types?: Array<SavedObjectsType<any>>;
   settings?: Record<string, any>;
+  clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
 
 export const getUpToDateMigratorTestKit = async ({
@@ -268,13 +304,57 @@ export const getCompatibleMigratorTestKit = async ({
 export const getReindexingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
+  types = getReindexingBaselineTypes(filterDeprecated),
   kibanaVersion = nextMinor,
+  clientWrapperFactory,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
     logFilePath,
-    types: getReindexingBaselineTypes(filterDeprecated),
+    types,
     kibanaVersion,
-    settings,
+    clientWrapperFactory,
+    settings: {
+      ...settings,
+      migrations: {
+        discardUnknownObjects: nextMinor,
+        discardCorruptObjects: nextMinor,
+        ...settings.migrations,
+      },
+    },
+  });
+};
+
+export const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
+export const getRelocatingMigratorTestKit = async ({
+  logFilePath = defaultLogFilePath,
+  filterDeprecated = false,
+  // relocate 'task' and 'basic' objects to a new SO index
+  relocateTypes = {
+    task: kibanaSplitIndex,
+    basic: kibanaSplitIndex,
+  },
+  types = getReindexingBaselineTypes(filterDeprecated).map((type) => ({
+    ...type,
+    ...(relocateTypes[type.name] && { indexPattern: relocateTypes[type.name] }),
+  })),
+  kibanaVersion = nextMinor,
+  clientWrapperFactory,
+  settings = {},
+}: GetMutatedMigratorParams & { relocateTypes?: Record<string, string> } = {}) => {
+  return await getKibanaMigratorTestKit({
+    logFilePath,
+    types,
+    kibanaVersion,
+    clientWrapperFactory,
+    defaultIndexTypesMap: baselineIndexTypesMap,
+    settings: {
+      ...settings,
+      migrations: {
+        discardUnknownObjects: nextMinor,
+        discardCorruptObjects: nextMinor,
+        ...settings.migrations,
+      },
+    },
   });
 };
