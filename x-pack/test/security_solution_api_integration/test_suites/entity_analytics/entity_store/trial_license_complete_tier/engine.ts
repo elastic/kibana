@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const utils = EntityStoreUtils(getService);
 
-    // Failing: See https://github.com/elastic/kibana/issues/196526
+  // Failing: See https://github.com/elastic/kibana/issues/196526
   describe.skip('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
