@@ -25,6 +25,11 @@ export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;
 
   private appMenuItems: AppMenuItem[];
+  /**
+   * As custom actions can be registered under a submenu from both root and data source profiles, we need to keep track of them separately.
+   * Otherwise, it would be less predictable. For example, we would override/reset the actions from the data source profile with the ones from the root profile.
+   * @private
+   */
   private customSubmenuItemsBySubmenuId: Map<
     string,
     Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
@@ -52,20 +57,34 @@ export class AppMenuRegistry {
     );
   }
 
+  /**
+   * Register a custom action to the app menu. It can be a simple action or a submenu with more actions and horizontal rules.
+   * Note: Only 2 top level custom actions are allowed to be rendered in the app menu. The rest will be ignored.
+   * A custom action can also open a flyout or a modal. For that, return your custom react node from action's `onClick` event and call `onFinishAction` when you're done.
+   * @param appMenuItem
+   */
   public registerCustomAction(appMenuItem: AppMenuItemCustom) {
     this.appMenuItems = [
       ...this.appMenuItems.filter(
-        // avoid duplicates and other items override
+        // prevent duplicates
         (item) => !(item.id === appMenuItem.id && item.type === AppMenuActionType.custom)
       ),
       appMenuItem,
     ];
   }
 
+  /**
+   * Register a custom action under a submenu. It can be an action or a horizontal rule.
+   * Any number of submenu actions can be registered and rendered.
+   * You can also extend an existing submenu with more actions. For example, AppMenuActionType.alerts.
+   * `order` property is optional and can be used to control the order of actions in the submenu.
+   * @param submenuId
+   * @param appMenuItem
+   */
   public registerCustomActionUnderSubmenu(submenuId: string, appMenuItem: AppMenuActionCustom) {
     this.customSubmenuItemsBySubmenuId.set(submenuId, [
       ...(this.customSubmenuItemsBySubmenuId.get(submenuId) ?? []).filter(
-        // avoid duplicates and other items override
+        // prevent duplicates
         (item) => !(item.id === appMenuItem.id && item.type === AppMenuActionType.custom)
       ),
       appMenuItem,
@@ -93,6 +112,9 @@ export class AppMenuRegistry {
     return sortAppMenuItemsByOrder(actions);
   }
 
+  /**
+   * Get the resulting app menu items sorted by type and order.
+   */
   public getSortedItems() {
     const primaryItems = this.getSortedItemsForType(AppMenuActionType.primary);
     const secondaryItems = this.getSortedItemsForType(AppMenuActionType.secondary);
