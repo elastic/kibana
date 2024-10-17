@@ -260,7 +260,7 @@ describe('function validation', () => {
         // date
         await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
         await expectErrors('FROM a_index | EVAL TEST(1.)', [
-          'Argument of [test] must be [date], found value [1] type [double]',
+          'Argument of [test] must be [date], found value [1.] type [double]',
         ]);
       });
     });
