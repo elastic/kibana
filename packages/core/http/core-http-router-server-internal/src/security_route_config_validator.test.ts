@@ -276,4 +276,19 @@ describe('RouteSecurity validation', () => {
       `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
     );
   });
+
+  it('should fail validation when anyRequired has superuser privileges set', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege1'], allRequired: ['privilege4'] },
+          { anyRequired: ['privilege5', 'superuser'] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: superuser privileges set cannot be used in anyRequired"`
+    );
+  });
 });
