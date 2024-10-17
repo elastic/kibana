@@ -45,7 +45,6 @@ import {
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
-import { useExportCSV } from './hooks/export_csv';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();
@@ -171,8 +170,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const { generateReportingJobCSV } = useExportCSV();
-
   const renderActions = (agent: Agent) => {
     const agentPolicy =
       typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
@@ -195,9 +192,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
-        onExportCSVClick={() => {
-          generateReportingJobCSV();
-        }}
       />
     );
   };

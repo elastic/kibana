@@ -31,6 +31,8 @@ import { getCommonTags } from '../utils';
 
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 
+import { useExportCSV } from '../hooks/export_csv';
+
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
@@ -97,6 +99,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+
+  const { generateReportingJobCSV } = useExportCSV();
 
   const menuItems = [
     {
@@ -215,6 +219,23 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       onClick: () => {
         closeMenu();
         setIsUnenrollModalOpen(true);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          data-test-subj="bulkAgentExportBtn"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="exportAction" size="m" />,
+      onClick: () => {
+        closeMenu();
+        generateReportingJobCSV();
       },
     },
   ];
