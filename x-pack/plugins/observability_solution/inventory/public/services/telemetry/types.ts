@@ -39,6 +39,9 @@ export type TelemetryEventParams =
 
 export interface ITelemetryClient {
   reportInventoryAddData(params: InventoryAddDataParams): void;
+  reportEntityInventoryViewed(params: EntityInventoryViewedParams): void;
+  reportSearchQuerySbmitted(params: SearchQuerySubmittedParams): void;
+  reportEntityViewClicked(params: EntityViewClickedParams): void;
 }
 
 export enum TelemetryEventTypes {
