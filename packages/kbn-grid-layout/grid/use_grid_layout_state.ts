@@ -8,9 +8,10 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, debounceTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 import {
+  ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
@@ -26,8 +27,9 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
-  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
@@ -36,6 +38,7 @@ export const useGridLayoutState = ({
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
+    const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
     const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
       columnPixelWidth: 0,
@@ -43,41 +46,22 @@ export const useGridLayoutState = ({
 
     return {
       rowRefs,
+      panelRefs,
       gridLayout$,
+      activePanel$,
       dragPreviewRef,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
-      updatePreviewElement: (previewRect: {
-        top: number;
-        bottom: number;
-        left: number;
-        right: number;
-      }) => {
-        if (!dragPreviewRef.current) return;
-        dragPreviewRef.current.style.opacity = '1';
-        dragPreviewRef.current.style.left = `${previewRect.left}px`;
-        dragPreviewRef.current.style.top = `${previewRect.top}px`;
-        dragPreviewRef.current.style.width = `${Math.max(
-          previewRect.right - previewRect.left,
-          runtimeSettings$.value.columnPixelWidth
-        )}px`;
-        dragPreviewRef.current.style.height = `${Math.max(
-          previewRect.bottom - previewRect.top,
-          runtimeSettings$.value.rowHeight
-        )}px`;
-      },
-      hideDragPreview: () => {
-        if (!dragPreviewRef.current) return;
-        dragPreviewRef.current.style.opacity = '0';
-      },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // debounce width changes to avoid unnecessary column width recalculation.
-    const subscription = gridLayoutStateManager.gridDimensions$
+    /**
+     * debounce width changes to avoid unnecessary column width recalculation.
+     */
+    const resizeSubscription = gridLayoutStateManager.gridDimensions$
       .pipe(debounceTime(250))
       .subscribe((dimensions) => {
         const elementWidth = dimensions.width ?? 0;
@@ -86,7 +70,90 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
       });
-    return () => subscription.unsubscribe();
+
+    /**
+     * on layout change, update the styles of every panel so that it renders as expected
+     */
+    const onLayoutChangeSubscription = combineLatest([
+      gridLayoutStateManager.gridLayout$,
+      gridLayoutStateManager.activePanel$,
+    ]).subscribe(([gridLayout, activePanel]) => {
+      const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+      const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+
+      for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
+        if (currentInteractionEvent && rowIndex !== currentInteractionEvent.targetRowIndex) {
+          /**
+           * If there is an interraction event happning but the current row is not being targetted, it
+           * does not need to be re-rendered; so, skip setting the panel styles of this row.
+           * Note that if there is **no** interaction event, then this is the initial render so the styles
+           * of every panel should be initialized.
+           */
+          continue;
+        }
+
+        // re-render the targetted row
+        const currentRow = gridLayout[rowIndex];
+        Object.keys(currentRow.panels).forEach((key) => {
+          const panel = currentRow.panels[key];
+          const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
+          if (!panelRef) return;
+
+          const isResize = currentInteractionEvent?.type === 'resize';
+          if (panel.id === activePanel?.id && activePanel.position) {
+            const { position: draggingPosition } = activePanel;
+            if (isResize) {
+              // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+              panelRef.style.width = `${Math.max(
+                draggingPosition.right - draggingPosition.left,
+                runtimeSettings.columnPixelWidth
+              )}px`;
+              panelRef.style.height = `${Math.max(
+                draggingPosition.bottom - draggingPosition.top,
+                runtimeSettings.rowHeight
+              )}px`;
+
+              // undo any "lock to grid" styles **except** for the top left corner, which stays locked
+              panelRef.style.gridColumnStart = `${panel.column + 1}`;
+              panelRef.style.gridRowStart = `${panel.row + 1}`;
+              panelRef.style.gridColumnEnd = ``;
+              panelRef.style.gridRowEnd = ``;
+            } else {
+              // if the current panel is being dragged, render it with a fixed position + size
+              panelRef.style.position = 'fixed';
+              panelRef.style.left = `${draggingPosition.left}px`;
+              panelRef.style.top = `${draggingPosition.top}px`;
+              panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+              panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+
+              // undo any "lock to grid" styles
+              panelRef.style.gridColumnStart = ``;
+              panelRef.style.gridRowStart = ``;
+              panelRef.style.gridColumnEnd = ``;
+              panelRef.style.gridRowEnd = ``;
+            }
+          } else {
+            // if the panel is not being dragged, undo any dragging styles
+            panelRef.style.position = '';
+            panelRef.style.left = ``;
+            panelRef.style.top = ``;
+            panelRef.style.width = ``;
+            panelRef.style.height = ``;
+
+            // and render the panel locked to the grid
+            panelRef.style.gridColumnStart = `${panel.column + 1}`;
+            panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+            panelRef.style.gridRowStart = `${panel.row + 1}`;
+            panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+          }
+        });
+      }
+    });
+
+    return () => {
+      resizeSubscription.unsubscribe();
+      onLayoutChangeSubscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
