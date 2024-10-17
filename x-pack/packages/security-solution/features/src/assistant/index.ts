@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { AssistantSubFeatureId } from '../product_features_keys';
-import type { SecurityFeatureParams } from '../security/types';
 import type { ProductFeatureParams } from '../types';
 import { getAssistantBaseKibanaFeature } from './kibana_features';
 import {
@@ -14,9 +13,9 @@ import {
 } from './kibana_sub_features';
 
 export const getAssistantFeature = (
-  params: SecurityFeatureParams
+  experimentalFeatures: Record<string, boolean>
 ): ProductFeatureParams<AssistantSubFeatureId> => ({
   baseKibanaFeature: getAssistantBaseKibanaFeature(),
   baseKibanaSubFeatureIds: getAssistantBaseKibanaSubFeatureIds(),
-  subFeaturesMap: getAssistantSubFeaturesMap(params),
+  subFeaturesMap: getAssistantSubFeaturesMap(experimentalFeatures),
 });

@@ -62,10 +62,7 @@ export class ProductFeaturesService {
       casesFeature.baseKibanaSubFeatureIds
     );
 
-    const assistantFeature = getAssistantFeature({
-      savedObjects: securityDefaultSavedObjects,
-      experimentalFeatures: this.experimentalFeatures,
-    });
+    const assistantFeature = getAssistantFeature(this.experimentalFeatures);
     this.securityAssistantProductFeatures = new ProductFeatures(
       this.logger,
       assistantFeature.subFeaturesMap,

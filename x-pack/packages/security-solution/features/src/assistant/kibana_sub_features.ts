@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { APP_ID } from '../constants';
-import type { SecurityFeatureParams } from '../security/types';
 
 const updateAnonymizationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
@@ -103,9 +102,9 @@ export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] =
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getAssistantSubFeaturesMap = ({
-  experimentalFeatures,
-}: SecurityFeatureParams): Map<AssistantSubFeatureId, SubFeatureConfig> => {
+export const getAssistantSubFeaturesMap = (
+  experimentalFeatures: Record<string, boolean>
+): Map<AssistantSubFeatureId, SubFeatureConfig> => {
   const assistantSubFeaturesList: Array<[AssistantSubFeatureId, SubFeatureConfig]> = [
     [AssistantSubFeatureId.updateAnonymization, updateAnonymizationSubFeature],
   ];
