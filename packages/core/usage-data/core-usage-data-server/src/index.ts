@@ -18,5 +18,6 @@ export type {
   CoreUsageCounter,
   CoreIncrementUsageCounter,
   CoreIncrementCounterParams,
+  DeprecatedApiUsageFetcher,
 } from './setup_contract';
 export type { CoreUsageData, ConfigUsageData, CoreUsageDataStart } from './start_contract';

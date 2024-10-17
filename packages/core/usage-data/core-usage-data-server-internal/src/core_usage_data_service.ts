@@ -37,6 +37,7 @@ import type {
   CoreConfigUsageData,
   CoreIncrementCounterParams,
   CoreUsageCounter,
+  DeprecatedApiUsageFetcher,
 } from '@kbn/core-usage-data-server';
 import {
   CORE_USAGE_STATS_TYPE,
@@ -49,7 +50,6 @@ import {
 } from '@kbn/core-saved-objects-server';
 
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { DeprecatedApiUsageFetcher } from '@kbn/core-usage-data-server/src/setup_contract';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';

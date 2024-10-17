@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 
-import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
-import { createCounterFetcher, CounterEvent } from '../common/counters';
+import { createCounterFetcher, type CounterEvent } from '../common/counters';
 
 const DEPRECATED_API_COUNTERS_FILTER = `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.counterType: deprecated_api_call\\:*`;
 
