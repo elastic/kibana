@@ -1076,72 +1076,72 @@ describe('ConfigureCases', () => {
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
-      // await waitFor(() => {
-      expect(persistCaseConfigure).toHaveBeenCalledWith({
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        closureType: 'close-by-user',
-        customFields: customFieldsConfigurationMock,
-        templates: [
-          {
-            key: expect.anything(),
-            name: 'Template name',
-            description: 'Template description',
-            tags: [],
-            caseFields: {
-              title: 'Case using template',
-              connector: {
-                id: 'none',
-                name: 'none',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-              settings: {
-                syncAlerts: true,
-              },
-              customFields: [
-                {
-                  key: customFieldsConfigurationMock[0].key,
-                  type: customFieldsConfigurationMock[0].type,
-                  value: customFieldsConfigurationMock[0].defaultValue,
-                },
-                {
-                  key: customFieldsConfigurationMock[1].key,
-                  type: customFieldsConfigurationMock[1].type,
-                  value: customFieldsConfigurationMock[1].defaultValue,
-                },
-                {
-                  key: customFieldsConfigurationMock[2].key,
-                  type: customFieldsConfigurationMock[2].type,
-                  value: null,
-                },
-                {
-                  key: customFieldsConfigurationMock[3].key,
-                  type: customFieldsConfigurationMock[3].type,
-                  value: false, // when no default value for toggle, we set it to false
-                },
-                {
-                  key: customFieldsConfigurationMock[4].key,
-                  type: customFieldsConfigurationMock[4].type,
-                  value: customFieldsConfigurationMock[4].defaultValue,
-                },
-                {
-                  key: customFieldsConfigurationMock[5].key,
-                  type: customFieldsConfigurationMock[5].type,
-                  value: null,
-                },
-              ],
-            },
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
           },
-        ],
-        id: '',
-        version: '',
+          closureType: 'close-by-user',
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: expect.anything(),
+              name: 'Template name',
+              description: 'Template description',
+              tags: [],
+              caseFields: {
+                title: 'Case using template',
+                connector: {
+                  id: 'none',
+                  name: 'none',
+                  type: ConnectorTypes.none,
+                  fields: null,
+                },
+                settings: {
+                  syncAlerts: true,
+                },
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: customFieldsConfigurationMock[0].type,
+                    value: customFieldsConfigurationMock[0].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[1].key,
+                    type: customFieldsConfigurationMock[1].type,
+                    value: customFieldsConfigurationMock[1].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[2].key,
+                    type: customFieldsConfigurationMock[2].type,
+                    value: null,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[3].key,
+                    type: customFieldsConfigurationMock[3].type,
+                    value: false, // when no default value for toggle, we set it to false
+                  },
+                  {
+                    key: customFieldsConfigurationMock[4].key,
+                    type: customFieldsConfigurationMock[4].type,
+                    value: customFieldsConfigurationMock[4].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[5].key,
+                    type: customFieldsConfigurationMock[5].type,
+                    value: null,
+                  },
+                ],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
       });
-      // });
 
       expect(screen.getByTestId('templates-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();

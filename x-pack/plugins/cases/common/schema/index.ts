@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
+
 import { MAX_DOCS_PER_PAGE } from '../constants';
 import type { PartialPaginationType } from './types';
 import { PaginationSchemaRt } from './types';

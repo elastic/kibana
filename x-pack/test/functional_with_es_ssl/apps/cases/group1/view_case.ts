@@ -1324,7 +1324,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(userActions).length(2);
       });
 
-      it.only('updates a number custom field correctly', async () => {
+      it('updates a number custom field correctly', async () => {
         const numberField = await testSubjects.find(
           `case-number-custom-field-${customFields[2].key}`
         );

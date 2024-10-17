@@ -234,18 +234,20 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = (
-  value: string | number | boolean,
-  type: CustomFieldTypes
-) => {
-  if (type === CustomFieldTypes.NUMBER && !Number.isNaN(Number(value))) {
-    return Number(value);
-  }
-
+export const convertCustomFieldValue = ({
+  value,
+  type,
+}: {
+  value: string | number | boolean | null;
+  type: CustomFieldTypes;
+}) => {
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
   }
 
+  if (type === CustomFieldTypes.NUMBER && value !== null && Number.isInteger(Number(value))) {
+    return Number(value);
+  }
   return value;
 };
 
@@ -295,7 +297,7 @@ export const customFieldsFormDeserializer = (
 };
 
 export const customFieldsFormSerializer = (
-  customFields: Record<string, string | boolean>,
+  customFields: Record<string, string | boolean | number | null>,
   selectedCustomFieldsConfiguration: CasesConfigurationUI['customFields']
 ): CaseUI['customFields'] => {
   const transformedCustomFields: CaseUI['customFields'] = [];
@@ -307,11 +309,10 @@ export const customFieldsFormSerializer = (
   for (const [key, value] of Object.entries(customFields)) {
     const configCustomField = selectedCustomFieldsConfiguration.find((item) => item.key === key);
     if (configCustomField) {
-      // transform the whole thing in one function
       transformedCustomFields.push({
         key: configCustomField.key,
         type: configCustomField.type,
-        value: convertCustomFieldValue(value, configCustomField.type),
+        value: convertCustomFieldValue({ value, type: configCustomField.type }),
       } as CaseUICustomField);
     }
   }

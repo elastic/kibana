@@ -24,7 +24,6 @@ describe('Edit ', () => {
   const customField = customFieldsMock[4] as CaseCustomFieldNumber;
   const customFieldConfiguration = customFieldsConfigurationMock[4];
 
-  // check if we check everything
   it('renders correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -241,7 +240,7 @@ describe('Edit ', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        value: 12312345,
+        value: 123412345,
       });
     });
   });
@@ -364,7 +363,7 @@ describe('Edit ', () => {
         />
       </FormTestComponent>
     );
-    // where test_key_6 and testing_key_5 in these tests??
+
     await userEvent.click(
       await screen.findByTestId('case-number-custom-field-edit-button-test_key_5')
     );
@@ -389,7 +388,7 @@ describe('Edit ', () => {
       await screen.findByTestId('case-number-custom-field-edit-button-test_key_5')
     );
     expect(await screen.findByTestId('case-number-custom-field-form-field-test_key_5')).toHaveValue(
-      123
+      1234
     );
   });
 

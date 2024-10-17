@@ -309,13 +309,13 @@ export const MAX_NUMBER_ERROR = (field: string, maxValue: number) =>
 export const MIN_NUMBER_ERROR = (field: string, minValue: number) =>
   i18n.translate('xpack.cases.customFields.tooManyDecimalPlacesError', {
     values: { field, minValue },
-    defaultMessage: `The value of the {field} cannot be more than {minValue}.`,
+    defaultMessage: 'The value of the {field} cannot be less than {minValue}.',
   });
 
 export const INTEGER_NUMBER_ERROR = (field: string) =>
   i18n.translate('xpack.cases.customFields.tooManyDecimalPlacesError', {
     values: { field },
-    defaultMessage: `The value of the {field} must be an integer number.`,
+    defaultMessage: 'The value of the {field} must be an integer number.',
   });
 
 export const MAX_TAGS_ERROR = (length: number) =>
