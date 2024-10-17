@@ -106,7 +106,7 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(queryByText('MockedStatefulEventsViewer')).toBeInTheDocument();
-    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
   });
 
   it('renders the matrix histogram when globalFullScreen is false', () => {
@@ -186,17 +186,17 @@ describe('EventsQueryTabBody', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it('only have 4 columns on Action bar for non-Enterprise user', () => {
+  it('only have 5 columns on Action bar for non-Enterprise user', () => {
     render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />
       </TestProviders>
     );
 
-    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
   });
 
-  it('shows 5 columns on Action bar for Enterprise user', () => {
+  it('shows 6 columns on Action bar for Enterprise user', () => {
     const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
     licenseServiceMock.isEnterprise.mockReturnValue(true);
@@ -207,6 +207,6 @@ describe('EventsQueryTabBody', () => {
       </TestProviders>
     );
 
-    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(6);
   });
 });
