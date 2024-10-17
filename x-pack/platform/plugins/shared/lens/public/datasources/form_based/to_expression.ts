@@ -492,6 +492,7 @@ function getExpressionForLayer(
       ? buildExpressionFunction('esql', {
           query: esqlLayer.esql,
           timeField: allDateHistogramFields[0],
+          partialRows,
           ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
         }).toAst()
       : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
