@@ -188,7 +188,7 @@ export function useExpressionRenderer(
     errorRenderHandlerRef.current = null;
     return () => {
       // when the error is fixed, call again the done() handler to kick off a new clean rendering
-      if (!error) {
+      if (!error && hasHandledErrorRef.current) {
         errorRenderHandlerRef.current?.done();
       }
     };
