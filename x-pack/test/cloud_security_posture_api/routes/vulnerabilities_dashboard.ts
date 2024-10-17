@@ -119,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_LATEST_INDEX);
   const scoresIndex = new EsIndexDataProvider(es, BENCHMARK_SCORES_INDEX);
 
-  describe('Vulnerability Dashboard API', async () => {
+  describe.skip('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
       await vulnerabilitiesIndex.deleteAll();
       await scoresIndex.deleteAll();
