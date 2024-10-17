@@ -19,7 +19,11 @@ import apm from 'elastic-apm-node';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
 import type { AgentlessApiResponse } from '../../../common/types';
-import { AgentlessAgentCreateError } from '../../errors';
+import {
+  AgentlessAgentConfigError,
+  AgentlessAgentCreateError,
+  AgentlessAgentDeleteError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 
@@ -44,24 +48,25 @@ class AgentlessAgentService {
     const logger = appContextService.getLogger();
     logger.debug(`[Agentless API] Creating agentless agent ${agentlessAgentPolicy.id}`);
 
-    if (!isAgentlessApiEnabled) {
-      logger.error(
-        '[Agentless API] Creating agentless agent not supported in non-cloud or non-serverless environments'
-      );
-      throw new AgentlessAgentCreateError('Agentless agent not supported', 'create');
-    }
-    if (!agentlessAgentPolicy.supports_agentless) {
-      logger.error('[Agentless API] Agentless agent policy does not have agentless enabled');
-      throw new AgentlessAgentCreateError(
-        'Agentless agent policy does not have agentless enabled',
-        'create'
-      );
-    }
-
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
       logger.error('[Agentless API] Missing agentless configuration', errorMetadata);
-      throw new AgentlessAgentCreateError('missing agentless configuration', 'create');
+      throw new AgentlessAgentConfigError('missing Agentless API configuration in Kibana');
+    }
+
+    if (!isAgentlessApiEnabled()) {
+      logger.error(
+        '[Agentless API] Agentless agents are only supported in cloud deployment and serverless projects'
+      );
+      throw new AgentlessAgentConfigError(
+        'Agentless agents are only supported in cloud deployment and serverless projects'
+      );
+    }
+    if (!agentlessAgentPolicy.supports_agentless) {
+      logger.error('[Agentless API] Agentless agent policy does not have agentless enabled');
+      throw new AgentlessAgentConfigError(
+        'Agentless agent policy does not have supports_agentless enabled'
+      );
     }
 
     const policyId = agentlessAgentPolicy.id;
@@ -231,10 +236,10 @@ class AgentlessAgentService {
       fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
 
     if (!defaultFleetHost) {
-      throw new AgentlessAgentCreateError('missing Fleet server host', 'create');
+      throw new AgentlessAgentConfigError('missing default Fleet server host');
     }
     if (!enrollmentApiKeys.length) {
-      throw new AgentlessAgentCreateError('missing Fleet enrollment token', 'create');
+      throw new AgentlessAgentConfigError('missing Fleet enrollment token');
     }
     const fleetToken = enrollmentApiKeys[0].api_key;
     const fleetUrl = defaultFleetHost?.host_urls[0];
@@ -292,10 +297,8 @@ class AgentlessAgentService {
         } ${error} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
-      throw new AgentlessAgentCreateError(
-        this.withRequestIdMessage(error.message, traceId),
-        action
-      );
+
+      throw this.getAgentlessAgentError(action, error.message, traceId);
     }
 
     const ERROR_HANDLING_MESSAGES = this.getErrorHandlingMessages(agentlessPolicyId);
@@ -337,10 +340,8 @@ class AgentlessAgentService {
         `${requestErrorMessage.log} ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
-      throw new AgentlessAgentCreateError(
-        this.withRequestIdMessage(requestErrorMessage.message, traceId),
-        action
-      );
+
+      throw this.getAgentlessAgentError(action, requestErrorMessage.message, traceId);
     } else {
       // Something happened in setting up the request that triggered an Error
       logger.error(
@@ -349,12 +350,11 @@ class AgentlessAgentService {
         } the agentless agent failed ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
-      throw new AgentlessAgentCreateError(
-        this.withRequestIdMessage(
-          `the Agentless API could not ${action} the agentless agent`,
-          traceId
-        ),
-        action
+
+      throw this.getAgentlessAgentError(
+        action,
+        `the Agentless API could not ${action} the agentless agent`,
+        traceId
       );
     }
   }
@@ -385,7 +385,7 @@ class AgentlessAgentService {
       }
     );
 
-    throw new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId), action);
+    throw this.getAgentlessAgentError(action, userMessage, traceId);
   }
 
   private convertCauseErrorsToString = (error: AxiosError) => {
@@ -394,6 +394,12 @@ class AgentlessAgentService {
     }
     return error.cause;
   };
+
+  private getAgentlessAgentError(action: string, userMessage: string, traceId: string | undefined) {
+    return action === 'create'
+      ? new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId))
+      : new AgentlessAgentDeleteError(this.withRequestIdMessage(userMessage, traceId));
+  }
 
   private getErrorHandlingMessages(agentlessPolicyId: string) {
     return {

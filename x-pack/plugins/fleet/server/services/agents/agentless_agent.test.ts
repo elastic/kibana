@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AxiosError } from 'axios';
 import axios from 'axios';
 
-import { AgentlessAgentCreateError } from '../../errors';
+import { AgentlessAgentConfigError } from '../../errors';
 import type { AgentPolicy, NewAgentPolicy } from '../../types';
 
 import { appContextService } from '../app_context';
@@ -88,11 +88,23 @@ describe('Agentless Agent service', () => {
     jest.resetAllMocks();
   });
 
-  it('should throw AgentlessAgentCreateError if agentless policy does not support_agentless', async () => {
+  it('should throw AgentlessAgentConfigError if agentless policy does not support_agentless', async () => {
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com/api/v1/ess',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+          },
+        },
+      },
+    } as any);
 
     await expect(
       agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -102,19 +114,31 @@ describe('Agentless Agent service', () => {
         supports_agentless: false,
       } as AgentPolicy)
     ).rejects.toThrowError(
-      new AgentlessAgentCreateError(
-        'Agentless agent policy does not have agentless enabled',
-        'create'
+      new AgentlessAgentConfigError(
+        'Agentless agent policy does not have supports_agentless enabled'
       )
     );
   });
 
-  it('should throw AgentlessAgentCreateError if cloud is not enabled', async () => {
+  it('should throw AgentlessAgentConfigError if cloud and serverless is not enabled', async () => {
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
-
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com/api/v1/ess',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+          },
+        },
+      },
+    } as any);
     await expect(
       agentlessAgentService.createAgentlessAgent(esClient, soClient, {
         id: 'mocked',
@@ -123,11 +147,13 @@ describe('Agentless Agent service', () => {
         supports_agentless: true,
       } as AgentPolicy)
     ).rejects.toThrowError(
-      new AgentlessAgentCreateError('missing agentless configuration', 'create')
+      new AgentlessAgentConfigError(
+        'Agentless agents are only supported in cloud deployment and serverless projects'
+      )
     );
   });
 
-  it('should throw AgentlessAgentCreateError if agentless configuration is not found', async () => {
+  it('should throw AgentlessAgentConfigError if agentless configuration is not found', async () => {
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -142,15 +168,17 @@ describe('Agentless Agent service', () => {
         supports_agentless: true,
       } as AgentPolicy)
     ).rejects.toThrowError(
-      new AgentlessAgentCreateError('missing agentless configuration', 'create')
+      new AgentlessAgentConfigError('missing Agentless API configuration in Kibana')
     );
   });
-  it('should throw AgentlessAgentCreateError if fleet hosts are not found', async () => {
+
+  it('should throw AgentlessAgentConfigError if fleet hosts are not found', async () => {
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
+        enabled: true,
         api: {
           url: 'http://api.agentless.com/api/v1/ess',
           tls: {
@@ -179,15 +207,16 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('missing Fleet server host', 'create'));
+    ).rejects.toThrowError(new AgentlessAgentConfigError('missing default Fleet server host'));
   });
 
-  it('should throw AgentlessAgentCreateError if enrollment tokens are not found', async () => {
+  it('should throw AgentlessAgentConfigError if enrollment tokens are not found', async () => {
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
+        enabled: true,
         api: {
           url: 'http://api.agentless.com/api/v1/ess',
           tls: {
@@ -219,9 +248,7 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(
-      new AgentlessAgentCreateError('missing Fleet enrollment token', 'create')
-    );
+    ).rejects.toThrowError(new AgentlessAgentConfigError('missing Fleet enrollment token'));
   });
 
   it('should throw an error and log and error when the Agentless API returns a status not handled and not in the 2xx series', async () => {
