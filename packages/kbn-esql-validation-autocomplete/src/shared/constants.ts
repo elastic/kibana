@@ -16,3 +16,4 @@ export const DOUBLE_BACKTICK = '``';
 export const SINGLE_BACKTICK = '`';
 
 export const METADATA_FIELDS = ['_version', '_id', '_index', '_source', '_ignored'];
+export const COMPARISON_OPERATORS = ['==', '!=', '>', '<', '>=', '<='];

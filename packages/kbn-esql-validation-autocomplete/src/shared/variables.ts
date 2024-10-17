@@ -10,7 +10,7 @@
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
-import { EDITOR_MARKER } from './constants';
+import { COMPARISON_OPERATORS, EDITOR_MARKER } from './constants';
 import { isColumnItem, isFunctionItem, getFunctionDefinition } from './helpers';
 
 function addToVariableOccurrences(variables: Map<string, ESQLVariable[]>, instance: ESQLVariable) {
@@ -145,7 +145,16 @@ function addVariableFromExpression(
       expressionOperation.location.min,
       expressionOperation.location.max + 1
     );
-    const expressionType = 'double'; // TODO - use getExpressionType once it actually works
+    let expressionType = 'double'; // TODO - use getExpressionType once it actually works
+
+    if (
+      (expressionOperation.subtype === 'binary-expression' &&
+        COMPARISON_OPERATORS.includes(expressionOperation.name)) ||
+      expressionOperation.subtype === 'postfix-unary-expression'
+    ) {
+      expressionType = 'boolean';
+    }
+
     addToVariableOccurrences(variables, {
       name: expressionText,
       type: expressionType,
