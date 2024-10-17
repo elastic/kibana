@@ -6,85 +6,63 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
-
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-import * as i18n from './translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { useDataViews } from './use_data_views';
+import * as i18n from './translations';
+
+type DataViewId = string | null | undefined;
 
 export interface DataViewSelectorProps {
-  kibanaDataViews: Record<string, DataViewListItem>;
   field: FieldHook<DefineStepRule['dataViewId']>;
 }
 
-export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorProps) => {
-  let isInvalid;
-  let errorMessage;
-  let dataViewId: string | null | undefined;
+export const DataViewSelector = ({ field }: DataViewSelectorProps) => {
+  const kibanaDataViews = useDataViews();
+  const dataViewId: DataViewId = field?.value;
+  const fieldAndError = field ? getFieldValidityAndErrorMessage(field) : undefined;
+  const isInvalid = fieldAndError?.isInvalid;
+  const errorMessage = fieldAndError?.errorMessage;
 
-  if (field != null) {
-    const fieldAndError = getFieldValidityAndErrorMessage(field);
-    isInvalid = fieldAndError.isInvalid;
-    errorMessage = fieldAndError.errorMessage;
-    dataViewId = field.value;
-  }
+  const selectedKibanaDataView = useMemo(() => {
+    if (!isDataViewIdValid(dataViewId)) {
+      return;
+    }
 
-  const kibanaDataViewsDefined = useMemo(
-    () => kibanaDataViews != null && Object.keys(kibanaDataViews).length > 0,
-    [kibanaDataViews]
-  );
+    return kibanaDataViews?.find((x) => x.id === dataViewId);
+  }, [dataViewId, kibanaDataViews]);
 
-  // Most likely case here is that a data view of an existing rule was deleted
-  // and can no longer be found
-  const selectedDataViewNotFound = useMemo(
-    () =>
-      dataViewId != null &&
-      dataViewId !== '' &&
-      kibanaDataViewsDefined &&
-      !Object.hasOwn(kibanaDataViews, dataViewId),
-    [kibanaDataViewsDefined, dataViewId, kibanaDataViews]
-  );
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    !selectedDataViewNotFound && dataViewId != null && dataViewId !== ''
-      ? [{ id: kibanaDataViews[dataViewId].id, label: kibanaDataViews[dataViewId].title }]
+    selectedKibanaDataView
+      ? [{ id: selectedKibanaDataView.id, label: selectedKibanaDataView.title }]
       : []
   );
-
   const [showDataViewAlertsOnAlertsWarning, setShowDataViewAlertsOnAlertsWarning] = useState(false);
 
   useEffect(() => {
-    if (!selectedDataViewNotFound && dataViewId) {
-      const dataViewsTitle = kibanaDataViews[dataViewId].title;
-      const dataViewsId = kibanaDataViews[dataViewId].id;
-
-      setShowDataViewAlertsOnAlertsWarning(dataViewsId === 'security-solution-default');
-
-      setSelectedOption([{ id: dataViewsId, label: dataViewsTitle }]);
-    } else {
+    if (!selectedKibanaDataView) {
       setSelectedOption([]);
+      return;
     }
-  }, [
-    dataViewId,
-    field,
-    kibanaDataViews,
-    selectedDataViewNotFound,
-    setShowDataViewAlertsOnAlertsWarning,
-  ]);
 
-  // TODO: optimize this, pass down array of data view ids
-  // at the same time we grab the data views in the top level form component
+    const dataViewsId = selectedKibanaDataView.id;
+    const dataViewsTitle = selectedKibanaDataView.title;
+
+    setShowDataViewAlertsOnAlertsWarning(dataViewsId === 'security-solution-default');
+    setSelectedOption([{ id: dataViewsId, label: dataViewsTitle }]);
+  }, [selectedKibanaDataView, setShowDataViewAlertsOnAlertsWarning, setSelectedOption]);
+
   const dataViewOptions = useMemo(() => {
-    return kibanaDataViewsDefined
-      ? Object.values(kibanaDataViews).map((dv) => ({
-          label: dv.title,
-          id: dv.id,
-        }))
-      : [];
-  }, [kibanaDataViewsDefined, kibanaDataViews]);
+    return (
+      kibanaDataViews?.map((kibanaDataView) => ({
+        id: kibanaDataView.id,
+        label: kibanaDataView.title,
+      })) ?? []
+    );
+  }, [kibanaDataViews]);
 
   const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;
@@ -102,9 +80,14 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
     }
   };
 
+  // Handling the loading state
+  if (!kibanaDataViews) {
+    return <EuiLoadingSpinner size="l" />;
+  }
+
   return (
     <>
-      {selectedDataViewNotFound && dataViewId != null && (
+      {Boolean(kibanaDataViews) && !selectedKibanaDataView && isDataViewIdValid(dataViewId) && (
         <>
           <EuiCallOut
             title={i18n.DATA_VIEW_NOT_FOUND_WARNING_LABEL}
@@ -150,3 +133,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
     </>
   );
 };
+
+function isDataViewIdValid(dataViewId: DataViewId): dataViewId is string {
+  return typeof dataViewId === 'string' && dataViewId !== '';
+}
