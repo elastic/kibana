@@ -9,22 +9,21 @@
 
 import { Subject } from 'rxjs';
 
-interface Event {
+export interface KibanaEvent {
   type: string;
   payload: any;
 }
 
 // Create a Subject to act as an event bus
-const eventBus = new Subject();
+export const eventBus = new Subject<KibanaEvent>();
 
 // Any part of the app can publish an event
-function publishEvent(event: Event) {
+function publishEvent(event: KibanaEvent) {
   eventBus.next(event);
 }
 
 // Plugins or components can subscribe to events
-eventBus.subscribe((value: unknown) => {
-  const event = value as Event;
+eventBus.subscribe((event) => {
   if (event.type === 'search-query-updated') {
     // eslint-disable-next-line no-console
     console.log('Received updated search query:', event.payload);
