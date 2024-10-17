@@ -193,7 +193,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
           set: { field, value: definition.staticFields![field] },
         }))
       : []),
-    ...(definition.metadata != null
+    ...(definition.metadata != null && definition.metadata.length > 0
       ? [{ script: { source: cleanScript(createMetadataPainlessScript(definition)) } }]
       : []),
     {
