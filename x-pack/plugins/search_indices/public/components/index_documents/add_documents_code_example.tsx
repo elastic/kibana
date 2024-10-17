@@ -55,16 +55,17 @@ export const AddDocumentsCodeExample = ({
     },
     [usageTracker]
   );
-  const sampleDocument = useMemo(() => {
-    // TODO: implement smart document generation
-    return generateSampleDocument(codeSampleMappings);
+  const sampleDocuments = useMemo(() => {
+    return [1, 2, 3].map((num) =>
+      generateSampleDocument(codeSampleMappings, `Example text ${num}`)
+    );
   }, [codeSampleMappings]);
   const { apiKey, apiKeyIsVisible } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
       elasticsearchURL: elasticsearchUrl,
-      sampleDocument,
+      sampleDocuments,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
       apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
@@ -72,7 +73,7 @@ export const AddDocumentsCodeExample = ({
   }, [
     indexName,
     elasticsearchUrl,
-    sampleDocument,
+    sampleDocuments,
     codeSampleMappings,
     indexHasMappings,
     apiKeyIsVisible,
