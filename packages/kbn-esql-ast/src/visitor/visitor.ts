@@ -52,7 +52,7 @@ export class Visitor<
         if (!location) return null;
         const isBefore = location.min > pos;
         let isFirstChild = true;
-        for (const child of ctx.arguments()) {
+        for (const child of ctx.children()) {
           const { location: childLocation } = child;
           if (!childLocation) continue;
           if (isFirstChild) {
@@ -116,7 +116,7 @@ export class Visitor<
     return new Visitor()
       .on('visitExpression', (ctx): ESQLProperNode | null => {
         const nodeLocation = ctx.node.location;
-        const nodes = [...ctx.arguments()];
+        const nodes = [...ctx.children()];
 
         if (nodeLocation && nodeLocation.max < pos) {
           const last = nodes[nodes.length - 1];
