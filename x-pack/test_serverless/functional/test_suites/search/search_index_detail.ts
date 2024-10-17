@@ -79,6 +79,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
       });
 
+      it('should have breadcrumb navigation', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectBreadcrumbNavigationWithIndexName(
+          indexName
+        );
+        await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
+        await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+      });
+
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
         await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
