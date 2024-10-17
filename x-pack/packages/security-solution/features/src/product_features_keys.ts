@@ -155,4 +155,5 @@ export enum CasesSubFeatureId {
 /** Sub-features IDs for Security Assistant */
 export enum AssistantSubFeatureId {
   updateAnonymization = 'updateAnonymizationSubFeature',
+  manageGlobalKnowledgeBase = 'manageGlobalKnowledgeBaseSubFeature',
 }

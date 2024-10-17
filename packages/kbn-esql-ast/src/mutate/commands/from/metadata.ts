@@ -157,7 +157,7 @@ export const insert = (
       return;
     }
 
-    option = generic.insertCommandOption(command, 'metadata');
+    option = generic.appendCommandOption(command, 'metadata');
   }
 
   const parts: string[] = typeof fieldName === 'string' ? [fieldName] : fieldName;

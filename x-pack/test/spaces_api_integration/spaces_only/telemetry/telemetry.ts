@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         filesSharedImage: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
+        dataQuality: 0,
       });
     });
 
