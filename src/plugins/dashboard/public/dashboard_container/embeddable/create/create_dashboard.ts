@@ -284,6 +284,7 @@ export const initializeDashboard = async ({
       query,
       filters,
       timeRestore,
+      fullScreenMode,
       timeRange: savedTimeRange,
       refreshInterval: savedRefreshInterval,
     } = initialDashboardInput;
@@ -327,6 +328,10 @@ export const initializeDashboard = async ({
         stopSyncingUnifiedSearchState();
         stopSyncingQueryServiceStateWithUrl();
       };
+
+      if (fullScreenMode != null) {
+        setTimeout(() => dashboardContainer.setFullScreenMode(fullScreenMode), 500);
+      }
     });
   }
 

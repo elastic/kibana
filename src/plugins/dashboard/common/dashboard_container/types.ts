@@ -53,6 +53,7 @@ export interface DashboardContainerInput extends EmbeddableInput {
   timeRange?: TimeRange;
   timeslice?: [number, number];
   refreshInterval?: RefreshInterval;
+  fullScreenMode?: boolean;
 
   // dashboard meta info
   title: string;
