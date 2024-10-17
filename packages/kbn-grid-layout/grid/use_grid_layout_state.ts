@@ -26,8 +26,9 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
+  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  // const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+  const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
@@ -52,8 +53,9 @@ export const useGridLayoutState = ({
 
     return {
       rowRefs,
+      panelRefs,
       gridLayout$,
-      // dragPreviewRef,
+      dragPreviewRef,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,

@@ -8,8 +8,10 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { combineLatest } from 'rxjs';
+
 import { resolveGridRow } from './resolve_grid_row';
-import { GridPanelData, GridLayoutStateManager } from './types';
+import { GridLayoutStateManager, GridPanelData } from './types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
   return (
@@ -158,10 +160,69 @@ export const useGridLayoutEvents = ({
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
 
-        console.log('GRID LAYOUT.NEXT');
         gridLayout$.next(nextLayout);
       }
     };
+
+    /**
+     * On layout change, update the styles of every panel so that it renders as expected
+     */
+    const onLayoutChangeSubscription = combineLatest([
+      gridLayoutStateManager.gridLayout$,
+      gridLayoutStateManager.draggingPosition$,
+    ]).subscribe(([gridLayout, draggingPosition]) => {
+      const event = interactionEvent$.getValue();
+      gridLayout.forEach((currentRow, rowIndex) => {
+        Object.keys(currentRow.panels).forEach((key) => {
+          const panel = currentRow.panels[key];
+          const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
+          if (!panelRef) return;
+
+          if (panel.id === event?.id && draggingPosition) {
+            // if the current panel is being dragged, render it with a fixed position
+            panelRef.style.position = 'fixed';
+            panelRef.style.left = `${draggingPosition.left}px`;
+            panelRef.style.top = `${draggingPosition.top}px`;
+            panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+            panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+
+            // undo any "lock to grid" styles
+            panelRef.style.gridColumnStart = ``;
+            panelRef.style.gridColumnEnd = ``;
+            panelRef.style.gridRowStart = ``;
+            panelRef.style.gridRowEnd = ``;
+
+            if (gridLayoutStateManager.dragPreviewRef.current) {
+              // update the position of the drag preview
+              gridLayoutStateManager.dragPreviewRef.current.style.gridColumnStart = `${
+                panel.column + 1
+              }`;
+              gridLayoutStateManager.dragPreviewRef.current.style.gridColumnEnd = `${
+                panel.column + 1 + panel.width
+              }`;
+              gridLayoutStateManager.dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
+              gridLayoutStateManager.dragPreviewRef.current.style.gridRowEnd = `${
+                panel.row + 1 + panel.height
+              }`;
+            }
+          } else {
+            // if the panel is not being dragged, undo any dragging styles
+            panelRef.style.position = '';
+            panelRef.style.left = ``;
+            panelRef.style.top = ``;
+            panelRef.style.width = ``;
+            panelRef.style.height = ``;
+
+            // and render the panel locked to the grid
+            panelRef.style.gridColumnStart = `${panel.column + 1}`;
+            panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+            panelRef.style.gridRowStart = `${panel.row + 1}`;
+            panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+          }
+        });
+      });
+    });
+
     const onMouseMove = (e: MouseEvent) => {
       mouseClientPosition.current = { x: e.clientX, y: e.clientY };
       calculateUserEvent(e);
@@ -172,6 +233,8 @@ export const useGridLayoutEvents = ({
     return () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);
+
+      onLayoutChangeSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

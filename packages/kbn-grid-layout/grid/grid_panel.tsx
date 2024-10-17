@@ -80,11 +80,9 @@ export const GridPanel = forwardRef<
             }
           `}
           onMouseDown={(e) => {
-            console.log('on mouse down', e);
             interactionStart('drag', e);
           }}
           onMouseUp={(e) => {
-            console.log('on mouse up', e);
             interactionStart('drop', e);
           }}
         >
@@ -95,7 +93,6 @@ export const GridPanel = forwardRef<
           className="resizeHandle"
           onMouseDown={(e) => interactionStart('resize', e)}
           onMouseUp={(e) => {
-            console.log('on mouse up', e);
             interactionStart('drop', e);
           }}
           css={css`
