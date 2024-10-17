@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subject } from 'rxjs';
+import { createSlice } from '@reduxjs/toolkit';
 
-import type { Action } from './event_bus';
+export const searchSlice = createSlice({
+  name: 'search',
+  initialState: {
+    query: '',
+  },
+  reducers: {
+    setSearchQuery: (state, action) => {
+      state.query = action.payload;
+    },
+  },
+});
 
-export interface EventBusPluginSetup {
-  eventBus$: Subject<Action>;
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EventBusPluginStart {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginStartDependencies {}
+export const { setSearchQuery } = searchSlice.actions;
