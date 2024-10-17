@@ -6,33 +6,22 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
-import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
+import { applyRuleDefaults } from '../../detection_rules_client/mergers/apply_rule_defaults';
+import { RuleResponse, type RuleToImport } from '../../../../../../../common/api/detection_engine';
 
-export const convertPrebuiltRuleAssetToRuleResponse = (
-  prebuiltRuleAsset: PrebuiltRuleAsset
-): RuleResponse => {
-  const immutable = true;
-
+export const convertRuleToImportToRuleResponse = (ruleToImport: RuleToImport): RuleResponse => {
   const ruleResponseSpecificFields = {
     id: uuidv4(),
     updated_at: new Date().toISOString(),
     updated_by: '',
     created_at: new Date().toISOString(),
     created_by: '',
-    immutable,
-    rule_source: {
-      type: 'external',
-      is_customized: false,
-    },
     revision: 1,
   };
-
-  const ruleWithDefaults = applyRuleDefaults(prebuiltRuleAsset);
+  const ruleWithDefaults = applyRuleDefaults(ruleToImport);
 
   return RuleResponse.parse({
-    ...ruleWithDefaults,
     ...ruleResponseSpecificFields,
+    ...ruleWithDefaults,
   });
 };
