@@ -26,6 +26,7 @@ export const getMetricsWithRetry = (
 ): Promise<NodeMetrics> => {
   return retry.try(async () => {
     const metrics = await getMetricsRequest(request, reset);
+    console.log('metrics', JSON.stringify(metrics, null, 2));
 
     if (metrics.metrics) {
       if ((callback && callback(metrics)) || !callback) {
