@@ -34,68 +34,81 @@ import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: ['@ess'] }, () => {
-  beforeEach(() => {
-    login();
-    deleteRiskEngineConfiguration();
-    deleteAlertsAndRules();
-  });
-
-  describe('show upgrade risk button', () => {
+describe(
+  'Upgrade risk scores',
+  {
+    tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['entityStoreDisabled'])}`,
+        ],
+      },
+    },
+  },
+  () => {
     beforeEach(() => {
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-      installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
-      installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
-      visitWithTimeRange(ENTITY_ANALYTICS_URL);
-    });
-
-    afterEach(() => {
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
-      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
-    });
-
-    it('shows upgrade panel', () => {
-      cy.get(UPGRADE_RISK_SCORE_BUTTON).should('be.visible');
-
-      clickUpgradeRiskScore();
-
-      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
-    });
-  });
-
-  describe('upgrade risk engine', () => {
-    beforeEach(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-      cy.task('esArchiverLoad', { archiveName: 'risk_users' });
       login();
-      installRiskScoreModule();
-      visitWithTimeRange(ENTITY_ANALYTICS_URL);
-    });
-
-    afterEach(() => {
-      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
-      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       deleteRiskEngineConfiguration();
+      deleteAlertsAndRules();
     });
 
-    it('show old risk score data before upgrade, and hide after', () => {
-      cy.get(HOSTS_TABLE).should('be.visible');
-      cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
+    describe('show upgrade risk button', () => {
+      beforeEach(() => {
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+        installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
+        installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
+      });
 
-      cy.get(USERS_TABLE).should('be.visible');
-      cy.get(USERS_TABLE_ROWS).should('have.length', 5);
+      afterEach(() => {
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+        cy.task('esArchiverUnload', { archiveName: 'risk_users' });
+      });
 
-      upgradeRiskEngine();
+      it('shows upgrade panel', () => {
+        cy.get(UPGRADE_RISK_SCORE_BUTTON).should('be.visible');
 
-      visitWithTimeRange(ENTITY_ANALYTICS_URL);
+        clickUpgradeRiskScore();
 
-      cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-      cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+        cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+      });
     });
-  });
-});
+
+    describe('upgrade risk engine', () => {
+      beforeEach(() => {
+        cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
+        cy.task('esArchiverLoad', { archiveName: 'risk_users' });
+        login();
+        installRiskScoreModule();
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
+      });
+
+      afterEach(() => {
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+        cy.task('esArchiverUnload', { archiveName: 'risk_users' });
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+        deleteRiskEngineConfiguration();
+      });
+
+      it('show old risk score data before upgrade, and hide after', () => {
+        cy.get(HOSTS_TABLE).should('be.visible');
+        cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
+
+        cy.get(USERS_TABLE).should('be.visible');
+        cy.get(USERS_TABLE_ROWS).should('have.length', 5);
+
+        upgradeRiskEngine();
+
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
+
+        cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+        cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+      });
+    });
+  }
+);
