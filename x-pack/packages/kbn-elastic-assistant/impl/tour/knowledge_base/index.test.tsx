@@ -16,8 +16,8 @@ import {
 } from '../../common/mock';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../common/lib/kibana';
-import { AttackDiscoveryTour } from '.';
-import { ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS } from './step_config';
+import { KnowledgeBaseTour } from '.';
+import { KNOWLEDGE_BASE_TOUR_CONFIG_ANCHORS } from './step_config';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
 import type { RouteSpyState } from '../../common/utils/route/types';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
@@ -38,7 +38,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    EuiTourStep: () => <div data-test-subj="attackDiscovery-tour-step-1" />,
+    EuiTourStep: () => <div data-test-subj="knowledgeBase-tour-step-1" />,
   };
 });
 const mockedUseKibana = mockUseKibana();
@@ -49,8 +49,8 @@ const mockStore = createMockStore(undefined, undefined, undefined, storageMock);
 const TestComponent = () => {
   return (
     <TestProviders store={mockStore}>
-      <div id={ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS.NAV_LINK} />
-      <AttackDiscoveryTour />
+      <div id={KNOWLEDGE_BASE_TOUR_CONFIG_ANCHORS.NAV_LINK} />
+      <KnowledgeBaseTour />
     </TestProviders>
   );
 };
@@ -79,59 +79,59 @@ describe('Attack discovery tour', () => {
   it('should not render tour step 1 when element is not mounted', () => {
     (useIsElementMounted as jest.Mock).mockReturnValueOnce(false);
     render(<TestComponent />);
-    expect(screen.queryByTestId('attackDiscovery-tour-step-1')).toBeNull();
+    expect(screen.queryByTestId('knowledgeBase-tour-step-1')).toBeNull();
   });
 
   it('should not render any tour steps when tour is not activated', () => {
-    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE, {
       currentTourStep: 1,
       isTourActive: false,
     });
     render(<TestComponent />);
-    expect(screen.queryByTestId('attackDiscovery-tour-step-1')).toBeNull();
-    expect(screen.queryByTestId('attackDiscovery-tour-step-2')).toBeNull();
+    expect(screen.queryByTestId('knowledgeBase-tour-step-1')).toBeNull();
+    expect(screen.queryByTestId('knowledgeBase-tour-step-2')).toBeNull();
   });
 
-  it('should not render any tour steps when tour is on step 2 and page is not attack discovery', () => {
-    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+  it('should not render any tour steps when tour is on step 2 and page is not knowledge base', () => {
+    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE, {
       currentTourStep: 2,
       isTourActive: true,
     });
     const { debug } = render(<TestComponent />);
-    expect(screen.queryByTestId('attackDiscovery-tour-step-1')).toBeNull();
+    expect(screen.queryByTestId('knowledgeBase-tour-step-1')).toBeNull();
     debug();
   });
 
   it('should  render tour step 1 when element is mounted', async () => {
     const { getByTestId } = render(<TestComponent />);
 
-    expect(getByTestId('attackDiscovery-tour-step-1')).toBeInTheDocument();
+    expect(getByTestId('knowledgeBase-tour-step-1')).toBeInTheDocument();
   });
 
-  it('should render tour video when tour is on step 2 and page is attack discovery', () => {
+  it('should render tour video when tour is on step 2 and page is knowledge base', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
-      { ...mockRouteSpy, pageName: SecurityPageName.attackDiscovery },
+      { ...mockRouteSpy, pageName: SecurityPageName.knowledgeBase },
     ]);
-    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE, {
       currentTourStep: 2,
       isTourActive: true,
     });
     const { getByTestId } = render(<TestComponent />);
-    expect(screen.queryByTestId('attackDiscovery-tour-step-1')).toBeNull();
-    expect(getByTestId('attackDiscovery-tour-step-2')).toBeInTheDocument();
+    expect(screen.queryByTestId('knowledgeBase-tour-step-1')).toBeNull();
+    expect(getByTestId('knowledgeBase-tour-step-2')).toBeInTheDocument();
   });
 
-  it('should advance to tour step 2 when page is attack discovery', () => {
+  it('should advance to tour step 2 when page is knowledge base', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
-      { ...mockRouteSpy, pageName: SecurityPageName.attackDiscovery },
+      { ...mockRouteSpy, pageName: SecurityPageName.knowledgeBase },
     ]);
-    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+    storageMock.set(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE, {
       currentTourStep: 1,
       isTourActive: true,
     });
     render(<TestComponent />);
-    expect(
-      storageMock.get(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY).currentTourStep
-    ).toEqual(2);
+    expect(storageMock.get(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE).currentTourStep).toEqual(
+      2
+    );
   });
 });

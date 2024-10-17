@@ -29,7 +29,7 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
     <EuiPortal>
       <div
-        data-test-subj="attackDiscovery-tour-step-2"
+        data-test-subj="knowledgeBase-tour-step-2"
         css={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}
       >
         <EuiToast onClose={onClose} css={{ maxWidth: VIDEO_CONTENT_WIDTH }}>
@@ -42,9 +42,9 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           />
           <EuiText size="s" grow={false} css={{ marginTop: 20 }}>
             <h4>
-              <EuiIcon type="cheer" color="success" /> {i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_TITLE}
+              <EuiIcon type="cheer" color="success" /> {i18n.KNOWLEDGE_BASE_TOUR_VIDEO_STEP_TITLE}
             </h4>
-            <p>{i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_DESC}</p>
+            <p>{i18n.KNOWLEDGE_BASE_TOUR_VIDEO_STEP_DESC}</p>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiButton color="success" onClick={openVideoInNewTab} fullWidth>
