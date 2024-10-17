@@ -21,12 +21,12 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   title: 'Markdown',
   isAccessible: true,
   icon: 'visText',
-  group: VisGroups.TOOLS,
+  group: VisGroups.LEGACY,
   titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
-    defaultMessage: 'Text',
+    defaultMessage: 'Markdown text',
   }),
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Add text and images to your dashboard.',
+    defaultMessage: 'Add custom text or images to dashboards.',
   }),
   order: 30,
   toExpressionAst,
