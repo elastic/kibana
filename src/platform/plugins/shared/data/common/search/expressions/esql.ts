@@ -66,6 +66,7 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
+  partialRows?: boolean;
   ignoreGlobalFilters?: boolean;
 }
 
@@ -148,6 +149,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
+      partialRows: {
+        types: ['boolean'],
+        default: false,
+        help: i18n.translate('data.search.esql.partialRows.help', {
+          defaultMessage: 'Whether to return rows that only contain partial data',
+        }),
+      },
       ignoreGlobalFilters: {
         types: ['boolean'],
         default: false,
@@ -170,6 +178,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         titleForInspector,
         descriptionForInspector,
         ignoreGlobalFilters,
+        partialRows,
       },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
@@ -412,6 +421,31 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
           const rows = normalizedValues.map((row) => zipObject(columnNames, row));
+
+          if (partialRows === false) {
+            const timeFilter =
+              input?.timeRange &&
+              getTime(undefined, input.timeRange, {
+                fieldName: timeField,
+              });
+
+            if (rows.length && timeFilter) {
+              let start = new Date(rows[0][timeField!]);
+              const from = new Date(timeFilter.query.range[timeField].gte);
+              const last = new Date(rows[rows.length - 1][timeField!]);
+              const to = new Date(timeFilter.query.range[timeField].lte);
+
+              const step =
+                new Date(rows[rows.length - 1][timeField!]) -
+                new Date(rows[rows.length - 2][timeField!]);
+              const end = new Date(last.getTime() + step);
+              while (from > start) {
+                rows.shift();
+                start = new Date(rows[0][timeField!]);
+              }
+              if (end > to) rows.pop();
+            }
+          }
 
           return {
             type: 'datatable',
