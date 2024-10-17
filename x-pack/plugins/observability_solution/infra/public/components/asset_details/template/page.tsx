@@ -88,13 +88,13 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
   const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
-  const hasEEM =
+  const shouldBypassOnboarding =
     isEntityCentricExperienceEnabled && (isLogsSignal(dataStreams) || isMetricsSignal(dataStreams));
 
   return (
     <InfraPageTemplate
       onboardingFlow={
-        isPending(entitySummaryStatus) || hasEEM
+        isPending(entitySummaryStatus) || shouldBypassOnboarding
           ? undefined
           : asset.type === 'host'
           ? OnboardingFlow.Hosts
