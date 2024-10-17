@@ -56,7 +56,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
         }
       ),
-      logos: ['kubernetes', 'opentelemetry', 'apache', 'mysql'],
+      logos: ['opentelemetry', 'apache', 'mysql'],
     },
     {
       id: 'kubernetes',
@@ -86,7 +86,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
         }
       ),
-      logos: ['opentelemetry', 'java', 'javascript', 'dotnet'],
+      logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
     },
     {
       id: 'cloud',
