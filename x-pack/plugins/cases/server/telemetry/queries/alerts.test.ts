@@ -17,7 +17,7 @@ describe('alerts', () => {
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
     savedObjectsClient.find.mockResolvedValue({
-      total: 5,
+      total: 3,
       saved_objects: [],
       per_page: 1,
       page: 1,
@@ -30,6 +30,7 @@ describe('alerts', () => {
           ],
         },
         references: { cases: { max: { value: 1 } } },
+        additionalAggsResult: { value: 5 },
       },
     });
 
@@ -42,6 +43,7 @@ describe('alerts', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
+
       expect(res).toEqual({
         all: {
           total: 5,
@@ -49,6 +51,15 @@ describe('alerts', () => {
           weekly: 2,
           monthly: 1,
           maxOnACase: 1,
+          counts: {
+            buckets: [
+              { doc_count: 1, key: 1 },
+              { doc_count: 2, key: 2 },
+              { doc_count: 3, key: 3 },
+            ],
+          },
+          references: { cases: { max: { value: 1 } } },
+          additionalAggsResult: { value: 5 },
         },
       });
     });
@@ -101,6 +112,11 @@ describe('alerts', () => {
             },
             nested: {
               path: 'cases-comments.references',
+            },
+          },
+          additionalAggsResult: {
+            cardinality: {
+              field: 'cases-comments.attributes.alertId',
             },
           },
         },

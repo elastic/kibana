@@ -28,6 +28,7 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
+  getUniqueAlertCommentsCountQuery,
 } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
@@ -994,6 +995,18 @@ describe('utils', () => {
     });
   });
 
+  describe('getUniqueAlertCommentsCountQuery', () => {
+    it('returns the correct query', () => {
+      expect(getUniqueAlertCommentsCountQuery()).toEqual({
+        additionalAggsResult: {
+          cardinality: {
+            field: 'cases-comments.attributes.alertId',
+          },
+        },
+      });
+    });
+  });
+
   describe('getCountsAndMaxData', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
     savedObjectsClient.find.mockResolvedValue({
@@ -1010,6 +1023,7 @@ describe('utils', () => {
           ],
         },
         references: { cases: { max: { value: 1 } } },
+        additionalAggsResult: { value: 5 },
       },
     });
 
@@ -1031,6 +1045,15 @@ describe('utils', () => {
           weekly: 2,
           monthly: 1,
           maxOnACase: 1,
+          counts: {
+            buckets: [
+              { doc_count: 1, key: 1 },
+              { doc_count: 2, key: 2 },
+              { doc_count: 3, key: 3 },
+            ],
+          },
+          references: { cases: { max: { value: 1 } } },
+          additionalAggsResult: { value: 5 },
         },
       });
     });
@@ -1065,6 +1088,7 @@ describe('utils', () => {
       await getCountsAndMaxData({
         savedObjectsClient: telemetrySavedObjectsClient,
         savedObjectType: 'test',
+        additionalAggs: getUniqueAlertCommentsCountQuery(),
       });
 
       expect(savedObjectsClient.find).toBeCalledWith({
@@ -1113,6 +1137,11 @@ describe('utils', () => {
             },
             nested: {
               path: 'test.references',
+            },
+          },
+          additionalAggsResult: {
+            cardinality: {
+              field: 'cases-comments.attributes.alertId',
             },
           },
         },
