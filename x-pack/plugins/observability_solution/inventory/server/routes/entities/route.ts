@@ -114,6 +114,7 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     t.partial({
       query: t.partial({
         kuery: t.string,
+        entityTypes: jsonRt.pipe(t.array(entityTypeRt)),
       }),
     }),
   ]),
@@ -129,12 +130,13 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     });
 
     const { field } = params.path;
-    const { kuery } = params.query ?? {};
+    const { kuery, entityTypes } = params.query ?? {};
 
     const groups = await getEntityGroupsBy({
       inventoryEsClient,
       field,
       kuery,
+      entityTypes,
     });
 
     return { groupBy: field, groups };
