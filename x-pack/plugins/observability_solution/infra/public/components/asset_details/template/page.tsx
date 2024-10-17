@@ -89,7 +89,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
 
   const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
   const hasEEM =
-    (isEntityCentricExperienceEnabled && isLogsSignal(dataStreams)) || isMetricsSignal(dataStreams);
+    isEntityCentricExperienceEnabled && (isLogsSignal(dataStreams) || isMetricsSignal(dataStreams));
 
   return (
     <InfraPageTemplate
