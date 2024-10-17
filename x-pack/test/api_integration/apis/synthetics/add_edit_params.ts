@@ -10,6 +10,7 @@ import { pick } from 'lodash';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
@@ -21,12 +22,15 @@ export default function ({ getService }: FtrProviderContext) {
   describe('AddEditParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
+
     const kServer = getService('kibanaServer');
     const testParam = {
       key: 'test',
       value: 'test',
     };
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
       await testPrivateLocations.installSyntheticsPackage();
@@ -331,6 +335,23 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(getResponse.body[0].namespaces).eql(['*']);
       assertHas(getResponse.body[0], testParam);
+    });
+
+    it('should not return values for non admin user', async () => {
+      const { username, password } = await monitorTestService.addsNewSpace();
+      const resp = await supertestWithoutAuth
+        .get(`${SYNTHETICS_API_URLS.PARAMS}`)
+        .auth(username, password)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      const params = resp.body;
+      expect(params.length).to.eql(6);
+      params.forEach((param: any) => {
+        expect(param.value).to.eql(undefined);
+        expect(param.key).to.not.empty();
+      });
     });
   });
 }
