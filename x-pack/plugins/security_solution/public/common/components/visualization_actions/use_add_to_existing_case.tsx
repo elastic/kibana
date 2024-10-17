@@ -59,7 +59,7 @@ export const useAddToExistingCase = ({
     disabled:
       lensAttributes == null ||
       timeRange == null ||
-      !userCasesPermissions.create ||
+      !userCasesPermissions.createComment ||
       !userCasesPermissions.read,
   };
 };

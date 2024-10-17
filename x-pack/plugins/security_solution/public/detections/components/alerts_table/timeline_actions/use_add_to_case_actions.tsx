@@ -142,7 +142,7 @@ export const useAddToCaseActions = ({
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (
       (isActiveTimelines || isInDetections) &&
-      userCasesPermissions.create &&
+      userCasesPermissions.createComment &&
       userCasesPermissions.read &&
       isAlert
     ) {
@@ -169,14 +169,14 @@ export const useAddToCaseActions = ({
     }
     return [];
   }, [
+    isActiveTimelines,
+    isInDetections,
+    userCasesPermissions.createComment,
+    userCasesPermissions.read,
+    isAlert,
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    userCasesPermissions.create,
-    userCasesPermissions.read,
-    isInDetections,
-    isActiveTimelines,
-    isAlert,
   ]);
 
   return {

@@ -23,7 +23,7 @@ describe('hooks', () => {
 
       expect(result.current).toEqual({
         actions: { crud: true, read: true },
-        generalCases: allCasesPermissions(),
+        generalCasesV2: allCasesPermissions(),
         visualize: { crud: true, read: true },
         dashboard: { crud: true, read: true },
       });
