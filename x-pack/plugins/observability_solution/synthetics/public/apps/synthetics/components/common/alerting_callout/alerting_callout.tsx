@@ -34,6 +34,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const { settings } = useSelector(selectDynamicSettings);
 
   const hasDefaultConnector = !settings || !isEmpty(settings?.defaultConnectors);
+  const defaultRuleEnabled = settings?.defaultTLSRuleEnabled || settings?.defaultStatusRuleEnabled;
 
   const { canSave } = useSyntheticsSettingsContext();
 
@@ -55,7 +56,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     (monitorsLoaded &&
       monitors.some((monitor) => monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
-  const showCallout = !hasDefaultConnector && hasAlertingConfigured;
+  const showCallout = !hasDefaultConnector && hasAlertingConfigured && defaultRuleEnabled;
   const hasDefaultRules =
     !rulesLoaded || Boolean(defaultRules?.statusRule && defaultRules?.tlsRule);
   const missingRules = !hasDefaultRules && !canSave;
