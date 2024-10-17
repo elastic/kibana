@@ -23,7 +23,6 @@ export const getCasesBaseKibanaFeature = ({
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
     deprecated: {
-      // TODO: Add docLinks to link to documentation about the deprecation
       notice: i18n.translate(
         'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCase.deprecationMessage',
         {

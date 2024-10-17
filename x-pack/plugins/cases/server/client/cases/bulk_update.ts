@@ -289,6 +289,7 @@ function partitionPatchRequest(
       // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     } else if (
+      reqCase.status != null &&
       foundCase.attributes.status !== reqCase.status &&
       foundCase.attributes.status === CaseStatuses.closed
     ) {

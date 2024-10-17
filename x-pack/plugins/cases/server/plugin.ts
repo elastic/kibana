@@ -30,7 +30,7 @@ import type {
   CasesServerStartDependencies,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import { getCasesKibanaFeature } from './features';
+import { getCasesKibanaFeatures} from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
@@ -44,7 +44,6 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
-import { getCasesKibanaFeatureV2 } from './features_v2';
 
 export class CasePlugin
   implements
@@ -95,8 +94,9 @@ export class CasePlugin
     if (this.caseConfig.stack.enabled) {
       // V1 is deprecated, but has to be maintained for the time being
       // https://github.com/elastic/kibana/pull/186800#issue-2369812818
-      plugins.features.registerKibanaFeature(getCasesKibanaFeature());
-      plugins.features.registerKibanaFeature(getCasesKibanaFeatureV2());
+      const casesFeatures = getCasesKibanaFeatures();
+      plugins.features.registerKibanaFeature(casesFeatures.v1);
+      plugins.features.registerKibanaFeature(casesFeatures.v2);
     }
 
     registerSavedObjects({

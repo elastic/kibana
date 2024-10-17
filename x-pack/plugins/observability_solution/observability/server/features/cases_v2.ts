@@ -118,7 +118,7 @@ export const getCasesFeatureV2 = (
     },
     {
       name: i18n.translate('xpack.observability.featureRegistry.addCommentsSubFeatureName', {
-        defaultMessage: 'Add comments',
+        defaultMessage: 'Create comments & attachments',
       }),
       privilegeGroups: [
         {

@@ -103,7 +103,7 @@ export const getCasesSubFeaturesMapV2 = ({
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureName',
       {
-        defaultMessage: 'Add comments',
+        defaultMessage: 'Create comments & attachments',
       }
     ),
     privilegeGroups: [
