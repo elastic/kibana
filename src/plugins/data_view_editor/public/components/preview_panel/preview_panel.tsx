@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -64,6 +64,12 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
     currentViewMode = ViewMode.allIndices;
   }
 
+  useEffect(() => {
+    if (!matched.visibleIndices.length && viewMode === ViewMode.onlyMatchingIndices) {
+      setViewMode(ViewMode.allIndices);
+    }
+  }, [matched, viewMode]);
+
   const indicesListContent = currentlyVisibleIndices.length ? (
     <IndicesList
       data-test-subj="createIndexPatternStep1IndicesList"
@@ -86,7 +92,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         query={title}
       />
       <EuiSpacer size="m" />
-      {Boolean(title) && currentlyVisibleIndices.length > 0 && (
+      {Boolean(title) && (
         <EuiButtonGroup
           isFullWidth
           legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
