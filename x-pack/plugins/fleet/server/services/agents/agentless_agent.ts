@@ -198,6 +198,68 @@ class AgentlessAgentService {
     return response;
   }
 
+  private withRequestIdMessage(message: string, traceId?: string) {
+    return `${message} [Request Id: ${traceId}]`;
+  }
+
+  private createTlsConfig(agentlessConfig: AgentlessConfig | undefined) {
+    return new SslConfig(
+      sslSchema.validate({
+        enabled: true,
+        certificate: agentlessConfig?.api?.tls?.certificate,
+        key: agentlessConfig?.api?.tls?.key,
+        certificateAuthorities: agentlessConfig?.api?.tls?.ca,
+      })
+    );
+  }
+
+  private async getFleetUrlAndTokenForAgentlessAgent(
+    esClient: ElasticsearchClient,
+    policyId: string,
+    soClient: SavedObjectsClientContract
+  ) {
+    const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
+      perPage: SO_SEARCH_LIMIT,
+      showInactive: true,
+      kuery: `policy_id:"${policyId}"`,
+    });
+
+    const { items: fleetHosts } = await listFleetServerHosts(soClient);
+    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
+    // https://github.com/elastic/security-team/issues/9695
+    const defaultFleetHost =
+      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
+
+    if (!defaultFleetHost) {
+      throw new AgentlessAgentCreateError('missing Fleet server host', 'create');
+    }
+    if (!enrollmentApiKeys.length) {
+      throw new AgentlessAgentCreateError('missing Fleet enrollment token', 'create');
+    }
+    const fleetToken = enrollmentApiKeys[0].api_key;
+    const fleetUrl = defaultFleetHost?.host_urls[0];
+    return { fleetUrl, fleetToken };
+  }
+
+  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
+    return JSON.stringify({
+      ...requestConfig,
+      data: {
+        ...requestConfig.data,
+        fleet_token: '[REDACTED]',
+      },
+      httpsAgent: {
+        ...requestConfig.httpsAgent,
+        options: {
+          ...requestConfig.httpsAgent.options,
+          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
+          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
+        },
+      },
+    });
+  }
+
   private catchAgentlessApiError(
     action: 'create' | 'delete',
     error: Error | AxiosError,
@@ -326,74 +388,12 @@ class AgentlessAgentService {
     throw new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId), action);
   }
 
-  private withRequestIdMessage(message: string, traceId?: string) {
-    return `${message} [Request Id: ${traceId}]`;
-  }
-
-  private createTlsConfig(agentlessConfig: AgentlessConfig | undefined) {
-    return new SslConfig(
-      sslSchema.validate({
-        enabled: true,
-        certificate: agentlessConfig?.api?.tls?.certificate,
-        key: agentlessConfig?.api?.tls?.key,
-        certificateAuthorities: agentlessConfig?.api?.tls?.ca,
-      })
-    );
-  }
-
-  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
-    return JSON.stringify({
-      ...requestConfig,
-      data: {
-        ...requestConfig.data,
-        fleet_token: '[REDACTED]',
-      },
-      httpsAgent: {
-        ...requestConfig.httpsAgent,
-        options: {
-          ...requestConfig.httpsAgent.options,
-          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
-        },
-      },
-    });
-  }
-
   private convertCauseErrorsToString = (error: AxiosError) => {
     if (error.cause instanceof AggregateError) {
       return error.cause.errors.map((e: Error) => e.message);
     }
     return error.cause;
   };
-
-  private async getFleetUrlAndTokenForAgentlessAgent(
-    esClient: ElasticsearchClient,
-    policyId: string,
-    soClient: SavedObjectsClientContract
-  ) {
-    const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
-      perPage: SO_SEARCH_LIMIT,
-      showInactive: true,
-      kuery: `policy_id:"${policyId}"`,
-    });
-
-    const { items: fleetHosts } = await listFleetServerHosts(soClient);
-    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-    // https://github.com/elastic/security-team/issues/9695
-    const defaultFleetHost =
-      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
-
-    if (!defaultFleetHost) {
-      throw new AgentlessAgentCreateError('missing Fleet server host', 'create');
-    }
-    if (!enrollmentApiKeys.length) {
-      throw new AgentlessAgentCreateError('missing Fleet enrollment token', 'create');
-    }
-    const fleetToken = enrollmentApiKeys[0].api_key;
-    const fleetUrl = defaultFleetHost?.host_urls[0];
-    return { fleetUrl, fleetToken };
-  }
 
   private getErrorHandlingMessages(agentlessPolicyId: string) {
     return {
