@@ -67,6 +67,21 @@
       },
       {
         "parentPluginId": "dataQuality",
+        "id": "def-common.PLUGIN_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"dataQuality\""
+        ],
+        "path": "x-pack/plugins/data_quality/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataQuality",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
