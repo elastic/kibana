@@ -96,22 +96,20 @@ export const AddDocumentsCodeExample = ({
               onSelectLanguage={onSelectLanguage}
             />
           </EuiFlexItem>
-          {selectedLanguage === 'curl' && (
-            <EuiFlexItem grow={false}>
-              <TryInConsoleButton
-                request={
-                  !indexHasMappings
-                    ? `${ingestCodeExamples.sense.updateMappingsCommand(
-                        codeParams
-                      )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
-                    : ingestCodeExamples.sense.ingestCommand(codeParams)
-                }
-                application={application}
-                sharePlugin={share}
-                consolePlugin={consolePlugin}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={
+                !indexHasMappings
+                  ? `${ingestCodeExamples.sense.updateMappingsCommand(
+                      codeParams
+                    )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
+                  : ingestCodeExamples.sense.ingestCommand(codeParams)
+              }
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText>
           <p>{ingestCodeExamples.description}</p>
