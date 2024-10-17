@@ -36,6 +36,7 @@ import {
 import { NameEdit, nameSchema } from './fields/name';
 import { NoteEdit, noteSchema } from './fields/note';
 import { ReferencesEdit, referencesSchema, referencesSerializer } from './fields/references';
+import { SetupEdit, setupSchema } from './fields/setup';
 import { TagsEdit, tagsSchema } from './fields/tags';
 
 interface CommonRuleFieldEditProps {
@@ -94,6 +95,8 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           serializer={referencesSerializer}
         />
       );
+    case 'setup':
+      return <FieldFormWrapper component={SetupEdit} fieldFormSchema={setupSchema} />;
     case 'tags':
       return <FieldFormWrapper component={TagsEdit} fieldFormSchema={tagsSchema} />;
     default:
