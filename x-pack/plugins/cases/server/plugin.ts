@@ -30,7 +30,7 @@ import type {
   CasesServerStartDependencies,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import { getCasesKibanaFeatures} from './features';
+import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
