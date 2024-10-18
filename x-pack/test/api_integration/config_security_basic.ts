@@ -23,9 +23,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.license.self_generated.type=basic',
         'xpack.security.enabled=true',
         'xpack.security.authc.api_key.enabled=true',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'assistantKnowledgeBaseByDefault',
-        ])}`,
       ],
     },
     junit: {
