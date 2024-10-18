@@ -13,6 +13,24 @@ import { Slice } from '@reduxjs/toolkit';
 import { searchSlice, type SearchSlice } from './search_slice';
 import { EventBus } from './event_bus';
 
+/**
+ * When building a registry in TypeScript where services are dynamically
+ * registered and not known upfront, maintaining type safety becomes
+ * challenging due to TypeScript's static type system.
+ *
+ * This registry uses generics for service access. It means you need to provide
+ * the type of the slice of the event bus you want to get for proper type safety.
+ *
+ * Example:
+ * const search = eventBusRegistry.get<SearchSlice>('search')
+ *
+ * Similar to Kibana's plugin depedency management, a different approach would
+ * be to define the possible services up front, but that's not possible here
+ * because the use case of this event bus registry is also to allow registering
+ * event buses dynamically, for example for a user generated dashboard.
+ *
+ * @returns The event bus registry
+ */
 const createEventBusRegistry = () => {
   const eventBuses: Map<string, unknown> = new Map();
 
