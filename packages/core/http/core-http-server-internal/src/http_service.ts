@@ -32,7 +32,6 @@ import type {
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
 import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
-import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 
 import { CspConfigType, cspConfig } from './csp';
 import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
@@ -54,7 +53,6 @@ export interface PrebootDeps {
 export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
-  getEluHistory?: MetricsServiceSetup['getEluHistory'];
 }
 
 /** @internal */
@@ -181,13 +179,13 @@ export class HttpService
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
       executionContext: deps.executionContext,
-      getEluHistory: deps.getEluHistory,
     });
 
     registerCoreHandlers(serverContract, config, this.env, this.log);
 
     this.internalSetup = {
       ...serverContract,
+      rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
       },

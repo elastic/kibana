@@ -4605,6 +4605,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-rate-limiter-internal@link:packages/core/http/core-http-rate-limiter-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-request-handler-context-server-internal@link:packages/core/http/core-http-request-handler-context-server-internal":
   version "0.0.0"
   uid ""
