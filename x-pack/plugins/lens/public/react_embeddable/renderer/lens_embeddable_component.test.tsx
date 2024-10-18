@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { getLensApiMock, getLensInternalApiMock } from '../mocks';
 import { LensApi, LensInternalApi } from '../types';
 import { BehaviorSubject } from 'rxjs';
