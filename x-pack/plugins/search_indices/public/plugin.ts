@@ -17,7 +17,7 @@ import type {
 } from './types';
 import { initQueryClient } from './services/query_client';
 import { INDICES_APP_ID, START_APP_ID } from '../common';
-import { INDICES_APP_BASE, START_APP_BASE, SearchIndexDetailsTabs } from './routes';
+import { INDICES_APP_BASE, START_APP_BASE, SearchIndexDetailsTabValues } from './routes';
 import { isGlobalEmptyStateEnabled } from './feature_flags';
 
 export class SearchIndicesPlugin
@@ -91,8 +91,7 @@ export class SearchIndicesPlugin
       indexManagement?.extensionsService.setIndexDetailsPageRoute({
         renderRoute: (indexName, detailsTabId) => {
           const route = `/app/elasticsearch/indices/index_details/${indexName}`;
-          const tabIds: string[] = Object.values(SearchIndexDetailsTabs);
-          if (detailsTabId && tabIds.includes(detailsTabId)) {
+          if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
             return `${route}/${detailsTabId}`;
           }
           return route;
