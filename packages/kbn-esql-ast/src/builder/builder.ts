@@ -16,11 +16,14 @@ import {
   ESQLCommand,
   ESQLCommandOption,
   ESQLDecimalLiteral,
+  ESQLFunction,
   ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLocation,
+  ESQLSingleAstItem,
   ESQLSource,
+  ESQLUnaryExpression,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -128,6 +131,35 @@ export namespace Builder {
         name: template.parts.join('.'),
         type: 'column',
       };
+    };
+
+    export const func = (
+      template: AstNodeTemplate<ESQLFunction>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLFunction => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: template.name.toLocaleLowerCase(),
+        type: 'function',
+      };
+    };
+
+    export const unary = (
+      operator: string,
+      operand: ESQLSingleAstItem,
+      template: Omit<AstNodeTemplate<ESQLUnaryExpression>, 'subtype' | 'name' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLUnaryExpression => {
+      return Builder.expression.func(
+        {
+          ...template,
+          name: operator,
+          args: [operand],
+          subtype: 'unary-expression',
+        },
+        fromParser
+      ) as ESQLUnaryExpression;
     };
 
     export const inlineCast = (

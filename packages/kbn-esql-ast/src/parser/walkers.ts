@@ -72,7 +72,6 @@ import {
   createFunction,
   createLiteral,
   createTimeUnit,
-  createFakeMultiplyLiteral,
   createList,
   createNumericLiteral,
   sanitizeIdentifierString,
@@ -85,6 +84,7 @@ import {
   createInlineCast,
   createUnknownItem,
   createOrderExpression,
+  createUnaryExpression,
 } from './factories';
 import { getPosition } from './helpers';
 
@@ -100,6 +100,7 @@ import {
   ESQLPositionalParamLiteral,
   ESQLNamedParamLiteral,
   ESQLOrderExpression,
+  ESQLSingleAstItem,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
 
@@ -301,14 +302,10 @@ function visitOperatorExpression(
   ctx: OperatorExpressionContext
 ): ESQLAstItem | ESQLAstItem[] | undefined {
   if (ctx instanceof ArithmeticUnaryContext) {
-    const arg = visitOperatorExpression(ctx.operatorExpression());
-    // this is a number sign thing
-    const fn = createFunction('*', ctx, undefined, 'binary-expression');
-    fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
-    if (arg) {
-      fn.args.push(arg);
-    }
-    return fn;
+    const item = visitOperatorExpression(ctx.operatorExpression());
+    const operand: ESQLSingleAstItem = (Array.isArray(item) ? item[0] : item) as ESQLSingleAstItem;
+    const unaryExpression = createUnaryExpression(ctx, operand);
+    return unaryExpression;
   }
   if (ctx instanceof ArithmeticBinaryContext) {
     const fn = createFunction(getMathOperation(ctx), ctx, undefined, 'binary-expression');
