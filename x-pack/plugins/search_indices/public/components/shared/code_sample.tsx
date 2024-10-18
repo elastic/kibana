@@ -52,10 +52,14 @@ export const CodeSample = ({
       <EuiTitle size="xs">
         <h3>{title}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" grow={false}>
-        <p>{description}</p>
-      </EuiText>
+      {description && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" grow={false}>
+            <p>{description}</p>
+          </EuiText>
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiThemeProvider colorMode="dark">
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>

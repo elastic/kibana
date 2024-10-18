@@ -78,21 +78,23 @@ export const CreateIndexCodeView = ({
             onSelectLanguage={onSelectLanguage}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TryInConsoleButton
-            request={selectedCodeExamples.sense.createIndex(codeParams)}
-            application={application}
-            sharePlugin={share}
-            consolePlugin={consolePlugin}
-            telemetryId={`${selectedLanguage}_create_index`}
-            onClick={() => {
-              usageTracker.click([
-                AnalyticsEvents.startCreateIndexRunInConsole,
-                `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
-              ]);
-            }}
-          />
-        </EuiFlexItem>
+        {selectedLanguage === 'curl' && (
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={selectedCodeExamples.sense.createIndex(codeParams)}
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+              telemetryId={`${selectedLanguage}_create_index`}
+              onClick={() => {
+                usageTracker.click([
+                  AnalyticsEvents.startCreateIndexRunInConsole,
+                  `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
+                ]);
+              }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
