@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import {
   FeatureFeedbackButton,
@@ -36,7 +36,7 @@ const INVENTORY_FEEDBACK_LINK = 'https://ela.st/feedback-new-inventory';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    services: { observabilityShared, inventoryAPIClient, kibanaEnvironment },
+    services: { observabilityShared, inventoryAPIClient, kibanaEnvironment, telemetry },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
@@ -61,6 +61,35 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     },
     [inventoryAPIClient]
   );
+
+  const [isLoadingComplete, setIsLoadingComplete] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    if (isLoadingComplete === undefined && hasDataLoading && isEnablementLoading) {
+      setIsLoadingComplete(false);
+    } else if (isLoadingComplete === false && !hasDataLoading && !isEnablementLoading) {
+      setIsLoadingComplete(true);
+    }
+
+    if (isLoadingComplete) {
+      const viewState = isEntityManagerEnabled
+        ? value.hasData
+          ? 'populated'
+          : 'empty'
+        : 'eem_disabled';
+
+      telemetry.reportEntityInventoryViewed({
+        view_state: viewState,
+      });
+    }
+  }, [
+    isEnablementLoading,
+    hasDataLoading,
+    isEntityManagerEnabled,
+    value.hasData,
+    telemetry,
+    isLoadingComplete,
+  ]);
 
   if (isEnablementLoading || hasDataLoading) {
     return (
