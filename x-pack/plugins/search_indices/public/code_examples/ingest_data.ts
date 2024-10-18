@@ -20,7 +20,7 @@ export const DenseVectorServerlessCodeExamples: IngestDataCodeExamples = {
   addMappingsTitle: i18n.translate(
     'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsTitle',
     {
-      defaultMessage: 'Apply Field Mappings',
+      defaultMessage: 'Define field mappings',
     }
   ),
   addMappingsDescription: i18n.translate(
