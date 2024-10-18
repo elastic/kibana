@@ -37,6 +37,7 @@ type VulnerabilitiesFindingDetailFields = Pick<
 interface VulnerabilitiesPackage extends Vulnerability {
   package: {
     name: string;
+    version: string;
   };
 }
 
@@ -108,6 +109,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
           href={navUrlParams({
             'vulnerability.id': vulnerability?.id,
             'resource.id': finding?.resource?.id || '',
+            'vulnerability.package.name': vulnerability?.package?.name,
+            'vulnerability.package.version': vulnerability?.package?.version,
           })}
           external={false}
           target="_blank"
