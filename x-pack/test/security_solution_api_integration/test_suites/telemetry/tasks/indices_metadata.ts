@@ -9,6 +9,7 @@ import {
   TELEMETRY_CLUSTER_STATS_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
+  TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
 } from '@kbn/security-solution-plugin/server/lib/telemetry/event_based/events';
 
@@ -24,6 +25,7 @@ import {
 } from '../../../../common/utils/security_solution';
 
 const TASK_ID = 'security:indices-metadata-telemetry:1.0.0';
+const NUM_INDICES = 5;
 
 export default ({ getService }: FtrProviderContext) => {
   const ebtServer = getService('kibana_ebt_server');
@@ -31,18 +33,14 @@ export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');
   const es = getService('es');
 
-  describe(' Indices metadata task telemetry', function () {
+  describe('Indices metadata task telemetry', function () {
     let dsName: string;
     let policyName: string;
-
-    before(async () => {});
-
-    after(async () => {});
 
     describe('@ess @serverless indices metadata', () => {
       beforeEach(async () => {
         dsName = await randomDatastream(es);
-        await ensureBackingIndices(dsName, 5, es);
+        await ensureBackingIndices(dsName, NUM_INDICES, es);
       });
 
       afterEach(async () => {
@@ -82,13 +80,13 @@ export default ({ getService }: FtrProviderContext) => {
           fromTimestamp: new Date().toISOString(),
         };
 
-        const regex = new RegExp(`^\.ds-${dsName}-.*$`);
+        // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
+        const regex = new RegExp(`^\.ds-${dsName}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
         await waitFor(
           async () => {
-            const events = await ebtServer.getEvents(100, opts);
-            // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
-            const filtered = events.filter((e) => regex.test(e.properties.index_name as string));
-            return filtered.length === 5;
+            const events = await ebtServer.getEvents(Number.MAX_SAFE_INTEGER, opts);
+            const filtered = events.filter((ev) => regex.test(ev.properties.index_name as string));
+            return filtered.length === NUM_INDICES;
           },
           'waitForTaskToRun',
           logger
@@ -121,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         policyName = await randomIlmPolicy(es);
         dsName = await randomDatastream(es, policyName);
-        await ensureBackingIndices(dsName, 5, es);
+        await ensureBackingIndices(dsName, NUM_INDICES, es);
       });
 
       afterEach(async () => {
@@ -147,6 +145,30 @@ export default ({ getService }: FtrProviderContext) => {
           async () => {
             const events = await ebtServer.getEventCount(opts);
             return events === 1;
+          },
+          'waitForTaskToRun',
+          logger
+        );
+      });
+
+      it('should publish ilm stats events', async () => {
+        await launchTask(TASK_ID, kibanaServer, logger);
+
+        const opts = {
+          eventTypes: [TELEMETRY_ILM_STATS_EVENT.eventType],
+          withTimeoutMs: 1000,
+          fromTimestamp: new Date().toISOString(),
+          filters: {
+            'properties.policy_name': {
+              eq: policyName,
+            },
+          },
+        };
+
+        await waitFor(
+          async () => {
+            const events = await ebtServer.getEventCount(opts);
+            return events === NUM_INDICES;
           },
           'waitForTaskToRun',
           logger
