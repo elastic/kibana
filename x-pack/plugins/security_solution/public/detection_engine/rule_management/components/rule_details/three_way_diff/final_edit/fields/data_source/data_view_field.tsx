@@ -9,10 +9,10 @@ import React from 'react';
 import { DataViewSelector } from '../../../../../../../rule_creation_ui/components/data_view_selector';
 import type { FieldHook } from '../../../../../../../../shared_imports';
 
-interface DataViewEditProps {
+interface DataViewFieldProps {
   field: FieldHook<string | undefined>;
 }
 
-export function DataViewEdit({ field }: DataViewEditProps): JSX.Element {
+export function DataViewField({ field }: DataViewFieldProps): JSX.Element {
   return <DataViewSelector field={field} />;
 }

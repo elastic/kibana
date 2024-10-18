@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FormData } from '../../../../../../shared_imports';
-import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
+import type { FormData } from '../../../../../../../shared_imports';
+import type { DiffableRule } from '../../../../../../../../common/api/detection_engine';
 
 export interface RuleFieldEditComponentProps {
   finalDiffableRule: DiffableRule;

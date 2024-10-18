@@ -7,15 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import { useForm, Form } from '../../../../../../shared_imports';
-import type { FormSchema, FormData } from '../../../../../../shared_imports';
+import { useForm, Form } from '../../../../../../../shared_imports';
+import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import type {
   DiffableAllFields,
   DiffableRule,
-} from '../../../../../../../common/api/detection_engine';
-import { useFinalSideContext } from '../final_side/final_side_context';
-import { useDiffableRuleContext } from '../diffable_rule_context';
-import * as i18n from '../translations';
+} from '../../../../../../../../common/api/detection_engine';
+import { useFinalSideContext } from '../../final_side/final_side_context';
+import { useDiffableRuleContext } from '../../diffable_rule_context';
+import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
 
 type RuleFieldEditComponent = React.ComponentType<RuleFieldEditComponentProps>;

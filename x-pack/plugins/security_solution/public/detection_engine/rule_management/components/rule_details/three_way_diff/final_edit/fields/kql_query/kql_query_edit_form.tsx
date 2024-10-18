@@ -9,7 +9,7 @@ import React from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
-import { FieldFormWrapper } from '../../field_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar';
 import {
   KqlQueryLanguage,
@@ -29,7 +29,7 @@ import { KqlQueryEdit } from './kql_query_edit';
 
 export function KqlQueryEditForm(): JSX.Element {
   return (
-    <FieldFormWrapper
+    <RuleFieldEditFormWrapper
       component={KqlQueryEdit}
       ruleFieldFormSchema={kqlQuerySchema}
       deserializer={kqlQueryDeserializer}

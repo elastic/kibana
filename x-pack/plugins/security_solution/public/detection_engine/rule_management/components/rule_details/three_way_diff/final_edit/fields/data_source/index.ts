@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './data_source_edit';
+export * from './data_source_edit_form';

@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
 import React from 'react';
+import type { PropsWithChildren } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
-import type { FormSchema } from '../../../../../../../../shared_imports';
 import { UseMultiFields } from '../../../../../../../../shared_imports';
-import type { RuleFieldComponentProps } from '../../field_component_props';
-import { IndexPatternEdit } from './index_pattern_edit';
+import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import { IndexPatternField } from './index_pattern_edit';
 import { DataSourceInfoText } from './data_source_info_text';
-import { DataViewEdit } from './data_view_edit';
+import { DataViewField } from './data_view_field';
 import { DataSourceTypeSelectorField } from './data_source_type_selector_field';
 
-export const dataSourceSchema = {
-  type: {
-    default: DataSourceType.index_patterns,
-  },
-  index_patterns: schema.index,
-  data_view_id: schema.dataViewId,
-} as FormSchema<{
-  type: string;
-  index_patterns: string[];
-  data_view_id: string;
-}>;
-
-export function DataSourceEdit({ resetForm }: RuleFieldComponentProps): JSX.Element {
+export function DataSourceEdit({ resetForm }: RuleFieldEditComponentProps): JSX.Element {
   return (
     <UseMultiFields<{
       type: string;
@@ -60,10 +46,10 @@ export function DataSourceEdit({ resetForm }: RuleFieldComponentProps): JSX.Elem
           </EuiFlexItem>
           <EuiFlexItem>
             <TabContent visible={type.value === DataSourceType.index_patterns}>
-              <IndexPatternEdit key="index-patterns" field={indexPatterns} />
+              <IndexPatternField key="index-patterns" field={indexPatterns} />
             </TabContent>
             <TabContent visible={type.value === DataSourceType.data_view}>
-              <DataViewEdit key="data-view" field={dataViewId} />
+              <DataViewField key="data-view" field={dataViewId} />
             </TabContent>
           </EuiFlexItem>
         </EuiFlexGroup>

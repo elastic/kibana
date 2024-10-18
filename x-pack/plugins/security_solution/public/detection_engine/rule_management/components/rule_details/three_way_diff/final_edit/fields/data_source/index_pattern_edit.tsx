@@ -15,11 +15,11 @@ import { DEFAULT_INDEX_KEY } from '../../../../../../../../../common/constants';
 import { Field } from '../../../../../../../../shared_imports';
 import * as i18n from './translations';
 
-interface IndexPatternEditProps {
+interface IndexPatternFieldProps {
   field: FieldHook<string[] | undefined>;
 }
 
-export function IndexPatternEdit({ field }: IndexPatternEditProps): JSX.Element {
+export function IndexPatternField({ field }: IndexPatternFieldProps): JSX.Element {
   const [defaultIndexPattern] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const isIndexModified = !isEqual(field.value, defaultIndexPattern);
 

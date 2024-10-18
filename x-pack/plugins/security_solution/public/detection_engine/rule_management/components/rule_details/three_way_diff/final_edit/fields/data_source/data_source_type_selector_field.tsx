@@ -11,7 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { FieldHook } from '../../../../../../../../shared_imports';
-import type { ResetFormFn } from '../../field_component_props';
+import type { ResetFormFn } from '../rule_field_edit_component_props';
 
 interface DataSourceTypeSelectorFieldProps {
   field: FieldHook<string>;

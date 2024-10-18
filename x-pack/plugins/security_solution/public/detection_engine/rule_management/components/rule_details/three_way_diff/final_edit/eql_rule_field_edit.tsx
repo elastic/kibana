@@ -7,8 +7,7 @@
 
 import React from 'react';
 import type { UpgradeableEqlFields } from '../../../../model/prebuilt_rule_upgrade/fields';
-import { FieldFormWrapper } from './field_form_wrapper';
-import { DataSourceEdit, dataSourceSchema } from './fields/data_source';
+import { DataSourceEditForm } from './fields/data_source';
 
 interface EqlRuleFieldEditProps {
   fieldName: UpgradeableEqlFields;
@@ -17,16 +16,7 @@ interface EqlRuleFieldEditProps {
 export function EqlRuleFieldEdit({ fieldName }: EqlRuleFieldEditProps) {
   switch (fieldName) {
     case 'data_source':
-      return (
-        <FieldFormWrapper
-          component={DataSourceEdit}
-          ruleFieldFormSchema={dataSourceSchema}
-          deserializer={(defaultRuleFieldValue) => defaultRuleFieldValue}
-          serializer={(formData) => ({
-            data_source: formData,
-          })}
-        />
-      );
+      return <DataSourceEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

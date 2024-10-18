@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from './field_form_wrapper';
+import { RuleFieldEditFormWrapper } from './fields/rule_field_edit_form_wrapper';
 import { NameEdit, nameSchema } from './fields/name';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 interface CommonRuleFieldEditProps {

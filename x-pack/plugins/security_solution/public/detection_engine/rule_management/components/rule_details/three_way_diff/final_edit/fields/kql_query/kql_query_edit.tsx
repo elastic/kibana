@@ -20,13 +20,13 @@ import { DataSourceType } from '../../../../../../../../detections/pages/detecti
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import type { RuleFieldComponentProps } from '../../field_component_props';
+import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
 
 export function KqlQueryEdit({
   finalDiffableRule,
   setValidity,
   setFieldValue,
-}: RuleFieldComponentProps): JSX.Element {
+}: RuleFieldEditComponentProps): JSX.Element {
   const defaultIndexPattern = useDefaultIndexPattern();
   const indexPatternParameters = getRuleIndexPatternParameters(
     finalDiffableRule,
