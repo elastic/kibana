@@ -142,7 +142,10 @@ describe('Assistant', () => {
 
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
-      const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
+      const getConversation = jest
+        .fn()
+        .mockResolvedValueOnce(mockData.welcome_id)
+        .mockResolvedValue(mockData.electric_sheep_id);
       (useConversation as jest.Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
@@ -167,7 +170,10 @@ describe('Assistant', () => {
         ...mockData.electric_sheep_id,
         excludeFromLastConversationStorage: true,
       };
-      const getConversation = jest.fn().mockResolvedValue(conversation);
+      const getConversation = jest
+        .fn()
+        .mockResolvedValueOnce(mockData.welcome_id)
+        .mockResolvedValue(conversation);
       (useConversation as jest.Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
