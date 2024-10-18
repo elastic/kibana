@@ -298,7 +298,7 @@ function UnifiedFieldListItemPopoverComponent({
     return (
       <>
         <UnifiedFieldListItemStats
-          creationOptions={options}
+          options={options}
           services={services}
           field={field}
           multiFields={multiFields}

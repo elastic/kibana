@@ -19,7 +19,7 @@ import { useQuerySubscriber, hasQuerySubscriberData } from '../../hooks/use_quer
 import { UnifiedFieldListSidebarContainerCreationOptions } from '../../types';
 
 export interface UnifiedFieldListItemStatsProps {
-  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
+  options: UnifiedFieldListSidebarContainerCreationOptions;
   field: DataViewField;
   services: Omit<FieldStatsServices, 'uiSettings'> & {
     core: CoreStart;
@@ -31,10 +31,10 @@ export interface UnifiedFieldListItemStatsProps {
 }
 
 export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ creationOptions, services, field, dataView, multiFields, onAddFilter, additionalFilters }) => {
+  ({ options, services, field, dataView, multiFields, onAddFilter, additionalFilters }) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
-      timeRangeUpdatesType: creationOptions.timeRangeUpdatesType,
+      timeRangeUpdatesType: options.timeRangeUpdatesType,
     });
     // prioritize an aggregatable multi field if available or take the parent field
     const fieldForStats = useMemo(
@@ -74,7 +74,7 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
         toDate={querySubscriberResult.toDate}
         dataViewOrDataViewId={dataView}
         field={fieldForStats}
-        data-test-subj={creationOptions.dataTestSubj?.fieldListItemStatsDataTestSubj}
+        data-test-subj={options.dataTestSubj?.fieldListItemStatsDataTestSubj}
         onAddFilter={onAddFilter}
       />
     );
