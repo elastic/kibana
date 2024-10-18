@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
-import { GroupSelector } from './group_selector';
 import { useInventoryState } from '../../hooks/use_inventory_state';
 
 export function UnifiedInventoryView() {
@@ -24,7 +21,6 @@ export function UnifiedInventoryView() {
   } = useKibana();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, kuery, entityTypes } = query;
-  const { euiTheme } = useEuiTheme();
   const inventoryRoute = useInventoryRouter();
   const pageIndex = pagination?.unified ?? 0;
 
@@ -75,39 +71,20 @@ export function UnifiedInventoryView() {
     });
   }
 
-  const totalEntities = value.entities.length;
-
   return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            font-weight: ${euiTheme.font.weight.bold};
-            color: ${euiTheme.colors.subduedText};
-          `}
-        >
-          <FormattedMessage
-            id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
-            defaultMessage="{total} Entities"
-            values={{ total: totalEntities }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow />
-        <EuiFlexItem grow={false}>
-          <GroupSelector />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EntitiesGrid
-        entities={value.entities}
-        loading={loading}
-        sortDirection={sortDirection}
-        sortField={sortField}
-        onChangePage={handlePageChange}
-        onChangeSort={handleSortChange}
-        pageIndex={pageIndex}
-        onFilterByType={handleTypeFilter}
-      />
-    </>
+    <EuiFlexGroup>
+      <EuiFlexItem grow>
+        <EntitiesGrid
+          entities={value.entities}
+          loading={loading}
+          sortDirection={sortDirection}
+          sortField={sortField}
+          onChangePage={handlePageChange}
+          onChangeSort={handleSortChange}
+          pageIndex={pageIndex}
+          onFilterByType={handleTypeFilter}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
