@@ -49,18 +49,9 @@ export class AiopsPlugin
             console.log('AIOps Received updated search query:', action);
           });
 
-          pluginStart.eventBus.getEventBus('search').dispatch({
-            type: 'search/setSearchQuery',
-            payload: 'test1',
-          });
-          pluginStart.eventBus.getEventBus('search').dispatch({
-            type: 'search/setSearchQuery',
-            payload: 'test1',
-          });
-          pluginStart.eventBus.getEventBus('search').dispatch({
-            type: 'search/setSearchQuery',
-            payload: 'test2',
-          });
+          pluginStart.eventBus.getEventBus('search').actions.setSearchQuery('test1');
+          pluginStart.eventBus.getEventBus('search').actions.setSearchQuery('test1');
+          pluginStart.eventBus.getEventBus('search').actions.setSearchQuery('test2');
         }
       }
     });
