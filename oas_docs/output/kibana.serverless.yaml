@@ -40636,6 +40636,7 @@ components:
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isDefault:
+          default: false
           description: Is default conversation.
           type: boolean
         messages:
