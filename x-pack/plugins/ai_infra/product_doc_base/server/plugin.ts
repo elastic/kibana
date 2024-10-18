@@ -104,9 +104,7 @@ export class ProductDocBasePlugin
 
     return {
       isInstalled: async () => {
-        // TODO: should also check license, probably
-
-        // TODO: something less naive
+        // can probably be improved. But is a boolean good enough then
         const installStatus = await productDocClient.getInstallationStatus();
         const installed = Object.values(installStatus).some(
           (status) => status.status === 'installed'
