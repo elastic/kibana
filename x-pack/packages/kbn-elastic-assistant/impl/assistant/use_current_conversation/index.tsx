@@ -206,8 +206,10 @@ export const useCurrentConversation = ({
         find(conversations, ['title', WELCOME_CONVERSATION_TITLE]) ||
         // if no Welcome convo exists, create one
         getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
-
-      if (nConversation && nConversation.id === '') {
+      if (nConversation == null) {
+        return;
+      }
+      if (nConversation.id === '') {
         // This is a default conversation that has not yet been initialized
         const conversation = await initializeDefaultConversationWithConnector(nConversation);
         return setCurrentConversation(conversation);

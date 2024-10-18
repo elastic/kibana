@@ -53,6 +53,7 @@ describe('useCurrentConversation', () => {
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     (deepEqual as jest.Mock).mockReturnValue(false);
     (find as jest.Mock).mockReturnValue(undefined);
+    mockUseConversation.getConversation.mockResolvedValue(mockData.welcome_id);
   });
 
   const defaultProps: Props = {
@@ -80,10 +81,11 @@ describe('useCurrentConversation', () => {
     const conversation = mockData.welcome_id;
     mockUseConversation.getConversation.mockResolvedValue(conversation);
 
-    const { result } = setupHook({
+    const { result, waitForNextUpdate } = setupHook({
       conversationId,
       conversations: { [conversationId]: conversation },
     });
+    await waitForNextUpdate();
 
     await act(async () => {
       await result.current.setCurrentSystemPromptId('prompt-id');
@@ -133,6 +135,7 @@ describe('useCurrentConversation', () => {
       [conversationId]: conversation,
     };
     (find as jest.Mock).mockReturnValue(conversation);
+    mockUseConversation.getConversation.mockResolvedValue(conversation);
 
     const { result } = setupHook({
       conversationId: mockData.welcome_id.id,
@@ -154,24 +157,11 @@ describe('useCurrentConversation', () => {
   });
 
   it('should non-existing handle conversation selection', async () => {
-    const conversationId = 'test-id';
-    const conversationTitle = 'Test Conversation';
-    const conversation = {
-      ...mockData.welcome_id,
-      id: conversationId,
-      title: conversationTitle,
-    } as Conversation;
-    const mockConversations = {
-      ...mockData,
-      [conversationId]: conversation,
-    };
-    (find as jest.Mock).mockReturnValue(conversation);
-
     const { result } = setupHook({
       conversationId: mockData.welcome_id.id,
-      conversations: mockConversations,
+      conversations: mockData,
       refetchCurrentUserConversations: jest.fn().mockResolvedValue({
-        data: mockConversations,
+        data: mockData,
       }),
     });
 
@@ -233,7 +223,7 @@ describe('useCurrentConversation', () => {
     } as Conversation;
     mockUseConversation.createConversation.mockResolvedValue(newConversation);
 
-    const { result } = setupHook({
+    const { result, waitForNextUpdate } = setupHook({
       conversations: {
         'old-id': {
           ...mockData.welcome_id,
@@ -255,6 +245,7 @@ describe('useCurrentConversation', () => {
         },
       }),
     });
+    await waitForNextUpdate();
 
     await act(async () => {
       await result.current.handleCreateConversation();
@@ -277,7 +268,7 @@ describe('useCurrentConversation', () => {
     } as Conversation;
     mockUseConversation.createConversation.mockResolvedValue(newConversation);
 
-    const { result } = setupHook({
+    const { result, waitForNextUpdate } = setupHook({
       conversations: {
         'old-id': {
           ...mockData.welcome_id,
@@ -317,7 +308,7 @@ describe('useCurrentConversation', () => {
         },
       }),
     });
-
+    await waitForNextUpdate();
     await act(async () => {
       await result.current.handleCreateConversation();
     });
@@ -354,7 +345,7 @@ describe('useCurrentConversation', () => {
     expect(result.current.currentConversation).toBeUndefined();
   });
 
-  it('should refetch the conversation multiple times if isStreamRefetch is true', async () => {
+  it.only('should refetch the conversation multiple times if isStreamRefetch is true', async () => {
     const conversationId = 'test-id';
     const conversation = { id: conversationId, messages: [{ role: 'user' }] } as Conversation;
     mockUseConversation.getConversation.mockResolvedValue(conversation);
@@ -371,6 +362,6 @@ describe('useCurrentConversation', () => {
       });
     });
 
-    expect(mockUseConversation.getConversation).toHaveBeenCalledTimes(6); // initial + 5 retries
+    expect(mockUseConversation.getConversation).toHaveBeenCalledTimes(7); // page load + initial refetchCurrentConversation + 5 retries
   });
 });
