@@ -19,8 +19,10 @@ import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-p
 import type { ControlGroupApi } from '../..';
 import {
   CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_LABEL_POSITION,
   type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
+  DEFAULT_CONTROL_CHAINING,
 } from '../../../common';
 import {
   type ControlGroupStateBuilder,
@@ -136,16 +138,18 @@ export const ControlGroupRenderer = ({
         ...initialState,
         editorConfig,
       });
-      const state = {
-        ...omit(initialState, ['initialChildControlState', 'ignoreParentSettings']),
+      const state: ControlGroupSerializedState = {
+        ...omit(initialState, ['initialChildControlState']),
         editorConfig,
-        controlStyle: initialState?.labelPosition,
-        panelsJSON: JSON.stringify(initialState?.initialChildControlState ?? {}),
-        ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
+        controlStyle: initialState?.labelPosition ?? DEFAULT_CONTROL_LABEL_POSITION,
+        chainingSystem: initialState?.chainingSystem ?? DEFAULT_CONTROL_CHAINING,
+        controls: Object.entries(initialState?.initialChildControlState ?? {}).map(
+          ([controlId, value]) => ({ ...value, id: controlId })
+        ),
       };
 
       if (!cancelled) {
-        setSerializedState(state as ControlGroupSerializedState);
+        setSerializedState(state);
       }
     })();
     return () => {
