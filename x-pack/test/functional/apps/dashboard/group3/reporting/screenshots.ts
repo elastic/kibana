@@ -134,10 +134,10 @@ export default function ({
           return;
         }
 
-        await dashboard.navigateToApp();
-        await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
-        await reporting.checkUsePrintLayout();
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.reporting.openExportTab();
+        await PageObjects.reporting.checkUsePrintLayout();
         await testSubjects.click('shareReportingCopyURL');
 
         const postUrl = await browser.getClipboardValue();
@@ -188,9 +188,9 @@ export default function ({
           return;
         }
 
-        await dashboard.navigateToApp();
-        await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.reporting.openExportTab();
         await testSubjects.click('pngV2-radioOption');
         await testSubjects.click('shareReportingCopyURL');
 
@@ -243,9 +243,9 @@ export default function ({
           return;
         }
 
-        await dashboard.navigateToApp();
-        await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.reporting.openExportTab();
         await testSubjects.click('shareReportingCopyURL');
 
         const postUrl = await browser.getClipboardValue();
