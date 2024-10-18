@@ -9,6 +9,7 @@ export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 
 export CACHE_DIR="$HOME/.kibana"
+export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
 PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
