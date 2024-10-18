@@ -46,6 +46,7 @@ export const LogRateAnalysisPage: FC = () => {
               'application',
               'charts',
               'data',
+              'eventBus',
               'executionContext',
               'fieldFormats',
               'http',
