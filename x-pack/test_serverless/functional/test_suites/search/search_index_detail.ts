@@ -196,28 +196,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       describe('manage index action', () => {
         beforeEach(async () => {
-          await pageObjects.svlSearchIndexDetailPage.manageIndex();
-          await pageObjects.svlSearchIndexDetailPage.manageIndexContextMenuExists();
+          await pageObjects.indexManagement.manageIndex(indexName);
+          await pageObjects.indexManagement.manageIndexContextMenuExists();
         });
-        it('overview navigates to settings tab', async () => {
-          await pageObjects.svlSearchIndexDetailPage.changeManageIndexTab(
-            'showOverviewIndexMenuButton'
-          );
+        it('navigates to overview tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
         });
 
-        it('settings navigates to settings tab', async () => {
-          await pageObjects.svlSearchIndexDetailPage.changeManageIndexTab(
-            'showSettingsIndexMenuButton'
-          );
+        it('navigates to settings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
         });
-        it('mappings navigates to settings tab', async () => {
-          await pageObjects.svlSearchIndexDetailPage.changeManageIndexTab(
-            'showMappingsIndexMenuButton'
-          );
+        it('navigates to mappings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
         });

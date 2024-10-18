@@ -188,36 +188,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
       });
     },
-    async manageIndex() {
-      const selectIndex = await testSubjects.find('indexTableRowCheckbox');
-      await selectIndex.click();
-      await retry.waitFor('manage index to show up ', async () => {
-        return (await testSubjects.isDisplayed('indexActionsContextMenuButton')) === true;
-      });
-      const contextMenuButton = await testSubjects.find('indexActionsContextMenuButton');
-      await contextMenuButton.click();
-      await retry.waitFor('manage index context menu to show ', async () => {
-        return (await testSubjects.isDisplayed('indexContextMenu')) === true;
-      });
-    },
-    async manageIndexContextMenuExists() {
-      await testSubjects.existOrFail('showOverviewIndexMenuButton');
-      await testSubjects.existOrFail('showSettingsIndexMenuButton');
-      await testSubjects.existOrFail('showMappingsIndexMenuButton');
-      await testSubjects.existOrFail('deleteIndexMenuButton');
-    },
-    async changeManageIndexTab(
-      manageIndexTab:
-        | 'showOverviewIndexMenuButton'
-        | 'showSettingsIndexMenuButton'
-        | 'showMappingsIndexMenuButton'
-        | 'deleteIndexMenuButton'
-    ) {
-      await testSubjects.existOrFail(manageIndexTab);
-      const manageIndexComponent = await testSubjects.find(manageIndexTab);
-      await manageIndexComponent.click();
-    },
-
     async expectSearchIndexDetailsTabsExists() {
       await testSubjects.existOrFail('dataTab');
       await testSubjects.existOrFail('mappingsTab');
