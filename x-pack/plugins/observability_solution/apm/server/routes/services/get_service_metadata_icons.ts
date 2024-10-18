@@ -22,11 +22,14 @@ import {
   LABEL_TELEMETRY_AUTO_VERSION,
   AGENT_VERSION,
   SERVICE_FRAMEWORK_NAME,
+  TELEMETRY_SDK_NAME,
+  TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import { ContainerType, SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
+import { getAgentName } from '../../utils/get_agent_name';
 
 export interface ServiceMetadataIcons {
   agentName?: string;
@@ -66,6 +69,8 @@ export async function getServiceMetadataIcons({
     CONTAINER_ID,
     AGENT_NAME,
     CLOUD_SERVICE_NAME,
+    TELEMETRY_SDK_NAME,
+    TELEMETRY_SDK_LANGUAGE,
     ...SERVICE_METADATA_KUBERNETES_KEYS,
   ] as const);
 
@@ -85,9 +90,9 @@ export async function getServiceMetadataIcons({
     },
   };
 
-  const response = await apmEventClient.search('get_service_metadata_icons', params);
+  const data = await apmEventClient.search('get_service_metadata_icons', params);
 
-  if (response.hits.total.value === 0) {
+  if (data.hits.total.value === 0) {
     return {
       agentName: undefined,
       containerType: undefined,
@@ -95,6 +100,13 @@ export async function getServiceMetadataIcons({
       serverlessType: undefined,
     };
   }
+
+  const response = structuredClone(data);
+  response.hits.hits[0].fields[AGENT_NAME] = getAgentName(
+    data.hits.hits[0]?.fields?.[AGENT_NAME] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_LANGUAGE] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_NAME] as unknown as string | null
+  ) as unknown as unknown[];
 
   const event = unflattenKnownApmEventFields(
     maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent

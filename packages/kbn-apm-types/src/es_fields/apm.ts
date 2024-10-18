@@ -193,6 +193,7 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 // OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
+export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
 // Metadata
 export const TIER = '_tier';
