@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Action, Subscribe } from './event_bus';
+import type { EventBusApi } from './plugin';
 
-export interface EventBusPluginSetup {
-  dispatch: (action: Action) => void;
-  subscribe: Subscribe;
-}
-
-export interface EventBusPluginStart {
-  dispatch: (action: Action) => void;
-  subscribe: Subscribe;
-}
+export type EventBusPluginSetup = EventBusApi;
+export type EventBusPluginStart = EventBusApi;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginStartDependencies {}
