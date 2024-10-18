@@ -9,6 +9,7 @@ import { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import {
   PublishesUnifiedSearch,
   StateComparators,
+  getUnchangingComparator,
   initializeTimeRange,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
@@ -28,25 +29,21 @@ export function initializeSearchContext(
   serialize: () => LensUnifiedSearchContext;
   cleanup: () => void;
 } {
-  const [searchSessionId$, searchSessionComparator] = buildObservableVariable<string | undefined>(
+  const [searchSessionId$] = buildObservableVariable<string | undefined>(
     apiPublishesSearchSession(parentApi) ? parentApi.searchSessionId$ : undefined
   );
 
-  const [lastReloadRequestTime, lastReloadRequestTimeComparator] = buildObservableVariable<
-    number | undefined
-  >(undefined);
+  const [lastReloadRequestTime] = buildObservableVariable<number | undefined>(undefined);
 
-  const [filters$, filtersComparator] = buildObservableVariable<Filter[] | undefined>(
+  const [filters$] = buildObservableVariable<Filter[] | undefined>(
     initialState.attributes.state.filters
   );
 
-  const [query$, queryComparator] = buildObservableVariable<Query | AggregateQuery | undefined>(
+  const [query$] = buildObservableVariable<Query | AggregateQuery | undefined>(
     initialState.attributes.state.query
   );
 
-  const [timeslice$, timesliceComparator] = buildObservableVariable<[number, number] | undefined>(
-    undefined
-  );
+  const [timeslice$] = buildObservableVariable<[number, number] | undefined>(undefined);
 
   const timeRange = initializeTimeRange(initialState);
   return {
@@ -59,12 +56,15 @@ export function initializeSearchContext(
       ...timeRange.api,
     },
     comparators: {
-      query: queryComparator,
-      filters: filtersComparator,
-      timeslice: timesliceComparator,
+      query: getUnchangingComparator<LensUnifiedSearchContext, 'query'>(),
+      filters: getUnchangingComparator<LensUnifiedSearchContext, 'filters'>(),
+      timeslice: getUnchangingComparator<LensUnifiedSearchContext, 'timeslice'>(),
+      searchSessionId: getUnchangingComparator<LensUnifiedSearchContext, 'searchSessionId'>(),
+      lastReloadRequestTime: getUnchangingComparator<
+        LensUnifiedSearchContext,
+        'lastReloadRequestTime'
+      >(),
       ...timeRange.comparators,
-      searchSessionId: searchSessionComparator,
-      lastReloadRequestTime: lastReloadRequestTimeComparator,
     },
     cleanup: noop,
     serialize: () => ({
