@@ -48,6 +48,13 @@ const commonAttributes: DashboardAttributes = {
   kibanaSavedObjectMeta: { searchSource: {} },
   timeRestore: false,
   version: 1,
+  options: {
+    hidePanelTitles: false,
+    useMargins: true,
+    syncColors: true,
+    syncCursor: true,
+    syncTooltips: true,
+  },
   panels: [],
   description: '',
   title: '',
@@ -68,7 +75,7 @@ describe('extractReferences', () => {
             title: 'Title 1',
             version: '7.9.1',
             gridData: { x: 0, y: 0, w: 1, h: 1 },
-            embeddableConfig: {},
+            panelConfig: {},
           },
           {
             panelIndex: 'panel-2',
@@ -77,7 +84,7 @@ describe('extractReferences', () => {
             title: 'Title 2',
             version: '7.9.1',
             gridData: { x: 1, y: 1, w: 2, h: 2 },
-            embeddableConfig: {},
+            panelConfig: {},
           },
         ],
       },
@@ -93,15 +100,22 @@ describe('extractReferences', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSource": Object {},
           },
+          "options": Object {
+            "hidePanelTitles": false,
+            "syncColors": true,
+            "syncCursor": true,
+            "syncTooltips": true,
+            "useMargins": true,
+          },
           "panels": Array [
             Object {
-              "embeddableConfig": Object {},
               "gridData": Object {
                 "h": 1,
                 "w": 1,
                 "x": 0,
                 "y": 0,
               },
+              "panelConfig": Object {},
               "panelIndex": "panel-1",
               "panelRefName": "panel_panel-1",
               "title": "Title 1",
@@ -109,13 +123,13 @@ describe('extractReferences', () => {
               "version": "7.9.1",
             },
             Object {
-              "embeddableConfig": Object {},
               "gridData": Object {
                 "h": 2,
                 "w": 2,
                 "x": 1,
                 "y": 1,
               },
+              "panelConfig": Object {},
               "panelIndex": "panel-2",
               "panelRefName": "panel_panel-2",
               "title": "Title 2",
@@ -176,7 +190,7 @@ describe('extractReferences', () => {
             title: 'Title 1',
             version: '7.9.1',
             gridData: { x: 0, y: 0, w: 1, h: 1 },
-            embeddableConfig: {},
+            panelConfig: {},
           },
         ],
       },
@@ -190,15 +204,22 @@ describe('extractReferences', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSource": Object {},
           },
+          "options": Object {
+            "hidePanelTitles": false,
+            "syncColors": true,
+            "syncCursor": true,
+            "syncTooltips": true,
+            "useMargins": true,
+          },
           "panels": Array [
             Object {
-              "embeddableConfig": Object {},
               "gridData": Object {
                 "h": 1,
                 "w": 1,
                 "x": 0,
                 "y": 0,
               },
+              "panelConfig": Object {},
               "panelIndex": "0",
               "title": "Title 1",
               "type": "visualization",
@@ -228,7 +249,7 @@ describe('injectReferences', () => {
           title: 'Title 1',
           version: '7.9.0',
           gridData: { x: 0, y: 0, w: 1, h: 1 },
-          embeddableConfig: {},
+          panelConfig: {},
         },
         {
           type: 'visualization',
@@ -236,7 +257,7 @@ describe('injectReferences', () => {
           title: 'Title 2',
           version: '7.9.0',
           gridData: { x: 1, y: 1, w: 2, h: 2 },
-          embeddableConfig: {},
+          panelConfig: {},
         },
       ],
     };
@@ -261,20 +282,37 @@ describe('injectReferences', () => {
         "kibanaSavedObjectMeta": Object {
           "searchSource": Object {},
         },
+        "options": Object {
+          "hidePanelTitles": false,
+          "syncColors": true,
+          "syncCursor": true,
+          "syncTooltips": true,
+          "useMargins": true,
+        },
         "panels": Array [
           Object {
-            "embeddableConfig": Object {},
-            "gridData": undefined,
+            "gridData": Object {
+              "h": 1,
+              "w": 1,
+              "x": 0,
+              "y": 0,
+            },
             "id": "1",
+            "panelConfig": Object {},
             "panelIndex": "0",
             "title": "Title 1",
             "type": "visualization",
             "version": "7.9.0",
           },
           Object {
-            "embeddableConfig": Object {},
-            "gridData": undefined,
+            "gridData": Object {
+              "h": 2,
+              "w": 2,
+              "x": 1,
+              "y": 1,
+            },
             "id": "2",
+            "panelConfig": Object {},
             "panelIndex": "1",
             "title": "Title 2",
             "type": "visualization",
@@ -314,13 +352,13 @@ describe('injectReferences', () => {
           panelRefName: 'panel_0',
           title: 'Title 1',
           gridData: { x: 0, y: 0, w: 1, h: 1 },
-          embeddableConfig: {},
+          panelConfig: {},
         },
         {
           type: 'visualization',
           title: 'Title 2',
           gridData: { x: 1, y: 1, w: 2, h: 2 },
-          embeddableConfig: {},
+          panelConfig: {},
         },
       ],
     };
@@ -339,9 +377,15 @@ describe('injectReferences', () => {
         "kibanaSavedObjectMeta": Object {
           "searchSource": Object {},
         },
+        "options": Object {
+          "hidePanelTitles": false,
+          "syncColors": true,
+          "syncCursor": true,
+          "syncTooltips": true,
+          "useMargins": true,
+        },
         "panels": Array [
           Object {
-            "embeddableConfig": Object {},
             "gridData": Object {
               "h": 1,
               "w": 1,
@@ -349,19 +393,20 @@ describe('injectReferences', () => {
               "y": 0,
             },
             "id": "1",
+            "panelConfig": Object {},
             "panelIndex": "0",
             "title": "Title 1",
             "type": "visualization",
             "version": undefined,
           },
           Object {
-            "embeddableConfig": Object {},
             "gridData": Object {
               "h": 2,
               "w": 2,
               "x": 1,
               "y": 1,
             },
+            "panelConfig": Object {},
             "panelIndex": "1",
             "title": "Title 2",
             "type": "visualization",
@@ -386,7 +431,7 @@ describe('injectReferences', () => {
           title: 'Title 1',
           type: 'visualization',
           gridData: { x: 0, y: 0, w: 1, h: 1 },
-          embeddableConfig: {},
+          panelConfig: {},
         },
       ],
     };
