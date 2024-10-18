@@ -40,10 +40,6 @@ export class SearchAssistantPlugin
   public setup(
     core: CoreSetup<SearchAssistantPluginStartDependencies, SearchAssistantPluginStart>
   ): SearchAssistantPluginSetup {
-    if (!this.config.ui.enabled) {
-      return {};
-    }
-
     return {};
   }
 
@@ -51,6 +47,9 @@ export class SearchAssistantPlugin
     coreStart: CoreStart,
     pluginsStart: SearchAssistantPluginStartDependencies
   ): SearchAssistantPluginStart {
+    if (!this.config.ui.enabled) {
+      return {};
+    }
     const appService = createAppService({
       pluginsStart,
     });
