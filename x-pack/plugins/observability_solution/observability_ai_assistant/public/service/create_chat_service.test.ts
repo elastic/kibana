@@ -57,7 +57,7 @@ describe('createChatService', () => {
   }
 
   beforeEach(async () => {
-    clientSpy.mockImplementationOnce(async () => {
+    clientSpy.mockImplementation(async () => {
       return {
         functionDefinitions: [],
         contextDefinitions: [],

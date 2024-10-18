@@ -14,7 +14,7 @@ import {
   filter,
   from,
   map,
-  merge,
+  combineLatest,
   Observable,
   of,
   OperatorFunction,
@@ -178,7 +178,7 @@ class ChatService {
     this.systemMessage = '';
     this.screenContexts$ = screenContexts$;
     this.functions$ = new BehaviorSubject([] as FunctionDefinition[]);
-    merge(scope$, screenContexts$).subscribe(() => {
+    combineLatest(scope$, screenContexts$).subscribe(() => {
       this.initialize();
     });
   }
