@@ -6,12 +6,10 @@
  */
 import { EuiDataGridSorting, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -21,7 +19,6 @@ import { useInventoryState } from '../../hooks/use_inventory_state';
 
 export function UnifiedInventoryView() {
   const { pagination, setPagination } = useInventoryState();
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
@@ -34,7 +31,7 @@ export function UnifiedInventoryView() {
   const {
     value = { entities: [] },
     loading,
-    refresh,
+    // refresh,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
@@ -51,24 +48,6 @@ export function UnifiedInventoryView() {
     },
     [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
   );
-
-  useEffectOnce(() => {
-    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refresh();
-        } else {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
-      }
-    );
-    return () => {
-      searchBarContentSubscription.unsubscribe();
-    };
-  });
 
   function handlePageChange(nextPage: number) {
     setPagination('unified', nextPage);
