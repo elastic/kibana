@@ -61,6 +61,7 @@ const SUTProvider = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: (_) => _,
+          getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           getSecurityLicense: getSecurityLicenseMock,
