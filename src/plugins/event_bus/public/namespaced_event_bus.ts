@@ -8,17 +8,18 @@
  */
 
 import { useState, useEffect } from 'react';
+import { Slice, CaseReducerActions } from '@reduxjs/toolkit';
 
 import { searchSlice } from './search_slice';
 import { EventBus } from './event_bus';
 
 export class NamespacedEventBus {
   private buses: {
-    [namespace: string]: EventBus;
+    [namespace: string]: EventBus<string, any, any>;
   } = {};
 
   // Register a namespaced event bus with reducer and initial state
-  registerNamespace(namespace: string, slice: any) {
+  registerNamespace(namespace: string, slice: Slice) {
     if (!this.buses[namespace]) {
       this.buses[namespace] = new EventBus(slice);
     } else {
@@ -39,7 +40,9 @@ export class NamespacedEventBus {
   }
 
   // Get a namespaced event bus
-  getEventBus(namespace: string): EventBus {
+  getEventBus<Namespace extends string, State, Actions extends CaseReducerActions<any, Namespace>>(
+    namespace: Namespace
+  ): EventBus<Namespace, State, Actions> {
     if (!this.buses[namespace]) {
       throw new Error(`Namespace ${namespace} is not registered.`);
     }
