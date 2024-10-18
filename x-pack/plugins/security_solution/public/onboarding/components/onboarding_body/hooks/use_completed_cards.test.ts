@@ -11,10 +11,11 @@ import { useCompletedCards } from './use_completed_cards';
 import type { OnboardingGroupConfig } from '../../../types';
 import type { OnboardingCardId } from '../../../constants';
 import { mockReportCardComplete } from '../../__mocks__/onboarding_context_mocks';
-import { useToasts } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const defaultStoredCompletedCardIds: OnboardingCardId[] = [];
 const mockSetStoredCompletedCardIds = jest.fn();
+const mockUseKibana = useKibana as jest.Mock;
 const mockUseStoredCompletedCardIds = jest.fn(() => [
   defaultStoredCompletedCardIds,
   mockSetStoredCompletedCardIds,
@@ -29,7 +30,9 @@ jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...original,
-    useToasts: jest.fn(),
+    useKibana: jest.fn().mockReturnValue({
+      services: { notifications: { toasts: { addError: jest.fn() } } },
+    }),
   };
 });
 
@@ -70,7 +73,6 @@ const cardMetadata = {
     .fn()
     .mockResolvedValue({ isComplete: true, metadata: { custom: 'metadata' } }),
 };
-const mockUseToast = useToasts as jest.Mock;
 const mockAddError = jest.fn();
 const mockError = new Error('Failed to check complete');
 const cardCheckCompleteFailed = {
@@ -99,9 +101,6 @@ const mockFailureCardsGroupConfig = [
 
 describe('useCompletedCards Hook', () => {
   beforeEach(() => {
-    mockUseToast.mockReturnValue({
-      addError: mockAddError,
-    });
     jest.clearAllMocks();
   });
 
@@ -111,6 +110,9 @@ describe('useCompletedCards Hook', () => {
       ReturnType<typeof useCompletedCards>
     >;
     beforeEach(async () => {
+      mockUseKibana.mockReturnValue({
+        services: { notifications: { toasts: { addError: mockAddError } } },
+      });
       renderResult = renderHook(useCompletedCards, { initialProps: mockFailureCardsGroupConfig });
       await act(async () => {
         await waitFor(() => {
@@ -137,16 +139,9 @@ describe('useCompletedCards Hook', () => {
         );
       });
 
-      it('should return checkCompleteError', () => {
-        expect(
-          renderResult.result.current.getCardCheckCompleteResult(cardCheckCompleteFailed.id)
-            ?.checkCompleteError
-        ).toEqual(mockError);
-      });
-
       it('should show an error toast', () => {
         expect(mockAddError).toHaveBeenCalledWith(mockError, {
-          title: `Failed to retrieve the completion status for ${cardCheckCompleteFailed.title}`,
+          title: cardCheckCompleteFailed.title,
         });
       });
 

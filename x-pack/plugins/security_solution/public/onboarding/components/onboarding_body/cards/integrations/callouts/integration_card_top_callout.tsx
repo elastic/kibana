@@ -20,16 +20,12 @@ export const IntegrationCardTopCallout = React.memo(
     isAgentRequired,
     selectedTabId,
   }: {
-    installedIntegrationsCount?: number;
-    isAgentRequired?: boolean;
+    installedIntegrationsCount: number;
+    isAgentRequired: boolean;
     selectedTabId: IntegrationTabId;
   }) => {
     const { isAgentlessAvailable$ } = useOnboardingService();
     const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
-
-    if (isAgentRequired == null || installedIntegrationsCount == null) {
-      return null;
-    }
 
     const showAgentlessCallout =
       isAgentlessAvailable &&

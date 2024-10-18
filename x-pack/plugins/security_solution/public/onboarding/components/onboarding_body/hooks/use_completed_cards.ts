@@ -6,8 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useKibana, useToasts } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useStoredCompletedCardIds } from '../../../hooks/use_stored_state';
 import type { OnboardingCardId } from '../../../constants';
 import type {
@@ -18,7 +17,6 @@ import type {
 } from '../../../types';
 import { useOnboardingContext } from '../../onboarding_context';
 
-export type IsCardCheckFailed = (cardId: OnboardingCardId) => boolean;
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
 export type SetCardComplete = (
   cardId: OnboardingCardId,
@@ -30,12 +28,6 @@ export type GetCardCheckCompleteResult = (
 ) => CheckCompleteResult | undefined;
 
 export type CardCheckCompleteResult = Partial<Record<OnboardingCardId, CheckCompleteResult>>;
-
-const getErrorMessage = (title: string) =>
-  i18n.translate('xpack.securitySolution.onboarding.checkCompleteError', {
-    defaultMessage: 'Failed to retrieve the completion status for {title}',
-    values: { title },
-  });
 
 /**
  * This hook implements the logic for tracking which onboarding cards have been completed using Local Storage.
@@ -50,7 +42,6 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
   const [completeCardIds, setCompleteCardIds] = useState<OnboardingCardId[]>(storedCompleteCardIds);
   // Local state to store the checkCompleteResult for each card
   const [cardCheckCompleteResult, setCardsCompleteResult] = useState<CardCheckCompleteResult>({});
-  const toasts = useToasts();
 
   const isCardComplete = useCallback<IsCardComplete>(
     (cardId) => completeCardIds.includes(cardId),
@@ -118,15 +109,6 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
     [setCardComplete, setCardCheckCompleteResult]
   );
 
-  const displayErrorToast = useCallback(
-    (cardTitle: string, error: Error) => {
-      toasts.addError(error, {
-        title: getErrorMessage(cardTitle),
-      });
-    },
-    [toasts]
-  );
-
   const checkCardComplete = useCallback(
     (cardId: OnboardingCardId) => {
       const cardConfig = cardsWithAutoCheck.find(({ id }) => id === cardId);
@@ -134,11 +116,10 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
       if (cardConfig) {
         cardConfig
           .checkComplete?.(services)
-          .catch((e: Error) => {
-            displayErrorToast(cardConfig.title, e);
+          .catch((err: Error) => {
+            services.notifications.toasts.addError(err, { title: cardConfig.title });
             return {
               isComplete: false,
-              checkCompleteError: e,
             };
           })
           .then((checkCompleteResult) => {
@@ -146,7 +127,7 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
           });
       }
     },
-    [cardsWithAutoCheck, displayErrorToast, processCardCheckCompleteResult, services]
+    [cardsWithAutoCheck, processCardCheckCompleteResult, services]
   );
 
   useEffect(() => {
@@ -158,18 +139,17 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
     cardsWithAutoCheck.map((card) =>
       card
         .checkComplete?.(services)
-        .catch((e: Error) => {
-          displayErrorToast(card.title, e);
+        .catch((err: Error) => {
+          services.notifications.toasts.addError(err, { title: card.title });
           return {
             isComplete: false,
-            checkCompleteError: e,
           };
         })
         .then((checkCompleteResult) => {
           processCardCheckCompleteResult(card.id, checkCompleteResult);
         })
     );
-  }, [cardsWithAutoCheck, displayErrorToast, processCardCheckCompleteResult, services, toasts]);
+  }, [cardsWithAutoCheck, processCardCheckCompleteResult, services]);
 
   return {
     isCardComplete,

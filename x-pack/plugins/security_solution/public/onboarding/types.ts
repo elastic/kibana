@@ -26,10 +26,6 @@ export interface CheckCompleteResult<TMetadata extends {} = {}> {
    * Optional metadata to be passed to the card component.
    */
   metadata?: TMetadata;
-  /**
-   * Error from the checkComplete function.
-   */
-  checkCompleteError?: Error;
 }
 /**
  * The result of a card completion auto check.
@@ -72,10 +68,6 @@ export type OnboardingCardComponent<TMetadata extends {} = {}> = React.Component
    * It will be `undefined` until the first checkComplete call finishes.
    */
   checkCompleteMetadata?: TMetadata;
-  /**
-   * Error occurred during the checkComplete function.
-   */
-  checkCompleteError?: Error;
 }>;
 
 export type OnboardingCardCheckComplete<TMetadata extends {} = {}> = (

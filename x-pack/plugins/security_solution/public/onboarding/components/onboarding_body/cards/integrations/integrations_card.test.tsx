@@ -22,19 +22,18 @@ describe('IntegrationsCard', () => {
     jest.clearAllMocks();
   });
 
-  it('renders a loading spinner when checkCompleteMetadata is undefined and no checkCompleteError', () => {
+  it('renders a loading spinner when checkCompleteMetadata is undefined', () => {
     const { getByTestId } = render(
       <IntegrationsCard {...props} checkCompleteMetadata={undefined} />
     );
     expect(getByTestId('loadingInstalledIntegrations')).toBeInTheDocument();
   });
 
-  it('renders the content if checkComplete error occurred', () => {
+  it('renders the content', () => {
     const { queryByTestId } = render(
       <IntegrationsCard
         {...props}
-        checkCompleteMetadata={undefined}
-        checkCompleteError={new Error('error')}
+        checkCompleteMetadata={{ installedIntegrationsCount: 1, isAgentRequired: false }}
       />
     );
     expect(queryByTestId('loadingInstalledIntegrations')).not.toBeInTheDocument();

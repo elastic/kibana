@@ -30,8 +30,8 @@ import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
 
 export interface IntegrationsCardGridTabsProps {
-  installedIntegrationsCount?: number;
-  isAgentRequired?: boolean;
+  installedIntegrationsCount: number;
+  isAgentRequired: boolean;
   useAvailablePackages: AvailablePackagesHookType;
 }
 
