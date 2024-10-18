@@ -25,7 +25,7 @@ const mockData = {
     title: 'Welcome',
     category: 'assistant',
     messages: [],
-    apiConfig: { connectorId: '123' },
+    apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
     replacements: {},
   },
   electric_sheep_id: {
@@ -33,7 +33,7 @@ const mockData = {
     category: 'assistant',
     title: 'electric sheep',
     messages: [],
-    apiConfig: { connectorId: '123' },
+    apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
     replacements: {},
   },
 };

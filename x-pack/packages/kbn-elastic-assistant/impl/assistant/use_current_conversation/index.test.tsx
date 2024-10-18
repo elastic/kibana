@@ -345,7 +345,7 @@ describe('useCurrentConversation', () => {
     expect(result.current.currentConversation).toBeUndefined();
   });
 
-  it.only('should refetch the conversation multiple times if isStreamRefetch is true', async () => {
+  it('should refetch the conversation multiple times if isStreamRefetch is true', async () => {
     const conversationId = 'test-id';
     const conversation = { id: conversationId, messages: [{ role: 'user' }] } as Conversation;
     mockUseConversation.getConversation.mockResolvedValue(conversation);
