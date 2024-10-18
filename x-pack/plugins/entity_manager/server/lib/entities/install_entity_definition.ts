@@ -50,10 +50,7 @@ export async function installEntityDefinition({
   validateDefinitionCanCreateValidTransformIds(definition);
 
   if (await entityDefinitionExists(soClient, definition.id)) {
-    throw new EntityIdConflict(
-      `Entity definition with [${definition.id}] already exists.`,
-      definition
-    );
+    throw new EntityIdConflict(`Entity definition [${definition.id}] already exists.`, definition);
   }
 
   try {
@@ -66,7 +63,7 @@ export async function installEntityDefinition({
 
     return await install({ esClient, soClient, logger, definition: entityDefinition });
   } catch (e) {
-    logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
+    logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
     await stopLatestTransform(esClient, definition, logger);
     await deleteLatestTransform(esClient, definition, logger);
@@ -156,16 +153,16 @@ async function install({
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
-  logger.info(`Installing definition ${definition.id} v${definition.version}`);
+  logger.info(`Installing definition [${definition.id}] v${definition.version}`);
   logger.debug(() => JSON.stringify(definition, null, 2));
 
-  logger.debug(`Installing index templates for definition ${definition.id}`);
+  logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
 
-  logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
+  logger.debug(`Installing ingest pipelines for definition [${definition.id}]`);
   const pipelines = await createAndInstallIngestPipelines(esClient, definition, logger);
 
-  logger.debug(`Installing transforms for definition ${definition.id}`);
+  logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
 
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
@@ -193,7 +190,7 @@ export async function reinstallEntityDefinition({
 
     logger.debug(
       () =>
-        `Reinstalling definition ${definition.id} from v${definition.version} to v${
+        `Reinstalling definition [${definition.id}] from v${definition.version} to v${
           definitionUpdate.version
         }\n${JSON.stringify(updatedDefinition, null, 2)}`
     );
@@ -204,7 +201,7 @@ export async function reinstallEntityDefinition({
       installStartedAt: new Date().toISOString(),
     });
 
-    logger.debug(`Deleting transforms for definition ${definition.id} v${definition.version}`);
+    logger.debug(`Deleting transforms for definition [${definition.id}] v${definition.version}`);
     await stopAndDeleteTransforms(clusterClient.asSecondaryAuthUser, definition, logger);
 
     if (deleteData) {
