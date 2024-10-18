@@ -26,7 +26,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { DatePickerField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
-import type { CaseCustomFieldDate } from '../../../../common/types/domain';
+import type { CaseCustomFieldDate, CustomFieldDate } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUICustomField } from '../../../../common/ui';
 import type { CustomFieldType } from '../types';
@@ -92,11 +92,11 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         component={DatePickerField}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
+          'data-test-subj': `case-date-custom-field-form-field-${customFieldConfiguration.key}`,
           euiFieldProps: {
             fullWidth: true,
             disabled: isLoading,
             isLoading,
-            'data-test-subj': `case-date-custom-field-form-field-${customFieldConfiguration.key}`,
             showTimeSelect: true,
             locale: i18n.getLocale(),
           },
@@ -141,7 +141,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldDate>['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.DATE,
-        value,
+        value: value as CustomFieldDate,
       });
     }
 
@@ -149,7 +149,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldDate>['Edit'] = ({
   };
 
   const title = customFieldConfiguration.label;
-  const isTextFieldValid =
+  const isFieldValid =
     formState.isValid ||
     (formState.value === customFieldConfiguration.defaultValue && !initialValue);
   const isCustomFieldValueDefined = !isEmpty(customField?.value);
@@ -217,7 +217,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldDate>['Edit'] = ({
                     iconType="save"
                     onClick={onSubmitCustomField}
                     size="s"
-                    disabled={!isTextFieldValid || isLoading}
+                    disabled={!isFieldValid || isLoading}
                   >
                     {SAVE}
                   </EuiButton>

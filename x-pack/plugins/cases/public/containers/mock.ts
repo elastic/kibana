@@ -16,6 +16,7 @@ import type {
   Cases,
   CaseConnector,
   Attachment,
+  CustomFieldDate,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
@@ -1160,12 +1161,12 @@ export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
   {
     type: CustomFieldTypes.DATE,
-    key: 'date_test_key_1',
-    value: '2024-02-28T00:00:00.000Z',
+    key: 'test_key_date_1',
+    value: '2024-02-28T00:00:00.000Z' as CustomFieldDate,
   },
   {
     type: CustomFieldTypes.DATE,
-    key: 'date_test_key_2',
+    key: 'test_key_date_2',
     value: null,
   },
 ];
@@ -1189,15 +1190,15 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
   {
     type: CustomFieldTypes.DATE,
-    key: 'date_test_key_1',
-    label: 'My Date test label 1',
+    key: 'test_key_date_1',
+    label: 'My test label date 1',
     required: true,
-    defaultValue: '2024-10-16T12:39:21.533Z',
+    defaultValue: '2024-10-16T12:39:21.533Z' as CustomFieldDate,
   },
   {
     type: CustomFieldTypes.DATE,
-    key: 'date_test_key_2',
-    label: 'My Date test label 2',
+    key: 'test_key_date_2',
+    label: 'My test label date 2',
     required: false,
   },
 ];

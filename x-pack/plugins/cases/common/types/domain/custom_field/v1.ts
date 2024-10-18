@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { dateRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export enum CustomFieldTypes {
@@ -31,7 +32,7 @@ export const CaseCustomFieldToggleRt = rt.strict({
 export const CaseCustomFieldDateRt = rt.strict({
   key: rt.string,
   type: CustomFieldDateTypeRt,
-  value: rt.union([rt.string, rt.null]),
+  value: rt.union([dateRt, rt.null]),
 });
 
 export const CaseCustomFieldRt = rt.union([
@@ -46,3 +47,4 @@ export type CaseCustomField = rt.TypeOf<typeof CaseCustomFieldRt>;
 export type CaseCustomFieldToggle = rt.TypeOf<typeof CaseCustomFieldToggleRt>;
 export type CaseCustomFieldText = rt.TypeOf<typeof CaseCustomFieldTextRt>;
 export type CaseCustomFieldDate = rt.TypeOf<typeof CaseCustomFieldDateRt>;
+export type CustomFieldDate = rt.TypeOf<typeof dateRt>;

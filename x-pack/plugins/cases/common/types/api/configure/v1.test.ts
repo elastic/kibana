@@ -570,7 +570,7 @@ describe('configure', () => {
             defaultValue: '30-08-2020',
           })
         )[0]
-      ).toContain(`30-08-2020 is not a valid date.`);
+      ).toContain(`Invalid value \"30-08-2020\" supplied`);
     });
 
     it('throws an error if the default value is an empty string', () => {
@@ -581,7 +581,7 @@ describe('configure', () => {
             defaultValue: '',
           })
         )[0]
-      ).toContain(' is not a valid date.');
+      ).toContain('Invalid value "" supplied');
     });
   });
 

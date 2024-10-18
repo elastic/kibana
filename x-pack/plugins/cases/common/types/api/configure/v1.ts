@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { dateRt } from '@kbn/io-ts-utils';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -17,12 +18,7 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../constants';
-import {
-  limitedArraySchema,
-  limitedStringSchema,
-  regexStringRt,
-  dateSchema,
-} from '../../../schema';
+import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import {
   CustomFieldDateTypeRt,
   CustomFieldTextTypeRt,
@@ -78,7 +74,7 @@ export const DateCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([dateSchema(), rt.null]),
+      defaultValue: rt.union([dateRt, rt.null]),
     })
   ),
 ]);

@@ -18,7 +18,7 @@ import {
   MAX_TEMPLATES_LENGTH,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
-import type { TemplatesConfiguration } from '../../../common/types/domain';
+import type { CustomFieldDate, TemplatesConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { ConfigurationRequest } from '../../../common/types/api';
 
@@ -286,7 +286,7 @@ describe('client', () => {
                   type: CustomFieldTypes.DATE,
                   label: 'custom field 3',
                   required: true,
-                  defaultValue: '2024-04-25',
+                  defaultValue: '2024-04-25' as CustomFieldDate,
                 },
               ],
               connector: {
@@ -336,7 +336,7 @@ describe('client', () => {
               type: CustomFieldTypes.DATE,
               label: 'custom field 3',
               required: true,
-              defaultValue: '2024-04-25',
+              defaultValue: '2024-04-25' as CustomFieldDate,
             },
           ],
           connector: {
@@ -1335,7 +1335,7 @@ describe('client', () => {
           type: CustomFieldTypes.DATE,
           label: 'custom field 3',
           required: true,
-          defaultValue: '2024-04-25',
+          defaultValue: '2024-04-25' as CustomFieldDate,
         },
       ];
 

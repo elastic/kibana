@@ -13,7 +13,6 @@ import {
   limitedStringSchema,
   NonEmptyString,
   paginationSchema,
-  dateSchema,
 } from '.';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 
@@ -316,42 +315,6 @@ describe('schema', () => {
       ).toMatchInlineSnapshot(`
         Array [
           "The foo field cannot be more than 2.",
-        ]
-      `);
-    });
-  });
-
-  describe('dateSchema', () => {
-    it('succeeds with correct format YYYY-MM-DD', () => {
-      expect(PathReporter.report(dateSchema().decode('2024-09-30'))).toMatchInlineSnapshot(`
-        Array [
-          "No errors!",
-        ]
-      `);
-    });
-
-    it('succeeds with format YYYY-MM-DD-HH:MM:SS', () => {
-      expect(PathReporter.report(dateSchema().decode('2024-10-01T15:11:48')))
-        .toMatchInlineSnapshot(`
-        Array [
-          "No errors!",
-        ]
-      `);
-    });
-
-    it('fails when invalid date', () => {
-      expect(PathReporter.report(dateSchema().decode('13/05/2024 15:11:48.033Z')))
-        .toMatchInlineSnapshot(`
-        Array [
-          "13/05/2024 15:11:48.033Z is not a valid date.",
-        ]
-      `);
-    });
-
-    it('fails when text passed', () => {
-      expect(PathReporter.report(dateSchema().decode('hello'))).toMatchInlineSnapshot(`
-        Array [
-          "hello is not a valid date.",
         ]
       `);
     });

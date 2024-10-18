@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CustomFieldDate } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { mockCases } from '../../mocks';
@@ -26,7 +27,7 @@ describe('Replace custom field', () => {
     {
       key: 'third_key',
       type: CustomFieldTypes.DATE as const,
-      value: '2020-09-01',
+      value: '2020-09-01' as CustomFieldDate,
     },
   ];
 
@@ -336,7 +337,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: third_key of case: mock-id-1 version:WzAsMV0= : Error: hello is not a valid date.,Invalid value \\"hello\\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: third_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"hello\\" supplied to \\"value\\""`
     );
   });
 

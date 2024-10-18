@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
-import moment from 'moment';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 import type { PartialPaginationType } from './types';
 import { PaginationSchemaRt } from './types';
@@ -171,21 +170,6 @@ export const regexStringRt = ({ codec, pattern, message }: RegexStringSchemaType
 
         if (!regex.test(value)) {
           return rt.failure(input, context, message);
-        }
-
-        return rt.success(value);
-      }),
-    rt.identity
-  );
-
-export const dateSchema = () =>
-  new rt.Type<string, string, unknown>(
-    'dateString',
-    rt.string.is,
-    (input, context) =>
-      either.chain(rt.string.validate(input, context), (value) => {
-        if (!moment(value, true).isValid()) {
-          return rt.failure(input, context, `${value} is not a valid date.`);
         }
 
         return rt.success(value);

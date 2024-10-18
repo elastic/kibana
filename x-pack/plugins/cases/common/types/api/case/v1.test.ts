@@ -42,6 +42,7 @@ import {
   CasesPatchRequestRt,
   CasesSearchRequestRt,
 } from './v1';
+import type { CustomFieldDate } from '../../domain/custom_field/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
 const basicCase: Case = {
@@ -152,7 +153,7 @@ describe('CasePostRequestRt', () => {
       {
         key: 'third_custom_field_key',
         type: CustomFieldTypes.DATE,
-        value: '2024-10-07',
+        value: '2024-10-07' as CustomFieldDate,
       },
     ],
   };
@@ -357,8 +358,8 @@ describe('CasePostRequestRt', () => {
             },
           ],
         })
-      )
-    ).toContain('202 is not a valid date.');
+      )[0]
+    ).toContain('Invalid value "202" supplied');
   });
 
   it('throws an error when a date customField has text value', () => {
@@ -374,8 +375,8 @@ describe('CasePostRequestRt', () => {
             },
           ],
         })
-      )
-    ).toContain('hello is not a valid date.');
+      )[0]
+    ).toContain('Invalid value "hello" supplied');
   });
 });
 
@@ -839,8 +840,8 @@ describe('CasePatchRequestRt', () => {
             },
           ],
         })
-      )
-    ).toContain('-1 is not a valid date.');
+      )[0]
+    ).toContain('Invalid value "-1" supplied');
   });
 
   it('throws an error when a date customField is text', () => {
@@ -856,8 +857,8 @@ describe('CasePatchRequestRt', () => {
             },
           ],
         })
-      )
-    ).toContain('text is not a valid date.');
+      )[0]
+    ).toContain('Invalid value "text" supplied');
   });
 });
 

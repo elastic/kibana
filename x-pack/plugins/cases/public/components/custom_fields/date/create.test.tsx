@@ -154,7 +154,13 @@ describe('Create ', () => {
   it('updates the value to null correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
-        <Create isLoading={false} customFieldConfiguration={customFieldConfiguration} />
+        <Create
+          isLoading={false}
+          customFieldConfiguration={{
+            ...customFieldConfiguration,
+            required: false,
+          }}
+        />
       </FormTestComponent>
     );
 
@@ -187,7 +193,6 @@ describe('Create ', () => {
           customFieldConfiguration={{
             ...customFieldConfiguration,
             defaultValue: null,
-            required: true,
           }}
         />
       </FormTestComponent>

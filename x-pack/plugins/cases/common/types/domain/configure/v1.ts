@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { dateRt } from '@kbn/io-ts-utils';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
 import { UserRt } from '../user/v1';
 import {
@@ -60,7 +61,7 @@ export const DateCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([rt.string, rt.null]),
+      defaultValue: rt.union([dateRt, rt.null]),
     })
   ),
 ]);
