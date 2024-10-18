@@ -30,7 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const MINUTES = 60 * 1000 * 10;
 
-  describe('Endpoint Exceptions', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/173441
+  describe.skip('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(10 * MINUTES);
