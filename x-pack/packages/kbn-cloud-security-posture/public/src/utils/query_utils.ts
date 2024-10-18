@@ -4,8 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { encode, decode } from '@kbn/rison';
 import type { LocationDescriptorObject } from 'history';
+import { Filter } from '@kbn/es-query';
+import { SECURITY_DEFAULT_DATA_VIEW_ID } from '@kbn/cloud-security-posture-common';
+import { CspClientPluginStartDeps } from '../types';
+import { createFilter, NavFilter } from '../hooks/use_navigate_findings';
 
 const encodeRison = (v: any): string | undefined => {
   try {
@@ -37,4 +42,25 @@ export const decodeQuery = <T extends unknown>(search?: string): Partial<T> | un
   const risonQuery = new URLSearchParams(search).get(QUERY_PARAM_KEY);
   if (!risonQuery) return;
   return decodeRison<T>(risonQuery);
+};
+
+export const encodeQueryUrl = (
+  services: Partial<CoreStart> & CoreStart & CspClientPluginStartDeps,
+  filters: Filter[],
+  groupBy?: string[]
+): any => {
+  return encodeQuery({
+    query: services.data.query.queryString.getDefaultQuery(),
+    filters,
+    ...(groupBy && { groupBy }),
+  });
+};
+
+export const queryFilters = (
+  filterParams: NavFilter = {},
+  dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID
+): Filter[] => {
+  return Object.entries(filterParams).map(([key, filterValue]) =>
+    createFilter(key, filterValue, dataViewId)
+  );
 };
