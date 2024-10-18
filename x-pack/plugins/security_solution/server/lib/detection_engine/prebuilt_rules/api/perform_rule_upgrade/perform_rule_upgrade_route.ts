@@ -87,7 +87,7 @@ export const performRuleUpgradeRoute = (
               prebuiltRulesCustomizationEnabled,
             }
           );
-          debugger;
+
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
             detectionRulesClient,
             modifiedPrebuiltRuleAssets
