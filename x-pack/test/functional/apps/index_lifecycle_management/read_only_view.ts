@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   describe('Read only view', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await security.testUser.setRoles(['read_ilm']);
 

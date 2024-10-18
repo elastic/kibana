@@ -16,6 +16,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFips } from 'crypto';
 
 describe('migrator-only node', () => {
   const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
@@ -43,6 +44,7 @@ describe('migrator-only node', () => {
           '--no-base-path',
           '--no-watch',
           '--oss',
+          getFips() === 1 ? '--xpack.security.experimental.fipsMode.enabled=true' : '',
         ],
         { stdio: ['pipe', 'pipe', 'pipe'] }
       );

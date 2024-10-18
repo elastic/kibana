@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ getService }) {
-  const supertest = getService('supertest');
+import { schema, TypeOf } from '@kbn/config-schema';
 
-  describe('kibana server with ssl', function () {
-    this.tags('skipFIPS');
-    it('handles requests using ssl with a P12 keystore that uses an intermediate CA', async () => {
-      await supertest.get('/').expect(302);
-    });
-  });
-}
+export const config = {
+  path: 'xpack.security',
+  schema: schema.object({
+    experimental: schema.maybe(
+      schema.object({
+        fipsMode: schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+        }),
+      })
+    ),
+  }),
+};
+
+export type SecurityConfigType = TypeOf<typeof config.schema>;

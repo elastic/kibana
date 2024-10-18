@@ -144,16 +144,16 @@ const keyLength = 64;
 const saltLength = 16;
 
 // N=2^14 (16 MiB), r=8 (1024 bytes), p=5
-const scryptParams = {
-  cost: 16384,
-  blockSize: 8,
-  parallelization: 5,
-};
+// const scryptParams = {
+//   cost: 16384,
+//   blockSize: 8,
+//   parallelization: 5,
+// };
 
 export async function hashSecret(secret: string) {
   return new Promise((resolve, reject) => {
     const salt = crypto.randomBytes(saltLength).toString('hex');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
+    crypto.pbkdf2(secret, salt, 100000, keyLength, 'sha512', (err, derivedKey) => {
       if (err) reject(err);
       resolve(`${salt}:${derivedKey.toString('hex')}`);
     });
@@ -163,7 +163,7 @@ export async function hashSecret(secret: string) {
 async function verifySecret(hash: string, secret: string) {
   return new Promise((resolve, reject) => {
     const [salt, key] = hash.split(':');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
+    crypto.pbkdf2(secret, salt, 100000, keyLength, 'sha512', (err, derivedKey) => {
       if (err) reject(err);
       resolve(crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey));
     });
