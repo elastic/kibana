@@ -125,6 +125,7 @@ xpack.index_management.dev.enableSemanticText: false
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true
 xpack.searchAssistant.enabled: true
+xpack.searchAssistant.ui.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
 xpack.observabilityAIAssistant.enableKnowledgeBase: false
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
