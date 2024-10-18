@@ -32,6 +32,8 @@ import type {
   ReportAssetCriticalityCsvPreviewGeneratedParams,
   ReportAssetCriticalityFileSelectedParams,
   ReportAssetCriticalityCsvImportedParams,
+  ReportEntityStoreEnablementParams,
+  ReportEntityStoreInitParams,
 } from './events/entity_analytics/types';
 import type {
   AssistantTelemetryEvent,
@@ -168,6 +170,9 @@ export interface TelemetryClientStart {
   ): void;
   reportAssetCriticalityCsvImported(params: ReportAssetCriticalityCsvImportedParams): void;
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
+  // Entity Analytics Entity Store
+  reportEntityStoreEnablement(params: ReportEntityStoreEnablementParams): void;
+  reportEntityStoreInit(params: ReportEntityStoreInitParams): void;
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
