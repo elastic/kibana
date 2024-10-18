@@ -44,6 +44,7 @@ run(
 
     let branch: string = '';
     let pipeline: string = '';
+    let prependTitle: string = '';
     if (updateGithub) {
       let isPr = false;
 
@@ -52,6 +53,7 @@ run(
         pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
         isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
         updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
+        prependTitle = process.env.PREPEND_FAILURE_TITLE || '';
       } else {
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
         const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
