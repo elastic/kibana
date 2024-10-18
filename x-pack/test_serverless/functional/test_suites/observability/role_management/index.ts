@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export * from './delete_all_timelines';
-export * from './wait_for';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Role Management', function () {
+    loadTestFile(require.resolve('./custom_role_access'));
+  });
+}
