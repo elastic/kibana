@@ -60,12 +60,9 @@ export function NavControl() {
       return hasBeenOpened
         ? service.start({ signal }).catch((error) => {
             notifications?.toasts.addError(error, {
-              title: i18n.translate(
-                'xpack.searchAssistant.navControl.initFailureErrorTitle',
-                {
-                  defaultMessage: 'Failed to initialize AI Assistant',
-                }
-              ),
+              title: i18n.translate('xpack.searchAssistant.navControl.initFailureErrorTitle', {
+                defaultMessage: 'Failed to initialize AI Assistant',
+              }),
             });
 
             setHasBeenOpened(false);
