@@ -71,7 +71,7 @@ async function getComponent({
 
   const props: UnifiedFieldListItemProps = {
     services: getServicesMock(),
-    stateService,
+    options: stateService.creationOptions,
     searchMode: 'documents',
     dataView: stubDataView,
     field: finalField,
