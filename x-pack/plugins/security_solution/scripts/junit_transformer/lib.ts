@@ -18,6 +18,20 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import globby from 'globby';
 import del from 'del';
 
+// Function to remove specific fields from an XML object in order to
+// compare them as strings.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function removeFields(obj: any, fieldsToRemove: string[]): any {
+  for (const key in obj) {
+    if (fieldsToRemove.includes(key)) {
+      delete obj[key];
+    } else if (typeof obj[key] === 'object') {
+      obj[key] = removeFields(obj[key], fieldsToRemove); // Recursively remove fields
+    }
+  }
+  return obj;
+}
+
 /**
  * Updates the `name` and `classname` attributes of each testcase.
  * `name` will have the value of `classname` appended to it. This makes sense because they each contain part of the bdd spec.
@@ -174,6 +188,10 @@ export async function command({ flags, log }: CommandArgs) {
     throw createFlagError('please provide a single --reportName flag');
   }
 
+  // Going to be used in order to store results as string in order to compare
+  // and remove duplicated reports.
+  const xmlResultFiles: string[] = [];
+
   for (const path of await globby(flags.pathPattern)) {
     // Read the file
     const source: string = await fs.readFile(path, 'utf8');
@@ -241,6 +259,26 @@ ${boilerplate}
       reportName: flags.reportName,
       rootDirectory: flags.rootDirectory,
     });
+
+    // We need to check if a XML Junit report is duplicate
+    // Only if we remove the time and timestamp and the rest of the
+    // report as a string is completely identical.
+    const fieldsToRemove = ['time', 'timestamp'];
+    const tempReport = await parseStringPromise(reportString);
+    const truncatedReport = removeFields(tempReport, fieldsToRemove);
+
+    // Rebuild the XML to compare (optional, if you want to compare XML strings)
+    const builder = new Builder();
+    const rebuildComparableReport = builder.buildObject(truncatedReport);
+
+    // Compare the cleaned and rebuilt XML objects or strings
+    if (xmlResultFiles.includes(rebuildComparableReport)) {
+      // If the report is a duplicate, we need to remove the file
+      // in order to be excluded from the uploaded results.
+      await del(path, { force: true });
+      continue;
+    }
+    xmlResultFiles.push(rebuildComparableReport);
 
     // If the writeInPlace flag was passed, overwrite the original file, otherwise log the output to stdout
     if (flags.writeInPlace) {
