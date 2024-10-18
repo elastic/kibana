@@ -29,12 +29,14 @@ const CSP_INSIGHT_TABLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutMisconfigurationFindingsTable'
 );
 
+const clickMisconfigurationTitle = () => {
+  cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).click();
+};
+
 const timestamp = Date.now();
 
-// Create a Date object using the timestamp
 const date = new Date(timestamp);
 
-// Convert the Date object to ISO 8601 format
 const iso8601String = date.toISOString();
 
 const mockFindingHostName = (matches: boolean) => {
@@ -46,7 +48,7 @@ const mockFindingHostName = (matches: boolean) => {
       name: 'kubelet',
       sub_type: 'lower case sub type',
     },
-    result: { evaluation: matches ? 'passed' : 'failed' }, // Adjusting result based on matches
+    result: { evaluation: matches ? 'passed' : 'failed' },
     rule: {
       name: 'Upper case rule name',
       section: 'Upper case section',
@@ -74,7 +76,7 @@ const mockFindingUserName = (matches: boolean) => {
       name: 'kubelet',
       sub_type: 'lower case sub type',
     },
-    result: { evaluation: matches ? 'passed' : 'failed' }, // Adjusting result based on matches
+    result: { evaluation: matches ? 'passed' : 'failed' },
     rule: {
       name: 'Upper case rule name',
       section: 'Upper case section',
@@ -132,6 +134,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     afterEach(() => {
+      /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
       deleteDataStream();
     });
 
@@ -141,7 +144,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).click();
+      clickMisconfigurationTitle();
       cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
       cy.get(CSP_INSIGHT_TABLE).should('be.visible');
     });
@@ -186,7 +189,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).click();
+      clickMisconfigurationTitle();
       cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
       cy.get(CSP_INSIGHT_TABLE).should('be.visible');
     });

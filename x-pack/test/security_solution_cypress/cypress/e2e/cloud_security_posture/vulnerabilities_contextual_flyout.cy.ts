@@ -27,10 +27,8 @@ const CSP_INSIGHT_VULNERABILITIES_TABLE = getDataTestSubjectSelector(
 
 const timestamp = Date.now();
 
-// Create a Date object using the timestamp
 const date = new Date(timestamp);
 
-// Convert the Date object to ISO 8601 format
 const iso8601String = date.toISOString();
 
 const getMockVulnerability = (isNameMatchesAlert: boolean) => {
@@ -166,6 +164,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       });
 
       afterEach(() => {
+        /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
         deleteDataStream();
       });
 
