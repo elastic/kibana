@@ -134,7 +134,7 @@ export class ChatFunctionClient {
     const allFunctions = Array.from(this.functionRegistry.values())
       .filter(
         (value) =>
-          requiredFunctions?.includes(value.handler.definition.name) || filterScopes(scopes)
+          requiredFunctions?.includes(value.handler.definition.name) || filterScopes(scopes)(value)
       )
       .map(({ handler }) => handler);
 

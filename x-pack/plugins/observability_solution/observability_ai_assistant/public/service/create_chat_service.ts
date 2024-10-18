@@ -14,11 +14,13 @@ import {
   filter,
   from,
   map,
+  merge,
   Observable,
   of,
   OperatorFunction,
   scan,
   shareReplay,
+  Subscription,
   switchMap,
   throwError,
   timestamp,
@@ -151,6 +153,7 @@ class ChatService {
   private systemMessage: string;
   public functions$: BehaviorSubject<FunctionDefinition[]>;
   private screenContexts$: BehaviorSubject<ObservabilityAIAssistantScreenContext[]>;
+  private functionSubscription: Subscription;
 
   constructor({
     abortSignal,
@@ -177,7 +180,7 @@ class ChatService {
     this.systemMessage = '';
     this.screenContexts$ = screenContexts$;
     this.functions$ = new BehaviorSubject([] as FunctionDefinition[]);
-    scope$.subscribe(() => {
+    this.functionSubscription = merge(scope$, screenContexts$).subscribe(() => {
       this.initialize();
     });
   }
@@ -261,10 +264,6 @@ class ChatService {
     return filterFunctionDefinitions({
       ...options,
       definitions: Array.from(this.functionRegistry.values()),
-    }).filter((value) => {
-      return value.scopes
-        ? value.scopes?.some((scope) => scope === 'all' || this.getScopes().includes(scope))
-        : true;
     });
   };
 
