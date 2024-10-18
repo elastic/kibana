@@ -20,8 +20,8 @@ if (!prConfig) {
 }
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
-const REQUIRED_PATHS = prConfig.always_require_ci_on_changed.map((r) => new RegExp(r, 'i'));
-const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new RegExp(r, 'i'));
+const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
+const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
 const getPipeline = (filename: string, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();
@@ -75,6 +75,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution\/inventory/,
+        /^packages\/kbn-apm-synthtrace/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/inventory_cypress.yml'));
     }
 
     if (

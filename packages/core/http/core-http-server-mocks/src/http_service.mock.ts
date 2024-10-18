@@ -276,6 +276,7 @@ const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
 
 const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
   next: jest.fn(),
+  authzResultNext: jest.fn(),
 });
 
 const createOnPreRoutingToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({

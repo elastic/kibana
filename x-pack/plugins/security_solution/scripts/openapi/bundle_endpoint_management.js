@@ -28,6 +28,7 @@ const ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Endpoint Management API',
+            'x-displayName': 'Security endpoint management',
             description:
               'Interact with and manage endpoints running the Elastic Defend integration.',
           },
@@ -52,6 +53,7 @@ const ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Endpoint Management API',
+            'x-displayName': 'Security endpoint management',
             description:
               'Interact with and manage endpoints running the Elastic Defend integration.',
           },

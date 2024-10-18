@@ -9,29 +9,32 @@
 
 import React, { useCallback, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { i18n } from '@kbn/i18n';
+
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiForm,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiCallOut,
+  EuiForm,
+  EuiFormRow,
+  EuiIconTip,
   EuiSwitch,
   EuiText,
-  EuiIconTip,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { DashboardContainerInput } from '../../../../common';
-import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import { savedObjectsTaggingService } from '../../../services/kibana_services';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -40,11 +43,6 @@ interface DashboardSettingsProps {
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
 export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
-  const {
-    savedObjectsTagging: { components },
-    dashboardContentManagement: { checkForDuplicateDashboardTitle },
-  } = pluginServices.getServices();
-
   const dashboardApi = useDashboardApi();
 
   const [localSettings, setLocalSettings] = useState(dashboardApi.getSettings());
@@ -63,13 +61,15 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
 
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await checkForDuplicateDashboardTitle({
-      title: localSettings.title,
-      copyOnSave: false,
-      lastSavedTitle: dashboardApi.panelTitle.value ?? '',
-      onTitleDuplicate,
-      isTitleDuplicateConfirmed,
-    });
+    const validTitle = await getDashboardContentManagementService().checkForDuplicateDashboardTitle(
+      {
+        title: localSettings.title,
+        copyOnSave: false,
+        lastSavedTitle: dashboardApi.panelTitle.value ?? '',
+        onTitleDuplicate,
+        isTitleDuplicateConfirmed,
+      }
+    );
 
     if (!isMounted()) return;
 
@@ -121,7 +121,9 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   };
 
   const renderTagSelector = () => {
-    if (!components) return;
+    const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
+    if (!savedObjectsTaggingApi) return;
+
     return (
       <EuiFormRow
         label={
@@ -131,7 +133,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           />
         }
       >
-        <components.TagSelector
+        <savedObjectsTaggingApi.ui.components.TagSelector
           selected={localSettings.tags}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />

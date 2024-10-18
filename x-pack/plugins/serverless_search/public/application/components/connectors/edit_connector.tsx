@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
   EuiPanel,
+  EuiForm,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -32,10 +33,14 @@ import { EditDescription } from './edit_description';
 import { DeleteConnectorModal } from './delete_connector_modal';
 import { ConnectorConfiguration } from './connector_config/connector_configuration';
 import { useConnector } from '../../hooks/api/use_connector';
+import { useConnectors } from '../../hooks/api/use_connectors';
+import { ConnectorPrivilegesCallout } from './connector_config/connector_privileges_callout';
 
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const { data: connectorsData } = useConnectors();
+  const isDisabled = !connectorsData?.canManageConnectors;
 
   const { id } = useParams<{ id: string }>();
 
@@ -46,7 +51,7 @@ export const EditConnector: React.FC = () => {
 
   const { data, isLoading } = useConnector(id);
 
-  if (isLoading) {
+  if (!data || isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
       <EuiPageTemplate.EmptyPrompt
         title={
@@ -96,7 +101,7 @@ export const EditConnector: React.FC = () => {
         <EuiText size="s">{CONNECTOR_LABEL}</EuiText>
         <EuiFlexGroup direction="row" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EditName connector={connector} />
+            <EditName connector={connector} isDisabled={isDisabled} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {deleteModalIsOpen && (
@@ -141,6 +146,7 @@ export const EditConnector: React.FC = () => {
                         },
                         {
                           name: DELETE_CONNECTOR_LABEL,
+                          disabled: isDisabled,
                           icon: 'trash',
                           onClick: () => {
                             setDeleteModalIsOpen(true);
@@ -156,11 +162,14 @@ export const EditConnector: React.FC = () => {
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>
+        <ConnectorPrivilegesCallout />
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={1}>
-            <EditServiceType connector={connector} />
-            <EuiSpacer />
-            <EditDescription connector={connector} />
+            <EuiForm>
+              <EditServiceType isDisabled={isDisabled} connector={connector} />
+              <EuiSpacer />
+              <EditDescription isDisabled={isDisabled} connector={connector} />
+            </EuiForm>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel hasBorder hasShadow={false}>

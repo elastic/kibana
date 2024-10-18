@@ -200,6 +200,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         services: {
           alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
+          getMaintenanceWindowIds: async () => [],
         },
         flappingSettings: {
           enabled: false,

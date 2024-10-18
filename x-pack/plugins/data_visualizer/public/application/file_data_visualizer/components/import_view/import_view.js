@@ -109,6 +109,11 @@ export class ImportView extends Component {
       pipelineId,
     } = this.state;
 
+    const createPipeline = pipelineString !== '';
+    this.setState({
+      createPipeline,
+    });
+
     importData(
       { data, results, dataViewsContract, fileUpload },
       {
@@ -119,6 +124,7 @@ export class ImportView extends Component {
         mappingsString,
         pipelineString,
         pipelineId,
+        createPipeline,
       },
       (state) => this.setState(state)
     );

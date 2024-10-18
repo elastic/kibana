@@ -181,7 +181,7 @@ export class SpaceValidator {
     if (!space.solution) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.requiredSolutionViewErrorMessage', {
-          defaultMessage: 'Select one solution.',
+          defaultMessage: 'Select a solution.',
         })
       );
     }

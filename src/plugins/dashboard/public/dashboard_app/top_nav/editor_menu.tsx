@@ -16,8 +16,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
 import { useGetDashboardPanels, DashboardPanelSelectionListFlyout } from './add_new_panel';
-import { pluginServices } from '../../services/plugin_services';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { coreServices } from '../../services/kibana_services';
 
 interface EditorMenuProps
   extends Pick<Parameters<typeof useGetDashboardPanels>[0], 'createNewVisType'> {
@@ -26,12 +26,6 @@ interface EditorMenuProps
 
 export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) => {
   const dashboardApi = useDashboardApi();
-
-  const {
-    overlays,
-    analytics,
-    settings: { i18n: i18nStart, theme },
-  } = pluginServices.getServices();
 
   const fetchDashboardPanels = useGetDashboardPanels({
     api: dashboardApi,
@@ -63,11 +57,11 @@ export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) =>
             />
           );
         }),
-        { analytics, theme, i18n: i18nStart }
+        { analytics: coreServices.analytics, theme: coreServices.theme, i18n: coreServices.i18n }
       );
 
       dashboardApi.openOverlay(
-        overlays.openFlyout(mount, {
+        coreServices.overlays.openFlyout(mount, {
           size: 'm',
           maxWidth: 500,
           paddingSize: flyoutPanelPaddingSize,
@@ -80,7 +74,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) =>
         })
       );
     },
-    [analytics, theme, i18nStart, dashboardApi, overlays, fetchDashboardPanels]
+    [dashboardApi, fetchDashboardPanels]
   );
 
   return (

@@ -31,7 +31,7 @@
           "IModalContextProviderProps",
           "<T>, \"children\"> & ",
           "ITabbedModalInner",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
         "deprecated": false,

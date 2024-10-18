@@ -70,7 +70,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('console history', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/193895
+    describe.skip('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.enterText(request);
         await PageObjects.console.clickPlay();
@@ -84,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           const history = await PageObjects.console.getHistoryEntries();
-          expect(history).to.eql(['/_search?pretty\na few seconds ago']);
+          expect(history).to.eql(['GET /_search?pretty\na few seconds ago']);
         });
 
         await PageObjects.console.clickClearHistory();

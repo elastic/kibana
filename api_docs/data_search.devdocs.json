@@ -29625,13 +29625,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",

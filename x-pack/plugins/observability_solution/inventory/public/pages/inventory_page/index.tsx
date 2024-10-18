@@ -7,6 +7,7 @@
 import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../../components/entities_grid';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
@@ -75,8 +76,19 @@ export function InventoryPage() {
       path: {},
       query: {
         ...query,
-        sortField: sorting.id,
+        sortField: sorting.id as EntityColumnIds,
         sortDirection: sorting.direction,
+      },
+    });
+  }
+
+  function handleTypeFilter(entityType: EntityType) {
+    inventoryRoute.push('/', {
+      path: {},
+      query: {
+        ...query,
+        // Override the current entity types
+        entityTypes: [entityType],
       },
     });
   }
@@ -90,6 +102,7 @@ export function InventoryPage() {
       onChangePage={handlePageChange}
       onChangeSort={handleSortChange}
       pageIndex={pageIndex}
+      onFilterByType={handleTypeFilter}
     />
   );
 }

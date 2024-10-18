@@ -183,6 +183,7 @@ export function HeaderActions({
             type: 'alert',
             id: alert.fields[ALERT_UUID],
           },
+          externalIncidentUrl: null,
         },
       });
 
@@ -200,6 +201,36 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          {Boolean(investigatePlugin) &&
+          alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
+            <EuiButtonIcon
+              display="empty"
+              size="m"
+              iconType="bellSlash"
+              data-test-subj="snooze-rule-button"
+              onClick={handleOpenSnoozeModal}
+              disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+              aria-label={i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+                defaultMessage: 'Snooze the rule',
+              })}
+            />
+          ) : (
+            <EuiButton
+              fill
+              iconType="bellSlash"
+              onClick={handleOpenSnoozeModal}
+              disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+              data-test-subj="snooze-rule-button"
+            >
+              <EuiText size="s">
+                {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+                  defaultMessage: 'Snooze the rule',
+                })}
+              </EuiText>
+            </EuiButton>
+          )}
+        </EuiFlexItem>
         {Boolean(investigatePlugin) &&
           alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID && (
             <EuiFlexItem grow={false}>
@@ -221,21 +252,6 @@ export function HeaderActions({
               </EuiButton>
             </EuiFlexItem>
           )}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="bellSlash"
-            onClick={handleOpenSnoozeModal}
-            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-            data-test-subj="snooze-rule-button"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                defaultMessage: 'Snooze the rule',
-              })}
-            </EuiText>
-          </EuiButton>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"

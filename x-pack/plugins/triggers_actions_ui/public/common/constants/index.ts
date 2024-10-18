@@ -8,6 +8,7 @@
 import { Comparator, COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 
+export { VIEW_LICENSE_OPTIONS_LINK } from '@kbn/alerts-ui-shared/src/common/constants';
 export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
 export { loadAllActions, loadActionTypes } from '../../application/lib/action_connector_api';
 export { ConnectorAddModal } from '../../application/sections/action_connector_form';
@@ -16,8 +17,6 @@ export type { ActionConnector } from '../..';
 export { builtInGroupByTypes } from './group_by_types';
 export * from './action_frequency_types';
 
-export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
-
 export const PLUGIN_ID = 'triggersActions';
 export const ALERTS_PAGE_ID = 'triggersActionsAlerts';
 export const CONNECTORS_PLUGIN_ID = 'triggersActionsConnectors';
@@ -25,9 +24,6 @@ export {
   I18N_WEEKDAY_OPTIONS,
   I18N_WEEKDAY_OPTIONS_DDD,
 } from '@kbn/alerts-ui-shared/src/common/constants/i18n_weekdays';
-
-// Feature flag for frontend rule specific flapping in rule flyout
-export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = false;
 
 export const builtInComparators: { [key: string]: Comparator } = {
   [COMPARATORS.GREATER_THAN]: {

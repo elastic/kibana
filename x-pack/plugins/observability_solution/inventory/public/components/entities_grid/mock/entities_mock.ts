@@ -9,30 +9,35 @@ import { APIReturnType } from '../../../api';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
-export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
+export const entitiesMock = [
   {
     'entity.lastSeenTimestamp': '2023-08-20T10:50:06.384Z',
     'entity.type': 'host',
     'entity.displayName': 'Spider-Man',
     'entity.id': '0',
+    alertsCount: 3,
   },
   {
     'entity.lastSeenTimestamp': '2024-06-16T21:48:16.259Z',
     'entity.type': 'service',
     'entity.displayName': 'Iron Man',
     'entity.id': '1',
+    alertsCount: 3,
   },
+
   {
     'entity.lastSeenTimestamp': '2024-04-28T03:31:57.528Z',
     'entity.type': 'host',
     'entity.displayName': 'Captain America',
     'entity.id': '2',
+    alertsCount: 10,
   },
   {
     'entity.lastSeenTimestamp': '2024-05-14T11:32:04.275Z',
     'entity.type': 'host',
     'entity.displayName': 'Hulk',
     'entity.id': '3',
+    alertsCount: 1,
   },
   {
     'entity.lastSeenTimestamp': '2023-12-05T13:33:54.028Z',
@@ -1630,6 +1635,7 @@ export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
     'entity.displayName':
       'Sed dignissim libero a diam sagittis, in convallis leo pellentesque. Cras ut sapien sed lacus scelerisque vehicula. Pellentesque at purus pulvinar, mollis justo hendrerit, pharetra purus. Morbi dapibus, augue et volutpat ultricies, neque quam sollicitudin mauris, vitae luctus ex libero id erat. Suspendisse risus lectus, scelerisque vel odio sed.',
     'entity.id': '269',
+    alertsCount: 4,
   },
   {
     'entity.lastSeenTimestamp': '2023-10-22T13:49:53.092Z',
@@ -3011,4 +3017,4 @@ export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
     'entity.displayName': 'Troy McClure',
     'entity.id': '499',
   },
-];
+] as unknown as InventoryEntitiesAPIReturnType['entities'];

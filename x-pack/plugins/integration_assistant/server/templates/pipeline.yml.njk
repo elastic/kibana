@@ -19,11 +19,11 @@ processors:
       field: originalMessage
       ignore_missing: true
       tag: remove_copied_message
-      if: 'ctx.event?.original != null'{% if log_format != 'unstructured' %}
+      if: 'ctx.event?.original != null'
   - remove:
       field: message
       ignore_missing: true
-      tag: remove_message{% endif %}{% if (log_format == 'json') or (log_format == 'ndjson') %}
+      tag: remove_message{% if (log_format == 'json') or (log_format == 'ndjson') %}
   - json:
       field: event.original
       tag: json_original

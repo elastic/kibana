@@ -27,6 +27,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/ui-theme",
     "@kbn/expressions-plugin",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/i18n-react"
   ]
 }

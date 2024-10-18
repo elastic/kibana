@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Router, type RouterOptions } from './router';
+import type { ResponseToolkit, ResponseObject } from '@hapi/hapi';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { isConfigSchema, schema } from '@kbn/config-schema';
-import { createFooValidation } from './router.test.util';
 import { createRequestMock } from '@kbn/hapi-mocks/src/request';
+import { createFooValidation } from './router.test.util';
+import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 
-const mockResponse: any = {
+const mockResponse = {
   code: jest.fn().mockImplementation(() => mockResponse),
   header: jest.fn().mockImplementation(() => mockResponse),
-};
-const mockResponseToolkit: any = {
+} as unknown as jest.Mocked<ResponseObject>;
+
+const mockResponseToolkit = {
   response: jest.fn().mockReturnValue(mockResponse),
-};
+} as unknown as jest.Mocked<ResponseToolkit>;
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
@@ -132,6 +134,78 @@ describe('Router', () => {
     }
   );
 
+  describe('elastic-api-version header', () => {
+    it('adds the header to public, unversioned routes', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.post(
+        {
+          path: '/public',
+          options: {
+            access: 'public',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ headers: { AAAA: 'test' } }) // with some fake headers
+      );
+      router.post(
+        {
+          path: '/internal',
+          options: {
+            access: 'internal',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      const [{ handler: publicHandler }, { handler: internalHandler }] = router.getRoutes();
+
+      await publicHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(2);
+      const [first, second] = mockResponse.header.mock.calls
+        .concat()
+        .sort(([k1], [k2]) => k1.localeCompare(k2));
+      expect(first).toEqual(['AAAA', 'test']);
+      expect(second).toEqual(['elastic-api-version', '2023-10-31']);
+
+      await internalHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(2); // no additional calls
+    });
+
+    it('does not add the header to public http resource routes', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.post(
+        {
+          path: '/public',
+          options: {
+            access: 'public',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      router.post(
+        {
+          path: '/public-resource',
+          options: {
+            access: 'public',
+            httpResource: true,
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      const [{ handler: publicHandler }, { handler: resourceHandler }] = router.getRoutes();
+
+      await publicHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1);
+      const [headersTuple] = mockResponse.header.mock.calls;
+      expect(headersTuple).toEqual(['elastic-api-version', '2023-10-31']);
+
+      await resourceHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1); // no additional calls
+    });
+  });
+
   it('constructs lazily provided validations once (idempotency)', async () => {
     const router = new Router('', logger, enhanceWithContext, routerOptions);
     const { fooValidation } = testValidation;
@@ -229,6 +303,47 @@ describe('Router', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"[options.body.output: 'file'] in route POST / is not valid. Only 'data' or 'stream' are valid."`
+      );
+    });
+
+    it('throws if enabled security config is not valid', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          {
+            path: '/',
+            validate: false,
+            security: {
+              authz: {
+                requiredPrivileges: [],
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    it('throws if disabled security config does not provide opt-out reason', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          {
+            path: '/',
+            validate: false,
+            security: {
+              // @ts-expect-error
+              authz: {
+                enabled: false,
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.reason]: expected value of type [string] but got [undefined]"`
       );
     });
 

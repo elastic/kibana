@@ -43,6 +43,10 @@ export interface RuleFormBaseErrors {
   tags?: string[];
 }
 
+export interface RuleFormActionsErrors {
+  filterQuery?: string[];
+}
+
 export interface RuleFormParamsErrors {
   [key: string]: string | string[] | RuleFormParamsErrors;
 }

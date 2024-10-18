@@ -1,0 +1,262 @@
+[role="xpack"]
+[[playground]]
+== Playground
+
+preview::[]
+
+// Variable (attribute) definition 
+:x:                    Playground 
+
+Use {x} to combine your Elasticsearch data with the power of large language models (LLMs) for retrieval augmented generation (RAG).
+The chat interface translates your natural language questions into {es} queries, retrieves the most relevant results from your {es} documents, and passes those documents to the LLM to generate tailored responses.
+
+Once you start chatting, use the UI to view and modify the Elasticsearch queries that search your data.
+You can also view the underlying Python code that powers the chat interface, and download this code to integrate into your own application.
+
+Learn how to get started on this page.
+Refer to the following for more advanced topics:
+
+* <<playground-context>>
+* <<playground-query>>
+* <<playground-troubleshooting>> 
+
+[float]
+[[playground-how-it-works]]
+=== How {x} works
+
+Here's a simpified overview of how {x} works:
+
+* User *creates a connection* to LLM provider
+* User *selects a model* to use for generating responses
+* User *define the model's behavior and tone* with initial instructions
+** *Example*: "_You are a friendly assistant for question-answering tasks. Keep responses as clear and concise as possible._"
+* User *selects {es} indices* to search
+* User *enters a question* in the chat interface
+* {x} *autogenerates an {es} query* to retrieve relevant documents
+** User can *view and modify underlying {es} query* in the UI
+* {x} *auto-selects relevant fields* from retrieved documents to pass to the LLM
+** User can *edit fields targeted*
+* {x} passes *filtered documents* to the LLM
+** The LLM generates a response based on the original query, initial instructions, chat history, and {es} context
+* User can *view the Python code* that powers the chat interface
+** User can also *Download the code* to integrate into application
+
+[float]
+[[playground-availability-prerequisites]]
+=== Availability and prerequisites
+
+For Elastic Cloud and self-managed deployments {x} is available in the *Search* space in {kib}, under *Content* > *{x}*.
+
+For Elastic Serverless, {x} is available in your {es} project UI.
+// TODO: Confirm URL path for Serverless
+
+To use {x}, you'll need the following:
+
+1. An Elastic *v8.14.0+* deployment or {es} *Serverless* project. (Start a https://cloud.elastic.co/registration[free trial]).
+2. At least one *{es} index* with documents to search.
+** See <<playground-getting-started-ingest, ingest data>> if you'd like to ingest sample data.
+3. An account with a *supported LLM provider*. {x} supports the following:
++
+[cols="2a,2a,1a", options="header"]
+|===
+| Provider | Models | Notes
+
+| *Amazon Bedrock*
+a|
+* Anthropic: Claude 3.5 Sonnet
+* Anthropic: Claude 3 Haiku
+a|
+
+| *OpenAI*
+a|
+* GPT-3 turbo
+* GPT-4 turbo
+* GPT-4 omni
+a|
+
+| *Azure OpenAI*
+a|
+* GPT-3 turbo
+* GPT-4 turbo
+a|
+Buffers responses in large chunks
+
+| *Google*
+a|
+* Google Gemini 1.5 Pro
+* Google Gemini 1.5 Flash
+a|
+
+|===
+
+[[playground-local-llms]]
+[TIP]
+====
+You can also use locally hosted LLMs that are compatible with the OpenAI SDK.
+Once you've set up your LLM, you can connect to it using the OpenAI connector.
+Refer to the following for examples:
+
+* {security-guide}/connect-to-byo-llm.html[Using LM Studio]
+* https://www.elastic.co/search-labs/blog/localai-for-text-embeddings[LocalAI with `docker-compose`]
+====
+
+[float]
+[[playground-getting-started]]
+=== Getting started
+
+[.screenshot]
+image::get-started.png[width=600]
+
+[float]
+[[playground-getting-started-connect]]
+==== Connect to LLM provider
+
+To get started with {x}, you need to create a <<action-types,connector>> for your LLM provider.
+You can also connect to <<playground-local-llms,locally hosted LLMs>> which are compatible with the OpenAI API, by using the OpenAI connector.
+
+To connect to an LLM provider, follow these steps on the {x} landing page:
+
+. Under *Connect to an LLM*, click *Create connector*.
+. Select your *LLM provider*.
+. *Name* your connector.
+. Select a *URL endpoint* (or use the default).
+. Enter *access credentials* for your LLM provider. (If you're running a locally hosted LLM using the OpenAI connector, you must input a value in the API key form, but the specific value doesn't matter.)
+
+[TIP]
+====
+If you need to update a connector, or add a new one, click the 🔧 *Manage* button beside *Model settings*.
+====
+
+[float]
+[[playground-getting-started-ingest]]
+==== Ingest data (optional)
+
+_You can skip this step if you already have data in one or more {es} indices._
+
+There are many options for ingesting data into {es}, including:
+
+* The {enterprise-search-ref}/crawler.html[Elastic crawler] for web content (*NOTE*: Not yet available in _Serverless_)
+* {ref}/es-connectors.html[Elastic connectors] for data synced from third-party sources
+* The {es} {ref}/docs-bulk.html[Bulk API] for JSON documents
++
+.*Expand* for example
+[%collapsible]
+==============
+To add a few documents to an index called `books` run the following in Dev Tools Console:
+
+[source,console]
+----
+POST /_bulk
+{ "index" : { "_index" : "books" } }
+{"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
+{ "index" : { "_index" : "books" } }
+{"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
+{ "index" : { "_index" : "books" } }
+{"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328}
+{ "index" : { "_index" : "books" } }
+{"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227}
+{ "index" : { "_index" : "books" } }
+{"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
+{ "index" : { "_index" : "books" } }
+{"name": "The Handmaids Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
+----
+==============
+
+We've also provided some Jupyter notebooks to easily ingest sample data into {es}. 
+Find these in the https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/ingestion-and-chunking[elasticsearch-labs] repository.
+These notebooks use the official {es} Python client.
+
+[float]
+[[playground-getting-started-index]]
+==== Select {es} indices
+
+Once you've connected to your LLM provider, it's time to choose the data you want to search.
+
+. Click *Add data sources*.
+. Select one or more {es} indices.
+. Click *Save and continue* to launch the chat interface.
+
+[TIP]
+====
+You can always add or remove indices later by selecting the *Data* button from the main {x} UI.
+
+[.screenshot]
+image::images/data-button.png[width=100]
+====
+
+[float]
+[[playground-getting-started-chat-query-modes]]
+==== Chat and query modes
+
+Since 8.15.0 (and earlier for {es} Serverless), the main {x} UI has two modes:
+
+* *Chat mode*: The default mode, where you can chat with your data via the LLM.
+* *Query mode*: View and modify the {es} query generated by the chat interface.
+
+The *chat mode* is selected when you first set up your {x} instance.
+
+[.screenshot]
+image::images/chat-interface.png[width=700]
+
+To switch to *query mode*, select *Query* from the main UI.
+
+[.screenshot]
+image::images/query-interface.png[width=700]
+
+[TIP]
+====
+Learn more about the underlying {es} queries used to search your data in <<playground-query>>
+====
+
+[float]
+[[playground-getting-started-setup-chat]]
+==== Set up the chat interface
+
+You can start chatting with your data immediately, but you might want to tweak some defaults first.
+
+You can adjust the following under *Model settings*:
+
+* *Model*. The model used for generating responses.
+* *Instructions*. Also known as the _system prompt_, these initial instructions and guidelines define the behavior of the model throughout the conversation. Be *clear and specific* for best results.
+* *Include citations*. A toggle to include citations from the relevant {es} documents in responses.
+
+{x} also uses another LLM under the hood, to encode all previous questions and responses, and make them available to the main model.
+This ensures the model has "conversational memory".
+
+Under *Indices*, you can edit which {es} indices will be searched.
+This will affect the underlying {es} query.
+
+[TIP]
+====
+Click *✨ Regenerate* to resend the last query to the model for a fresh response.
+
+Click *⟳ Clear chat* to clear chat history and start a new conversation.
+====
+
+[float]
+[[playground-getting-started-view-code]]
+==== View and download Python code
+
+Use the *View code* button to see the Python code that powers the chat interface.
+You can integrate it into your own application, modifying as needed.
+We currently support two implementation options:
+
+* {es} Python Client + LLM provider
+* LangChain + LLM provider
+
+[.screenshot]
+image::images/view-code-button.png[width=100]
+
+[float]
+[[playground-next-steps]]
+==== Next steps
+
+Once you've got {x} up and running, and you've tested out the chat interface, you might want to explore some more advanced topics:
+
+* <<playground-context>>
+* <<playground-query>>
+* <<playground-troubleshooting>>
+
+include::playground-context.asciidoc[]
+include::playground-query.asciidoc[]
+include::playground-troubleshooting.asciidoc[]

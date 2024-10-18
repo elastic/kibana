@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
@@ -19,7 +19,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { Role } from '@kbn/security-plugin-types-common';
+import type { Role, SecurityLicense } from '@kbn/security-plugin-types-common';
 import {
   createRawKibanaPrivileges,
   kibanaFeatures,
@@ -27,13 +27,14 @@ import {
 
 import { PrivilegesRolesForm } from './space_assign_role_privilege_form';
 import type { Space } from '../../../../../common';
-import { FEATURE_PRIVILEGES_ALL, FEATURE_PRIVILEGES_READ } from '../../../../../common/constants';
-import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
 import {
-  createPrivilegeAPIClientMock,
-  getPrivilegeAPIClientMock,
-} from '../../../privilege_api_client.mock';
-import { createRolesAPIClientMock, getRolesAPIClientMock } from '../../../roles_api_client.mock';
+  FEATURE_PRIVILEGES_ALL,
+  FEATURE_PRIVILEGES_CUSTOM,
+  FEATURE_PRIVILEGES_READ,
+} from '../../../../../common/constants';
+import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
+import { createPrivilegeAPIClientMock } from '../../../privilege_api_client.mock';
+import { createRolesAPIClientMock } from '../../../roles_api_client.mock';
 import { EditSpaceProvider } from '../../provider';
 
 const rolesAPIClient = createRolesAPIClientMock();
@@ -70,6 +71,9 @@ const spacesClientsInvocatorMock = jest.fn((fn) =>
 const dispatchMock = jest.fn();
 const onSaveCompleted = jest.fn();
 const closeFlyout = jest.fn();
+const licenseMock = {
+  getFeatures: jest.fn(() => ({})),
+} as unknown as SecurityLicense;
 
 const renderPrivilegeRolesForm = ({
   preSelectedRoles,
@@ -89,15 +93,21 @@ const renderPrivilegeRolesForm = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: jest.fn((_) => _),
-          getRolesAPIClient: getRolesAPIClientMock,
-          getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           navigateToUrl: jest.fn(),
+          license: licenseMock,
+          isRoleManagementEnabled: true,
           capabilities: {
             navLinks: {},
             management: {},
             catalogue: {},
             spaces: { manage: true },
           },
+          dispatch: dispatchMock,
+          state: {
+            roles: new Map(),
+            fetchRolesError: false,
+          },
+          invokeClient: spacesClientsInvocatorMock,
         }}
       >
         <PrivilegesRolesForm
@@ -107,9 +117,6 @@ const renderPrivilegeRolesForm = ({
             closeFlyout,
             defaultSelected: preSelectedRoles,
             onSaveCompleted,
-            storeDispatch: dispatchMock,
-            spacesClientsInvocator: spacesClientsInvocatorMock,
-            getUrlForApp: jest.fn((_) => _),
           }}
         />
       </EditSpaceProvider>
@@ -158,6 +165,32 @@ describe('PrivilegesRolesForm', () => {
     await waitFor(() => null);
 
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
+  it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    const roles: Role[] = [
+      createRole('test_role_1', [{ base: [], feature: {}, spaces: [space.id] }]),
+    ];
+
+    renderPrivilegeRolesForm({
+      preSelectedRoles: roles,
+    });
+
+    await waitFor(() => null);
+
+    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+      'aria-pressed',
+      String(false)
+    );
+
+    expect(
+      screen.getByTestId('space-assign-role-privilege-customization-form')
+    ).toBeInTheDocument();
+
+    expect(screen.getByTestId('space-update-role-create-roles-privilege-button')).toBeDisabled();
   });
 
   it('preselects the privilege of the selected role when one is provided', async () => {
@@ -290,6 +323,11 @@ describe('PrivilegesRolesForm', () => {
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
       expect(
         screen.getByTestId('space-assign-role-privilege-customization-form')
       ).toBeInTheDocument();
@@ -303,6 +341,186 @@ describe('PrivilegesRolesForm', () => {
         'aria-pressed',
         String(true)
       );
+    });
+
+    it('allows modifying individual features after selecting a base privilege within the customize table', async () => {
+      const user = userEvent.setup();
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featureIds: string[] = kibanaFeatures.map((kibanaFeature) => kibanaFeature.id);
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
+      );
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      // By default all features are set to the none privilege
+      expect(screen.queryByTestId(`${featureIds[0]}_read`)).not.toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      await user.click(screen.getByTestId('changeAllPrivilegesButton'));
+
+      // change all privileges to read
+      await user.click(screen.getByTestId(`changeAllPrivileges-${FEATURE_PRIVILEGES_READ}`));
+
+      featureIds.forEach((_, idx) => {
+        // verify that all features are set to read
+        expect(screen.queryByTestId(`${featureIds[idx]}_read`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        );
+      });
+
+      // change a single feature to all
+      await user.click(screen.getByTestId(`${featureIds[0]}_all`));
+
+      expect(screen.queryByTestId(`${featureIds[0]}_read`)).not.toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+
+      expect(screen.getByTestId(`${featureIds[0]}_all`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      );
+    });
+
+    it('prevents customization up to sub privilege level by default', async () => {
+      const user = userEvent.setup();
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+        Boolean(kibanaFeature.subFeatures.length)
+      );
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      const featureUT = featuresWithSubFeatures[0];
+
+      // change a single feature with sub features to read from default privilege "none"
+      await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
+
+      // click on the accordion toggle to show sub features
+      await user.click(
+        screen.getByTestId(
+          `featurePrivilegeControls_${featureUT.category.id}_${featureUT.id}_accordionToggle`
+        )
+      );
+
+      // sub feature table renders
+      expect(
+        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+      ).toBeInTheDocument();
+
+      // assert switch to customize sub feature can toggled
+      expect(
+        within(
+          screen.getByTestId(
+            `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
+          )
+        ).getByTestId('customizeSubFeaturePrivileges')
+      ).toBeDisabled();
+    });
+
+    it('supports customization up to sub privilege level only when security license allows', async () => {
+      const user = userEvent.setup();
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      // enable sub feature privileges
+      (licenseMock.getFeatures as jest.Mock).mockReturnValue({
+        allowSubFeaturePrivileges: true,
+      });
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+        Boolean(kibanaFeature.subFeatures.length)
+      );
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      const featureUT = featuresWithSubFeatures[0];
+
+      // change a single feature with sub features to read from default privilege "none"
+      await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
+
+      // click on the accordion toggle to show sub features
+      await user.click(
+        screen.getByTestId(
+          `featurePrivilegeControls_${featureUT.category.id}_${featureUT.id}_accordionToggle`
+        )
+      );
+
+      // sub feature table renders
+      expect(
+        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+      ).toBeInTheDocument();
+
+      // assert switch to customize sub feature can toggled
+      expect(
+        within(
+          screen.getByTestId(
+            `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
+          )
+        ).getByTestId('customizeSubFeaturePrivileges')
+      ).not.toBeDisabled();
     });
   });
 });

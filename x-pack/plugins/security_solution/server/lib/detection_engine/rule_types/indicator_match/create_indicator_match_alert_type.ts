@@ -20,7 +20,13 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, version, licensing, experimentalFeatures } = createOptions;
+  const {
+    eventsTelemetry,
+    version,
+    licensing,
+    experimentalFeatures,
+    scheduleNotificationResponseActionsService,
+  } = createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -76,7 +82,7 @@ export const createIndicatorMatchAlertType = (
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
-          inputIndexFields,
+          intendedTimestamp,
         },
         services,
         spaceId,
@@ -100,6 +106,7 @@ export const createIndicatorMatchAlertType = (
           publicBaseUrl: runOpts.publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
 
       const result = await indicatorMatchExecutor({
@@ -119,11 +126,11 @@ export const createIndicatorMatchAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
-        inputIndexFields,
         wrapSuppressedHits,
         runOpts,
         licensing,
         experimentalFeatures,
+        scheduleNotificationResponseActionsService,
       });
       return { ...result, state };
     },

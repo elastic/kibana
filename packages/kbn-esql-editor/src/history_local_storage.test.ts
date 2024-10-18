@@ -46,6 +46,24 @@ describe('history local storage', function () {
     );
   });
 
+  it('should update queries to cache correctly if they are the same with different format', function () {
+    addQueriesToCache({
+      queryString: 'from kibana_sample_data_flights | limit 10 | stats meow = avg(woof)      ',
+      timeZone: 'Browser',
+      status: 'success',
+    });
+
+    const historyItems = getCachedQueries();
+    expect(historyItems.length).toBe(2);
+    expect(historyItems[1].timeRan).toBeDefined();
+    expect(historyItems[1].status).toBe('success');
+
+    expect(mockSetItem).toHaveBeenCalledWith(
+      'QUERY_HISTORY_ITEM_KEY',
+      JSON.stringify(historyItems)
+    );
+  });
+
   it('should allow maximum x queries ', function () {
     addQueriesToCache(
       {

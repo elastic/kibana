@@ -92,7 +92,10 @@ const SPECIAL_TEST_TIMEOUT = 50000;
 
 const localMockedTimelineData = structuredClone(mockTimelineData);
 
-const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) => {
+const TestComponent = (
+  props: Partial<ComponentProps<typeof UnifiedTimeline>> & { show?: boolean }
+) => {
+  const { show, ...restProps } = props;
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
     columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
     activeTab: TimelineTabs.query,
@@ -119,8 +122,11 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: show ?? true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,
@@ -133,9 +139,9 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
         },
       })
     );
-  }, [dispatch]);
+  }, [dispatch, show]);
 
-  return <UnifiedTimeline {...testComponentDefaultProps} {...props} />;
+  return <UnifiedTimeline {...testComponentDefaultProps} {...restProps} />;
 };
 
 const customStore = createMockStore();
@@ -513,6 +519,51 @@ describe('unified timeline', () => {
   });
 
   describe('unified field list', () => {
+    describe('render', () => {
+      let TestProviderWithNewStore: FC<PropsWithChildren<unknown>>;
+      beforeEach(() => {
+        const freshStore = createMockStore();
+        // eslint-disable-next-line react/display-name
+        TestProviderWithNewStore = ({ children }) => {
+          return <TestProviders store={freshStore}>{children}</TestProviders>;
+        };
+      });
+      it(
+        'should not render when timeline has never been opened',
+        async () => {
+          render(<TestComponent show={false} />, {
+            wrapper: TestProviderWithNewStore,
+          });
+          expect(await screen.queryByTestId('timeline-sidebar')).not.toBeInTheDocument();
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should render when timeline has been opened',
+        async () => {
+          render(<TestComponent />, {
+            wrapper: TestProviderWithNewStore,
+          });
+          expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should not re-render when timeline has been opened at least once',
+        async () => {
+          const { rerender } = render(<TestComponent />, {
+            wrapper: TestProviderWithNewStore,
+          });
+          rerender(<TestComponent show={false} />);
+          // Even after timeline is closed, it should still exist in the background
+          expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+    });
+
     it(
       'should be able to add filters',
       async () => {
