@@ -18,6 +18,7 @@ import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-commo
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
+  NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -114,6 +115,18 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const navUrlParams = useGetNavigationUrlParamsFindings();
 
+    const getFindingsPageUrlFilteredByRuleAndResourceId = (ruleId: string, resourceId: string) => {
+      return navUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId });
+    };
+
+    const getFindingsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.CLICK,
+        NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+      );
+      return navUrlParams({ [queryField]: name }, ['rule.name']);
+    };
+
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
         field: 'rule',
@@ -121,7 +134,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         width: '5%',
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <EuiLink
-            href={navUrlParams({ 'rule.id': rule?.id, 'resource.id': finding?.resource?.id })}
+            href={getFindingsPageUrlFilteredByRuleAndResourceId(rule?.id, finding?.resource?.id)}
             external={false}
             target="_blank"
           >
@@ -156,11 +169,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     return (
       <>
         <EuiPanel hasShadow={false}>
-          <EuiLink
-            href={navUrlParams({ [fieldName]: queryName }, ['rule.name'])}
-            target="_blank"
-            external={false}
-          >
+          <EuiLink href={getFindingsPageUrl(queryName, fieldName)} target="_blank" external={false}>
             {i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
               {

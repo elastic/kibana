@@ -24,6 +24,7 @@ import {
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
+  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -96,6 +97,28 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
 
   const navUrlParams = useGetNavigationUrlParamsVulnerabilities();
 
+  const getVulnerabilityUrl = (name: string, queryField: 'host.name' | 'user.name') => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.CLICK,
+      NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+    );
+    return navUrlParams({ [queryField]: name });
+  };
+
+  const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
+    vulnerabilityId: string,
+    resourceId: string,
+    vulnerabilityPackageName: string,
+    vulnerabilityPackageVersion: string
+  ) => {
+    return navUrlParams({
+      'vulnerability.id': vulnerabilityId,
+      'resource.id': resourceId,
+      'vulnerability.package.name': vulnerabilityPackageName,
+      'vulnerability.package.version': vulnerabilityPackageVersion,
+    });
+  };
+
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
     {
       field: 'vulnerability',
@@ -106,12 +129,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         finding: VulnerabilitiesFindingDetailFields
       ) => (
         <EuiLink
-          href={navUrlParams({
-            'vulnerability.id': vulnerability?.id,
-            'resource.id': finding?.resource?.id || '',
-            'vulnerability.package.name': vulnerability?.package?.name,
-            'vulnerability.package.version': vulnerability?.package?.version,
-          })}
+          href={getVulnerabilityUrlFilteredByVulnerabilityAndResourceId(
+            vulnerability?.id,
+            finding?.resource?.id || '',
+            vulnerability?.package?.name,
+            vulnerability?.package?.version
+          )}
           external={false}
           target="_blank"
         >
@@ -177,7 +200,11 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
   return (
     <>
       <EuiPanel hasShadow={false}>
-        <EuiLink href={navUrlParams({ 'host.name': queryName })} target="_blank" external={false}>
+        <EuiLink
+          href={getVulnerabilityUrl(queryName, 'host.name')}
+          target="_blank"
+          external={false}
+        >
           {i18n.translate('xpack.securitySolution.flyout.left.insights.vulnerability.tableTitle', {
             defaultMessage: 'Vulnerability ',
           })}
