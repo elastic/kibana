@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { stringify } from '../../utils/stringify';
 import type {
   MetadataListResponse,
   EndpointSortableField,
@@ -45,7 +46,10 @@ export function getMetadataListRequestHandler(
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
+    logger.debug(() => `endpoint host metadata list request:\n${stringify(request.query)}`);
+
+    const spaceId = (await context.securitySolution).getSpaceId();
+    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
 
     try {
       const { data, total } = await endpointMetadataService.getHostMetadataList(request.query);
@@ -77,7 +81,8 @@ export const getMetadataRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
+    const spaceId = (await context.securitySolution).getSpaceId();
+    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
 
     try {
       return response.ok({

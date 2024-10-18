@@ -6,6 +6,7 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../common';
@@ -32,6 +33,9 @@ export const useGetDataUsageDataStreams = ({
   options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>;
 }): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
   const http = useKibanaContextForPlugin().services.http;
+  const {
+    services: { notifications },
+  } = useKibanaContextForPlugin();
 
   return useQuery<GetDataUsageDataStreamsResponse, IHttpFetchError>({
     queryKey: ['get-data-usage-data-streams'],
@@ -82,6 +86,14 @@ export const useGetDataUsageDataStreams = ({
           ? selectedDataStreamsCount + 10
           : PAGING_PARAMS.default
       );
+    },
+    onError: (error: IHttpFetchError) => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.dataUsage.getDataStreams.addFailure.toast.title', {
+          defaultMessage: 'Error getting data streams',
+        }),
+        text: error.message,
+      });
     },
   });
 };
