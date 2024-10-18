@@ -100,8 +100,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
 }) => {
-  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin, eventBus } = useAiopsAppContext();
   const { dataView } = useDataSource();
+  const eventBusState = eventBus.useEventBus();
 
   const dispatch = useAppDispatch();
   const {
