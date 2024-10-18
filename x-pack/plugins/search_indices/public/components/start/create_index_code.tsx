@@ -6,7 +6,6 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
@@ -97,9 +96,8 @@ export const CreateIndexCodeView = ({
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
-          title={i18n.translate('xpack.searchIndices.startPage.codeView.installCommand.title', {
-            defaultMessage: 'Install Elasticsearch serverless client',
-          })}
+          title={selectedCodeExamples.installTitle}
+          description={selectedCodeExamples.installDescription}
           language="shell"
           code={selectedCodeExample.installCommand}
           onCodeCopyClick={() => {
@@ -112,9 +110,8 @@ export const CreateIndexCodeView = ({
       )}
       <CodeSample
         id="createIndex"
-        title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
-          defaultMessage: 'Connect and create an index',
-        })}
+        title={selectedCodeExamples.createIndexTitle}
+        description={selectedCodeExamples.createIndexDescription}
         language={Languages[selectedLanguage].codeBlockLanguage}
         code={selectedCodeExample.createIndex(codeParams)}
         onCodeCopyClick={() => {

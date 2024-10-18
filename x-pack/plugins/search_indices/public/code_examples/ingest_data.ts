@@ -12,8 +12,11 @@ import { JSServerlessIngestVectorDataExample } from './javascript';
 import { PythonServerlessVectorsIngestDataExample } from './python';
 import { ConsoleVectorsIngestDataExample } from './sense';
 import { CurlVectorsIngestDataExample } from './curl';
+import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
 
 export const DenseVectorServerlessCodeExamples: IngestDataCodeExamples = {
+  installTitle: INSTALL_INSTRUCTIONS_TITLE,
+  installDescription: INSTALL_INSTRUCTIONS_DESCRIPTION,
   addMappingsTitle: i18n.translate(
     'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsTitle',
     {

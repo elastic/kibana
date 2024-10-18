@@ -114,15 +114,8 @@ export const AddDocumentsCodeExample = ({
           <EuiFlexItem>
             <CodeSample
               id="installCodeExample"
-              title={i18n.translate('xpack.searchIndices.indexDetails.installLibrary.title', {
-                defaultMessage: 'Install Elasticsearch Client',
-              })}
-              description={i18n.translate(
-                'xpack.searchIndices.indexDetails.installLibrary.description',
-                {
-                  defaultMessage: 'Install the Elasticsearch client on the command line:',
-                }
-              )}
+              title={ingestCodeExamples.installTitle}
+              description={ingestCodeExamples.installDescription}
               language="shell"
               code={selectedCodeExamples.installCommand}
               onCodeCopyClick={() => {
