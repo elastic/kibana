@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_APP_CATEGORIES,
-  type CoreSetup,
-  type Plugin,
-  CoreStart,
-  AppMountParameters,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { createAppService } from '@kbn/ai-assistant';
+import ReactDOM from 'react-dom';
+import React from 'react';
 import type {
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
   SearchAssistantPluginStartDependencies,
 } from './types';
+import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 
 export interface PublicConfigType {
   ui: {
@@ -48,32 +44,36 @@ export class SearchAssistantPlugin
       return {};
     }
 
-    core.application.register({
-      id: 'searchAssistant',
-      title: i18n.translate('xpack.searchAssistant.appTitle', {
-        defaultMessage: 'Search Assistant',
-      }),
-      euiIconType: 'logoEnterpriseSearch',
-      appRoute: '/app/searchAssistant',
-      category: DEFAULT_APP_CATEGORIES.search,
-      visibleIn: [],
-      deepLinks: [],
-      mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        // Load application bundle and Get start services
-        const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application'),
-          core.getStartServices() as Promise<
-            [CoreStart, SearchAssistantPluginStartDependencies, unknown]
-          >,
-        ]);
-
-        return renderApp(coreStart, pluginsStart, appMountParameters);
-      },
-    });
     return {};
   }
 
-  public start(): SearchAssistantPluginStart {
+  public start(
+    coreStart: CoreStart,
+    pluginsStart: SearchAssistantPluginStartDependencies
+  ): SearchAssistantPluginStart {
+    const appService = createAppService({
+      pluginsStart,
+    });
+    const isEnabled = appService.isEnabled();
+
+    coreStart.chrome.navControls.registerRight({
+      mount: (element) => {
+        ReactDOM.render(
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+          />,
+          element,
+          () => {}
+        );
+
+        return () => {};
+      },
+      // right before the user profile
+      order: 1001,
+    });
+
     return {};
   }
 

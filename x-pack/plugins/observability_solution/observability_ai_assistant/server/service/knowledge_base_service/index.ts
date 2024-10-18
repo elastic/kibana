@@ -34,6 +34,7 @@ interface Dependencies {
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
   getModelId: () => Promise<string>;
+  enabled: boolean;
 }
 
 export interface RecalledEntry {
@@ -92,137 +93,142 @@ export class KnowledgeBaseService {
   }
 
   setup = async () => {
-    const elserModelId = await this.dependencies.getModelId();
+    if (this.dependencies.enabled) {
+      const elserModelId = await this.dependencies.getModelId();
 
-    const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
-    const getModelInfo = async () => {
-      return await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
-        model_id: elserModelId,
-        include: 'definition_status',
-      });
-    };
+      const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
+      const getModelInfo = async () => {
+        return await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
+          model_id: elserModelId,
+          include: 'definition_status',
+        });
+      };
 
-    const isModelInstalledAndReady = async () => {
-      try {
-        const getResponse = await getModelInfo();
-        this.dependencies.logger.debug(
-          () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
-        );
+      const isModelInstalledAndReady = async () => {
+        try {
+          const getResponse = await getModelInfo();
+          this.dependencies.logger.debug(
+            () =>
+              'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
+          );
 
-        return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
-      } catch (error) {
-        if (isModelMissingOrUnavailableError(error)) {
-          return false;
-        } else {
-          throw error;
+          return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+        } catch (error) {
+          if (isModelMissingOrUnavailableError(error)) {
+            return false;
+          } else {
+            throw error;
+          }
         }
-      }
-    };
+      };
 
-    const installModelIfDoesNotExist = async () => {
-      const modelInstalledAndReady = await isModelInstalledAndReady();
-      if (!modelInstalledAndReady) {
-        await installModel();
-      }
-    };
-
-    const installModel = async () => {
-      this.dependencies.logger.info(`Installing ${elserModelId} model`);
-      try {
-        await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
-          {
-            model_id: elserModelId,
-            input: {
-              field_names: ['text_field'],
-            },
-            wait_for_completion: true,
-          },
-          { requestTimeout: '20m' }
-        );
-      } catch (error) {
-        if (isCreateModelValidationError(error)) {
-          throw badRequest(error);
-        } else {
-          throw error;
-        }
-      }
-      this.dependencies.logger.info(`Finished installing ${elserModelId} model`);
-    };
-
-    const pollForModelInstallCompleted = async () => {
-      await pRetry(async () => {
-        this.dependencies.logger.info(`Polling installation of ${elserModelId} model`);
+      const installModelIfDoesNotExist = async () => {
         const modelInstalledAndReady = await isModelInstalledAndReady();
         if (!modelInstalledAndReady) {
-          throwKnowledgeBaseNotReady({
-            message: 'Model is not fully defined',
-          });
+          await installModel();
         }
+      };
+
+      const installModel = async () => {
+        this.dependencies.logger.info(`Installing ${elserModelId} model`);
+        try {
+          await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
+            {
+              model_id: elserModelId,
+              input: {
+                field_names: ['text_field'],
+              },
+              wait_for_completion: true,
+            },
+            { requestTimeout: '20m' }
+          );
+        } catch (error) {
+          if (isCreateModelValidationError(error)) {
+            throw badRequest(error);
+          } else {
+            throw error;
+          }
+        }
+        this.dependencies.logger.info(`Finished installing ${elserModelId} model`);
+      };
+
+      const pollForModelInstallCompleted = async () => {
+        await pRetry(async () => {
+          this.dependencies.logger.info(`Polling installation of ${elserModelId} model`);
+          const modelInstalledAndReady = await isModelInstalledAndReady();
+          if (!modelInstalledAndReady) {
+            throwKnowledgeBaseNotReady({
+              message: 'Model is not fully defined',
+            });
+          }
+        }, retryOptions);
+      };
+      await installModelIfDoesNotExist();
+      await pollForModelInstallCompleted();
+
+      try {
+        await this.dependencies.esClient.asInternalUser.ml.startTrainedModelDeployment({
+          model_id: elserModelId,
+          wait_for: 'fully_allocated',
+        });
+      } catch (error) {
+        this.dependencies.logger.debug(`Error starting ${elserModelId} model deployment`);
+        this.dependencies.logger.debug(error);
+        if (!isModelMissingOrUnavailableError(error)) {
+          throw error;
+        }
+      }
+
+      await pRetry(async () => {
+        const response = await this.dependencies.esClient.asInternalUser.ml.getTrainedModelsStats({
+          model_id: elserModelId,
+        });
+
+        const isReady = response.trained_model_stats.some((stats) =>
+          (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+            (node) => node.routing_state.routing_state === 'started'
+          )
+        );
+
+        if (isReady) {
+          return Promise.resolve();
+        }
+
+        this.dependencies.logger.debug(`${elserModelId} model is not allocated yet`);
+        this.dependencies.logger.debug(() => JSON.stringify(response));
+
+        throw gatewayTimeout();
       }, retryOptions);
-    };
-    await installModelIfDoesNotExist();
-    await pollForModelInstallCompleted();
 
-    try {
-      await this.dependencies.esClient.asInternalUser.ml.startTrainedModelDeployment({
-        model_id: elserModelId,
-        wait_for: 'fully_allocated',
-      });
-    } catch (error) {
-      this.dependencies.logger.debug(`Error starting ${elserModelId} model deployment`);
-      this.dependencies.logger.debug(error);
-      if (!isModelMissingOrUnavailableError(error)) {
-        throw error;
-      }
+      this.dependencies.logger.info(`${elserModelId} model is ready`);
+      this.ensureTaskScheduled();
     }
-
-    await pRetry(async () => {
-      const response = await this.dependencies.esClient.asInternalUser.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-
-      const isReady = response.trained_model_stats.some((stats) =>
-        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
-          (node) => node.routing_state.routing_state === 'started'
-        )
-      );
-
-      if (isReady) {
-        return Promise.resolve();
-      }
-
-      this.dependencies.logger.debug(`${elserModelId} model is not allocated yet`);
-      this.dependencies.logger.debug(() => JSON.stringify(response));
-
-      throw gatewayTimeout();
-    }, retryOptions);
-
-    this.dependencies.logger.info(`${elserModelId} model is ready`);
-    this.ensureTaskScheduled();
   };
 
   private ensureTaskScheduled() {
-    this.dependencies.taskManagerStart
-      .ensureScheduled({
-        taskType: INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
-        id: INDEX_QUEUED_DOCUMENTS_TASK_ID,
-        state: {},
-        params: {},
-        schedule: {
-          interval: '1h',
-        },
-      })
-      .then(() => {
-        this.dependencies.logger.debug('Scheduled queue task');
-        return this.dependencies.taskManagerStart.runSoon(INDEX_QUEUED_DOCUMENTS_TASK_ID);
-      })
-      .then(() => {
-        this.dependencies.logger.debug('Queue task ran');
-      })
-      .catch((err) => {
-        this.dependencies.logger.error(`Failed to schedule queue task`);
-        this.dependencies.logger.error(err);
-      });
+    if (this.dependencies.enabled) {
+      this.dependencies.taskManagerStart
+        .ensureScheduled({
+          taskType: INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
+          id: INDEX_QUEUED_DOCUMENTS_TASK_ID,
+          state: {},
+          params: {},
+          schedule: {
+            interval: '1h',
+          },
+        })
+        .then(() => {
+          this.dependencies.logger.debug('Scheduled queue task');
+          return this.dependencies.taskManagerStart.runSoon(INDEX_QUEUED_DOCUMENTS_TASK_ID);
+        })
+        .then(() => {
+          this.dependencies.logger.debug('Queue task ran');
+        })
+        .catch((err) => {
+          this.dependencies.logger.error(`Failed to schedule queue task`);
+          this.dependencies.logger.error(err);
+        });
+    }
   }
 
   private async processOperation(operation: KnowledgeBaseEntryOperation) {
@@ -251,7 +257,7 @@ export class KnowledgeBaseService {
   }
 
   async processQueue() {
-    if (!this._queue.length) {
+    if (!this._queue.length || !this.dependencies.enabled) {
       return;
     }
 
@@ -305,6 +311,9 @@ export class KnowledgeBaseService {
   }
 
   status = async () => {
+    if (!this.dependencies.enabled) {
+      return { ready: false, enabled: false };
+    }
     const elserModelId = await this.dependencies.getModelId();
 
     try {
@@ -320,11 +329,13 @@ export class KnowledgeBaseService {
         deployment_state: deploymentState,
         allocation_state: allocationState,
         model_name: elserModelId,
+        enabled: true,
       };
     } catch (error) {
       return {
         error: error instanceof errors.ResponseError ? error.body.error : String(error),
         ready: false,
+        enabled: true,
         model_name: elserModelId,
       };
     }
@@ -402,6 +413,9 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
+    if (!this.dependencies.enabled) {
+      return { entries: [] };
+    }
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
@@ -474,6 +488,9 @@ export class KnowledgeBaseService {
     namespace: string,
     user?: { name: string }
   ): Promise<Array<Instruction & { public?: boolean }>> => {
+    if (!this.dependencies.enabled) {
+      return [];
+    }
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.aliases.kb,
@@ -514,6 +531,9 @@ export class KnowledgeBaseService {
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+    if (!this.dependencies.enabled) {
+      return { entries: [] };
+    }
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.aliases.kb,
@@ -578,6 +598,9 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }) => {
+    if (!this.dependencies.enabled) {
+      return null;
+    }
     const res = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'doc_id'>
     >({
@@ -607,6 +630,9 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
+    if (!this.dependencies.enabled) {
+      return;
+    }
     // for now we want to limit the number of user instructions to 1 per user
     if (document.type === KnowledgeBaseType.UserInstruction) {
       const existingId = await this.getExistingUserInstructionId({
@@ -647,6 +673,9 @@ export class KnowledgeBaseService {
   }: {
     operations: KnowledgeBaseEntryOperation[];
   }): Promise<void> => {
+    if (!this.dependencies.enabled) {
+      return;
+    }
     this.dependencies.logger.info(`Starting import of ${operations.length} entries`);
 
     const limiter = pLimit(5);

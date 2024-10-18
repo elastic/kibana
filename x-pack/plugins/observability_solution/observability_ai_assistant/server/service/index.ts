@@ -237,14 +237,13 @@ export class ObservabilityAIAssistantService {
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
-      this.kbService = this.enableKnowledgeBase
-        ? new KnowledgeBaseService({
-            logger: this.logger.get('kb'),
-            esClient,
-            taskManagerStart: pluginsStart.taskManager,
-            getModelId: this.getModelId,
-          })
-        : undefined;
+      this.kbService = new KnowledgeBaseService({
+        logger: this.logger.get('kb'),
+        esClient,
+        taskManagerStart: pluginsStart.taskManager,
+        getModelId: this.getModelId,
+        enabled: this.enableKnowledgeBase,
+      });
 
       this.logger.info('Successfully set up index assets');
     } catch (error) {

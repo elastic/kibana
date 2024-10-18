@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -35,6 +35,12 @@ export interface StartDependencies {
   enterpriseSearch?: EnterpriseSearchPublicStart;
 }
 
+export interface ConfigSchema {
+  logSourcesEnabled: boolean;
+  spacesEnabled: boolean;
+  visibilityEnabled: boolean;
+}
+
 export class AiAssistantManagementObservabilityPlugin
   implements
     Plugin<
@@ -44,6 +50,12 @@ export class AiAssistantManagementObservabilityPlugin
       StartDependencies
     >
 {
+  private readonly config: ConfigSchema;
+
+  constructor(context: PluginInitializerContext<ConfigSchema>) {
+    this.config = context.config.get();
+  }
+
   public setup(
     core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>,
     { home, management, observabilityAIAssistant }: SetupDependencies
@@ -78,6 +90,7 @@ export class AiAssistantManagementObservabilityPlugin
           return mountManagementSection({
             core,
             mountParams,
+            config: this.config,
           });
         },
       });

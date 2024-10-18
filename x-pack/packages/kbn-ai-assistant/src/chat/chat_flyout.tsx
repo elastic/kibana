@@ -53,7 +53,7 @@ export function ChatFlyout({
   initialFlyoutPositionMode?: FlyoutPositionMode;
   isOpen: boolean;
   onClose: () => void;
-  navigateToConversation(conversationId?: string): void;
+  navigateToConversation?: (conversationId?: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -272,10 +272,14 @@ export function ChatFlyout({
                 conversationList.conversations.refresh();
               }}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
-              navigateToConversation={(newConversationId?: string) => {
-                if (onClose) onClose();
-                navigateToConversation(newConversationId);
-              }}
+              navigateToConversation={
+                navigateToConversation
+                  ? (newConversationId?: string) => {
+                      if (onClose) onClose();
+                      navigateToConversation(newConversationId);
+                    }
+                  : undefined
+              }
             />
           </EuiFlexItem>
 

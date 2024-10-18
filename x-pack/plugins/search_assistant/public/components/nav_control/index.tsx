@@ -6,40 +6,43 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { AIAssistantAppService, useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
-import { useKibana } from '../../hooks/use_kibana';
-import { useTheme } from '../../hooks/use_theme';
-import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
-import { SharedProviders } from '../../utils/shared_providers';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
-import { useNavControlScope } from '../../hooks/use_nav_control_scope';
+import { useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
+import { useKibana } from '@kbn/ai-assistant/src/hooks/use_kibana';
+import { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/types';
+import { EuiErrorBoundary } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 interface NavControlWithProviderDeps {
-  appService: AIAssistantAppService;
   coreStart: CoreStart;
-  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  pluginsStart: AIAssistantPluginStartDependencies;
 }
 
-export const NavControlWithProvider = ({
-  appService,
-  coreStart,
-  pluginsStart,
-}: NavControlWithProviderDeps) => {
+export const NavControlWithProvider = ({ coreStart, pluginsStart }: NavControlWithProviderDeps) => {
   return (
-    <SharedProviders
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      service={appService}
-      theme$={coreStart.theme.theme$}
-    >
-      <NavControl />
-    </SharedProviders>
+    <EuiErrorBoundary>
+      <KibanaThemeProvider theme={coreStart.theme}>
+        <KibanaContextProvider
+          services={{
+            ...coreStart,
+            ...pluginsStart,
+          }}
+        >
+          <RedirectAppLinks coreStart={coreStart}>
+            <coreStart.i18n.Context>
+              <NavControl />
+            </coreStart.i18n.Context>
+          </RedirectAppLinks>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
+    </EuiErrorBoundary>
   );
 };
 
@@ -47,28 +50,16 @@ export function NavControl() {
   const service = useAIAssistantAppService();
 
   const {
-    services: {
-      application,
-      http,
-      notifications,
-      plugins: {
-        start: {
-          observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
-        },
-      },
-    },
+    services: { application, http, notifications, observabilityAIAssistant },
   } = useKibana();
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
-
-  useNavControlScreenContext();
-  useNavControlScope();
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
       return hasBeenOpened
         ? service.start({ signal }).catch((error) => {
-            notifications.toasts.addError(error, {
+            notifications?.toasts.addError(error, {
               title: i18n.translate(
                 'xpack.observabilityAiAssistant.navControl.initFailureErrorTitle',
                 {
@@ -84,7 +75,7 @@ export function NavControl() {
           })
         : undefined;
     },
-    [service, hasBeenOpened, notifications.toasts]
+    [service, hasBeenOpened, notifications?.toasts]
   );
 
   const [isOpen, setIsOpen] = useState(false);
@@ -108,7 +99,7 @@ export function NavControl() {
     title: undefined,
   };
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   const buttonCss = css`
     padding: 0px 8px;
@@ -117,22 +108,6 @@ export function NavControl() {
       fill: ${theme.colors.darkestShade};
     }
   `;
-
-  useEffect(() => {
-    const keyboardListener = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.code === 'Semicolon') {
-        service.conversations.openNewConversation({
-          messages: [],
-        });
-      }
-    };
-
-    window.addEventListener('keypress', keyboardListener);
-
-    return () => {
-      window.removeEventListener('keypress', keyboardListener);
-    };
-  }, [service.conversations]);
 
   return (
     <>
@@ -154,8 +129,11 @@ export function NavControl() {
           {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
         </EuiButton>
       </EuiToolTip>
-      {chatService.value ? (
-        <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
+      {chatService.value &&
+      Boolean(observabilityAIAssistant?.ObservabilityAIAssistantChatServiceContext) ? (
+        <observabilityAIAssistant.ObservabilityAIAssistantChatServiceContext.Provider
+          value={chatService.value}
+        >
           <ChatFlyout
             key={keyRef.current}
             isOpen={isOpen}
@@ -164,15 +142,8 @@ export function NavControl() {
             onClose={() => {
               setIsOpen(false);
             }}
-            navigateToConversation={(conversationId?: string) => {
-              application.navigateToUrl(
-                http.basePath.prepend(
-                  `/app/observabilityAIAssistant/conversations/${conversationId || ''}`
-                )
-              );
-            }}
           />
-        </ObservabilityAIAssistantChatServiceContext.Provider>
+        </observabilityAIAssistant.ObservabilityAIAssistantChatServiceContext.Provider>
       ) : undefined}
     </>
   );

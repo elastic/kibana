@@ -128,3 +128,6 @@ xpack.searchAssistant.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
 xpack.observabilityAIAssistant.enableKnowledgeBase: false
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
+xpack.observabilityAiAssistantManagement.spacesEnabled: false
+xpack.observabilityAiAssistantManagement.visibilityEnabled: false

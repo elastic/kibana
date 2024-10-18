@@ -24,7 +24,7 @@ const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 interface ConversationViewProps {
   conversationId?: string;
-  navigateToConversation: (nextConversationId?: string) => void;
+  navigateToConversation?: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
   scope?: AssistantScope;
@@ -80,7 +80,9 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
     if (!conversationId) {
       updateConversationIdInPlace(conversation.conversation.id);
-      navigateToConversation(conversation.conversation.id);
+      if (navigateToConversation) {
+        navigateToConversation(conversation.conversation.id);
+      }
     }
     handleRefreshConversations();
   };
@@ -142,7 +144,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
           isLoading={conversationList.isLoading}
           onConversationDeleteClick={(deletedConversationId) => {
             conversationList.deleteConversation(deletedConversationId).then(() => {
-              if (deletedConversationId === conversationId) {
+              if (deletedConversationId === conversationId && navigateToConversation) {
                 navigateToConversation(undefined);
               }
             });
