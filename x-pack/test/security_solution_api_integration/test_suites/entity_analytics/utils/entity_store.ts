@@ -72,7 +72,7 @@ export const EntityStoreUtils = (
   };
 
   const initEntityEngineForEntityTypesAndWait = async (entityTypes: EntityType[]) => {
-    await Promise.all(entityTypes.map((entityType) => initEntityEngineForEntityType(entityType)));
+    await Promise.all(entityTypes.map((entityType) => _initEntityEngineForEntityType(entityType)));
 
     await retry.waitForWithTimeout(
       `Engines to start for entity types: ${entityTypes.join(', ')}`,
