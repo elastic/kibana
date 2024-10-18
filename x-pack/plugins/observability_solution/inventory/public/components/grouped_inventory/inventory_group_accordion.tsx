@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiAccordion, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { InventoryGroupPanel } from './inventory_group_panel';
 import { GroupedGridWrapper } from './grouped_grid_wrapper';
 import { EntityGroup } from '../../../common/entities';
@@ -23,9 +24,16 @@ export interface InventoryGroupAccordionProps {
 }
 
 export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccordionProps) {
+  const { euiTheme } = useEuiTheme();
   const field = group[groupBy];
   const id = `inventory-group-${groupBy}-${field}`;
   const [load, setLoad] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const onToggle = useCallback(() => {
+    setLoad(true);
+    setOpen((opened) => !opened);
+  }, []);
 
   return (
     <>
@@ -44,15 +52,22 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
             />
           }
           buttonProps={{ paddingSize: 'm' }}
-          paddingSize="m"
-          onToggle={() => setLoad(true)}
-        >
-          {load && (
-            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-              <GroupedGridWrapper field={field} />
-            </EuiPanel>
-          )}
-        </EuiAccordion>
+          paddingSize="none"
+          onToggle={onToggle}
+        />
+      </EuiPanel>
+      <EuiPanel
+        css={css`
+          display: ${open ? 'block' : 'none'};
+          margin: 0 ${euiTheme.size.s};
+          border-top: none;
+          border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        `}
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+      >
+        {load && <GroupedGridWrapper field={field} />}
       </EuiPanel>
       <EuiSpacer size="s" />
     </>
