@@ -42,7 +42,15 @@ export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
+  const {
+    console: consolePlugin,
+    docLinks,
+    application,
+    history,
+    share,
+    chrome,
+    serverless,
+  } = useKibana().services;
   const {
     data: index,
     refetch,
@@ -73,6 +81,25 @@ export const SearchIndexDetailsPage = () => {
     setDocumentsLoading(isInitialLoading);
     setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
   }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
+
+  useEffect(() => {
+    chrome.docTitle.change(indexName);
+
+    if (serverless) {
+      serverless.setBreadcrumbs([
+        {
+          text: i18n.translate('xpack.searchIndices.indexBreadcrumbLabel', {
+            defaultMessage: 'Index Management',
+          }),
+          href: '/app/management/data/index_management/indices',
+        },
+        {
+          text: indexName,
+        },
+      ]);
+    }
+  }, [chrome, indexName, serverless]);
+
   const usageTracker = useUsageTracker();
 
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
