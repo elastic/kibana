@@ -88,12 +88,24 @@ class AgentlessAgentService {
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
 
+    const labels = agentlessAgentPolicy.global_data_tags
+      ? {
+          organization: agentlessAgentPolicy.global_data_tags.find(
+            (tag) => tag.name === 'organization'
+          )?.value,
+          division: agentlessAgentPolicy.global_data_tags.find((tag) => tag.name === 'division')
+            ?.value,
+          team: agentlessAgentPolicy.global_data_tags.find((tag) => tag.name === 'team')?.value,
+        }
+      : undefined;
+
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
         policy_id: policyId,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
+        labels,
       },
       method: 'POST',
       headers: {

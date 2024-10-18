@@ -150,16 +150,21 @@ export function useSetupTechnology({
   }, [isDefaultAgentlessPolicyEnabled]);
 
   const handleSetupTechnologyChange = useCallback(
-    (setupTechnology: SetupTechnology) => {
+    (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (isAgentlessApiEnabled) {
-          setNewAgentPolicy(newAgentlessPolicy as NewAgentPolicy);
+          const agentlessPolicy = {
+            ...newAgentlessPolicy,
+            ...getAdditionalAgentlessPolicyInfo(policyTemplateName, packageInfo),
+          } as NewAgentPolicy;
+
+          setNewAgentPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
-          updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
+          updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
         // tech debt: remove this when Serverless uses the Agentless API
         // https://github.com/elastic/security-team/issues/9781
@@ -187,6 +192,7 @@ export function useSetupTechnology({
       newAgentlessPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,
+      packageInfo,
     ]
   );
 
@@ -195,3 +201,37 @@ export function useSetupTechnology({
     selectedSetupTechnology,
   };
 }
+
+const getAdditionalAgentlessPolicyInfo = (
+  policyTemplateName?: string,
+  packageInfo?: PackageInfo
+) => {
+  if (!policyTemplateName || !packageInfo) {
+    return {
+      global_data_tags: [],
+    };
+  }
+  const agentlessPolicyTemplate = policyTemplateName
+    ? packageInfo?.policy_templates?.find((policy) => policy.name === policyTemplateName)
+    : undefined;
+
+  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
+  return {
+    global_data_tags: agentlessInfo
+      ? [
+          {
+            name: 'organization',
+            value: agentlessInfo.organization,
+          },
+          {
+            name: 'division',
+            value: agentlessInfo.division,
+          },
+          {
+            name: 'team',
+            value: agentlessInfo.team,
+          },
+        ]
+      : [],
+  };
+};
