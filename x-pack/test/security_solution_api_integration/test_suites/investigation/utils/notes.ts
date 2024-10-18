@@ -15,7 +15,7 @@ import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Deletes the first 100 notes (the getNotes endpoints is paginated and defaults to 10 is nothing is provided)
- * This works in ess, serverless and on the MKI environments as it avoid having to look at hidden indexes.
+ * This works in ess, serverless and on the MKI environments as it avoids having to look at hidden indexes.
  */
 export const deleteNotes = async (supertest: SuperTest.Agent): Promise<void> => {
   const response = await supertest
@@ -34,6 +34,11 @@ export const deleteNotes = async (supertest: SuperTest.Agent): Promise<void> => 
 
 /**
  * Create a note that can be attached to a document only, a saved object only, both or none
+ *
+ * @param supertest
+ * @param note
+ *   documentId is the document (alert, event...) id we want to associate the note with
+ *   savedObjectId is the id of the saved object (most likely a timeline id) we want to associate the note with
  */
 export const createNote = async (
   supertest: SuperTest.Agent,
@@ -50,10 +55,6 @@ export const createNote = async (
       note: {
         eventId: note.documentId || '',
         timelineId: note.savedObjectId || '',
-        created: Date.now(),
-        createdBy: 'elastic',
-        updated: Date.now(),
-        updatedBy: 'elastic',
         note: note.text,
       },
     } as PersistNoteRouteRequestBody);

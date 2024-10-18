@@ -16,11 +16,10 @@ import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Deletes the first 100 timelines.
- * This works in ess, serverless and on the MKI environments as it avoid having to look at hidden indexes.
+ * This works in ess, serverless and on the MKI environments as it avoids having to look at hidden indexes.
  */
 export const deleteTimelines = async (supertest: SuperTest.Agent): Promise<void> => {
   const response = await supertest
-    // .get(`${TIMELINE_URL}?page_size=100&page_index=1&timeline_type=default`)
     .get('/api/timelines')
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31');

@@ -382,7 +382,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         expect(notes[2].eventId).to.be('1');
       });
 
-      // this test cannot be run in serverless because in serverless the default user is 'test_user' instead of 'elastic'
+      // skipped https://github.com/elastic/kibana/issues/196896
       describe('@skipInServerless', () => {
         it('should retrieve all notes that have been created by a specific user', async () => {
           await Promise.all([
