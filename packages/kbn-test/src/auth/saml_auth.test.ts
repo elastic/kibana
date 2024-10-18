@@ -194,7 +194,7 @@ describe('saml_auth', () => {
           }
         )
       ).rejects.toThrow(
-        'Failed to create the new cloud session: MFA must be disabled for test user'
+        'Failed to create the new cloud session: MFA must be disabled for the test account'
       );
       expect(axiosRequestMock).toBeCalledTimes(1);
     });
