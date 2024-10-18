@@ -26,13 +26,19 @@ export default createTestConfig({
   ],
   apps: {
     serverlessElasticsearch: {
-      pathname: '/app/elasticsearch',
+      pathname: '/app/elasticsearch/getting_started',
     },
     serverlessConnectors: {
       pathname: '/app/connectors',
     },
     searchPlayground: {
       pathname: '/app/search_playground',
+    },
+    elasticsearchStart: {
+      pathname: '/app/elasticsearch/start',
+    },
+    elasticsearchIndices: {
+      pathname: '/app/elasticsearch/indices',
     },
   },
 });
