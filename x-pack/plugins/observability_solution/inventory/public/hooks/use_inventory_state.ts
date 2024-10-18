@@ -15,7 +15,7 @@ export function useInventoryState() {
   const { query } = useInventoryParams('/');
   const inventoryRoute = useInventoryRouter();
   const pagination = query.pagination
-    ? (decode(query.pagination) as Partial<Record<EntityView, number>>)
+    ? (decode(query.pagination) as Partial<Record<string, number>>)
     : undefined;
 
   const setGroupBy = useCallback(
@@ -34,7 +34,7 @@ export function useInventoryState() {
   );
 
   const setPagination = useCallback(
-    (group: EntityView, nextPage: number) => {
+    (group: string, nextPage: number) => {
       inventoryRoute.replace('/', {
         path: {},
         query: {
