@@ -224,6 +224,7 @@ export function useFetchAgentsData() {
             sendGetAgentPolicies({
               kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
               perPage: SO_SEARCH_LIMIT,
+              noAgentCount: true,
               full: false,
             }),
             sendGetAgentTags({

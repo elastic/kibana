@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { GetAgentPoliciesRequestSchema } from './agent_policy';
 
 describe('GetAgentPoliciesRequestSchema.query', () => {
