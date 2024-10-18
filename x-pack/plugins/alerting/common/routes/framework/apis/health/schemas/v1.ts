@@ -20,8 +20,7 @@ export const healthFrameworkResponseBodySchema = schema.object({
   }),
   has_permanent_encryption_key: schema.boolean({
     meta: {
-      description:
-        'If false, the encrypted saved object plugin does not have a permanent encryption key.',
+      description: 'If false, the encryption key is not set',
     },
   }),
   alerting_framework_health: schema.object(
