@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import {
   FieldStats,
   type FieldStatsProps,
@@ -28,13 +29,32 @@ export interface UnifiedFieldListItemStatsProps {
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
   onAddFilter: FieldStatsProps['onAddFilter'];
   additionalFilters?: FieldStatsProps['filters'];
+  /**
+   * Custom query and filters to override the default subscription to the query service
+   */
+  queryAndFiltersOverride?: {
+    query: Query | AggregateQuery;
+    filters: Filter[];
+    fromDate: string;
+    toDate: string;
+  };
 }
 
 export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ options, services, field, dataView, multiFields, onAddFilter, additionalFilters }) => {
+  ({
+    options,
+    services,
+    field,
+    dataView,
+    multiFields,
+    onAddFilter,
+    additionalFilters,
+    queryAndFiltersOverride,
+  }) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
       timeRangeUpdatesType: options.timeRangeUpdatesType,
+      isDisabled: Boolean(queryAndFiltersOverride),
     });
     // prioritize an aggregatable multi field if available or take the parent field
     const fieldForStats = useMemo(
@@ -57,8 +77,13 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
     );
 
     const filters = useMemo(
-      () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
-      [querySubscriberResult.filters, additionalFilters]
+      () => [
+        ...((queryAndFiltersOverride
+          ? queryAndFiltersOverride.filters
+          : querySubscriberResult.filters) ?? []),
+        ...(additionalFilters ?? []),
+      ],
+      [querySubscriberResult.filters, additionalFilters, queryAndFiltersOverride]
     );
 
     if (!hasQuerySubscriberData(querySubscriberResult)) {
@@ -68,10 +93,18 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
     return (
       <FieldStats
         services={statsServices}
-        query={querySubscriberResult.query}
+        query={
+          queryAndFiltersOverride ? queryAndFiltersOverride.query : querySubscriberResult.query
+        }
         filters={filters}
-        fromDate={querySubscriberResult.fromDate}
-        toDate={querySubscriberResult.toDate}
+        fromDate={
+          queryAndFiltersOverride
+            ? queryAndFiltersOverride.fromDate
+            : querySubscriberResult.fromDate
+        }
+        toDate={
+          queryAndFiltersOverride ? queryAndFiltersOverride.toDate : querySubscriberResult.toDate
+        }
         dataViewOrDataViewId={dataView}
         field={fieldForStats}
         data-test-subj={options.dataTestSubj?.fieldListItemStatsDataTestSubj}

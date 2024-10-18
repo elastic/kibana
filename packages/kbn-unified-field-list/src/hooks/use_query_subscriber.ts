@@ -18,6 +18,10 @@ import type { TimeRangeUpdatesType, SearchMode } from '../types';
  * Hook params
  */
 export interface QuerySubscriberParams {
+  /**
+   * If `true`, the hook will not subscribe to any updates
+   */
+  isDisabled?: boolean;
   data: DataPublicPluginStart;
   /**
    * Pass `timefilter` only if you are not using search sessions for the global search
@@ -38,16 +42,28 @@ export interface QuerySubscriberResult {
 
 /**
  * Memorizes current query, filters and absolute date range
+ * @param isDisabled
  * @param data
  * @param timeRangeUpdatesType
  * @public
  */
 export const useQuerySubscriber = ({
+  isDisabled,
   data,
   timeRangeUpdatesType = 'search-session',
 }: QuerySubscriberParams) => {
   const timefilter = data.query.timefilter.timefilter;
   const [result, setResult] = useState<QuerySubscriberResult>(() => {
+    if (isDisabled) {
+      return {
+        query: undefined,
+        filters: undefined,
+        fromDate: undefined,
+        toDate: undefined,
+        searchMode: undefined,
+      };
+    }
+
     const state = data.query.getState();
     const dateRange = getResolvedDateRange(timefilter);
     return {
@@ -60,6 +76,10 @@ export const useQuerySubscriber = ({
   });
 
   useEffect(() => {
+    if (isDisabled) {
+      return;
+    }
+
     if (timeRangeUpdatesType !== 'search-session') {
       return;
     }
@@ -74,9 +94,13 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, data.search.session.state$, timeRangeUpdatesType]);
+  }, [setResult, timefilter, data.search.session.state$, timeRangeUpdatesType, isDisabled]);
 
   useEffect(() => {
+    if (isDisabled) {
+      return;
+    }
+
     if (timeRangeUpdatesType !== 'timefilter') {
       return;
     }
@@ -91,9 +115,13 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, timeRangeUpdatesType]);
+  }, [setResult, timefilter, timeRangeUpdatesType, isDisabled]);
 
   useEffect(() => {
+    if (isDisabled) {
+      return;
+    }
+
     const subscription = data.query.state$.subscribe(({ state, changes }) => {
       if (changes.query || changes.filters) {
         setResult((prevState) => ({
@@ -106,7 +134,7 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, data.query.state$]);
+  }, [setResult, data.query.state$, isDisabled]);
 
   return result;
 };

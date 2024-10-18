@@ -1,0 +1,90 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo } from 'react';
+import { CustomGridColumnInfoPopover } from '@kbn/unified-data-table';
+import { UnifiedFieldListItemPopover } from '@kbn/unified-field-list';
+import { DataViewField } from '@kbn/data-plugin/common';
+import { useEuiTheme, EuiButtonIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { PLUGIN_ID } from '../../../common';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useIsEsqlMode } from '../../application/main/hooks/use_is_esql_mode';
+
+const options = {
+  originatingApp: PLUGIN_ID,
+};
+
+export const DiscoverGridColumnInfoPopover: CustomGridColumnInfoPopover = ({
+  dataView,
+  columnName,
+  columnsMeta,
+}) => {
+  const services = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
+  const { euiTheme } = useEuiTheme();
+  const field = useMemo(() => {
+    if (columnsMeta) {
+      if (!columnsMeta[columnName]) {
+        return null;
+      }
+
+      return new DataViewField(
+        convertDatatableColumnToDataViewFieldSpec({
+          id: columnName,
+          name: columnName,
+          meta: columnsMeta[columnName],
+        })
+      );
+    }
+
+    return dataView?.fields.getByName(columnName);
+  }, [dataView, columnName, columnsMeta]);
+
+  if (!field) {
+    return null;
+  }
+
+  return (
+    <span
+      css={css`
+        display: inline-block;
+        width: ${euiTheme.size.base};
+        line-height: ${euiTheme.size.base};
+      `}
+    >
+      <UnifiedFieldListItemPopover
+        ButtonComponent={({ onTogglePopover }) => (
+          <EuiButtonIcon
+            iconType="iInCircle"
+            color="text"
+            aria-label={i18n.translate('discover.dataGrid.columnInfoPopoverButtonAriaLabel', {
+              defaultMessage: 'Open column info popover',
+            })}
+            onClick={onTogglePopover}
+          />
+        )}
+        options={options}
+        field={field}
+        dataView={dataView}
+        services={services}
+        size="s" // TODO: make these props optional
+        itemIndex={0}
+        groupIndex={0}
+        isEmpty={false}
+        isSelected={true}
+        onAddFieldToWorkspace={() => {}}
+        onRemoveFieldFromWorkspace={() => {}}
+        searchMode={isEsqlMode ? 'text-based' : 'documents'}
+      />
+    </span>
+  );
+};

@@ -58,6 +58,7 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
+  CustomGridColumnInfoPopover as CustomGridColumnInfoPopoverType,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -382,6 +383,10 @@ export interface UnifiedDataTableProps {
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   /**
+   * Provide a custom popover component to be used for the column info icon
+   */
+  CustomGridColumnInfoPopover?: CustomGridColumnInfoPopoverType;
+  /**
    * Name of the UnifiedDataTable consumer component or application
    */
   consumer?: string;
@@ -482,6 +487,7 @@ export const UnifiedDataTable = ({
   gridStyleOverride,
   rowLineHeightOverride,
   customGridColumnsConfiguration,
+  CustomGridColumnInfoPopover,
   enableComparisonMode,
   cellContext,
   renderCellPopover,
@@ -840,6 +846,7 @@ export const UnifiedDataTable = ({
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
+        CustomGridColumnInfoPopover,
         onResize,
       }),
     [
@@ -847,6 +854,7 @@ export const UnifiedDataTable = ({
       columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
+      CustomGridColumnInfoPopover,
       dataView,
       dataViewFieldEditor,
       defaultColumns,

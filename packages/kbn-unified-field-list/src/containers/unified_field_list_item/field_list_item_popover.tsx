@@ -203,6 +203,10 @@ export interface UnifiedFieldListItemPopoverBaseProps {
    * Custom filters to apply for the field list, ex: namespace custom filter
    */
   additionalFilters?: Filter[];
+  /**
+   * Custom query and filters to override the default subscription to the query service
+   */
+  queryAndFiltersOverride?: UnifiedFieldListItemStatsProps['queryAndFiltersOverride'];
 }
 
 export interface UnifiedFieldListItemPopoverProps extends UnifiedFieldListItemPopoverBaseProps {
@@ -240,6 +244,7 @@ function UnifiedFieldListItemPopoverComponent({
     workspaceSelectedFieldNames,
     size,
     additionalFilters,
+    queryAndFiltersOverride,
   } = otherProps;
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -305,6 +310,7 @@ function UnifiedFieldListItemPopoverComponent({
           dataView={dataView}
           onAddFilter={addFilterAndClosePopover}
           additionalFilters={additionalFilters}
+          queryAndFiltersOverride={queryAndFiltersOverride}
         />
 
         {searchMode === 'documents' && multiFields && (
@@ -389,3 +395,7 @@ function UnifiedFieldListItemPopoverComponent({
 }
 
 export const UnifiedFieldListItemPopover = memo(UnifiedFieldListItemPopoverComponent);
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default UnifiedFieldListItemPopover;
