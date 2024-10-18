@@ -22,9 +22,10 @@ import { EntityIcon } from '../../entity_icon';
 
 interface EntityNameProps {
   entity: Entity;
+  onClick?: () => void;
 }
 
-export function EntityName({ entity }: EntityNameProps) {
+export function EntityName({ entity, onClick }: EntityNameProps) {
   const { services } = useKibana();
 
   const assetDetailsLocator =
@@ -58,7 +59,8 @@ export function EntityName({ entity }: EntityNameProps) {
   }, [entity, assetDetailsLocator, serviceOverviewLocator]);
 
   return (
-    <EuiLink data-test-subj="entityNameLink" href={getEntityRedirectUrl()}>
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink data-test-subj="entityNameLink" href={getEntityRedirectUrl()} onClick={onClick}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={0}>
           <EntityIcon entity={entity} />
