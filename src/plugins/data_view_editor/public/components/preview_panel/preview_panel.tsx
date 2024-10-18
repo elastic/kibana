@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
@@ -64,12 +65,6 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
     currentViewMode = ViewMode.allIndices;
   }
 
-  useEffect(() => {
-    if (!matched.visibleIndices.length && viewMode === ViewMode.onlyMatchingIndices) {
-      setViewMode(ViewMode.allIndices);
-    }
-  }, [matched, viewMode]);
-
   const indicesListContent = currentlyVisibleIndices.length ? (
     <IndicesList
       data-test-subj="createIndexPatternStep1IndicesList"
@@ -80,7 +75,10 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
       }
     />
   ) : (
-    <></>
+    <FormattedMessage
+      id="indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail"
+      defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases."
+    />
   );
 
   return (
