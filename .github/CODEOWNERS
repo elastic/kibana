@@ -94,7 +94,6 @@ x-pack/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security
 x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
-x-pack/packages/kbn-cloud-security-posture/storybook/config @elastic/kibana-cloud-security-posture
 packages/shared-ux/code_editor/impl @elastic/appex-sharedux
 packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
 packages/kbn-code-owners @elastic/appex-qa
@@ -1833,10 +1832,10 @@ x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detections/components/osquery @elastic/security-defend-workflows
 
 # Cloud Defend
-/x-pack/plugins/cloud_defend/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 
 # Cloud Security Posture
+x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
