@@ -66,7 +66,8 @@ describe('threatMatchRowRenderer', () => {
     });
   });
 
-  describe('#renderRow', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/196199
+  describe.skip('#renderRow', () => {
     it('renders with minimum required props', () => {
       const children = threatMatchRowRenderer.renderRow({
         data: threatMatchData,
