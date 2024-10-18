@@ -105,35 +105,35 @@ interface AssetCriticalitySystemProcessedAssignmentFileEvent {
 }
 
 export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventTypeOpts<AssetCriticalitySystemProcessedAssignmentFileEvent> =
-{
-  eventType: 'Asset Criticality Csv Upload Processed',
-  schema: {
-    processing: {
-      properties: {
-        startTime: { type: 'date', _meta: { description: 'Processing start time' } },
-        endTime: { type: 'date', _meta: { description: 'Processing end time' } },
-        tookMs: { type: 'long', _meta: { description: 'How long processing took ms' } },
+  {
+    eventType: 'Asset Criticality Csv Upload Processed',
+    schema: {
+      processing: {
+        properties: {
+          startTime: { type: 'date', _meta: { description: 'Processing start time' } },
+          endTime: { type: 'date', _meta: { description: 'Processing end time' } },
+          tookMs: { type: 'long', _meta: { description: 'How long processing took ms' } },
+        },
+      },
+      result: {
+        properties: {
+          successful: {
+            type: 'long',
+            _meta: { description: 'Number of criticality records successfully created or updated' },
+          },
+          failed: {
+            type: 'long',
+            _meta: { description: 'Number of criticality records which had errors' },
+          },
+          total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
+        },
+      },
+      status: {
+        type: 'keyword',
+        _meta: { description: 'Status of the processing either success, partial_success or fail' },
       },
     },
-    result: {
-      properties: {
-        successful: {
-          type: 'long',
-          _meta: { description: 'Number of criticality records successfully created or updated' },
-        },
-        failed: {
-          type: 'long',
-          _meta: { description: 'Number of criticality records which had errors' },
-        },
-        total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
-      },
-    },
-    status: {
-      type: 'keyword',
-      _meta: { description: 'Status of the processing either success, partial_success or fail' },
-    },
-  },
-};
+  };
 
 export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionAlertsCreated: number;
@@ -447,9 +447,9 @@ export const createAssetCriticalityProcessedFileEvent = ({
   startTime,
   endTime,
 }: CreateAssetCriticalityProcessedFileEvent): [
-    string,
-    AssetCriticalitySystemProcessedAssignmentFileEvent
-  ] => {
+  string,
+  AssetCriticalitySystemProcessedAssignmentFileEvent
+] => {
   const status = getUploadStatus(result);
 
   const processing = {
