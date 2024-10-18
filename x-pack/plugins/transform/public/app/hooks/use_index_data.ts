@@ -254,7 +254,7 @@ export const useIndexData = (
       setStatus(INDEX_STATUS.LOADED);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading]);
+  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading, dataGridData]);
 
   const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
   const { error: histogramsForFieldsError, data: histogramsForFieldsData } =
