@@ -38,6 +38,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { useFieldStatsFlyoutContext } from '@kbn/ml-field-stats-flyout';
 
 import { MAX_ROW_COUNT } from '@kbn/ml-data-grid/lib/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
@@ -76,7 +77,6 @@ import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
