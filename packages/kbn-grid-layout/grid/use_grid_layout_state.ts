@@ -82,10 +82,11 @@ export const useGridLayoutState = ({
       for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
         if (currentInteractionEvent && rowIndex !== currentInteractionEvent.targetRowIndex) {
           /**
-           * If there is an interraction event happning but the current row is not being targetted, it
+           * If there is an interaction event happening but the current row is not being targetted, it
            * does not need to be re-rendered; so, skip setting the panel styles of this row.
-           * Note that if there is **no** interaction event, then this is the initial render so the styles
-           * of every panel should be initialized.
+           *
+           * If there is **no** interaction event, then this is the initial render so the styles of every
+           * panel should be initialized; so, don't skip setting the panel styles.
            */
           continue;
         }
@@ -98,8 +99,10 @@ export const useGridLayoutState = ({
           if (!panelRef) return;
 
           const isResize = currentInteractionEvent?.type === 'resize';
-          if (panel.id === activePanel?.id && activePanel.position) {
+          if (panel.id === activePanel?.id) {
+            // if the current panel is active, give it fixed positioning depending on the interaction event
             const { position: draggingPosition } = activePanel;
+
             if (isResize) {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               panelRef.style.width = `${Math.max(
@@ -131,7 +134,7 @@ export const useGridLayoutState = ({
               panelRef.style.gridRowEnd = ``;
             }
           } else {
-            // if the panel is not being dragged, undo any dragging styles
+            // if the panel is not being dragged and/or resized, undo any fixed position styles
             panelRef.style.position = '';
             panelRef.style.left = ``;
             panelRef.style.top = ``;

@@ -31,7 +31,7 @@ export interface GridRowData {
   };
 }
 
-export type GridLayoutData = GridRowData[]; // make this array of behaviour subjects?
+export type GridLayoutData = GridRowData[];
 
 export interface GridSettings {
   gutterSize: number;
