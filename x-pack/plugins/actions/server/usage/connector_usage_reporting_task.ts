@@ -20,7 +20,7 @@ import { ActionsConfig } from '../config';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1d' };
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '15m' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
@@ -163,6 +163,8 @@ export class ConnectorUsageReportingTask {
       projectId: this.projectId || 'missing-project-id',
     });
 
+    this.logger.debug(`USAGE RECORD: ${JSON.stringify(record)}`);
+
     try {
       attempts = attempts + 1;
       await this.pushUsageRecord(record);
@@ -184,7 +186,9 @@ export class ConnectorUsageReportingTask {
         };
       }
       this.logger.error(
-        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${e.message}`
+        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${
+          e.message
+        } ${JSON.stringify(e.stack_trace)}`
       );
       return {
         state: {
