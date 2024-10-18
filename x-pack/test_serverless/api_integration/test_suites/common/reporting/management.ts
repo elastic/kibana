@@ -20,8 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
+  const samlAuth = getService('samlAuth');
   let adminUser: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
@@ -37,8 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
     let path: string;
 
     before(async () => {
-      adminUser = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      adminUser = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
@@ -67,15 +66,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminUser);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminUser);
     });
 
     it(`user can delete a report they've created`, async () => {
+      const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       const response = await supertestWithoutAuth
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
         .set(...API_HEADER)
         .set(...INTERNAL_HEADER)
-        .set(adminUser.apiKeyHeader);
+        .set(cookieHeader);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ deleted: true });
