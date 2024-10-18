@@ -679,7 +679,8 @@ export const performInstallSpecificRules = async (
   });
 
 export const performUpgradeSpecificRules = async (
-  rules: UpgradeSpecificRulesRequest['rules']
+  rules: UpgradeSpecificRulesRequest['rules'],
+  isPrebuiltRulesCustomizationEnabled: boolean
 ): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
@@ -687,7 +688,7 @@ export const performUpgradeSpecificRules = async (
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
-      pick_version: 'TARGET', // Setting fixed 'TARGET' temporarily for Milestone 2
+      pick_version: isPrebuiltRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
     }),
   });
 

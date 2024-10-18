@@ -9,10 +9,10 @@ import { usePerformSpecificRulesUpgradeMutation } from '../../api/hooks/prebuilt
 
 import * as i18n from './translations';
 
-export const usePerformUpgradeSpecificRules = () => {
+export const usePerformUpgradeSpecificRules = (isPrebuiltRulesCustomizationEnabled: boolean) => {
   const { addError, addSuccess } = useAppToasts();
 
-  return usePerformSpecificRulesUpgradeMutation({
+  return usePerformSpecificRulesUpgradeMutation(isPrebuiltRulesCustomizationEnabled, {
     onError: (err) => {
       addError(err, { title: i18n.RULE_UPGRADE_FAILED });
     },

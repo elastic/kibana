@@ -179,7 +179,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [rulesUpgradeState]
   );
 
-  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
+  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules(
+    isPrebuiltRulesCustomizationEnabled
+  );
 
   const upgradeRules = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
@@ -197,14 +199,18 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         }
 
         const rulesWithConflicts = getRulesWithConflicts(ruleIds);
-        if (rulesWithConflicts.length > 0 && !(await confirmConflictsUpgrade())) {
+        if (
+          isPrebuiltRulesCustomizationEnabled &&
+          rulesWithConflicts.length > 0 &&
+          !(await confirmConflictsUpgrade())
+        ) {
           return;
         }
 
         const ruleIdsWithConflicts = rulesWithConflicts.map((rule) => rule.rule_id);
-        const rulesToUpgradeWithNoConflicts = rulesToUpgrade.filter(
-          (rule) => !ruleIdsWithConflicts.includes(rule.rule_id)
-        );
+        const rulesToUpgradeWithNoConflicts = isPrebuiltRulesCustomizationEnabled
+          ? rulesToUpgrade.filter((rule) => !ruleIdsWithConflicts.includes(rule.rule_id))
+          : rulesToUpgrade;
         await upgradeSpecificRulesRequest(rulesToUpgradeWithNoConflicts);
       } finally {
         setLoadingRules((prev) =>
@@ -219,6 +225,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       getRulesWithConflicts,
       rulesUpgradeState,
       upgradeSpecificRulesRequest,
+      isPrebuiltRulesCustomizationEnabled,
     ]
   );
 
