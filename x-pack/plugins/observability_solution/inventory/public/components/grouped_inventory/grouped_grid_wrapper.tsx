@@ -10,14 +10,14 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import type { EntityColumnIds, EntityType, EntityView } from '../../../common/entities';
+import type { EntityColumnIds, EntityType } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useInventoryState } from '../../hooks/use_inventory_state';
 
 interface Props {
-  field?: EntityView;
+  field: string;
 }
 
 export function GroupedGridWrapper({ field }: Props) {
