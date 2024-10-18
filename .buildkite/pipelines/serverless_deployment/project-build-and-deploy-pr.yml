@@ -1,5 +1,7 @@
 env:
   ELASTIC_PR_COMMENTS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-serverless-deployment
 
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
