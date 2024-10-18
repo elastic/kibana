@@ -76,6 +76,7 @@ import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
@@ -289,10 +290,13 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     };
   });
 
-  const rowCountInfoLabel = i18n.translate('xpack.transform.stepDefineForm.rowCountInfoLabel', {
-    defaultMessage: 'Results are limited to a maximum of {maxRowCount} for preview purposes',
-    values: { maxRowCount: MAX_ROW_COUNT },
-  });
+  const rowCountInfoLabel = (
+    <FormattedMessage
+      id="xpack.transform.stepDefineForm.rowCountInfoLabel"
+      defaultMessage="Results are limited to a maximum of {maxRowCount} for preview purposes"
+      values={{ maxRowCount: MAX_ROW_COUNT }}
+    />
+  );
 
   return (
     <div data-test-subj="transformStepDefineForm">
