@@ -26,6 +26,7 @@ export const PERFORM_SPECIFIC_RULES_UPGRADE_KEY = [
 ];
 
 export const usePerformSpecificRulesUpgradeMutation = (
+  isPrebuiltRulesCustomizationEnabled: boolean,
   options?: UseMutationOptions<
     PerformRuleUpgradeResponseBody,
     Error,
@@ -43,7 +44,7 @@ export const usePerformSpecificRulesUpgradeMutation = (
 
   return useMutation<PerformRuleUpgradeResponseBody, Error, UpgradeSpecificRulesRequest['rules']>(
     (rulesToUpgrade: UpgradeSpecificRulesRequest['rules']) => {
-      return performUpgradeSpecificRules(rulesToUpgrade);
+      return performUpgradeSpecificRules(rulesToUpgrade, isPrebuiltRulesCustomizationEnabled);
     },
     {
       ...options,
