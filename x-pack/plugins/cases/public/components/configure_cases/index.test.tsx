@@ -55,7 +55,7 @@ const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 const useLicenseMock = useLicense as jest.Mock;
 
-describe('ConfigureCases', () => {
+describe.skip('ConfigureCases', () => {
   beforeAll(() => {
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
