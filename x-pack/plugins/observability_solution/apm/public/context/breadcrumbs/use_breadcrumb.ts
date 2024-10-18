@@ -8,8 +8,10 @@
 import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 import { useKibanaEnvironmentContext } from '../kibana_environment_context/use_kibana_environment_context';
+import { useKibana } from '../kibana_context/use_kibana';
 
 export function useBreadcrumb(
   callback: () => Breadcrumb | Breadcrumb[],
@@ -17,6 +19,9 @@ export function useBreadcrumb(
   options?: { omitRootOnServerless?: boolean; omitOnServerless?: boolean }
 ) {
   const { isServerlessEnv } = useKibanaEnvironmentContext();
+  const {
+    services: { chrome },
+  } = useKibana();
   const { omitRootOnServerless = false, omitOnServerless = false } = options || {};
 
   const api = useContext(BreadcrumbsContext);
@@ -29,8 +34,11 @@ export function useBreadcrumb(
 
   const matchedRoute = useRef(match?.route);
 
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
+
   useEffect(() => {
-    if (isServerlessEnv && omitOnServerless) {
+    const isProjectStyle = isServerlessEnv || chromeStyle === 'project';
+    if (isProjectStyle && omitOnServerless) {
       return;
     }
 
@@ -42,10 +50,9 @@ export function useBreadcrumb(
 
     if (matchedRoute.current) {
       const breadcrumbs = castArray(callback());
-
       api.set(
         matchedRoute.current,
-        isServerlessEnv && omitRootOnServerless && breadcrumbs.length >= 1
+        isProjectStyle && omitRootOnServerless && breadcrumbs.length >= 1
           ? breadcrumbs.slice(1)
           : breadcrumbs
       );
@@ -57,5 +64,5 @@ export function useBreadcrumb(
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match, ...fnDeps]);
+  }, [match, chromeStyle, ...fnDeps]);
 }

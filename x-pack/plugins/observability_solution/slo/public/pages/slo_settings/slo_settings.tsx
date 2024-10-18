@@ -16,17 +16,21 @@ import { HeaderMenu } from '../../components/header_menu/header_menu';
 export function SloSettingsPage() {
   const {
     http: { basePath },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
-  useBreadcrumbs([
-    {
-      href: basePath.prepend(paths.slosSettings),
-      text: i18n.translate('xpack.slo.breadcrumbs.slosSettingsText', {
-        defaultMessage: 'SLOs Settings',
-      }),
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        href: basePath.prepend(paths.slosSettings),
+        text: i18n.translate('xpack.slo.breadcrumbs.slosSettingsText', {
+          defaultMessage: 'SLOs Settings',
+        }),
+      },
+    ],
+    { serverless }
+  );
 
   return (
     <ObservabilityPageTemplate
