@@ -7,14 +7,7 @@
 
 import React from 'react';
 import type { UpgradeableCustomQueryFields } from '../../../../model/prebuilt_rule_upgrade/fields';
-import { FieldFormWrapper } from './field_form_wrapper';
-import {
-  KqlQueryEdit,
-  kqlQuerySchema,
-  kqlQuerySerializer,
-  kqlQueryDeserializer,
-} from './fields/kql_query';
-import { DataSourceEdit, dataSourceSchema } from './fields/data_source';
+import { KqlQueryEditForm } from './fields/kql_query';
 
 interface CustomQueryRuleFieldEditProps {
   fieldName: UpgradeableCustomQueryFields;
@@ -23,14 +16,7 @@ interface CustomQueryRuleFieldEditProps {
 export function CustomQueryRuleFieldEdit({ fieldName }: CustomQueryRuleFieldEditProps) {
   switch (fieldName) {
     case 'kql_query':
-      return (
-        <FieldFormWrapper
-          component={KqlQueryEdit}
-          ruleFieldFormSchema={kqlQuerySchema}
-          serializer={kqlQuerySerializer}
-          deserializer={kqlQueryDeserializer}
-        />
-      );
+      return <KqlQueryEditForm />;
     case 'data_source':
       return <FieldFormWrapper component={DataSourceEdit} ruleFieldFormSchema={dataSourceSchema} />;
     default:

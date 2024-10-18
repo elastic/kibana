@@ -51,16 +51,9 @@ export function FieldFormWrapper({
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
   const deserialize = useCallback(
-    (defaultValue: FormData): FormData => {
-      if (!deserializer) {
-        return defaultValue;
-      }
-
-      const rule = finalDiffableRule as Record<string, unknown>;
-      const defaultRuleFieldValue = rule[fieldName] as FormData;
-      return deserializer(defaultRuleFieldValue, finalDiffableRule);
-    },
-    [deserializer, fieldName, finalDiffableRule]
+    (defaultValue: FormData): FormData =>
+      deserializer ? deserializer(defaultValue, finalDiffableRule) : defaultValue,
+    [deserializer, finalDiffableRule]
   );
 
   const handleSubmit = useCallback(
