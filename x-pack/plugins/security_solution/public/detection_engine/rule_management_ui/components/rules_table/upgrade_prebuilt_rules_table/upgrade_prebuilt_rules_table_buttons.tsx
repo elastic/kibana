@@ -39,18 +39,17 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const isRuleUpgrading = loadingRules.length > 0;
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
   const isAllSelectedRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled &&
-    selectedRules.every((rule) => rule.diff.num_fields_with_conflicts > 0);
+    isPrebuiltRulesCustomizationEnabled && isAllRuleHaveConflicts(selectedRules);
   const isAllRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled &&
-    ruleUpgradeInfos.every((rule) => rule.diff.num_fields_with_conflicts > 0);
+    isPrebuiltRulesCustomizationEnabled && isAllRuleHaveConflicts(ruleUpgradeInfos);
+
   const upgradeSelectedRules = useCallback(
     () => upgradeRules(selectedRules.map((rule) => rule.rule_id)),
     [selectedRules, upgradeRules]
   );
 
   const upgradeAllRules = useCallback(
-    // Upgrade all rules, ignoring filter and selction
+    // Upgrade all rules, ignoring filter and selection
     () => upgradeRules(ruleUpgradeInfos.map((rule) => rule.rule_id)),
     [ruleUpgradeInfos, upgradeRules]
   );
@@ -91,3 +90,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
     </EuiFlexGroup>
   );
 };
+
+function isAllRuleHaveConflicts(rules: Array<{ diff: { num_fields_with_conflicts: number } }>) {
+  return rules.every((rule) => rule.diff.num_fields_with_conflicts > 0);
+}
