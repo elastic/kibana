@@ -20,7 +20,6 @@ import {
   OperatorFunction,
   scan,
   shareReplay,
-  Subscription,
   switchMap,
   throwError,
   timestamp,
@@ -153,7 +152,6 @@ class ChatService {
   private systemMessage: string;
   public functions$: BehaviorSubject<FunctionDefinition[]>;
   private screenContexts$: BehaviorSubject<ObservabilityAIAssistantScreenContext[]>;
-  private functionSubscription: Subscription;
 
   constructor({
     abortSignal,
@@ -180,7 +178,7 @@ class ChatService {
     this.systemMessage = '';
     this.screenContexts$ = screenContexts$;
     this.functions$ = new BehaviorSubject([] as FunctionDefinition[]);
-    this.functionSubscription = merge(scope$, screenContexts$).subscribe(() => {
+    merge(scope$, screenContexts$).subscribe(() => {
       this.initialize();
     });
   }
