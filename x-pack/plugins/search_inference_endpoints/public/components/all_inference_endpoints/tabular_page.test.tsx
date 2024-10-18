@@ -118,4 +118,17 @@ describe('When the tabular page is loaded', () => {
     expect(deleteActions[3]).toBeEnabled();
     expect(deleteActions[4]).toBeEnabled();
   });
+
+  it('should show preconfigured badge only for preconfigured endpoints', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    const preconfigured = 'PRECONFIGURED';
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[1]).toHaveTextContent(preconfigured);
+    expect(rows[2]).toHaveTextContent(preconfigured);
+    expect(rows[3]).not.toHaveTextContent(preconfigured);
+    expect(rows[4]).not.toHaveTextContent(preconfigured);
+    expect(rows[5]).not.toHaveTextContent(preconfigured);
+  });
 });

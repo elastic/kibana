@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 import { DeleteAction } from './delete_action';
+import { InferenceEndpointUI } from '../../../../types';
 
 describe('Delete Action', () => {
   const mockProvider = {
@@ -22,34 +23,35 @@ describe('Delete Action', () => {
     task_settings: {},
   } as any;
 
-  const mockItem = {
+  const mockItem: InferenceEndpointUI = {
     endpoint: 'my-hugging-face',
     provider: mockProvider,
     type: 'text_embedding',
   };
 
-  const Wrapper = ({ preconfiguredEndpoint }: { preconfiguredEndpoint: boolean }) => {
+  const Wrapper = ({ item }: { item: InferenceEndpointUI }) => {
     const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
-        <DeleteAction preconfiguredEndpoint={preconfiguredEndpoint} selectedEndpoint={mockItem} />
+        <DeleteAction selectedEndpoint={item} />
       </QueryClientProvider>
     );
   };
   it('renders', () => {
-    render(<Wrapper preconfiguredEndpoint={false} />);
+    render(<Wrapper item={mockItem} />);
 
     expect(screen.getByTestId('inferenceUIDeleteAction')).toBeEnabled();
   });
 
   it('disable the delete action for preconfigured endpoint', () => {
-    render(<Wrapper preconfiguredEndpoint={true} />);
+    const preconfiguredMockItem = { ...mockItem, endpoint: '.elser-2' };
+    render(<Wrapper item={preconfiguredMockItem} />);
 
     expect(screen.getByTestId('inferenceUIDeleteAction')).toBeDisabled();
   });
 
   it('loads confirm delete modal', () => {
-    render(<Wrapper preconfiguredEndpoint={false} />);
+    render(<Wrapper item={mockItem} />);
 
     fireEvent.click(screen.getByTestId('inferenceUIDeleteAction'));
     expect(screen.getByTestId('deleteModalForInferenceUI')).toBeInTheDocument();

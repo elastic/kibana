@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'searchInferenceEndpoints';
-export const PLUGIN_NAME = 'Inference Endpoints';
+import { i18n } from '@kbn/i18n';
 
-export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
-export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
+export const PRECONFIGURED_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
+  {
+    defaultMessage: 'PRECONFIGURED',
+  }
+);

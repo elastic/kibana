@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'searchInferenceEndpoints';
-export const PLUGIN_NAME = 'Inference Endpoints';
+import { PRECONFIGURED_ENDPOINTS } from '../components/all_inference_endpoints/constants';
 
-export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
-export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
+export const isEndpointPreconfigured = (endpoint: string) =>
+  Object.values(PRECONFIGURED_ENDPOINTS).includes(endpoint);

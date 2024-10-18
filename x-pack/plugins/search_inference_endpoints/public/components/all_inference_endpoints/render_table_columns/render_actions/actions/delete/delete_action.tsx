@@ -8,19 +8,16 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 import { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {
   selectedEndpoint: InferenceEndpointUI;
-  preconfiguredEndpoint: boolean;
 }
 
-export const DeleteAction: React.FC<DeleteActionProps> = ({
-  selectedEndpoint,
-  preconfiguredEndpoint,
-}) => {
+export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const { mutate: deleteEndpoint } = useDeleteEndpoint(() => setIsModalVisible(false));
@@ -44,7 +41,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({
           values: { selectedEndpointName: selectedEndpoint.endpoint },
         })}
         data-test-subj="inferenceUIDeleteAction"
-        disabled={preconfiguredEndpoint}
+        disabled={isEndpointPreconfigured(selectedEndpoint.endpoint)}
         key="delete"
         iconType="trash"
         color="danger"
