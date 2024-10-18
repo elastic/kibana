@@ -311,7 +311,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
         mlBrushSelection.exit().remove();
       }
 
-      function updateBrushes() {
+      function updateBrush() {
         const mlBrushSelection = gBrushes
           .selectAll('.brush')
           .data<SingleBrush>(brushes.current, (d) => (d as SingleBrush).id);
@@ -346,7 +346,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
         minRef.current = min;
         maxRef.current = max;
         snapTimestampsRef.current = snapTimestamps;
-        updateBrushes();
+        updateBrush();
       }
 
       drawBrushes();
