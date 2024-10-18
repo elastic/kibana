@@ -129,7 +129,7 @@ describe('useCompletedCards Hook', () => {
         });
       });
 
-      it('should set the correct completed card ids', async () => {
+      it('should not set the completed card ids', async () => {
         expect(mockSetStoredCompletedCardIds).not.toHaveBeenCalled();
       });
 
