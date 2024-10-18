@@ -6,12 +6,7 @@
  */
 
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
-import {
-  fetch$,
-  apiHasExecutionContext,
-  type FetchContext,
-  apiPublishesViewMode,
-} from '@kbn/presentation-publishing';
+import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { BehaviorSubject, type Subscription, distinctUntilChanged, skip } from 'rxjs';
@@ -239,17 +234,13 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$
       .pipe(distinctUntilChanged(fastIsEqual), skip(1))
       .subscribe(() => reload('disableTriggers')),
+    api.viewMode.subscribe(() => {
+      // only reload if drilldowns are set
+      if (getState().enhancements?.dynamicActions) {
+        reload('viewMode');
+      }
+    }),
   ];
-  if (apiPublishesViewMode(parentApi)) {
-    subscriptions.push(
-      parentApi.viewMode.subscribe(() => {
-        // only reload if drilldowns are set
-        if (getState().enhancements?.dynamicActions) {
-          reload('viewMode');
-        }
-      })
-    );
-  }
 
   return {
     cleanup: () => {

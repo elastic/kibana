@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import React from 'react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
 import {
@@ -16,11 +15,8 @@ import {
   LensSerializedState,
 } from './types';
 
-import { ExpressionWrapper } from './expression_wrapper';
 import { loadEmbeddableData } from './data_loader';
-import { isTextBasedLanguage, deserializeState, getViewMode } from './helper';
-import { UserMessages } from './user_messages/container';
-import { useMessages } from './user_messages/use_messages';
+import { isTextBasedLanguage, deserializeState } from './helper';
 import { initializeEditApi } from './initializers/inizialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
@@ -31,6 +27,8 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { apiHasLensComponentCallbacks } from './type_guards';
+import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
+// import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -176,64 +174,21 @@ export const createLensEmbeddableFactory = (
         parentApi.onLoad?.(true);
       }
 
+      const onUnmount = () => {
+        editConfig.cleanup();
+        inspectorConfig.cleanup();
+        searchContextConfig.cleanup();
+        expressionConfig.cleanup();
+        actionsConfig.cleanup();
+        integrationsConfig.cleanup();
+        dashboardConfig.cleanup();
+      };
+
       return {
         api,
-        Component: function LensEmbeddable() {
-          const [
-            // Pick up updated params from the observable
-            expressionParams,
-            // used for functional tests
-            renderCount,
-            // has the render completed?
-            hasRendered,
-          ] = useBatchedPublishingSubjects(
-            internalApi.expressionParams$,
-            internalApi.renderCount$,
-            internalApi.hasRenderCompleted$
-          );
-          const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(parentApi) === 'edit');
-
-          const [warningOrErrors, infoMessages] = useMessages(internalApi);
-
-          // On unmount call all the cleanups
-          useEffect(() => {
-            return () => {
-              editConfig.cleanup();
-              inspectorConfig.cleanup();
-              searchContextConfig.cleanup();
-              expressionConfig.cleanup();
-              actionsConfig.cleanup();
-              integrationsConfig.cleanup();
-              dashboardConfig.cleanup();
-            };
-          }, []);
-
-          // Publish the data attributes only if avaialble/visible
-          const title = !api.hidePanelTitle?.getValue()
-            ? { 'data-title': api.panelTitle?.getValue() }
-            : undefined;
-          const description = api.panelDescription?.getValue()
-            ? { 'data-description': api.panelDescription?.getValue() }
-            : undefined;
-
-          return (
-            <div
-              style={{ width: '100%', height: '100%' }}
-              data-rendering-count={renderCount}
-              data-render-complete={hasRendered}
-              {...title}
-              {...description}
-              data-shared-item
-            >
-              {expressionParams == null ? null : <ExpressionWrapper {...expressionParams} />}
-              <UserMessages
-                warningOrErrors={warningOrErrors}
-                infoMessages={infoMessages}
-                canEdit={canEdit}
-              />
-            </div>
-          );
-        },
+        Component: () => (
+          <LensEmbeddableComponent api={api} internalApi={internalApi} onUnmount={onUnmount} />
+        ),
       };
     },
   };

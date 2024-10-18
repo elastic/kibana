@@ -23,6 +23,9 @@ export function UserMessages({
   warningOrErrors: UserMessage[];
   infoMessages: UserMessage[];
 }) {
+  if (!blockingErrors?.length && !warningOrErrors.length && !infoMessages.length) {
+    return null;
+  }
   return (
     <>
       {blockingErrors ? (

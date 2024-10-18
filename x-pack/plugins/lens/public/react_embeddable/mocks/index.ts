@@ -8,7 +8,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import faker from 'faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import { PhaseEvent } from '@kbn/presentation-publishing';
+import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,17 +16,30 @@ import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mock
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
-import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
+import { DOC_TYPE } from '../../../common/constants';
+import { createEmptyLensState } from '../helper';
 import {
+  ExpressionWrapperProps,
   LensApi,
   LensEmbeddableStartServices,
+  LensInternalApi,
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
 } from '../types';
-import { createEmptyLensState } from '../helper';
-import { DOC_TYPE } from '../../../common/constants';
+import {
+  createMockDatasource,
+  createMockVisualization,
+  defaultDoc,
+  makeDefaultServices,
+} from '../../mocks';
+import {
+  Datasource,
+  DatasourceMap,
+  UserMessage,
+  Visualization,
+  VisualizationMap,
+} from '../../types';
 
 const LensApiMock: LensApi = {
   // Static props
@@ -92,6 +105,7 @@ const LensApiMock: LensApi = {
   blockingError: new BehaviorSubject<Error | undefined>(undefined),
   panelDescription: new BehaviorSubject<string | undefined>(undefined),
   setPanelDescription: jest.fn(),
+  viewMode: new BehaviorSubject<ViewMode>('view'),
 };
 
 const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
@@ -207,3 +221,34 @@ export const mockDatasourceMap = (
     },
   };
 };
+
+const LensInternalApiMock: LensInternalApi = {
+  dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
+  attributes$: new BehaviorSubject<LensRuntimeState['attributes']>(defaultDoc),
+  overrides$: new BehaviorSubject<LensRuntimeState['overrides']>(undefined),
+  disableTriggers$: new BehaviorSubject<LensRuntimeState['disableTriggers']>(undefined),
+  dataLoading$: new BehaviorSubject<boolean | undefined>(undefined),
+  hasRenderCompleted$: new BehaviorSubject<boolean>(true),
+  expressionParams$: new BehaviorSubject<ExpressionWrapperProps | null>(null),
+  expressionAbortController$: new BehaviorSubject<AbortController | undefined>(undefined),
+  renderCount$: new BehaviorSubject<number>(0),
+  messages$: new BehaviorSubject<UserMessage[]>([]),
+  updateAttributes: jest.fn(),
+  updateOverrides: jest.fn(),
+  dispatchRenderStart: jest.fn(),
+  dispatchRenderComplete: jest.fn(),
+  updateRenderCount: jest.fn(),
+  updateDataLoading: jest.fn(),
+  updateExpressionParams: jest.fn(),
+  updateAbortController: jest.fn(),
+  updateDataViews: jest.fn(),
+  updateMessages: jest.fn(),
+  resetAllMessages: jest.fn(),
+};
+
+export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
+  return {
+    ...LensInternalApiMock,
+    ...overrides,
+  };
+}

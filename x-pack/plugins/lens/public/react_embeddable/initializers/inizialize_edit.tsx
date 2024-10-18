@@ -8,6 +8,8 @@
 import {
   HasEditCapabilities,
   HasSupportedTriggers,
+  PublishesViewMode,
+  ViewMode,
   apiHasAppContext,
 } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -23,7 +25,7 @@ import {
   LensInternalApi,
   LensRuntimeState,
 } from '../types';
-import { emptySerializer, getViewMode } from '../helper';
+import { buildObservableVariable, emptySerializer, getViewMode } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
@@ -57,7 +59,7 @@ export function initializeEditApi(
   startDependencies: LensEmbeddableStartServices,
   parentApi?: unknown
 ): {
-  api: HasSupportedTriggers & HasEditCapabilities & { uuid: string };
+  api: HasSupportedTriggers & HasEditCapabilities & PublishesViewMode & { uuid: string };
   comparators: {};
   serialize: () => {};
   cleanup: () => void;
@@ -135,12 +137,15 @@ export function initializeEditApi(
     ? parentApi.canEditInline
     : true;
 
+  const [viewMode$] = buildObservableVariable<ViewMode>(getViewMode(parentApi) || 'view');
+
   return {
     comparators: {},
     serialize: emptySerializer,
     cleanup: noop,
     api: {
       uuid,
+      viewMode: viewMode$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.lens.embeddableDisplayName', {
           defaultMessage: 'Lens',

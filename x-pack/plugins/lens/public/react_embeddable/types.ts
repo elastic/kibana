@@ -23,6 +23,7 @@ import type {
   PublishesDataViews,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
+  PublishesViewMode,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishingSubject,
@@ -355,6 +356,8 @@ export type LensApi = Simplify<
     // Offers methods to operate from/on the linked saved object
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &
+    // Let the container know the view mode
+    PublishesViewMode &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:

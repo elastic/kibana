@@ -72,8 +72,6 @@ export type ComparatorType<T extends unknown> = [
   (a: T, b: T) => boolean
 ];
 
-type ObservableFactoryReturnType<T extends unknown> = [BehaviorSubject<T>, ComparatorType<T>];
-
 export function makeComparator<T extends unknown>(
   observable: BehaviorSubject<T>
 ): ComparatorType<T> {
@@ -82,7 +80,7 @@ export function makeComparator<T extends unknown>(
 
 export function buildObservableVariable<T extends unknown>(
   variable: T | PublishingSubject<T>
-): ObservableFactoryReturnType<T> {
+): [BehaviorSubject<T>, ComparatorType<T>] {
   if (variable instanceof BehaviorSubject) {
     return [variable, makeComparator(variable)];
   }

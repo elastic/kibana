@@ -49,7 +49,9 @@ export function LensRenderer({
 
   const apiRef = useRef<LensApi | undefined>(undefined);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes || createEmptyLensState(null, title, '', query, filters)
+    props.attributes
+      ? { attributes: props.attributes }
+      : createEmptyLensState(null, title, '', query, filters)
   );
 
   const searchApi = useSearchApi(props);
