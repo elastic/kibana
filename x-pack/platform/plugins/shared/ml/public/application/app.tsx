@@ -83,6 +83,7 @@ const App: FC<AppProps> = ({
       dataViews: deps.data.dataViews,
       dataVisualizer: deps.dataVisualizer,
       embeddable: deps.embeddable,
+      eventBus: deps.eventBus,
       fieldFormats: deps.fieldFormats,
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
