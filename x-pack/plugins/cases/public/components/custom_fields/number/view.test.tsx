@@ -24,6 +24,6 @@ describe('View ', () => {
   it('renders correctly', async () => {
     render(<View customField={customField} />);
 
-    expect(screen.getByText('My text test value')).toBeInTheDocument();
+    expect(screen.getByText('123')).toBeInTheDocument();
   });
 });

@@ -545,18 +545,24 @@ describe('Utils', () => {
         convertCustomFieldValue({ value: false, type: CustomFieldTypes.TOGGLE })
       ).toMatchInlineSnapshot('false');
     });
-    it('returns value as integer number when value is integer string', () => {
+    it('returns value as integer number when value is integer string and type is number', () => {
       expect(convertCustomFieldValue({ value: '123', type: CustomFieldTypes.NUMBER })).toEqual(123);
     });
 
-    it('returns value as integer number when value is float string ', () => {
+    it('returns value as null when value is float string and type is number', () => {
       expect(convertCustomFieldValue({ value: '0.5', type: CustomFieldTypes.NUMBER })).toEqual(
-        '0.5'
+        null
       );
     });
 
-    it('returns value as null when value is null ', () => {
+    it('returns value as null when value is null and type is number', () => {
       expect(convertCustomFieldValue({ value: null, type: CustomFieldTypes.NUMBER })).toEqual(null);
+    });
+
+    it('returns value as null when value is characters string and type is number', () => {
+      expect(convertCustomFieldValue({ value: 'fdgdg', type: CustomFieldTypes.NUMBER })).toEqual(
+        null
+      );
     });
   });
 

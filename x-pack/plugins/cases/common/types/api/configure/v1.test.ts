@@ -24,8 +24,6 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
-  MAX_LONG_NUMBER_LIMIT,
-  MIN_LONG_NUMBER_LIMIT,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -578,26 +576,26 @@ describe('configure', () => {
       ).toContain('Invalid value "string" supplied');
     });
 
-    it(`throws an error if the default value is more than ${MAX_LONG_NUMBER_LIMIT}`, () => {
+    it(`throws an error if the default value is more than  Number.MAX_SAFE_INTEGER`, () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            defaultValue: MAX_LONG_NUMBER_LIMIT * 2,
+            defaultValue: Number.MAX_SAFE_INTEGER + 1,
           })
         )[0]
-      ).toContain(`The defaultValue field cannot be more than ${MAX_LONG_NUMBER_LIMIT}.`);
+      ).toContain(`The defaultValue field should be a safe integer number.`);
     });
 
-    it(`throws an error if the default value is less than ${MIN_LONG_NUMBER_LIMIT}`, () => {
+    it(`throws an error if the default value is less than ${Number.MIN_SAFE_INTEGER}`, () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            defaultValue: MIN_LONG_NUMBER_LIMIT * 2,
+            defaultValue: Number.MIN_SAFE_INTEGER - 1,
           })
         )[0]
-      ).toContain(`The defaultValue field cannot be less than ${MIN_LONG_NUMBER_LIMIT}.`);
+      ).toContain(`The defaultValue field should be a safe integer number.`);
     });
   });
 

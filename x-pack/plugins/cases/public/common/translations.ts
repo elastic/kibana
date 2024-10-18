@@ -300,22 +300,10 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
       'The length of the {field} is too long. The maximum length is {length} characters.',
   });
 
-export const MAX_NUMBER_ERROR = (field: string, maxValue: number) =>
-  i18n.translate('xpack.cases.customFields.infiniteNumberError', {
-    values: { field, maxValue },
-    defaultMessage: `The value of the {field} cannot be more than {maxValue}.`,
-  });
-
-export const MIN_NUMBER_ERROR = (field: string, minValue: number) =>
-  i18n.translate('xpack.cases.customFields.tooManyDecimalPlacesError', {
-    values: { field, minValue },
-    defaultMessage: 'The value of the {field} cannot be less than {minValue}.',
-  });
-
-export const INTEGER_NUMBER_ERROR = (field: string) =>
-  i18n.translate('xpack.cases.customFields.tooManyDecimalPlacesError', {
+export const SAFE_INTEGER_NUMBER_ERROR = (field: string) =>
+  i18n.translate('xpack.cases.customFields.safeIntegerNumberError', {
     values: { field },
-    defaultMessage: 'The value of the {field} must be an integer number.',
+    defaultMessage: `The value of the {field} should be a safe integer number.`,
   });
 
 export const MAX_TAGS_ERROR = (length: number) =>

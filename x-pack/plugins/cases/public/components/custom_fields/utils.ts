@@ -19,12 +19,12 @@ export const customFieldSerializer = (
     return otherProperties;
   }
 
-  if (
-    field.type === CustomFieldTypes.NUMBER &&
-    defaultValue !== null &&
-    Number.isInteger(Number(defaultValue))
-  ) {
-    return { ...field, defaultValue: Number(defaultValue) };
+  if (field.type === CustomFieldTypes.NUMBER) {
+    if (defaultValue !== null && Number.isSafeInteger(Number(defaultValue))) {
+      return { ...field, defaultValue: Number(defaultValue) };
+    } else {
+      return { ...field, defaultValue: null };
+    }
   }
 
   return field;

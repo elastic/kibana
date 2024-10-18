@@ -245,9 +245,14 @@ export const convertCustomFieldValue = ({
     return null;
   }
 
-  if (type === CustomFieldTypes.NUMBER && value !== null && Number.isInteger(Number(value))) {
-    return Number(value);
+  if (type === CustomFieldTypes.NUMBER) {
+    if (value !== null && Number.isSafeInteger(Number(value))) {
+      return Number(value);
+    } else {
+      return null;
+    }
   }
+
   return value;
 };
 

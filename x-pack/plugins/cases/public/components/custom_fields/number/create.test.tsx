@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
-import { MAX_LONG_NUMBER_LIMIT, MIN_LONG_NUMBER_LIMIT } from '../../../../common/constants';
 
 describe('Create ', () => {
   const onSubmit = jest.fn();
@@ -132,14 +131,12 @@ describe('Create ', () => {
 
     await userEvent.clear(numberCustomField);
     await userEvent.click(numberCustomField);
-    await userEvent.paste(`${MAX_LONG_NUMBER_LIMIT * 2}`);
+    await userEvent.paste(`${Number.MAX_SAFE_INTEGER + 1}`);
 
     await userEvent.click(await screen.findByText('Submit'));
 
     expect(
-      await screen.findByText(
-        'The value of the My test label 5 cannot be more than 9223372036854776000.'
-      )
+      await screen.findByText('The value of the My test label 5 should be a safe integer number.')
     ).toBeInTheDocument();
 
     await waitFor(() => {
@@ -163,14 +160,12 @@ describe('Create ', () => {
 
     await userEvent.clear(numberCustomField);
     await userEvent.click(numberCustomField);
-    await userEvent.paste(`${MIN_LONG_NUMBER_LIMIT * 2}`);
+    await userEvent.paste(`${Number.MIN_SAFE_INTEGER - 1}`);
 
     await userEvent.click(await screen.findByText('Submit'));
 
     expect(
-      await screen.findByText(
-        'The value of the My test label 5 cannot be less than -9223372036854776000.'
-      )
+      await screen.findByText('The value of the My test label 5 should be a safe integer number.')
     ).toBeInTheDocument();
 
     await waitFor(() => {

@@ -230,7 +230,7 @@ export const schemas: Record<string, FormSchema> = {
                 message: i18n.translate(
                   'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldDecimalError',
                   {
-                    defaultMessage: `The value should be an integer number.`,
+                    defaultMessage: `The value should be a safe integer number.`,
                   }
                 ),
               };

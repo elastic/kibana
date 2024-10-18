@@ -7,13 +7,7 @@
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import {
-  REQUIRED_FIELD,
-  MAX_NUMBER_ERROR,
-  MIN_NUMBER_ERROR,
-  INTEGER_NUMBER_ERROR,
-} from '../translations';
-import { MAX_LONG_NUMBER_LIMIT, MIN_LONG_NUMBER_LIMIT } from '../../../../common/constants';
+import { REQUIRED_FIELD, SAFE_INTEGER_NUMBER_ERROR } from '../translations';
 
 const { emptyField } = fieldValidators;
 
@@ -45,20 +39,8 @@ export const getNumberFieldConfig = ({
           }
           const numericValue = Number(value);
 
-          if (!Number.isInteger(numericValue)) {
-            return { message: INTEGER_NUMBER_ERROR(label) };
-          }
-
-          if (numericValue > MAX_LONG_NUMBER_LIMIT) {
-            return {
-              message: MAX_NUMBER_ERROR(label, MAX_LONG_NUMBER_LIMIT),
-            };
-          }
-
-          if (numericValue < MIN_LONG_NUMBER_LIMIT) {
-            return {
-              message: MIN_NUMBER_ERROR(label, MIN_LONG_NUMBER_LIMIT),
-            };
+          if (!Number.isSafeInteger(numericValue)) {
+            return { message: SAFE_INTEGER_NUMBER_ERROR(label) };
           }
         },
       },

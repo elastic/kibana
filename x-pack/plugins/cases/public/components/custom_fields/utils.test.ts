@@ -97,5 +97,41 @@ describe('utils ', () => {
         }
       `);
     });
+
+    it('serializes the data correctly if the default value is integer number', async () => {
+      const customField = {
+        key: 'my_test_key',
+        type: CustomFieldTypes.NUMBER,
+        required: true,
+        defaultValue: 1,
+      } as CustomFieldConfiguration;
+
+      expect(customFieldSerializer(customField)).toMatchInlineSnapshot(`
+        Object {
+          "defaultValue": 1,
+          "key": "my_test_key",
+          "required": true,
+          "type": "number",
+        }
+      `);
+    });
+
+    it('serializes the data correctly if the default value is float number', async () => {
+      const customField = {
+        key: 'my_test_key',
+        type: CustomFieldTypes.NUMBER,
+        required: true,
+        defaultValue: 1.5,
+      } as CustomFieldConfiguration;
+
+      expect(customFieldSerializer(customField)).toMatchInlineSnapshot(`
+        Object {
+          "defaultValue": null,
+          "key": "my_test_key",
+          "required": true,
+          "type": "number",
+        }
+      `);
+    });
   });
 });

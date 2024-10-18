@@ -6,11 +6,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import {
-  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_LONG_NUMBER_LIMIT,
-  MIN_LONG_NUMBER_LIMIT,
-} from '../../../constants';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
 import {
   CaseCustomFieldTextWithValidationValueRt,
   CustomFieldPutRequestRt,
@@ -122,16 +118,16 @@ describe('Custom Fields', () => {
       });
     });
 
-    it('should not be more than MAX_LONG_NUMBER_LIMIT', () => {
+    it('should not be more than Number.MAX_SAFE_INTEGER', () => {
       expect(
-        PathReporter.report(numberCustomFieldValueType.decode(MAX_LONG_NUMBER_LIMIT * 2))[0]
-      ).toContain(`The value field cannot be more than ${MAX_LONG_NUMBER_LIMIT}.`);
+        PathReporter.report(numberCustomFieldValueType.decode(Number.MAX_SAFE_INTEGER + 1))[0]
+      ).toContain(`The value field should be a safe integer number.`);
     });
 
-    it('should not be less than MIN_LONG_NUMBER_LIMIT', () => {
+    it('should not be less than Number.MIN_SAFE_INTEGER', () => {
       expect(
-        PathReporter.report(numberCustomFieldValueType.decode(MIN_LONG_NUMBER_LIMIT * 2))[0]
-      ).toContain(`The value field cannot be less than ${MIN_LONG_NUMBER_LIMIT}.`);
+        PathReporter.report(numberCustomFieldValueType.decode(Number.MIN_SAFE_INTEGER - 1))[0]
+      ).toContain(`The value field should be a safe integer number.`);
     });
   });
 });
