@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiContextMenu, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
+import { EntityView } from '../../../common/entities';
+import { useInventoryState } from '../../hooks/use_inventory_state';
 
-const GROUP_LABELS: Record<string, string> = {
-  none: i18n.translate('xpack.inventory.groupedInventoryPage.noneLabel', {
+const GROUP_LABELS: Record<EntityView, string> = {
+  unified: i18n.translate('xpack.inventory.groupedInventoryPage.noneLabel', {
     defaultMessage: 'None',
   }),
   [ENTITY_TYPE]: i18n.translate('xpack.inventory.groupedInventoryPage.typeLabel', {
@@ -28,14 +28,13 @@ export interface GroupedSelectorProps {
 }
 
 export function GroupSelector() {
-  const { euiTheme } = useEuiTheme();
-  const { grouping, setGrouping } = useInventoryPageViewContext();
+  const { groupBy, setGroupBy } = useInventoryState();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const onGroupChange = (selected: string) => {
-    setGrouping(grouping === selected ? 'none' : selected);
+  const onGroupChange = (selected: EntityView) => {
+    setGroupBy(groupBy === selected ? 'unified' : selected);
   };
-  const isGroupSelected = (groupKey: string) => {
-    return grouping === groupKey;
+  const isGroupSelected = (groupKey: EntityView) => {
+    return groupBy === groupKey;
   };
   const panels = [
     {
@@ -43,10 +42,10 @@ export function GroupSelector() {
       title: 'Select grouping',
       items: [
         {
-          'data-test-subj': 'panel-none',
-          name: GROUP_LABELS.none,
-          icon: isGroupSelected('none') ? 'check' : 'empty',
-          onClick: () => onGroupChange('none'),
+          'data-test-subj': 'panel-unified',
+          name: GROUP_LABELS.unified,
+          icon: isGroupSelected('unified') ? 'check' : 'empty',
+          onClick: () => onGroupChange('unified'),
         },
         {
           'data-test-subj': 'panel-type',
@@ -65,28 +64,18 @@ export function GroupSelector() {
   const button = (
     <EuiButtonEmpty
       data-test-subj="group-selector-dropdown"
-      css={css`
-        font-weight: 'normal';
-
-        .euiButtonEmpty__text {
-          max-width: 300px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      `}
       flush="both"
       iconSide="right"
       iconSize="s"
       iconType="arrowDown"
       onClick={onButtonClick}
-      title={GROUP_LABELS[grouping]}
+      title={GROUP_LABELS[groupBy]}
       size="s"
     >
       <FormattedMessage
         id="xpack.inventory.groupedInventoryPage.groupedByLabel"
         defaultMessage={`Group entities by: {grouping}`}
-        values={{ grouping: GROUP_LABELS[grouping] }}
+        values={{ grouping: GROUP_LABELS[groupBy] }}
       />
     </EuiButtonEmpty>
   );
@@ -100,19 +89,6 @@ export function GroupSelector() {
       panelPaddingSize="none"
     >
       <EuiContextMenu
-        css={css`
-          width: 250px;
-          & .euiContextMenuItem__text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .euiContextMenuItem {
-            border-bottom: ${euiTheme.border.thin};
-          }
-          .euiContextMenuItem:last-child {
-            border: none;
-          }
-        `}
         data-test-subj="entitiesGroupByContextMnue"
         initialPanelId="firstPanel"
         panels={panels}

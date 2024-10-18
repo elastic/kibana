@@ -9,7 +9,12 @@ import * as t from 'io-ts';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
-import { defaultEntitySortField, entityTypesRt, entityColumnIdsRt } from '../../common/entities';
+import {
+  defaultEntitySortField,
+  entityTypesRt,
+  entityColumnIdsRt,
+  entityViewRt,
+} from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -31,7 +36,8 @@ const inventoryRoutes = {
         t.partial({
           entityTypes: entityTypesRt,
           kuery: t.string,
-          view: t.string,
+          view: entityViewRt,
+          pagination: t.string,
         }),
       ]),
     }),
