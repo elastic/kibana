@@ -333,7 +333,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     /** @default stable */
     stability?: 'experimental' | 'beta' | 'stable';
     /**
-     * Must be a stack version
+     * The stack version in which the route was introduced (eg: 8.15.0).
      */
     since?: string;
   };
