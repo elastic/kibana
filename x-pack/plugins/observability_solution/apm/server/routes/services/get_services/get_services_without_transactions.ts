@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAgentName } from '../../../utils/get_agent_name';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,

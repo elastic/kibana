@@ -9,6 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   CLOUD_AVAILABILITY_ZONE,
@@ -32,7 +33,6 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { should } from './get_service_metadata_icons';
 import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
 import { maybe } from '../../../common/utils/maybe';
-import { getAgentName } from '../../utils/get_agent_name';
 
 export interface ServiceMetadataDetails {
   service?: {

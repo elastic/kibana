@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import { getAgentName } from '../../../utils/get_agent_name';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,

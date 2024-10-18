@@ -9,6 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { maybe } from '../../../common/utils/maybe';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -29,7 +30,6 @@ import { ContainerType, SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
-import { getAgentName } from '../../utils/get_agent_name';
 
 export interface ServiceMetadataIcons {
   agentName?: string;
