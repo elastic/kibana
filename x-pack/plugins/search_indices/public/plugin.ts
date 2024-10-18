@@ -90,12 +90,12 @@ export class SearchIndicesPlugin
     if (this.pluginEnabled) {
       indexManagement?.extensionsService.setIndexDetailsPageRoute({
         renderRoute: (indexName, detailsTabId) => {
-          const route = `/app/elasticsearch/indices/index_details/${indexName}`
-          if(detailsTabId && Object.values(SearchIndexDetailsTabs).includes(detailsTabId)){
-            return `${route}/${detailsTabId}`
+          const route = `/app/elasticsearch/indices/index_details/${indexName}`;
+          const tabIds:string[] = Object.values(SearchIndexDetailsTabs)
+          if (detailsTabId && tabIds.includes(detailsTabId)) {
+            return `${route}/${detailsTabId}`;
           }
-          return route
-
+          return route;
         },
       });
     }

@@ -89,7 +89,8 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
-            history
+            history,
+            IndexDetailsSection.Overview
           );
         },
       });

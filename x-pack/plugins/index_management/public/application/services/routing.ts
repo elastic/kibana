@@ -92,11 +92,9 @@ export const navigateToIndexDetailsPage = (
   tabId?: IndexDetailsSection
 ) => {
   if (!extensionsService.indexDetailsPageRoute) {
-    history.push(
-      getIndexDetailsLink(indexName, indicesListURLParams, IndexDetailsSection.Overview)
-    );
+    history.push(getIndexDetailsLink(indexName, indicesListURLParams, tabId));
   } else {
     const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
-    application.navigateToUrl(http.basePath.prepend(`${route}`));
+    application.navigateToUrl(http.basePath.prepend(route));
   }
 };
