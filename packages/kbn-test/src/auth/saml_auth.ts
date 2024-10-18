@@ -136,7 +136,7 @@ export const createCloudSession = async (
             });
 
             // MFA must be disabled for test accounts
-            if (data['mfa_required'] === true) {
+            if (data.mfa_required === true) {
               // Changing MFA configuration requires manual action, skip retry
               attemptsLeft = 0;
               throw new Error(
