@@ -645,9 +645,16 @@ export const fieldLimitMitigationRolloverButton = i18n.translate(
   }
 );
 
-export const manualMitigationCustomPipelineText = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText',
+export const manualMitigationCustomPipelineCopyPipelineNameAriaText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.copyPipelineNameAriaText',
   {
-    defaultMessage: 'Copy the name below to add or edit the custom pipeline',
+    defaultMessage: 'Copy pipeline name',
+  }
+);
+
+export const manualMitigationCustomPipelineCreateEditPipelineLink = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.createEditPipelineLink',
+  {
+    defaultMessage: 'create or edit the pipeline',
   }
 );

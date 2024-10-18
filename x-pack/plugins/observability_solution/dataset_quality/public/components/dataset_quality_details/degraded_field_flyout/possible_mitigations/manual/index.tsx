@@ -6,110 +6,19 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiPanel, EuiSpacer, EuiText, EuiCopy, EuiButtonEmpty } from '@elastic/eui';
-import { useKibanaContextForPlugin } from '../../../../../utils';
-import {
-  manualMitigationCustomPipelineText,
-  otherMitigationsCustomComponentTemplate,
-  otherMitigationsCustomIngestPipeline,
-} from '../../../../../../common/translations';
+import { EuiSpacer } from '@elastic/eui';
 import { useDatasetQualityDetailsState } from '../../../../../hooks';
-import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
+import { CreateEditComponentTemplateLink } from './component_template_link';
+import { CreateEditPipelineLink } from './pipeline_link';
 
 export function ManualMitigations() {
   const { integrationDetails } = useDatasetQualityDetailsState();
   const isIntegration = !!integrationDetails?.integration;
   return (
     <>
-      <EditComponentTemplate isIntegration={isIntegration} />
+      <CreateEditComponentTemplateLink isIntegration={isIntegration} />
       <EuiSpacer size="s" />
-      <EditPipeline isIntegration={isIntegration} />
+      <CreateEditPipelineLink isIntegration={isIntegration} />
     </>
-  );
-}
-
-function EditComponentTemplate({ isIntegration }: { isIntegration: boolean }) {
-  const {
-    services: {
-      share: {
-        url: { locators },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
-  const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
-  const { name } = datasetDetails;
-
-  const customComponentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({
-    componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
-      dataStreamSettings?.indexTemplate ?? name
-    )}@custom`,
-  });
-
-  const indexTemplateUrl = locators
-    .get('MANAGEMENT_APP_LOCATOR')
-    ?.useUrl({ indexTemplate: dataStreamSettings?.indexTemplate });
-
-  const componentTemplateUrl = isIntegration ? customComponentTemplateUrl : indexTemplateUrl;
-
-  return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiLink
-        data-test-subj="datasetQualityManualMitigationsCustomComponentTemplateLink"
-        href={componentTemplateUrl}
-        css={{ width: '100%' }}
-        target="_blank"
-        external
-      >
-        {otherMitigationsCustomComponentTemplate}
-      </EuiLink>
-    </EuiPanel>
-  );
-}
-
-function EditPipeline({ isIntegration }: { isIntegration: boolean }) {
-  const {
-    services: {
-      share: {
-        url: { locators },
-      },
-    },
-  } = useKibanaContextForPlugin();
-
-  const { datasetDetails } = useDatasetQualityDetailsState();
-  const { type, name } = datasetDetails;
-
-  const copyText = isIntegration ? `${type}-${name}@custom` : `${type}@custom`;
-
-  const pipelineUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({ pipeline: '' });
-
-  return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiLink
-        data-test-subj="datasetQualityManualMitigationsPipelineLink"
-        href={pipelineUrl}
-        target="_blank"
-        external
-        css={{ width: '100%' }}
-      >
-        {otherMitigationsCustomIngestPipeline}
-      </EuiLink>
-      <EuiSpacer size="s" />
-      <EuiText data-test-subj="datasetQualityManualMitigationsPipelineLinkText" size="xs">
-        <p>{manualMitigationCustomPipelineText}</p>
-        <EuiCopy textToCopy={copyText}>
-          {(copy) => (
-            <EuiButtonEmpty
-              iconType="copy"
-              onClick={copy}
-              data-test-subj="datasetQualityEditPipelineButton"
-              size="s"
-            >
-              {copyText}
-            </EuiButtonEmpty>
-          )}
-        </EuiCopy>
-      </EuiText>
-    </EuiPanel>
   );
 }
