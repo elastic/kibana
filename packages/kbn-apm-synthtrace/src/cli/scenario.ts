@@ -13,18 +13,25 @@ import {
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
   SyntheticsSynthtraceEsClient,
+  OtelSynthtraceEsClient,
+  EntitiesSynthtraceEsClient,
 } from '../..';
-import { AssetsSynthtraceEsClient } from '../lib/assets/assets_synthtrace_es_client';
 import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 import { RunOptions } from './utils/parse_run_cli_flags';
+import { EntitiesSynthtraceKibanaClient } from '../lib/entities/entities_synthtrace_kibana_client';
 
 interface EsClients {
   apmEsClient: ApmSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
-  assetsEsClient: AssetsSynthtraceEsClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  otelEsClient: OtelSynthtraceEsClient;
+  entitiesEsClient: EntitiesSynthtraceEsClient;
+}
+
+interface KibanaClients {
+  entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
 }
 
 type Generate<TFields> = (options: {
@@ -33,6 +40,6 @@ type Generate<TFields> = (options: {
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
-  bootstrap?: (options: EsClients) => Promise<void>;
+  bootstrap?: (options: EsClients & KibanaClients) => Promise<void>;
   generate: Generate<TFields>;
 }>;
