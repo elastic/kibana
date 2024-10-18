@@ -32,7 +32,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverUnload', { archiveName: 'overview' });
   });
 
-  it('Expected failure', { tags: ['@testhere'] }, () => {
+  it('Expected failures', { tags: ['@testhere'] }, () => {
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {

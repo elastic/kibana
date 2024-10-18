@@ -157,7 +157,7 @@ run(
           }
 
           const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch, pipeline);
-          console.log(`Issue : ${JSON.stringify(newIssue)}`)
+          console.log(`Issue : ${JSON.stringify(newIssue)}`);
           existingIssues.addNewlyCreated(failure, newIssue);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {
