@@ -134,7 +134,17 @@ export const createCloudSession = async (
                 data[key] = 'REDACTED';
               }
             });
+
+            // MFA must be disabled for test accounts
+            if (data['mfa_required'] === true) {
+              // Changing MFA configuration requires manual action, skip retry
+              attemptsLeft = 0;
+              throw new Error(
+                `Failed to create the new cloud session: MFA must be disabled for the test account`
+              );
+            }
           }
+
           throw new Error(
             `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
               data
