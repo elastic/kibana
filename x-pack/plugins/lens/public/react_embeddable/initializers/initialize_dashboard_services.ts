@@ -59,10 +59,14 @@ export function initializeDashboardServices(
   const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
 
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
-    initialState.title || initialState.attributes.title
+    initialState.savedObjectId
+      ? initialState.attributes.title ?? initialState.title
+      : initialState.title
   );
   const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
-    initialState.description || initialState.attributes.description
+    initialState.savedObjectId
+      ? initialState.attributes.description ?? initialState.description
+      : initialState.description
   );
   // The observable references here are the same to the internalApi,
   // the buildObservableVariable re-uses the same observable when detected but it builds the right comparator
@@ -82,9 +86,12 @@ export function initializeDashboardServices(
       updateOverrides: internalApi.updateOverrides,
       // The functions below brings the HasInPlaceLibraryTransforms compliance (new interface)
       saveToLibrary: async (title: string) => {
-        const attributes = getLatestState().attributes;
+        const { attributes } = getLatestState();
         const savedObjectId = await attributeService.saveToLibrary(
-          { ...attributes, title },
+          {
+            ...attributes,
+            title,
+          },
           attributes.references
         );
         // keep in sync the state
