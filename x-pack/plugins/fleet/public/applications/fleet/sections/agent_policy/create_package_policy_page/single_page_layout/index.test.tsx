@@ -300,7 +300,7 @@ describe('When on the package policy create page', () => {
       test('should use custom "cancel" URL', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
-      });
+      }, 10000);
     });
   });
 

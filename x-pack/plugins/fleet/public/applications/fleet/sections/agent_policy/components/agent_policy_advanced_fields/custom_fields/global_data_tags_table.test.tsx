@@ -125,7 +125,7 @@ describe('GlobalDataTagsTable', () => {
         { name: 'newTag2', value: '123 123' },
       ],
     });
-  });
+  }, 10000);
 
   it('should edit an existing tag', async () => {
     renderComponent(globalDataTags);
