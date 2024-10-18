@@ -10,12 +10,11 @@
 import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
-import type { Config } from '@kbn/test';
 import { createTestEsCluster, esTestConfig } from '@kbn/test';
+import type { Config } from '../config/config';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -25,10 +24,6 @@ interface RunElasticsearchOptions {
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
   name?: string;
-}
-
-interface CcsConfig {
-  remoteClusterUrl: string;
 }
 
 type EsConfig = ReturnType<typeof getEsConfig>;
@@ -45,7 +40,6 @@ function getEsConfig({
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
   const port: number | undefined = config.get('servers.elasticsearch.port');
-  const ccsConfig: CcsConfig | undefined = config.get('esTestCluster.ccs');
 
   const password: string | undefined = isSecurityEnabled
     ? 'changeme'
@@ -70,7 +64,6 @@ function getEsConfig({
     port,
     password,
     dataArchive,
-    ccsConfig,
     serverless,
     files,
   };
@@ -82,44 +75,14 @@ export async function runElasticsearch(
   const { log, logsDir, name } = options;
   const config = getEsConfig(options);
 
-  if (!config.ccsConfig) {
-    const node = await startEsNode({
-      log,
-      name: name ?? 'ftr',
-      logsDir,
-      config,
-    });
-    return async () => {
-      await node.cleanup();
-      await extractAndArchiveLogs({ outputFolder: logsDir, log });
-    };
-  }
-
-  const remotePort = await getPort();
-  const remoteNode = await startEsNode({
+  const node = await startEsNode({
     log,
-    name: name ?? 'ftr-remote',
+    name: name ?? 'ftr',
     logsDir,
-    config: {
-      ...config,
-      port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
-      transportPort: remotePort,
-    },
+    config,
   });
-
-  const localNode = await startEsNode({
-    log,
-    name: name ?? 'ftr-local',
-    logsDir,
-    config: {
-      ...config,
-      esArgs: [...config.esArgs, `cluster.remote.ftr-remote.seeds=localhost:${remotePort}`],
-    },
-  });
-
   return async () => {
-    await localNode.cleanup();
-    await remoteNode.cleanup();
+    await node.cleanup();
     await extractAndArchiveLogs({ outputFolder: logsDir, log });
   };
 }

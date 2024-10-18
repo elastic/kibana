@@ -7,34 +7,116 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Schema } from 'joi';
+import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { UrlParts } from '@kbn/test';
+import { schema } from './schema';
 
-class Config {
-  private data: Record<string, any>;
+const $values = Symbol('values');
+
+export class Config {
+  private [$values]: Record<string, any>;
 
   constructor(data: Record<string, any>) {
-    this.data = data;
+    const { error, value } = schema.validate(data, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    this[$values] = value;
   }
 
-  get(path: string): any {
-    return path.split('.').reduce((acc, key) => {
-      if (acc && typeof acc === 'object') {
-        return acc[key];
+  public has(key: string | string[]) {
+    function recursiveHasCheck(
+      remainingPath: string[],
+      values: Record<string, any>,
+      childSchema: any
+    ): boolean {
+      if (!childSchema.$_terms.keys && !childSchema.$_terms.patterns) {
+        return false;
       }
-      return undefined;
-    }, this.data);
+
+      // normalize child and pattern checks so we can iterate the checks in a single loop
+      const checks: Array<{ test: (k: string) => boolean; schema: Schema }> = [
+        // match children first, they have priority
+        ...(childSchema.$_terms.keys || []).map((child: { key: string; schema: Schema }) => ({
+          test: (k: string) => child.key === k,
+          schema: child.schema,
+        })),
+
+        // match patterns on any key that doesn't match an explicit child
+        ...(childSchema.$_terms.patterns || []).map((pattern: { regex: RegExp; rule: Schema }) => ({
+          test: (k: string) => pattern.regex.test(k) && has(values, k),
+          schema: pattern.rule,
+        })),
+      ];
+
+      for (const check of checks) {
+        if (!check.test(remainingPath[0])) {
+          continue;
+        }
+
+        if (remainingPath.length > 1) {
+          return recursiveHasCheck(
+            remainingPath.slice(1),
+            get(values, remainingPath[0]),
+            check.schema
+          );
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+
+    const path = toPath(key);
+    if (!path.length) {
+      return true;
+    }
+    return recursiveHasCheck(path, this[$values], schema);
+  }
+
+  public get(key: string | string[], defaultValue?: any) {
+    if (!this.has(key)) {
+      throw new Error(`Unknown config key "${key}"`);
+    }
+
+    return cloneDeepWith(get(this[$values], key, defaultValue), (v) => {
+      if (typeof v === 'function') {
+        return v;
+      }
+    });
+  }
+
+  public getAll() {
+    return cloneDeepWith(this[$values], (v) => {
+      if (typeof v === 'function') {
+        return v;
+      }
+    });
   }
 }
 
-interface ConfigType {
+export interface ConfigType {
+  serverless: boolean;
   servers: {
     kibana: UrlParts;
     elasticsearch: UrlParts;
+    fleetserver?: UrlParts; // validate if needed
   };
+  dockerServers: any;
   esTestCluster: {
+    from: string;
+    files: string[];
     serverArgs: string[];
+    ssl: boolean;
   };
   kbnTestServer: {
+    env: any;
     buildArgs: string[];
     sourceArgs: string[];
     serverArgs: string[];

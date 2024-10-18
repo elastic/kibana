@@ -13,19 +13,17 @@ import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { readConfigFile } from '@kbn/test';
 import { runElasticsearch } from './run_elasticsearch';
 import { runKibanaServer } from './run_kibana_server';
 import { StartServerOptions } from './flags';
-
-// const FTR_SCRIPT_PATH = Path.resolve(REPO_ROOT, 'scripts/functional_test_runner');
+import { loadConfig } from '../config/config_load';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(log, options.esVersion, options.config);
+    const config = await loadConfig(options.config);
 
     const shutdownEs = await runElasticsearch({
       config,

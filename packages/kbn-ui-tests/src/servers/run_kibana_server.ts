@@ -14,8 +14,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { Config } from '@kbn/test';
 import { parseRawFlags, getArgValue, remapPluginPaths, DedicatedTaskRunner } from '@kbn/test';
+import type { Config } from '../config/config';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;
