@@ -451,7 +451,7 @@ export class EntityStoreDataClient {
           originalStatus === ENGINE_STATUS.UPDATING
         ) {
           throw new Error(
-            `Error updating entity store: There is an changes already in progress for engine ${id}`
+            `Error updating entity store: There are changes already in progress for engine ${id}`
           );
         }
 
