@@ -93,7 +93,6 @@ export const DataUsageMetrics = () => {
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
   const {
-    error,
     data,
     isFetching,
     isFetched,
