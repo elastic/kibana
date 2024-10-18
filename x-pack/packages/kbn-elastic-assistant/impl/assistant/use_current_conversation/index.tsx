@@ -257,7 +257,9 @@ export const useCurrentConversation = ({
 
   const handleCreateConversation = useCallback(async () => {
     const newChatExists = find(conversations, ['title', NEW_CHAT]);
-    if (newChatExists && !newChatExists.messages.length) {
+    // New chat will only exist if a user has not yet sent a message,
+    // or renamed the chat to "New Chat"
+    if (newChatExists) {
       handleOnConversationSelected({
         cId: newChatExists.id,
         cTitle: newChatExists.title,

@@ -72,7 +72,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     http,
     baseConversations,
     isAssistantEnabled,
-    fields: ['title', 'is_default', 'updated_at', 'api_config'],
   });
 
   const { getDefaultConversation } = useConversation();

@@ -23,7 +23,6 @@ import {
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
-  assertErrorToastShown,
   updateConversationTitle,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
@@ -158,10 +157,13 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       updateConversationTitle('New chat');
       selectConversation('Welcome');
       createNewChat();
-      assertErrorToastShown('Error creating conversation with title New chat');
-      selectConversation('New chat');
+      // if a conversation called new chat exists, change to it instead of creating a new conversation
+      assertConversationTitle('New chat');
+      // assertion proves non-empty convo state
+      assertMessageSent('hello');
       updateConversationTitle('My other chat');
       createNewChat();
+      // assertion proves empty convo state
       assertNewConversation(false, 'New chat');
     });
   });

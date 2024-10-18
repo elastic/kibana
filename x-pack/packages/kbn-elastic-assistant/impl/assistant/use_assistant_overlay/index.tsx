@@ -94,6 +94,7 @@ export const useAssistantOverlay = (
   const { data: conversations, isLoading } = useFetchCurrentUserConversations({
     http,
     filter: `title: ${conversationTitle}`,
+    fields: ['title'],
     isAssistantEnabled,
   });
   // memoize the props so that we can use them in the effect below:

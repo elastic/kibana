@@ -59,7 +59,10 @@ export const useFetchCurrentUserConversations = ({
   signal,
   refetchOnWindowFocus = true,
   isAssistantEnabled,
-  fields,
+  // defaults to only return these fields to keep conversations object small
+  // will fill in mock data for the other fields ie: `messages: []`
+  // when you need the full conversation object, call the getConversation api
+  fields = ['title', 'is_default', 'updated_at', 'api_config'],
   filter,
 }: UseFetchCurrentUserConversationsParams) =>
   useQuery(

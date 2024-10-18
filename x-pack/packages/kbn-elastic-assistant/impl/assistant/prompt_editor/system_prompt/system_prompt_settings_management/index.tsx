@@ -60,7 +60,6 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     http,
     baseConversations,
     isAssistantEnabled,
-    fields: ['title', 'is_default', 'updated_at', 'api_config'],
   });
 
   const refetchAll = useCallback(() => {

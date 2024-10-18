@@ -58,7 +58,6 @@ export const useDataStreamApis = ({
     baseConversations,
     refetchOnWindowFocus: !isStreaming,
     isAssistantEnabled,
-    fields: ['title', 'is_default', 'updated_at'],
   });
 
   const {
