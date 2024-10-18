@@ -95,6 +95,19 @@ Review important information about the {kib} 7.17.x releases.
 
 --
 
+[[release-notes-7.17.25]]
+== {kib} 7.17.25
+
+The 7.17.25 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.25]]
+=== Bug fixes
+
+Machine Learning::
+* Fixes potential prototype pollution vulnerability in `setNestedProperty` function ({kibana-pull}194538[#194538]).
+* Fixes incomplete string escaping issue in the Machine Learning saved object service ({kibana-pull}194530[#194530]).
+
 [[release-notes-7.17.24]]
 == {kib} 7.17.24
 
