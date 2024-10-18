@@ -33,8 +33,6 @@ const DISABLE_MISSING_TEST_REPORT_ERRORS =
 
 run(
   async ({ log, flags }) => {
-
-    console.log(`log - ${JSON.stringify(log)} : flags - ${JSON.stringify(flags)}`);
     const indexInEs = flags['index-errors'];
 
     let updateGithub = flags['github-update'];
@@ -46,8 +44,6 @@ run(
 
     let branch: string = '';
     let pipeline: string = '';
-    console.log(`branch - ${branch} : pipeline - ${pipeline}`);
-    console.log(`!updateGithub - ${!updateGithub}`);
     if (updateGithub) {
       let isPr = false;
 
