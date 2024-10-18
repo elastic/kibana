@@ -20,7 +20,7 @@ import { ActionsConfig } from '../config';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '15m' };
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1d' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
@@ -110,9 +110,12 @@ export class ConnectorUsageReportingTask {
     const { state } = taskInstance;
 
     if (!this.projectId) {
-      this.logger.warn(
+      this.logger.error(
         `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
       );
+      return {
+        state,
+      };
     }
 
     if (!this.caCertificate) {
@@ -160,10 +163,10 @@ export class ConnectorUsageReportingTask {
       totalUsage,
       fromDate,
       toDate,
-      projectId: this.projectId || 'missing-project-id',
+      projectId: this.projectId,
     });
 
-    this.logger.debug(`USAGE RECORD: ${JSON.stringify(record)}`);
+    this.logger.warn(`Record: ${JSON.stringify(record)}`);
 
     try {
       attempts = attempts + 1;
@@ -186,9 +189,7 @@ export class ConnectorUsageReportingTask {
         };
       }
       this.logger.error(
-        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${
-          e.message
-        } ${JSON.stringify(e.stack_trace)}`
+        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${e.message}`
       );
       return {
         state: {
@@ -264,7 +265,7 @@ export class ConnectorUsageReportingTask {
     toDate: Date;
     projectId: string;
   }): ConnectorUsageReport => {
-    const period = (toDate.getTime() - fromDate.getTime()) / 1000;
+    const period = Math.round((toDate.getTime() - fromDate.getTime()) / 1000);
     const fromStr = fromDate.toISOString();
     const toStr = toDate.toISOString();
 

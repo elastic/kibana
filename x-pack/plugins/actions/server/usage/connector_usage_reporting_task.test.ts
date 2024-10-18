@@ -227,11 +227,18 @@ describe('ConnectorUsageReportingTask', () => {
 
     const taskRunner = await createTaskRunner({ lastReportedUsageDate });
 
-    await taskRunner.run();
+    const response = await taskRunner.run();
 
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'Missing required project id while running actions:connector_usage_reporting'
     );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
   });
 
   it('returns the existin state and logs error when the CA Certificate is missing', async () => {
