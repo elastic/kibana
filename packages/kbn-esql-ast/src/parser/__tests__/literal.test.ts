@@ -24,7 +24,7 @@ describe('literal expression', () => {
     });
   });
 
-  it('decimals vs integers', () => {
+  it('doubles vs integers', () => {
     const text = 'ROW a(1.0, 1)';
     const { ast } = parse(text);
 
@@ -36,7 +36,7 @@ describe('literal expression', () => {
           args: [
             {
               type: 'literal',
-              literalType: 'decimal',
+              literalType: 'double',
             },
             {
               type: 'literal',
