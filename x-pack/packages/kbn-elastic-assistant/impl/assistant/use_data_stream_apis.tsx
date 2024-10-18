@@ -11,8 +11,8 @@ import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { useFetchPrompts } from './api';
-import { Conversation, useFetchCurrentUserConversations } from '../..';
+import { useFetchCurrentUserConversations, useFetchPrompts } from './api';
+import { Conversation } from '../..';
 
 interface Props {
   baseConversations: Record<string, Conversation>;
