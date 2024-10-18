@@ -45,7 +45,6 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
@@ -95,7 +94,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
@@ -334,9 +332,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-        await kibanaServer.uiSettings.update({
-          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-        });
       });
 
       after(async () => {
