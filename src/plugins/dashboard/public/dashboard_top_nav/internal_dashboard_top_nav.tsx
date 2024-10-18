@@ -124,13 +124,6 @@ export function InternalDashboardTopNav({
   }, [title, viewMode]);
 
   /**
-   * Manage chrome visibility when dashboard is embedded.
-   */
-  useEffect(() => {
-    if (!embedSettings) coreServices.chrome.setIsVisible(viewMode !== 'print');
-  }, [embedSettings, viewMode]);
-
-  /**
    * populate recently accessed, and set is chrome visible.
    */
   useEffect(() => {
