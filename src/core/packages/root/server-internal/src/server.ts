@@ -45,6 +45,7 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
@@ -59,7 +60,6 @@ import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
 import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
-import { MetricsServiceSetup } from '@kbn/core-metrics-server';
 
 const coreId = Symbol('core');
 
@@ -81,6 +81,7 @@ export class Server {
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
   private readonly metrics: MetricsService;
+  private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
   private readonly logging: LoggingService;
@@ -134,6 +135,7 @@ export class Server {
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
+    this.httpRateLimiter = new HttpRateLimiterService();
     this.httpResources = new HttpResourcesService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
@@ -272,13 +274,9 @@ export class Server {
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
-    let metricsSetup: MetricsServiceSetup;
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
-      getEluHistory() {
-        return metricsSetup.getEluHistory();
-      }
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -292,7 +290,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    metricsSetup = await this.metrics.setup({
+    const metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
     });
@@ -348,6 +346,10 @@ export class Server {
       i18n: i18nServiceSetup,
     });
 
+    this.httpRateLimiter.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
+    });
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,
@@ -447,6 +449,7 @@ export class Server {
 
     const featureFlagsStart = this.featureFlags.start();
 
+    this.httpRateLimiter.start();
     this.status.start();
 
     this.coreStart = {
@@ -489,6 +492,7 @@ export class Server {
     this.log.debug('stopping server');
 
     this.coreApp.stop();
+    this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();

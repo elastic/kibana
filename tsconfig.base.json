@@ -392,6 +392,8 @@
       "@kbn/core-http-context-server-mocks/*": ["packages/core/http/core-http-context-server-mocks/*"],
       "@kbn/core-http-plugin": ["test/plugin_functional/plugins/core_http"],
       "@kbn/core-http-plugin/*": ["test/plugin_functional/plugins/core_http/*"],
+      "@kbn/core-http-rate-limiter-internal": ["src/core/packages/http/rate-limiter-internal"],
+      "@kbn/core-http-rate-limiter-internal/*": ["src/core/packages/http/rate-limiter-internal/*"],
       "@kbn/core-http-request-handler-context-server": ["src/core/packages/http/request-handler-context-server"],
       "@kbn/core-http-request-handler-context-server/*": ["src/core/packages/http/request-handler-context-server/*"],
       "@kbn/core-http-request-handler-context-server-internal": ["src/core/packages/http/request-handler-context-server-internal"],
