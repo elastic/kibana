@@ -17,6 +17,13 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: |
+      buildkite-agent meta-data set pr_comment:job_url "PR Project deployment started at: $BUILDKITE_BUILD_URL"'
+    label: Comment with job URL
+    agents:
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+
   - wait: ~
 
   - command: .buildkite/scripts/steps/build_kibana.sh
