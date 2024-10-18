@@ -81,7 +81,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
               requestBody: request.body,
             }
           );
-
+          debugger;
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
             detectionRulesClient,
             modifiedPrebuiltRuleAssets

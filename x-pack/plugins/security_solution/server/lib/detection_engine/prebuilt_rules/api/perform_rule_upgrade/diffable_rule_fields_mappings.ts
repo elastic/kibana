@@ -218,7 +218,10 @@ function isInlineQuery(value: unknown): value is InlineKqlQuery {
 
 function isDataSourceIndexPatterns(value: unknown): value is DataSourceIndexPatterns {
   return (
-    typeof value === 'object' && value !== null && 'type' in value && value.type === 'index_pattern'
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'index_patterns'
   );
 }
 
