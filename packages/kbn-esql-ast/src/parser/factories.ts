@@ -42,8 +42,8 @@ import type {
   ESQLNumericLiteral,
   ESQLOrderExpression,
 } from '../types';
-import { parseIdentifier, getPosition } from './helpers';
-import { Builder, type AstNodeParserFields } from '../builder';
+import { parseIdentifier, getPosition, createParserFields } from './helpers';
+import { Builder } from '../builder';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -60,12 +60,6 @@ export function createAstBaseItem<Name = string>(
     incomplete: Boolean(ctx.exception),
   };
 }
-
-const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
-  text: ctx.getText(),
-  location: getPosition(ctx.start, ctx.stop),
-  incomplete: Boolean(ctx.exception),
-});
 
 export const createCommand = (name: string, ctx: ParserRuleContext) =>
   Builder.command({ name, args: [] }, createParserFields(ctx));

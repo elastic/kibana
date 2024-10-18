@@ -34,14 +34,13 @@ import {
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
-  createFunction,
   createOption,
   createLiteral,
   textExistsAndIsValid,
   createSource,
   createAstBaseItem,
 } from './factories';
-import { getPosition } from './helpers';
+import { createParserFields } from './helpers';
 import {
   collectAllSourceIdentifiers,
   collectAllFields,
@@ -57,6 +56,7 @@ import {
   getEnrichClauses,
 } from './walkers';
 import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
+import { Builder } from '../builder';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -76,8 +76,14 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.text = ctx.getText();
     if (textExistsAndIsValid(ctx.INFO().getText())) {
-      // TODO: these probably should not be functions, instead use "column", like: INFO <identifier>?
-      commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
+      const arg = Builder.expression.source(
+        {
+          name: 'info',
+          sourceType: 'builtin',
+        },
+        createParserFields(ctx)
+      );
+      commandAst?.args.push(arg);
     }
   }
 

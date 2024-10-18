@@ -222,7 +222,7 @@ export interface ESQLTimeInterval extends ESQLAstBaseItem {
 
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
-  sourceType: 'index' | 'policy';
+  sourceType: 'index' | 'policy' | 'builtin';
 
   /**
    * Represents the cluster part of the source identifier. Empty string if not

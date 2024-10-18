@@ -13,15 +13,15 @@ describe('commands', () => {
   describe('correctly formatted, basic usage', () => {
     it('SHOW', () => {
       const query = 'SHOW info';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {
           type: 'command',
           name: 'show',
           args: [
             {
-              type: 'function',
+              type: 'source',
               name: 'info',
             },
           ],
@@ -31,9 +31,9 @@ describe('commands', () => {
 
     it('FROM', () => {
       const query = 'FROM index';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {
           type: 'command',
           name: 'from',
@@ -49,9 +49,9 @@ describe('commands', () => {
 
     it('ROW', () => {
       const query = 'ROW 1';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {
           type: 'command',
           name: 'row',
@@ -67,9 +67,9 @@ describe('commands', () => {
 
     it('EVAL', () => {
       const query = 'FROM index | EVAL 1';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -86,9 +86,9 @@ describe('commands', () => {
 
     it('STATS', () => {
       const query = 'FROM index | STATS 1';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -105,9 +105,9 @@ describe('commands', () => {
 
     it('LIMIT', () => {
       const query = 'FROM index | LIMIT 1';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -124,9 +124,9 @@ describe('commands', () => {
 
     it('KEEP', () => {
       const query = 'FROM index | KEEP abc';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -143,9 +143,9 @@ describe('commands', () => {
 
     it('SORT', () => {
       const query = 'FROM index | SORT 1';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -162,9 +162,9 @@ describe('commands', () => {
 
     it('WHERE', () => {
       const query = 'FROM index | WHERE 1';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -181,9 +181,9 @@ describe('commands', () => {
 
     it('DROP', () => {
       const query = 'FROM index | DROP abc';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -200,9 +200,9 @@ describe('commands', () => {
 
     it('RENAME', () => {
       const query = 'FROM index | RENAME a AS b, c AS d';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -243,9 +243,9 @@ describe('commands', () => {
 
     it('DISSECT', () => {
       const query = 'FROM index | DISSECT a "b" APPEND_SEPARATOR="c"';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -276,9 +276,9 @@ describe('commands', () => {
 
     it('GROK', () => {
       const query = 'FROM index | GROK a "b"';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -299,9 +299,9 @@ describe('commands', () => {
 
     it('ENRICH', () => {
       const query = 'FROM index | ENRICH a ON b WITH c, d';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
@@ -332,9 +332,9 @@ describe('commands', () => {
 
     it('MV_EXPAND', () => {
       const query = 'FROM index | MV_EXPAND a ';
-      const { ast } = parse(query);
+      const { root } = parse(query);
 
-      expect(ast).toMatchObject([
+      expect(root.commands).toMatchObject([
         {},
         {
           type: 'command',
