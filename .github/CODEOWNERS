@@ -1918,7 +1918,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 
 # Ent. Search design
 /x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design
-/x-pack/test/accessibility/apps/group3/enterprise_search.ts @elastic/search-design
+/x-pack/test/accessibility/apps/group3/enterprise_search.ts @elastic/search-kibana
 
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
