@@ -17,20 +17,20 @@ export const INSTALL_INSTRUCTIONS_TITLE = i18n.translate(
 export const INSTALL_INSTRUCTIONS_DESCRIPTION = i18n.translate(
   'xpack.searchIndices.code.installCommand.title',
   {
-    defaultMessage: 'Install the Elasticsearch client on the command line:',
+    defaultMessage: 'In your terminal, install the Elasticsearch client:',
   }
 );
 
 export const CONNECT_CREATE_VECTOR_INDEX_CMD_TITLE = i18n.translate(
   'xpack.searchIndices.code.createIndexCommand.title',
   {
-    defaultMessage: 'Create an Index with Dense Vector Fields',
+    defaultMessage: 'Create an index with dense vector fields',
   }
 );
 
 export const CONNECT_CREATE_VECTOR_INDEX_CMD_DESCRIPTION = i18n.translate(
   'xpack.searchIndices.code.createIndexCommand.description',
   {
-    defaultMessage: 'Create an index with dense vector fields using the Elasticsearch client',
+    defaultMessage: 'Use the Elasticsearch client to create an index with dense vector fields',
   }
 );

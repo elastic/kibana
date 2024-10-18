@@ -27,7 +27,7 @@ export const DenseVectorServerlessCodeExamples: IngestDataCodeExamples = {
     'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsDescription',
     {
       defaultMessage:
-        'The following example defines two fields: a 3 dimensional dense vector field and a single text field. You can define more types of fields to your index by modifying the mappings. You can also define the field mappings in the mappings tab.',
+        'This example defines two fields: a 3-dimensional dense vector field and a text field. You can add more field types by modifying the mappings in your API call, or in the mappings tab.',
     }
   ),
   defaultMapping: {

@@ -154,7 +154,7 @@ export const AddDocumentsCodeExample = ({
               'xpack.searchIndices.indexDetails.ingestDocuments.description',
               {
                 defaultMessage:
-                  'We will then use Elasticsearh bulk API to ingest an array of documents into the index.',
+                  'Next, use the Elasticsearch bulk API to ingest an array of documents into the index.',
               }
             )}
             language={Languages[selectedLanguage].codeBlockLanguage}
