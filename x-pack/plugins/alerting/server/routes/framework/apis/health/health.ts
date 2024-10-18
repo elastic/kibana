@@ -7,30 +7,16 @@
 
 import { IRouter } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { ILicenseState } from '../lib';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { healthFrameworkResponseSchemaV1 } from '../../../../../common/routes/framework/apis/health';
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   AlertingFrameworkHealth,
-} from '../types';
-import { getSecurityHealth } from '../lib/get_security_health';
-
-const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
-  isSufficientlySecure,
-  hasPermanentEncryptionKey,
-  alertingFrameworkHealth,
-  ...rest
-}) => ({
-  ...rest,
-  is_sufficiently_secure: isSufficientlySecure,
-  has_permanent_encryption_key: hasPermanentEncryptionKey,
-  alerting_framework_health: {
-    decryption_health: alertingFrameworkHealth.decryptionHealth,
-    execution_health: alertingFrameworkHealth.executionHealth,
-    read_health: alertingFrameworkHealth.readHealth,
-  },
-});
+} from '../../../../types';
+import { getSecurityHealth } from '../../../../lib/get_security_health';
+import { transformHealthBodyResponse } from './transforms/transform_health_response/v1';
 
 export const healthRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -45,7 +31,18 @@ export const healthRoute = (
         summary: `Get the alerting framework health`,
         tags: ['oas-tag:alerting'],
       },
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          200: {
+            body: () => healthFrameworkResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          401: {
+            description: 'Authorization information is missing or invalid.',
+          },
+        },
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
@@ -68,7 +65,7 @@ export const healthRoute = (
             };
 
             return res.ok({
-              body: rewriteBodyRes(frameworkHealth),
+              body: transformHealthBodyResponse(frameworkHealth),
             });
           } else {
             return res.forbidden({
