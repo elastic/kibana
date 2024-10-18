@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         it('should have with data tabs', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
-          await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
         });
         it('should be able to change tabs to mappings and mappings is shown', async () => {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
@@ -184,10 +184,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await es.indices.create({ index: indexName });
         await security.testUser.setRoles(['index_management_user']);
+      });
+      beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the indices tab
         await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+      describe('manage index action', () => {
+        beforeEach(async () => {
+          await pageObjects.svlSearchIndexDetailPage.manageIndex();
+          await pageObjects.svlSearchIndexDetailPage.manageIndexContextMenuExists();
+        });
+        it('overview navigates to settings tab', async () => {
+          await pageObjects.svlSearchIndexDetailPage.changeManageIndexTab(
+            'showOverviewIndexMenuButton'
+          );
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
+        });
+
+        it('settings navigates to settings tab', async () => {
+          await pageObjects.svlSearchIndexDetailPage.changeManageIndexTab(
+            'showSettingsIndexMenuButton'
+          );
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
+        });
+        it('mappings navigates to settings tab', async () => {
+          await pageObjects.svlSearchIndexDetailPage.changeManageIndexTab(
+            'showMappingsIndexMenuButton'
+          );
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
+        });
       });
       describe('can view search index details', function () {
         it('renders search index details with no documents', async () => {

@@ -125,9 +125,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
       await testSubjects.existOrFail('dataTab', { timeout: 2000 });
     },
-    async expectShouldDefaultToDataTab() {
-      expect(await browser.getCurrentUrl()).contain('/data');
-    },
     async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
       await testSubjects.click(tab);
     },
@@ -190,6 +187,29 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await retry.waitFor('index details page title to show up', async () => {
         return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
       });
+    },
+    async manageIndex() {
+      const selectIndex = await testSubjects.find('indexTableRowCheckbox');
+      await selectIndex.click();
+      await retry.waitFor('manage index to show up ', async () => {
+        return (await testSubjects.isDisplayed('indexActionsContextMenuButton')) === true;
+      });
+      const contextMenuButton = await testSubjects.find('indexActionsContextMenuButton');
+      await contextMenuButton.click();
+      await retry.waitFor('manage index context menu to show ', async () => {
+        return (await testSubjects.isDisplayed('indexContextMenu')) === true;
+      });
+    },
+    async manageIndexContextMenuExists() {
+      await testSubjects.existOrFail('showOverviewIndexMenuButton');
+      await testSubjects.existOrFail('showSettingsIndexMenuButton');
+      await testSubjects.existOrFail('showMappingsIndexMenuButton');
+      await testSubjects.existOrFail('deleteIndexMenuButton');
+    },
+    async changeManageIndexTab(manageIndexTab: 'showOverviewIndexMenuButton' | 'showSettingsIndexMenuButton' | 'showMappingsIndexMenuButton'| 'deleteIndexMenuButton') {
+      await testSubjects.existOrFail(manageIndexTab);
+      const manageIndexComponent = await testSubjects.find(manageIndexTab);
+      await manageIndexComponent.click();
     },
 
     async expectSearchIndexDetailsTabsExists() {
