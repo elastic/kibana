@@ -264,7 +264,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
         <UnifiedFieldListItem
-          creationOptions={stateService.creationOptions}
+          options={stateService.creationOptions}
           searchMode={searchMode}
           services={services}
           alwaysShowActionButton={alwaysShowActionButton}

@@ -21,7 +21,7 @@ import {
 export type UnifiedFieldListItemProps = UnifiedFieldListItemPopoverBaseProps;
 
 const UnifiedFieldListItemButtonComponent: UnifiedFieldListItemPopoverProps['ButtonComponent'] = ({
-  creationOptions,
+  options,
   alwaysShowActionButton = false,
   field,
   highlight,
@@ -59,7 +59,7 @@ const UnifiedFieldListItemButtonComponent: UnifiedFieldListItemPopoverProps['But
     [field, itemIndex]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
-  const isDragDisabled = alwaysShowActionButton || creationOptions.disableFieldListItemDragAndDrop;
+  const isDragDisabled = alwaysShowActionButton || options.disableFieldListItemDragAndDrop;
 
   return (
     <Draggable
@@ -70,8 +70,7 @@ const UnifiedFieldListItemButtonComponent: UnifiedFieldListItemPopoverProps['But
       onDragStart={onClosePopover}
       isDisabled={isDragDisabled}
       dataTestSubj={`${
-        creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
-        'unifiedFieldListItemDnD'
+        options.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ?? 'unifiedFieldListItemDnD'
       }-${field.name}`}
     >
       <FieldItemButton
@@ -83,7 +82,7 @@ const UnifiedFieldListItemButtonComponent: UnifiedFieldListItemPopoverProps['But
         shouldAlwaysShowAction={alwaysShowActionButton}
         onClick={field.type !== '_source' ? onTogglePopover : undefined}
         {...getCommonFieldItemButtonProps({
-          creationOptions,
+          options,
           field,
           isSelected,
           toggleDisplay,

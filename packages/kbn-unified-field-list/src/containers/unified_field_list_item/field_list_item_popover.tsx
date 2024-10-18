@@ -34,7 +34,7 @@ import type {
 import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
 
 export interface GetCommonFieldItemButtonPropsParams {
-  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
+  options: UnifiedFieldListSidebarContainerCreationOptions;
   field: DataViewField;
   size: FieldItemButtonProps<DataViewField>['size'];
   isSelected: boolean;
@@ -42,7 +42,7 @@ export interface GetCommonFieldItemButtonPropsParams {
 }
 
 export function getCommonFieldItemButtonProps({
-  creationOptions,
+  options,
   field,
   size,
   isSelected,
@@ -62,15 +62,15 @@ export function getCommonFieldItemButtonProps({
     field,
     size,
     isSelected,
-    buttonAddFieldToWorkspaceProps: creationOptions.buttonAddFieldToWorkspaceProps,
-    buttonRemoveFieldFromWorkspaceProps: creationOptions.buttonRemoveFieldFromWorkspaceProps,
+    buttonAddFieldToWorkspaceProps: options.buttonAddFieldToWorkspaceProps,
+    buttonRemoveFieldFromWorkspaceProps: options.buttonRemoveFieldFromWorkspaceProps,
     onAddFieldToWorkspace: handler,
     onRemoveFieldFromWorkspace: handler,
   };
 }
 
 interface MultiFieldsProps {
-  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
+  options: UnifiedFieldListSidebarContainerCreationOptions;
   multiFields: NonNullable<UnifiedFieldListItemPopoverProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
@@ -78,7 +78,7 @@ interface MultiFieldsProps {
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ creationOptions, multiFields, toggleDisplay, alwaysShowActionButton, size }) => (
+  ({ options, multiFields, toggleDisplay, alwaysShowActionButton, size }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -97,7 +97,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           shouldAlwaysShowAction={alwaysShowActionButton}
           onClick={undefined}
           {...getCommonFieldItemButtonProps({
-            creationOptions,
+            options,
             field: entry.field,
             isSelected: entry.isSelected,
             toggleDisplay,
@@ -113,7 +113,7 @@ export interface UnifiedFieldListItemPopoverBaseProps {
   /**
    * Options form the service for managing the state
    */
-  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
+  options: UnifiedFieldListSidebarContainerCreationOptions;
 
   /**
    * Required services
@@ -223,7 +223,7 @@ function UnifiedFieldListItemPopoverComponent({
   ...otherProps
 }: UnifiedFieldListItemPopoverProps) {
   const {
-    creationOptions,
+    options,
     services,
     searchMode,
     alwaysShowActionButton = false,
@@ -277,10 +277,9 @@ function UnifiedFieldListItemPopoverComponent({
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
   const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(() => {
-    const dataTestSubjPrefix =
-      creationOptions.dataTestSubj?.fieldListItemPopoverHeaderDataTestSubjPrefix;
+    const dataTestSubjPrefix = options.dataTestSubj?.fieldListItemPopoverHeaderDataTestSubjPrefix;
     return {
-      buttonAddFieldToWorkspaceProps: creationOptions.buttonAddFieldToWorkspaceProps,
+      buttonAddFieldToWorkspaceProps: options.buttonAddFieldToWorkspaceProps,
       ...(dataTestSubjPrefix && {
         buttonAddFilterProps: {
           'data-test-subj': `${dataTestSubjPrefix}AddExistFilter-${field.name}`,
@@ -293,13 +292,13 @@ function UnifiedFieldListItemPopoverComponent({
         },
       }),
     };
-  }, [field.name, creationOptions]);
+  }, [field.name, options]);
 
   const renderPopover = () => {
     return (
       <>
         <UnifiedFieldListItemStats
-          creationOptions={creationOptions}
+          creationOptions={options}
           services={services}
           field={field}
           multiFields={multiFields}
@@ -312,7 +311,7 @@ function UnifiedFieldListItemPopoverComponent({
           <>
             <EuiSpacer size="m" />
             <MultiFields
-              creationOptions={creationOptions}
+              options={options}
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
@@ -338,7 +337,7 @@ function UnifiedFieldListItemPopoverComponent({
         multiFields={rawMultiFields}
         trackUiMetric={trackUiMetric}
         contextualFields={workspaceSelectedFieldNames}
-        originatingApp={creationOptions.originatingApp}
+        originatingApp={options.originatingApp}
         uiActions={uiActions}
       />
     );
@@ -348,7 +347,7 @@ function UnifiedFieldListItemPopoverComponent({
     rawMultiFields,
     searchMode,
     services.uiActions,
-    creationOptions.originatingApp,
+    options.originatingApp,
     trackUiMetric,
     workspaceSelectedFieldNames,
   ]);
@@ -365,7 +364,7 @@ function UnifiedFieldListItemPopoverComponent({
         />
       }
       closePopover={closePopover}
-      data-test-subj={creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
+      data-test-subj={options.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
         <FieldPopoverHeader
           services={services}
