@@ -9,12 +9,8 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 
-import type { ControlGroupInputSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
-
+import { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
 import {
-  type ControlGroupRuntimeState,
-  type ControlPanelState,
-  type SerializedControlState,
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
@@ -29,15 +25,6 @@ export const getDefaultControlGroupState = (): SerializableControlGroupState => 
   ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
 });
 
-// using SerializableRecord to force type to be read as serializable
-export type SerializableControlGroupState = SerializableRecord &
-  Omit<
-    ControlGroupRuntimeState,
-    'initialChildControlState' | 'editorConfig' // editor config is not persisted
-  > & {
-    panels: Record<string, ControlPanelState<SerializedControlState>> | {};
-  };
-
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
   try {
@@ -48,7 +35,7 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
 };
 
 export const controlGroupSavedObjectStateToSerializableRuntimeState = (
-  savedObjectState: ControlGroupInputSavedObjectAttributes
+  savedObjectState: ControlGroupSavedObjectState
 ): SerializableControlGroupState => {
   const defaultControlGroupInput = getDefaultControlGroupState();
   return {
@@ -66,7 +53,7 @@ export const controlGroupSavedObjectStateToSerializableRuntimeState = (
 
 export const serializableRuntimeStateToControlGroupSavedObjectState = (
   serializable: SerializableRecord // It is safe to treat this as SerializableControlGroupState
-): ControlGroupInputSavedObjectAttributes => {
+): ControlGroupSavedObjectState => {
   return {
     controlStyle: serializable.labelPosition as SerializableControlGroupState['labelPosition'],
     chainingSystem: serializable.chainingSystem as SerializableControlGroupState['chainingSystem'],

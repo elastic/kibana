@@ -16,7 +16,6 @@ export {
   controlGroupSavedObjectStateToSerializableRuntimeState,
   serializableRuntimeStateToControlGroupSavedObjectState,
 } from './control_group/control_group_persistence';
-export {
-  type ControlGroupTelemetry,
-  initializeControlGroupTelemetry,
-} from './control_group/control_group_telemetry';
+export { initializeControlGroupTelemetry } from './control_group/control_group_telemetry';
+
+export type { ControlGroupTelemetry } from './control_group/types';
