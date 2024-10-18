@@ -15,6 +15,9 @@ import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 // Decrement the patch version by 1 and preserve pre-release tag (if any)
 const decrementPatchVersion = (version: string): string | null => {
   const parsedVersion = semver.parse(version);
+  if (!parsedVersion) {
+    return null;
+  }
   const newPatchVersion = parsedVersion.patch - 1;
   // Create a new version string with the decremented patch - removing any possible pre-release tag
   const newVersion = `${parsedVersion.major}.${parsedVersion.minor}.${newPatchVersion}`;
@@ -64,7 +67,7 @@ export const agentDownloaderRunner: RunFn = async (cliContext) => {
   ok(version, 'version argument is required');
 
   // Validate version format
-  if (!semver.valid(version)) {
+  if (!semver.valid(version as string)) {
     throw new Error('Invalid version format');
   }
 

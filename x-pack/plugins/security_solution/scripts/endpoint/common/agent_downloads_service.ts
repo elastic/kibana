@@ -116,7 +116,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
               const { body } = await nodeFetch(agentDownloadUrl);
               await finished(body.pipe(outputStream));
             },
-            () => fs.unlink(newDownloadInfo.fullFilePath) // Clean up on interruption
+            () => fs.unlinkSync(newDownloadInfo.fullFilePath) // Clean up on interruption
           );
           this.log.info(`Successfully downloaded agent to [${newDownloadInfo.fullFilePath}]`);
         },
@@ -125,7 +125,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           onFailedAttempt: (error) => {
             this.log.error(`Download attempt ${error.attemptNumber} failed: ${error.message}`);
             // Cleanup failed download
-            return fs.unlink(newDownloadInfo.fullFilePath);
+            return unlink(newDownloadInfo.fullFilePath);
           },
         }
       );
