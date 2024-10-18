@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   AuditLogger,
   IScopedClusterClient,
+  AuditEvent,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -53,7 +54,8 @@ import {
   isPromiseFulfilled,
   isPromiseRejected,
 } from './utils';
-import { EntityEngineAuditActions } from './auditing/actions';
+import { EntityEngineActions } from './auditing/actions';
+import { EntityStoreResource } from './auditing/resources';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface EntityStoreClientOpts {
@@ -123,8 +125,6 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { logger } = this.options;
-
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
     const requiresMigration =
@@ -135,18 +135,15 @@ export class EntityStoreDataClient {
         'Asset criticality data migration is required before initializing entity store. If this error persists, please restart Kibana.'
       );
     }
-    logger.info(
-      `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
-    );
+
+    this.log('info', entityType, `Initializing entity store`);
 
     const descriptor = await this.engineClient.init(entityType, {
       filter,
       fieldHistoryLength,
       indexPattern,
     });
-    logger.debug(`Initialized engine for ${entityType}`);
-    // first create the entity definition without starting it
-    // so that the index template is created which we can add a component template to
+    this.log('debug', entityType, `Initialized engine`);
 
     this.asyncSetup(
       entityType,
@@ -155,9 +152,7 @@ export class EntityStoreDataClient {
       indexPattern,
       filter,
       pipelineDebugMode
-    ).catch((error) => {
-      logger.error('There was an error during async setup of the Entity Store', error);
-    });
+    );
 
     return descriptor;
   }
@@ -170,7 +165,7 @@ export class EntityStoreDataClient {
     filter: string,
     pipelineDebugMode: boolean
   ) {
-    const { logger, namespace, appClient, dataViewsService, auditLogger } = this.options;
+    const { logger, namespace, appClient, dataViewsService } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
     const unitedDefinition = getUnitedEntityDefinition({
@@ -181,14 +176,17 @@ export class EntityStoreDataClient {
     });
     const { entityManagerDefinition } = unitedDefinition;
 
-    const debugLog = (message: string) =>
-      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
-
     try {
       // clean up any existing entity store
       await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 
       // set up the entity manager definition
+      this.audit(
+        EntityEngineActions.CREATE,
+        EntityStoreResource.ENTITY_DEFINITION,
+        entityType,
+        'Creating entity definition'
+      );
       await this.entityClient.createEntityDefinition({
         definition: {
           ...entityManagerDefinition,
@@ -199,69 +197,110 @@ export class EntityStoreDataClient {
         },
         installOnly: true,
       });
-      debugLog(`Created entity definition`);
+      this.log(`debug`, entityType, `Created entity definition`);
 
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
+      this.audit(
+        EntityEngineActions.CREATE,
+        EntityStoreResource.INDEX_COMPONENT_TEMPLATE,
+        entityType,
+        'Creating entity index component template'
+      );
       await createEntityIndexComponentTemplate({
         unitedDefinition,
         esClient: this.esClient,
       });
-      debugLog(`Created entity index component template`);
+      this.log(`debug`, entityType, `Created entity index component template`);
+      this.audit(
+        EntityEngineActions.CREATE,
+        EntityStoreResource.ENTITY_INDEX,
+        entityType,
+        'Creating entity index'
+      );
       await createEntityIndex({
         entityType,
         esClient: this.esClient,
         namespace,
         logger,
       });
-      debugLog(`Created entity index`);
+      this.log(`debug`, entityType, `Created entity index`);
 
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist
+      this.audit(
+        EntityEngineActions.CREATE,
+        EntityStoreResource.FIELD_RETENTION_ENRICH_POLICY,
+        entityType,
+        'Creating field retention enrich policy'
+      );
       await createFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient: this.esClient,
       });
-      debugLog(`Created field retention enrich policy`);
+      this.log(`debug`, entityType, `Created field retention enrich policy`);
+
+      this.audit(
+        EntityEngineActions.EXECUTE,
+        EntityStoreResource.FIELD_RETENTION_ENRICH_POLICY,
+        entityType,
+        'Executing field retention enrich policy'
+      );
       await executeFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient: this.esClient,
         logger,
       });
-      debugLog(`Executed field retention enrich policy`);
+      this.log(`debug`, entityType, `Executed field retention enrich policy`);
+      this.audit(
+        EntityEngineActions.CREATE,
+        EntityStoreResource.PLATFORM_PIPELINE,
+        entityType,
+        'Creating platform pipeline'
+      );
       await createPlatformPipeline({
         debugMode: pipelineDebugMode,
         unitedDefinition,
         logger,
         esClient: this.esClient,
       });
-      debugLog(`Created @platform pipeline`);
+      this.log(`debug`, entityType, `Created @platform pipeline`);
 
       // finally start the entity definition now that everything is in place
+      this.audit(
+        EntityEngineActions.START,
+        EntityStoreResource.ENTITY_DEFINITION,
+        entityType,
+        'Starting entity definition'
+      );
       const updated = await this.start(entityType, { force: true });
-      debugLog(`Started entity definition`);
+      this.log(`debug`, entityType, `Started entity definition`);
 
       // the task will execute the enrich policy on a schedule
+      this.audit(
+        EntityEngineActions.START,
+        EntityStoreResource.FIELD_RETENTION_ENRICH_POLICY_TASK,
+        entityType,
+        'Starting entity store field retention enrich task'
+      );
       await startEntityStoreFieldRetentionEnrichTask({
         namespace,
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized for ${entityType}`);
-      auditLogger?.log({
-        message: `System initialized the entity engine for ${entityType}`,
-        event: {
-          action: EntityEngineAuditActions.ENTITY_ENGINE_INIT,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.CHANGE,
-          outcome: AUDIT_OUTCOME.SUCCESS,
-        },
-      });
+      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
+      this.log(`info`, entityType, `Entity store initialized`);
 
       return updated;
     } catch (err) {
-      this.options.logger.error(
-        `Error initializing entity store for ${entityType}: ${err.message}`
+      this.log(`error`, entityType, `Error initializing entity store: ${err.message}`);
+
+      this.audit(
+        EntityEngineActions.INIT,
+        EntityStoreResource.ENTITY_ENGINE,
+        entityType,
+        'Failed to initialize entity engine',
+        err
       );
 
       await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
@@ -287,41 +326,54 @@ export class EntityStoreDataClient {
   }
 
   public async start(entityType: EntityType, options?: { force: boolean }) {
+    const { namespace } = this.options;
     const descriptor = await this.engineClient.get(entityType);
     if (!options?.force && descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
-        `In namespace ${this.options.namespace}: Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${namespace}: Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
-    this.options.logger.info(
-      `In namespace ${this.options.namespace}: Starting entity store for ${entityType}`
-    );
+    this.log('info', entityType, `Starting entity store`);
 
     // startEntityDefinition requires more fields than the engine descriptor
     // provides so we need to fetch the full entity definition
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
+    this.audit(
+      EntityEngineActions.START,
+      EntityStoreResource.ENTITY_DEFINITION,
+      entityType,
+      'Starting entity definition'
+    );
     await this.entityClient.startEntityDefinition(fullEntityDefinition);
+    this.log('debug', entityType, `Started entity definition`);
 
     return this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
   }
 
   public async stop(entityType: EntityType) {
+    const { namespace } = this.options;
     const descriptor = await this.engineClient.get(entityType);
 
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
       throw new Error(
-        `In namespace ${this.options.namespace}: Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
+        `In namespace ${namespace}: Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
-    this.options.logger.info(
-      `In namespace ${this.options.namespace}: Stopping entity store for ${entityType}`
-    );
+    this.log('info', entityType, `Stopping entity store`);
+
     // stopEntityDefinition requires more fields than the engine descriptor
     // provides so we need to fetch the full entity definition
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
+    this.audit(
+      EntityEngineActions.STOP,
+      EntityStoreResource.ENTITY_DEFINITION,
+      entityType,
+      'Stopping entity definition'
+    );
     await this.entityClient.stopEntityDefinition(fullEntityDefinition);
+    this.log('debug', entityType, `Stopped entity definition`);
 
     return this.engineClient.update(entityType, ENGINE_STATUS.STOPPED);
   }
@@ -351,38 +403,73 @@ export class EntityStoreDataClient {
       fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
     });
     const { entityManagerDefinition } = unitedDefinition;
-    logger.info(`In namespace ${namespace}: Deleting entity store for ${entityType}`);
+
+    this.log('info', entityType, `Deleting entity store`);
     try {
-      try {
-        await this.entityClient.deleteEntityDefinition({
-          id: entityManagerDefinition.id,
-          deleteData,
-        });
-      } catch (e) {
-        logger.error(`Error deleting entity definition for ${entityType}: ${e.message}`);
-      }
+      this.audit(
+        EntityEngineActions.DELETE,
+        EntityStoreResource.ENTITY_DEFINITION,
+        entityType,
+        'Deleting entity definition'
+      );
+      await this.entityClient.deleteEntityDefinition({
+        id: entityManagerDefinition.id,
+        deleteData,
+      });
+      this.log('debug', entityType, `Deleted entity definition`);
+
+      this.audit(
+        EntityEngineActions.DELETE,
+        EntityStoreResource.INDEX_COMPONENT_TEMPLATE,
+        entityType,
+        'Deleting entity index component template'
+      );
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,
         esClient: this.esClient,
       });
+      this.log('debug', entityType, `Deleted entity index component template`);
+
+      this.audit(
+        EntityEngineActions.DELETE,
+        EntityStoreResource.PLATFORM_PIPELINE,
+        entityType,
+        'Deleting platform pipeline'
+      );
       await deletePlatformPipeline({
         unitedDefinition,
         logger,
         esClient: this.esClient,
       });
+      this.log('debug', entityType, `Deleted platform pipeline`);
+
+      this.audit(
+        EntityEngineActions.DELETE,
+        EntityStoreResource.FIELD_RETENTION_ENRICH_POLICY,
+        entityType,
+        'Deleting field retention enrich policy'
+      );
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient: this.esClient,
         logger,
       });
+      this.log('debug', entityType, `Deleted field retention enrich policy`);
 
       if (deleteData) {
+        this.audit(
+          EntityEngineActions.DELETE,
+          EntityStoreResource.ENTITY_INDEX,
+          entityType,
+          'Deleting entity index'
+        );
         await deleteEntityIndex({
           entityType,
           esClient: this.esClient,
           namespace,
           logger,
         });
+        this.log('debug', entityType, `Deleted entity index`);
       }
 
       if (descriptor && deleteEngine) {
@@ -391,18 +478,34 @@ export class EntityStoreDataClient {
       // if the last engine then stop the task
       const { engines } = await this.engineClient.list();
       if (engines.length === 0) {
+        this.audit(
+          EntityEngineActions.DELETE,
+          EntityStoreResource.FIELD_RETENTION_ENRICH_POLICY_TASK,
+          entityType,
+          'Deleted entity store field retention enrich task'
+        );
         await removeEntityStoreFieldRetentionEnrichTask({
           namespace,
           logger,
           taskManager,
         });
+        this.log('debug', entityType, `Deleted entity store field retention enrich task`);
       }
 
       return { deleted: true };
-    } catch (e) {
-      logger.error(`Error deleting entity store for ${entityType}: ${e.message}`);
-      // TODO: should we set the engine status to error here?
-      throw e;
+    } catch (err) {
+      logger.error(`Error deleting entity store for ${entityType}: ${err.message}`);
+
+      this.audit(
+        EntityEngineActions.DELETE,
+        EntityStoreResource.ENTITY_ENGINE,
+        entityType,
+        'Failed to delete entity engine',
+        err
+      );
+
+      // QUESTION: should we set the engine status to error here?
+      throw err;
     }
   }
 
@@ -517,5 +620,51 @@ export class EntityStoreDataClient {
       successes: updateSuccesses,
       errors: updateErrors,
     };
+  }
+
+  private log(
+    level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>,
+    entityType: EntityType,
+    msg: string
+  ) {
+    this.options.logger[level](
+      `[Entity Engine] [entity.${entityType}] [namespace: ${this.options.namespace}] ${msg}`
+    );
+  }
+
+  private audit(
+    action: EntityEngineActions,
+    resource: EntityStoreResource,
+    entityType: EntityType,
+    msg: string,
+    error?: Error
+  ) {
+    // NOTE: Excluding errors, all auditing events are currently WRITE events, meaning the outcome is always UNKNOWN.
+    // This may change in the future, depending on the audit action.
+    const outcome = error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.UNKNOWN;
+
+    // QUESTION: For EXECUTE action: Maybe START is better: https://www.elastic.co/guide/en/ecs/8.11/ecs-allowed-values-event-type.html#ecs-event-type-start
+    const type =
+      action === EntityEngineActions.CREATE
+        ? AUDIT_TYPE.CREATION
+        : EntityEngineActions.DELETE
+        ? AUDIT_TYPE.DELETION
+        : AUDIT_TYPE.CHANGE;
+
+    // QUESTION: For resource ENTITY_DEFINITION:  Maybe PROCESS or CONFIGURATION is better: https://www.elastic.co/guide/en/ecs/8.11/ecs-allowed-values-event-category.html#ecs-event-category-configuration
+    const category = AUDIT_CATEGORY.DATABASE;
+
+    const message = error ? `${msg}: ${error.message}` : msg;
+    const event: AuditEvent = {
+      message: `[Entity Engine] [entity.${entityType}] ${message}`,
+      event: {
+        action: `${action}_${entityType}_${resource}`,
+        category,
+        outcome,
+        type,
+      },
+    };
+
+    return this.options.auditLogger?.log(event);
   }
 }
