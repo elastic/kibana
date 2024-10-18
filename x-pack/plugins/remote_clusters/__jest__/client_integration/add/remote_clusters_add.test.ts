@@ -276,6 +276,18 @@ describe('Create Remote cluster', () => {
         });
       });
 
+      describe('node connections', () => {
+        const maxNodeConnections = 2147483647;
+        test('should require a valid number of node connections', async () => {
+          await actions.saveButton.click();
+
+          actions.nodeConnectionsInput.setValue(String(maxNodeConnections + 1));
+          expect(actions.getErrorMessages()).toContain(
+            `This number must be equal or less than ${maxNodeConnections}.`
+          );
+        });
+      });
+
       test('server name is optional (proxy connection)', () => {
         actions.connectionModeSwitch.toggle();
         actions.saveButton.click();
