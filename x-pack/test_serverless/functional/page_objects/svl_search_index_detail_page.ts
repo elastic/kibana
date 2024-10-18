@@ -206,7 +206,13 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('showMappingsIndexMenuButton');
       await testSubjects.existOrFail('deleteIndexMenuButton');
     },
-    async changeManageIndexTab(manageIndexTab: 'showOverviewIndexMenuButton' | 'showSettingsIndexMenuButton' | 'showMappingsIndexMenuButton'| 'deleteIndexMenuButton') {
+    async changeManageIndexTab(
+      manageIndexTab:
+        | 'showOverviewIndexMenuButton'
+        | 'showSettingsIndexMenuButton'
+        | 'showMappingsIndexMenuButton'
+        | 'deleteIndexMenuButton'
+    ) {
       await testSubjects.existOrFail(manageIndexTab);
       const manageIndexComponent = await testSubjects.find(manageIndexTab);
       await manageIndexComponent.click();

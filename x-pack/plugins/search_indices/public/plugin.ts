@@ -91,7 +91,7 @@ export class SearchIndicesPlugin
       indexManagement?.extensionsService.setIndexDetailsPageRoute({
         renderRoute: (indexName, detailsTabId) => {
           const route = `/app/elasticsearch/indices/index_details/${indexName}`;
-          const tabIds:string[] = Object.values(SearchIndexDetailsTabs)
+          const tabIds: string[] = Object.values(SearchIndexDetailsTabs);
           if (detailsTabId && tabIds.includes(detailsTabId)) {
             return `${route}/${detailsTabId}`;
           }

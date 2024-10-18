@@ -191,6 +191,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
+      after(async () => {
+        await esDeleteAllIndices(indexName);
+      });
       describe('manage index action', () => {
         beforeEach(async () => {
           await pageObjects.svlSearchIndexDetailPage.manageIndex();
