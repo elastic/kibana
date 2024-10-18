@@ -20,8 +20,10 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectAPIReferenceDocLinkExists() {
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
     },
-    async expectUseInPlaygroundLinkExists() {
+    async expectActionItemReplacedWhenHasDocs() {
+      await testSubjects.missingOrFailt('ApiReferenceDoc', { timeout: 2000 });
       await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
+      await testSubjects.existOrFail('viewInDiscoverLink', { timeout: 5000 });
     },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
@@ -76,9 +78,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectMoreOptionsOverviewMenuIsShown() {
       await testSubjects.existOrFail('moreOptionsContextMenu');
     },
-    async expectPlaygroundButtonExistsInMoreOptions() {
-      await testSubjects.existOrFail('moreOptionsPlayground');
-    },
     async expectToNavigateToPlayground(indexName: string) {
       await testSubjects.click('moreOptionsPlayground');
       expect(await browser.getCurrentUrl()).contain(
@@ -88,6 +87,9 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     },
     async expectAPIReferenceDocLinkExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsApiReference', { timeout: 2000 });
+    },
+    async expectAPIReferenceDocLinkMissingInMoreOptions() {
+      await testSubjects.missingOrFailt('moreOptionsApiReference', { timeout: 2000 });
     },
     async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
