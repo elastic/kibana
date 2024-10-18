@@ -86,14 +86,24 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   });
 
   const getFilesClient = mockGetFilesClient();
-  const casesProviderValue = {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    features,
-    owner,
-    permissions,
-    getFilesClient,
-  };
+  const casesProviderValue = useMemo(
+    () => ({
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      features,
+      owner,
+      permissions,
+      getFilesClient,
+    }),
+    [
+      externalReferenceAttachmentTypeRegistry,
+      features,
+      getFilesClient,
+      owner,
+      permissions,
+      persistableStateAttachmentTypeRegistry,
+    ]
+  );
 
   return (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
