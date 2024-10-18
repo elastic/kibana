@@ -9,18 +9,18 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { nameSpacedEventBus } from './namespaced_event_bus';
+import { eventBusRegistry } from './event_bus_registry';
 import type { EventBusPluginSetup, EventBusPluginStart } from './types';
 
-export type EventBusApi = typeof nameSpacedEventBus;
+export type EventBusApi = typeof eventBusRegistry;
 
 export class EventBusPlugin implements Plugin<EventBusPluginSetup, EventBusPluginStart> {
   public setup(core: CoreSetup): EventBusPluginSetup {
-    return nameSpacedEventBus;
+    return eventBusRegistry;
   }
 
   public start(core: CoreStart): EventBusPluginStart {
-    return nameSpacedEventBus;
+    return eventBusRegistry;
   }
 
   public stop() {}
