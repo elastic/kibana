@@ -51,7 +51,6 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-
     const isMetricsFilter = filterName === 'metricTypes';
     const isDataStreamsFilter = filterName === 'dataStreams';
 
@@ -87,11 +86,6 @@ export const ChartsFilter = memo<ChartsFilterProps>(
 
     // track popover state to pin selected options
     const wasPopoverOpen = useRef(isPopoverOpen);
-    useEffect(() => {
-      return () => {
-        wasPopoverOpen.current = isPopoverOpen;
-      };
-    }, [isPopoverOpen, wasPopoverOpen]);
 
     // compute if selected dataStreams should be pinned
     const shouldPinSelectedDataStreams = useCallback(
@@ -121,8 +115,16 @@ export const ChartsFilter = memo<ChartsFilterProps>(
 
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
+        const optionItemsToSet = newOptions.map((option) => option);
+        const currChecks = optionItemsToSet.filter((option) => option.checked === 'on');
+
+        // don't update filter state if trying to uncheck all options
+        if (currChecks.length < 1) {
+          return;
+        }
+
         // update filter UI options state
-        setItems(newOptions.map((option) => option));
+        setItems(optionItemsToSet);
 
         // compute a selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
@@ -146,10 +148,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         shouldPinSelectedDataStreams(false);
         setAreDataStreamsSelectedOnMount(false);
 
-        // update overall query state
-        if (typeof onChangeFilterOptions !== 'undefined') {
-          onChangeFilterOptions(selectedItems);
-        }
+        onChangeFilterOptions(selectedItems);
       },
       [
         setItems,
@@ -162,6 +161,12 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         setUrlDataStreamsFilter,
       ]
     );
+
+    useEffect(() => {
+      return () => {
+        wasPopoverOpen.current = isPopoverOpen;
+      };
+    }, [isPopoverOpen, wasPopoverOpen]);
 
     return (
       <ChartsFilterPopover
