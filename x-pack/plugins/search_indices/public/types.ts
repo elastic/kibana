@@ -100,7 +100,7 @@ export interface CreateIndexCodeExamples {
 
 export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
   indexName: string;
-  sampleDocument: object;
+  sampleDocuments: object[];
   mappingProperties: Record<string, MappingProperty>;
 }
 
