@@ -32,6 +32,7 @@ const testProps = {
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
+  assistantFeatures: {},
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');
