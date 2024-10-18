@@ -102,6 +102,21 @@ export const getRecommendedQueries = ({
           },
           {
             label: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.eventRate.label',
+              {
+                defaultMessage: 'Event rate',
+              }
+            ),
+            description: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.eventRate.description',
+              {
+                defaultMessage: 'Event rate over time',
+              }
+            ),
+            queryString: `${fromCommand}\n  | STATS count = COUNT(*), min_timestamp = MIN(${timeField}) // MIN(dateField) finds the earliest timestamp in the dataset.\n  | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) // Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time.\n | KEEP event_rate`,
+          },
+          {
+            label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.lastHour.label',
               {
                 defaultMessage: 'Total count vs count last hour',
