@@ -72,7 +72,7 @@ export const serializeGeoipDatabase = ({
   databaseName: string;
   maxmind?: string;
 }): SerializedGeoipDatabase => {
-  const database = { name: databaseName } as SerializedGeoipDatabase;
+  const database = { name: `${databaseName}.mmdb` } as SerializedGeoipDatabase;
 
   if (databaseType === 'maxmind') {
     database.maxmind = { account_id: maxmind ?? '' };
