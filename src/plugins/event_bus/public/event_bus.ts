@@ -10,30 +10,84 @@
 import { distinctUntilChanged, scan, BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 
-import { setSearchQuery, searchSlice } from './search_slice';
+import { setSearchQuery } from './search_slice';
 
 export interface Action {
   type: string;
   payload: any;
 }
 
-// Create a Subject to act as an event bus
-export const eventBus$ = new BehaviorSubject<Action>({
+const initialAction: Action = {
   type: 'init',
   payload: null,
-});
+};
 
-// Any part of the app can publish an event
-export function dispatch(action: Action) {
-  eventBus$.next(action);
+/**
+ * Namespaced Event Bus
+ */
+export class NamespacedEventBus {
+  private buses: { [namespace: string]: BehaviorSubject<any> } = {};
+
+  // Create or get an existing namespaced bus
+  getOrCreateBus(namespace: string) {
+    if (!this.buses[namespace]) {
+      this.buses[namespace] = new BehaviorSubject<Action>(initialAction);
+    }
+    return this.buses[namespace];
+  }
+
+  // Register a namespaced event bus
+  registerNamespace(namespace: string) {
+    if (!this.buses[namespace]) {
+      this.buses[namespace] = new BehaviorSubject<Action>(initialAction);
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(`Namespace ${namespace} is already registered.`);
+    }
+  }
+
+  // Unregister a namespaced event bus
+  unregisterNamespace(namespace: string) {
+    if (this.buses[namespace]) {
+      this.buses[namespace].complete();
+      delete this.buses[namespace];
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(`Namespace ${namespace} is not registered.`);
+    }
+  }
+
+  // Dispatch an action to a specific namespaced bus
+  dispatch(namespace: string, action: Action) {
+    const bus = this.buses[namespace];
+    if (bus) {
+      bus.next(action);
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(`Namespace ${namespace} is not registered. Cannot dispatch action.`);
+    }
+  }
+
+  // Subscribe to a specific namespaced bus
+  subscribe(namespace: string, reducer: any, initialState: any, cb: any) {
+    const bus = this.buses[namespace];
+    if (!bus) {
+      // eslint-disable-next-line no-console
+      console.warn(`Namespace ${namespace} is not registered. Cannot subscribe.`);
+      return { unsubscribe: () => {} }; // Return a no-op unsubscribe function
+    }
+
+    return bus.pipe(scan(reducer, initialState), distinctUntilChanged(isEqual)).subscribe(cb);
+  }
 }
 
+export const eventBus = new NamespacedEventBus();
+
 // Plugins or components can subscribe to events
-export const subscribe = (cb: any) =>
-  eventBus$
-    .pipe(scan(searchSlice.reducer, { query: '' }), distinctUntilChanged(isEqual))
-    .subscribe(cb);
-export type Subscribe = typeof subscribe;
+export type Subscribe = typeof eventBus.subscribe;
+
+// Register a namespace
+eventBus.registerNamespace('search');
 
 // Publishing an event
-dispatch(setSearchQuery('new search term'));
+eventBus.dispatch('search', setSearchQuery('new search term'));
