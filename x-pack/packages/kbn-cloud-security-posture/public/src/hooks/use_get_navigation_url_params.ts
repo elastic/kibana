@@ -8,6 +8,7 @@
 import {
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   SECURITY_DEFAULT_DATA_VIEW_ID,
+  CLOUD_SECURITY_POSTURE_PATH,
 } from '@kbn/cloud-security-posture-common';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -16,7 +17,16 @@ import { CspClientPluginStartDeps } from '../types';
 import { encodeQuery } from '../utils/query_utils';
 import { NavFilter, createFilter } from './use_navigate_findings';
 import { useDataView } from './use_data_view';
-import { findingsNavigationUrl } from '../constants/navigation';
+
+/* If we put this on constant folder and import it here, it will cause our bundle size to go above the limit */
+const findingPageNavigationUrl = {
+  findings: {
+    path: `${CLOUD_SECURITY_POSTURE_PATH}/findings/configurations`,
+  },
+  vulnerabilities: {
+    path: `${CLOUD_SECURITY_POSTURE_PATH}/findings/vulnerabilities`,
+  },
+};
 
 export const useGetNavigationUrlParams = (
   pathname: string,
@@ -46,8 +56,8 @@ export const useGetNavigationUrlParams = (
 
 export const useGetNavigationUrlParamsFindings = () => {
   const { data } = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
-  return useGetNavigationUrlParams(findingsNavigationUrl.findings.path, data?.id);
+  return useGetNavigationUrlParams(findingPageNavigationUrl.findings.path, data?.id);
 };
 
 export const useGetNavigationUrlParamsVulnerabilities = () =>
-  useGetNavigationUrlParams(findingsNavigationUrl.vulnerabilities.path);
+  useGetNavigationUrlParams(findingPageNavigationUrl.vulnerabilities.path);

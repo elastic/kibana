@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  CLOUD_SECURITY_POSTURE_BASE_PATH,
-  CLOUD_SECURITY_POSTURE_PATH,
-} from '@kbn/cloud-security-posture-common';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 
 export const NAV_ITEMS_NAMES = {
@@ -60,14 +57,5 @@ export const findingsNavigation = {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource/:resourceId`,
     id: 'cloud_security_posture-findings-vulnerabilities-resourceId',
-  },
-};
-
-export const findingsNavigationUrl = {
-  findings: {
-    path: `${CLOUD_SECURITY_POSTURE_PATH}/findings/configurations`,
-  },
-  vulnerabilities: {
-    path: `${CLOUD_SECURITY_POSTURE_PATH}/findings/vulnerabilities`,
   },
 };
