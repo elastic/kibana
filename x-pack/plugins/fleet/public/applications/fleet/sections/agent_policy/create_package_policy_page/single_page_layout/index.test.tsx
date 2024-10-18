@@ -154,13 +154,6 @@ afterAll(() => {
   consoleDebugMock.mockRestore();
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/196463
-// FLAKY: https://github.com/elastic/kibana/issues/196464
-// FLAKY: https://github.com/elastic/kibana/issues/196465
-// FLAKY: https://github.com/elastic/kibana/issues/196466
-// FLAKY: https://github.com/elastic/kibana/issues/196467
-// FLAKY: https://github.com/elastic/kibana/issues/196468
-// FLAKY: https://github.com/elastic/kibana/issues/196469
 describe('When on the package policy create page', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -212,6 +205,7 @@ describe('When on the package policy create page', () => {
           data_streams: [
             {
               type: 'logs',
+              name: 'access logs',
               dataset: 'nginx.access',
               title: 'Nginx access logs',
               ingest_pipeline: 'default',
