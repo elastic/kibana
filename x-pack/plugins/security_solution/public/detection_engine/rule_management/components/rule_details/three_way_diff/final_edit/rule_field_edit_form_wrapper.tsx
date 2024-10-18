@@ -16,17 +16,17 @@ import type {
 import { useFinalSideContext } from '../final_side/final_side_context';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import * as i18n from '../translations';
-import type { RuleFieldComponentProps } from './field_component_props';
+import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
 
-type FieldComponent = React.ComponentType<RuleFieldComponentProps>;
+type RuleFieldEditComponent = React.ComponentType<RuleFieldEditComponentProps>;
 
 export type FieldDeserializerFn = (
   defaultRuleFieldValue: FormData,
   finalDiffableRule: DiffableRule
 ) => FormData;
 
-interface FieldFormWrapperProps {
-  component: FieldComponent;
+interface RuleFieldEditFormWrapperProps {
+  component: RuleFieldEditComponent;
   ruleFieldFormSchema: FormSchema;
   deserializer?: FieldDeserializerFn;
   serializer?: (formData: FormData) => FormData;
@@ -41,14 +41,15 @@ interface FieldFormWrapperProps {
  * @param {Function} props.deserializer - Deserializer prepares initial form data. It converts field value from a DiffableRule format to a format used by the form.
  * @param {Function} props.serializer - Serializer prepares form data for submission. It converts form data back to a DiffableRule format.
  */
-export function FieldFormWrapper({
+export function RuleFieldEditFormWrapper({
   component: FieldComponent,
   ruleFieldFormSchema,
   deserializer,
   serializer,
-}: FieldFormWrapperProps) {
+}: RuleFieldEditFormWrapperProps) {
   const { fieldName, setReadOnlyMode } = useFinalSideContext();
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
+  const [validity, setValidity] = useState<boolean | undefined>(undefined);
 
   const deserialize = useCallback(
     (defaultValue: FormData): FormData =>
@@ -79,10 +80,7 @@ export function FieldFormWrapper({
     serializer,
     onSubmit: handleSubmit,
   });
-
-  const [validity, setValidity] = useState<boolean | undefined>(undefined);
-
-  const isValid = validity === undefined ? form.isValid : validity;
+  const isValid = validity ?? form.isValid;
 
   return (
     <>
