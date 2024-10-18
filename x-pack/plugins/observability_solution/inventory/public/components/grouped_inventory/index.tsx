@@ -7,11 +7,8 @@
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
-import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { GroupSelector } from './group_selector';
 import { InventoryGroupAccordion } from './inventory_group_accordion';
@@ -23,12 +20,10 @@ export interface GroupedInventoryPageProps {
 }
 
 export function GroupedInventoryView() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
 
-  const inventoryRoute = useInventoryRouter();
   const { query } = useInventoryParams('/');
   const { kuery, entityTypes } = query;
 
@@ -51,24 +46,6 @@ export function GroupedInventoryView() {
   );
 
   const totalEntities = value.groups.reduce((acc, group) => acc + group.count, 0);
-
-  useEffectOnce(() => {
-    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refresh();
-        } else {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
-      }
-    );
-    return () => {
-      searchBarContentSubscription.unsubscribe();
-    };
-  });
 
   return (
     <>
