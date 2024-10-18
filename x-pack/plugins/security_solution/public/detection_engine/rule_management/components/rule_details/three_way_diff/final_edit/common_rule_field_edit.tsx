@@ -48,6 +48,12 @@ import {
   ruleNameOverrideSerializer,
   ruleNameOverrideSchema,
 } from './fields/rule_name_override';
+import {
+  RuleScheduleEdit,
+  ruleScheduleSchema,
+  ruleScheduleDeserializer,
+  ruleScheduleSerializer,
+} from './fields/rule_schedule';
 import { SetupEdit, setupSchema } from './fields/setup';
 import { TagsEdit, tagsSchema } from './fields/tags';
 
@@ -123,6 +129,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={ruleNameOverrideSchema}
           serializer={ruleNameOverrideSerializer}
           deserializer={ruleNameOverrideDeserializer}
+        />
+      );
+    case 'rule_schedule':
+      return (
+        <FieldFormWrapper
+          component={RuleScheduleEdit}
+          fieldFormSchema={ruleScheduleSchema}
+          serializer={ruleScheduleSerializer}
+          deserializer={ruleScheduleDeserializer}
         />
       );
     case 'setup':
