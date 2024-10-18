@@ -274,6 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
