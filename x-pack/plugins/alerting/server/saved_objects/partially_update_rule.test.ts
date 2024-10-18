@@ -263,6 +263,17 @@ const DefaultAttributesForEsUpdate = {
       },
     },
   },
+  snoozeSchedule: [
+    {
+      duration: 1000,
+      id: '1',
+      rRule: {
+        count: 1,
+        dtstart: '2019-02-13T21:01:22.479Z',
+        tzid: 'UTC',
+      },
+    },
+  ],
 };
 
 const AttributesForEsUpdateWithUnallowedFields = {

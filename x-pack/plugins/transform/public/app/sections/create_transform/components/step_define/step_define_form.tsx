@@ -126,16 +126,23 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
   const fieldStatsContext = useFieldStatsFlyoutContext();
-  const indexPreviewProps = {
-    ...useIndexData(
-      dataView,
-      transformConfigQuery,
-      runtimeMappings,
-      timeRangeMs,
+
+  const populatedFields = useMemo(
+    () =>
       isPopulatedFields(fieldStatsContext?.populatedFields)
         ? [...fieldStatsContext.populatedFields]
-        : []
-    ),
+        : [],
+    [fieldStatsContext?.populatedFields]
+  );
+
+  const indexPreviewProps = {
+    ...useIndexData({
+      dataView,
+      query: transformConfigQuery,
+      populatedFields,
+      combinedRuntimeMappings: runtimeMappings,
+      timeRangeMs,
+    }),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };

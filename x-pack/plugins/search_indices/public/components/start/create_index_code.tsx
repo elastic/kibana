@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
@@ -21,15 +22,18 @@ import { LanguageSelector } from '../shared/language_selector';
 
 import { CreateIndexFormState } from './types';
 import { useStartPageCodingExamples } from './hooks/use_coding_examples';
+import { APIKeyCallout } from './api_key_callout';
 
 export interface CreateIndexCodeViewProps {
   createIndexForm: CreateIndexFormState;
   changeCodingLanguage: (language: AvailableLanguages) => void;
+  canCreateApiKey?: boolean;
 }
 
 export const CreateIndexCodeView = ({
   createIndexForm,
   changeCodingLanguage,
+  canCreateApiKey,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
@@ -47,18 +51,26 @@ export const CreateIndexCodeView = ({
     [usageTracker, changeCodingLanguage]
   );
   const elasticsearchUrl = useElasticsearchUrl();
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
+      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl]);
+  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
+      {canCreateApiKey && (
+        <EuiFlexItem grow={true}>
+          <APIKeyCallout apiKey={apiKey} />
+        </EuiFlexItem>
+      )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
@@ -74,6 +86,13 @@ export const CreateIndexCodeView = ({
               application={application}
               sharePlugin={share}
               consolePlugin={consolePlugin}
+              telemetryId={`${selectedLanguage}_create_index`}
+              onClick={() => {
+                usageTracker.click([
+                  AnalyticsEvents.startCreateIndexRunInConsole,
+                  `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
+                ]);
+              }}
             />
           </EuiFlexItem>
         )}
@@ -94,6 +113,7 @@ export const CreateIndexCodeView = ({
         />
       )}
       <CodeSample
+        id="createIndex"
         title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
           defaultMessage: 'Connect and create an index',
         })}

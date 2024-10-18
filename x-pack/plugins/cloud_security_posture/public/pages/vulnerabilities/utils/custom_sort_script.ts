@@ -14,7 +14,13 @@ export const getCaseInsensitiveSortScript = (field: string, direction: string) =
       type: 'string',
       order: direction,
       script: {
-        source: `doc["${field}"].value.toLowerCase()`,
+        source: `
+          if (doc.containsKey('${field}') && !doc['${field}'].empty) {
+            return doc['${field}'].value.toLowerCase();
+          } else {
+            return "";
+          }
+        `,
         lang: 'painless',
       },
     },

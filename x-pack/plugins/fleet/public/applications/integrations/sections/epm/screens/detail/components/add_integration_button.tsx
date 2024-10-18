@@ -32,7 +32,7 @@ export function AddIntegrationButton(props: AddIntegrationButtonProps) {
         ) : (
           <FormattedMessage
             id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-            defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
+            defaultMessage="Elastic Agent Integrations require the All privilege for Agent policies and All privilege for Integrations. Contact your administrator."
           />
         ),
       }

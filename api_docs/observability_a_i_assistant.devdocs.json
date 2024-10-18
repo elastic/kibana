@@ -108,7 +108,7 @@
         "signature": [
           "({ size = 's', css, className }: ",
           "AssistantAvatarProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
         "deprecated": false,
@@ -149,7 +149,7 @@
             "section": "def-public.Feedback",
             "text": "Feedback"
           },
-          ") => void; onRegenerateClick: () => void; onStopGeneratingClick: () => void; }) => JSX.Element | null"
+          ") => void; onRegenerateClick: () => void; onStopGeneratingClick: () => void; }) => React.JSX.Element | null"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
         "deprecated": false,
@@ -338,7 +338,7 @@
         "signature": [
           "(props: ",
           "UseGenAIConnectorsResult",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
         "deprecated": false,
@@ -609,7 +609,7 @@
         "label": "FailedToLoadResponse",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/failed_to_load_response.tsx",
         "deprecated": false,
@@ -626,7 +626,7 @@
         "label": "FeedbackButtons",
         "description": [],
         "signature": [
-          "({ onClickFeedback }: FeedbackButtonsProps) => JSX.Element"
+          "({ onClickFeedback }: FeedbackButtonsProps) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "deprecated": false,
@@ -692,7 +692,7 @@
         "label": "MessageText",
         "description": [],
         "signature": [
-          "({ loading, content, onActionClick }: Props) => JSX.Element"
+          "({ loading, content, onActionClick }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/message_text.tsx",
         "deprecated": false,
@@ -1156,7 +1156,13 @@
             "label": "scopes",
             "description": [],
             "signature": [
-              "AssistantScope",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
@@ -1475,7 +1481,13 @@
                 "text": "FunctionDefinition"
               },
               "<any>, \"name\" | \"description\" | \"parameters\">[] | undefined; functionCall?: string | undefined; signal: AbortSignal; scope: ",
-              "AssistantScope",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
               "; }) => ",
               "Observable",
               "<",
@@ -1640,7 +1652,13 @@
               "[]; persist: boolean; disableFunctions: boolean | { except: string[]; }; signal: AbortSignal; instructions?: ",
               "AdHocInstruction",
               "[] | undefined; scope: ",
-              "AssistantScope",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
               "; }) => ",
               "Observable",
               "<",
@@ -1814,7 +1832,13 @@
             "description": [],
             "signature": [
               "(options?: { contexts?: string[] | undefined; filter?: string | undefined; scope: ",
-              "AssistantScope",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
               "; } | undefined) => ",
               {
                 "pluginId": "observabilityAIAssistant",
@@ -1886,6 +1910,29 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.functions$",
+            "type": "Object",
+            "tags": [],
+            "label": "functions$",
+            "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.FunctionDefinition",
+                "text": "FunctionDefinition"
+              },
+              "<any>[]>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "observabilityAIAssistant",
@@ -1990,9 +2037,7 @@
                 "section": "def-public.ChatActionClickHandler",
                 "text": "ChatActionClickHandler"
               },
-              ", scope?: ",
-              "AssistantScope",
-              " | undefined) => React.ReactNode"
+              ") => React.ReactNode"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
@@ -2089,24 +2134,31 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "observabilityAIAssistant",
-                "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$5",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "scope",
-                "description": [],
-                "signature": [
-                  "AssistantScope",
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.getScope",
+            "type": "Function",
+            "tags": [],
+            "label": "getScope",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -4093,17 +4145,95 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantService.scope",
-            "type": "CompoundType",
+            "id": "def-public.ObservabilityAIAssistantService.scope$",
+            "type": "Object",
             "tags": [],
-            "label": "scope",
+            "label": "scope$",
             "description": [],
             "signature": [
-              "\"search\" | \"observability\" | \"all\""
+              "BehaviorSubject",
+              "<",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
+              ">"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.setScope",
+            "type": "Function",
+            "tags": [],
+            "label": "setScope",
+            "description": [],
+            "signature": [
+              "(scope: ",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantService.setScope.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ai-assistant-common",
+                    "scope": "common",
+                    "docId": "kibKbnAiAssistantCommonPluginApi",
+                    "section": "def-common.AssistantScope",
+                    "text": "AssistantScope"
+                  }
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.getScope",
+            "type": "Function",
+            "tags": [],
+            "label": "getScope",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5522,6 +5652,18 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.elasticAiAssistantImage",
+        "type": "string",
+        "tags": [],
+        "label": "elasticAiAssistantImage",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.Feedback",
         "type": "Type",
         "tags": [],
@@ -6838,7 +6980,13 @@
               "description": [],
               "signature": [
                 "{ scope: ",
-                "AssistantScope",
+                {
+                  "pluginId": "@kbn/ai-assistant-common",
+                  "scope": "common",
+                  "docId": "kibKbnAiAssistantCommonPluginApi",
+                  "section": "def-common.AssistantScope",
+                  "text": "AssistantScope"
+                },
                 "; connectorId?: string | undefined; service: ",
                 {
                   "pluginId": "observabilityAIAssistant",
@@ -8830,7 +8978,13 @@
             "label": "scopes",
             "description": [],
             "signature": [
-              "AssistantScope",
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",

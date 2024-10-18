@@ -33,12 +33,11 @@ import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
-import { getRelatedAlertKuery } from '../../../../../common/utils/alerting/get_related_alerts_query';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertParams } from '../../types';
-import { Threshold } from '../custom_threshold';
+import { Threshold } from '../threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
@@ -49,15 +48,10 @@ import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and
 interface AppSectionProps {
   alert: CustomThresholdAlert;
   rule: CustomThresholdRule;
-  setRelatedAlertsKuery: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function AlertDetailsAppSection({
-  alert,
-  rule,
-  setRelatedAlertsKuery,
-}: AppSectionProps) {
+export default function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const services = useKibana().services;
   const {
     charts,
@@ -79,7 +73,6 @@ export default function AlertDetailsAppSection({
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
-  const tags = alert.fields.tags;
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -111,10 +104,6 @@ export default function AlertDetailsAppSection({
   };
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
-
-  useEffect(() => {
-    setRelatedAlertsKuery(getRelatedAlertKuery(tags, groups));
-  }, [groups, setRelatedAlertsKuery, tags]);
 
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));

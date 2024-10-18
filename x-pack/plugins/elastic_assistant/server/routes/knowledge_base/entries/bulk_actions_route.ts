@@ -22,11 +22,18 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
-import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import {
+  EsKnowledgeBaseEntrySchema,
+  UpdateKnowledgeBaseEntrySchema,
+} from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
-import { transformToCreateSchema } from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
+import {
+  getUpdateScript,
+  transformToCreateSchema,
+  transformToUpdateSchema,
+} from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
 
 export interface BulkOperationError {
   message: string;
@@ -210,7 +217,17 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               })
             ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: [], // TODO: Support bulk update
+            documentsToUpdate: body.update?.map((entry) =>
+              // TODO: KB-RBAC check, required when users != null as entry will either be created globally if empty
+              transformToUpdateSchema({
+                user: authenticatedUser,
+                updatedAt: changedAt,
+                entry,
+                global: entry.users != null && entry.users.length === 0,
+              })
+            ),
+            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
+              getUpdateScript({ entry, isPatch: true }),
             authenticatedUser,
           });
           const created =

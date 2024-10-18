@@ -138,6 +138,9 @@ describe('Versioned route', () => {
         tags: ['access:test'],
         timeout: { payload: 60_000, idleSocket: 10_000 },
         xsrfRequired: false,
+        excludeFromOAS: true,
+        httpResource: true,
+        summary: `test`,
       },
     };
 
@@ -548,7 +551,7 @@ describe('Versioned route', () => {
     expect(
       // @ts-expect-error
       versionedRoute.getSecurity({
-        headers: {},
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
       })
     ).toStrictEqual(securityConfigDefault);
 
@@ -569,7 +572,7 @@ describe('Versioned route', () => {
     expect(
       // @ts-expect-error
       versionedRoute.getSecurity({
-        headers: {},
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
       })
     ).toStrictEqual(securityConfigDefault);
     expect(router.get).toHaveBeenCalledTimes(1);

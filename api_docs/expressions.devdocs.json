@@ -8634,11 +8634,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -12282,14 +12282,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionRendererComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12303,7 +12303,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13588,7 +13588,7 @@
               "section": "def-public.ReactExpressionRendererProps",
               "text": "ReactExpressionRendererProps"
             },
-            ") => JSX.Element"
+            ") => React.JSX.Element"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -20111,11 +20111,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -33138,11 +33138,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -38171,11 +38171,11 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
@@ -38187,19 +38187,19 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           }
         ],
         "initialIsOpen": false
@@ -39704,9 +39704,7 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: ",
-              "Dictionary",
-              "<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -45633,7 +45631,7 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ">) => any"
+              ">) => string | number | boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
             "deprecated": false,

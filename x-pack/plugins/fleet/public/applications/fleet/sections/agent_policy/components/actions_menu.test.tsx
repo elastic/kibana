@@ -109,6 +109,39 @@ describe('AgentPolicyActionMenu', () => {
       const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
       expect(deleteButton).toHaveAttribute('disabled');
     });
+
+    it('is disabled when agent policy support agentless  is true', () => {
+      const testRenderer = createFleetTestRendererMock();
+      const agentlessPolicy: AgentPolicy = {
+        ...baseAgentPolicy,
+        supports_agentless: true,
+        package_policies: [
+          {
+            id: 'test-package-policy',
+            is_managed: false,
+            created_at: new Date().toISOString(),
+            created_by: 'test',
+            enabled: true,
+            inputs: [],
+            name: 'test-package-policy',
+            namespace: 'default',
+            policy_id: 'test',
+            policy_ids: ['test'],
+            revision: 1,
+            updated_at: new Date().toISOString(),
+            updated_by: 'test',
+          },
+        ],
+      };
+
+      const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={agentlessPolicy} />);
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      agentActionsButton.click();
+
+      const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
+      expect(deleteButton).not.toHaveAttribute('disabled');
+    });
   });
 
   describe('add agent', () => {
@@ -175,6 +208,39 @@ describe('AgentPolicyActionMenu', () => {
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
+    });
+
+    it('should remove add agent button when agent policy support agentless  is true', () => {
+      const testRenderer = createFleetTestRendererMock();
+      const agentlessPolicy: AgentPolicy = {
+        ...baseAgentPolicy,
+        supports_agentless: true,
+        package_policies: [
+          {
+            id: 'test-package-policy',
+            is_managed: false,
+            created_at: new Date().toISOString(),
+            created_by: 'test',
+            enabled: true,
+            inputs: [],
+            name: 'test-package-policy',
+            namespace: 'default',
+            policy_id: 'test',
+            policy_ids: ['test'],
+            revision: 1,
+            updated_at: new Date().toISOString(),
+            updated_by: 'test',
+          },
+        ],
+      };
+
+      const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={agentlessPolicy} />);
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      agentActionsButton.click();
+
+      const addAgentActionButton = result.queryByTestId('agentPolicyActionMenuAddAgentButton');
+      expect(addAgentActionButton).toBeNull();
     });
   });
 

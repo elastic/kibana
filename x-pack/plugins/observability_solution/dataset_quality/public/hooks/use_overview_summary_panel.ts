@@ -26,10 +26,9 @@ export const useOverviewSummaryPanel = () => {
     .map((key: string) => services[key].length)
     .reduce((a, b) => a + b, 0);
 
-  const totalDocsCount = formatNumber(dataStreamDetails?.docsCount ?? 0, NUMBER_FORMAT);
+  const totalDocsCount = formatNumber(dataStreamDetails.docsCount, NUMBER_FORMAT);
 
-  const sizeInBytesAvailable = dataStreamDetails?.sizeBytes !== null;
-  const sizeInBytes = formatNumber(dataStreamDetails?.sizeBytes ?? 0, BYTE_NUMBER_FORMAT);
+  const sizeInBytes = formatNumber(dataStreamDetails.sizeBytes, BYTE_NUMBER_FORMAT);
   const isUserAllowedToSeeSizeInBytes = dataStreamDetails?.userPrivileges?.canMonitor ?? true;
 
   const hosts = dataStreamDetails?.hosts ?? {};
@@ -57,7 +56,6 @@ export const useOverviewSummaryPanel = () => {
 
   return {
     totalDocsCount,
-    sizeInBytesAvailable,
     sizeInBytes,
     isUserAllowedToSeeSizeInBytes,
     totalServicesCount,

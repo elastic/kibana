@@ -9,40 +9,47 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExternalRouteDeps } from '.';
+import { API_VERSIONS } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService, isServerless } = deps;
+  const { router, getSpacesService } = deps;
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/api/spaces/space/{id}',
+      access: 'public',
+      description: `Get a space`,
       options: {
-        access: isServerless ? 'internal' : 'public',
-        description: `Get a space`,
+        tags: ['oas-tag:spaces'],
       },
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    createLicensedRouteHandler(async (context, request, response) => {
-      const spaceId = request.params.id;
-      const spacesClient = getSpacesService().createSpacesClient(request);
-
-      try {
-        const space = await spacesClient.get(spaceId);
-        return response.ok({
-          body: space,
-        });
-      } catch (error) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          return response.notFound();
-        }
-        return response.customError(wrapError(error));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      createLicensedRouteHandler(async (context, request, response) => {
+        const spaceId = request.params.id;
+        const spacesClient = getSpacesService().createSpacesClient(request);
+        try {
+          const space = await spacesClient.get(spaceId);
+          return response.ok({
+            body: space,
+          });
+        } catch (error) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return response.notFound();
+          }
+          return response.customError(wrapError(error));
+        }
+      })
+    );
 }

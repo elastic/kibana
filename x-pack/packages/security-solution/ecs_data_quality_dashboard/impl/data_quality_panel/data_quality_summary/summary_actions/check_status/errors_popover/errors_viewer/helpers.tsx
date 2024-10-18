@@ -9,11 +9,10 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
+import { EMPTY_PLACEHOLDER } from '../../../../../constants';
 import type { ErrorSummary } from '../../../../../types';
 import { INDEX } from '../../../../../translations';
 import { ERROR, PATTERN } from '../../../translations';
-
-export const EMPTY_PLACEHOLDER = '--';
 
 export const ERRORS_CONTAINER_MAX_WIDTH = 600; // px
 export const ERRORS_CONTAINER_MIN_WIDTH = 450; // px

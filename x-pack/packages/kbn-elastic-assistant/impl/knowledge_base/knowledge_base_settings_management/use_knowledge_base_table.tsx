@@ -5,23 +5,71 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
 import {
   DocumentEntryType,
   IndexEntryType,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
+
+import useAsync from 'react-use/lib/useAsync';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
-import { isEsqlSystemEntry } from './helpers';
+import { isSystemEntry } from './helpers';
+
+const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
+  const { currentUserAvatar, userProfileService } = useAssistantContext();
+
+  const userProfile = useAsync(async () => {
+    const profile = await userProfileService?.bulkGet({ uids: new Set([entry.createdBy]) });
+    return profile?.[0].user.username;
+  }, []);
+
+  const userName = useMemo(() => userProfile?.value ?? 'Unknown', [userProfile?.value]);
+  const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
+  const userImage = isSystemEntry(entry) ? (
+    <EuiIcon
+      type={'logoElastic'}
+      css={css`
+        margin-left: 4px;
+        margin-right: 14px;
+      `}
+    />
+  ) : currentUserAvatar?.imageUrl != null ? (
+    <EuiAvatar
+      name={userName}
+      imageUrl={currentUserAvatar.imageUrl}
+      size={'s'}
+      color={currentUserAvatar?.color ?? 'subdued'}
+      css={css`
+        margin-right: 10px;
+      `}
+    />
+  ) : (
+    <EuiAvatar
+      name={userName}
+      initials={currentUserAvatar?.initials}
+      size={'s'}
+      color={currentUserAvatar?.color ?? 'subdued'}
+      css={css`
+        margin-right: 10px;
+      `}
+    />
+  );
+  return (
+    <>
+      {userImage}
+      <EuiText size={'s'}>{badgeItem}</EuiText>
+    </>
+  );
+};
 
 export const useKnowledgeBaseTable = () => {
-  const { currentUserAvatar } = useAssistantContext();
   const getActions = useInlineActions<KnowledgeBaseEntryResponse & { isDefault?: undefined }>();
 
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
@@ -29,10 +77,10 @@ export const useKnowledgeBaseTable = () => {
       if (entry.kbResource === 'user') {
         return 'userAvatar';
       }
-      if (entry.kbResource === 'esql') {
+      if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';
       }
-      return 'visText';
+      return 'document';
     } else if (entry.type === IndexEntryType.value) {
       return 'index';
     }
@@ -43,9 +91,13 @@ export const useKnowledgeBaseTable = () => {
     ({
       isDeleteEnabled,
       isEditEnabled,
-      onEntryNameClicked,
       onDeleteActionClicked,
       onEditActionClicked,
+    }: {
+      isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
+      isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
+      onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
       return [
         {
@@ -55,9 +107,7 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: ({ id, name }: KnowledgeBaseEntryResponse) => (
-            <EuiLink onClick={() => onEntryNameClicked({ id })}>{name}</EuiLink>
-          ),
+          render: ({ name }: KnowledgeBaseEntryResponse) => name,
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
         },
@@ -74,51 +124,12 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_AUTHOR,
           sortable: ({ users }: KnowledgeBaseEntryResponse) => users[0]?.name,
-          render: (entry: KnowledgeBaseEntryResponse) => {
-            // TODO: Look up user from `createdBy` id if privileges allow
-            const userName = entry.users?.[0]?.name ?? 'Unknown';
-            const badgeItem = isEsqlSystemEntry(entry) ? 'Elastic' : userName;
-            const userImage = isEsqlSystemEntry(entry) ? (
-              <EuiIcon
-                type={'logoElastic'}
-                css={css`
-                  margin-left: 4px;
-                  margin-right: 14px;
-                `}
-              />
-            ) : currentUserAvatar?.imageUrl != null ? (
-              <EuiAvatar
-                name={userName}
-                imageUrl={currentUserAvatar.imageUrl}
-                size={'s'}
-                color={currentUserAvatar?.color ?? 'subdued'}
-                css={css`
-                  margin-right: 10px;
-                `}
-              />
-            ) : (
-              <EuiAvatar
-                name={userName}
-                initials={currentUserAvatar?.initials}
-                size={'s'}
-                color={currentUserAvatar?.color ?? 'subdued'}
-                css={css`
-                  margin-right: 10px;
-                `}
-              />
-            );
-            return (
-              <>
-                {userImage}
-                <EuiText size={'s'}>{badgeItem}</EuiText>
-              </>
-            );
-          },
+          render: (entry: KnowledgeBaseEntryResponse) => <AuthorColumn entry={entry} />,
         },
         {
           name: i18n.COLUMN_ENTRIES,
           render: (entry: KnowledgeBaseEntryResponse) => {
-            return isEsqlSystemEntry(entry)
+            return isSystemEntry(entry)
               ? entry.text
               : entry.type === DocumentEntryType.value
               ? '1'
@@ -153,7 +164,7 @@ export const useKnowledgeBaseTable = () => {
         },
       ];
     },
-    [currentUserAvatar, getActions]
+    [getActions]
   );
   return { getColumns };
 };

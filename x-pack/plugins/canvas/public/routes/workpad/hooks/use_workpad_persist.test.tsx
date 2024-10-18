@@ -19,12 +19,17 @@ jest.mock('react-redux', () => ({
   useSelector: (selector: any) => selector(mockGetState()),
 }));
 
+jest.mock('../../../services/canvas_workpad_service', () => ({
+  getCanvasWorkpadService: () => {
+    return {
+      updateWorkpad: mockUpdateWorkpad,
+      updateAssets: mockUpdateAssets,
+      update: mockUpdate,
+    };
+  },
+}));
+
 jest.mock('../../../services', () => ({
-  useWorkpadService: () => ({
-    updateWorkpad: mockUpdateWorkpad,
-    updateAssets: mockUpdateAssets,
-    update: mockUpdate,
-  }),
   useNotifyService: () => ({
     error: mockNotifyError,
   }),

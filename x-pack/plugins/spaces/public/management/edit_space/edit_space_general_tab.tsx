@@ -13,7 +13,6 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-import { EditSpaceEnabledFeatures } from './edit_space_features_tab';
 import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
@@ -21,7 +20,9 @@ import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeSpace } from '../components/customize_space';
+import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { SpaceValidator } from '../lib';
 import type { CustomizeSpaceFormValues } from '../types';
@@ -249,17 +250,15 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           <EuiSpacer />
           <EuiCallOut
             color="warning"
-            iconType="help"
-            title="Warning"
-            data-test-subj="space-edit-page-user-impact-warning"
-          >
-            {i18n.translate(
+            iconType="iInCircle"
+            title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {
-                defaultMessage: 'The changes made will impact all users in the space.',
+                defaultMessage: 'The changes will apply to all users of the space.',
               }
             )}
-          </EuiCallOut>
+            data-test-subj="space-edit-page-user-impact-warning"
+          />
         </>
       )
     );
@@ -289,16 +288,24 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         </>
       )}
 
-      {props.allowFeatureVisibility && (solution == null || solution === SOLUTION_VIEW_CLASSIC) && (
+      {props.allowFeatureVisibility && (!solution || solution === SOLUTION_VIEW_CLASSIC) && (
         <>
           <EuiSpacer />
-          <EditSpaceEnabledFeatures
+          <EnabledFeatures
             features={features}
             space={getSpaceFromFormValues(formValues)}
             onChange={onChangeFeatures}
           />
         </>
       )}
+
+      <EuiSpacer />
+
+      <CustomizeAvatar
+        space={getSpaceFromFormValues(formValues)}
+        onChange={onChangeSpaceSettings}
+        validator={validator}
+      />
 
       {doShowUserImpactWarning()}
 

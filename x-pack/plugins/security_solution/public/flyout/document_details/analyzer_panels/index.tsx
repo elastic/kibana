@@ -11,6 +11,7 @@ import { FlyoutBody } from '@kbn/security-solution-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DocumentDetailsAnalyzerPanelKey } from '../shared/constants/panel_keys';
 import { DetailsPanel } from '../../../resolver/view/details_panel';
+import type { NodeEventOnClick } from '../../../resolver/view/panels/node_events_of_type';
 import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../preview/constants';
 
@@ -32,7 +33,7 @@ export interface AnalyzerPanelExpandableFlyoutProps extends FlyoutPanelProps {
 export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentInstanceID }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
-  const openPreview = useCallback(
+  const openPreview = useCallback<NodeEventOnClick>(
     ({ documentId, indexName, scopeId }) =>
       () => {
         openPreviewPanel({
