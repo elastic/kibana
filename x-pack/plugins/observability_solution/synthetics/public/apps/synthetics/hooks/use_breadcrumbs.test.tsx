@@ -9,7 +9,7 @@ import { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { OVERVIEW_ROUTE } from '../../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {

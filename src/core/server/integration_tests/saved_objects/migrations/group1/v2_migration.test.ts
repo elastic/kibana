@@ -22,7 +22,6 @@ import {
   readLog,
   clearLog,
   currentVersion,
-  nextMinor,
 } from '../kibana_migrator_test_kit';
 import {
   BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
@@ -86,12 +85,14 @@ describe('v2 migration', () => {
       expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toMatchInlineSnapshot(`
         Array [
           Object {
-            "destIndex": ".kibana_migrator_${currentVersion}_001",
-            "status": "patched",
+            "destIndex": ".kibana_migrator_8.16.0_001",
+            "sourceIndex": ".kibana_migrator_8.16.0_001",
+            "status": "migrated",
           },
           Object {
-            "destIndex": ".kibana_migrator_tasks_${currentVersion}_001",
-            "status": "patched",
+            "destIndex": ".kibana_migrator_tasks_8.16.0_001",
+            "sourceIndex": ".kibana_migrator_tasks_8.16.0_001",
+            "status": "migrated",
           },
         ]
       `);
@@ -320,19 +321,19 @@ describe('v2 migration', () => {
           // omit elapsedMs as it varies in each execution
           expect(migrationResults.map((result) => omit(result, 'elapsedMs')))
             .toMatchInlineSnapshot(`
-                      Array [
-                        Object {
-                          "destIndex": ".kibana_migrator_${nextMinor}_001",
-                          "sourceIndex": ".kibana_migrator_${currentVersion}_001",
-                          "status": "migrated",
-                        },
-                        Object {
-                          "destIndex": ".kibana_migrator_tasks_${currentVersion}_001",
-                          "sourceIndex": ".kibana_migrator_tasks_${currentVersion}_001",
-                          "status": "migrated",
-                        },
-                      ]
-                  `);
+            Array [
+              Object {
+                "destIndex": ".kibana_migrator_8.18.0_001",
+                "sourceIndex": ".kibana_migrator_8.16.0_001",
+                "status": "migrated",
+              },
+              Object {
+                "destIndex": ".kibana_migrator_tasks_8.16.0_001",
+                "sourceIndex": ".kibana_migrator_tasks_8.16.0_001",
+                "status": "migrated",
+              },
+            ]
+          `);
         });
 
         it('each migrator takes less than 60 seconds', () => {

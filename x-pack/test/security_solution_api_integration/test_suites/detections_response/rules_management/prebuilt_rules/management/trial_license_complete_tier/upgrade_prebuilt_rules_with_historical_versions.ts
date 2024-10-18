@@ -15,7 +15,7 @@ import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
-  upgradePrebuiltRules,
+  performUpgradePrebuiltRules,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
@@ -110,7 +110,10 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(1);
 
           // Call the upgrade prebuilt rules endpoint and check that the outdated rule was updated
-          const response = await upgradePrebuiltRules(es, supertest);
+          const response = await performUpgradePrebuiltRules(es, supertest, {
+            mode: 'ALL_RULES',
+            pick_version: 'TARGET',
+          });
           expect(response.summary.succeeded).toBe(1);
           expect(response.summary.total).toBe(1);
 
@@ -138,7 +141,10 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(statusResponse.stats.num_prebuilt_rules_to_install).toBe(0);
 
           // Call the upgrade prebuilt rules endpoint and check that the outdated rule was updated
-          const response = await upgradePrebuiltRules(es, supertest);
+          const response = await performUpgradePrebuiltRules(es, supertest, {
+            mode: 'ALL_RULES',
+            pick_version: 'TARGET',
+          });
           expect(response.summary.succeeded).toBe(1);
           expect(response.summary.total).toBe(1);
 
