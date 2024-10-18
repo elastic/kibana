@@ -186,7 +186,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     if (fs.existsSync(filePath)) {
       return {
         filename,
+        /** The local directory where downloads are stored */
         directory: this.downloadsDirFullPath,
+        /** The full local file path and name */
         fullFilePath: filePath,
       };
     }

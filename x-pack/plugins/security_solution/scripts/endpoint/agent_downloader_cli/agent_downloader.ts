@@ -15,22 +15,16 @@ import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 // Decrement the patch version by 1 and preserve pre-release tag (if any)
 const decrementPatchVersion = (version: string): string | null => {
   const parsedVersion = semver.parse(version);
-
-  // Decrement the patch version
   const newPatchVersion = parsedVersion.patch - 1;
-
   // Create a new version string with the decremented patch - removing any possible pre-release tag
   const newVersion = `${parsedVersion.major}.${parsedVersion.minor}.${newPatchVersion}`;
-
   return semver.valid(newVersion) ? newVersion : null;
 };
 
 // Generate a list of versions to attempt downloading, including a fallback to the previous patch (GA)
 const getVersionsToDownload = (version: string): string[] => {
   const parsedVersion = semver.parse(version);
-
-  if (!parsedVersion) return []; // Handle invalid version string
-
+  if (!parsedVersion) return [];
   // If patch version is 0, return only the current version.
   if (parsedVersion.patch === 0) {
     return [version];
