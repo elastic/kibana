@@ -24,6 +24,7 @@ export interface MonitorFilterState {
   schedules?: string[];
   locations?: string[];
   monitorQueryIds?: string[]; // Monitor Query IDs
+  showFromAllSpaces?: boolean;
 }
 
 export interface MonitorListPageState extends MonitorFilterState {
