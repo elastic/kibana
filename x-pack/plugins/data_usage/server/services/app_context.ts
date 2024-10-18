@@ -11,10 +11,10 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { LoggerFactory } from '@kbn/core/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { DataUsageConfigType } from './config';
-import type { DataUsageContext } from './types';
+import { DataUsageConfigType } from '../config';
+import type { DataUsageContext } from '../types';
 
-class AppContextService {
+export class AppContextService {
   private config$?: Observable<DataUsageConfigType>;
   private configSubject$?: BehaviorSubject<DataUsageConfigType>;
   private kibanaVersion: DataUsageContext['kibanaVersion'] = kibanaPackageJson.version;
@@ -23,7 +23,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logFactory?: LoggerFactory;
 
-  public start(appContext: DataUsageContext) {
+  constructor(appContext: DataUsageContext) {
     this.cloud = appContext.cloud;
     this.logFactory = appContext.logFactory;
     this.kibanaVersion = appContext.kibanaVersion;
@@ -70,5 +70,3 @@ class AppContextService {
     return this.kibanaInstanceId;
   }
 }
-
-export const appContextService = new AppContextService();
