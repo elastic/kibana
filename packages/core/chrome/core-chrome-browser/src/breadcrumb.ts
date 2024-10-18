@@ -24,3 +24,22 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
 export interface ChromeBreadcrumbsAppendExtension {
   content: MountPoint<HTMLDivElement>;
 }
+
+/** @public */
+export interface ChromeSetBreadcrumbsParams {
+  /**
+   * Declare the breadcrumbs for the project/solution type navigation in stateful.
+   * Those breadcrumbs correspond to the serverless breadcrumbs declaration.
+   */
+  project?: {
+    /**
+     * The breadcrumb value to set. Can be a single breadcrumb or an array of breadcrumbs.
+     */
+    value: ChromeBreadcrumb | ChromeBreadcrumb[];
+    /**
+     * Indicates whether the breadcrumb should be absolute (replaces the full path) or relative.
+     * @default false
+     */
+    absolute?: boolean;
+  };
+}
