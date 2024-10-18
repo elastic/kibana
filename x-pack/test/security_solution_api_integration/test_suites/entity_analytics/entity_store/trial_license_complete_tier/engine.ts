@@ -32,12 +32,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have installed the expected user resources', async () => {
-        await utils.initEntityEngineForEntityTypeAndWait('user');
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
         await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
-        await utils.initEntityEngineForEntityTypeAndWait('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
         await utils.expectEngineAssetsExist('host');
       });
     });
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityTypeAndWait('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
 
       after(async () => {
@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await utils.initEntityEngineForEntityTypeAndWait('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
         await api
           .deleteEntityEngine({
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should delete the user entity engine', async () => {
-        await utils.initEntityEngineForEntityTypeAndWait('user');
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
 
         await api
           .deleteEntityEngine({
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('apply_dataview_indices', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityTypeAndWait('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
 
       after(async () => {

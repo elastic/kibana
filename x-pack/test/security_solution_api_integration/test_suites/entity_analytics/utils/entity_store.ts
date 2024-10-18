@@ -17,6 +17,7 @@ export const EntityStoreUtils = (
   const api = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
+  const retry = getService('retry');
   const {
     expectTransformExists,
     expectTransformNotFound,
@@ -50,7 +51,7 @@ export const EntityStoreUtils = (
     }
   };
 
-  const initEntityEngineForEntityType = async (entityType: EntityType) => {
+  const _initEntityEngineForEntityType = async (entityType: EntityType) => {
     log.info(
       `Initializing engine for entity type ${entityType} in namespace ${namespace || 'default'}`
     );
@@ -70,51 +71,19 @@ export const EntityStoreUtils = (
     expect(res.status).to.eql(200);
   };
 
-  const initEntityEngineForEntityTypeAndWait = async (entityType: EntityType) => {
-    await initEntityEngineForEntityType(entityType);
-
-    let attempts = 10;
-    let lastBody: any = null;
-    const delayMs = 2000;
-
-    while (attempts > 0) {
-      const { body } = await api.getEntityEngine({ params: { entityType } }, namespace).expect(200);
-      lastBody = body;
-      if (body.status === 'started') {
-        return;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-      attempts--;
-    }
-
-    throw new Error(
-      `Engine for entity type ${entityType} did not start after multiple attempts, last status: ${JSON.stringify(
-        lastBody
-      )}`
-    );
-  };
-
   const initEntityEngineForEntityTypesAndWait = async (entityTypes: EntityType[]) => {
     await Promise.all(entityTypes.map((entityType) => initEntityEngineForEntityType(entityType)));
 
-    let attempts = 10;
-    let lastBody: any = null;
-    const delayMs = 2000;
-
-    while (attempts > 0) {
-      const { body } = await api.listEntityEngines(namespace).expect(200);
-      lastBody = body;
-      if (body.engines.every((engine: any) => engine.status === 'started')) {
-        return;
+    await retry.waitForWithTimeout(
+      `Engines to start for entity types: ${entityTypes.join(', ')}`,
+      60_000,
+      async () => {
+        const { body } = await api.listEntityEngines(namespace).expect(200);
+        if (body.engines.every((engine: any) => engine.status === 'started')) {
+          return true;
+        }
+        return false;
       }
-
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-      attempts--;
-    }
-
-    throw new Error(
-      `Engines did not start after multiple attempts, last status: ${JSON.stringify(lastBody)}`
     );
   };
 
@@ -148,7 +117,9 @@ export const EntityStoreUtils = (
 
   const expectEngineAssetsExist = async (entityType: EntityType) => {
     await expectTransformExists(`entities-v1-latest-security_${entityType}_${namespace}`);
-    await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_${namespace}_v1`);
+    await expectEnrichPolicyExists(
+      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
+    );
     await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectEntitiesIndexExists(entityType, namespace);
@@ -156,7 +127,9 @@ export const EntityStoreUtils = (
 
   const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
     await expectTransformNotFound(`entities-v1-latest-security_${entityType}_${namespace}`);
-    await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_${namespace}_v1`);
+    await expectEnrichPolicyNotFound(
+      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
+    );
     await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);
     await expectEntitiesIndexNotFound(entityType, namespace);
@@ -164,8 +137,6 @@ export const EntityStoreUtils = (
 
   return {
     cleanEngines,
-    initEntityEngineForEntityType,
-    initEntityEngineForEntityTypeAndWait,
     initEntityEngineForEntityTypesAndWait,
     expectTransformStatus,
     expectEngineAssetsExist,
