@@ -109,9 +109,8 @@ export interface IngestDataCodeDefinition {
 }
 
 export interface IngestDataCodeExamples {
-  title: string;
-  ingestTitle: string;
-  description: string;
+  addMappingsTitle: string;
+  addMappingsDescription: string;
   defaultMapping: Record<string, MappingProperty>;
   sense: IngestDataCodeDefinition;
   curl: IngestDataCodeDefinition;

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
@@ -95,33 +95,34 @@ export const AddDocumentsCodeExample = ({
               onSelectLanguage={onSelectLanguage}
             />
           </EuiFlexItem>
-          {selectedLanguage === 'curl' && (
-            <EuiFlexItem grow={false}>
-              <TryInConsoleButton
-                request={
-                  !indexHasMappings
-                    ? `${ingestCodeExamples.sense.updateMappingsCommand(
-                        codeParams
-                      )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
-                    : ingestCodeExamples.sense.ingestCommand(codeParams)
-                }
-                application={application}
-                sharePlugin={share}
-                consolePlugin={consolePlugin}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={
+                !indexHasMappings
+                  ? `${ingestCodeExamples.sense.updateMappingsCommand(
+                      codeParams
+                    )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
+                  : ingestCodeExamples.sense.ingestCommand(codeParams)
+              }
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiText>
-          <p>{ingestCodeExamples.description}</p>
-        </EuiText>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample
               id="installCodeExample"
               title={i18n.translate('xpack.searchIndices.indexDetails.installLibrary.title', {
-                defaultMessage: 'Install Elasticsearch library',
+                defaultMessage: 'Install Elasticsearch Client',
               })}
+              description={i18n.translate(
+                'xpack.searchIndices.indexDetails.installLibrary.description',
+                {
+                  defaultMessage: 'Install the Elasticsearch client on the command line:',
+                }
+              )}
               language="shell"
               code={selectedCodeExamples.installCommand}
               onCodeCopyClick={() => {
@@ -137,9 +138,8 @@ export const AddDocumentsCodeExample = ({
           <EuiFlexItem>
             <CodeSample
               id="addMappingsCodeExample"
-              title={i18n.translate('xpack.searchIndices.indexDetails.addMappingsCode.title', {
-                defaultMessage: 'Add mappings to your index',
-              })}
+              title={ingestCodeExamples.addMappingsTitle}
+              description={ingestCodeExamples.addMappingsDescription}
               language={Languages[selectedLanguage].codeBlockLanguage}
               code={selectedCodeExamples.updateMappingsCommand(codeParams)}
               onCodeCopyClick={() => {
@@ -154,7 +154,16 @@ export const AddDocumentsCodeExample = ({
         <EuiFlexItem>
           <CodeSample
             id="ingestDataCodeExample"
-            title={ingestCodeExamples.ingestTitle}
+            title={i18n.translate('xpack.searchIndices.indexDetails.ingestDocuments.title', {
+              defaultMessage: 'Ingest documents',
+            })}
+            description={i18n.translate(
+              'xpack.searchIndices.indexDetails.ingestDocuments.description',
+              {
+                defaultMessage:
+                  'We will then use Elasticsearh bulk API to ingest an array of documents into the index.',
+              }
+            )}
             language={Languages[selectedLanguage].codeBlockLanguage}
             code={selectedCodeExamples.ingestCommand(codeParams)}
             onCodeCopyClick={() => {

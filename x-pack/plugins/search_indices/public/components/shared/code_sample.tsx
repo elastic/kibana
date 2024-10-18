@@ -20,12 +20,20 @@ import {
 export interface CodeSampleProps {
   id?: string;
   title: string;
+  description?: string;
   language: string;
   code: string;
   onCodeCopyClick?: React.MouseEventHandler<HTMLElement>;
 }
 
-export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeSampleProps) => {
+export const CodeSample = ({
+  id,
+  title,
+  language,
+  code,
+  onCodeCopyClick,
+  description,
+}: CodeSampleProps) => {
   const onCodeClick = React.useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
       if (onCodeCopyClick === undefined) return;
@@ -40,10 +48,13 @@ export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeS
 
   return (
     <EuiFlexItem id={id}>
-      <EuiText size="s">
+      <EuiText size="m">
         <strong>{title}</strong>
       </EuiText>
-      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>{description}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
       <EuiThemeProvider colorMode="dark">
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
           <div onClick={onCodeClick}>
