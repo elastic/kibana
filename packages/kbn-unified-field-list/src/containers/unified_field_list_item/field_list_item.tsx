@@ -15,7 +15,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
-import type { SearchMode } from '../../types';
+import { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
   FieldPopover,
@@ -29,13 +29,13 @@ import {
   type UnifiedFieldListItemStatsProps,
 } from './field_list_item_stats';
 import type {
-  UnifiedFieldListSidebarContainerStateService,
+  UnifiedFieldListSidebarContainerCreationOptions,
   AddFieldFilterHandler,
 } from '../../types';
 import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
-  stateService: UnifiedFieldListSidebarContainerStateService;
+  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
   field: DataViewField;
   size: FieldItemButtonProps<DataViewField>['size'];
   isSelected: boolean;
@@ -43,7 +43,7 @@ interface GetCommonFieldItemButtonPropsParams {
 }
 
 function getCommonFieldItemButtonProps({
-  stateService,
+  creationOptions,
   field,
   size,
   isSelected,
@@ -63,16 +63,15 @@ function getCommonFieldItemButtonProps({
     field,
     size,
     isSelected,
-    buttonAddFieldToWorkspaceProps: stateService.creationOptions.buttonAddFieldToWorkspaceProps,
-    buttonRemoveFieldFromWorkspaceProps:
-      stateService.creationOptions.buttonRemoveFieldFromWorkspaceProps,
+    buttonAddFieldToWorkspaceProps: creationOptions.buttonAddFieldToWorkspaceProps,
+    buttonRemoveFieldFromWorkspaceProps: creationOptions.buttonRemoveFieldFromWorkspaceProps,
     onAddFieldToWorkspace: handler,
     onRemoveFieldFromWorkspace: handler,
   };
 }
 
 interface MultiFieldsProps {
-  stateService: UnifiedFieldListSidebarContainerStateService;
+  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
   multiFields: NonNullable<UnifiedFieldListItemProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
@@ -80,7 +79,7 @@ interface MultiFieldsProps {
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ stateService, multiFields, toggleDisplay, alwaysShowActionButton, size }) => (
+  ({ creationOptions, multiFields, toggleDisplay, alwaysShowActionButton, size }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -99,7 +98,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           shouldAlwaysShowAction={alwaysShowActionButton}
           onClick={undefined}
           {...getCommonFieldItemButtonProps({
-            stateService,
+            creationOptions,
             field: entry.field,
             isSelected: entry.isSelected,
             toggleDisplay,
@@ -113,9 +112,9 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
 
 export interface UnifiedFieldListItemProps {
   /**
-   * Service for managing the state
+   * Options form the service for managing the state
    */
-  stateService: UnifiedFieldListSidebarContainerStateService;
+  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
 
   /**
    * Required services
@@ -208,7 +207,7 @@ export interface UnifiedFieldListItemProps {
 }
 
 function UnifiedFieldListItemComponent({
-  stateService,
+  creationOptions,
   services,
   searchMode,
   alwaysShowActionButton = false,
@@ -267,9 +266,9 @@ function UnifiedFieldListItemComponent({
 
   const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(() => {
     const dataTestSubjPrefix =
-      stateService.creationOptions.dataTestSubj?.fieldListItemPopoverHeaderDataTestSubjPrefix;
+      creationOptions.dataTestSubj?.fieldListItemPopoverHeaderDataTestSubjPrefix;
     return {
-      buttonAddFieldToWorkspaceProps: stateService.creationOptions.buttonAddFieldToWorkspaceProps,
+      buttonAddFieldToWorkspaceProps: creationOptions.buttonAddFieldToWorkspaceProps,
       ...(dataTestSubjPrefix && {
         buttonAddFilterProps: {
           'data-test-subj': `${dataTestSubjPrefix}AddExistFilter-${field.name}`,
@@ -282,13 +281,13 @@ function UnifiedFieldListItemComponent({
         },
       }),
     };
-  }, [field.name, stateService.creationOptions]);
+  }, [field.name, creationOptions]);
 
   const renderPopover = () => {
     return (
       <>
         <UnifiedFieldListItemStats
-          stateService={stateService}
+          creationOptions={creationOptions}
           services={services}
           field={field}
           multiFields={multiFields}
@@ -301,7 +300,7 @@ function UnifiedFieldListItemComponent({
           <>
             <EuiSpacer size="m" />
             <MultiFields
-              stateService={stateService}
+              creationOptions={creationOptions}
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
@@ -327,7 +326,7 @@ function UnifiedFieldListItemComponent({
         multiFields={rawMultiFields}
         trackUiMetric={trackUiMetric}
         contextualFields={workspaceSelectedFieldNames}
-        originatingApp={stateService.creationOptions.originatingApp}
+        originatingApp={creationOptions.originatingApp}
         uiActions={uiActions}
       />
     );
@@ -337,7 +336,7 @@ function UnifiedFieldListItemComponent({
     rawMultiFields,
     searchMode,
     services.uiActions,
-    stateService.creationOptions.originatingApp,
+    creationOptions.originatingApp,
     trackUiMetric,
     workspaceSelectedFieldNames,
   ]);
@@ -353,8 +352,7 @@ function UnifiedFieldListItemComponent({
     [field, itemIndex]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
-  const isDragDisabled =
-    alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop;
+  const isDragDisabled = alwaysShowActionButton || creationOptions.disableFieldListItemDragAndDrop;
 
   return (
     <FieldPopover
@@ -368,7 +366,7 @@ function UnifiedFieldListItemComponent({
           onDragStart={closePopover}
           isDisabled={isDragDisabled}
           dataTestSubj={`${
-            stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
+            creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
             'unifiedFieldListItemDnD'
           }-${field.name}`}
         >
@@ -381,7 +379,7 @@ function UnifiedFieldListItemComponent({
             shouldAlwaysShowAction={alwaysShowActionButton}
             onClick={field.type !== '_source' ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({
-              stateService,
+              creationOptions,
               field,
               isSelected,
               toggleDisplay,
@@ -391,7 +389,7 @@ function UnifiedFieldListItemComponent({
         </Draggable>
       }
       closePopover={closePopover}
-      data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
+      data-test-subj={creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
         <FieldPopoverHeader
           services={services}
