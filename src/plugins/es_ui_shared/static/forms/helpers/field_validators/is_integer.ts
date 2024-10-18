@@ -15,11 +15,13 @@ export const isInteger =
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
 
-    if (value === '') {
-      return;
+    if (
+      value === '' ||
+      (typeof value === 'number' && Number.isInteger(value)) ||
+      (typeof value === 'string' && Number.isInteger(Number(value)))
+    ) {
+      return undefined;
     }
 
-    const numValue = typeof value === 'string' ? Number(value) : value;
-
-    return Number.isInteger(numValue) ? undefined : { message, code: 'ERR_NOT_INT_NUMBER' };
+    return { message, code: 'ERR_NOT_INT_NUMBER' };
   };

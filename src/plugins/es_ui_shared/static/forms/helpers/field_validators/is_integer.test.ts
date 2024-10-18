@@ -36,4 +36,12 @@ describe('isInteger', () => {
   test('should return Validation function if value a string that can not be parsed to number', () => {
     expect(validator('test')).toMatchObject({ message, code });
   });
+
+  test('should return Validation function if value is boolean', () => {
+    expect(validator(false)).toMatchObject({ message, code });
+  });
+
+  test('should return undefined if value is empty', () => {
+    expect(validator('')).toBeUndefined();
+  });
 });
