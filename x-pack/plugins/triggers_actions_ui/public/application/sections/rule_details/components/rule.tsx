@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback } from 'react';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
@@ -71,6 +71,9 @@ export function RuleComponent({
 }: RuleComponentProps) {
   const { ruleTypeRegistry, actionTypeRegistry, alertsTableConfigurationRegistry } =
     useKibana().services;
+  // The lastReloadRequestTime should be updated when the refreshToken changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
 
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
@@ -106,6 +109,7 @@ export function RuleComponent({
           ruleTypeIds={[ruleType.id]}
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
+          lastReloadRequestTime={lastReloadRequestTime}
         />
       );
     }
@@ -120,6 +124,7 @@ export function RuleComponent({
   }, [
     alerts,
     alertsTableConfigurationRegistry,
+    lastReloadRequestTime,
     onMuteAction,
     readOnly,
     rule.id,
