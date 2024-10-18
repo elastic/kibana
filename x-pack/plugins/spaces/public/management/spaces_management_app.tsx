@@ -34,6 +34,7 @@ export interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   logger: Logger;
+  getIsRoleManagementEnabled: () => Promise<() => boolean | undefined>;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
@@ -48,6 +49,7 @@ export const spacesManagementApp = Object.freeze({
     config,
     logger,
     eventTracker,
+    getIsRoleManagementEnabled,
     getRolesAPIClient,
     getPrivilegesAPIClient,
     getSecurityLicense,
@@ -163,6 +165,7 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               selectedTabId={selectedTabId}
+              getIsRoleManagementEnabled={getIsRoleManagementEnabled}
               getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
