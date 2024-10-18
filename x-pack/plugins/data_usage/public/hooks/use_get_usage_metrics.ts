@@ -6,7 +6,6 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { UsageMetricsRequestBody, UsageMetricsResponseSchemaBody } from '../../common/rest_types';
@@ -23,9 +22,6 @@ export const useGetDataUsageMetrics = (
   options: UseQueryOptions<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> => {
   const http = useKibanaContextForPlugin().services.http;
-  const {
-    services: { notifications },
-  } = useKibanaContextForPlugin();
 
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
     queryKey: ['get-data-usage-metrics', body],
@@ -41,14 +37,6 @@ export const useGetDataUsageMetrics = (
           metricTypes: body.metricTypes,
           dataStreams: body.dataStreams,
         }),
-      });
-    },
-    onError: (error: IHttpFetchError<ErrorType>) => {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.dataUsage.getMetrics.addFailure.toast.title', {
-          defaultMessage: 'Error getting usage metrics',
-        }),
-        text: error.message,
       });
     },
   });
