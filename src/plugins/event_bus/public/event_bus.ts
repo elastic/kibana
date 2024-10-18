@@ -9,19 +9,24 @@
 
 import { distinctUntilChanged, scan, BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
+import { Slice, CaseReducerActions } from '@reduxjs/toolkit';
 
-export interface Action {
+export interface Action<T = any> {
   type: string;
-  payload: any;
+  payload: T;
 }
 
-export class EventBus {
-  public subject: BehaviorSubject<any>;
-  private reducer: any;
-  private initialState: any;
-  public actions: any;
+export class EventBus<
+  Namespace extends string,
+  State,
+  Actions extends CaseReducerActions<any, Namespace>
+> {
+  public subject: BehaviorSubject<Action>;
+  private reducer: (state: State, action: Action) => State;
+  private initialState: State;
+  public actions: Actions;
 
-  constructor(slice: any) {
+  constructor(slice: Slice) {
     this.subject = new BehaviorSubject<Action>({ type: 'init', payload: null });
     this.reducer = slice.reducer;
     this.initialState = slice.getInitialState();
@@ -29,21 +34,21 @@ export class EventBus {
   }
 
   // Subscribe to this event bus
-  subscribe(cb: any) {
+  subscribe(cb: (state: State) => void) {
     return this.subject
       .pipe(scan(this.reducer, this.initialState), distinctUntilChanged(isEqual))
       .subscribe(cb);
   }
 
   // Wrap actions to automatically dispatch through the event bus
-  private wrapActions(actions: any) {
-    const wrappedActions: any = {};
+  private wrapActions(actions: Actions): Actions {
+    const wrappedActions: Partial<Actions> = {};
     for (const [key, actionCreator] of Object.entries(actions)) {
-      wrappedActions[key] = (...args: any[]) => {
+      wrappedActions[key as keyof Actions] = ((...args: any[]) => {
         const action = actionCreator(...args);
         this.subject.next(action);
-      };
+      }) as any;
     }
-    return wrappedActions;
+    return wrappedActions as Actions;
   }
 }
