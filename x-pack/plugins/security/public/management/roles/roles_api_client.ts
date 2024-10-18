@@ -9,25 +9,35 @@ import type { HttpStart } from '@kbn/core/public';
 import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
+import { API_VERSIONS } from '../../../common/constants';
 import { copyRole } from '../../../common/model';
+
+const version = API_VERSIONS.roles.public.v1;
 
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public getRoles = async () => {
-    return await this.http.get<Role[]>('/api/security/role');
+    return await this.http.get<Role[]>('/api/security/role', {
+      version,
+      query: { replaceDeprecatedPrivileges: true },
+    });
   };
 
   public getRole = async (roleName: string) => {
-    return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`);
+    return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`, {
+      version,
+      query: { replaceDeprecatedPrivileges: true },
+    });
   };
 
   public deleteRole = async (roleName: string) => {
-    await this.http.delete(`/api/security/role/${encodeURIComponent(roleName)}`);
+    await this.http.delete(`/api/security/role/${encodeURIComponent(roleName)}`, { version });
   };
 
   public saveRole = async ({ role, createOnly = false }: { role: Role; createOnly?: boolean }) => {
     await this.http.put(`/api/security/role/${encodeURIComponent(role.name)}`, {
+      version,
       body: JSON.stringify(this.transformRoleForSave(copyRole(role))),
       query: { createOnly },
     });
@@ -37,6 +47,7 @@ export class RolesAPIClient {
     rolesUpdate,
   }: BulkUpdatePayload): Promise<BulkUpdateRoleResponse> => {
     return await this.http.post('/api/security/roles', {
+      version,
       body: JSON.stringify({
         roles: Object.fromEntries(
           rolesUpdate.map((role) => [role.name, this.transformRoleForSave(copyRole(role))])

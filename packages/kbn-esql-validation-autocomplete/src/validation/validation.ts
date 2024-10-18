@@ -47,7 +47,6 @@ import {
   sourceExists,
   getColumnExists,
   hasWildcard,
-  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
@@ -77,7 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
-import { isStringType } from '../shared/esql_types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -113,7 +112,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             argType: argDef.type as string,
-            value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
+            value: actualArg.text,
             givenType: actualArg.literalType,
           },
           locations: actualArg.location,
@@ -815,11 +814,6 @@ function validateSource(
     return messages;
   }
 
-  const hasCCS = hasCCSSource(source.name);
-  if (hasCCS) {
-    return messages;
-  }
-
   const commandDef = getCommandDefinition(commandName);
   const isWildcardAndNotSupported =
     hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
@@ -876,10 +870,12 @@ function validateColumnForCommand(
       const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
-          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
-          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
-        });
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
+          ({ innerTypes }) =>
+            innerTypes &&
+            !innerTypes.includes('any') &&
+            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
+        );
         if (hasSomeWrongInnerTypes) {
           const supportedTypes: string[] = columnParamsWithInnerTypes
             .map(({ innerTypes }) => innerTypes)

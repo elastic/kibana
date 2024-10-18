@@ -243,6 +243,7 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
@@ -296,6 +297,10 @@ import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
+import type {
+  CopyTimelineRequestBodyInput,
+  CopyTimelineResponse,
+} from './timeline/copy_timeline/copy_timeline_route.gen';
 import type {
   CreateTimelinesRequestBodyInput,
   CreateTimelinesResponse,
@@ -390,6 +395,18 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         },
         method: 'DELETE',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async applyEntityEngineDataviewIndices() {
+    this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
+    return this.kbnClient
+      .request<ApplyEntityEngineDataviewIndicesResponse>({
+        path: '/api/entity_store/engines/apply_dataview_indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -550,9 +567,26 @@ If asset criticality records already exist for the specified entities, those rec
       .request<CleanUpRiskEngineResponse>({
         path: '/api/risk_score/engine/dangerously_delete_data',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Copies and returns a timeline or timeline template.
+
+    */
+  async copyTimeline(props: CopyTimelineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CopyTimeline`);
+    return this.kbnClient
+      .request<CopyTimelineResponse>({
+        path: '/api/timeline/_copy',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1992,6 +2026,9 @@ export interface BulkUpsertAssetCriticalityRecordsProps {
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
+}
+export interface CopyTimelineProps {
+  body: CopyTimelineRequestBodyInput;
 }
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;

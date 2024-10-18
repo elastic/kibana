@@ -40,6 +40,7 @@ const enabledActionTypes = [
   '.bedrock',
   '.cases-webhook',
   '.email',
+  '.gemini',
   '.index',
   '.opsgenie',
   '.pagerduty',
@@ -76,6 +77,7 @@ const enabledActionTypes = [
   'test.system-action',
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
+  'test.connector-with-hooks',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -354,6 +356,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };

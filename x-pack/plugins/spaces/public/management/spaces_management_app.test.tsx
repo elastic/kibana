@@ -77,7 +77,9 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       logger,
       getRolesAPIClient: jest.fn(),
       getPrivilegesAPIClient: jest.fn(),
+      getSecurityLicense: jest.fn(),
       eventTracker,
+      isServerless: false,
     })
     .mount({
       basePath,
@@ -101,7 +103,9 @@ describe('spacesManagementApp', () => {
         logger,
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: jest.fn(),
         eventTracker,
+        isServerless: false,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -126,7 +130,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"serverBasePath":"","history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"allowSolutionVisibility":true}
+          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"serverBasePath":"","history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"allowSolutionVisibility":true,"isServerless":false}
         </div>
       </div>
     `);

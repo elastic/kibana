@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev'"
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2'"
       );
     });
 
@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(result.message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev' Private Location(s) 'moon' not found. No private location available to use."
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2' Private Location(s) 'moon' not found. No private location available to use."
       );
     });
 

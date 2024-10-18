@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, takeUntil } from 'rxjs';
+import { from, takeUntil, switchMap, of } from 'rxjs';
 
 import type { IStaticAssets } from '@kbn/core-http-browser';
 
@@ -25,7 +25,7 @@ export function getConnectorsSearchResultProvider(
   staticAssets: IStaticAssets
 ): GlobalSearchResultProvider {
   return {
-    find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
+    find: ({ term, types, tags }, { aborted$, client, maxResults }, { core: { capabilities } }) => {
       if (!client || !term || tags || (types && !types.includes('connector'))) {
         return from([[]]);
       }
@@ -52,7 +52,17 @@ export function getConnectorsSearchResultProvider(
           .slice(0, maxResults);
         return searchResults;
       };
-      return from(getConnectorData()).pipe(takeUntil(aborted$));
+
+      return capabilities.pipe(
+        takeUntil(aborted$),
+        switchMap((caps) => {
+          if (!caps.catalogue.enterpriseSearch) {
+            return of([]);
+          }
+
+          return from(getConnectorData());
+        })
+      );
     },
     getSearchableTypes: () => ['connector'],
     id: 'enterpriseSearchConnectors',

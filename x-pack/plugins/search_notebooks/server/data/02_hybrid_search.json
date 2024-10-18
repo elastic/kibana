@@ -44,7 +44,7 @@
    },
    "outputs": [],
    "source": [
-    "!pip install -qU elasticsearch sentence_transformers"
+    "!pip install -qU elasticsearch sentence-transformers==2.7.0"
    ]
   },
   {

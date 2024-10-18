@@ -21,7 +21,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { getSampleDashboardPanel, mockControlGroupApi } from '../../../mocks';
 import { dataService, embeddableService } from '../../../services/kibana_services';
-import { DashboardCreationOptions } from '../dashboard_container_factory';
+import { DashboardCreationOptions } from '../../..';
 import { createDashboard } from './create_dashboard';
 import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
@@ -97,7 +97,7 @@ test('passes managed state from the saved object into the Dashboard component st
   });
   const dashboard = await createDashboard({}, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
-  expect(dashboard!.getState().componentState.managed).toBe(true);
+  expect(dashboard!.managed$.value).toBe(true);
 });
 
 test('pulls view mode from dashboard backup', async () => {
@@ -132,7 +132,7 @@ test('managed dashboards start in view mode', async () => {
   });
   const dashboard = await createDashboard({}, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
-  expect(dashboard!.getState().componentState.managed).toBe(true);
+  expect(dashboard!.managed$.value).toBe(true);
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.VIEW);
 });
 

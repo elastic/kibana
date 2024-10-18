@@ -41,7 +41,12 @@ export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Pro
         )}
       </p>
 
-      <p>{nodeAllocationMigrationGuidance}</p>
+      <p>
+        {
+          // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
+          nodeAllocationMigrationGuidance
+        }
+      </p>
     </EuiCallOut>
   );
 };

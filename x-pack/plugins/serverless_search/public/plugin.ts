@@ -43,9 +43,6 @@ export class ServerlessSearchPlugin
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
-    const { searchHomepage } = setupDeps;
-    const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
-
     const queryClient = new QueryClient({
       mutationCache: new MutationCache({
         onError: (error) => {
@@ -72,23 +69,14 @@ export class ServerlessSearchPlugin
         },
       }),
     });
-    if (useSearchHomepage) {
-      core.application.register({
-        id: 'serverlessHomeRedirect',
-        title: i18n.translate('xpack.serverlessSearch.app.home.title', {
-          defaultMessage: 'Home',
-        }),
-        appRoute: '/app/elasticsearch',
-        euiIconType: 'logoElastic',
-        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        visibleIn: [],
-        async mount({}: AppMountParameters) {
-          const [coreStart] = await core.getStartServices();
-          coreStart.application.navigateToApp('searchHomepage');
-          return () => {};
-        },
-      });
-    }
+
+    const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
+      defaultMessage: 'Home',
+    });
+    const useGlobalEmptyState = setupDeps.searchIndices?.enabled ?? false;
+    const serverlessElasticsearchAppRoute = useGlobalEmptyState
+      ? '/app/elasticsearch/getting_started'
+      : '/app/elasticsearch';
 
     core.application.register({
       id: 'serverlessElasticsearch',
@@ -97,11 +85,12 @@ export class ServerlessSearchPlugin
       }),
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: useSearchHomepage ? '/app/elasticsearch/getting_started' : '/app/elasticsearch',
+      appRoute: serverlessElasticsearchAppRoute,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
         docLinks.setDocLinks(coreStart.docLinks.links);
+        coreStart.chrome.docTitle.change(homeTitle);
         let user: AuthenticatedUser | undefined;
         try {
           const response = await coreStart.security.authc.getCurrentUser();
@@ -114,11 +103,13 @@ export class ServerlessSearchPlugin
       },
     });
 
+    const connectorsTitle = i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+      defaultMessage: 'Connectors',
+    });
+
     core.application.register({
       id: 'serverlessConnectors',
-      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
-        defaultMessage: 'Connectors',
-      }),
+      title: connectorsTitle,
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -126,11 +117,30 @@ export class ServerlessSearchPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
-
+        coreStart.chrome.docTitle.change(connectorsTitle);
         docLinks.setDocLinks(coreStart.docLinks.links);
+
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
     });
+
+    if (useGlobalEmptyState) {
+      const redirectApp = setupDeps.searchIndices!.startAppId;
+      core.application.register({
+        id: 'serverlessHomeRedirect',
+        title: homeTitle,
+        appRoute: '/app/elasticsearch',
+        euiIconType: 'logoElastic',
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        visibleIn: [],
+        async mount({}: AppMountParameters) {
+          const [coreStart] = await core.getStartServices();
+          coreStart.chrome.docTitle.change(homeTitle);
+          coreStart.application.navigateToApp(redirectApp);
+          return () => {};
+        },
+      });
+    }
 
     setupDeps.discover.showInlineTopNav();
 
@@ -141,12 +151,19 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement, security, searchHomepage } = services;
-    const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
+    const { serverless, management, indexManagement, security } = services;
+    const useGlobalEmptyState = services.searchIndices?.enabled ?? false;
+    const homeRoute = useGlobalEmptyState
+      ? services.searchIndices!.startRoute
+      : '/app/elasticsearch';
+    serverless.setProjectHome(homeRoute);
 
-    serverless.setProjectHome(useSearchHomepage ? '/app/elasticsearch/home' : '/app/elasticsearch');
-
-    const navigationTree$ = of(navigationTree(searchHomepage?.isHomepageFeatureEnabled() ?? false));
+    const navigationTree$ = of(
+      navigationTree(
+        useGlobalEmptyState ? services.searchIndices?.startAppId : undefined,
+        useGlobalEmptyState
+      )
+    );
     serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(

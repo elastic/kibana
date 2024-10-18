@@ -12,7 +12,10 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getTransaction } from '../transactions/get_transaction';
-import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
+import {
+  type TransactionDetailRedirectInfo,
+  getRootTransactionByTraceId,
+} from '../transactions/get_transaction_by_trace';
 import {
   getTopTracesPrimaryStats,
   TopTracesPrimaryStatsResponse,
@@ -128,7 +131,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: Transaction;
+    transaction?: TransactionDetailRedirectInfo;
   }> => {
     const {
       params: {
@@ -155,7 +158,7 @@ const transactionByIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: Transaction;
+    transaction?: Transaction;
   }> => {
     const {
       params: {
@@ -191,7 +194,7 @@ const transactionByNameRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: Transaction;
+    transaction?: TransactionDetailRedirectInfo;
   }> => {
     const {
       params: {
@@ -295,7 +298,7 @@ const transactionFromTraceByIdRoute = createApmServerRoute({
     query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<Transaction> => {
+  handler: async (resources): Promise<Transaction | undefined> => {
     const { params } = resources;
     const {
       path: { transactionId, traceId },

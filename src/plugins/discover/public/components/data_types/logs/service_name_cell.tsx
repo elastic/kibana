@@ -20,7 +20,7 @@ const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_i
 
 export const getServiceNameCell =
   (serviceNameField: string) => (props: DataGridCellValueElementProps) => {
-    const serviceNameValue = getFieldValue(props.row, serviceNameField);
+    const serviceNameValue = getFieldValue(props.row, serviceNameField) as string;
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
 
     if (!serviceNameValue) {

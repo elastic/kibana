@@ -376,6 +376,7 @@ export class SavedObjectsService
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
+          logger: this.logger.get('importer'),
         }),
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,

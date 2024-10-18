@@ -639,3 +639,4 @@ security:
 tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
+    x-displayName: Security Osquery

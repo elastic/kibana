@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
-// import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { RulePanel } from '.';
 import { getStepsData } from '../../../detections/pages/detection_engine/rules/helpers';
 import { useRuleDetails } from '../hooks/use_rule_details';
@@ -22,6 +22,8 @@ import {
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { BODY_TEST_ID, LOADING_TEST_ID } from './test_ids';
 import { RULE_PREVIEW_FOOTER_TEST_ID } from '../preview/test_ids';
+
+jest.mock('../../document_details/shared/hooks/use_rule_details_link');
 
 const mockUseRuleDetails = useRuleDetails as jest.Mock;
 jest.mock('../hooks/use_rule_details');
@@ -89,6 +91,7 @@ describe('<RulePanel />', () => {
   });
 
   it('should render preview footer when isPreviewMode is true', () => {
+    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
     mockUseRuleDetails.mockReturnValue({
       rule,
       loading: false,
@@ -97,8 +100,6 @@ describe('<RulePanel />', () => {
     mockGetStepsData.mockReturnValue({});
     const { getByTestId } = renderRulePanel(true);
 
-    // await act(async () => {
     expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
-    // });
   });
 });

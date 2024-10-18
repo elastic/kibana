@@ -94,6 +94,7 @@ export const mockRule = (id: string): SavedQueryRule => ({
   version: 1,
   revision: 1,
   exceptions_list: [],
+  rule_source: { type: 'internal' },
 });
 
 export const mockRuleWithEverything = (id: string): RuleResponse => ({

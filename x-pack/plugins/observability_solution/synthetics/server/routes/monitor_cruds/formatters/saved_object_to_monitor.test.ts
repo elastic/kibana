@@ -84,17 +84,8 @@ describe('mergeSourceMonitor', () => {
       id: 'todos-lightweight-test-projects-default',
       ipv4: true,
       ipv6: true,
-      locations: [
-        {
-          geo: {
-            lat: 41.25,
-            lon: -95.86,
-          },
-          id: 'us_central',
-          isServiceManaged: true,
-          label: 'North America - US Central',
-        },
-      ],
+      locations: ['us_central', 'us_east'],
+      private_locations: ['pvt_us_east'],
       max_redirects: 0,
       mode: 'any',
       name: 'Todos Lightweight',
@@ -166,12 +157,30 @@ describe('mergeSourceMonitor', () => {
       locations: [
         {
           geo: {
-            lat: 41.25,
             lon: -95.86,
+            lat: 41.25,
           },
-          id: 'us_central',
           isServiceManaged: true,
+          id: 'us_central',
           label: 'North America - US Central',
+        },
+        {
+          geo: {
+            lon: -95.86,
+            lat: 41.25,
+          },
+          isServiceManaged: true,
+          id: 'us-east4-a',
+          label: 'US East',
+        },
+        {
+          geo: {
+            lon: -95.86,
+            lat: 41.25,
+          },
+          isServiceManaged: false,
+          id: 'pvt_us_east',
+          label: 'US East (Private)',
         },
       ],
       max_redirects: '0',
@@ -239,6 +248,24 @@ const testMonitor = {
       isServiceManaged: true,
       id: 'us_central',
       label: 'North America - US Central',
+    },
+    {
+      geo: {
+        lon: -95.86,
+        lat: 41.25,
+      },
+      isServiceManaged: true,
+      id: 'us-east4-a',
+      label: 'US East',
+    },
+    {
+      geo: {
+        lon: -95.86,
+        lat: 41.25,
+      },
+      isServiceManaged: false,
+      id: 'pvt_us_east',
+      label: 'US East (Private)',
     },
   ],
   namespace: 'default',

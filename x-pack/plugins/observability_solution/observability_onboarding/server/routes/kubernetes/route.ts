@@ -29,10 +29,14 @@ export interface HasKubernetesDataRouteResponse {
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/kubernetes/flow',
+  params: t.type({
+    body: t.type({ pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]) }),
+  }),
   options: { tags: [] },
   async handler({
     context,
     request,
+    params,
     plugins,
     services,
     kibanaVersion,
@@ -41,7 +45,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       elasticsearch: { client },
     } = await context.core;
 
-    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
 
     if (!hasPrivileges) {
       throw Boom.forbidden(
@@ -53,10 +57,16 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersion] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding'),
+      createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
       getAgentVersion(fleetPluginStart, kibanaVersion),
-      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
+      // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
+      // Kubernetes package is required for both classic kubernetes and otel
+      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
+      // Kubernetes otel package is required only for otel
+      params.body.pkgName === 'kubernetes_otel'
+        ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
+        : undefined,
     ]);
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl

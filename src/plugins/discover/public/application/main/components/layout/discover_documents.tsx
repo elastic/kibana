@@ -117,7 +117,7 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
   const [
     dataSource,
     query,
@@ -199,6 +199,22 @@ function DiscoverDocumentsComponent({
     sort,
     settings: grid,
   });
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
+  );
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
@@ -299,14 +315,22 @@ function DiscoverDocumentsComponent({
         columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddColumn={onAddColumnWithTracking}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={query}
       />
     ),
-    [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
+    [
+      dataView,
+      onAddColumnWithTracking,
+      onAddFilter,
+      onRemoveColumnWithTracking,
+      query,
+      savedSearch.id,
+      setExpandedDoc,
+    ]
   );
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
@@ -491,6 +515,7 @@ function DiscoverDocumentsComponent({
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
                 query={query}
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}

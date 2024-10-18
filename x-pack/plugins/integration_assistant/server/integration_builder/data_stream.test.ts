@@ -22,6 +22,10 @@ jest.mock('../util', () => ({
   generateFields: jest.fn(),
 }));
 
+beforeEach(async () => {
+  jest.clearAllMocks();
+});
+
 describe('createDataStream', () => {
   const packageName = 'package';
   const dataStreamPath = 'path';
@@ -55,6 +59,22 @@ describe('createDataStream', () => {
     samplesFormat: { name: 'ndjson', multiline: false },
   };
 
+  const celDataStream: DataStream = {
+    name: firstDatastreamName,
+    title: 'Datastream_1',
+    description: 'Datastream_1 description',
+    inputTypes: ['cel'] as InputType[],
+    docs: firstDataStreamDocs,
+    rawSamples: [samples],
+    pipeline: firstDataStreamPipeline,
+    samplesFormat: { name: 'ndjson', multiline: false },
+    celInput: {
+      program: 'line1\nline2',
+      stateSettings: { setting1: 100, setting2: '' },
+      redactVars: ['setting2'],
+    },
+  };
+
   it('Should create expected directories and files', async () => {
     createDataStream(packageName, dataStreamPath, firstDataStream);
 
@@ -80,5 +100,36 @@ describe('createDataStream', () => {
     expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
     expect(render).toHaveBeenCalledWith(`filestream_manifest.yml.njk`, expect.anything());
     expect(render).toHaveBeenCalledWith(`azure_eventhub_manifest.yml.njk`, expect.anything());
+  });
+
+  it('Should return the list of fields', async () => {
+    const fields = createDataStream(packageName, dataStreamPath, firstDataStream);
+
+    expect(Array.isArray(fields)).toBe(true);
+    fields.forEach((field) => {
+      expect(field).toMatchObject({
+        name: expect.any(String),
+        type: expect.any(String),
+      });
+    });
+  });
+
+  it('Should populate expected CEL fields', async () => {
+    createDataStream(packageName, dataStreamPath, celDataStream);
+
+    const expectedMappedValues = {
+      data_stream_title: celDataStream.title,
+      data_stream_description: celDataStream.description,
+      package_name: packageName,
+      data_stream_name: firstDatastreamName,
+      multiline_ndjson: celDataStream.samplesFormat.multiline,
+      program: celDataStream.celInput?.program.split('\n'),
+      state: celDataStream.celInput?.stateSettings,
+      redact: celDataStream.celInput?.redactVars,
+    };
+
+    // // Manifest files
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
+    expect(render).toHaveBeenCalledWith(`cel_manifest.yml.njk`, expectedMappedValues);
   });
 });
