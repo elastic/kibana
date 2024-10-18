@@ -161,7 +161,10 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
     interval(countInterval).pipe(map(() => FLUSH_MARKER)),
     errors$.pipe(
       filter(
-        (e) => SavedObjectsErrorHelpers.isTooManyRequestsError(e) || isEsCannotExecuteScriptError(e)
+        (e) =>
+          SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
+          SavedObjectsErrorHelpers.isEsUnavailableError(e) ||
+          isEsCannotExecuteScriptError(e)
       )
     )
   ).pipe(
