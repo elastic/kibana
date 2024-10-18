@@ -613,12 +613,11 @@ describe('dashboard', () => {
       expect(newDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "description": "",
             "kibanaSavedObjectMeta": Object {
               "searchSourceJSON": "{\\"query\\":{\\"language\\":\\"kuery\\",\\"query\\":\\"\\"},\\"filter\\":[{\\"query\\":{\\"match_phrase\\":{\\"machine.os.keyword\\":\\"osx\\"}},\\"$state\\":{\\"store\\":\\"appState\\"},\\"meta\\":{\\"type\\":\\"phrase\\",\\"key\\":\\"machine.os.keyword\\",\\"params\\":{\\"query\\":\\"osx\\"},\\"disabled\\":false,\\"negate\\":false,\\"alias\\":null,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
             },
-            "optionsJSON": "{\\"useMargins\\":true,\\"hidePanelTitles\\":false}",
-            "panelsJSON": "[{\\"version\\":\\"7.9.3\\",\\"type\\":\\"visualization\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelRefName\\":\\"panel_82fa0882-9f9e-476a-bbb9-03555e5ced91\\"}]",
+            "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
+            "panelsJSON": "[{\\"version\\":\\"7.9.3\\",\\"type\\":\\"visualization\\",\\"panelRefName\\":\\"panel_82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"}}]",
             "timeRestore": false,
             "title": "Dashboard A",
             "version": 1,
@@ -710,7 +709,7 @@ describe('dashboard', () => {
         contextMock
       );
       expect(migratedDoc.attributes.panelsJSON).toMatchInlineSnapshot(
-        `"[{\\"version\\":\\"7.9.3\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"0\\"},\\"panelIndex\\":\\"0\\",\\"embeddableConfig\\":{}},{\\"version\\":\\"7.13.0\\",\\"gridData\\":{\\"x\\":24,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"embeddableConfig\\":{\\"attributes\\":{\\"byValueThing\\":\\"ThisIsByValue\\"},\\"superCoolKey\\":\\"ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH\\"}}]"`
+        `"[{\\"version\\":\\"7.9.3\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"0\\"},\\"panelIndex\\":\\"0\\",\\"embeddableConfig\\":{}},{\\"gridData\\":{\\"x\\":24,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"embeddableConfig\\":{\\"attributes\\":{\\"byValueThing\\":\\"ThisIsByValue\\"},\\"superCoolKey\\":\\"ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH\\"},\\"version\\":\\"7.13.0\\"}]"`
       );
     });
   });
