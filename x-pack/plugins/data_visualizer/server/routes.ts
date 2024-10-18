@@ -93,18 +93,16 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           const { endpoints } = await esClient.asCurrentUser.inference.get({
             inference_id: '_all',
           });
-          const { trained_model_stats: stats } =
-            await esClient.asCurrentUser.ml.getTrainedModelsStats();
 
-          const deployedInferenceEndpoints = endpoints.filter((endpoint) => {
-            const modelId = endpoint.service_settings.model_id;
-            // Check to see if there is a started deployment which
-            // matches the model ID
-            const modelStats = stats.find((stat) => modelId === stat.deployment_stats?.model_id);
-            return modelStats?.deployment_stats?.state === 'started';
+          const filteredInferenceEndpoints = endpoints.filter((endpoint) => {
+            return (
+              endpoint.task_type === 'sparse_embedding' || endpoint.task_type === 'text_embedding'
+              // TODO: add this back in when the fix has made it into es in 8.16
+              // && endpoint.service_settings.num_allocations > 0
+            );
           });
 
-          return response.ok({ body: deployedInferenceEndpoints });
+          return response.ok({ body: filteredInferenceEndpoints });
         } catch (e) {
           return response.customError(wrapError(e));
         }
