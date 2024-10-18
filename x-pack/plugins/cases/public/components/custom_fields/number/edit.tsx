@@ -65,7 +65,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
     defaultValue: {
       value:
         customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
-          ? Number(customFieldConfiguration.defaultValue) // Number put here for type reasons. Write the type guard
+          ? Number(customFieldConfiguration.defaultValue)
           : initialValue,
     },
   });

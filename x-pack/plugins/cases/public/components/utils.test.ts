@@ -523,30 +523,40 @@ describe('Utils', () => {
     });
 
     it('returns the string when the value is a non-empty string', async () => {
-      expect(convertCustomFieldValue('my text value', CustomFieldTypes.TEXT)).toMatchInlineSnapshot(
-        `"my text value"`
-      );
+      expect(
+        convertCustomFieldValue({ value: 'my text value', type: CustomFieldTypes.TEXT })
+      ).toMatchInlineSnapshot(`"my text value"`);
     });
 
     it('returns null when value is empty string', async () => {
-      expect(convertCustomFieldValue('', CustomFieldTypes.TEXT)).toMatchInlineSnapshot('null');
+      expect(
+        convertCustomFieldValue({ value: '', type: CustomFieldTypes.TEXT })
+      ).toMatchInlineSnapshot('null');
     });
 
     it('returns value as it is when value is true', async () => {
-      expect(convertCustomFieldValue(true, CustomFieldTypes.TOGGLE)).toMatchInlineSnapshot('true');
+      expect(
+        convertCustomFieldValue({ value: true, type: CustomFieldTypes.TOGGLE })
+      ).toMatchInlineSnapshot('true');
     });
 
-    it.only('returns value as it is when value is false', async () => {
-      expect(convertCustomFieldValue(false, CustomFieldTypes.TOGGLE)).toMatchInlineSnapshot(
-        'false'
-      );
+    it('returns value as it is when value is false', async () => {
+      expect(
+        convertCustomFieldValue({ value: false, type: CustomFieldTypes.TOGGLE })
+      ).toMatchInlineSnapshot('false');
     });
     it('returns value as integer number when value is integer string', () => {
-      expect(convertCustomFieldValue('123', CustomFieldTypes.NUMBER)).toMatchInlineSnapshot(123);
+      expect(convertCustomFieldValue({ value: '123', type: CustomFieldTypes.NUMBER })).toEqual(123);
     });
 
-    it.only('returns value as integer number when value is float string ', () => {
-      expect(convertCustomFieldValue('0.5', CustomFieldTypes.NUMBER)).toMatchInlineSnapshot(123);
+    it('returns value as integer number when value is float string ', () => {
+      expect(convertCustomFieldValue({ value: '0.5', type: CustomFieldTypes.NUMBER })).toEqual(
+        '0.5'
+      );
+    });
+
+    it('returns value as null when value is null ', () => {
+      expect(convertCustomFieldValue({ value: null, type: CustomFieldTypes.NUMBER })).toEqual(null);
     });
   });
 
@@ -584,6 +594,16 @@ describe('Utils', () => {
                 Object {
                   "key": "test_key_4",
                   "type": "toggle",
+                  "value": null,
+                },
+                Object {
+                  "key": "test_key_5",
+                  "type": "number",
+                  "value": 1234,
+                },
+                Object {
+                  "key": "test_key_6",
+                  "type": "number",
                   "value": null,
                 },
                 Object {

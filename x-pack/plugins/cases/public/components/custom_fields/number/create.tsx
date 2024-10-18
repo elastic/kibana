@@ -12,7 +12,6 @@ import type { CaseCustomFieldNumber } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getNumberFieldConfig } from './config';
 import { OptionalFieldLabel } from '../../optional_field_label';
-import { CustomFieldTypes } from '../../../../common/types/domain';
 
 const CreateComponent: CustomFieldType<CaseCustomFieldNumber>['Create'] = ({
   customFieldConfiguration,
@@ -20,13 +19,11 @@ const CreateComponent: CustomFieldType<CaseCustomFieldNumber>['Create'] = ({
   setAsOptional,
   setDefaultValue = true,
 }) => {
-  if (customFieldConfiguration.type !== CustomFieldTypes.NUMBER) return; // type guard
-
   const { key, label, required, defaultValue } = customFieldConfiguration;
   const config = getNumberFieldConfig({
     required: setAsOptional ? false : required,
     label,
-    ...(defaultValue && setDefaultValue && { defaultValue }),
+    ...(defaultValue && setDefaultValue && { defaultValue: Number(defaultValue) }),
   });
 
   return (

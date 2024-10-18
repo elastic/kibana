@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
+import { MAX_LONG_NUMBER_LIMIT, MIN_LONG_NUMBER_LIMIT } from '../../../../common/constants';
 
 describe('Create ', () => {
   const onSubmit = jest.fn();
@@ -131,18 +132,21 @@ describe('Create ', () => {
 
     await userEvent.clear(numberCustomField);
     await userEvent.click(numberCustomField);
-    await userEvent.paste(`${10000000}`);
+    await userEvent.paste(`${MAX_LONG_NUMBER_LIMIT * 2}`);
 
     await userEvent.click(await screen.findByText('Submit'));
 
-    expect(await screen.findByText(`dfr`)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        'The value of the My test label 5 cannot be more than 9223372036854776000.'
+      )
+    ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
   });
 
-  // rewrite;
   it('shows error when number is too small', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -152,6 +156,26 @@ describe('Create ', () => {
         />
       </FormTestComponent>
     );
+
+    const numberCustomField = await screen.findByTestId(
+      `${customFieldConfiguration.key}-number-create-custom-field`
+    );
+
+    await userEvent.clear(numberCustomField);
+    await userEvent.click(numberCustomField);
+    await userEvent.paste(`${MIN_LONG_NUMBER_LIMIT * 2}`);
+
+    await userEvent.click(await screen.findByText('Submit'));
+
+    expect(
+      await screen.findByText(
+        'The value of the My test label 5 cannot be less than -9223372036854776000.'
+      )
+    ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
+    });
   });
 
   it('shows error when number is required but is empty', async () => {
