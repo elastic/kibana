@@ -190,7 +190,7 @@ export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cp
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
-
+// OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 
