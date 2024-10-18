@@ -63,15 +63,11 @@ export const findingsNavigation = {
   },
 };
 
-export const findingsNavigationBase = {
-  findings_default: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
+export const findingsNavigationUrl = {
+  findings: {
     path: `${CLOUD_SECURITY_POSTURE_PATH}/findings/configurations`,
-    id: 'cloud_security_posture-findings-default',
   },
   vulnerabilities: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_PATH}/findings/vulnerabilities`,
-    id: 'cloud_security_posture-findings-vulnerabilities',
   },
 };
