@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: Common Splunk Rules Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    OriginalRule:
+      type: object
+      description: The original rule to migrate.
+      required:
+        - id
+        - vendor
+        - title
+        - description
+        - query
+        - queryLanguage
+      properties:
+        id:
+          type: string
+          description: The original rule id.
+        vendor:
+          type: string
+          description: The original rule vendor identifier.
+          enum:
+            - splunk
+        title:
+          type: string
+          description: The original rule name.
+        description:
+          type: string
+          description: The original rule description.
+        query:
+          type: string
+          description: The original rule query.
+        queryLanguage:
+          type: string
+          description: The original rule query language.
+        mitreAttackIds:
+          type: array
+          items:
+            type: string
+          description: The original rule Mitre Attack technique IDs.
+
+    ElasticRule:
+      type: object
+      description: The migrated elastic rule.
+      required:
+        - title
+        - query
+        - queryLanguage
+      properties:
+        title:
+          type: string
+          description: The migrated rule title.
+        description:
+          type: string
+          description: The migrated rule description.
+        severity:
+          type: string
+          description: The migrated rule severity.
+        query:
+          type: string
+          description: The translated elastic query.
+        queryLanguage:
+          type: string
+          description: The translated elastic query language.
+          enum:
+            - esql
+          default: esql
+        prebuiltRuleId:
+          type: string
+          description: The Elastic prebuilt rule id matched.
+        id:
+          type: string
+          description: The Elastic rule id installed as a result.
+
+    RuleMigration:
+      type: object
+      description: The rule migration document object.
+      required:
+        - migrationId
+        - originalRule
+        - status
+      properties:
+        migrationId:
+          type: string
+          description: The migration id.
+        originalRule:
+          $ref: '#/components/schemas/OriginalRule'
+        elasticRule:
+          $ref: '#/components/schemas/ElasticRule'
+        translationState:
+          type: string
+          description: The translation state.
+          enum:
+            - complete
+            - partial
+            - untranslatable
+        status:
+          type: string
+          description: The status of the rule migration.
+          enum:
+            - pending
+            - processing
+            - finished
+            - error
+          default: pending
+        comments:
+          type: array
+          description: The comments for the migration including a summary from the LLM in markdown.
+          items:
+            type: string
+        createdAt:
+          type: string
+          description: The moment of creation
+        updatedAt:
+          type: string
+          description: The moment of the last update
+        updatedBy:
+          type: string
+          description: The user who last updated the migration
