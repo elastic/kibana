@@ -88,6 +88,10 @@ export interface CreateIndexCodeDefinition {
 
 export interface CreateIndexCodeExamples {
   exampleType: string;
+  installTitle: string;
+  installDescription: string;
+  createIndexTitle: string;
+  createIndexDescription: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
@@ -109,9 +113,10 @@ export interface IngestDataCodeDefinition {
 }
 
 export interface IngestDataCodeExamples {
-  title: string;
-  ingestTitle: string;
-  description: string;
+  addMappingsTitle: string;
+  addMappingsDescription: string;
+  installTitle: string;
+  installDescription: string;
   defaultMapping: Record<string, MappingProperty>;
   sense: IngestDataCodeDefinition;
   curl: IngestDataCodeDefinition;
