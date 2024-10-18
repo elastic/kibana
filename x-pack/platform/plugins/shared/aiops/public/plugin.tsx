@@ -48,20 +48,20 @@ export class AiopsPlugin
           }
 
           if (pluginStart.eventBus) {
-            pluginStart.eventBus.subscribe('search', (action) => {
+            pluginStart.eventBus.getEventBus('search').subscribe((action) => {
               // eslint-disable-next-line no-console
               console.log('AIOps Received updated search query:', action);
             });
 
-            pluginStart.eventBus.dispatch('search', {
+            pluginStart.eventBus.getEventBus('search').dispatch({
               type: 'search/setSearchQuery',
               payload: 'test1',
             });
-            pluginStart.eventBus.dispatch('search', {
+            pluginStart.eventBus.getEventBus('search').dispatch({
               type: 'search/setSearchQuery',
               payload: 'test1',
             });
-            pluginStart.eventBus.dispatch('search', {
+            pluginStart.eventBus.getEventBus('search').dispatch({
               type: 'search/setSearchQuery',
               payload: 'test2',
             });
