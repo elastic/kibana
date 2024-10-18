@@ -183,7 +183,6 @@ export default function ({ getService }: FtrProviderContext) {
       let tasks: any[] = [];
       await retry.try(async () => {
         tasks = (await currentTasks()).docs;
-        log.debug(`tasks retreived ${JSON.stringify(tasks)}`);
         expect(tasks.length).to.eql(3);
       });
 
