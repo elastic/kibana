@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { useForm, Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
@@ -82,13 +82,19 @@ export function RuleFieldEditFormWrapper({
   });
   const isValid = validity ?? form.isValid;
 
+  // form.isValid has `undefined` value until all fields are dirty.
+  // Run the validation upfront to visualize form validity state.
+  useEffect(() => {
+    form.validate();
+  }, [form]);
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
           {i18n.CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
-        <EuiButtonEmpty iconType="save" onClick={form.submit} disabled={isValid === false}>
+        <EuiButtonEmpty iconType="save" onClick={form.submit} disabled={!isValid}>
           {i18n.SAVE_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexGroup>

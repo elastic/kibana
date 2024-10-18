@@ -6,11 +6,19 @@
  */
 
 import React from 'react';
-import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
-import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
+import type { ValidationFunc, ERROR_CODE } from '../../../../../../../../shared_imports';
+import {
+  fieldValidators,
+  type FormData,
+  type FormSchema,
+  FIELD_TYPES,
+} from '../../../../../../../../shared_imports';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { DataSourceEdit } from './data_source_edit';
+import { INDEX_HELPER_TEXT } from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
 
 export function DataSourceEditForm(): JSX.Element {
   return (
@@ -41,8 +49,72 @@ const dataSourceSchema = {
   type: {
     default: DataSourceType.index_patterns,
   },
-  index_patterns: schema.index,
-  data_view_id: schema.dataViewId,
+  index_patterns: {
+    defaultValue: [],
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.indexPatterns.label',
+      {
+        defaultMessage: 'Index patterns',
+      }
+    ),
+    helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+
+          if (formData.type !== DataSourceType.index_patterns) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.indexPatterns.requiredError',
+              {
+                defaultMessage: 'A minimum of one index pattern is required.',
+              }
+            )
+          )(...args);
+        },
+      },
+    ],
+  },
+  data_view_id: {
+    label: i18n.translate(
+      'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.dataViewSelector.name',
+      {
+        defaultMessage: 'Data view',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, path, value }] = args;
+
+          if (formData.type !== DataSourceType.data_view) {
+            return;
+          }
+
+          return value == null || value === ''
+            ? {
+                path,
+                message: i18n.translate(
+                  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.dataView.requiredError',
+                  {
+                    defaultMessage: 'Please select an available Data View.',
+                  }
+                ),
+              }
+            : undefined;
+        },
+      },
+    ],
+  },
 } as FormSchema<{
   type: string;
   index_patterns: string[];

@@ -49,9 +49,9 @@ export function DataSourceTypeSelectorField({
   const handleDataSourceChange = useCallback(
     (optionId: string) => {
       field.setValue(optionId);
-      // resetForm({ resetValues: false });
+      resetForm({ resetValues: false });
     },
-    [field]
+    [field, resetForm]
   );
 
   return (
