@@ -27,11 +27,9 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
   const { euiTheme } = useEuiTheme();
   const field = group[groupBy];
   const id = `inventory-group-${groupBy}-${field}`;
-  const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
 
   const onToggle = useCallback(() => {
-    setLoad(true);
     setOpen((opened) => !opened);
   }, []);
 
@@ -56,19 +54,20 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
           onToggle={onToggle}
         />
       </EuiPanel>
-      <EuiPanel
-        css={css`
-          display: ${open ? 'block' : 'none'};
-          margin: 0 ${euiTheme.size.s};
-          border-top: none;
-          border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
-        `}
-        hasBorder
-        hasShadow={false}
-        paddingSize="m"
-      >
-        {load && <GroupedGridWrapper field={field} />}
-      </EuiPanel>
+      {open && (
+        <EuiPanel
+          css={css`
+            margin: 0 ${euiTheme.size.s};
+            border-top: none;
+            border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+          `}
+          hasBorder
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <GroupedGridWrapper field={field} />
+        </EuiPanel>
+      )}
       <EuiSpacer size="s" />
     </>
   );
