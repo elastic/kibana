@@ -57,15 +57,14 @@ export function initializeDashboardServices(
   { attributeService }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
   const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
-
+  // For some legacy reason the title and description default value is picked differently
+  // ( based on existing FTR tests ).
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
-    initialState.savedObjectId
-      ? initialState.attributes.title ?? initialState.title
-      : initialState.title
+    initialState.title || initialState.attributes.title
   );
   const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
     initialState.savedObjectId
-      ? initialState.attributes.description ?? initialState.description
+      ? initialState.attributes.description || initialState.description
       : initialState.description
   );
   // The observable references here are the same to the internalApi,
