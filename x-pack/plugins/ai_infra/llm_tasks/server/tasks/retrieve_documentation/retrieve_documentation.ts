@@ -13,7 +13,7 @@ import type { RetrieveDocumentationAPI } from './types';
 import { summarizeDocument } from './summarize_document';
 
 // if document content length greater, then we'll trigger the summary task
-const MIN_TOKENS_TO_SUMMARIZE = 750;
+const MIN_TOKENS_TO_SUMMARIZE = 1000;
 // maximum token length of generated summaries - will truncate if greater
 const MAX_SUMMARY_TOKEN_LENGTH = 1000;
 
