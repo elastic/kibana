@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useMemo, useRef } from 'react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -60,6 +60,7 @@ export const GridRow = forwardRef<
     },
     gridRef
   ) => {
+    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
     const activePanel = useStateFromPublishingSubject(gridLayoutStateManager.activePanel$);
 
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
@@ -148,9 +149,10 @@ export const GridRow = forwardRef<
               />
             ))}
 
-            {activePanel?.id && rowData.panels[activePanel.id] && (
+            {/* render the drag preview if this row is currently being targetted */}
+            {isGridTargeted && (
               <div
-                ref={gridLayoutStateManager.dragPreviewRef}
+                ref={dragPreviewRef}
                 css={css`
                   pointer-events: none;
                   border-radius: ${euiThemeVars.euiBorderRadius};

@@ -27,7 +27,6 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
-  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
@@ -49,7 +48,6 @@ export const useGridLayoutState = ({
       panelRefs,
       gridLayout$,
       activePanel$,
-      dragPreviewRef,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,

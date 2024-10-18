@@ -41,7 +41,6 @@ export const useGridLayoutEvents = ({
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
-      // const previewElement = gridLayoutStateManager.dragPreviewRef.current;
 
       const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
@@ -117,8 +116,6 @@ export const useGridLayoutEvents = ({
         ? previewRect.bottom - targetedGridTop
         : previewRect.top - targetedGridTop;
 
-      // gridLayoutStateManager.updateDragPreview(previewRect);
-
       const targetColumn = Math.min(
         Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
         maxColumn
@@ -153,7 +150,6 @@ export const useGridLayoutEvents = ({
 
         // resolve origin grid
         if (hasChangedGridRow) {
-          // debugger;
           const originGrid = nextLayout[lastRowIndex];
           const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;

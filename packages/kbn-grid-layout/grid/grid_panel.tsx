@@ -58,10 +58,6 @@ export const GridPanel = forwardRef<
           className="dragHandle"
           css={css`
             opacity: 0;
-            &:active,
-            &:hover {
-              opacity: 1 !important;
-            }
             display: flex;
             cursor: move;
             position: absolute;
@@ -77,6 +73,11 @@ export const GridPanel = forwardRef<
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
             &:hover {
               cursor: grab;
+              opacity: 1 !important;
+            }
+            &:active {
+              cursor: grabbing;
+              opacity: 1 !important;
             }
           `}
           onMouseDown={(e) => interactionStart('drag', e)}
