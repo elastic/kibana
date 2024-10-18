@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiTitle,
   EuiText,
   EuiThemeProvider,
 } from '@elastic/eui';
@@ -48,10 +49,11 @@ export const CodeSample = ({
 
   return (
     <EuiFlexItem id={id}>
-      <EuiText size="m">
-        <strong>{title}</strong>
-      </EuiText>
-      <EuiText size="s">
+      <EuiTitle size="xs">
+        <h4>{title}</h4>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" grow={false}>
         <p>{description}</p>
       </EuiText>
       <EuiSpacer size="m" />
