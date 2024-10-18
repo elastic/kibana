@@ -52,9 +52,13 @@ export class AiopsPlugin
             console.log('AIOps Received updated search query:', action);
           });
 
+          // subscribers will only be notified if the search query changes
           search.actions.setSearchQuery('test1');
           search.actions.setSearchQuery('test1');
           search.actions.setSearchQuery('test2');
+          search.actions.setSearchQuery('test2');
+          search.actions.setSearchQuery('test3');
+          search.actions.setSearchQuery('test3');
         }
       }
     });
