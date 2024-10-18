@@ -9,7 +9,7 @@ import { createTestConfig } from '../../../config/serverless/config.base';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
-  uiSettings: {},
+  suiteTags: { exclude: ['skipServerless'] },
   junit: {
     reportName: 'Security Solution - Telemetry Integration Tests - Serverless Env',
   },

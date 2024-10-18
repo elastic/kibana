@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TELEMETRY_DATA_STREAM_EVENT } from '@kbn/security-solution-plugin/server/lib/telemetry/event_based/events';
+import {
+  TELEMETRY_CLUSTER_STATS_EVENT,
+  TELEMETRY_DATA_STREAM_EVENT,
+  TELEMETRY_ILM_POLICY_EVENT,
+  TELEMETRY_INDEX_STATS_EVENT,
+} from '@kbn/security-solution-plugin/server/lib/telemetry/event_based/events';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { waitFor } from '../../../../common/utils/security_solution';
+import {
+  cleanupDatastreams,
+  cleanupPolicies,
+  ensureBackingIndices,
+  launchTask,
+  randomDatastream,
+  randomIlmPolicy,
+  waitFor,
+} from '../../../../common/utils/security_solution';
 
 const TASK_ID = 'security:indices-metadata-telemetry:1.0.0';
 
@@ -19,38 +31,26 @@ export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');
   const es = getService('es');
 
-  const dsPrefix: string = 'test-ds';
-
-  describe('@ess @serverless Indices metadata task telemetry', () => {
+  describe(' Indices metadata task telemetry', function () {
     let dsName: string;
+    let policyName: string;
 
     before(async () => {});
 
     after(async () => {});
 
-    beforeEach(async () => {
-      dsName = `${dsPrefix}-${Date.now()}`;
-      const indexTemplateBody = {
-        index_patterns: [`${dsPrefix}-*`],
-        data_stream: {},
-        template: {},
-      };
-
-      await es.indices.putIndexTemplate({
-        name: dsPrefix,
-        body: indexTemplateBody,
+    describe('@ess @serverless indices metadata', () => {
+      beforeEach(async () => {
+        dsName = await randomDatastream(es);
+        await ensureBackingIndices(dsName, 5, es);
       });
 
-      await es.indices.createDataStream({ name: dsName });
-    });
+      afterEach(async () => {
+        await cleanupDatastreams(es);
+      });
 
-    afterEach(async () => {
-      es.indices.deleteDataStream({ name: dsName });
-    });
-
-    describe('indices metadata', () => {
       it('should publish data stream events', async () => {
-        await runSoon(TASK_ID);
+        await launchTask(TASK_ID, kibanaServer, logger);
 
         const opts = {
           eventTypes: [TELEMETRY_DATA_STREAM_EVENT.eventType],
@@ -72,26 +72,86 @@ export default ({ getService }: FtrProviderContext) => {
           logger
         );
       });
+
+      it('should publish index stats events', async () => {
+        await launchTask(TASK_ID, kibanaServer, logger);
+
+        const opts = {
+          eventTypes: [TELEMETRY_INDEX_STATS_EVENT.eventType],
+          withTimeoutMs: 1000,
+          fromTimestamp: new Date().toISOString(),
+        };
+
+        const regex = new RegExp(`^\.ds-${dsName}-.*$`);
+        await waitFor(
+          async () => {
+            const events = await ebtServer.getEvents(100, opts);
+            // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
+            const filtered = events.filter((e) => regex.test(e.properties.index_name as string));
+            return filtered.length === 5;
+          },
+          'waitForTaskToRun',
+          logger
+        );
+      });
+
+      it('should publish cluster stats events', async () => {
+        await launchTask(TASK_ID, kibanaServer, logger);
+
+        const opts = {
+          eventTypes: [TELEMETRY_CLUSTER_STATS_EVENT.eventType],
+          withTimeoutMs: 1000,
+          fromTimestamp: new Date().toISOString(),
+        };
+
+        await waitFor(
+          async () => {
+            const events = await ebtServer.getEventCount(opts);
+            return events === 1;
+          },
+          'waitForTaskToRun',
+          logger
+        );
+      });
+    });
+
+    describe('@ess indices metadata', function () {
+      this.tags('skipServerless');
+
+      beforeEach(async () => {
+        policyName = await randomIlmPolicy(es);
+        dsName = await randomDatastream(es, policyName);
+        await ensureBackingIndices(dsName, 5, es);
+      });
+
+      afterEach(async () => {
+        await cleanupDatastreams(es);
+        await cleanupPolicies(es);
+      });
+
+      it('should publish ilm policy events', async () => {
+        await launchTask(TASK_ID, kibanaServer, logger);
+
+        const opts = {
+          eventTypes: [TELEMETRY_ILM_POLICY_EVENT.eventType],
+          withTimeoutMs: 1000,
+          fromTimestamp: new Date().toISOString(),
+          filters: {
+            'properties.policy_name': {
+              eq: policyName,
+            },
+          },
+        };
+
+        await waitFor(
+          async () => {
+            const events = await ebtServer.getEventCount(opts);
+            return events === 1;
+          },
+          'waitForTaskToRun',
+          logger
+        );
+      });
     });
   });
-
-  const runSoon = async (taskId: string, delayMillis: number = 1_000) => {
-    const task = await kibanaServer.savedObjects.get({
-      type: 'task',
-      id: taskId,
-    });
-
-    const runAt = new Date(Date.now() + delayMillis).toISOString();
-
-    await kibanaServer.savedObjects.update({
-      type: 'task',
-      id: taskId,
-      attributes: {
-        ...task.attributes,
-        runAt,
-        scheduledAt: runAt,
-        status: TaskStatus.Idle,
-      },
-    });
-  };
 };

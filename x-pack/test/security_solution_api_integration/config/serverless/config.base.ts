@@ -15,6 +15,7 @@ export interface CreateTestConfigOptions {
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
+  suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -24,6 +25,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     );
     return {
       ...svlSharedConfig.getAll(),
+      suiteTags: options.suiteTags,
       services: {
         ...services,
       },
