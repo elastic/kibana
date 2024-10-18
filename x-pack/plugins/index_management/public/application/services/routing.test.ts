@@ -39,7 +39,7 @@ describe('routing', () => {
       } as ExtensionsService;
       navigateToIndexDetailsPage('testIndex', '', extensionService, application, http, history);
       expect(history.push).toHaveBeenCalledTimes(1);
-      expect(application.navigateToUrl).toHaveBeenCalledTimes(0);
+      expect(application.navigateToUrl).not.toHaveBeenCalled();
     });
 
     it('renders route from extensionService indexDetailsPageRoute with tab id', () => {
@@ -60,6 +60,7 @@ describe('routing', () => {
         IndexDetailsSection.Settings
       );
       expect(application.navigateToUrl).toHaveBeenCalledTimes(1);
+      expect(application.navigateToUrl).toHaveBeenCalledWith('test_url/settings');
     });
   });
 
