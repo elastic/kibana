@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../../shared/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'timePicker', 'common', 'header']);
@@ -60,12 +60,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should have limited navigation menu', async () => {
       await pageObjects.svlCommonPage.assertUserAvatarExists();
       // discover navigation link is present
-      await testSubjects.existOrFail('~nav-item-search_project_nav.kibana.discover');
-      // dashboard and index_management navigation links are hidden
-      await testSubjects.missingOrFail('~nav-item-search_project_nav.kibana.dashboard');
-      await testSubjects.missingOrFail(
-        'nav-item-search_project_nav.content.management:index_management'
-      );
+      await testSubjects.existOrFail('~nav-item-id-last-used-logs-viewer');
+
+      // all other links in navigation menu are hidden
+      await testSubjects.missingOrFail('~nav-item-id-dashboards');
+      await testSubjects.missingOrFail('~nav-item-id-observability-overview:alerts');
+      await testSubjects.missingOrFail('~nav-item-id-observability-overview:cases');
+      await testSubjects.missingOrFail('~nav-item-id-slo');
+      await testSubjects.missingOrFail('~nav-item-id-aiops');
+      await testSubjects.missingOrFail('~nav-item-id-inventory');
+      await testSubjects.missingOrFail('~nav-item-id-apm');
+      await testSubjects.missingOrFail('~nav-item-id-metrics');
+      await testSubjects.missingOrFail('~nav-item-id-synthetics');
+
+      // TODO: 'Add data' and 'Project Settings' should be hidden
+      // await testSubjects.missingOrFail('~nav-item-id-observabilityOnboarding');
+      // await testSubjects.missingOrFail('~nav-item-id-project_settings_project_nav');
     });
 
     it('should access Discover app', async () => {
