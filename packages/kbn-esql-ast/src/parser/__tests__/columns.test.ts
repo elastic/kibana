@@ -90,4 +90,28 @@ describe('Column Identifier Expressions', () => {
       },
     ]);
   });
+
+  it('column inside a unary expression', () => {
+    const text = 'ROW -col';
+    const { ast } = parse(text);
+
+    expect(ast).toMatchObject([
+      {
+        type: 'command',
+        args: [
+          {
+            type: 'function',
+            subtype: 'unary-expression',
+            name: '-',
+            args: [
+              {
+                type: 'column',
+                parts: ['col'],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
 });

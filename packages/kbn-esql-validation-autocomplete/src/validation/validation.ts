@@ -344,6 +344,14 @@ function validateFunction(
   if (astFunction.incomplete) {
     return messages;
   }
+
+  if (astFunction.subtype === 'unary-expression') {
+    const name = astFunction.name;
+    if (name === '+' || name === '-') {
+      return messages;
+    }
+  }
+
   const fnDefinition = getFunctionDefinition(astFunction.name)!;
 
   const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);

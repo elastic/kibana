@@ -41,6 +41,8 @@ import type {
   FunctionSubtype,
   ESQLNumericLiteral,
   ESQLOrderExpression,
+  ESQLUnaryExpression,
+  ESQLSingleAstItem,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -87,21 +89,6 @@ export const createNumericLiteral = (
     { value: Number(ctx.getText()), literalType },
     createParserFields(ctx)
   );
-
-export function createFakeMultiplyLiteral(
-  ctx: ArithmeticUnaryContext,
-  literalType: ESQLNumericLiteralType
-): ESQLLiteral {
-  return {
-    type: 'literal',
-    literalType,
-    text: ctx.getText(),
-    name: ctx.getText(),
-    value: ctx.PLUS() ? 1 : -1,
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
-}
 
 export function createLiteralString(token: Token): ESQLLiteral {
   const text = token.text!;
@@ -198,6 +185,14 @@ export function createFunction<Subtype extends FunctionSubtype>(
     node.subtype = subtype;
   }
   return node;
+}
+
+export function createUnaryExpression(
+  ctx: ArithmeticUnaryContext,
+  operand: ESQLSingleAstItem
+): ESQLUnaryExpression {
+  const operator = ctx.PLUS() ? '+' : ctx.MINUS() ? '-' : 'unknown';
+  return Builder.expression.unary(operator, operand, {}, createParserFields(ctx));
 }
 
 export const createOrderExpression = (
