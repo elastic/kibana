@@ -102,7 +102,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http, embeddingOrigin, eventBus } = useAiopsAppContext();
   const { dataView } = useDataSource();
-  const eventBusState = eventBus.useEventBus();
+  const eventBusState = eventBus.useEventBus('search');
+  console.log('hook:', eventBusState);
 
   const dispatch = useAppDispatch();
   const {
