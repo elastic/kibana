@@ -10,22 +10,22 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import type { EntityColumnIds, EntityType } from '../../../common/entities';
+import type { EntityColumnIds, EntityType, EntityView } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useInventoryPageViewContext } from '../../context/inventory_page_view_provider';
+import { useInventoryState } from '../../hooks/use_inventory_state';
 
 interface Props {
-  field?: string;
+  field?: EntityView;
 }
 
 export function GroupedGridWrapper({ field }: Props) {
-  const { pagination, setPagination } = useInventoryPageViewContext();
+  const { pagination, setPagination } = useInventoryState();
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery } = query;
   const inventoryRoute = useInventoryRouter();
-  const pageIndex = (field ? pagination?.[field] : pagination?.none) ?? 0;
+  const pageIndex = (field ? pagination?.[field] : pagination?.unified) ?? 0;
 
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
@@ -72,7 +72,7 @@ export function GroupedGridWrapper({ field }: Props) {
   );
 
   function handlePageChange(nextPage: number) {
-    setPagination(field ?? 'none', nextPage);
+    setPagination(field ?? 'unified', nextPage);
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {

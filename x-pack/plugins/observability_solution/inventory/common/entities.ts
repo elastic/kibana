@@ -37,6 +37,10 @@ export const entityColumnIdsRt = t.union([
 
 export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
 
+export const entityViewRt = t.union([t.literal('unified'), t.literal(ENTITY_TYPE)]);
+
+export type EntityView = t.TypeOf<typeof entityViewRt>;
+
 export type EntityType = t.TypeOf<typeof entityTypeRt>;
 
 export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
