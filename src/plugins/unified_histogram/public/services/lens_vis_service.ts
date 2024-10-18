@@ -30,6 +30,7 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import type { ChartType } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -76,19 +77,6 @@ interface Services {
 interface LensVisServiceParams {
   services: Services;
   lensSuggestionsApi: LensSuggestionsApi;
-}
-
-export enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Area = 'Area',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-  Table = 'Table',
 }
 
 export class LensVisService {

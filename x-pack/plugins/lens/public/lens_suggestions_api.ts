@@ -6,22 +6,10 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ChartType } from '@kbn/visualization-utils';
 import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
-
-export enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Area = 'Area',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-  Table = 'Table',
-}
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
