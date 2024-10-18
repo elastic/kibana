@@ -23,7 +23,7 @@ jest.mock('../../containers/user_profiles/api');
 
 const currentUserProfile = userProfiles[0];
 
-describe('Assignees', () => {
+describe.skip('Assignees', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 

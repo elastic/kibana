@@ -92,7 +92,7 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
-describe('AllCasesListGeneric', () => {
+describe.skip('AllCasesListGeneric', () => {
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
 

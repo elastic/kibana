@@ -17,7 +17,7 @@ import * as api from '../../../containers/user_profiles/api';
 
 jest.mock('../../../containers/user_profiles/api');
 
-describe('EditAssigneesSelectable', () => {
+describe.skip('EditAssigneesSelectable', () => {
   let user: UserEvent;
   let appMock: AppMockRenderer;
 

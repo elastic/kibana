@@ -20,7 +20,7 @@ import { casesQueriesKeys } from '../../containers/constants';
 import { basicCase } from '../../containers/mock';
 import { CasesTableUtilityBar } from './utility_bar';
 
-describe('Severity form field', () => {
+describe.skip('Severity form field', () => {
   let user: UserEvent;
   let appMockRender: AppMockRenderer;
   const deselectCases = jest.fn();

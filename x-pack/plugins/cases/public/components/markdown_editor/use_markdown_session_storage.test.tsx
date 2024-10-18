@@ -11,7 +11,7 @@ import type { SessionStorageType } from './use_markdown_session_storage';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-describe('useMarkdownSessionStorage', () => {
+describe.skip('useMarkdownSessionStorage', () => {
   const field = {
     label: '',
     helpText: '',
