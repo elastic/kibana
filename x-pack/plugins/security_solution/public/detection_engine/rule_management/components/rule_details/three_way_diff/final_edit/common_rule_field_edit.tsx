@@ -56,6 +56,7 @@ import {
 } from './fields/rule_schedule';
 import { SetupEdit, setupSchema } from './fields/setup';
 import { TagsEdit, tagsSchema } from './fields/tags';
+import { ThreatEdit, threatSchema, threatSerializer } from './fields/threat';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -144,6 +145,14 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
       return <FieldFormWrapper component={SetupEdit} fieldFormSchema={setupSchema} />;
     case 'tags':
       return <FieldFormWrapper component={TagsEdit} fieldFormSchema={tagsSchema} />;
+    case 'threat':
+      return (
+        <FieldFormWrapper
+          component={ThreatEdit}
+          fieldFormSchema={threatSchema}
+          serializer={threatSerializer}
+        />
+      );
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }
