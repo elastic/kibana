@@ -44,7 +44,6 @@ type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const log = getService('log');
   const retry = getService('retry');
   const supertest = getService('supertest');
 
