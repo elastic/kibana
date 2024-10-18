@@ -12,21 +12,46 @@ describe('GetAgentPoliciesRequestSchema.query', () => {
     expect(() => GetAgentPoliciesRequestSchema.query.validate({})).not.toThrow();
   });
 
-  it('should work without perPage being less than 100', () => {
+  it('should work with perPage being less than 100', () => {
     expect(() => GetAgentPoliciesRequestSchema.query.validate({ perPage: 50 })).not.toThrow();
   });
 
-  it('should work without perPage being less than 100 and agentCount and full', () => {
+  it('should work with perPage being more than 100', () => {
+    expect(() => GetAgentPoliciesRequestSchema.query.validate({ perPage: 500 })).not.toThrow();
+  });
+
+  it('should work with perPage being less than 100 and agentCount and full', () => {
     expect(() =>
       GetAgentPoliciesRequestSchema.query.validate({ perPage: 50, full: true, noAgentCount: false })
     ).not.toThrow();
   });
 
-  it('should throw without perPage being more than 100 and agentCount', () => {
+  it('should work with perPage being less than 100 and agentCount', () => {
+    expect(() =>
+      GetAgentPoliciesRequestSchema.query.validate({ perPage: 50, noAgentCount: true })
+    ).not.toThrow();
+  });
+
+  it('should work with perPage being less than 100 and no agentCount and full', () => {
+    expect(() =>
+      GetAgentPoliciesRequestSchema.query.validate({ perPage: 50, full: true, noAgentCount: false })
+    ).not.toThrow();
+  });
+
+  it('should throw with perPage being more than 100 and noagentCount', () => {
     expect(() =>
       GetAgentPoliciesRequestSchema.query.validate({
         perPage: 500,
         noAgentCount: false,
+      })
+    ).toThrow(/perPage should be less or equal to 100 when fetching full policies or agent count./);
+  });
+
+  it('should throw with perPage being more than 100 and withAgentCount', () => {
+    expect(() =>
+      GetAgentPoliciesRequestSchema.query.validate({
+        perPage: 500,
+        withAgentCount: true,
       })
     ).toThrow(/perPage should be less or equal to 100 when fetching full policies or agent count./);
   });

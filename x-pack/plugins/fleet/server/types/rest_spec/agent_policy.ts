@@ -42,15 +42,32 @@ export const GetAgentPoliciesRequestSchema = {
           },
         })
       ),
-      noAgentCount: schema.maybe(schema.boolean()),
-      full: schema.maybe(schema.boolean()),
+      noAgentCount: schema.maybe(
+        schema.boolean({
+          meta: { description: 'deprecated use withAgentCount instead' },
+        })
+      ), //
+      withAgentCount: schema.maybe(
+        schema.boolean({
+          meta: { description: 'get policies with agent count' },
+        })
+      ),
+      full: schema.maybe(
+        schema.boolean({
+          meta: { description: 'get full policies with package policies populated' },
+        })
+      ),
       format: schema.maybe(
         schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
       ),
     },
     {
       validate: (query) => {
-        if (query.perPage && query.perPage > 100 && (query.full || !query.noAgentCount)) {
+        if (
+          query.perPage &&
+          query.perPage > 100 &&
+          (query.full || query.noAgentCount === false || query.withAgentCount === true)
+        ) {
           return 'perPage should be less or equal to 100 when fetching full policies or agent count.';
         }
       },

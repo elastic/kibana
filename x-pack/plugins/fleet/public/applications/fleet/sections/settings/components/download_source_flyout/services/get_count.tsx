@@ -18,7 +18,6 @@ export async function getCountsForDownloadSource(downloadSource: DownloadSource)
     kuery,
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    noAgentCount: true,
   });
 
   if (agentPolicies.error) {
