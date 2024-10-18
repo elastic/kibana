@@ -139,7 +139,6 @@ export type { PromptContext } from './impl/assistant/prompt_context/types';
  */
 export type { PromptContextTemplate } from './impl/assistant/prompt_context/types';
 
-export { useFetchCurrentUserConversations } from './impl/assistant/api/conversations/use_fetch_current_user_conversations';
 export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 

@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useConversation } from '../../use_conversation';
+import { WELCOME_CONVERSATION_TITLE } from '../../../..';
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
@@ -37,7 +39,6 @@ import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bo
 interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
-  defaultSelectedConversation: Conversation;
   isDisabled?: boolean;
 }
 
@@ -46,10 +47,10 @@ export const DEFAULT_TABLE_OPTIONS = {
   sort: { field: 'createdAt', direction: 'desc' as const },
 };
 
+const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
   defaultConnector,
-  defaultSelectedConversation,
   isDisabled,
 }) => {
   const {
@@ -73,6 +74,15 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     isAssistantEnabled,
     fields: ['title', 'is_default', 'updated_at', 'api_config'],
   });
+
+  const { getDefaultConversation } = useConversation();
+
+  const defaultSelectedConversation = useMemo(
+    () =>
+      conversations?.[defaultSelectedConversationId] ??
+      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
+    [conversations, getDefaultConversation]
+  );
 
   const refetchAll = useCallback(() => {
     refetchPrompts();
