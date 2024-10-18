@@ -1,5 +1,5 @@
 {
-  "query_rule.delete": {
+  "query_rules.delete_ruleset": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -10,9 +10,9 @@
       "DELETE"
     ],
     "patterns": [
-      "_query_rules/{ruleset_id}/_rule/{rule_id}"
+      "_query_rules/{ruleset_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-query-rule.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-query-ruleset.html",
     "availability": {
       "stack": true,
       "serverless": true
