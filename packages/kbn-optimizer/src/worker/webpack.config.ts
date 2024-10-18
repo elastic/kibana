@@ -27,6 +27,7 @@ import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
+import { BundleRemoteUsedExportsPlugin } from './bundle_remote_used_exports_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
@@ -372,6 +373,11 @@ export function getWebpackConfig(
     mode: 'production',
 
     plugins: [
+      // NOTE: this plugin is needed to mark exports on public and extraPublicDir entry files
+      // as used otherwise the new webpack v5 aggressive exports analysis will mark them as unused
+      // and they will be removed. Without this plugin we need to run with usedExports: false which
+      // affects the bundle sizes by a big margin.
+      new BundleRemoteUsedExportsPlugin(bundle),
       new webpack.DefinePlugin({
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
@@ -392,8 +398,9 @@ export function getWebpackConfig(
         }),
       ],
       // TODO: try to understand why usedExports is treeShaking code it shouldn't be
-      usedExports: false,
+      // usedExports: false,
       // sideEffects: false,
+      // mangleExports: false,
       //
     },
   };

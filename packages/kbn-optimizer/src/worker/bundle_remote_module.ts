@@ -12,6 +12,8 @@ import { KbnImportReq } from '@kbn/repo-packages';
 
 // @ts-ignore not typed by @types/webpack
 import Module from 'webpack/lib/Module';
+// @ts-ignore not typed by @types/webpack
+// import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
 import { RawSource } from 'webpack-sources';
 import { BundleRemote } from '../common';
 
@@ -56,6 +58,8 @@ export class BundleRemoteModule extends Module {
       module: __.outputOptions.module,
       exportsArgument: '__webpack_exports__',
     };
+
+    // super.addDependency(new StaticExportsDependency(true, false));
     callback();
   }
 
@@ -79,7 +83,12 @@ export class BundleRemoteModule extends Module {
 
     return {
       sources,
-      runtimeRequirements: new Set(['module', '__webpack_exports__', '__webpack_require__']),
+      runtimeRequirements: new Set([
+        'module',
+        '__webpack_exports__',
+        '__webpack_require__',
+        // '__webpack_require__.r',
+      ]),
       data,
     };
   }

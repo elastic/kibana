@@ -11,6 +11,7 @@ import { LicenseReadOnly } from './license';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: LicenseReadOnly,
@@ -22,7 +23,11 @@ interface TemplateProps {
 }
 
 const Template: StoryFn<TemplateProps> = (args) => {
-  return <FieldReadOnly fieldName="license" finalDiffableRule={args.finalDiffableRule} />;
+  return (
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="license" />
+    </ThreeWayDiffStorybookProviders>
+  );
 };
 
 export const Default = {

@@ -17,6 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
@@ -39,6 +40,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   cloud?: CloudStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  indexManagement: IndexManagementPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
@@ -49,6 +51,7 @@ export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
     indexManagement: IndexManagementPluginStart;
+    serverless: ServerlessPluginStart;
   };
 
 export interface AppUsageTracker {
