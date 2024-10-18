@@ -9,11 +9,10 @@ import { RegistrationCallback } from '@kbn/observability-ai-assistant-plugin/ser
 
 export const registerFunctions: (isServerless: boolean) => RegistrationCallback =
   (isServerless: boolean) =>
-  async ({ client, functions, resources, signal }) => {
-    functions.registerInstruction({
-      instruction: {
-        doc_id: 'search_system_prompt',
-        text: `You are a helpful assistant for Elasticsearch. Your goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.
+  async ({ client, functions, resources, signal, scopes }) => {
+    if (scopes.includes('search')) {
+      functions.registerInstruction(
+        `You are a helpful assistant for Elasticsearch. Your goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.
 
   It's very important to not assume what the user means. Ask them for clarification if needed.
 
@@ -32,9 +31,7 @@ export const registerFunctions: (isServerless: boolean) => RegistrationCallback 
   The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the ${
     isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
   }.
-  If the user asks how to change the language, reply in the same language the user asked in.`,
-        instruction_type: 'system_instruction',
-      },
-      scopes: ['search'],
-    });
+  If the user asks how to change the language, reply in the same language the user asked in.`
+      );
+    }
   };
