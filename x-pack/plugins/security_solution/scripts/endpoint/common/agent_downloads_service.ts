@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import { mkdir, readdir, stat, unlink } from 'fs/promises';
 import { join } from 'path';
 import fs from 'fs';
@@ -102,40 +103,40 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
       return newDownloadInfo;
     }
 
-    const maxAttempts = 2;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      try {
-        this.log.info(
-          `Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
-        );
-        const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
+    try {
+      await pRetry(
+        async (attempt) => {
+          this.log.info(
+            `Attempt ${attempt} - Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
+          );
+          const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
 
-        await handleProcessInterruptions(
-          async () => {
-            const { body } = await nodeFetch(agentDownloadUrl);
-            await finished(body.pipe(outputStream));
+          await handleProcessInterruptions(
+            async () => {
+              const { body } = await nodeFetch(agentDownloadUrl);
+              await finished(body.pipe(outputStream));
+            },
+            () => fs.unlink(newDownloadInfo.fullFilePath) // Clean up on interruption
+          );
+          this.log.info(`Successfully downloaded agent to [${newDownloadInfo.fullFilePath}]`);
+        },
+        {
+          retries: 2, // 2 retries = 3 total attempts (1 initial + 2 retries)
+          onFailedAttempt: (error) => {
+            this.log.error(`Download attempt ${error.attemptNumber} failed: ${error.message}`);
+            // Cleanup failed download
+            return fs.unlink(newDownloadInfo.fullFilePath);
           },
-          () => fs.promises.unlink(newDownloadInfo.fullFilePath) // Clean up on interruption
-        );
-        this.log.info(`Successfully downloaded agent to [${newDownloadInfo.fullFilePath}]`);
-      } catch (error) {
-        this.log.error(`Attempt ${attempt + 1} to download agent failed: ${error.message}`);
-        await unlink(newDownloadInfo.fullFilePath);
-        if (attempt >= maxAttempts - 1) {
-          throw new Error(`Download failed after ${maxAttempts} attempts`);
         }
-
-        await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1000)); // Exponential backoff
-        this.log.info('Retrying download...');
-      }
+      );
+    } catch (error) {
+      throw new Error(`Download failed after multiple attempts: ${error.message}`);
     }
+
     await this.cleanupDownloads();
     return newDownloadInfo;
   }
 
-  /**
-   * Cleans up downloads older than the configured max file age.
-   */
   public async cleanupDownloads(): Promise<{ deleted: string[] }> {
     this.log.debug('Performing cleanup of cached Agent downloads');
 

@@ -8,26 +8,38 @@
 import { ok } from 'assert';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import semver from 'semver';
 import { getAgentDownloadUrl, getAgentFileName } from '../common/fleet_services';
 import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 
-// Decrement the patch version by 1
-const decrementPatchVersion = (version: string): string => {
-  const [major, minor, patch] = version.split('.').map(Number);
-  return `${major}.${minor}.${patch - 1}`;
+// Decrement the patch version by 1 and preserve pre-release tag (if any)
+const decrementPatchVersion = (version: string): string | null => {
+  const parsedVersion = semver.parse(version);
+
+  // Decrement the patch version
+  const newPatchVersion = parsedVersion.patch - 1;
+
+  // Create a new version string with the decremented patch - removing any possible pre-release tag
+  const newVersion = `${parsedVersion.major}.${parsedVersion.minor}.${newPatchVersion}`;
+
+  return semver.valid(newVersion) ? newVersion : null;
 };
 
 // Generate a list of versions to attempt downloading, including a fallback to the previous patch (GA)
 const getVersionsToDownload = (version: string): string[] => {
-  const patch = parseInt(version.split('.')[2], 10);
+  const parsedVersion = semver.parse(version);
+
+  if (!parsedVersion) return []; // Handle invalid version string
 
   // If patch version is 0, return only the current version.
-  if (patch === 0) {
+  if (parsedVersion.patch === 0) {
     return [version];
   }
 
-  return [version, decrementPatchVersion(version)];
+  const decrementedVersion = decrementPatchVersion(version);
+  return decrementedVersion ? [version, decrementedVersion] : [version];
 };
+
 // Download and store the Elastic Agent for the specified version(s)
 const downloadAndStoreElasticAgent = async (
   version: string,
@@ -36,24 +48,20 @@ const downloadAndStoreElasticAgent = async (
 ): Promise<void> => {
   const versionsToDownload = getVersionsToDownload(version);
 
-  for (const v of versionsToDownload) {
+  for (const versionToDownload of versionsToDownload) {
     try {
-      const { url } = await getAgentDownloadUrl(v, closestMatch, log);
-      const fileName = `${getAgentFileName(v)}.tar.gz`;
+      const { url } = await getAgentDownloadUrl(versionToDownload, closestMatch, log);
+      const fileName = `${getAgentFileName(versionToDownload)}.tar.gz`;
 
       await downloadAndStoreAgent(url, fileName);
-      log.info(`Successfully downloaded and stored version ${v}`);
+      log.info(`Successfully downloaded and stored version ${versionToDownload}`);
       return; // Exit once successful
     } catch (error) {
-      log.error(`Failed to download or store version ${v}: ${error.message}`);
+      log.error(`Failed to download or store version ${versionToDownload}: ${error.message}`);
     }
   }
 
   log.error(`Failed to download agent for any available version: ${versionsToDownload.join(', ')}`);
-};
-
-const isValidVersion = (version: string): boolean => {
-  return /^\d+\.\d+\.\d+$/.test(version); // Validate semantic version format
 };
 
 export const agentDownloaderRunner: RunFn = async (cliContext) => {
@@ -62,7 +70,7 @@ export const agentDownloaderRunner: RunFn = async (cliContext) => {
   ok(version, 'version argument is required');
 
   // Validate version format
-  if (!isValidVersion(version as string)) {
+  if (!semver.valid(version)) {
     throw new Error('Invalid version format');
   }
 
