@@ -15,7 +15,7 @@ export function filterScopes<T extends { scopes?: AssistantScope[] }>(
       return true;
     }
     return value?.scopes
-      ? value.scopes.some((scope) => scope === 'all' || scopeFilters.includes(scope))
+      ? value.scopes.some((scope) => [...scopeFilters, 'all'].includes(scope))
       : true;
   };
 }

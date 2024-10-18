@@ -39,7 +39,9 @@ export const registerFunctions: RegistrationCallback = async ({
   const isServerless = !!resources.plugins.serverless;
 
   functions.registerInstruction({
-    instruction: `You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.
+    instruction: {
+      doc_id: 'observability_system_prompt',
+      text: `You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.
 
   It's very important to not assume what the user is meaning. Ask them for clarification if needed.
 
@@ -61,11 +63,15 @@ export const registerFunctions: RegistrationCallback = async ({
     isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`,
+      instruction_type: 'system_instruction',
+    },
     scopes: ['observability'],
   });
 
   functions.registerInstruction({
-    instruction: `You are a helpful assistant for Elasticsearch. Your goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.
+    instruction: {
+      doc_id: 'all_scoped_system_prompt',
+      text: `You are a helpful assistant for Elasticsearch. Your goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.
 
   It's very important to not assume what the user means. Ask them for clarification if needed.
 
@@ -83,6 +89,8 @@ export const registerFunctions: RegistrationCallback = async ({
     isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`,
+      instruction_type: 'system_instruction',
+    },
     scopes: ['all'],
   });
 

@@ -11,7 +11,11 @@ import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
 import { type AssistantScope, filterScopes } from '@kbn/ai-assistant-common';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
+import type {
+  Message,
+  ObservabilityAIAssistantScreenContextRequest,
+  SystemInstruction,
+} from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
   FunctionCallChatFunction,
@@ -34,6 +38,13 @@ const ajv = new Ajv({
 });
 
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
+
+function instructionIsSystemMessage(value: InstructionOrCallback): value is SystemInstruction {
+  return (
+    typeof value === 'object' &&
+    (value as SystemInstruction).instruction_type === 'system_instruction'
+  );
+}
 
 export class ChatFunctionClient {
   private readonly instructions: InstructionOrCallbackWithScopes[] = [];
@@ -111,10 +122,14 @@ export class ChatFunctionClient {
   }
 
   getInstructions(scopes: AssistantScope[]): InstructionOrCallback[] {
-    // for instructions we only want to use those explicitly assigned to one of the current scopes
+    // forsystem instructions we only want to use those explicitly assigned to one of the current scopes
     // 'all' does not override scopes for instructions
     return this.instructions
-      .filter((instructions) => instructions.scopes.some((scope) => scopes.includes(scope)))
+      .filter((instruction) =>
+        instructionIsSystemMessage(instruction.instruction)
+          ? scopes.some((scope) => instruction.scopes.includes(scope))
+          : filterScopes(scopes)(instruction)
+      )
       .map((i) => i.instruction);
   }
 
