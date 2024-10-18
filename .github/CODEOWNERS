@@ -541,6 +541,7 @@ x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-tea
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
+packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
