@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { render as reactRender, waitFor } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
@@ -99,11 +98,9 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   return (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
-        <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
-            <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
-          </CasesProvider>
-        </MemoryRouter>
+        <CasesProvider value={casesProviderValue} queryClient={queryClient}>
+          <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
+        </CasesProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
@@ -162,11 +159,9 @@ export const createAppMockRenderer = ({
   const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
-        <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
-            {children}
-          </CasesProvider>
-        </MemoryRouter>
+        <CasesProvider value={casesProviderValue} queryClient={queryClient}>
+          {children}
+        </CasesProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

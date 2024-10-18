@@ -26,6 +26,10 @@ describe('SolutionFilter ', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    appMockRender.clearQueryCache();
+  });
+
   it('renders button correctly', () => {
     const { getByTestId } = appMockRender.render(
       <SolutionFilter onChange={onChange} selectedOptionKeys={[]} availableSolutions={solutions} />
