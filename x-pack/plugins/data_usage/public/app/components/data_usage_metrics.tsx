@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
@@ -17,7 +17,6 @@ import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
 import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
-import { UX_LABELS } from '../translations';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 
 const EuiItemCss = css`
@@ -173,16 +172,7 @@ export const DataUsageMetrics = () => {
           showMetricsTypesFilter={false}
         />
       </FlexItemWithCss>
-      {!isFetching && error?.message && (
-        <FlexItemWithCss>
-          <EuiCallOut
-            size="s"
-            title={UX_LABELS.noDataStreamsSelected}
-            iconType="iInCircle"
-            color="warning"
-          />
-        </FlexItemWithCss>
-      )}
+
       <FlexItemWithCss>
         {isFetched && data?.metrics ? (
           <Charts data={data} />
