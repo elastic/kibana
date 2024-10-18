@@ -41,15 +41,18 @@ export const InfraPageTemplate = ({
   const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
   const { remoteClustersExist } = source?.status ?? {};
 
-  const { data, status } = useFetcher(async (callApi) => {
-    if (!onboardingFlow) return;
-    return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
-      method: 'GET',
-      query: {
-        modules: dataAvailabilityModules,
-      },
-    });
-  });
+  const { data, status } = useFetcher(
+    async (callApi) => {
+      if (!onboardingFlow) return;
+      return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
+        method: 'GET',
+        query: {
+          modules: dataAvailabilityModules,
+        },
+      });
+    },
+    [onboardingFlow, dataAvailabilityModules]
+  );
 
   const hasData = !!data?.hasData;
   const noDataConfig = getNoDataConfig({
