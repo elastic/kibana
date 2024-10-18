@@ -121,6 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
         });
         it('should have link to API reference doc link in options menu', async () => {
+          await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
         });
         it('should have index documents', async () => {
