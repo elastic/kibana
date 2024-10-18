@@ -50,7 +50,7 @@ export const CodeSample = ({
   return (
     <EuiFlexItem id={id}>
       <EuiTitle size="xs">
-        <h4>{title}</h4>
+        <h3>{title}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiText size="s" grow={false}>
