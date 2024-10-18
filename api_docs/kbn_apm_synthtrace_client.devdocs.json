@@ -3415,9 +3415,9 @@
             "label": "hostEntity",
             "description": [],
             "signature": [
-              "({ agentName, dataStreamType, dataStreamDataset, hostName, entityId, }: { agentName: string[]; dataStreamType: ",
+              "({ agentName, dataStreamType, hostName, entityId, }: { agentName: string[]; dataStreamType: ",
               "EntityDataStreamType",
-              "[]; dataStreamDataset: string; hostName: string; entityId: string; }) => HostEntity"
+              "[]; hostName: string; entityId: string; }) => HostEntity"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
             "deprecated": false,
@@ -3434,7 +3434,7 @@
                 "signature": [
                   "{ agentName: string[]; dataStreamType: ",
                   "EntityDataStreamType",
-                  "[]; dataStreamDataset: string; hostName: string; entityId: string; }"
+                  "[]; hostName: string; entityId: string; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/host_entity.ts",
                 "deprecated": false,
@@ -3450,9 +3450,9 @@
             "label": "containerEntity",
             "description": [],
             "signature": [
-              "({ agentName, dataStreamType, dataStreamDataset, containerId, entityId, }: { agentName: string[]; dataStreamType: ",
+              "({ agentName, dataStreamType, containerId, entityId, }: { agentName: string[]; dataStreamType: ",
               "EntityDataStreamType",
-              "[]; dataStreamDataset: string; containerId: string; entityId: string; }) => ContainerEntity"
+              "[]; containerId: string; entityId: string; }) => ContainerEntity"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
             "deprecated": false,
@@ -3469,7 +3469,7 @@
                 "signature": [
                   "{ agentName: string[]; dataStreamType: ",
                   "EntityDataStreamType",
-                  "[]; dataStreamDataset: string; containerId: string; entityId: string; }"
+                  "[]; containerId: string; entityId: string; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/container_entity.ts",
                 "deprecated": false,
