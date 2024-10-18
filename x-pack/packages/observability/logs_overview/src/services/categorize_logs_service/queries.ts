@@ -111,6 +111,22 @@ export const createCategorizationRequestParams = ({
           size: maxCategoriesCount,
           categorization_analyzer: {
             tokenizer: 'standard',
+            char_filter: [
+              'first_line_with_letters',
+              // @ts-expect-error the official types don't support inline char filters
+              {
+                type: 'pattern_replace',
+                pattern: '\b[0-9a-fA-F]+\b',
+                replacement: '',
+              },
+            ],
+            filter: [
+              // @ts-expect-error the official types don't support inline token filters
+              {
+                type: 'limit',
+                max_token_count: '100',
+              },
+            ],
           },
           ...(minDocsPerCategory > 0 ? { min_doc_count: minDocsPerCategory } : {}),
         },
