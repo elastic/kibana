@@ -149,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
+        expect(parsedSample.data?.entity.id).to.be('admin-console');
       });
 
       it('should delete entities data when specified', async () => {

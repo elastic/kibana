@@ -53,9 +53,7 @@ export const getDataUsageMetricsFiltersFromUrlParams = (
         }, [])
     : [];
 
-  const urlDataStreams = urlParams.dataStreams
-    ? String(urlParams.dataStreams).split(',').sort()
-    : [];
+  const urlDataStreams = urlParams.dataStreams ? String(urlParams.dataStreams).split(',') : [];
 
   dataUsageMetricsFilters.metricTypes = urlMetricTypes.length ? urlMetricTypes : undefined;
   dataUsageMetricsFilters.dataStreams = urlDataStreams.length ? urlDataStreams : undefined;
