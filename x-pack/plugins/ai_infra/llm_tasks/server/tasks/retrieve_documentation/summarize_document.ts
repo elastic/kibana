@@ -51,9 +51,9 @@ export const summarizeDocument = async ({
 
       Given a question and a document, please provide a condensed version of the document
       that can be used to answer the question.
-      - Please try to limit the length of the output to approximately 4000 characters, or 800 words.
+      - Limit the length of the output to 800 words.
       - Try to include all relevant information that could be used to answer the question in the condensed version. If this
-        can't be done without exceeding the 4000chars/800words requirement, please only include the information that you think
+        can't be done without exceeding the 800 words limit requirement, then only include the information that you think
         are the most relevant and the most helpful to answer the question.
       - If you think the document isn't relevant at all to answer the question, just return an empty text`,
       input: `
