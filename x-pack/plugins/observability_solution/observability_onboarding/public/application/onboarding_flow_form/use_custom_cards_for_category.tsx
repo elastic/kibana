@@ -61,12 +61,12 @@ export function useCustomCardsForCategory(
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="apple" size="m" />
-            </EuiFlexItem>,
-            <EuiFlexItem grow={false}>
+            </ExtraLabelBadgeWrapper>,
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="linux" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -79,6 +79,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
+          release: 'preview',
         },
         {
           id: 'otel-logs',
@@ -98,12 +99,12 @@ export function useCustomCardsForCategory(
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="apple" size="m" />
-            </EuiFlexItem>,
-            <EuiFlexItem grow={false}>
+            </ExtraLabelBadgeWrapper>,
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="linux" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -139,9 +140,9 @@ export function useCustomCardsForCategory(
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -154,6 +155,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
+          release: 'preview',
         },
         {
           id: 'otel-kubernetes',
@@ -173,9 +175,9 @@ export function useCustomCardsForCategory(
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -355,4 +357,12 @@ export function useCustomCardsForCategory(
     default:
       return undefined;
   }
+}
+
+function ExtraLabelBadgeWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
+      {children}
+    </EuiFlexItem>
+  );
 }
