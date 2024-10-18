@@ -86,7 +86,7 @@ if command -v jq &> /dev/null; then
           .results[] as $result |
           .tool.driver.rules[] as $rule |
           select($rule.id == $result.ruleId) |
-          "Rule: \($result.ruleId)\nMessage: \($result.message.text)\nFile: \($result.locations[].physicalLocation.artifactLocation.uri)\nLine: \($result.locations[].physicalLocation.region.startLine)\nSecurity Severity: \($rule.properties."problem.severity" // "N/A")\n"' "$QUERY_OUTPUT" |
+          "Rule: \($result.ruleId)\nMessage: \($result.message.text)\nFile: \($result.locations[].physicalLocation.artifactLocation.uri)\nLine: \($result.locations[].physicalLocation.region.startLine)\nSecurity Severity: \($rule.properties."security-severity" // "N/A")\n"' "$QUERY_OUTPUT" |
         while IFS= read -r line; do
             case "$line" in
                 Rule:*)
