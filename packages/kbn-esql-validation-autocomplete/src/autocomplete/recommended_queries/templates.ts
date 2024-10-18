@@ -104,7 +104,7 @@ export const getRecommendedQueries = ({
             label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.eventRate.label',
               {
-                defaultMessage: 'Event rate',
+                defaultMessage: 'Calculate the event rate',
               }
             ),
             description: i18n.translate(
