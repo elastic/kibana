@@ -151,7 +151,7 @@ export const generateFindingHit = (finding: CspFinding) => {
   };
 };
 
-const getFindingsBsearchResponse = (findings: CspFinding[]) => {
+const getFindingsSearchResponse = (findings: CspFinding[]) => {
   const buckets = findings.reduce(
     (acc, finding) => {
       if (finding.result.evaluation === 'failed') {
@@ -174,28 +174,26 @@ const getFindingsBsearchResponse = (findings: CspFinding[]) => {
   );
 
   return {
-    id: 0,
-    result: {
-      rawResponse: {
-        took: 1,
-        timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: findings.length,
-          max_score: null,
-          hits: findings.map(generateFindingHit),
-        },
-        aggregations: {
-          count: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets,
-          },
+    id: '1',
+    rawResponse: {
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: findings.length,
+        max_score: null,
+        hits: findings.map(generateFindingHit),
+      },
+      aggregations: {
+        count: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets,
         },
       },
       isPartial: false,
@@ -214,8 +212,8 @@ export const rulesGetStatesHandler = http.get(
   }
 );
 
-export const bsearchFindingsHandler = (findings: CspFinding[]) =>
-  http.post('internal/bsearch', async ({ request }) => {
+export const searchFindingsHandler = (findings: CspFinding[]) =>
+  http.post('internal/search', async ({ request }) => {
     const jsonRequest = (await request.json()) as Partial<estypes.SearchRequest>;
 
     const filter = jsonRequest?.query?.bool?.filter;
@@ -233,7 +231,7 @@ export const bsearchFindingsHandler = (findings: CspFinding[]) =>
         return finding.rule.section === termValue;
       });
 
-      return HttpResponse.json(getFindingsBsearchResponse(filteredFindings));
+      return HttpResponse.json(getFindingsSearchResponse(filteredFindings));
     }
 
     const hasRuleSectionFilter =
@@ -244,7 +242,7 @@ export const bsearchFindingsHandler = (findings: CspFinding[]) =>
         return finding.rule.section === filter?.[0]?.match_phrase?.['rule.section'];
       });
 
-      return HttpResponse.json(getFindingsBsearchResponse(filteredFindings));
+      return HttpResponse.json(getFindingsSearchResponse(filteredFindings));
     }
 
     const hasResultEvaluationFilter =
@@ -255,8 +253,8 @@ export const bsearchFindingsHandler = (findings: CspFinding[]) =>
         return finding.result.evaluation === filter?.[0]?.match_phrase?.['result.evaluation'];
       });
 
-      return HttpResponse.json(getFindingsBsearchResponse(filteredFindings));
+      return HttpResponse.json(getFindingsSearchResponse(filteredFindings));
     }
 
-    return HttpResponse.json(getFindingsBsearchResponse(findings));
+    return HttpResponse.json(getFindingsSearchResponse(findings));
   });

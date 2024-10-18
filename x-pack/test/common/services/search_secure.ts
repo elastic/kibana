@@ -38,7 +38,7 @@ interface SendOptions {
   internalOrigin: string;
 }
 
-export class BsearchSecureService extends FtrService {
+export class SearchSecureService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   async send<T extends IEsSearchResponse>({
@@ -109,24 +109,12 @@ export class BsearchSecureService extends FtrService {
 
     const result = await this.retry.try(async () => {
       const resp = await supertestWithoutAuth
-        .post(`${spaceUrl}/internal/bsearch`)
+        .post(`${spaceUrl}/internal/search/${strategy}/${body.id}`)
         .auth(auth.username, auth.password)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-        .send({
-          batch: [
-            {
-              request: {
-                id: body.id,
-                ...options,
-              },
-              options: {
-                strategy,
-              },
-            },
-          ],
-        })
+        .send()
         .expect(200);
       const [parsedResponse] = parseBfetchResponse(resp);
       expect(parsedResponse.result.isRunning).equal(false);

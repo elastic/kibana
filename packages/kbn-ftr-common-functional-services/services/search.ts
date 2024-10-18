@@ -8,25 +8,10 @@
  */
 
 import expect from '@kbn/expect';
-import request from 'superagent';
 import type SuperTest from 'supertest';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrService } from './ftr_provider_context';
-
-/**
- * Function copied from here:
- * test/api_integration/apis/search/bsearch.ts without the compress
- *
- * Splits the JSON lines from bsearch
- */
-const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
-  return resp.text
-    .trim()
-    .split('\n')
-    .map((item) => JSON.parse(item));
-};
 
 /**
  * Function copied from here:
@@ -48,13 +33,13 @@ export interface SendOptions {
 }
 
 /**
- * Bsearch Service that can reduce flake on the CI systems when they are under
- * pressure and bsearch returns an async search response or a sync response.
+ * Search Service that can reduce flake on the CI systems when they are under
+ * pressure and search returns an async search response or a sync response.
  *
  * @example
  * const supertest = getService('supertest');
- * const bsearch = getService('bsearch');
- * const response = await bsearch.send<MyType>({
+ * const search = getService('search');
+ * const response = await search.send<MyType>({
  *   supertest,
  *   options: {
  *     defaultIndex: ['large_volume_dns_data'],
@@ -64,7 +49,7 @@ export interface SendOptions {
  * expect(response).eql({ ... your value ... });
  */
 
-export class BsearchService extends FtrService {
+export class SearchService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   /** Send method to send in your supertest, url, options, and strategy name */
@@ -85,26 +70,13 @@ export class BsearchService extends FtrService {
 
     const result = await this.retry.try(async () => {
       const resp = await supertest
-        .post(`${spaceUrl}/internal/bsearch`)
+        .post(`${spaceUrl}/internal/search/${strategy}/${body.id}`)
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-        .send({
-          batch: [
-            {
-              request: {
-                id: body.id,
-                ...options,
-              },
-              options: {
-                strategy,
-              },
-            },
-          ],
-        })
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send()
         .expect(200);
-      const [parsedResponse] = parseBfetchResponse(resp);
-      expect(parsedResponse.result.isRunning).equal(false);
-      return parsedResponse.result as T;
+      expect(resp.body.isRunning).equal(false);
+      return resp.body as T;
     });
     return result;
   }

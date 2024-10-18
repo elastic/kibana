@@ -50,7 +50,7 @@ export const executeEsQueryAPI = async ({
                       operationName: name,
                       kibanaRequest: {
                         route: {
-                          path: '/internal/bsearch',
+                          path: '/internal/search',
                           method: 'POST',
                         },
                       } as any,
@@ -82,7 +82,7 @@ export const executeEsQueryAPI = async ({
                     operationName: name,
                     kibanaRequest: {
                       route: {
-                        path: '/internal/bsearch',
+                        path: '/internal/search',
                         method: 'POST',
                       },
                     } as any,
