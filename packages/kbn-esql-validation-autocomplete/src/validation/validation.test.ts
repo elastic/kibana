@@ -1636,6 +1636,8 @@ describe('validation logic', () => {
       // accepts casting with multiple types
       testErrorsAndWarnings('from a_index | eval 1::keyword::long::double', []);
 
+      testErrorsAndWarnings('from a_index | where 1::string=="keyword"', []);
+
       // takes into account casting in function arguments
       testErrorsAndWarnings('from a_index | eval trim("23"::double)', [
         'Argument of [trim] must be [keyword], found value ["23"::double] type [double]',
