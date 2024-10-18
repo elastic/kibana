@@ -14,3 +14,4 @@ export { checkConnectivity } from './check_connectivity';
 export { createArtifact } from './create_artifact';
 export { cleanupFolders } from './cleanup_folders';
 export { deleteIndex } from './delete_index';
+export { processDocuments } from './process_documents';
