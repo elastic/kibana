@@ -61,9 +61,9 @@ export function NavControl() {
         ? service.start({ signal }).catch((error) => {
             notifications?.toasts.addError(error, {
               title: i18n.translate(
-                'xpack.observabilityAiAssistant.navControl.initFailureErrorTitle',
+                'xpack.searchAssistant.navControl.initFailureErrorTitle',
                 {
-                  defaultMessage: 'Failed to initialize Observability AI Assistant',
+                  defaultMessage: 'Failed to initialize AI Assistant',
                 }
               ),
             });
@@ -150,6 +150,6 @@ export function NavControl() {
 }
 
 const buttonLabel = i18n.translate(
-  'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
+  'xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel',
   { defaultMessage: 'Open the AI Assistant' }
 );
