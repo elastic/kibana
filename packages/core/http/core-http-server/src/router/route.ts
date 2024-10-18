@@ -326,8 +326,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
    * Kibana APIs can also specify some metadata about API availability.
    *
-   * @remark intended to be used for informational purposes only.
+   * This setting is only applicable if your route `access` is `public`.
    *
+   * @remark intended to be used for informational purposes only.
    */
   availability?: {
     /** @default stable */
