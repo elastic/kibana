@@ -34,21 +34,23 @@ export interface GeneratePdfRequest {
   data: GenerateReportRequestData;
 }
 
-export type GeneratePdfResponse = SuccessResponse | ErrorResponse;
-
-export interface SuccessResponse {
-  error?: undefined;
-  data: {
-    buffer: Uint8Array;
-    metrics: {
-      pages: number;
-    };
+export interface GeneratePdfData {
+  buffer: Uint8Array;
+  metrics: {
+    pages: number;
   };
 }
 
-export interface ErrorResponse {
-  error: string;
-  data: null;
+export enum GeneratePdfResponseType {
+  Log,
+  Data,
+}
+
+export interface GeneratePdfResponse {
+  type: GeneratePdfResponseType;
+  data?: GeneratePdfData;
+  error?: string;
+  message?: string;
 }
 
 if (!isMainThread) {
@@ -133,7 +135,8 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       pdfDoc.end();
     });
 
-    const successResponse: SuccessResponse = {
+    const successResponse: GeneratePdfResponse = {
+      type: GeneratePdfResponseType.Data,
       data: {
         buffer,
         metrics: {
@@ -143,7 +146,10 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
     };
     port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
   } catch (error) {
-    const errorResponse: ErrorResponse = { error: error.message, data: null };
+    const errorResponse: GeneratePdfResponse = {
+      type: GeneratePdfResponseType.Data,
+      error: error.message,
+    };
     port.postMessage(errorResponse);
   } finally {
     process.nextTick(() => {
