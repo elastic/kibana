@@ -16,6 +16,7 @@ import {
   updateManagementPageStateAction,
   fetchMonitorFiltersAction,
   selectMonitorFilterOptions,
+  selectOverviewState,
 } from '../../../../state';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { SyntheticsUrlParams } from '../../../../utils/url_params';
@@ -31,10 +32,17 @@ export const useFilters = (): MonitorFiltersResult | null => {
   const dispatch = useDispatch();
   const filtersData = useSelector(selectMonitorFilterOptions);
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const {
+    pageState: { showFromAllSpaces },
+  } = useSelector(selectOverviewState);
 
   useEffect(() => {
-    dispatch(fetchMonitorFiltersAction.get());
-  }, [lastRefresh, dispatch]);
+    dispatch(
+      fetchMonitorFiltersAction.get({
+        showFromAllSpaces,
+      })
+    );
+  }, [lastRefresh, dispatch, showFromAllSpaces]);
 
   return filtersData;
 };

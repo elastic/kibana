@@ -26,7 +26,6 @@ export default createTestConfig({
     `--xpack.cloud.organization_url=/account/members`,
     `--xpack.security.roleManagementEnabled=true`,
     `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
-    `--xpack.searchIndices.enabled=true`, // global empty state FF
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
@@ -37,6 +36,12 @@ export default createTestConfig({
   apps: {
     serverlessElasticsearch: {
       pathname: '/app/elasticsearch/getting_started',
+    },
+    serverlessConnectors: {
+      pathname: '/app/connectors',
+    },
+    searchPlayground: {
+      pathname: '/app/search_playground',
     },
     elasticsearchStart: {
       pathname: '/app/elasticsearch/start',

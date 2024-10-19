@@ -20,10 +20,6 @@ disabled:
   - x-pack/test_serverless/functional/config.base.ts
   - x-pack/test_serverless/shared/config.base.ts
 
-  # serverless config files that run deployment-agnostic tests
-  # Failing https://github.com/elastic/kibana/issues/195811
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
@@ -102,5 +98,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy_response/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
+  # serverless config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
