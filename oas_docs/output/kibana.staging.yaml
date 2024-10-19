@@ -1945,6 +1945,7 @@ paths:
                     type: string
                   params:
                     additionalProperties: {}
+                    default: {}
                     description: The parameters for the rule.
                     type: object
                   revision:
@@ -2145,7 +2146,6 @@ paths:
                   - consumer
                   - schedule
                   - actions
-                  - params
                   - created_by
                   - updated_by
                   - created_at
@@ -3118,6 +3118,7 @@ paths:
                     type: string
                   params:
                     additionalProperties: {}
+                    default: {}
                     description: The parameters for the rule.
                     type: object
                   revision:
@@ -3318,7 +3319,6 @@ paths:
                   - consumer
                   - schedule
                   - actions
-                  - params
                   - created_by
                   - updated_by
                   - created_at
@@ -4262,6 +4262,7 @@ paths:
                     type: string
                   params:
                     additionalProperties: {}
+                    default: {}
                     description: The parameters for the rule.
                     type: object
                   revision:
@@ -4462,7 +4463,6 @@ paths:
                   - consumer
                   - schedule
                   - actions
-                  - params
                   - created_by
                   - updated_by
                   - created_at
@@ -5500,6 +5500,7 @@ paths:
                     type: string
                   params:
                     additionalProperties: {}
+                    default: {}
                     description: The parameters for the rule.
                     type: object
                   revision:
@@ -5700,7 +5701,6 @@ paths:
                   - consumer
                   - schedule
                   - actions
-                  - params
                   - created_by
                   - updated_by
                   - created_at
