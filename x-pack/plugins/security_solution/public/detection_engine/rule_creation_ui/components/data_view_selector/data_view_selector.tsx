@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
@@ -80,11 +80,6 @@ export const DataViewSelector = ({ field }: DataViewSelectorProps) => {
     }
   };
 
-  // Handling the loading state
-  if (!kibanaDataViews) {
-    return <EuiLoadingSpinner size="l" />;
-  }
-
   return (
     <>
       {Boolean(kibanaDataViews) && !selectedKibanaDataView && isDataViewIdValid(dataViewId) && (
@@ -120,6 +115,7 @@ export const DataViewSelector = ({ field }: DataViewSelectorProps) => {
         data-test-subj="pick-rule-data-source"
       >
         <EuiComboBox
+          isDisabled={!kibanaDataViews}
           isClearable
           singleSelection={{ asPlainText: true }}
           onChange={onChangeDataViews}
