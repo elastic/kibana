@@ -10,6 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import React from 'react';
 import {
   UserAvatarTip,
@@ -97,10 +98,7 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
   );
 };
 
-const dateFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-  dateStyle: 'long',
-  timeStyle: 'short',
-});
+const dateFormatter = (when: string) => moment(when).format('MMMM D, YYYY [at] h:mm A');
 
 const ActivityCard = ({
   what,
@@ -130,7 +128,7 @@ const ActivityCard = ({
               id="contentManagement.contentEditor.activity.lastUpdatedByDateTime"
               defaultMessage="on {dateTime}"
               values={{
-                dateTime: dateFormatter.format(new Date(when)),
+                dateTime: dateFormatter(when),
               }}
             />
           </EuiText>
