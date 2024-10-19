@@ -10,8 +10,7 @@
 import * as path from 'path';
 import fs from 'fs';
 import type { StorybookConfig } from '@storybook/react-webpack5';
-import webpack, { Configuration } from 'webpack';
-import { merge as webpackMerge } from 'webpack-merge';
+import webpack from 'webpack';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
@@ -43,8 +42,6 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
-  // @ts-expect-error StorybookConfig type is incomplete
-  // https://storybook.js.org/docs/react/configure/babel#custom-configuration
   babel: async (options) => {
     options.presets.push([
       require.resolve('@emotion/babel-preset-css-prop'),
