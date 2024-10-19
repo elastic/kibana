@@ -266,11 +266,14 @@ export class ConnectorUsageReportingTask {
     projectId: string;
   }): ConnectorUsageReport => {
     const period = Math.round((toDate.getTime() - fromDate.getTime()) / 1000);
-    const fromStr = fromDate.toISOString();
     const toStr = toDate.toISOString();
+    const timestamp = new Date(toStr);
+    timestamp.setMinutes(0);
+    timestamp.setSeconds(0);
+    timestamp.setMilliseconds(0);
 
     return {
-      id: `connector-request-body-bytes-${fromStr}-${toStr}`,
+      id: `connector-request-body-bytes-${timestamp.toISOString()}`,
       usage_timestamp: toStr,
       creation_timestamp: toStr,
       usage: {

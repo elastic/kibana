@@ -289,7 +289,7 @@ describe('ConnectorUsageReportingTask', () => {
 
     const report = {
       creation_timestamp: nowStr,
-      id: `connector-request-body-bytes-${lastReportedUsageDateStr}-${nowStr}`,
+      id: 'connector-request-body-bytes-2024-01-01T12:00:00.000Z',
       source: {
         id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
         instance_group_id: 'test-project',
