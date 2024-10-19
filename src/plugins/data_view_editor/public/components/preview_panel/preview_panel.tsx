@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
@@ -65,20 +64,17 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
     currentViewMode = ViewMode.allIndices;
   }
 
-  const indicesListContent = currentlyVisibleIndices.length ? (
+  const indicesListContent = matched.allIndices ? (
     <IndicesList
       data-test-subj="createIndexPatternStep1IndicesList"
       query={title}
-      indices={currentlyVisibleIndices}
+      indices={currentlyVisibleIndices.length ? currentlyVisibleIndices : matched.allIndices}
       isExactMatch={(indexName) =>
         title.length > 0 && matched.exactMatchedIndices.some((index) => index.name === indexName)
       }
     />
   ) : (
-    <FormattedMessage
-      id="indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail"
-      defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases."
-    />
+    <></>
   );
 
   return (
@@ -90,7 +86,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         query={title}
       />
       <EuiSpacer size="m" />
-      {Boolean(title) && (
+      {Boolean(title) && currentlyVisibleIndices.length > 0 && (
         <EuiButtonGroup
           isFullWidth
           legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
