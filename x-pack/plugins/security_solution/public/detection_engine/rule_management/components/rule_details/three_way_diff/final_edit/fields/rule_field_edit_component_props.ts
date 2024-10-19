@@ -10,7 +10,6 @@ import type { DiffableRule } from '../../../../../../../../common/api/detection_
 
 export interface RuleFieldEditComponentProps {
   finalDiffableRule: DiffableRule;
-  setValidity: SetValidityFn;
   setFieldValue: SetFieldValueFn;
   resetForm: ResetFormFn;
 }

@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/css';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
 import { QueryBarDefineRule } from '../../../../../../../rule_creation_ui/components/query_bar';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
@@ -24,7 +25,6 @@ import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_p
 
 export function KqlQueryEdit({
   finalDiffableRule,
-  setValidity,
   setFieldValue,
 }: RuleFieldEditComponentProps): JSX.Element {
   const defaultIndexPattern = useDefaultIndexPattern();
@@ -58,6 +58,9 @@ export function KqlQueryEdit({
       <UseField
         path="queryBar"
         config={{
+          // queryBar's validation doesn't work until specified here.
+          // ...schema.queryBar copies all configuration from the define rule form schema.
+          ...schema.queryBar,
           label: stepDefineRuleI18n.QUERY_BAR_LABEL,
           labelAppend: isSavedQueryRule ? null : (
             <ImportTimelineQueryButton handleOpenTimelineSearch={toggleIsTimelineSearchOpen} />
@@ -69,7 +72,6 @@ export function KqlQueryEdit({
           isLoading: isIndexPatternLoading,
           openTimelineSearch: isTimelineSearchOpen,
           onCloseTimelineSearch: toggleIsTimelineSearchOpen,
-          onValidityChange: setValidity,
           onOpenTimeline,
           isDisabled: isSavedQueryRule,
           defaultSavedQuery: savedQuery,

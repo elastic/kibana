@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { useForm, Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
@@ -49,7 +49,6 @@ export function RuleFieldEditFormWrapper({
 }: RuleFieldEditFormWrapperProps) {
   const { fieldName, setReadOnlyMode } = useFinalSideContext();
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
-  const [validity, setValidity] = useState<boolean | undefined>(undefined);
 
   const deserialize = useCallback(
     (defaultValue: FormData): FormData =>
@@ -80,7 +79,6 @@ export function RuleFieldEditFormWrapper({
     serializer,
     onSubmit: handleSubmit,
   });
-  const isValid = validity ?? form.isValid;
 
   // form.isValid has `undefined` value until all fields are dirty.
   // Run the validation upfront to visualize form validity state.
@@ -94,14 +92,13 @@ export function RuleFieldEditFormWrapper({
         <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
           {i18n.CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
-        <EuiButtonEmpty iconType="save" onClick={form.submit} disabled={!isValid}>
+        <EuiButtonEmpty iconType="save" onClick={form.submit} disabled={!form.isValid}>
           {i18n.SAVE_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexGroup>
       <Form form={form}>
         <FieldComponent
           finalDiffableRule={finalDiffableRule}
-          setValidity={setValidity}
           setFieldValue={form.setFieldValue}
           resetForm={form.reset}
         />
