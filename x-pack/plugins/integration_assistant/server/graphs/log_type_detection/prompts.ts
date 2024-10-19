@@ -32,6 +32,10 @@ Follow these steps to do this:
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
+- Do not consider a free-form text with characters like \`:\` \`=\` as structured syslogs.
+- Only a message body with characters \`:\` or \`=\` as delimeters to key-value pairs is considered "structured".
+- If you can not 100% determine the key-value pairs and a delimeter , classify the syslogs as "unstrtuctured".
+- Make sure to verify that the "structured" syslogs have key-value pairs in the message body.
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.
 </guidelines>
 
