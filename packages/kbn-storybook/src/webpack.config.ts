@@ -68,10 +68,7 @@ function isDesiredPreset(preset: Preset) {
  * @returns {import('webpack').Configuration}
  */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
-  const config = {
-    devServer: {
-      stats: 'errors-only',
-    },
+  const config: Configuration = {
     externals,
     module: {
       // no parse rules for a few known large packages which have no require() statements
