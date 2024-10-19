@@ -38,9 +38,7 @@ interface Props {
 
 export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, job }) => {
   const isMounted = useMountedState();
-
   const { apiClient } = useInternalApiClient();
-  const isServerless = apiClient.getIsServerless();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<undefined | Error>();
@@ -141,7 +139,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
           {isLoading ? (
             <EuiLoadingSpinner />
           ) : loadingError ? undefined : !!info ? (
-            <ReportInfoFlyoutContent info={info} isServerless={isServerless} />
+            <ReportInfoFlyoutContent info={info} config={config} />
           ) : undefined}
         </EuiFlyoutBody>
         {!isLoading && (

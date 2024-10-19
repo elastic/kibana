@@ -23,7 +23,7 @@ uiSettings.get.mockImplementation((key: string) => {
       return 'Mars';
   }
 });
-const apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0', false);
+const apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0');
 
 const getJobParamsDefault = () => ({
   objectType: 'test-object-type',

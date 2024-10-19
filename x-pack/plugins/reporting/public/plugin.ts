@@ -67,7 +67,6 @@ export class ReportingPublicPlugin
     >
 {
   private kibanaVersion: string;
-  private isServerless: boolean;
   private apiClient?: ReportingAPIClient;
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
@@ -83,7 +82,6 @@ export class ReportingPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   private getContract(apiClient: ReportingAPIClient, startServices$: StartServices$) {
@@ -129,12 +127,7 @@ export class ReportingPublicPlugin
     );
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = new ReportingAPIClient(
-      core.http,
-      core.uiSettings,
-      this.kibanaVersion,
-      this.isServerless
-    );
+    const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
     this.apiClient = apiClient;
 
     homeSetup.featureCatalogue.register({
