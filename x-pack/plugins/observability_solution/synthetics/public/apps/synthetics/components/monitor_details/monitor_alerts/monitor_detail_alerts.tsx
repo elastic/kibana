@@ -50,7 +50,7 @@ export function MonitorDetailsAlerts() {
             id={MONITOR_ALERTS_TABLE_ID}
             data-test-subj="monitorAlertsTable"
             ruleTypeIds={ruleTypeIds}
-            consumers={[AlertConsumers.UPTIME, AlertConsumers.ALERTS]}
+            consumers={[AlertConsumers.UPTIME, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
             query={{
               bool: {
                 filter: [

@@ -1062,11 +1062,13 @@ export class AlertsClient {
     sort = [{ unitsCount: { order: 'desc' } }],
   }: {
     /**
-     * The rule type IDs the alerts belong to. Used for filtering.
+     * The rule type IDs the alerts belong to.
+     * Used for filtering.
      */
     ruleTypeIds: string[];
     /**
-     * The consumers the alerts belong to. Used for filtering.
+     * The consumers the alerts belong to.
+     * Used for filtering.
      */
     consumers?: string[];
     /**

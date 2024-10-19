@@ -36,7 +36,7 @@ describe('useFetchAlertsIndexNamesQuery', () => {
     queryClient.clear();
   });
 
-  it('does not fetch if featureIds is empty', () => {
+  it('does not fetch if ruleTypeIds is empty', () => {
     renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: [] }), {
       wrapper,
     });

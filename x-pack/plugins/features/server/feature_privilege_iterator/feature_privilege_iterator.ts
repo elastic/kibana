@@ -108,6 +108,11 @@ function mergeWithSubFeatures(
       subFeaturePrivilege.savedObject.read
     );
 
+    /**
+     * Merges all alerting rule types and consumers
+     * from features and sub features.
+     * Removes duplicated values.
+     */
     const mergeAlertingEntries = (
       entries: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>
     ): ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }> => {

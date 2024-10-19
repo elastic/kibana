@@ -15,7 +15,7 @@ import {
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
-import { SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { typedSearch } from '../utils/queries';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
@@ -110,12 +110,14 @@ export class GetSLOsOverview {
     const [rules, alerts] = await Promise.all([
       this.rulesClient.find({
         options: {
-          search: 'alert.attributes.alertTypeId:("slo.rules.burnRate")',
+          ruleTypeIds: SLO_RULE_TYPE_IDS,
+          consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         },
       }),
 
       this.racClient.getAlertSummary({
         ruleTypeIds: SLO_RULE_TYPE_IDS,
+        consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         gte: moment().subtract(24, 'hours').toISOString(),
         lte: moment().toISOString(),
       }),

@@ -103,9 +103,6 @@ export const findRulesInternalRequestQuerySchema = schema.object({
   page: schema.number({
     defaultValue: 1,
     min: 1,
-    meta: {
-      description: 'The page number to return.',
-    },
   }),
   search: schema.maybe(schema.string()),
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {

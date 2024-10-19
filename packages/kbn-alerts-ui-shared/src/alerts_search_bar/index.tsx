@@ -10,11 +10,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useLoadRuleTypesQuery, useAlertsDataView } from '../common/hooks';
+import { useAlertsDataView } from '../common/hooks';
 
 export type { AlertsSearchBarProps } from './types';
 
@@ -23,7 +23,7 @@ const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 export const AlertsSearchBar = ({
   appName,
   disableQueryLanguageSwitcher = false,
-  ruleTypeIds,
+  ruleTypeIds = [],
   query,
   filters,
   onQueryChange,
@@ -43,14 +43,14 @@ export const AlertsSearchBar = ({
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    ruleTypeIds: ruleTypeIds ?? [],
+    ruleTypeIds,
     http,
     toasts,
     dataViewsService: dataService.dataViews,
   });
 
   const indexPatterns = useMemo(() => {
-    if (ruleTypeIds && dataView?.fields?.length) {
+    if (ruleTypeIds.length > 0 && dataView?.fields?.length) {
       return [{ title: ruleTypeIds.join(','), fields: dataView.fields }];
     }
 
@@ -60,22 +60,7 @@ export const AlertsSearchBar = ({
     return null;
   }, [dataView, ruleTypeIds]);
 
-  const ruleType = useLoadRuleTypesQuery({
-    filteredRuleTypes: ruleTypeIds ?? [],
-    enabled: Boolean(ruleTypeIds?.length),
-    http,
-    toasts,
-  });
-
-  const allProducers = new Set(
-    ruleTypeIds
-      ?.map((ruleTypeId) => ruleType.ruleTypesState.data.get(ruleTypeId)?.producer)
-      .filter((ruleTypeId): ruleTypeId is string => Boolean(ruleTypeId)) ?? []
-  );
-
-  const hasSiemRuleTypes = ruleTypeIds?.some(isSiemRuleType) ?? false;
-  const isSiemProducer = allProducers.has(AlertConsumers.SIEM);
-  const isSecurity = hasSiemRuleTypes || isSiemProducer;
+  const isSecurity = ruleTypeIds?.some(isSiemRuleType) ?? false;
 
   const onSearchQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {

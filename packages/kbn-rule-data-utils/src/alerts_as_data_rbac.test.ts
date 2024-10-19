@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
-export const ES_QUERY_ID = '.es-query';
-export const ML_ANOMALY_DETECTION_RULE_TYPE_ID = 'xpack.ml.anomaly_detection_alert';
+import { isSiemRuleType } from './alerts_as_data_rbac';
 
-/**
- * These rule types are not the only stack rules. There are more.
- * The variable holds all stack rule types that support multiple
- * consumers aka the "Role visibility" UX dropdown.
- */
-export const STACK_RULE_TYPE_IDS = [ES_QUERY_ID, ML_ANOMALY_DETECTION_RULE_TYPE_ID];
+describe('alertsAsDataRbac', () => {
+  describe('isSiemRuleType', () => {
+    test('returns true for siem rule types', () => {
+      expect(isSiemRuleType('siem.esqlRuleType')).toBe(true);
+    });
+
+    test('returns false for NON siem rule types', () => {
+      expect(isSiemRuleType('apm.anomaly')).toBe(false);
+    });
+  });
+});

@@ -108,7 +108,7 @@ export function AlertsOverview() {
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
               ruleTypeIds={APM_RULE_TYPE_IDS}
-              consumers={[AlertConsumers.APM, AlertConsumers.ALERTS]}
+              consumers={[AlertConsumers.APM, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}

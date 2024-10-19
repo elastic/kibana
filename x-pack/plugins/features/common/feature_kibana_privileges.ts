@@ -97,21 +97,21 @@ export interface FeatureKibanaPrivileges {
   alerting?: {
     rule?: {
       /**
-       * List of rule types which users should have full read/write access to when granted this privilege.
+       * List of rule types and consumers for which users should have full read/write access to when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    all: ['my-alert-type-within-my-feature']
+       *    all: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
       all?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
       /**
-       * List of rule types which users should have read-only access to when granted this privilege.
+       * List of rule types and consumers for which users should have read-only access to when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    read: ['my-alert-type']
+       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
@@ -119,21 +119,21 @@ export interface FeatureKibanaPrivileges {
     };
     alert?: {
       /**
-       * List of rule types for which users should have full read/write access their alert data to when granted this privilege.
+       * List of rule types and consumers for which users should have full read/write access their alert data to when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    all: ['my-alert-type-within-my-feature']
+       *    all: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
       all?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
       /**
-       * List of rule types for which users should have read-only access to their alert data when granted this privilege.
+       * List of rule types and consumers for which users should have read-only access to their alert data when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    read: ['my-alert-type']
+       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */

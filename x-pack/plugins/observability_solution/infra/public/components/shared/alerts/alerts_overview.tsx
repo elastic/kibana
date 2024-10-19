@@ -113,7 +113,11 @@ export const AlertsOverview = ({
         <AlertSummaryWidget
           chartProps={chartProps}
           ruleTypeIds={INFRA_RULE_TYPE_IDS}
-          consumers={[AlertConsumers.INFRASTRUCTURE, AlertConsumers.ALERTS]}
+          consumers={[
+            AlertConsumers.INFRASTRUCTURE,
+            AlertConsumers.ALERTS,
+            AlertConsumers.OBSERVABILITY,
+          ]}
           filter={alertsEsQuery}
           timeRange={summaryTimeRange}
           onLoaded={onLoaded}
@@ -127,7 +131,11 @@ export const AlertsOverview = ({
           id={'assetDetailsAlertsTable'}
           configurationId={AlertConsumers.OBSERVABILITY}
           ruleTypeIds={INFRA_RULE_TYPE_IDS}
-          consumers={[AlertConsumers.INFRASTRUCTURE, AlertConsumers.ALERTS]}
+          consumers={[
+            AlertConsumers.INFRASTRUCTURE,
+            AlertConsumers.ALERTS,
+            AlertConsumers.OBSERVABILITY,
+          ]}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}

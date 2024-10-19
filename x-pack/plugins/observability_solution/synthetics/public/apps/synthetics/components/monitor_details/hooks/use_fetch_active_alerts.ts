@@ -28,8 +28,8 @@ export function useFetchActiveAlerts() {
   const { loading, data } = useFetcher(async () => {
     return await http.post<ESSearchResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       body: JSON.stringify({
-        ruleTypeIds: [UPTIME_RULE_TYPE_IDS],
-        consumers: [AlertConsumers.UPTIME],
+        ruleTypeIds: UPTIME_RULE_TYPE_IDS,
+        consumers: [AlertConsumers.UPTIME, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         size: 0,
         track_total_hits: true,
         query: {

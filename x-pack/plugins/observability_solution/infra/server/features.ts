@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
+  AlertConsumers,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -34,7 +35,7 @@ const metricRuleTypes = [
 
 const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [METRICS_FEATURE_ID, ALERTING_FEATURE_ID],
+  consumers: [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
 }));
 
 export const METRICS_FEATURE = {
@@ -106,7 +107,7 @@ const logsRuleTypes = [
 
 const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [LOGS_FEATURE_ID, ALERTING_FEATURE_ID],
+  consumers: [LOGS_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
 }));
 
 export const LOGS_FEATURE = {

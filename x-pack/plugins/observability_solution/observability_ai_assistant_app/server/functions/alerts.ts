@@ -14,6 +14,7 @@ import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  AlertConsumers,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '@kbn/observability-plugin/common/constants';
@@ -175,6 +176,15 @@ export function registerAlertsFunction({
 
       const response = await alertsClient.find({
         ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+        consumers: [
+          AlertConsumers.APM,
+          AlertConsumers.INFRASTRUCTURE,
+          AlertConsumers.LOGS,
+          AlertConsumers.UPTIME,
+          AlertConsumers.SLO,
+          AlertConsumers.OBSERVABILITY,
+          AlertConsumers.ALERTS,
+        ],
         query: {
           bool: {
             filter: [

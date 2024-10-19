@@ -106,7 +106,7 @@ export function SloAlertsTable({
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
       configurationId={SLO_ALERTS_TABLE_CONFIG_ID}
       ruleTypeIds={[SLO_BURN_RATE_RULE_TYPE_ID]}
-      consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS]}
+      consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}
       initialPageSize={ALERTS_PER_PAGE}

@@ -420,4 +420,41 @@ describe('ruleActionsSettings', () => {
 
     expect(screen.queryByText('filter query error')).toBeInTheDocument();
   });
+
+  test('should show the rule actions filter for siem rule types', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        settings: {},
+      },
+      formData: {
+        consumer: 'siem',
+        schedule: { interval: '5h' },
+      },
+      selectedRuleType: {
+        /**
+         * With the current configuration
+         * hasFieldsForAad will return false
+         * and we are testing the isSiemRuleType(ruleTypeId)
+         * branch of the code
+         */
+        ...ruleType,
+        id: 'siem.esqlRuleType',
+        hasFieldsForAAD: false,
+      },
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(
+      <RuleActionsSettings
+        action={getAction('1')}
+        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
+        onNotifyWhenChange={mockOnNotifyWhenChange}
+        onActionGroupChange={mockOnActionGroupChange}
+        onAlertsFilterChange={mockOnAlertsFilterChange}
+        onTimeframeChange={mockOnTimeframeChange}
+      />
+    );
+
+    expect(screen.queryByText('RuleActionsAlertsFilter')).toBeInTheDocument();
+  });
 });

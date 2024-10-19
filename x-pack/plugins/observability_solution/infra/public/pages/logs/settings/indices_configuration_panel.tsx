@@ -94,7 +94,7 @@ export const IndicesConfigurationPanel = React.memo<{
         const { ruleExecutionStatus } = await loadRuleAggregations({
           http,
           ruleTypeIds: [LOG_THRESHOLD_ALERT_TYPE_ID],
-          consumers: [AlertConsumers.LOGS],
+          consumers: [AlertConsumers.LOGS, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         });
         const numberOfRules = Object.values(ruleExecutionStatus).reduce(
           (acc, value) => acc + value,

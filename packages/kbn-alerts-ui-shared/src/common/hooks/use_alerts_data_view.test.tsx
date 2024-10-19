@@ -76,7 +76,7 @@ describe('useAlertsDataView', () => {
     await waitFor(() => expect(result.current).toEqual(mockedAsyncDataView));
   });
 
-  it('fetches indexes and fields for non-siem feature ids, returning a DataViewBase object', async () => {
+  it('fetches indexes and fields for non-siem rule type ids, returning a DataViewBase object', async () => {
     const { result, waitForValueToChange } = renderHook(
       () =>
         useAlertsDataView({
@@ -95,7 +95,7 @@ describe('useAlertsDataView', () => {
     expect(result.current.dataView).not.toBe(mockDataView);
   });
 
-  it('only fetches index names for the siem feature id, returning a DataView', async () => {
+  it('only fetches index names for the siem rule type ids, returning a DataView', async () => {
     const { result, waitFor } = renderHook(
       () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['siem.esqlRule', 'siem.eqlRule'] }),
       {
@@ -109,7 +109,7 @@ describe('useAlertsDataView', () => {
     await waitFor(() => expect(result.current.dataView).toBe(mockDataView));
   });
 
-  it('does not fetch anything if siem and other feature ids are mixed together', async () => {
+  it('does not fetch anything if siem and other rule type ids are mixed together', async () => {
     const { result, waitFor } = renderHook(
       () =>
         useAlertsDataView({

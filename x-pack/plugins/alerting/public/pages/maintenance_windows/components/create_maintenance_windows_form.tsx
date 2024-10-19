@@ -72,7 +72,10 @@ const useDefaultTimezone = () => {
   }
   return { defaultTimezone: kibanaTz, isBrowser: false };
 };
-const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
+
+const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
+  label: timezoneOption,
+})) ?? [{ label: 'UTC' }];
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>((props) => {
   const { onCancel, onSuccess, initialValue, maintenanceWindowId } = props;
@@ -202,6 +205,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     form,
     watch: ['recurring', 'timezone', 'categoryIds', 'scopedQuery'],
   });
+
   const isRecurring = recurring || false;
   const showTimezone = isBrowser || initialValue?.timezone !== undefined;
 

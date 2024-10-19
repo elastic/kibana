@@ -95,6 +95,7 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
 };
 
 /**
- * TODO: Abstract it and remove it
+ * TODO: Remove when checks for specific rule type ids is not needed
+ *in the codebase.
  */
 export const isSiemRuleType = (ruleTypeId: string) => ruleTypeId.startsWith('siem.');

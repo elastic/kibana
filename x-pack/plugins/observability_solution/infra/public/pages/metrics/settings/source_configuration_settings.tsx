@@ -60,7 +60,11 @@ export const SourceConfigurationSettings = ({
         const { ruleExecutionStatus } = await loadRuleAggregations({
           http,
           ruleTypeIds: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
-          consumers: [AlertConsumers.INFRASTRUCTURE],
+          consumers: [
+            AlertConsumers.INFRASTRUCTURE,
+            AlertConsumers.ALERTS,
+            AlertConsumers.OBSERVABILITY,
+          ],
         });
         const numberOfRules = Object.values(ruleExecutionStatus).reduce(
           (acc, value) => acc + value,

@@ -17,7 +17,7 @@ export const AlertsTabBadge = () => {
 
   const { alertsCount, loading, error } = useAlertsCount({
     ruleTypeIds: INFRA_RULE_TYPE_IDS,
-    consumers: [AlertConsumers.INFRASTRUCTURE],
+    consumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
     query: alertsEsQuery,
   });
 
