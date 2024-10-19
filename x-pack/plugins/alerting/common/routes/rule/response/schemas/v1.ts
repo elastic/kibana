@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
@@ -18,9 +19,6 @@ import {
 import { validateNotifyWhenV1 } from '../../validation';
 import { flappingSchemaV1 } from '../../common';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
-  meta: { description: 'The parameters for the rule.' },
-});
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: {
     description:
