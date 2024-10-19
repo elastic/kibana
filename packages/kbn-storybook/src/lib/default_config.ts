@@ -43,9 +43,6 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
-  features: {
-    postcss: false,
-  },
   // @ts-expect-error StorybookConfig type is incomplete
   // https://storybook.js.org/docs/react/configure/babel#custom-configuration
   babel: async (options) => {
@@ -109,21 +106,21 @@ export const defaultConfig: StorybookConfig = {
       })
     );
 
-    config?.module?.rules?.push({
-      test: /\.(js|jsx|ts|tsx)$/,
-      use: [
-        {
-          loader: require.resolve('babel-loader'),
-          options: {
-            presets: [
-              require.resolve('@babel/preset-env'),
-              require.resolve('@babel/preset-react'),
-              [require.resolve('@babel/preset-typescript'), { allowDeclareFields: true }],
-            ],
-          },
-        },
-      ],
-    });
+    // config?.module?.rules?.push({
+    //   test: /\.(js|jsx|ts|tsx)$/,
+    //   use: [
+    //     {
+    //       loader: require.resolve('babel-loader'),
+    //       options: {
+    //         presets: [
+    //           require.resolve('@babel/preset-env'),
+    //           require.resolve('@babel/preset-react'),
+    //           [require.resolve('@babel/preset-typescript'), { allowDeclareFields: true }],
+    //         ],
+    //       },
+    //     },
+    //   ],
+    // });
 
     config.resolve = {
       ...config.resolve,
@@ -138,37 +135,6 @@ export const defaultConfig: StorybookConfig = {
       ignored: IGNORE_GLOBS,
     };
 
-    // Remove when @storybook has moved to @emotion v11
-    // https://github.com/storybookjs/storybook/issues/13145
-    const emotion11CompatibleConfig = {
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve?.alias,
-          '@emotion/core': toPath('node_modules/@emotion/react'),
-          '@emotion/styled': toPath('node_modules/@emotion/styled'),
-          'emotion-theming': toPath('node_modules/@emotion/react'),
-        },
-      },
-    };
-
-    return emotion11CompatibleConfig;
-  },
-};
-
-// defaultConfigWebFinal and mergeWebpackFinal have been moved here  because webpackFinal usage in
-// storybook main.ts somehow is  causing issues with newly added dependency of ts-node most likely
-// an issue with storybook typescript setup see this issue for more details
-// https://github.com/storybookjs/storybook/issues/9610
-
-export const defaultConfigWebFinal: StorybookConfig = {
-  ...defaultConfig,
-  webpackFinal: (config: Configuration) => {
     return WebpackConfig({ config });
   },
-};
-
-export const mergeWebpackFinal = (extraConfig: Configuration) => {
-  return { webpackFinal: (config: Configuration) => webpackMerge(config, extraConfig) };
 };
