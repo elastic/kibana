@@ -7,7 +7,9 @@
 
 import { useEffect, useState } from 'react';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from './translations';
 
 /**
  * Fetches known Kibana data views from the Data View Service.
@@ -18,11 +20,19 @@ export function useDataViews(): DataViewListItem[] | undefined {
   const {
     data: { dataViews: dataViewsService },
   } = useKibana().services;
+  const { addError } = useAppToasts();
+
   const [dataViews, setDataViews] = useState<DataViewListItem[] | undefined>();
 
   useEffect(() => {
-    (async () => setDataViews(await dataViewsService.getIdsWithTitle()))();
-  }, [dataViewsService]);
+    (async () => {
+      try {
+        setDataViews(await dataViewsService.getIdsWithTitle());
+      } catch (e) {
+        addError(e, { title: i18n.DATA_VIEWS_FETCH_ERROR });
+      }
+    })();
+  }, [dataViewsService, addError]);
 
   return dataViews;
 }

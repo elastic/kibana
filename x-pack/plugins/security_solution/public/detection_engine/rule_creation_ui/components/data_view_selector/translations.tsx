@@ -45,3 +45,10 @@ export const DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION = i18n.translate(
       'The default Security data view includes the alerts index. This could result in redundant alerts being generated from existing alerts.',
   }
 );
+
+export const DATA_VIEWS_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewFetchError',
+  {
+    defaultMessage: 'Unable to retrieve available data views',
+  }
+);
