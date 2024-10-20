@@ -340,7 +340,7 @@ export interface AddVersionOpts<P, Q, B> {
   security?: Exclude<RouteConfigOptions<RouteMethod>['security'], undefined>;
 
   options?: {
-    deprecated: RouteDeprecationInfo;
+    deprecated?: RouteDeprecationInfo;
   };
 }
 

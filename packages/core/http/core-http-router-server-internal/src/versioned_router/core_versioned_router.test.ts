@@ -49,6 +49,7 @@ describe('Versioned router', () => {
       Array [
         Object {
           "handlers": Array [],
+          "isVersioned": true,
           "method": "get",
           "options": Object {
             "access": "internal",
@@ -58,6 +59,7 @@ describe('Versioned router', () => {
         },
         Object {
           "handlers": Array [],
+          "isVersioned": true,
           "method": "post",
           "options": Object {
             "access": "internal",
@@ -68,6 +70,7 @@ describe('Versioned router', () => {
         },
         Object {
           "handlers": Array [],
+          "isVersioned": true,
           "method": "delete",
           "options": Object {
             "access": "internal",

@@ -175,7 +175,7 @@ export type InternalRegistrar<M extends Method, C extends RequestHandlerContextB
 
 /** @internal */
 type RouterEvents =
-  /** Just before registered handlers are called */
+  /** Called after route validation, regardless of success or failure */
   'onPostValidate';
 
 /**

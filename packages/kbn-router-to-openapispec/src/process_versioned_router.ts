@@ -92,11 +92,13 @@ export const processVersionedRouter = (
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
       const hasVersionFilter = Boolean(filters?.version);
+      // If any handler is deprecated we show deprecated: true in the spec
+      const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
         ...(route.options.description ? { description: route.options.description } : {}),
-        ...{ deprecated: route.handlers.some(({ options }) => options.options?.deprecated) },
+        ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: hasBody
           ? {

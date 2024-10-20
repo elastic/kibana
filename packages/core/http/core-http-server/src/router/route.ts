@@ -320,7 +320,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
    * created from HTTP API introspection (like OAS).
    *
-   * Seting this object marks the route as deprecated.
+   * Setting this object marks the route as deprecated.
    *
    * @remarks This may be surfaced in OAS documentation.
    * @public
