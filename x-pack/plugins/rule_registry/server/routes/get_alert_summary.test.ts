@@ -148,5 +148,32 @@ describe('getAlertSummaryRoute', () => {
         )
       ).resolves.not.toThrow();
     });
+
+    test('calls the alerts client correctly', async () => {
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_alert_summary`,
+            body: {
+              gte: '2020-12-16T15:00:00.000Z',
+              lte: '2020-12-16T16:00:00.000Z',
+              consumers: ['foo'],
+              ruleTypeIds: ['bar'],
+            },
+          }),
+          context
+        )
+      ).resolves.not.toThrow();
+
+      expect(clients.rac.getAlertSummary).toHaveBeenCalledWith({
+        consumers: ['foo'],
+        filter: undefined,
+        fixedInterval: undefined,
+        gte: '2020-12-16T15:00:00.000Z',
+        lte: '2020-12-16T16:00:00.000Z',
+        ruleTypeIds: ['bar'],
+      });
+    });
   });
 });

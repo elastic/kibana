@@ -19,47 +19,105 @@ describe('getBrowserFieldsByFeatureId', () => {
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+
+    clients.rac.getAuthorizedAlertsIndices.mockResolvedValue([
+      '.alerts-observability.logs.alerts-default',
+    ]);
+
+    clients.rac.getBrowserFields.mockResolvedValue({ browserFields: {}, fields: [] });
+
+    getBrowserFieldsByFeatureId(server.router);
   });
 
-  describe('when racClient returns o11y indices', () => {
-    beforeEach(() => {
-      clients.rac.getAuthorizedAlertsIndices.mockResolvedValue([
-        '.alerts-observability.logs.alerts-default',
-      ]);
+  test('route registered', async () => {
+    const response = await server.inject(getO11yBrowserFields(), context);
 
-      getBrowserFieldsByFeatureId(server.router);
-    });
+    expect(response.status).toEqual(200);
+  });
 
-    test('route registered', async () => {
-      const response = await server.inject(getO11yBrowserFields(), context);
+  test('it calls getAuthorizedAlertsIndices with o11y rule types', async () => {
+    const response = await server.inject(getO11yBrowserFields(), context);
 
-      expect(response.status).toEqual(200);
-    });
+    expect(response.status).toEqual(200);
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith([
+      'apm.anomaly',
+      'logs.alert.document.count',
+    ]);
+  });
 
-    test('rejects invalid featureId type', async () => {
-      await expect(
-        server.inject(
-          requestMock.create({
-            method: 'get',
-            path,
-            query: { ruleTypeIds: undefined },
-          }),
-          context
-        )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
-      );
-    });
+  test('it calls getAuthorizedAlertsIndices only for o11y rule types when siem rule types are mixed', async () => {
+    const response = await server.inject(
+      {
+        ...getO11yBrowserFields(),
+        query: { ruleTypeIds: ['apm.anomaly', 'siem.esqlRuleType'] },
+      },
+      context
+    );
 
-    test('returns error status if rac client "getAuthorizedAlertsIndices" fails', async () => {
-      clients.rac.getAuthorizedAlertsIndices.mockRejectedValue(new Error('Unable to get index'));
-      const response = await server.inject(getO11yBrowserFields(), context);
+    expect(response.status).toEqual(200);
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith(['apm.anomaly']);
+  });
 
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        attributes: { success: false },
-        message: 'Unable to get index',
-      });
+  test('it does not call getAuthorizedAlertsIndices with siem rule types', async () => {
+    const response = await server.inject(
+      {
+        ...getO11yBrowserFields(),
+        query: { ruleTypeIds: ['siem.esqlRuleType'] },
+      },
+      context
+    );
+
+    expect(response.status).toEqual(200);
+    expect(clients.rac.getAuthorizedAlertsIndices).not.toHaveBeenCalledWith();
+  });
+
+  test('accepts an array of string ', async () => {
+    const ruleTypeIds = ['foo', 'bar'];
+
+    await server.inject({ ...getO11yBrowserFields(), query: { ruleTypeIds } }, context);
+
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith(ruleTypeIds);
+  });
+
+  test('accepts a single string', async () => {
+    const ruleTypeIds = 'foo';
+
+    await server.inject({ ...getO11yBrowserFields(), query: { ruleTypeIds } }, context);
+
+    expect(clients.rac.getAuthorizedAlertsIndices).toHaveBeenCalledWith([ruleTypeIds]);
+  });
+
+  test('returns 404 when getAuthorizedAlertsIndices returns an empty array', async () => {
+    clients.rac.getAuthorizedAlertsIndices.mockResolvedValue([]);
+
+    const response = await server.inject(getO11yBrowserFields(), context);
+
+    expect(response.status).toEqual(404);
+  });
+
+  test('rejects invalid ruleTypeIds', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'get',
+          path,
+          query: { ruleTypeIds: undefined },
+        }),
+        context
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+    );
+  });
+
+  test('returns error status if rac client "getAuthorizedAlertsIndices" fails', async () => {
+    clients.rac.getAuthorizedAlertsIndices.mockRejectedValue(new Error('Unable to get index'));
+    const response = await server.inject(getO11yBrowserFields(), context);
+
+    expect(response.status).toEqual(500);
+    expect(response.body).toEqual({
+      attributes: { success: false },
+      message: 'Unable to get index',
     });
   });
 });

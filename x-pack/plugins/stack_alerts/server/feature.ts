@@ -23,16 +23,12 @@ import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containme
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
 const DISCOVER_CONSUMER = 'discover';
 
-const basicAlertingFeatures = [
-  IndexThreshold,
-  GeoContainment,
-  TransformHealth,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-].map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
-}));
+const basicAlertingFeatures = [IndexThreshold, GeoContainment, TransformHealth].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+  })
+);
 
 /**
  * We need to add the discover consumer
@@ -46,7 +42,32 @@ const esQueryAlertingFeature = {
   consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID, DISCOVER_CONSUMER],
 };
 
-const alertingFeatures = [...basicAlertingFeatures, esQueryAlertingFeature];
+/**
+ * Only the stackAlerts consumer is valid
+ * for the stackAlerts feature ID for the
+ * xpack.ml.anomaly_detection_alert rule type.
+ */
+const mlAnomalyDetectionAlertingFeature = {
+  ruleTypeId: ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  consumers: [STACK_ALERTS_FEATURE_ID],
+};
+
+/**
+ * Only the stackAlerts consumer is valid
+ * for the stackAlerts feature ID for the
+ * observability.rules.custom_threshold rule type.
+ */
+const observabilityThresholdAlertingFeature = {
+  ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  consumers: [STACK_ALERTS_FEATURE_ID],
+};
+
+const alertingFeatures = [
+  ...basicAlertingFeatures,
+  esQueryAlertingFeature,
+  mlAnomalyDetectionAlertingFeature,
+  observabilityThresholdAlertingFeature,
+];
 
 export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   id: STACK_ALERTS_FEATURE_ID,

@@ -55,8 +55,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const security = securityMock.createSetup();
   const spaces = spacesMock.createStart();
   const logger = loggerMock.create();
+  const authorizationMock = alertingAuthorizationMock.create();
   const getAuthorizedRuleTypesMock = jest.fn();
   const getAlertIndicesAliasMock = jest.fn();
+
   const response = getBasicResponse({
     rawResponse: {
       hits: {
@@ -75,9 +77,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     getAuthorizedRuleTypesMock.mockResolvedValue([]);
     getAlertIndicesAliasMock.mockReturnValue(['test']);
-    const authorizationMock = alertingAuthorizationMock.create();
     alerting.getAlertingAuthorizationWithRequest.mockResolvedValue(authorizationMock);
     alerting.getAlertIndicesAlias = getAlertIndicesAliasMock;
     alerting.listTypes.mockReturnValue(
@@ -246,6 +249,30 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     ).resolves.not.toThrow();
   });
 
+  it('should filter out invalid rule types', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query', 'not-exist'],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await expect(
+      lastValueFrom(
+        strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+      )
+    ).resolves.not.toThrow();
+
+    expect(authorizationMock.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
+      authorizationEntity: 'alert',
+      ruleTypeIds: ['.es-query'],
+    });
+  });
+
   it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
     const request: RuleRegistrySearchRequest = {
       ruleTypeIds: ['.es-query'],
@@ -412,7 +439,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     );
   });
 
-  it('passes the fields if provided', async () => {
+  it('passes the fields if provided for siem rule types', async () => {
     const request: RuleRegistrySearchRequest = {
       ruleTypeIds: ['siem.esqlRule'],
       query: {
@@ -434,39 +461,94 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     );
 
     const arg0 = searchStrategySearch.mock.calls[0][0];
-    expect(arg0.params.body.fields.length).toEqual(
+    const fields = arg0.params.body.fields;
+
+    expect(fields.length).toEqual(
       // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
       // fields.push({ field: 'signal.*', include_unmapped: false }); + my-super-field
       ALERT_EVENTS_FIELDS.length + 3
     );
 
-    expect(arg0).toEqual(
-      expect.objectContaining({
-        id: undefined,
-        params: expect.objectContaining({
-          allow_no_indices: true,
-          body: expect.objectContaining({
-            _source: false,
-            fields: expect.arrayContaining([
-              expect.objectContaining({
-                field: 'my-super-field',
-                include_unmapped: true,
-              }),
-            ]),
-            from: 0,
-            query: {
-              ids: {
-                values: ['test-id'],
-              },
-            },
-            size: 1000,
-            sort: [],
-          }),
-          ignore_unavailable: true,
-          index: ['security-siem'],
-        }),
-      })
+    const siemField = fields.find((field: { field: string }) => field.field === 'signal.*');
+    const kibanaField = fields.find((field: { field: string }) => field.field === 'kibana.alert.*');
+    const myField = fields.find((field: { field: string }) => field.field === 'my-super-field');
+
+    expect(siemField).toMatchInlineSnapshot(`
+      Object {
+        "field": "signal.*",
+        "include_unmapped": false,
+      }
+    `);
+
+    expect(kibanaField).toMatchInlineSnapshot(`
+      Object {
+        "field": "kibana.alert.*",
+        "include_unmapped": false,
+      }
+    `);
+
+    expect(myField).toMatchInlineSnapshot(`
+      Object {
+        "field": "my-super-field",
+        "include_unmapped": true,
+      }
+    `);
+  });
+
+  it('passes the fields if provided for o11y rule types', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query'],
+      query: {
+        ids: { values: ['test-id'] },
+      },
+      fields: [{ field: 'my-super-field', include_unmapped: true }],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
     );
+
+    const arg0 = (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0];
+    const fields = arg0.params.body.fields;
+
+    expect(fields.length).toEqual(
+      // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
+      // fields.push({ field: '*', include_unmapped: false }); + my-super-field
+      3
+    );
+
+    const allField = fields.find((field: { field: string }) => field.field === '*');
+    const kibanaField = fields.find((field: { field: string }) => field.field === 'kibana.alert.*');
+    const myField = fields.find((field: { field: string }) => field.field === 'my-super-field');
+
+    expect(allField).toMatchInlineSnapshot(`
+      Object {
+        "field": "*",
+        "include_unmapped": true,
+      }
+    `);
+
+    expect(kibanaField).toMatchInlineSnapshot(`
+      Object {
+        "field": "kibana.alert.*",
+        "include_unmapped": false,
+      }
+    `);
+
+    expect(myField).toMatchInlineSnapshot(`
+      Object {
+        "field": "my-super-field",
+        "include_unmapped": true,
+      }
+    `);
   });
 
   it('should handle Boom errors correctly', async () => {

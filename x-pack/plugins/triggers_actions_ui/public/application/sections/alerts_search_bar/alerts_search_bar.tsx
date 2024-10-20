@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
@@ -17,7 +17,6 @@ import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { TriggersAndActionsUiServices } from '../../..';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
@@ -73,20 +72,7 @@ export function AlertsSearchBar({
     return null;
   }, [dataView, ruleTypeIds]);
 
-  const ruleType = useLoadRuleTypesQuery({
-    filteredRuleTypes: ruleTypeIds ?? [],
-    enabled: Boolean(ruleTypeIds?.length),
-  });
-
-  const allProducers = new Set(
-    ruleTypeIds
-      ?.map((ruleTypeId) => ruleType.ruleTypesState.data.get(ruleTypeId)?.producer)
-      .filter((ruleTypeId): ruleTypeId is string => Boolean(ruleTypeId)) ?? []
-  );
-
-  const hasSiemRuleTypes = ruleTypeIds?.some(isSiemRuleType) ?? false;
-  const isSiemProducer = allProducers.has(AlertConsumers.SIEM);
-  const isSecurity = hasSiemRuleTypes || isSiemProducer;
+  const isSecurity = ruleTypeIds?.some(isSiemRuleType) ?? false;
 
   const onSearchQuerySubmit = useCallback(
     (

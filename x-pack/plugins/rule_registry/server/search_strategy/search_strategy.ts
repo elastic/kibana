@@ -59,6 +59,7 @@ export const ruleRegistrySearchStrategyProvider = (
       // those requests.
       const isAnyRuleTypeESAuthorized = request.ruleTypeIds.some(isSiemRuleType);
       const isEachRuleTypeESAuthorized =
+        // every returns true for empty arrays
         request.ruleTypeIds.length > 0 && request.ruleTypeIds.every(isSiemRuleType);
 
       const registeredRuleTypes = alerting.listTypes();

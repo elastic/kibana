@@ -58,23 +58,21 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
           ],
           "ruleTypeId": "xpack.ml.anomaly_detection_alert",
         },
         Object {
           "consumers": Array [
             "stackAlerts",
-            "alerts",
           ],
           "ruleTypeId": "observability.rules.custom_threshold",
-        },
-        Object {
-          "consumers": Array [
-            "stackAlerts",
-            "alerts",
-            "discover",
-          ],
-          "ruleTypeId": ".es-query",
         },
       ]
     `);
@@ -106,23 +104,21 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
           ],
           "ruleTypeId": "xpack.ml.anomaly_detection_alert",
         },
         Object {
           "consumers": Array [
             "stackAlerts",
-            "alerts",
           ],
           "ruleTypeId": "observability.rules.custom_threshold",
-        },
-        Object {
-          "consumers": Array [
-            "stackAlerts",
-            "alerts",
-            "discover",
-          ],
-          "ruleTypeId": ".es-query",
         },
       ]
     `);
@@ -154,23 +150,21 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
           ],
           "ruleTypeId": "xpack.ml.anomaly_detection_alert",
         },
         Object {
           "consumers": Array [
             "stackAlerts",
-            "alerts",
           ],
           "ruleTypeId": "observability.rules.custom_threshold",
-        },
-        Object {
-          "consumers": Array [
-            "stackAlerts",
-            "alerts",
-            "discover",
-          ],
-          "ruleTypeId": ".es-query",
         },
       ]
     `);

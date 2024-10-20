@@ -40,6 +40,7 @@ export const createMatchPhraseFilter = (
     params: { query: value },
     value: undefined,
     ruleTypeIds: [],
+    consumers: [],
   },
   $state,
   query: {

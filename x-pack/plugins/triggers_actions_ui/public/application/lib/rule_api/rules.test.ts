@@ -240,7 +240,7 @@ describe('loadRules', () => {
     `);
   });
 
-  test('should call find API with searchText and tagsFilter and ruleTypeIds', async () => {
+  test('should call find API with searchText and tagsFilter and ruleTypeIds and consumers', async () => {
     const resolvedValue = {
       page: 1,
       per_page: 10,
@@ -254,6 +254,7 @@ describe('loadRules', () => {
       searchText: 'apples, foo, baz',
       typesFilter: ['foo', 'bar'],
       ruleTypeIds: ['one', 'two'],
+      consumers: ['my-consumer'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual({
@@ -267,6 +268,9 @@ describe('loadRules', () => {
         "/internal/alerting/rules/_find",
         Object {
           "query": Object {
+            "consumers": Array [
+              "my-consumer",
+            ],
             "default_search_operator": "AND",
             "filter": "alert.attributes.alertTypeId:(foo or bar)",
             "page": 1,
@@ -453,6 +457,49 @@ describe('loadRules', () => {
               "foo",
               "bar",
             ],
+            "search": undefined,
+            "search_fields": undefined,
+            "sort_field": "name",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('should call find API with consumers', async () => {
+    const resolvedValue = {
+      page: 1,
+      per_page: 10,
+      total: 0,
+      data: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRules({
+      http,
+      consumers: ['foo', 'bar'],
+      page: { index: 0, size: 10 },
+    });
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_find",
+        Object {
+          "query": Object {
+            "consumers": Array [
+              "foo",
+              "bar",
+            ],
+            "default_search_operator": "AND",
+            "filter": undefined,
+            "page": 1,
+            "per_page": 10,
             "search": undefined,
             "search_fields": undefined,
             "sort_field": "name",

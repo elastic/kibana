@@ -338,4 +338,44 @@ describe('getAlertsGroupAggregations', () => {
       )
     ).resolves.not.toThrow();
   });
+
+  test('calls the alerts client correctly', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+          body: {
+            ruleTypeIds: [
+              'apm.anomaly',
+              'logs.alert.document.count',
+              'metrics.alert.threshold',
+              'slo.rules.burnRate',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
+            groupByField: 'kibana.alert.rule.name',
+            consumers: ['foo'],
+          },
+        }),
+        context
+      )
+    ).resolves.not.toThrow();
+
+    expect(clients.rac.getGroupAggregations).toHaveBeenCalledWith({
+      aggregations: undefined,
+      consumers: ['foo'],
+      filters: undefined,
+      groupByField: 'kibana.alert.rule.name',
+      pageIndex: 0,
+      pageSize: 10,
+      ruleTypeIds: [
+        'apm.anomaly',
+        'logs.alert.document.count',
+        'metrics.alert.threshold',
+        'slo.rules.burnRate',
+        'xpack.uptime.alerts.durationAnomaly',
+      ],
+      sort: undefined,
+    });
+  });
 });

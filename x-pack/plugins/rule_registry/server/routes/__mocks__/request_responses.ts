@@ -33,6 +33,13 @@ export const getUpdateRequest = () =>
     },
   });
 
+export const getFindRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${BASE_RAC_ALERTS_API_PATH}/find`,
+    body: { rule_type_ids: ['siem.esqlRule'], consumers: ['siem'] },
+  });
+
 export const getO11yBrowserFields = () =>
   requestMock.create({
     method: 'get',

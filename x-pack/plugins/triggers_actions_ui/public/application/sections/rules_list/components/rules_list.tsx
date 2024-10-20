@@ -771,12 +771,16 @@ export const RulesList = ({
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
 
+  const allRuleCategories = getAllUniqueRuleTypeCategories(
+    Array.from(ruleTypesState.data.values())
+  );
+
   return (
     <>
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={ruleTypeIds} />
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
@@ -1086,3 +1090,9 @@ export { RulesList as default };
 function filterRulesById(rules: Rule[], ids: string[]): Rule[] {
   return rules.filter((rule) => ids.includes(rule.id));
 }
+
+const getAllUniqueRuleTypeCategories = (ruleTypes: RuleType[]) => {
+  const categories = new Set(ruleTypes.map((ruleType) => ruleType.category));
+
+  return Array.from(categories).filter(Boolean);
+};

@@ -95,7 +95,7 @@ export const getCasesConnectorAdapter = ({
   return {
     connectorTypeId: CASES_CONNECTOR_ID,
     ruleActionParamsSchema: CasesConnectorRuleActionParamsSchema,
-    buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
+    buildActionParams: ({ alerts, rule, params, ruleUrl }) => {
       const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
 
       const owner = getOwnerFromRuleConsumerProducer({
