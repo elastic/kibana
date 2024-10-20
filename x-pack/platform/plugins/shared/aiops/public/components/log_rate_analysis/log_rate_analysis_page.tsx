@@ -23,16 +23,15 @@ import {
   useAppDispatch,
   useCurrentSelectedSignificantItem,
   useCurrentSelectedGroup,
-  setInitialAnalysisStart,
-  setDocumentCountChartData,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import { useDataSource } from '../../hooks/use_data_source';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import {
@@ -64,7 +63,9 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
   showContextualInsights = false,
 }) => {
   const aiopsAppContext = useAiopsAppContext();
-  const { data: dataService, observabilityAIAssistant } = aiopsAppContext;
+  const { data: dataService, observabilityAIAssistant, eventBus } = aiopsAppContext;
+  const { setInitialAnalysisStart, setDocumentCountChartData } =
+    eventBus.get(logRateAnalysisSlice).actions;
   const { dataView, savedSearch } = useDataSource();
 
   const currentSelectedGroup = useCurrentSelectedGroup();
@@ -139,15 +140,13 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
   // across Log Rate Analysis and Pattern Analysis. We discussed that we should
   // split this up into more specific hooks.
   useEffect(() => {
-    dispatch(
-      setDocumentCountChartData({
-        earliest,
-        latest,
-        intervalMs,
-        documentStats,
-      })
-    );
-  }, [documentStats, dispatch, earliest, intervalMs, latest]);
+    setDocumentCountChartData({
+      earliest,
+      latest,
+      intervalMs,
+      documentStats,
+    });
+  }, [documentStats, dispatch, earliest, intervalMs, latest, setDocumentCountChartData]);
 
   useEffect(
     // TODO: Consolidate this hook/function with the one in `x-pack/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx`
@@ -195,7 +194,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
 
   useEffect(
     () => {
-      dispatch(setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp)));
+      setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

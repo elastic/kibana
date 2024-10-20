@@ -20,7 +20,7 @@ import { type AggregateQuery } from '@kbn/es-query';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { getBoundsRoundedToInterval, useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useReload } from './use_reload';
 
 export const FilterQueryContext = createContext<{
