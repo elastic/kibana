@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Slice } from '@reduxjs/toolkit';
 
-import { searchSlice, type SearchSlice } from './search_slice';
+import { searchSlice } from './search_slice';
 import { EventBus } from './event_bus';
 
 /**
@@ -52,32 +52,30 @@ const createEventBusRegistry = () => {
     eventBuses.delete(name);
   }
 
-  function get<T extends Slice>(name: string): EventBus<T> {
-    const eventBus = eventBuses.get(name);
+  function get<S extends Slice>(slice: S): EventBus<S> {
+    const eventBus = eventBuses.get(slice.name);
     if (eventBus === undefined) {
-      throw new Error(`Event bus '${name}' not found`);
+      throw new Error(`Event bus '${slice.name}' not found`);
     }
-    return eventBus as EventBus<T>;
+    return eventBus as EventBus<S>;
   }
 
   // React hook with an optional selector
   // without needing to provide the generic type.
-  function useEventBusValue<S extends Slice>(name: S['name']): ReturnType<S['reducer']>;
-  function useEventBusValue<S extends Slice, SelectedState>(
-    name: S['name'],
-    selector: (state: ReturnType<S['reducer']>) => SelectedState
-  ): SelectedState;
   function useEventBusValue<S extends Slice, SelectedState = ReturnType<S['reducer']>>(
-    name: S['name'],
+    slice: S,
     selector?: (state: ReturnType<S['reducer']>) => SelectedState
   ): SelectedState {
+    const eventBus = useMemo(() => get<S>(slice), [slice]);
+
     const initialValue = selector
-      ? selector(get<S>(name).slice.getInitialState())
-      : get<S>(name).slice.getInitialState();
+      ? selector(eventBus.slice.getInitialState())
+      : eventBus.slice.getInitialState();
+
     const [eventBusValue, setEventBusValue] = useState<SelectedState>(initialValue);
 
     useEffect(() => {
-      const subscription = get<S>(name).subscribe(
+      const subscription = eventBus.subscribe(
         setEventBusValue,
         // Workaround to satisfy correct types to be returned
         selector ?? ((state) => state as SelectedState)
@@ -86,7 +84,7 @@ const createEventBusRegistry = () => {
       return () => {
         subscription.unsubscribe();
       };
-    }, [name, selector]);
+    }, [eventBus, selector]);
 
     return eventBusValue;
   }
@@ -105,4 +103,4 @@ export const eventBusRegistry = createEventBusRegistry();
 eventBusRegistry.register(searchSlice);
 
 // Publishing an event
-eventBusRegistry.get<SearchSlice>('search').actions.setSearchQuery('new search term');
+eventBusRegistry.get(searchSlice).actions.setSearchQuery('new search term');
