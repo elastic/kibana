@@ -28,6 +28,7 @@
     "@kbn/visualization-utils",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/ml-agg-utils",
+    "@kbn/aiops-context",
   ],
   "exclude": [
     "target/**/*",

@@ -12,8 +12,8 @@ import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
 import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export interface SearchBarProps {
   query: Query;

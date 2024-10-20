@@ -16,10 +16,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
+import type { AiopsAppContextValue } from '@kbn/aiops-context';
+import { AiopsAppContext } from '@kbn/aiops-context';
 import { DataSourceContext } from '../../hooks/use_data_source';
-import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { LogCategorizationPage } from './log_categorization_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
