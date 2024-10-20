@@ -82,6 +82,99 @@ describe('Duration Format', () => {
   });
 
   testCase({
+    inputFormat: 'minutes',
+    outputFormat: 'asHours',
+    outputPrecision: undefined,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: -60,
+        output: '-1.00 hour',
+      },
+      {
+        input: 60,
+        output: '1.00 hour',
+      },
+      {
+        input: 125,
+        output: '2.08 hours',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'minutes',
+    outputFormat: 'asDays',
+    outputPrecision: undefined,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: -1440,
+        output: '-1.00 day',
+      },
+      {
+        input: 1440,
+        output: '1.00 day',
+      },
+      {
+        input: 2880,
+        output: '2.00 days',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'hours',
+    outputFormat: 'asWeeks',
+    outputPrecision: undefined,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 168,
+        output: '1.00 week',
+      },
+      {
+        input: 336,
+        output: '2.00 weeks',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'hours',
+    outputFormat: 'asMonths',
+    outputPrecision: undefined,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 730.56,
+        output: '1.00 month',
+      },
+      {
+        input: 1461.11,
+        output: '2.00 months',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'hours',
+    outputFormat: 'asYears',
+    outputPrecision: undefined,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 8760,
+        output: '1.00 year',
+      },
+      {
+        input: 17520,
+        output: '2.00 years',
+      },
+    ],
+  });
+
+  testCase({
     inputFormat: 'seconds',
     outputFormat: 'asSeconds',
     outputPrecision: 0,
@@ -138,8 +231,47 @@ describe('Duration Format', () => {
         output: '-60 seconds',
       },
       {
+        input: 1,
+        output: '1 second',
+      },
+      {
         input: -32.333,
         output: '-32 seconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'nanoseconds',
+    outputFormat: 'asMilliseconds',
+    outputPrecision: 0,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 1000000,
+        output: '1 millisecond',
+      },
+      {
+        input: 2000000,
+        output: '2 milliseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'seconds',
+    outputFormat: 'asMinutes',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: false,
+    fixtures: [
+      {
+        input: 60,
+        output: '1.00 minute',
+      },
+      {
+        input: 120,
+        output: '2.00 minutes',
       },
     ],
   });
@@ -253,7 +385,7 @@ describe('Duration Format', () => {
       },
       {
         input: 1,
-        output: '1.00 seconds',
+        output: '1.00 second',
       },
       {
         input: 12,
@@ -274,6 +406,14 @@ describe('Duration Format', () => {
       {
         input: 3857,
         output: '1.07 hours',
+      },
+      {
+        input: 3600,
+        output: '1.00 hour',
+      },
+      {
+        input: 86400,
+        output: '1.00 day',
       },
       {
         input: 123292,
@@ -422,7 +562,7 @@ describe('Duration Format', () => {
       },
       {
         input: 604800,
-        output: '1.00 weeks',
+        output: '1.00 week',
       },
       // 1 week and 3 and a half days
       {

@@ -99,7 +99,7 @@ export class DurationFormat extends FieldFormat {
     const precise = human || humanPrecise ? formatted : Number(formatted).toFixed(outputPrecision);
     const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
 
-    const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
+    const unitText = useShortSuffix ? type?.shortText : type?.text(precise).toLowerCase();
 
     const suffix = showSuffix && unitText && !human ? `${includeSpace}${unitText}` : '';
 
@@ -131,9 +131,9 @@ function formatDurationHumanPrecise(
   if (!duration || !duration.isValid()) return;
   const valueInSeconds = duration.as('seconds');
 
-  const getUnitText = (method: string) => {
+  const getUnitText = (method: string, unitValue: string) => {
     const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
-    return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
+    return useShortSuffix ? type?.shortText : type?.text(unitValue).toLowerCase();
   };
 
   for (const unit of units) {
@@ -141,7 +141,12 @@ function formatDurationHumanPrecise(
     if (unitValue >= 1 || unit === units[units.length - 1]) {
       // return a value if it's the first iteration where the value > 1, or the last iteration
       const prefix = negativeValue ? '-' : '';
-      return prefix + unitValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
+      return (
+        prefix +
+        unitValue.toFixed(outputPrecision) +
+        includeSpace +
+        getUnitText(unit.method, unitValue.toFixed(outputPrecision))
+      );
     }
   }
 }
