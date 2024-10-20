@@ -18,10 +18,10 @@ import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import { getEsQueryFromSavedSearch } from '../../application/utils/search_utils';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 
 export interface ChangePointDetectionPageUrlState {
