@@ -18,7 +18,7 @@ import type {
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
-import { getOriginalId } from '@kbn/transpose-helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type { DatatableColumnConfig, LensGridDirection } from '../../../../common/expressions';
 import type { FormatFactory } from '../../../../common/types';

@@ -7,12 +7,12 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { transposeTable } from '@kbn/transpose-helpers';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../types';
 import { computeSummaryRowForColumn } from './summary';
 import type { DatatableExpressionFunction } from './types';
+import { transposeTable } from './transpose_helpers';
 
 /**
  * Available datatables logged to inspector

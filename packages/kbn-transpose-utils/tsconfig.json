@@ -15,9 +15,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/field-formats-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/lens-plugin",
-  ]
+  "kbn_references": []
 }

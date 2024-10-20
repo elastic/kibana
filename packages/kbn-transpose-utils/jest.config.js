@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-transpose-helpers'],
+  roots: ['<rootDir>/packages/kbn-transpose-utils'],
 };

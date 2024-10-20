@@ -7047,7 +7047,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transpose-helpers@link:packages/kbn-transpose-helpers":
+"@kbn/transpose-utils@link:packages/kbn-transpose-utils":
   version "0.0.0"
   uid ""
 

@@ -18,7 +18,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
-import { getOriginalId } from '@kbn/transpose-helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';

@@ -32,7 +32,7 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { getOriginalId, isTransposeId } from '@kbn/transpose-helpers';
+import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';

@@ -25,7 +25,7 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
-import { getOriginalId } from '@kbn/transpose-helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
 import type { DateRange } from '../../../common/types';
 import type {
   FramePublicAPI,

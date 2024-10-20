@@ -8,7 +8,7 @@
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
-import { getTransposeId } from '@kbn/transpose-helpers';
+import { getTransposeId } from '@kbn/transpose-utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { DatatableArgs } from '../../../../common/expressions';

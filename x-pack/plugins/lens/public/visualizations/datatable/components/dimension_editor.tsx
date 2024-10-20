@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic
 import { PaletteRegistry, getFallbackDataBounds } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getOriginalId } from '@kbn/transpose-helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 

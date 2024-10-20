@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { getOriginalId } from '@kbn/transpose-helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { DatatableColumnArgs } from './datatable_column';
 import { isNumericFieldForDatatable } from './utils';
 

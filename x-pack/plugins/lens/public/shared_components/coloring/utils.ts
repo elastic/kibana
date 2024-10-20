@@ -21,7 +21,7 @@ import {
   getColorsFromMapping,
   DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
-import { getOriginalId } from '@kbn/transpose-helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { DataType } from '../../types';
 

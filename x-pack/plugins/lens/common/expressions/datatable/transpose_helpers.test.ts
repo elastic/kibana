@@ -1,17 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { DatatableArgs } from '@kbn/lens-plugin/common/expressions';
-
-import { transposeTable } from '.';
+import { DatatableArgs } from '..';
+import { transposeTable } from './transpose_helpers';
 
 describe('transpose helpers', () => {
   function buildTable(): Datatable {
@@ -122,10 +119,10 @@ describe('transpose helpers', () => {
       'bucket2',
       'bucket3',
       'A---metric1',
-      'B---metric1',
-      'C---metric1',
       'A---metric2',
+      'B---metric1',
       'B---metric2',
+      'C---metric1',
       'C---metric2',
     ]);
 
@@ -181,22 +178,22 @@ describe('transpose helpers', () => {
     expect(table.columns.map((c) => c.id)).toEqual([
       'bucket3',
       'A---D---metric1',
-      'B---D---metric1',
-      'C---D---metric1',
-      'A---E---metric1',
-      'B---E---metric1',
-      'C---E---metric1',
-      'A---F---metric1',
-      'B---F---metric1',
-      'C---F---metric1',
       'A---D---metric2',
-      'B---D---metric2',
-      'C---D---metric2',
+      'A---E---metric1',
       'A---E---metric2',
-      'B---E---metric2',
-      'C---E---metric2',
+      'A---F---metric1',
       'A---F---metric2',
+      'B---D---metric1',
+      'B---D---metric2',
+      'B---E---metric1',
+      'B---E---metric2',
+      'B---F---metric1',
       'B---F---metric2',
+      'C---D---metric1',
+      'C---D---metric2',
+      'C---E---metric1',
+      'C---E---metric2',
+      'C---F---metric1',
       'C---F---metric2',
     ]);
 
