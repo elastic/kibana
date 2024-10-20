@@ -104,7 +104,10 @@
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/core-application-browser-mocks",
     "@kbn/unified-tabs",
-    "@kbn/unified-histogram"
+    "@kbn/unified-histogram",
+    "@kbn/aiops-context"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

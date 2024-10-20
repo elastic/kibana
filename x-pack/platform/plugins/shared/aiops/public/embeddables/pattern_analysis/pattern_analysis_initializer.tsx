@@ -29,7 +29,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import type { PatternAnalysisEmbeddableRuntimeState } from './types';
 import { PatternAnalysisSettings } from '../../components/log_categorization/log_categorization_for_embeddable/embeddable_menu';

@@ -9,9 +9,10 @@ import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { useAiopsAppContext } from '@kbn/aiops-context';
+
 import type { ChangePointEmbeddableState } from '../embeddables/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
-import { useAiopsAppContext } from './use_aiops_app_context';
 import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
 import type { PatternAnalysisEmbeddableRuntimeState } from '../embeddables/pattern_analysis/types';
 import type { EmbeddableLogRateAnalysisType } from '../embeddables/log_rate_analysis/embeddable_log_rate_analysis_factory';

@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { GroupTableItem, TableItemAction } from '@kbn/aiops-log-rate-analysis/state';
-
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';

@@ -28,6 +28,7 @@ import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
@@ -39,7 +40,6 @@ import { MetricFieldSelector } from '../../components/change_point_detection/met
 import { PartitionsSelector } from '../../components/change_point_detection/partitions_selector';
 import { SplitFieldSelector } from '../../components/change_point_detection/split_field_selector';
 import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 import { DEFAULT_SERIES } from './const';
