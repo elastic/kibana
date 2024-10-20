@@ -125,16 +125,4 @@ export const logRateAnalysisSlice = createSlice({
   },
 });
 
-// Action creators are generated for each case reducer function
-export const {
-  brushSelectionUpdate,
-  clearSelection,
-  setAnalysisType,
-  setAutoRunAnalysis,
-  setDocumentCountChartData,
-  setGroupResults,
-  setInitialAnalysisStart,
-  setIsBrushCleared,
-  setStickyHistogram,
-  setChartWindowParameters,
-} = logRateAnalysisSlice.actions;
+export type LogRateAnalysisSlice = typeof logRateAnalysisSlice;

@@ -24,7 +24,6 @@
     "@kbn/core-execution-context-browser",
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-service",
@@ -78,6 +77,9 @@
     "@kbn/ui-theme",
     "@kbn/apm-utils",
     "@kbn/ml-field-stats-flyout",
+    "@kbn/shared-ux-router",
+    "@kbn/aiops-context",
+    "@kbn/event-bus-plugin",
   ],
   "exclude": [
     "target/**/*",

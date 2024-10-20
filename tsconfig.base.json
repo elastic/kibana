@@ -26,6 +26,8 @@
       "@kbn/aiops-common/*": ["x-pack/packages/ml/aiops_common/*"],
       "@kbn/aiops-components": ["x-pack/packages/ml/aiops_components"],
       "@kbn/aiops-components/*": ["x-pack/packages/ml/aiops_components/*"],
+      "@kbn/aiops-context": ["x-pack/packages/ml/aiops_context"],
+      "@kbn/aiops-context/*": ["x-pack/packages/ml/aiops_context/*"],
       "@kbn/aiops-log-pattern-analysis": ["x-pack/packages/ml/aiops_log_pattern_analysis"],
       "@kbn/aiops-log-pattern-analysis/*": ["x-pack/packages/ml/aiops_log_pattern_analysis/*"],
       "@kbn/aiops-log-rate-analysis": ["x-pack/packages/ml/aiops_log_rate_analysis"],

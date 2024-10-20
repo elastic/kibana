@@ -19,9 +19,9 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
+import { AiopsAppContext, type AiopsAppContextValue } from '@kbn/aiops-context';
 
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
-import { AiopsAppContext, type AiopsAppContextValue } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
