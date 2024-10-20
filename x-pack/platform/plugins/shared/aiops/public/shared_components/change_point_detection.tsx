@@ -16,12 +16,12 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
+import { AiopsAppContext, type AiopsAppContextValue } from '@kbn/aiops-context';
 import {
   ChangePointDetectionControlsContextProvider,
   type ChangePointAnnotation,
 } from '../components/change_point_detection/change_point_detection_context';
 import { ChartGridEmbeddableWrapper } from '../embeddables/change_point_chart/embeddable_chart_component_wrapper';
-import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -87,8 +87,17 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      charts,
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      share,
+      storage,
+      unifiedSearch,
+      eventBus,
+    } = pluginStart;
 
     return {
       charts,
@@ -99,6 +108,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
       unifiedSearch,
       share,
       storage,
+      eventBus,
       ...coreStart,
     };
   }, [coreStart, pluginStart]);

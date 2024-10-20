@@ -6,17 +6,9 @@
  */
 
 export {
-  brushSelectionUpdate,
-  clearSelection,
-  setAnalysisType,
-  setAutoRunAnalysis,
-  setDocumentCountChartData,
-  setGroupResults,
-  setInitialAnalysisStart,
-  setIsBrushCleared,
-  setStickyHistogram,
-  setChartWindowParameters,
+  logRateAnalysisSlice,
   type BrushSelectionUpdatePayload,
+  type LogRateAnalysisSlice,
 } from './log_rate_analysis_slice';
 export {
   clearAllRowState,

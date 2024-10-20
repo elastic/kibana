@@ -35,13 +35,13 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../application/url_state/log_pattern_analysis';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';

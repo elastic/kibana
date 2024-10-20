@@ -18,8 +18,8 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
-import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '@kbn/aiops-context';
+import { AiopsAppContext } from '@kbn/aiops-context';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 

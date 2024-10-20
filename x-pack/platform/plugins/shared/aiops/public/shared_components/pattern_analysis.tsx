@@ -15,13 +15,13 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
+import { AiopsAppContext, type AiopsAppContextValue } from '@kbn/aiops-context';
 import type { MinimumTimeRangeOption } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 import type {
   RandomSamplerOption,
   RandomSamplerProbability,
 } from '../components/log_categorization/sampling_menu/random_sampler';
 import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysis_component_wrapper';
-import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -84,10 +84,20 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+      eventBus,
+    } = pluginStart;
 
     return {
+      eventBus,
       data,
       lens,
       usageCollection,

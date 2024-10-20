@@ -24,10 +24,10 @@ import {
 } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import type { AiopsAppContextValue } from '@kbn/aiops-context';
+import { AiopsAppContext } from '@kbn/aiops-context';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
-import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { PageHeader } from '../page_header';

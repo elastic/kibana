@@ -16,9 +16,9 @@ import {
   type QueryMode,
 } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import type { AiOpsIndexBasedAppState } from '../../application/url_state/common';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export function useDiscoverLinks() {
   const {

@@ -32,10 +32,10 @@ import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   getDefaultLogCategorizationAppState,
   type LogCategorizationPageUrlState,

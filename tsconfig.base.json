@@ -38,6 +38,8 @@
       "@kbn/aiops-common/*": ["x-pack/platform/packages/shared/ml/aiops_common/*"],
       "@kbn/aiops-components": ["x-pack/platform/packages/private/ml/aiops_components"],
       "@kbn/aiops-components/*": ["x-pack/platform/packages/private/ml/aiops_components/*"],
+      "@kbn/aiops-context": ["x-pack/platform/packages/private/ml/aiops_context"],
+      "@kbn/aiops-context/*": ["x-pack/platform/packages/private/ml/aiops_context/*"],
       "@kbn/aiops-log-pattern-analysis": ["x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis"],
       "@kbn/aiops-log-pattern-analysis/*": ["x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/*"],
       "@kbn/aiops-log-rate-analysis": ["x-pack/platform/packages/shared/ml/aiops_log_rate_analysis"],

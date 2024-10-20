@@ -10,14 +10,12 @@ import React, { memo, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 import {
-  brushSelectionUpdate,
-  setAutoRunAnalysis,
-  useAppSelector,
-  useAppDispatch,
   useCurrentSelectedGroup,
   useCurrentSelectedSignificantItem,
   type GroupTableItem,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { DocumentCountChart, type DocumentCountChartProps } from './document_count_chart';
@@ -63,11 +61,17 @@ type DocumentCountChartReduxProps = Omit<
  * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
  */
 export const DocumentCountChartRedux: FC<DocumentCountChartReduxProps> = memo((props) => {
-  const dispatch = useAppDispatch();
+  const { eventBus } = useAiopsAppContext();
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-  const { documentStats, initialAnalysisStart, isBrushCleared } = useAppSelector(
-    (s) => s.logRateAnalysis
+  const { documentStats, initialAnalysisStart, isBrushCleared } = eventBus.useEventBusValue(
+    logRateAnalysisSlice,
+    (state) => ({
+      documentStats: state.documentStats,
+      initialAnalysisStart: state.initialAnalysisStart,
+      isBrushCleared: state.isBrushCleared,
+    })
   );
   const { documentCountStats, documentCountStatsCompare } = documentStats;
 
@@ -118,9 +122,9 @@ export const DocumentCountChartRedux: FC<DocumentCountChartReduxProps> = memo((p
       chartPoints={chartPoints}
       chartPointsSplit={chartPointsSplit}
       autoAnalysisStart={initialAnalysisStart}
-      brushSelectionUpdateHandler={(d) => dispatch(brushSelectionUpdate(d))}
+      brushSelectionUpdateHandler={(d) => logRateAnalysis.actions.brushSelectionUpdate(d)}
       isBrushCleared={isBrushCleared}
-      setAutoRunAnalysisFn={(d: boolean) => dispatch(setAutoRunAnalysis(d))}
+      setAutoRunAnalysisFn={(d: boolean) => logRateAnalysis.actions.setAutoRunAnalysis(d)}
     />
   );
 });

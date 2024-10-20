@@ -10,12 +10,12 @@ import { renderHook, act } from '@testing-library/react';
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 import type { TimefilterConfig } from '@kbn/data-plugin/public/query';
 import { Timefilter } from '@kbn/data-plugin/public/query';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useReload } from './use_reload';
 
 const mockCurrentDate = new Date('2024-02-23T00:13:45.000Z');
 
-jest.mock('./use_aiops_app_context');
+jest.mock('@kbn/aiops-context');
 
 jest.mock('./use_reload');
 

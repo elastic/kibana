@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
-import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
+import { useAppSelector, logRateAnalysisSlice } from '@kbn/aiops-log-rate-analysis/state';
 import {
   commonColumns,
   significantItemColumns,
@@ -32,9 +32,9 @@ import {
   getLogRateChange,
   LOG_RATE_ANALYSIS_TYPE,
 } from '@kbn/aiops-log-rate-analysis';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
@@ -157,21 +157,26 @@ export const useColumns = (
   barHighlightColorOverride?: string,
   isExpandedRow: boolean = false
 ): Array<EuiBasicTableColumn<SignificantItem>> => {
-  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, eventBus } = useAiopsAppContext();
   const { dataView } = useDataSource();
   const { euiTheme } = useEuiTheme();
   const viewInDiscoverAction = useViewInDiscoverAction(dataView.id);
   const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataView.id);
   const copyToClipBoardAction = useCopyToClipboardAction();
 
-  const { earliest, latest } = useAppSelector((s) => s.logRateAnalysis);
+  const {
+    earliest,
+    latest,
+    documentStats: { documentCountStats },
+  } = eventBus.useEventBusValue(logRateAnalysisSlice, (state) => ({
+    earliest: state.earliest,
+    latest: state.latest,
+    documentStats: state.documentStats,
+  }));
   const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
 
   const loading = useAppSelector((s) => s.stream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
-  const {
-    documentStats: { documentCountStats },
-  } = useAppSelector((s) => s.logRateAnalysis);
   const { currentAnalysisType, currentAnalysisWindowParameters } = useAppSelector(
     (s) => s.logRateAnalysisResults
   );

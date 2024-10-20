@@ -13,11 +13,11 @@ import type {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
+import { logRateAnalysisSlice } from '@kbn/aiops-log-rate-analysis/state';
 import { DocumentCountChartRedux } from '@kbn/aiops-components';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import { TotalCountHeader } from '../total_count_header';
 
@@ -40,9 +40,10 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   attachmentsMenu,
   ...docCountChartProps
 }) => {
-  const { data, uiSettings, fieldFormats, charts, embeddingOrigin } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, embeddingOrigin, eventBus } =
+    useAiopsAppContext();
 
-  const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
+  const { documentStats } = eventBus.useEventBusValue(logRateAnalysisSlice);
   const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
   const isCasesEmbedding = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;

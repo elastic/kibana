@@ -29,8 +29,6 @@ const getReduxStore = () =>
       logRateAnalysisTable: getPreloadedState(),
     },
     reducer: {
-      // General page state
-      logRateAnalysis: logRateAnalysisSlice.reducer,
       // Field candidates
       logRateAnalysisFieldCandidates: logRateAnalysisFieldCandidatesSlice.reducer,
       // Analysis results

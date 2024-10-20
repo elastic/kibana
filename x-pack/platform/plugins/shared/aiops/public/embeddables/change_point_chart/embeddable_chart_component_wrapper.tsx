@@ -12,6 +12,7 @@ import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detect
 import { getEsQueryConfig } from '@kbn/data-service';
 import { buildEsQuery } from '@kbn/es-query';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import type { ChangePointDetectionProps } from '../../shared_components/change_point_detection';
 import { ChangePointsTable } from '../../components/change_point_detection/change_points_table';
 import {
@@ -20,7 +21,6 @@ import {
 } from '../../components/change_point_detection/change_point_detection_context';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
 import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
 import { NoDataFoundWarning } from '../../components/change_point_detection/no_data_warning';
