@@ -60,26 +60,42 @@ const createEventBusRegistry = () => {
     return eventBus as EventBus<T>;
   }
 
+  // React hook with an optional selector
+  // without needing to provide the generic type.
+  function useEventBusValue<S extends Slice>(name: S['name']): ReturnType<S['reducer']>;
+  function useEventBusValue<S extends Slice, SelectedState>(
+    name: S['name'],
+    selector: (state: ReturnType<S['reducer']>) => SelectedState
+  ): SelectedState;
+  function useEventBusValue<S extends Slice, SelectedState = ReturnType<S['reducer']>>(
+    name: S['name'],
+    selector?: (state: ReturnType<S['reducer']>) => SelectedState
+  ): SelectedState {
+    const initialValue = selector
+      ? selector(get<S>(name).slice.getInitialState())
+      : get<S>(name).slice.getInitialState();
+    const [eventBusValue, setEventBusValue] = useState<SelectedState>(initialValue);
+
+    useEffect(() => {
+      const subscription = get<S>(name).subscribe(
+        setEventBusValue,
+        // Workaround to satisfy correct types to be returned
+        selector ?? ((state) => state as SelectedState)
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [name, selector]);
+
+    return eventBusValue;
+  }
+
   return {
     register,
     unregister,
     get,
-
-    // React hook
-    useEventBusValue<T extends Slice>(name: T['name']) {
-      const [eventBusValue, setEventBusValue] = useState<any>(null);
-
-      useEffect(() => {
-        const subscription = get<T>(name).subscribe(setEventBusValue);
-
-        return () => {
-          subscription.unsubscribe();
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
-
-      return eventBusValue;
-    },
+    useEventBusValue,
   };
 };
 
