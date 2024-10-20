@@ -7170,7 +7170,7 @@ paths:
       summary: Get all alerts for a case
       tags:
         - cases
-      x-technical-preview: true
+      x-state: Technical preview
   /api/cases/{caseId}/comments:
     delete:
       description: >
@@ -7538,7 +7538,7 @@ paths:
       summary: Get cases for an alert
       tags:
         - cases
-      x-technical-preview: true
+      x-state: Technical preview
   /api/cases/configure:
     get:
       description: >
@@ -13409,7 +13409,6 @@ paths:
         - Security Exceptions API
   /api/fleet/agent_download_sources:
     get:
-      deprecated: false
       description: List agent binary download sources
       operationId: '%2Fapi%2Ffleet%2Fagent_download_sources#0'
       parameters:
@@ -13486,7 +13485,6 @@ paths:
       tags:
         - Elastic Agent binary download sources
     post:
-      deprecated: false
       description: Create agent binary download source
       operationId: '%2Fapi%2Ffleet%2Fagent_download_sources#1'
       parameters:
@@ -13586,7 +13584,6 @@ paths:
         - Elastic Agent binary download sources
   /api/fleet/agent_download_sources/{sourceId}:
     delete:
-      deprecated: false
       description: Delete agent binary download source by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#2'
       parameters:
@@ -13642,7 +13639,6 @@ paths:
       tags:
         - Elastic Agent binary download sources
     get:
-      deprecated: false
       description: Get agent binary download source by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#0'
       parameters:
@@ -13713,7 +13709,6 @@ paths:
       tags:
         - Elastic Agent binary download sources
     put:
-      deprecated: false
       description: Update agent binary download source by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#1'
       parameters:
@@ -13818,7 +13813,6 @@ paths:
         - Elastic Agent binary download sources
   /api/fleet/agent_policies:
     get:
-      deprecated: false
       description: List agent policies
       operationId: '%2Fapi%2Ffleet%2Fagent_policies#0'
       parameters:
@@ -14424,7 +14418,6 @@ paths:
       tags:
         - Elastic Agent policies
     post:
-      deprecated: false
       description: Create an agent policy
       operationId: '%2Fapi%2Ffleet%2Fagent_policies#1'
       parameters:
@@ -15160,7 +15153,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/_bulk_get:
     post:
-      deprecated: false
       description: Bulk get agent policies
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F_bulk_get#0'
       parameters:
@@ -15741,7 +15733,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}:
     get:
-      deprecated: false
       description: Get an agent policy by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#0'
       parameters:
@@ -16298,7 +16289,6 @@ paths:
       tags:
         - Elastic Agent policies
     put:
-      deprecated: false
       description: Update an agent policy by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#1'
       parameters:
@@ -17042,7 +17032,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
-      deprecated: false
       description: Copy an agent policy by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fcopy#0'
       parameters:
@@ -17621,7 +17610,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      deprecated: false
       description: Download an agent policy by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fdownload#0'
       parameters:
@@ -17696,7 +17684,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/full:
     get:
-      deprecated: false
       description: Get a full agent policy by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Ffull#0'
       parameters:
@@ -18029,7 +18016,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
-      deprecated: false
       description: Delete agent policy by ID
       operationId: '%2Fapi%2Ffleet%2Fagent_policies%2Fdelete#0'
       parameters:
@@ -18100,7 +18086,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_status:
     get:
-      deprecated: false
       description: Get agent status summary
       operationId: '%2Fapi%2Ffleet%2Fagent_status#0'
       parameters:
@@ -18202,7 +18187,6 @@ paths:
         - Elastic Agent status
   /api/fleet/agent_status/data:
     get:
-      deprecated: false
       description: Get incoming agent data
       operationId: '%2Fapi%2Ffleet%2Fagent_status%2Fdata#0'
       parameters:
@@ -18276,7 +18260,7 @@ paths:
         - Elastic Agents
   /api/fleet/agent-status:
     get:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagent-status#0'
       parameters:
         - description: The version of the API to use
@@ -18312,7 +18296,6 @@ paths:
       tags: []
   /api/fleet/agents:
     get:
-      deprecated: false
       description: List agents
       operationId: '%2Fapi%2Ffleet%2Fagents#0'
       parameters:
@@ -18978,7 +18961,6 @@ paths:
       tags:
         - Elastic Agents
     post:
-      deprecated: false
       description: List agents by action ids
       operationId: '%2Fapi%2Ffleet%2Fagents#1'
       parameters:
@@ -19045,7 +19027,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/{agentId}:
     delete:
-      deprecated: false
       description: Delete agent by ID
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#2'
       parameters:
@@ -19103,7 +19084,6 @@ paths:
       tags:
         - Elastic Agents
     get:
-      deprecated: false
       description: Get agent by ID
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#0'
       parameters:
@@ -19432,7 +19412,6 @@ paths:
       tags:
         - Elastic Agents
     put:
-      deprecated: false
       description: Update agent by ID
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#1'
       parameters:
@@ -19777,7 +19756,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
     post:
-      deprecated: false
       description: Create agent action
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Factions#0'
       parameters:
@@ -19923,7 +19901,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/reassign:
     post:
-      deprecated: false
       description: Reassign agent
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#1'
       parameters:
@@ -19986,7 +19963,7 @@ paths:
       tags:
         - Elastic Agent actions
     put:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0'
       parameters:
         - description: The version of the API to use
@@ -20025,7 +20002,6 @@ paths:
       tags: []
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
-      deprecated: false
       description: Request agent diagnostics
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Frequest_diagnostics#0'
       parameters:
@@ -20096,7 +20072,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/unenroll:
     post:
-      deprecated: false
       description: Unenroll agent
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Funenroll#0'
       parameters:
@@ -20138,7 +20113,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/upgrade:
     post:
-      deprecated: false
       description: Upgrade agent
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fupgrade#0'
       parameters:
@@ -20208,7 +20182,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/uploads:
     get:
-      deprecated: false
       description: List agent uploads
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fuploads#0'
       parameters:
@@ -20290,7 +20263,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/action_status:
     get:
-      deprecated: false
       description: Get agent action status
       operationId: '%2Fapi%2Ffleet%2Fagents%2Faction_status#0'
       parameters:
@@ -20459,7 +20431,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/actions/{actionId}/cancel:
     post:
-      deprecated: false
       description: Cancel agent action
       operationId: '%2Fapi%2Ffleet%2Fagents%2Factions%2F%7BactionId%7D%2Fcancel#0'
       parameters:
@@ -20555,7 +20526,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/available_versions:
     get:
-      deprecated: false
       description: Get available agent versions
       operationId: '%2Fapi%2Ffleet%2Fagents%2Favailable_versions#0'
       parameters:
@@ -20602,7 +20572,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/bulk_reassign:
     post:
-      deprecated: false
       description: Bulk reassign agents
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fbulk_reassign#0'
       parameters:
@@ -20677,7 +20646,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_request_diagnostics:
     post:
-      deprecated: false
       description: Bulk request diagnostics from agents
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fbulk_request_diagnostics#0'
       parameters:
@@ -20752,7 +20720,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_unenroll:
     post:
-      deprecated: false
       description: Bulk unenroll agents
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fbulk_unenroll#0'
       parameters:
@@ -20834,7 +20801,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_update_agent_tags:
     post:
-      deprecated: false
       description: Bulk update agent tags
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fbulk_update_agent_tags#0'
       parameters:
@@ -20914,7 +20880,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/bulk_upgrade:
     post:
-      deprecated: false
       description: Bulk upgrade agents
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fbulk_upgrade#0'
       parameters:
@@ -21000,7 +20965,6 @@ paths:
         - Elastic Agent actions
   /api/fleet/agents/files/{fileId}:
     delete:
-      deprecated: false
       description: Delete file uploaded by agent
       operationId: '%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D#0'
       parameters:
@@ -21060,7 +21024,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/files/{fileId}/{fileName}:
     get:
-      deprecated: false
       description: Get file uploaded by agent
       operationId: '%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D%2F%7BfileName%7D#0'
       parameters:
@@ -21109,7 +21072,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/setup:
     get:
-      deprecated: false
       description: Get agent setup info
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fsetup#0'
       parameters:
@@ -21181,7 +21143,6 @@ paths:
       tags:
         - Elastic Agents
     post:
-      deprecated: false
       description: Initiate agent setup
       operationId: '%2Fapi%2Ffleet%2Fagents%2Fsetup#1'
       parameters:
@@ -21252,7 +21213,6 @@ paths:
         - Elastic Agents
   /api/fleet/agents/tags:
     get:
-      deprecated: false
       description: List agent tags
       operationId: '%2Fapi%2Ffleet%2Fagents%2Ftags#0'
       parameters:
@@ -21310,7 +21270,6 @@ paths:
         - Elastic Agents
   /api/fleet/check-permissions:
     get:
-      deprecated: false
       description: Check permissions
       operationId: '%2Fapi%2Ffleet%2Fcheck-permissions#0'
       parameters:
@@ -21366,7 +21325,6 @@ paths:
         - Fleet internals
   /api/fleet/data_streams:
     get:
-      deprecated: false
       description: List data streams
       operationId: '%2Fapi%2Ffleet%2Fdata_streams#0'
       parameters:
@@ -21472,7 +21430,6 @@ paths:
         - Data streams
   /api/fleet/enrollment_api_keys:
     get:
-      deprecated: false
       description: List enrollment API keys
       operationId: '%2Fapi%2Ffleet%2Fenrollment_api_keys#0'
       parameters:
@@ -21616,7 +21573,6 @@ paths:
       tags:
         - Fleet enrollment API keys
     post:
-      deprecated: false
       description: Create enrollment API key
       operationId: '%2Fapi%2Ffleet%2Fenrollment_api_keys#1'
       parameters:
@@ -21721,7 +21677,6 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment_api_keys/{keyId}:
     delete:
-      deprecated: false
       description: Revoke enrollment API key by ID by marking it as inactive
       operationId: '%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#1'
       parameters:
@@ -21779,7 +21734,6 @@ paths:
       tags:
         - Fleet enrollment API keys
     get:
-      deprecated: false
       description: Get enrollment API key by ID
       operationId: '%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#0'
       parameters:
@@ -21862,7 +21816,7 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment-api-keys:
     get:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#0'
       parameters:
         - description: The version of the API to use
@@ -21894,7 +21848,7 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#1'
       parameters:
         - description: The version of the API to use
@@ -21932,7 +21886,7 @@ paths:
       tags: []
   /api/fleet/enrollment-api-keys/{keyId}:
     delete:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1'
       parameters:
         - description: The version of the API to use
@@ -21959,7 +21913,7 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0'
       parameters:
         - description: The version of the API to use
@@ -21980,7 +21934,6 @@ paths:
       tags: []
   /api/fleet/epm/bulk_assets:
     post:
-      deprecated: false
       description: Bulk get assets
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fbulk_assets#0'
       parameters:
@@ -22080,7 +22033,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/categories:
     get:
-      deprecated: false
       description: List package categories
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fcategories#0'
       parameters:
@@ -22179,7 +22131,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/custom_integrations:
     post:
-      deprecated: false
       description: Create custom integration
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fcustom_integrations#0'
       parameters:
@@ -22376,7 +22327,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/data_streams:
     get:
-      deprecated: false
       description: List data streams
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fdata_streams#0'
       parameters:
@@ -22460,7 +22410,6 @@ paths:
         - Data streams
   /api/fleet/epm/packages:
     get:
-      deprecated: false
       description: List packages
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages#0'
       parameters:
@@ -23215,7 +23164,6 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
-      deprecated: false
       description: Install package by upload
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages#1'
       parameters:
@@ -23397,7 +23345,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/_bulk:
     post:
-      deprecated: false
       description: Bulk install packages
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F_bulk#0'
       parameters:
@@ -23681,7 +23628,7 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgkey}:
     delete:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3'
       parameters:
         - description: The version of the API to use
@@ -23720,7 +23667,7 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0'
       parameters:
         - description: The version of the API to use
@@ -23761,7 +23708,7 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2'
       parameters:
         - description: The version of the API to use
@@ -23817,7 +23764,7 @@ paths:
       summary: ''
       tags: []
     put:
-      deprecated: false
+      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1'
       parameters:
         - description: The version of the API to use
@@ -23856,7 +23803,6 @@ paths:
       tags: []
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
-      deprecated: false
       description: Delete package
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#3'
       parameters:
@@ -24037,7 +23983,6 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     get:
-      deprecated: false
       description: Get package
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#0'
       parameters:
@@ -24923,7 +24868,6 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
-      deprecated: false
       description: Install package from registry
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#2'
       parameters:
@@ -25127,7 +25071,6 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     put:
-      deprecated: false
       description: Update package settings
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#1'
       parameters:
@@ -26003,7 +25946,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
     get:
-      deprecated: false
       description: Get package file
       operationId: >-
         %2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2F%7BfilePath*%7D#0
@@ -26057,7 +25999,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
-      deprecated: false
       description: Authorize transforms
       operationId: >-
         %2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Ftransforms%2Fauthorize#0
@@ -26152,7 +26093,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
-      deprecated: false
       description: Get package stats
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2Fstats#0'
       parameters:
@@ -26208,7 +26148,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/installed:
     get:
-      deprecated: false
       description: Get installed packages
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2Finstalled#0'
       parameters:
@@ -26363,7 +26302,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/limited:
     get:
-      deprecated: false
       description: Get limited package list
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2Flimited#0'
       parameters:
@@ -26415,7 +26353,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
-      deprecated: false
       description: Get inputs template
       operationId: >-
         %2Fapi%2Ffleet%2Fepm%2Ftemplates%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Finputs#0
@@ -26525,7 +26462,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/verification_key_id:
     get:
-      deprecated: false
       description: Get a package signature verification key ID
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fverification_key_id#0'
       parameters:
@@ -26571,7 +26507,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/fleet_server_hosts:
     get:
-      deprecated: false
       description: List Fleet Server hosts
       operationId: '%2Fapi%2Ffleet%2Ffleet_server_hosts#0'
       parameters:
@@ -26652,7 +26587,6 @@ paths:
       tags:
         - Fleet Server hosts
     post:
-      deprecated: false
       description: Create Fleet Server host
       operationId: '%2Fapi%2Ffleet%2Ffleet_server_hosts#1'
       parameters:
@@ -26760,7 +26694,6 @@ paths:
         - Fleet Server hosts
   /api/fleet/fleet_server_hosts/{itemId}:
     delete:
-      deprecated: false
       description: Delete Fleet Server host by ID
       operationId: '%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#1'
       parameters:
@@ -26816,7 +26749,6 @@ paths:
       tags:
         - Fleet Server hosts
     get:
-      deprecated: false
       description: Get Fleet Server host by ID
       operationId: '%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#0'
       parameters:
@@ -26891,7 +26823,6 @@ paths:
       tags:
         - Fleet Server hosts
     put:
-      deprecated: false
       description: Update Fleet Server host by ID
       operationId: '%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#2'
       parameters:
@@ -26997,7 +26928,6 @@ paths:
         - Fleet Server hosts
   /api/fleet/health_check:
     post:
-      deprecated: false
       description: Check Fleet Server health
       operationId: '%2Fapi%2Ffleet%2Fhealth_check#0'
       parameters:
@@ -27086,7 +27016,6 @@ paths:
         - Fleet internals
   /api/fleet/kubernetes:
     get:
-      deprecated: false
       description: Get full K8s agent manifest
       operationId: '%2Fapi%2Ffleet%2Fkubernetes#0'
       parameters:
@@ -27146,7 +27075,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/kubernetes/download:
     get:
-      deprecated: false
       operationId: '%2Fapi%2Ffleet%2Fkubernetes%2Fdownload#0'
       parameters:
         - description: The version of the API to use
@@ -27215,7 +27143,6 @@ paths:
         - Elastic Agent policies
   /api/fleet/logstash_api_keys:
     post:
-      deprecated: false
       description: Generate Logstash API key
       operationId: '%2Fapi%2Ffleet%2Flogstash_api_keys#0'
       parameters:
@@ -27267,7 +27194,6 @@ paths:
         - Fleet outputs
   /api/fleet/message_signing_service/rotate_key_pair:
     post:
-      deprecated: false
       description: Rotate fleet message signing key pair
       operationId: '%2Fapi%2Ffleet%2Fmessage_signing_service%2Frotate_key_pair#0'
       parameters:
@@ -27341,7 +27267,6 @@ paths:
         - Message Signing Service
   /api/fleet/outputs:
     get:
-      deprecated: false
       description: List outputs
       operationId: '%2Fapi%2Ffleet%2Foutputs#0'
       parameters:
@@ -28098,7 +28023,6 @@ paths:
       tags:
         - Fleet outputs
     post:
-      deprecated: false
       description: Create output
       operationId: '%2Fapi%2Ffleet%2Foutputs#1'
       parameters:
@@ -29559,7 +29483,6 @@ paths:
         - Fleet outputs
   /api/fleet/outputs/{outputId}:
     delete:
-      deprecated: false
       description: Delete output by ID
       operationId: '%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#2'
       parameters:
@@ -29631,7 +29554,6 @@ paths:
       tags:
         - Fleet outputs
     get:
-      deprecated: false
       description: Get output by ID
       operationId: '%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#0'
       parameters:
@@ -30382,7 +30304,6 @@ paths:
       tags:
         - Fleet outputs
     put:
-      deprecated: false
       description: Update output by ID
       operationId: '%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#1'
       parameters:
@@ -31827,7 +31748,6 @@ paths:
         - Fleet outputs
   /api/fleet/outputs/{outputId}/health:
     get:
-      deprecated: false
       description: Get latest output health
       operationId: '%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D%2Fhealth#0'
       parameters:
@@ -31886,7 +31806,6 @@ paths:
         - Fleet outputs
   /api/fleet/package_policies:
     get:
-      deprecated: false
       description: List package policies
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies#0'
       parameters:
@@ -32392,7 +32311,6 @@ paths:
       tags:
         - Fleet package policies
     post:
-      deprecated: false
       description: Create package policy
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies#1'
       parameters:
@@ -33296,7 +33214,6 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/_bulk_get:
     post:
-      deprecated: false
       description: Bulk get package policies
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2F_bulk_get#0'
       parameters:
@@ -33790,7 +33707,6 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/{packagePolicyId}:
     delete:
-      deprecated: false
       description: Delete package policy by ID
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#2'
       parameters:
@@ -33851,7 +33767,6 @@ paths:
       tags:
         - Fleet package policies
     get:
-      deprecated: false
       description: Get package policy by ID
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#0'
       parameters:
@@ -34321,7 +34236,6 @@ paths:
       tags:
         - Fleet package policies
     put:
-      deprecated: false
       description: Update package policy by ID
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#1'
       parameters:
@@ -35219,7 +35133,6 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/delete:
     post:
-      deprecated: false
       description: Bulk delete package policies
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2Fdelete#0'
       parameters:
@@ -35357,7 +35270,6 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/upgrade:
     post:
-      deprecated: false
       description: Upgrade package policy to a newer package version
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade#0'
       parameters:
@@ -35439,7 +35351,6 @@ paths:
         - Fleet package policies
   /api/fleet/package_policies/upgrade/dryrun:
     post:
-      deprecated: false
       description: Dry run package policy upgrade
       operationId: '%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade%2Fdryrun#0'
       parameters:
@@ -36290,7 +36201,6 @@ paths:
         - Fleet package policies
   /api/fleet/proxies:
     get:
-      deprecated: false
       description: List proxies
       operationId: '%2Fapi%2Ffleet%2Fproxies#0'
       parameters:
@@ -36377,7 +36287,6 @@ paths:
       tags:
         - Fleet proxies
     post:
-      deprecated: false
       description: Create proxy
       operationId: '%2Fapi%2Ffleet%2Fproxies#1'
       parameters:
@@ -36497,7 +36406,6 @@ paths:
         - Fleet proxies
   /api/fleet/proxies/{itemId}:
     delete:
-      deprecated: false
       description: Delete proxy by ID
       operationId: '%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#2'
       parameters:
@@ -36553,7 +36461,6 @@ paths:
       tags:
         - Fleet proxies
     get:
-      deprecated: false
       description: Get proxy by ID
       operationId: '%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#1'
       parameters:
@@ -36634,7 +36541,6 @@ paths:
       tags:
         - Fleet proxies
     put:
-      deprecated: false
       description: Update proxy by ID
       operationId: '%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#0'
       parameters:
@@ -36756,7 +36662,6 @@ paths:
         - Fleet proxies
   /api/fleet/service_tokens:
     post:
-      deprecated: false
       description: Create a service token
       operationId: '%2Fapi%2Ffleet%2Fservice_tokens#0'
       parameters:
@@ -36822,7 +36727,7 @@ paths:
         - Fleet service tokens
   /api/fleet/service-tokens:
     post:
-      deprecated: false
+      deprecated: true
       description: Create a service token
       operationId: '%2Fapi%2Ffleet%2Fservice-tokens#0'
       parameters:
@@ -36846,7 +36751,6 @@ paths:
       tags: []
   /api/fleet/settings:
     get:
-      deprecated: false
       description: Get settings
       operationId: '%2Fapi%2Ffleet%2Fsettings#0'
       parameters:
@@ -36946,7 +36850,6 @@ paths:
       tags:
         - Fleet internals
     put:
-      deprecated: false
       description: Update settings
       operationId: '%2Fapi%2Ffleet%2Fsettings#1'
       parameters:
@@ -37090,7 +36993,6 @@ paths:
         - Fleet internals
   /api/fleet/setup:
     post:
-      deprecated: false
       description: Initiate Fleet setup
       operationId: '%2Fapi%2Ffleet%2Fsetup#0'
       parameters:
@@ -37173,7 +37075,6 @@ paths:
         - Fleet internals
   /api/fleet/uninstall_tokens:
     get:
-      deprecated: false
       description: List metadata for latest uninstall tokens per agent policy
       operationId: '%2Fapi%2Ffleet%2Funinstall_tokens#0'
       parameters:
@@ -37274,7 +37175,6 @@ paths:
         - Fleet uninstall tokens
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
-      deprecated: false
       description: Get one decrypted uninstall token by its ID
       operationId: '%2Fapi%2Ffleet%2Funinstall_tokens%2F%7BuninstallTokenId%7D#0'
       parameters:
@@ -40748,7 +40648,6 @@ paths:
         - Prompts API
   /api/security/role:
     get:
-      deprecated: false
       operationId: '%2Fapi%2Fsecurity%2Frole#0'
       parameters:
         - description: The version of the API to use
@@ -40770,7 +40669,6 @@ paths:
         - roles
   /api/security/role/{name}:
     delete:
-      deprecated: false
       operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
       parameters:
         - description: The version of the API to use
@@ -40799,7 +40697,6 @@ paths:
       tags:
         - roles
     get:
-      deprecated: false
       operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
       parameters:
         - description: The version of the API to use
@@ -40826,7 +40723,6 @@ paths:
       tags:
         - roles
     put:
-      deprecated: false
       operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
       parameters:
         - description: The version of the API to use
@@ -41017,7 +40913,6 @@ paths:
         - roles
   /api/security/roles:
     post:
-      deprecated: false
       operationId: '%2Fapi%2Fsecurity%2Froles#0'
       parameters:
         - description: The version of the API to use
@@ -41203,7 +41098,13 @@ paths:
         - roles
   /api/spaces/_copy_saved_objects:
     post:
-      description: Copy saved objects to spaces
+      description: >-
+        It also allows you to automatically copy related objects, so when you
+        copy a dashboard, this can automatically copy over the associated
+        visualizations, data views, and saved searches, as required. You can
+        request to overwrite any objects that already exist in the target space
+        if they share an identifier or you can use the resolve copy saved
+        objects conflicts API to do this on a per-object basis.
       operationId: '%2Fapi%2Fspaces%2F_copy_saved_objects#0'
       parameters:
         - description: The version of the API to use
@@ -41230,12 +41131,26 @@ paths:
               properties:
                 compatibilityMode:
                   default: false
+                  description: >-
+                    Apply various adjustments to the saved objects that are
+                    being copied to maintain compatibility between different
+                    Kibana versions. Use this option only if you encounter
+                    issues with copied saved objects. This option cannot be used
+                    with the `createNewCopies` option.
                   type: boolean
                 createNewCopies:
                   default: true
+                  description: >-
+                    Create new copies of saved objects, regenerate each object
+                    identifier, and reset the origin. When used, potential
+                    conflict errors are avoided.  This option cannot be used
+                    with the `overwrite` and `compatibilityMode` options.
                   type: boolean
                 includeReferences:
                   default: false
+                  description: >-
+                    When set to true, all saved objects related to the specified
+                    saved objects will also be copied into the target spaces.
                   type: boolean
                 objects:
                   items:
@@ -41243,8 +41158,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        description: The identifier of the saved object to copy.
                         type: string
                       type:
+                        description: The type of the saved object to copy.
                         type: string
                     required:
                       - type
@@ -41252,20 +41169,29 @@ paths:
                   type: array
                 overwrite:
                   default: false
+                  description: >-
+                    When set to true, all conflicts are automatically
+                    overridden. When a saved object with a matching type and
+                    identifier exists in the target space, that version is
+                    replaced with the version from the source space. This option
+                    cannot be used with the `createNewCopies` option.
                   type: boolean
                 spaces:
                   items:
+                    description: >-
+                      The identifiers of the spaces where you want to copy the
+                      specified objects.
                     type: string
                   type: array
               required:
                 - spaces
                 - objects
       responses: {}
-      summary: ''
-      tags: []
+      summary: Copy saved objects between spaces
+      tags:
+        - spaces
   /api/spaces/_disable_legacy_url_aliases:
     post:
-      description: Disable legacy URL aliases
       operationId: '%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0'
       parameters:
         - description: The version of the API to use
@@ -41296,10 +41222,15 @@ paths:
                     type: object
                     properties:
                       sourceId:
+                        description: >-
+                          The alias source object identifier. This is the legacy
+                          object identifier.
                         type: string
                       targetSpace:
+                        description: The space where the alias target object exists.
                         type: string
                       targetType:
+                        description: 'The type of alias target object. '
                         type: string
                     required:
                       - targetSpace
@@ -41309,11 +41240,12 @@ paths:
               required:
                 - aliases
       responses: {}
-      summary: ''
-      tags: []
+      summary: Disable legacy URL aliases
+      tags:
+        - spaces
   /api/spaces/_get_shareable_references:
     post:
-      description: Get shareable references
+      description: Collect references and space contexts for saved objects.
       operationId: '%2Fapi%2Fspaces%2F_get_shareable_references#0'
       parameters:
         - description: The version of the API to use
@@ -41354,11 +41286,14 @@ paths:
               required:
                 - objects
       responses: {}
-      summary: ''
-      tags: []
+      summary: Get shareable references
+      tags:
+        - spaces
   /api/spaces/_resolve_copy_saved_objects_errors:
     post:
-      description: Resolve conflicts copying saved objects
+      description: >-
+        Overwrite saved objects that are returned as errors from the copy saved
+        objects to space API.
       operationId: '%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0'
       parameters:
         - description: The version of the API to use
@@ -41412,17 +41347,33 @@ paths:
                       type: object
                       properties:
                         createNewCopy:
+                          description: >-
+                            Creates new copies of the saved objects, regenerates
+                            each object ID, and resets the origin.
                           type: boolean
                         destinationId:
+                          description: >-
+                            Specifies the destination identifier that the copied
+                            object should have, if different from the current
+                            identifier.
                           type: string
                         id:
+                          description: The saved object identifier.
                           type: string
                         ignoreMissingReferences:
+                          description: >-
+                            When set to true, any missing references errors are
+                            ignored.
                           type: boolean
                         overwrite:
                           default: false
+                          description: >-
+                            When set to true, the saved object from the source
+                            space overwrites the conflicting object in the
+                            destination space.
                           type: boolean
                         type:
+                          description: The saved object type.
                           type: string
                       required:
                         - type
@@ -41433,11 +41384,11 @@ paths:
                 - retries
                 - objects
       responses: {}
-      summary: ''
+      summary: Resolve conflicts copying saved objects
       tags: []
   /api/spaces/_update_objects_spaces:
     post:
-      description: Update saved objects in spaces
+      description: Update one or more saved objects to add or remove them from some spaces.
       operationId: '%2Fapi%2Fspaces%2F_update_objects_spaces#0'
       parameters:
         - description: The version of the API to use
@@ -41468,8 +41419,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        description: The identifier of the saved object to update.
                         type: string
                       type:
+                        description: The type of the saved object to update.
                         type: string
                     required:
                       - type
@@ -41477,10 +41430,16 @@ paths:
                   type: array
                 spacesToAdd:
                   items:
+                    description: >-
+                      The identifiers of the spaces the saved objects should be
+                      added to or removed from.
                     type: string
                   type: array
                 spacesToRemove:
                   items:
+                    description: >-
+                      The identifiers of the spaces the saved objects should be
+                      added to or removed from.
                     type: string
                   type: array
               required:
@@ -41488,12 +41447,11 @@ paths:
                 - spacesToAdd
                 - spacesToRemove
       responses: {}
-      summary: ''
-      tags: []
+      summary: Update saved objects in spaces
+      tags:
+        - spaces
   /api/spaces/space:
     get:
-      deprecated: false
-      description: Get all spaces
       operationId: '%2Fapi%2Fspaces%2Fspace#0'
       parameters:
         - description: The version of the API to use
@@ -41504,7 +41462,10 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: query
+        - description: >-
+            Specifies which authorization checks are applied to the API call.
+            The default value is `any`.
+          in: query
           name: purpose
           required: false
           schema:
@@ -41513,7 +41474,15 @@ paths:
               - copySavedObjectsIntoSpace
               - shareSavedObjectsIntoSpace
             type: string
-        - in: query
+        - description: >-
+            When enabled, the API returns any spaces that the user is authorized
+            to access in any capacity and each space will contain the purposes
+            for which the user is authorized. This can be useful to determine
+            which spaces a user can read but not take a specific action in. If
+            the security plugin is not enabled, this parameter has no effect,
+            since no authorization checks take place. This parameter cannot be
+            used in with the `purpose` parameter.
+          in: query
           name: include_authorized_purposes
           required: true
           schema:
@@ -41532,13 +41501,13 @@ paths:
                 x-oas-optional: true
               - type: boolean
                 x-oas-optional: true
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get all spaces
       tags:
         - spaces
     post:
-      deprecated: false
-      description: Create a space
       operationId: '%2Fapi%2Fspaces%2Fspace#1'
       parameters:
         - description: The version of the API to use
@@ -41566,22 +41535,45 @@ paths:
                 _reserved:
                   type: boolean
                 color:
+                  description: >-
+                    The hexadecimal color code used in the space avatar. By
+                    default, the color is automatically generated from the space
+                    name.
                   type: string
                 description:
+                  description: A description for the space.
                   type: string
                 disabledFeatures:
                   default: []
                   items:
+                    description: The list of features that are turned off in the space.
                     type: string
                   type: array
                 id:
+                  description: >-
+                    The space ID that is part of the Kibana URL when inside the
+                    space. Space IDs are limited to lowercase alphanumeric,
+                    underscore, and hyphen characters (a-z, 0-9, _, and -). You
+                    are cannot change the ID with the update operation.
                   type: string
                 imageUrl:
+                  description: >-
+                    The data-URL encoded image to display in the space avatar.
+                    If specified, initials will not be displayed and the color
+                    will be visible as the background color for transparent
+                    images. For best results, your image should be 64x64. Images
+                    will not be optimized by this API call, so care should be
+                    taken when using custom images.
                   type: string
                 initials:
+                  description: >-
+                    One or two characters that are shown in the space avatar. By
+                    default, the initials are automatically generated from the
+                    space name.
                   maxLength: 2
                   type: string
                 name:
+                  description: 'The display name for the space. '
                   minLength: 1
                   type: string
                 solution:
@@ -41594,14 +41586,17 @@ paths:
               required:
                 - id
                 - name
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Create a space
       tags:
         - spaces
   /api/spaces/space/{id}:
     delete:
-      deprecated: false
-      description: Delete a space
+      description: >-
+        When you delete a space, all saved objects that belong to the space are
+        automatically deleted, which is permanent and cannot be undone.
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
       parameters:
         - description: The version of the API to use
@@ -41619,18 +41614,21 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
             type: string
-      responses: {}
-      summary: ''
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '404':
+          description: Indicates that the request failed.
+      summary: Delete a space
       tags:
         - spaces
     get:
-      deprecated: false
-      description: Get a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0'
       parameters:
         - description: The version of the API to use
@@ -41641,18 +41639,19 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
             type: string
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get a space
       tags:
         - spaces
     put:
-      deprecated: false
-      description: Update a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1'
       parameters:
         - description: The version of the API to use
@@ -41670,7 +41669,10 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: >-
+            The space identifier. You are unable to change the ID with the
+            update operation.
+          in: path
           name: id
           required: true
           schema:
@@ -41685,22 +41687,45 @@ paths:
                 _reserved:
                   type: boolean
                 color:
+                  description: >-
+                    The hexadecimal color code used in the space avatar. By
+                    default, the color is automatically generated from the space
+                    name.
                   type: string
                 description:
+                  description: A description for the space.
                   type: string
                 disabledFeatures:
                   default: []
                   items:
+                    description: The list of features that are turned off in the space.
                     type: string
                   type: array
                 id:
+                  description: >-
+                    The space ID that is part of the Kibana URL when inside the
+                    space. Space IDs are limited to lowercase alphanumeric,
+                    underscore, and hyphen characters (a-z, 0-9, _, and -). You
+                    are cannot change the ID with the update operation.
                   type: string
                 imageUrl:
+                  description: >-
+                    The data-URL encoded image to display in the space avatar.
+                    If specified, initials will not be displayed and the color
+                    will be visible as the background color for transparent
+                    images. For best results, your image should be 64x64. Images
+                    will not be optimized by this API call, so care should be
+                    taken when using custom images.
                   type: string
                 initials:
+                  description: >-
+                    One or two characters that are shown in the space avatar. By
+                    default, the initials are automatically generated from the
+                    space name.
                   maxLength: 2
                   type: string
                 name:
+                  description: 'The display name for the space. '
                   minLength: 1
                   type: string
                 solution:
@@ -41713,8 +41738,10 @@ paths:
               required:
                 - id
                 - name
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Update a space
       tags:
         - spaces
   /api/status:
@@ -46440,7 +46467,7 @@ components:
           maxItems: 1000
           type: array
       title: Alert identifiers
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_alert_indices:
       description: >
         The alert indices. It is required only when `type` is `alert`. If you
@@ -46458,7 +46485,7 @@ components:
           maxItems: 1000
           type: array
       title: Alert indices
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_alert_response_properties:
       type: object
       properties:
@@ -47596,7 +47623,7 @@ components:
           description: The rule name.
           example: security_rule
           type: string
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_searchFieldsType:
       description: The fields to perform the `simple_query_string` parsed query against.
       enum:
@@ -47789,7 +47816,7 @@ components:
                         - type: string
                         - type: boolean
                 type: array
-                x-technical-preview: true
+                x-state: Technical preview
               description:
                 $ref: '#/components/schemas/Cases_case_description'
               settings:
@@ -47815,7 +47842,7 @@ components:
           tags:
             $ref: '#/components/schemas/Cases_template_tags'
       type: array
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_update_alert_comment_request_properties:
       description: Defines properties for case comment requests when type is alert.
       type: object
@@ -58302,6 +58329,7 @@ components:
     Security_Timeline_API_AssociatedFilterType:
       description: Filter notes based on their association with a document or saved object.
       enum:
+        - all
         - document_only
         - saved_object_only
         - document_and_saved_object
