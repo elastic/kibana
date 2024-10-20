@@ -30,6 +30,7 @@ import {
   setGroupResults,
   useAppDispatch,
   useAppSelector,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
 import {
   getSwappedWindowParameters,
@@ -48,8 +49,8 @@ import {
   resetResults,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_field_candidates_slice';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 
 import {
@@ -102,8 +103,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http, embeddingOrigin, eventBus } = useAiopsAppContext();
   const { dataView } = useDataSource();
-  const eventBusState = eventBus.useEventBusValue('search');
-  console.log('hook:', eventBusState);
 
   const dispatch = useAppDispatch();
   const {
@@ -115,7 +114,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     stickyHistogram,
     isBrushCleared,
     groupResults,
-  } = useAppSelector((s) => s.logRateAnalysis);
+  } = eventBus.useEventBusValue(logRateAnalysisSlice);
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.stream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
