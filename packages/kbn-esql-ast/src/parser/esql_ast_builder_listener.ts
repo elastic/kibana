@@ -10,7 +10,6 @@
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   type ShowInfoContext,
-  type MetaFunctionsContext,
   type SingleStatementContext,
   type RowCommandContext,
   type FromCommandContext,
@@ -28,7 +27,6 @@ import {
   type EnrichCommandContext,
   type WhereCommandContext,
   default as esql_parser,
-  type MetaCommandContext,
   type MetricsCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
@@ -84,21 +82,6 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   }
 
   /**
-   * Exit a parse tree produced by the `showFunctions`
-   * labeled alternative in `esql_parser.showCommand`.
-   * @param ctx the parse tree
-   */
-  exitMetaFunctions(ctx: MetaFunctionsContext) {
-    const commandAst = createCommand('meta', ctx);
-    this.ast.push(commandAst);
-    // update the text
-    commandAst.text = ctx.getText();
-    if (textExistsAndIsValid(ctx.FUNCTIONS().getText())) {
-      commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
-    }
-  }
-
-  /**
    * Enter a parse tree produced by `esql_parser.singleStatement`.
    * @param ctx the parse tree
    */
@@ -137,7 +120,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const metadataContext = ctx.metadata();
     const metadataContent =
       metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
-    if (metadataContent) {
+    if (metadataContent && metadataContent.METADATA()) {
       const option = createOption(
         metadataContent.METADATA().getText().toLowerCase(),
         metadataContent
@@ -310,14 +293,6 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     this.ast.push(command);
   }
 
-  /**
-   * Enter a parse tree produced by `esql_parser.metaCommand`.
-   * @param ctx the parse tree
-   */
-  enterMetaCommand(ctx: MetaCommandContext) {
-    const command = createCommand('meta', ctx);
-    this.ast.push(command);
-  }
   /**
    * Exit a parse tree produced by `esql_parser.enrichCommand`.
    * @param ctx the parse tree

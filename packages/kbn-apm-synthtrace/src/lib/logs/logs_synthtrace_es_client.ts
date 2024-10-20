@@ -23,6 +23,10 @@ export const LogsCustom = 'logs@custom';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+interface Pipeline {
+  includeSerialization?: boolean;
+}
+
 export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
   constructor(options: { client: Client; logger: Logger } & LogsSynthtraceEsClientOptions) {
     super({
@@ -45,6 +49,33 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.info(`Index template successfully created: ${name}`);
     } catch (err) {
       this.logger.error(`Index template creation failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async createComponentTemplate(name: string, mappings: MappingTypeMapping) {
+    const isTemplateExisting = await this.client.cluster.existsComponentTemplate({ name });
+
+    if (isTemplateExisting) return this.logger.info(`Component template already exists: ${name}`);
+
+    try {
+      await this.client.cluster.putComponentTemplate({
+        name,
+        template: {
+          mappings,
+        },
+      });
+      this.logger.info(`Component template successfully created: ${name}`);
+    } catch (err) {
+      this.logger.error(`Component template creation failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async deleteComponentTemplate(name: string) {
+    try {
+      await this.client.cluster.deleteComponentTemplate({ name });
+      this.logger.info(`Component template successfully deleted: ${name}`);
+    } catch (err) {
+      this.logger.error(`Component template deletion failed: ${name} - ${err.message}`);
     }
   }
 
@@ -105,13 +136,22 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.error(`Custom pipeline creation failed: ${LogsCustom} - ${err.message}`);
     }
   }
+
+  getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+    return logsPipeline({ includeSerialization });
+  }
 }
 
-function logsPipeline() {
+function logsPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
   return (base: Readable) => {
+    const serializationTransform = includeSerialization
+      ? [getSerializeTransform<LogDocument>()]
+      : [];
+
     return pipeline(
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
-      getSerializeTransform<LogDocument>(),
+      ...serializationTransform,
       getRoutingTransform('logs'),
       (err: unknown) => {
         if (err) {

@@ -19,7 +19,7 @@ import {
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import { useKey } from 'react-use';
+import useKey from 'react-use/lib/useKey';
 import { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
