@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerRoutes } from './register_routes';
-export { registerDeprecatedRoutes } from './deprecated_routes';
+import { IRouter } from '@kbn/core/server';
+import { registerDeprecatedRoute } from './unversioned';
+import { registerVersionedDeprecatedRoute } from './versioned';
+
+export function registerDeprecatedRoutes(router: IRouter) {
+  registerDeprecatedRoute(router);
+  registerVersionedDeprecatedRoute(router);
+}

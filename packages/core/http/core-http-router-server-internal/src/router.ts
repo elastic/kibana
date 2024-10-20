@@ -205,7 +205,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <P, Q, B>(
         route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
-        { isVersioned, events }: InternalRegistrarOptions = { isVersioned: false, events: false }
+        { isVersioned, events }: InternalRegistrarOptions = { isVersioned: false, events: true }
       ) => {
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);

@@ -72,7 +72,7 @@ export class DeprecationsClient {
       const incrementBy = apiTotalCalls - totalMarkedAsResolved;
 
       return {
-        path: '/api/deprecations/mark_as_resolved/',
+        path: '/api/deprecations/mark_as_resolved',
         method: 'POST',
         asSystemRequest: true,
         body: JSON.stringify({

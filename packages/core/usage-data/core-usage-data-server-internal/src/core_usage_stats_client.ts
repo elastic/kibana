@@ -205,6 +205,15 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
             counterType: `deprecated_api_call:${resolved ? 'resolved' : 'total'}`,
             incrementBy,
           });
+
+          if (resolved) {
+            // increment number of times the marked_as_resolve has been called
+            incrementUsageCounter({
+              counterName: id,
+              counterType: 'deprecated_api_call:marked_as_resolved',
+              incrementBy: 1,
+            });
+          }
         })
       )
       .subscribe();
