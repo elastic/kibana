@@ -13,6 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import {
   getWindowParametersForTrigger,
   getSnappedTimestamps,
@@ -23,12 +24,9 @@ import {
 } from '@kbn/aiops-log-rate-analysis';
 import {
   clearAllRowState,
-  clearSelection,
-  setAutoRunAnalysis,
-  setInitialAnalysisStart,
   useAppDispatch,
   useAppSelector,
-  setGroupResults,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
@@ -37,7 +35,6 @@ import {
   LogRateAnalysisResults,
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { LogRateAnalysisAttachmentsMenu } from './log_rate_analysis_attachments_menu';
 
 export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
@@ -73,7 +70,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onAnalysisCompleted,
   onWindowParametersChange,
 }) => {
-  const { embeddingOrigin } = useAiopsAppContext();
+  const { embeddingOrigin, eventBus } = useAiopsAppContext();
+  const { clearSelection, setAutoRunAnalysis, setGroupResults, setInitialAnalysisStart } =
+    eventBus.get(logRateAnalysisSlice).actions;
 
   const dispatch = useAppDispatch();
 
@@ -83,8 +82,15 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     (s) => s.logRateAnalysisResults.significantItemsGroups
   );
   const loaded = useAppSelector((s) => s.logRateAnalysisResults.loaded);
-  const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
-  const windowParameters = useAppSelector((s) => s.logRateAnalysis.chartWindowParameters);
+  const {
+    analysisType,
+    chartWindowParameters: windowParameters,
+    autoRunAnalysis,
+    documentStats,
+    earliest,
+    latest,
+    isBrushCleared,
+  } = eventBus.useEventBusValue(logRateAnalysisSlice);
 
   // Window parameters stored in the url state use this components
   // `initialAnalysisStart` prop to set the initial params restore from url state.
@@ -115,15 +121,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
-  const { autoRunAnalysis, documentStats, earliest, latest, isBrushCleared } = useAppSelector(
-    (s) => s.logRateAnalysis
-  );
-
   const { documentCountStats } = documentStats;
 
   function clearSelectionHandler() {
-    dispatch(setGroupResults(false));
-    dispatch(clearSelection());
+    setGroupResults(false);
+    clearSelection();
     dispatch(clearAllRowState());
   }
 
@@ -148,8 +150,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       : undefined;
 
   const triggerAnalysisForManualSelection = useCallback(() => {
-    dispatch(setAutoRunAnalysis(true));
-  }, [dispatch]);
+    setAutoRunAnalysis(true);
+  }, [setAutoRunAnalysis]);
 
   const triggerAnalysisForChangePoint = useCallback(() => {
     if (documentCountStats) {
@@ -168,10 +170,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
         triggerAnalysisForManualSelection();
-        dispatch(setInitialAnalysisStart(wpSnap));
+        setInitialAnalysisStart(wpSnap);
       }
     }
-  }, [documentCountStats, dispatch, triggerAnalysisForManualSelection]);
+  }, [documentCountStats, triggerAnalysisForManualSelection, setInitialAnalysisStart]);
 
   useEffect(() => {
     if (!isRunning && loaded === 1 && onAnalysisCompleted) {
