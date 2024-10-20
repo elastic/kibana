@@ -61,8 +61,7 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      // If any route is deprecated we show deprecated: true in the spec
-      const hasDeprecations = !!routes.some(({ options }) => options.deprecated);
+      const hasDeprecations = !!route.options.deprecated;
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
