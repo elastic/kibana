@@ -194,8 +194,9 @@ export const createAppMockRenderer = ({
   const clearQueryCache = async () => {
     queryClient.getQueryCache().clear();
 
+    const start = performance.now();
     await waitFor(() => {
-      console.log('stop fetching...');
+      console.log(`stop fetching ${performance.now() - start} since first try`);
       return expect(queryClient.isFetching()).toBe(0);
     });
   };
