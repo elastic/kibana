@@ -39,7 +39,6 @@ export const create = async () => {
     .parse();
   const kibanaUrl = removeTrailingSlash(argv.kibana);
   const count = Number(argv.count);
-  logger.info(`Creating ${count} conversations...`);
   logger.info(`Kibana URL: ${kibanaUrl}`);
   const connectorsApiUrl = `${kibanaUrl}/api/actions/connectors`;
   const conversationsCreateUrl = `${kibanaUrl}${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}`;
