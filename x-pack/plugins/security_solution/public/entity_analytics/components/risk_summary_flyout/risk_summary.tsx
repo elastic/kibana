@@ -80,9 +80,6 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-  const columns = useMemo(() => columnsArray, []);
-
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
@@ -263,7 +260,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
-                  columns={columns}
+                  columns={columnsArray}
                   items={rows}
                   compressed
                   loading={riskScoreData.loading || recalculatingScore}
