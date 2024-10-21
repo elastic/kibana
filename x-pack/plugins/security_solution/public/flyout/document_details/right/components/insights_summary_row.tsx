@@ -9,15 +9,13 @@ import type { ReactElement, VFC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiSkeletonText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedCount } from '../../../../common/components/formatted_number';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+
+const LOADING = i18n.translate(
+  'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
+  { defaultMessage: 'Loading' }
+);
 
 export interface InsightsSummaryRowProps {
   /**
@@ -29,22 +27,17 @@ export interface InsightsSummaryRowProps {
    */
   error?: boolean;
   /**
-   * Icon to display on the left side of each row
-   */
-  icon: string;
-  /**
-   * Number of results/entries found
-   */
-  value?: number;
-  /**
    * Text corresponding of the number of results/entries
    */
   text: string | ReactElement;
   /**
-   * Optional parameter for now, will be used to display a dot on the right side
-   * (corresponding to some sort of severity?)
+   * Number of results/entries found
    */
-  color?: string; // TODO remove optional when we have guidance on what the colors will actually be
+  value: ReactElement;
+  /**
+   * Decides the color of the badge
+   */
+  color?: EuiBadgeProps['color'];
   /**
    *  Prefix data-test-subj because this component will be used in multiple places
    */
@@ -54,19 +47,15 @@ export interface InsightsSummaryRowProps {
 /**
  * Panel showing summary information as an icon, a count and text as well as a severity colored dot.
  * Should be used for Entities, Threat intelligence, Prevalence, Correlations and Results components under the Insights section.
- * The colored dot is currently optional but will ultimately be mandatory (waiting on PM and UIUX).
  */
 export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   loading = false,
   error = false,
-  icon,
   value,
   text,
-  color,
+  color = 'hollow',
   'data-test-subj': dataTestSubj,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const loadingDataTestSubj = `${dataTestSubj}Loading`;
   if (loading) {
     return (
@@ -74,13 +63,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         lines={1}
         size="m"
         isLoading={loading}
-        contentAriaLabel={i18n.translate(
-          'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
-          {
-            defaultMessage: 'Loading insights for {value}',
-            values: { value },
-          }
-        )}
+        contentAriaLabel={LOADING}
         data-test-subj={loadingDataTestSubj}
       />
     );
@@ -90,9 +73,8 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
     return null;
   }
 
-  const iconDataTestSubj = `${dataTestSubj}Icon`;
+  const textDataTestSubj = `${dataTestSubj}Text`;
   const valueDataTestSubj = `${dataTestSubj}Value`;
-  const colorDataTestSubj = `${dataTestSubj}Color`;
 
   return (
     <EuiFlexGroup
@@ -101,26 +83,8 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
       alignItems={'center'}
       responsive={false}
     >
-      <EuiFlexItem grow={false}>
-        <EuiIcon
-          css={css`
-            margin: ${euiTheme.size.s};
-          `}
-          data-test-subj={iconDataTestSubj}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.insights.insightSummaryButtonIconAriaLabel',
-            {
-              defaultMessage: 'Insight summary row icon',
-            }
-          )}
-          color="text"
-          display="empty"
-          type={icon}
-          size="m"
-        />
-      </EuiFlexItem>
       <EuiFlexItem
-        data-test-subj={valueDataTestSubj}
+        data-test-subj={textDataTestSubj}
         css={css`
           word-break: break-word;
           display: -webkit-box;
@@ -129,13 +93,11 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
           overflow: hidden;
         `}
       >
-        {value && <FormattedCount count={value} />} {text}
+        {text}
       </EuiFlexItem>
-      {color && (
-        <EuiFlexItem grow={false} data-test-subj={colorDataTestSubj}>
-          <EuiHealth color={color} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false} data-test-subj={valueDataTestSubj}>
+        <EuiBadge color={color}>{value}</EuiBadge>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

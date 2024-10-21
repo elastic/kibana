@@ -7,17 +7,45 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '@kbn/security-solution-common';
+import { i18n } from '@kbn/i18n';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
+import {
+  INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID,
+} from './test_ids';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+
+const TITLE = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTitle"
+    defaultMessage="Threat intelligence"
+  />
+);
+const TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
+    defaultMessage="Show all threat intelligence"
+  />
+);
+const THREAT_MATCHES_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.right.insights.threatIntelligence.threatMatches.buttonLabel',
+  { defaultMessage: 'Threat matches' }
+);
+const ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.right.insights.threatIntelligence.enrichedWithThreatIntelligence.buttonLabel',
+  { defaultMessage: 'Enriched with threat intelligence' }
+);
 
 /**
  * Threat intelligence section under Insights section, overview tab.
@@ -53,26 +81,72 @@ export const ThreatIntelligenceOverview: FC = () => {
       !isPreviewMode
         ? {
             callback: goToThreatIntelligenceTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
-                defaultMessage="Show all threat intelligence"
-              />
-            ),
+            tooltip: TOOLTIP,
           }
         : undefined,
     [isPreviewMode, goToThreatIntelligenceTab]
   );
 
+  const threatMatchCountText = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatMatchDescription"
+        defaultMessage="Threat {count, plural, one {match} other {matches}} detected"
+        values={{ count: threatMatchesCount }}
+      />
+    ),
+    [threatMatchesCount]
+  );
+
+  const threatMatchCountValue = useMemo(
+    () => (
+      <EuiButtonEmpty
+        aria-label={THREAT_MATCHES_BUTTON}
+        onClick={goToThreatIntelligenceTab}
+        flush={'both'}
+        size="xs"
+        isDisabled={isPreviewMode}
+        data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID}
+      >
+        {threatMatchesCount}
+      </EuiButtonEmpty>
+    ),
+    [goToThreatIntelligenceTab, isPreviewMode, threatMatchesCount]
+  );
+
+  const threatEnrichmentsCountText = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatEnrichmentDescription"
+        defaultMessage="{count, plural, one {Field} other {Fields}} enriched with threat intelligence"
+        values={{ count: threatEnrichmentsCount }}
+      />
+    ),
+    [threatEnrichmentsCount]
+  );
+
+  const threatEnrichmentsCountValue = useMemo(
+    () => (
+      <EuiButtonEmpty
+        aria-label={ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON}
+        onClick={goToThreatIntelligenceTab}
+        flush={'both'}
+        size="xs"
+        isDisabled={isPreviewMode}
+        data-test-subj={
+          INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID
+        }
+      >
+        {threatEnrichmentsCount}
+      </EuiButtonEmpty>
+    ),
+    [goToThreatIntelligenceTab, isPreviewMode, threatEnrichmentsCount]
+  );
+
   return (
     <ExpandablePanel
       header={{
-        title: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTitle"
-            defaultMessage="Threat intelligence"
-          />
-        ),
+        title: TITLE,
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
@@ -81,32 +155,18 @@ export const ThreatIntelligenceOverview: FC = () => {
     >
       <EuiFlexGroup
         direction="column"
-        gutterSize="none"
+        gutterSize="s"
         data-test-subj={`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Container`}
       >
         <InsightsSummaryRow
-          icon={'warning'}
-          value={threatMatchesCount}
-          text={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatMatchDescription"
-              defaultMessage="threat {count, plural, one {match} other {matches}} detected"
-              values={{ count: threatMatchesCount }}
-            />
-          }
-          data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+          text={threatMatchCountText}
+          value={threatMatchCountValue}
+          data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID}
         />
         <InsightsSummaryRow
-          icon={'warning'}
-          value={threatEnrichmentsCount}
-          text={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatEnrichmentDescription"
-              defaultMessage="{count, plural, one {field} other {fields}} enriched with threat intelligence"
-              values={{ count: threatEnrichmentsCount }}
-            />
-          }
-          data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+          text={threatEnrichmentsCountText}
+          value={threatEnrichmentsCountValue}
+          data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID}
         />
       </EuiFlexGroup>
     </ExpandablePanel>
