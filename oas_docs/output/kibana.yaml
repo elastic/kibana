@@ -13857,11 +13857,12 @@ paths:
           required: false
           schema:
             type: string
-        - description: deprecated use withAgentCount instead
+        - description: use withAgentCount instead
           in: query
           name: noAgentCount
           required: false
           schema:
+            deprecated: true
             type: boolean
         - description: get policies with agent count
           in: query
