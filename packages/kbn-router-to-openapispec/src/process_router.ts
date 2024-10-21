@@ -27,6 +27,8 @@ import {
 import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
+import { KibanaFeature } from '@kbn/features-plugin/server';
+
 interface PrivilegeGroupValue {
   allRequired: string[];
   anyRequired: string[];
@@ -37,8 +39,6 @@ interface PrivilegeGroups {
   serverless: PrivilegeGroupValue;
   traditional: PrivilegeGroupValue;
 }
-
-const getFeatureForPrivilege = (privilege: string) => {};
 
 const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: string) => {
   if (!route?.security?.authz || (route.security.authz as AuthzDisabled).enabled === false) {

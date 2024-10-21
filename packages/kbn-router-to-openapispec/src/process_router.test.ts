@@ -138,6 +138,6 @@ describe('processRouter', () => {
     const result = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
       version: '2023-10-31',
     });
-    console.log(result);
+    console.log(JSON.stringify(result, null, 2));
   });
 });

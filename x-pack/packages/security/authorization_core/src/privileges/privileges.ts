@@ -247,6 +247,33 @@ export function privilegesFactory(
         }, {}),
       };
     },
+    getFeatureForPrivilege(features: KibanaFeature[], searchTerm: string) {
+      const result: string[] = [];
+
+      features.forEach((feature) => {
+        if (feature.privileges?.all.api?.includes(searchTerm)) {
+          result.push(`${feature.id}.all`);
+        }
+
+        if (feature.privileges?.read && feature.privileges.read.api?.includes(searchTerm)) {
+          result.push(`${feature.id}.read`);
+        }
+
+        if (feature.subFeatures) {
+          feature.subFeatures.forEach((subFeature) => {
+            subFeature.privilegeGroups.forEach((group) => {
+              group.privileges.forEach((privilege) => {
+                if (privilege.api?.includes(searchTerm)) {
+                  result.push(`${feature.id}.${privilege.id}`);
+                }
+              });
+            });
+          });
+        }
+      });
+
+      return result;
+    },
   };
 }
 
