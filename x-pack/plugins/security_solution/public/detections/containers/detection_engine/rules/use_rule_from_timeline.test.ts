@@ -120,8 +120,9 @@ describe('useRuleFromTimeline', () => {
     it('does not reset timeline sourcerer if it originally had same data view as the timeline used in the rule', async () => {
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitFor(() => null);
-      expect(setRuleQuery).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(setRuleQuery).toHaveBeenCalled();
+      });
     });
   });
 
