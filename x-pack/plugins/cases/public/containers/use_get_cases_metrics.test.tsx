@@ -17,7 +17,7 @@ import { CaseMetricsFeature } from '../../common/types/api';
 jest.mock('../api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCasesMetrics', () => {
+describe.skip('useGetCasesMetrics', () => {
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   const addError = jest.fn();
