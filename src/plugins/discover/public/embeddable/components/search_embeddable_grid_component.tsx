@@ -17,7 +17,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import { Filter } from '@kbn/es-query';
 import {
   FetchContext,
   useBatchedOptionalPublishingSubjects,
@@ -27,7 +26,6 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
@@ -69,8 +67,8 @@ export function SearchEmbeddableGridComponent({
     savedSearch,
     savedSearchId,
     interceptedWarnings,
-    query,
-    filters,
+    apiQuery,
+    apiFilters,
     fetchContext,
     rows,
     totalHitCount,
@@ -89,6 +87,9 @@ export function SearchEmbeddableGridComponent({
     stateManager.columnsMeta,
     stateManager.grid
   );
+
+  const query = fetchContext?.query ?? apiQuery;
+  const filters = fetchContext?.filters ?? apiFilters;
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
     useBatchedOptionalPublishingSubjects(
@@ -229,7 +230,7 @@ export function SearchEmbeddableGridComponent({
       <DiscoverDocTableEmbeddableMemoized
         {...sharedProps}
         {...onStateEditedProps}
-        filters={savedSearch.searchSource.getField('filter') as Filter[]}
+        filters={filters}
         isEsqlMode={isEsql}
         isLoading={Boolean(loading)}
         sharedItemTitle={panelTitle || savedSearchTitle}
@@ -258,7 +259,9 @@ export function SearchEmbeddableGridComponent({
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
-      query={savedSearch.searchSource.getField('query')}
+      query={query}
+      filters={filters}
+      timeRange={timeRange}
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}

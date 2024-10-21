@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, Query, Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
@@ -20,17 +20,20 @@ import {
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
-import { DiscoverGrid } from '../../components/discover_grid';
+import { DiscoverGrid, getDiscoverGridColumnInfoPopover } from '../../components/discover_grid';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useProfileAccessor } from '../../context_awareness';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
   totalHitCount?: number;
-  query?: AggregateQuery | Query;
+  query: AggregateQuery | Query | undefined;
+  filters: Filter[] | undefined;
+  timeRange: { from: string; to: string } | undefined;
   interceptedWarnings?: SearchResponseWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
@@ -40,7 +43,8 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, ...gridProps } = props;
+  const services = useDiscoverServices();
+  const { interceptedWarnings, query, filters, timeRange, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -64,7 +68,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onAddColumn={props.onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
-        query={props.query}
+        query={query}
+        filters={filters}
       />
     ),
     [
@@ -72,7 +77,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onAddColumn,
       props.onFilter,
       props.onRemoveColumn,
-      props.query,
+      query,
+      filters,
       props.savedSearchId,
     ]
   );
@@ -87,6 +93,23 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       }),
     [props.totalHitCount]
   );
+
+  const renderCustomGridColumnInfoPopover = useMemo(() => {
+    if (!query || !filters || !timeRange) {
+      return undefined;
+    }
+
+    return getDiscoverGridColumnInfoPopover({
+      isEsqlMode: isOfAggregateQueryType(query),
+      services,
+      queryAndFiltersOverride: {
+        query,
+        filters,
+        fromDate: timeRange.from,
+        toDate: timeRange.to,
+      },
+    });
+  }, [services, query, filters, timeRange]);
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
@@ -130,6 +153,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
         renderCustomToolbar={renderCustomToolbarWithElements}
+        renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
         showColumnTokens

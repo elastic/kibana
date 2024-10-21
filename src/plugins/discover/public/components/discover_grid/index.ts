@@ -8,4 +8,4 @@
  */
 
 export { DiscoverGrid } from './discover_grid';
-export { DiscoverGridColumnInfoPopover } from './discover_grid_column_info_popover';
+export { getDiscoverGridColumnInfoPopover } from './discover_grid_column_info_popover';
