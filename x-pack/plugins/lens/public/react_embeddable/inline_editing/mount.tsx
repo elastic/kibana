@@ -45,6 +45,7 @@ export function mountInlineEditPanel(
         'data-test-subj': 'customizeLens',
         type: 'push',
         paddingSize: 'm',
+        maxWidth: 800,
         hideCloseButton: true,
         isResizable: true,
         onClose: (overlayRef) => {
