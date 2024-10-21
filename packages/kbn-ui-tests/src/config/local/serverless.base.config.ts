@@ -17,7 +17,7 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 
 import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ConfigType } from '../../config';
+import type { ConfigType } from '../config';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];

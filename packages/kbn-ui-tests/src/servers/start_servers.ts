@@ -9,6 +9,7 @@
 
 import * as Rx from 'rxjs';
 import dedent from 'dedent';
+import Path from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -23,7 +24,9 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    const config = await loadConfig(options.config);
+    const configPath = Path.resolve(__dirname, '..', 'config', 'local', options.configName);
+
+    const config = await loadConfig(configPath);
 
     const shutdownEs = await runElasticsearch({
       config,

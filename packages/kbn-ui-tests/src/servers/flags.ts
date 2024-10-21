@@ -14,16 +14,19 @@ import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { EsVersion } from '@kbn/test';
-
 export type StartServerOptions = ReturnType<typeof parseFlags>;
+type SupportedConfigurations =
+  | 'stateful.config.ts'
+  | 'es.serverless.config.ts'
+  | 'oblt.serverless.config.ts'
+  | 'security.serverless.config.ts';
 
 export const FLAG_OPTIONS: FlagOptions = {
-  string: ['config', 'journey', 'esFrom', 'kibana-install-dir'],
-  boolean: ['logToFile'],
+  string: ['serverless', 'esFrom', 'kibana-install-dir'],
+  boolean: ['stateful', 'logToFile'],
   help: `
-    --config             Define a FTR config that should be executed. Can be specified multiple times
-    --journey            Define a Journey that should be executed. Can be specified multiple times
+    --stateful           Start Elasticsearch and Kibana with default ESS configuration
+    --serverless         Start Elasticsearch and Kibana with serverless project configuration: es | oblt | security
     --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
@@ -31,18 +34,20 @@ export const FLAG_OPTIONS: FlagOptions = {
 };
 
 export function parseFlags(flags: FlagsReader) {
-  const configs = [
-    ...(flags.arrayOfPaths('config') ?? []),
-    ...(flags.arrayOfPaths('journey') ?? []),
-  ];
-  if (configs.length !== 1) {
-    throw createFlagError(`expected exactly one --config or --journey flag`);
+  const serverlessType = flags.enum('serverless', ['es', 'oblt', 'security']);
+  const isStateful = flags.boolean('stateful');
+
+  if ((!serverlessType && !isStateful) || (serverlessType && isStateful)) {
+    throw createFlagError(`expected exactly one --serverless=<type> or --stateful flag`);
   }
 
+  const configName: SupportedConfigurations = serverlessType
+    ? `${serverlessType}.serverless.config.ts`
+    : 'stateful.config.ts';
+
   return {
-    config: configs[0],
+    configName,
     esFrom: flags.enum('esFrom', ['source', 'snapshot', 'serverless']),
-    esVersion: EsVersion.getDefault(),
     installDir: flags.string('kibana-install-dir'),
     logsDir: flags.boolean('logToFile')
       ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
