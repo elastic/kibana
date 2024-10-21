@@ -17,6 +17,7 @@ import {
   MORE_THAN_1024_CHARS,
 } from './data';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
+import { logsNginxMappings } from './custom_mappings/custom_integration_mappings';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -39,6 +40,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const serviceName = 'test_service';
   const count = 5;
   const customComponentTemplateName = 'logs-synth@mappings';
+  const customComponentTemplateNameNginx = 'logs-nginx.access@custom';
 
   const nginxAccessDatasetName = 'nginx.access';
   const nginxAccessDataStreamName = `${type}-${nginxAccessDatasetName}-${defaultNamespace}`;
@@ -99,7 +101,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     describe('detecting root cause for ignored fields', () => {
       before(async () => {
-        await synthtrace.clean();
         // Create custom component template
         await synthtrace.createComponentTemplate(
           customComponentTemplateName,
@@ -129,6 +130,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Install Nginx Integration and ingest logs for it
         await PageObjects.observabilityLogsExplorer.installPackage(nginxPkg);
+
+        // Create custom component template to avoid issues with LogsDB
+        await synthtrace.createComponentTemplate(
+          customComponentTemplateNameNginx,
+          logsNginxMappings(nginxAccessDatasetName)
+        );
 
         await synthtrace.index([
           // Ingest Degraded Logs with 25 fields in degraded DataSet
@@ -854,6 +861,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           name: degradedDatasetWithLimitDataStreamName,
         });
         await synthtrace.deleteComponentTemplate(customComponentTemplateName);
+        await PageObjects.observabilityLogsExplorer.uninstallPackage(nginxPkg);
+        await synthtrace.deleteComponentTemplate(customComponentTemplateNameNginx);
       });
     });
   });
