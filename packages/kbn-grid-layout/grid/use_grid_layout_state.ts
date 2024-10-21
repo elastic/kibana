@@ -143,6 +143,11 @@ export const useGridLayoutState = ({
              * If there is an activePanel happening but the current row is not being targetted, it
              * does not need to be re-rendered; so, skip setting the panel styles of this row.
              */
+            const previousDragPreview = gridLayoutStateManager.dragPreviewRefs[rowIndex].current;
+            if (previousDragPreview) {
+              previousDragPreview.style.display = 'none';
+            }
+
             continue;
           }
 
