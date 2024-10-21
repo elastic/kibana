@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -110,16 +111,41 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   }, []);
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem
+      css={css`
+        position: relative;
+      `}
+    >
+      {selectedConnector?.iconPath && (
+        <EuiIcon
+          type={selectedConnector.iconPath}
+          size="l"
+          css={css`
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            z-index: 2;
+          `}
+        />
+      )}
       <EuiSelectable
         aria-label={i18n.translate(
           'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
           { defaultMessage: 'Select a data source for your connector to use.' }
         )}
+        css={css`
+          .euiFormControlLayoutCustomIcon {
+            display: ${selectedConnector !== null ? 'none' : ''};
+          }
+          .euiFieldSearch {
+            padding-left: 45px;
+          }
+        `}
         options={selectableOptions}
         onChange={(newOptions, _, changedOption) => {
           selectableSetOptions(newOptions);
           closePopover();
+
           if (changedOption.checked === 'on') {
             const keySelected = Number(changedOption.key);
             setSelectedConnector(allConnectors[keySelected]);
