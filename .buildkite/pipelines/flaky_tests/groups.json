@@ -89,10 +89,6 @@
       "name": "APM - Cypress"
     },
     {
-      "key": "cypress/inventory_cypress",
-      "name": "Inventory - Cypress"
-    },
-    {
       "key": "cypress/cloud_security_posture",
       "name": "Cloud Security Posture - Cypress"
     },
