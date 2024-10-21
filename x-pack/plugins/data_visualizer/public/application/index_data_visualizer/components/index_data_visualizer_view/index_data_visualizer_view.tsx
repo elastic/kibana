@@ -154,6 +154,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
+  const [localQueryString, setLocalQueryString] = useState<Query['query'] | undefined>(
+    dataVisualizerListState.searchString
+  );
+
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
@@ -464,6 +468,43 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     },
   });
 
+  const queryNeedsUpdate = useMemo(
+    () => (localQueryString !== dataVisualizerListState.searchString ? true : undefined),
+    [dataVisualizerListState.searchString, localQueryString]
+  );
+
+  const onQueryChange = useCallback((query: Query['query'] | undefined) => {
+    setLocalQueryString(query);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    if (queryNeedsUpdate) {
+      const newQuery = buildEsQuery(
+        currentDataView,
+        {
+          query: localQueryString || '',
+          language: searchQueryLanguage,
+        },
+        data.query.filterManager.getFilters() ?? [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
+      setDataVisualizerListState({
+        ...dataVisualizerListState,
+        searchString: localQueryString,
+        searchQuery: newQuery,
+      });
+    }
+  }, [
+    queryNeedsUpdate,
+    currentDataView,
+    localQueryString,
+    searchQueryLanguage,
+    data.query.filterManager,
+    uiSettings,
+    setDataVisualizerListState,
+    dataVisualizerListState,
+  ]);
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -514,6 +555,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 isAutoRefreshOnly={!hasValidTimeField}
                 showRefresh={!hasValidTimeField}
                 width="full"
+                needsUpdate={queryNeedsUpdate}
+                onRefresh={handleRefresh}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -537,6 +580,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 setVisibleFieldNames={setVisibleFieldNames}
                 showEmptyFields={showEmptyFields}
                 onAddFilter={onAddFilter}
+                onQueryChange={onQueryChange}
               />
 
               {overallStats?.totalCount !== undefined && (

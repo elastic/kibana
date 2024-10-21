@@ -6848,7 +6848,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; uuid: string; destroy: () => void; readonly parent?: ",
+          ">; uuid: string; readonly parent?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6872,7 +6872,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; dataViews: ",
+          "> | undefined; destroy: () => void; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

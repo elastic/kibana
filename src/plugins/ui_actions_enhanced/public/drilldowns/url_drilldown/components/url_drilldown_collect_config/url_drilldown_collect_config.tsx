@@ -31,6 +31,19 @@ export interface UrlDrilldownCollectConfigProps {
   variablesHelpDocsLink?: string;
 }
 
+const isCursorBetweenDoubleCurlyBrackets = (editor: monaco.editor.IStandaloneCodeEditor) => {
+  const model = editor.getModel();
+  const position = editor.getPosition();
+  if (!model || !position) return false;
+
+  const offset = model.getOffsetAt(position);
+  const text = model.getValue();
+  const twoCharactersBeforeOffset = text.slice(offset - 2, offset);
+  const twoCharactersAfterOffset = text.slice(offset, offset + 2);
+
+  return twoCharactersBeforeOffset === '{{' && twoCharactersAfterOffset === '}}';
+};
+
 export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = ({
   config,
   variables,
@@ -64,9 +77,10 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
       onSelect={(variable: string) => {
         const editor = editorRef.current;
         if (!editor) return;
+        const text = isCursorBetweenDoubleCurlyBrackets(editor) ? variable : `{{${variable}}}`;
 
         editor.trigger('keyboard', 'type', {
-          text: '{{' + variable + '}}',
+          text,
         });
       }}
     />
