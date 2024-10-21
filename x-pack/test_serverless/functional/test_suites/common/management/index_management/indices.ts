@@ -36,7 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
 
-    describe('manage index', () => {
+    describe('manage index', function () {
       after(async () => {
         await esDeleteAllIndices(testIndexName);
       });
@@ -48,21 +48,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.manageIndex(testIndexName);
         await pageObjects.indexManagement.manageIndexContextMenuExists();
       });
-      it('navigates to overview tab', async () => {
-        await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
-        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-        await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('overview');
-      });
+      describe('navigate to index detail tabs', function () {
+        this.tags('skipSvlSearch');
+        it('navigates to overview', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
+          await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+          await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('overview');
+        });
 
-      it('navigates to settings tab', async () => {
-        await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
-        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-        await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('settings');
-      });
-      it('navigates to mappings tab', async () => {
-        await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
-        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-        await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('mappings');
+        it('navigates to settings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
+          await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+          await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('settings');
+        });
+        it('navigates to mappings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
+          await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+          await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('mappings');
+        });
       });
       it('can delete index', async () => {
         await pageObjects.indexManagement.confirmDeleteModalIsVisible();
