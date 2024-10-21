@@ -207,31 +207,31 @@ const getAdditionalAgentlessPolicyInfo = (
   packageInfo?: PackageInfo
 ) => {
   if (!policyTemplateName || !packageInfo) {
-    return {
-      global_data_tags: [],
-    };
+    return {};
   }
   const agentlessPolicyTemplate = policyTemplateName
     ? packageInfo?.policy_templates?.find((policy) => policy.name === policyTemplateName)
     : undefined;
 
   const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
-  return {
-    global_data_tags: agentlessInfo
-      ? [
-          {
-            name: 'organization',
-            value: agentlessInfo.organization,
-          },
-          {
-            name: 'division',
-            value: agentlessInfo.division,
-          },
-          {
-            name: 'team',
-            value: agentlessInfo.team,
-          },
-        ]
-      : [],
-  };
+  return !agentlessInfo
+    ? {}
+    : {
+        global_data_tags: agentlessInfo
+          ? [
+              {
+                name: 'organization',
+                value: agentlessInfo.organization,
+              },
+              {
+                name: 'division',
+                value: agentlessInfo.division,
+              },
+              {
+                name: 'team',
+                value: agentlessInfo.team,
+              },
+            ]
+          : [],
+      };
 };
