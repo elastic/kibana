@@ -13,20 +13,10 @@ export type FetchAvailableCatIndicesResponseRequired = Array<
   Required<Pick<CatIndicesIndicesRecord, 'index' | 'creation.date'>>
 >;
 
-export interface FetchAvailableIndicesResponse {
-  aggregations: {
-    index: {
-      buckets: Array<{
-        key: string;
-      }>;
-    };
-  };
-}
-
 export const fetchAvailableIndices = async (
   esClient: ElasticsearchClient,
   params: { indexPattern: string; startDate: string; endDate: string }
-): Promise<FetchAvailableIndicesResponse> => {
+): Promise<string[]> => {
   const { indexPattern, startDate, endDate } = params;
 
   const startDateMoment = dateMath.parse(startDate);
@@ -61,13 +51,5 @@ export const fetchAvailableIndices = async (
     return creationDateMillis >= startDateMillis && creationDateMillis <= endDateMillis;
   });
 
-  return {
-    aggregations: {
-      index: {
-        buckets: filteredIndices.map((indexInfo) => ({
-          key: indexInfo.index,
-        })),
-      },
-    },
-  };
+  return filteredIndices.map((indexInfo) => indexInfo.index);
 };
