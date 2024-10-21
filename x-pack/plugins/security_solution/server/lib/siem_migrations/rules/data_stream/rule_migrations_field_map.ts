@@ -9,6 +9,7 @@ import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>> = {
+  '@timestamp': { type: 'date', required: false },
   migrationId: { type: 'keyword', required: true },
   status: { type: 'keyword', required: true },
   originalRule: { type: 'nested', required: true },
@@ -16,12 +17,12 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>>
   'originalRule.id': { type: 'keyword', required: true },
   'originalRule.title': { type: 'keyword', required: true },
   'originalRule.description': { type: 'keyword', required: false },
-  'originalRule.query': { type: 'keyword', required: true },
+  'originalRule.query': { type: 'text', required: true },
   'originalRule.queryLanguage': { type: 'keyword', required: true },
-  'originalRule.mitreAttackIds': { type: 'keyword', array: true, required: true },
+  'originalRule.mitreAttackIds': { type: 'keyword', array: true, required: false },
   elasticRule: { type: 'nested', required: false },
   'elasticRule.title': { type: 'keyword', required: true },
-  'elasticRule.query': { type: 'keyword', required: true },
+  'elasticRule.query': { type: 'text', required: true },
   'elasticRule.queryLanguage': { type: 'keyword', required: true },
   'elasticRule.description': { type: 'keyword', required: false },
   'elasticRule.severity': { type: 'keyword', required: false },
@@ -29,7 +30,6 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>>
   'elasticRule.id': { type: 'keyword', required: false },
   translationState: { type: 'keyword', required: false },
   comments: { type: 'text', array: true, required: false },
-  createdAt: { type: 'date', required: false },
   updatedAt: { type: 'date', required: false },
   updatedBy: { type: 'keyword', required: false },
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
@@ -22,7 +22,6 @@ export interface SiemRuleMigrationsGetClientParams {
 }
 
 export interface SiemRuleMigrationsClient {
-  install: () => Promise<void>;
-  index: (body: RuleMigration) => Promise<IndexResponse>;
+  create: (body: RuleMigration[]) => Promise<BulkResponse>;
   find: () => Promise<void>;
 }

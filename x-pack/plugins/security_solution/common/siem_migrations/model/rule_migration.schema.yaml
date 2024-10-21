@@ -84,6 +84,9 @@ components:
         - originalRule
         - status
       properties:
+        "@timestamp":
+          type: string
+          description: The moment of creation
         migrationId:
           type: string
           description: The migration id.
@@ -112,9 +115,6 @@ components:
           description: The comments for the migration including a summary from the LLM in markdown.
           items:
             type: string
-        createdAt:
-          type: string
-          description: The moment of creation
         updatedAt:
           type: string
           description: The moment of the last update

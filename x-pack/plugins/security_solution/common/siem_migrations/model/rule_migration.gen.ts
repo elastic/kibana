@@ -92,6 +92,10 @@ export const ElasticRule = z.object({
 export type RuleMigration = z.infer<typeof RuleMigration>;
 export const RuleMigration = z.object({
   /**
+   * The moment of creation
+   */
+  '@timestamp': z.string().optional(),
+  /**
    * The migration id.
    */
   migrationId: z.string(),
@@ -109,10 +113,6 @@ export const RuleMigration = z.object({
    * The comments for the migration including a summary from the LLM in markdown.
    */
   comments: z.array(z.string()).optional(),
-  /**
-   * The moment of creation
-   */
-  createdAt: z.string().optional(),
   /**
    * The moment of the last update
    */

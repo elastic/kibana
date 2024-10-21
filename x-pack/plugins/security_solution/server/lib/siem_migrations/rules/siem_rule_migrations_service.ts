@@ -16,7 +16,6 @@ import type {
 export class SiemRuleMigrationsService {
   private dataStreamAdapter: RuleMigrationsDataStream;
   private esClusterClient?: IClusterClient;
-  private dataStreamName?: string;
 
   constructor(private logger: Logger, kibanaVersion: string) {
     this.dataStreamAdapter = new RuleMigrationsDataStream({ kibanaVersion });
@@ -32,17 +31,21 @@ export class SiemRuleMigrationsService {
     if (!this.esClusterClient) {
       throw new Error('ES client not available, please call setup first');
     }
-    const esClient = this.esClusterClient.asScoped(request).asCurrentUser;
+    // Installs the data stream for the specific space. it will only install if it hasn't been installed yet.
+    // The adapter stores the data stream name promise, it will return it directly when the data stream is known to be installed.
+    const dataStreamNamePromise = this.dataStreamAdapter.installSpace(spaceId);
 
+    const esClient = this.esClusterClient.asScoped(request).asCurrentUser;
     return {
-      install: async () => {
-        this.dataStreamName = await this.dataStreamAdapter.installSpace(spaceId);
-      },
-      index: async (body) => {
-        if (!this.dataStreamName) {
-          throw new Error('Install must be called before indexing');
-        }
-        return esClient.index({ index: this.dataStreamName, ...body });
+      create: async (ruleMigrations) => {
+        const dataStreamName = await dataStreamNamePromise;
+        return esClient.bulk({
+          refresh: 'wait_for',
+          body: ruleMigrations.flatMap((ruleMigration) => [
+            { create: { _index: dataStreamName } },
+            ruleMigration,
+          ]),
+        });
       },
       find: async () => {
         // TODO: Implement
