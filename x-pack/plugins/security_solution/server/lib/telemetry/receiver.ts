@@ -559,7 +559,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         const buckets = endpointMetadataResponse?.aggregations?.endpoint_metadata?.buckets ?? [];
 
         return buckets.reduce((cache, endpointAgentId) => {
-          // const id = endpointAgentId.latest_metadata.hits.hits[0]._id;
           const doc = endpointAgentId.latest_metadata.hits.hits[0]._source;
           cache.set(endpointAgentId.key, doc);
           return cache;
@@ -568,7 +567,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.debug('Searching diagnostic alerts', {
+    this.logger.l('Searching diagnostic alerts', {
       from: executeFrom,
       to: executeTo,
     } as LogMeta);
@@ -612,10 +611,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
+        this.logger.l('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
       } catch (e) {
-        this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
+        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
         fetchMore = false;
       }
 
@@ -788,7 +787,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     executeFrom: string,
     executeTo: string
   ) {
-    this.logger.debug('Searching prebuilt rule alerts from', {
+    this.logger.l('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
@@ -926,14 +925,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
+        this.logger.l('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }
     } catch (e) {
       // to keep backward compatibility with the previous implementation, silent return
       // once we start using `paginate` this error should be managed downstream
-      this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
+      this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
       return;
     } finally {
       await this.closePointInTime(pitId);
@@ -957,10 +956,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.l('Error trying to close point in time', {
+      this.logger.warn('Error trying to close point in time', {
         pit: pitId,
-        error: JSON.stringify(error),
-      });
+        error_message: error.message,
+      } as LogMeta);
     }
   }
 
@@ -1046,7 +1045,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         fetchMore = numOfHits > 0;
       } catch (e) {
-        this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
+        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
         fetchMore = false;
       }
 
@@ -1061,11 +1060,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.l('Error trying to close point in time', {
+      this.logger.warn('Error trying to close point in time', {
         pit: pitId,
-        error: JSON.stringify(error),
+        error_message: error.message,
         keepAlive,
-      });
+      } as LogMeta);
     }
 
     this.logger.l('Timeline alerts to return', { alerts: alertsToReturn.length });
@@ -1259,7 +1258,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
       return ret.license;
     } catch (err) {
-      this.logger.l('failed retrieving license', { error: JSON.stringify(err) });
+      this.logger.warn('failed retrieving license', { error_message: err.message } as LogMeta);
       return undefined;
     }
   }
@@ -1320,7 +1319,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         yield data;
       } while (esQuery.search_after !== undefined);
     } catch (e) {
-      this.logger.l('Error running paginated query', { error: JSON.stringify(e) });
+      this.logger.warn('Error running paginated query', { error_message: e.message } as LogMeta);
       throw e;
     } finally {
       await this.closePointInTime(pit.id);
@@ -1352,7 +1351,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getClusterStats(): Promise<ClusterStats> {
     const es = this.esClient();
 
-    this.logger.debug('Fetching cluster stats');
+    this.logger.l('Fetching cluster stats');
 
     return es.cluster.stats({}).then(
       (response) =>
@@ -1369,7 +1368,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getIndices(): Promise<string[]> {
     const es = this.esClient();
 
-    this.logger.debug('Fetching indices');
+    this.logger.l('Fetching indices');
 
     const request: CatIndicesRequest = {
       expand_wildcards: ['open', 'hidden'],
@@ -1389,7 +1388,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getDataStreams(): Promise<DataStream[]> {
     const es = this.esClient();
 
-    this.logger.debug('Fetching datstreams');
+    this.logger.l('Fetching datstreams');
 
     const request: IndicesGetDataStreamRequest = {
       name: '*',
@@ -1422,19 +1421,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async *getIndicesStats(indices: string[], config: QueryConfig) {
     const es = this.esClient();
 
-    this.logger.debug(`Fetching indices stats for ${indices.length} indices`, {
-      indices,
-    } as LogMeta);
+    this.logger.l('Fetching indices stats', { indices } as LogMeta);
 
     const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
 
-    this.logger.debug(`Splitted indices into ${groupedIndices.length} groups`, {
+    this.logger.l('Splitted indices into groups', {
       groups: groupedIndices.length,
+      indices: indices.length,
     } as LogMeta);
 
     for (const group of groupedIndices) {
       for (const name of group) {
-        // this.logger.debug(`Fetching indices stats for ${name}`, { name } as LogMeta);
         const request: IndicesStatsRequest = {
           index: `${name}*`,
           level: 'indices',
@@ -1472,17 +1469,15 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async *getIlmsStats(indices: string[], config: QueryConfig) {
     const es = this.esClient();
 
-    this.logger.debug(`Fetching ilm stats for ${indices.length} indices`, { indices } as LogMeta);
-
     const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
 
-    this.logger.debug(`Splitted indices into ${groupedIndices.length} groups`, {
+    this.logger.l('Splitted indices into groups', {
       groups: groupedIndices.length,
+      indices: indices.length,
     } as LogMeta);
 
     for (const group of groupedIndices) {
       for (const name of group) {
-        // this.logger.debug(`Fetching ilm stats for ${name}`, { name } as LogMeta);
         const request: IlmExplainLifecycleRequest = {
           index: `${name}*`,
           only_managed: false,
@@ -1523,17 +1518,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    this.logger.debug(`Fetching ilms policies for ${ilms.length} ilms`, { ilms } as LogMeta);
-
     const groupedIlms = findCommonPrefixes(ilms, config).map((v, _) => v.parts);
 
-    this.logger.debug(`Splitted ilms into ${groupedIlms.length} groups`, {
+    this.logger.l(`Splitted ilms into groups`, {
       groups: groupedIlms.length,
+      ilms: ilms.length,
     } as LogMeta);
 
     for (const group of groupedIlms) {
       for (const name of group) {
-        this.logger.debug(`Fetching ilm policies for ${name}`, { name } as LogMeta);
+        this.logger.l('Fetching ilm policies', { name } as LogMeta);
         const request: IlmGetLifecycleRequest = {
           name: `${name}*`,
           filter_path: [
@@ -1562,7 +1556,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             } as IlmPolicy;
           }
         } catch (error) {
-          this.logger.warn('Error fetching ilm policies', { error_message: error } as LogMeta);
+          this.logger.warn('Error fetching ilm policies', {
+            error_message: error.message,
+          } as LogMeta);
           throw error;
         }
       }
