@@ -38,15 +38,15 @@ export default function ({ getService }: FtrProviderContext) {
     const logger = getService('log');
     const retry = getService('retry');
     const slo = getService('slo');
-    const transform = getService('transform');
+    // const transform = getService('transform');
     const sloEsClient = new SloEsClient(esClient);
 
-    const onFailure = async () => {
-      const allTransforms = await transform.api.getTransformList();
-      for (const tf of allTransforms.transforms) {
-        await transform.api.scheduleTransform(tf.id);
-      }
-    };
+    // const onFailure = async () => {
+    //   const allTransforms = await transform.api.getTransformList();
+    //   for (const tf of allTransforms.transforms) {
+    //     await transform.api.scheduleTransform(tf.id);
+    //   }
+    // };
 
     let createSLOInput: CreateSLOInput;
 
