@@ -10,37 +10,29 @@
 import { Schema } from '..';
 import { K8sEntity } from '.';
 
-export function k8sStatefulSetEntity({
+export function k8sContainerEntity({
   schema,
-  name,
-  uid,
-  clusterName,
+  id,
   entityId,
   ...others
 }: {
   schema: Schema;
-  name: string;
-  uid?: string;
-  clusterName?: string;
+  id: string;
   entityId: string;
   [key: string]: any;
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
-      'entity.type': 'stateful_set',
-      'kubernetes.statefulset.name': name,
-      'kubernetes.statefulset.uid': uid,
-      'kubernetes.namespace': clusterName,
+      'entity.type': 'container',
+      'kubernetes.container.id': id,
       'entity.id': entityId,
       ...others,
     });
   }
 
   return new K8sEntity(schema, {
-    'entity.type': 'stateful_set',
-    'k8s.statefulset.name': name,
-    'k8s.statefulset.uid': uid,
-    'k8s.cluster.name': clusterName,
+    'entity.type': 'container',
+    'container.id': id,
     'entity.id': entityId,
     ...others,
   });

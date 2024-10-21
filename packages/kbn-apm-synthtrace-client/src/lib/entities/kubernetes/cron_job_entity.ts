@@ -27,7 +27,7 @@ export function k8sCronJobEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
-      'entity.type': 'cronJob',
+      'entity.type': 'cron_job',
       'kubernetes.cronjob.name': name,
       'kubernetes.cronjob.uid': uid,
       'kubernetes.namespace': clusterName,
@@ -37,7 +37,7 @@ export function k8sCronJobEntity({
   }
 
   return new K8sEntity(schema, {
-    'entity.type': 'cronJob',
+    'entity.type': 'cron_job',
     'k8s.cronjob.name': name,
     'k8s.cronjob.uid': uid,
     'k8s.cluster.name': clusterName,

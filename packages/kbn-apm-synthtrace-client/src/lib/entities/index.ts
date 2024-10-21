@@ -20,9 +20,10 @@ import { k8sNodeEntity } from './kubernetes/node_entity';
 import { k8sPodEntity } from './kubernetes/pod_entity';
 import { k8sReplicaSetEntity } from './kubernetes/replica_set';
 import { k8sStatefulSetEntity } from './kubernetes/stateful_set';
+import { k8sContainerEntity } from './kubernetes/container_entity';
 
 export type EntityDataStreamType = 'metrics' | 'logs' | 'traces';
-export type Schema = 'ecs' | 'otel';
+export type Schema = 'ecs' | 'semconv';
 
 export type EntityFields = Fields &
   Partial<{
@@ -56,5 +57,6 @@ export const entities = {
     k8sPodEntity,
     k8sReplicaSetEntity,
     k8sStatefulSetEntity,
+    k8sContainerEntity,
   },
 };

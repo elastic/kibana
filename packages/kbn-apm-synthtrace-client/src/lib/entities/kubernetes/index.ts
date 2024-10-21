@@ -14,51 +14,49 @@ const identityFieldsMap: Record<Schema, Record<K8sEntityType, string[]>> = {
   ecs: {
     pod: ['kubernetes.pod.name'],
     cluster: ['orchestrator.cluster.name'],
-    cronJob: ['kubernetes.cronjob.name'],
-    daemonSet: ['kubernetes.daemonset.name'],
+    cron_job: ['kubernetes.cronjob.name'],
+    daemon_set: ['kubernetes.daemonset.name'],
     deployment: ['kubernetes.deployment.name'],
     job: ['kubernetes.job.name'],
     node: ['kubernetes.node.name'],
-    replicaSet: ['kubernetes.replicaset.name'],
-    statefulSet: ['kubernetes.statefulset.name'],
+    replica_set: ['kubernetes.replicaset.name'],
+    stateful_set: ['kubernetes.statefulset.name'],
     container: ['kubernetes.container.id'],
   },
-  otel: {
+  semconv: {
     pod: ['k8s.pod.name'],
     cluster: ['k8s.cluster.uid'],
-    cronJob: ['k8s.cronjob.name'],
-    daemonSet: ['k8s.daemonset.name'],
+    cron_job: ['k8s.cronjob.name'],
+    daemon_set: ['k8s.daemonset.name'],
     deployment: ['k8s.deployment.name'],
     job: ['k8s.job.name'],
     node: ['k8s.node.uid'],
-    replicaSet: ['k8s.replicaset.name'],
-    statefulSet: ['k8s.statefulset.name'],
+    replica_set: ['k8s.replicaset.name'],
+    stateful_set: ['k8s.statefulset.name'],
     container: ['container.id'],
   },
 };
 
 type K8sEntityType =
-  | 'statefulSet'
-  | 'replicaSet'
+  | 'stateful_set'
+  | 'replica_set'
   | 'pod'
   | 'node'
   | 'job'
   | 'deployment'
-  | 'daemonSet'
-  | 'cronJob'
+  | 'daemon_set'
+  | 'cron_job'
   | 'cluster'
   | 'container';
 
 export class K8sEntity extends Serializable<EntityFields> {
   constructor(schema: Schema, fields: EntityFields) {
     const entityType = fields['entity.type'] as K8sEntityType;
-    const entityTypeWithSchema = `${entityType}_${schema}`;
-    const entityDefinitionId = `kubernetes.${entityType}.${schema}`;
+    const entityTypeWithSchema = `kubernetes_${entityType}_${schema}`;
     super({
       ...fields,
       'entity.type': entityTypeWithSchema,
-      'entity.definitionId': `builtin_${entityDefinitionId}_from_ecs_data`,
-      'entity.identityFields': identityFieldsMap[schema][entityType],
+      'entity.definitionId': `builtin_${entityTypeWithSchema}`,
       'entity.displayName': getDisplayName({ schema, entityType, fields }),
     });
   }

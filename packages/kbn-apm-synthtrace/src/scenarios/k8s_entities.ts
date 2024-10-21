@@ -125,11 +125,18 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
                   entityId: NODE_ENTITY_ID,
                 })
                 .timestamp(timestamp),
+              entities.k8s
+                .k8sContainerEntity({
+                  id: '123',
+                  schema,
+                  entityId: NODE_ENTITY_ID,
+                })
+                .timestamp(timestamp),
             ];
           });
 
       const ecsEntities = getK8sEntitiesEvents('ecs');
-      const otelEntities = getK8sEntitiesEvents('otel');
+      const otelEntities = getK8sEntitiesEvents('semconv');
 
       return [
         withClient(

@@ -27,7 +27,7 @@ export function k8sDaemonSetEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
-      'entity.type': 'daemonSet',
+      'entity.type': 'daemon_set',
       'kubernetes.daemonset.name': name,
       'kubernetes.daemonset.uid': uid,
       'kubernetes.namespace': clusterName,
@@ -37,7 +37,7 @@ export function k8sDaemonSetEntity({
   }
 
   return new K8sEntity(schema, {
-    'entity.type': 'daemonSet',
+    'entity.type': 'daemon_set',
     'k8s.daemonset.name': name,
     'k8s.daemonset.uid': uid,
     'k8s.cluster.name': clusterName,
