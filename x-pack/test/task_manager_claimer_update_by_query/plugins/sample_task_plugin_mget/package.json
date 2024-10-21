@@ -1,11 +1,11 @@
 {
-  "name": "@kbn/sample-task-plugin-mget",
+  "name": "@kbn/sample-task-plugin-update-by-query",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
-  "main": "target/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget",
+  "main": "target/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget",
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"

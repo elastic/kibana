@@ -742,7 +742,7 @@ x-pack/plugins/runtime_fields @elastic/kibana-management
 packages/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
 x-pack/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget @elastic/response-ops
+x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
 x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
@@ -929,9 +929,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
@@ -1467,7 +1467,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/task_manager_claimer_mget/ @elastic/response-ops
+/x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
