@@ -11,18 +11,21 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import { useAgentPoliciesSpaces } from '../../../../../../hooks';
-import { useAgentPolicyFormContext } from '../agent_policy_form';
 
 export interface SpaceSelectorProps {
   value: string[];
   onChange: (newVal: string[]) => void;
   isDisabled?: boolean;
+  setInvalidSpaceError?: (hasError: boolean) => void;
 }
 
-export const SpaceSelector: React.FC<SpaceSelectorProps> = ({ value, onChange, isDisabled }) => {
+export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
+  setInvalidSpaceError,
+  value,
+  onChange,
+  isDisabled,
+}) => {
   const res = useAgentPoliciesSpaces();
-
-  const agentPolicyFormContect = useAgentPolicyFormContext();
 
   const [error, setError] = React.useState<string>();
 
@@ -89,10 +92,8 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({ value, onChange, i
                   values: { space: searchValue },
                 });
           setError(newError);
-          if (newError) {
-            agentPolicyFormContect?.setInvalidSpaceError(!!newError);
-          } else {
-            agentPolicyFormContect?.setInvalidSpaceError(!!newError);
+          if (setInvalidSpaceError) {
+            setInvalidSpaceError(!!newError);
           }
         }}
         onChange={(newOptions) => {
