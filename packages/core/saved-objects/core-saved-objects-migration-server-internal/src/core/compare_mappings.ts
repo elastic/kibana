@@ -33,6 +33,13 @@ export const getUpdatedRootFields = (indexMappings: IndexMapping): string[] => {
     .map(([propertyName]) => propertyName);
 };
 
+interface GetUpdatedTypesParams {
+  indexMeta?: IndexMappingMeta;
+  indexTypes: string[];
+  latestMappingsVersions: VirtualVersionMap;
+  hashToVersionMap?: Record<string, string>;
+}
+
 /**
  * Compares the current vs stored mappings' hashes or modelVersions.
  * Returns a list with all the types that have been updated.
@@ -47,12 +54,7 @@ export const getUpdatedTypes = ({
   indexTypes,
   latestMappingsVersions,
   hashToVersionMap = {},
-}: {
-  indexMeta?: IndexMappingMeta;
-  indexTypes: string[];
-  latestMappingsVersions: VirtualVersionMap;
-  hashToVersionMap?: Record<string, string>;
-}): string[] => {
+}: GetUpdatedTypesParams): string[] => {
   if (!indexMeta || (!indexMeta.mappingVersions && !indexMeta.migrationMappingPropertyHashes)) {
     // if we currently do NOT have meta information stored in the index
     // we consider that all types have been updated
@@ -62,13 +64,49 @@ export const getUpdatedTypes = ({
   // If something exists in stored, but is missing in current
   // we don't care, as it could be a disabled plugin, etc
   // and keeping stale stuff around is better than migrating unecessesarily.
-  return indexTypes.filter((type) =>
-    isTypeUpdated({
-      type,
-      mappingVersion: latestMappingsVersions[type],
-      indexMeta,
-      hashToVersionMap,
-    })
+  return indexTypes.filter(
+    (type) =>
+      checkTypeStatus({
+        type,
+        mappingVersion: latestMappingsVersions[type],
+        indexMeta,
+        hashToVersionMap,
+      }) === 'updated'
+  );
+};
+
+/**
+ * Compares the current vs stored mappings' hashes or modelVersions.
+ * Returns a list with all the new types and the types that have been updated.
+ * @param indexMeta The meta information stored in the SO index
+ * @param knownTypes The list of SO types that belong to the index and are enabled
+ * @param latestMappingsVersions A map holding [type => version] with the latest versions where mappings have changed for each type
+ * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
+ * @returns the list of new types + thosetypes that have been updated (in terms of their mappings)
+ */
+export const getNewAndUpdatedTypes = ({
+  indexMeta,
+  indexTypes,
+  latestMappingsVersions,
+  hashToVersionMap = {},
+}: GetUpdatedTypesParams): string[] => {
+  if (!indexMeta || (!indexMeta.mappingVersions && !indexMeta.migrationMappingPropertyHashes)) {
+    // if we currently do NOT have meta information stored in the index
+    // we consider that all types have been updated
+    return indexTypes;
+  }
+
+  // If something exists in stored, but is missing in current
+  // we don't care, as it could be a disabled plugin, etc
+  // and keeping stale stuff around is better than migrating unecessesarily.
+  return indexTypes.filter(
+    (type) =>
+      checkTypeStatus({
+        type,
+        mappingVersion: latestMappingsVersions[type],
+        indexMeta,
+        hashToVersionMap,
+      }) !== 'unchanged'
   );
 };
 
@@ -78,9 +116,9 @@ export const getUpdatedTypes = ({
  * @param mappingVersion The most recent model version that includes mappings changes
  * @param indexMeta The meta information stored in the SO index
  * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
- * @returns true if the mappings for the given type have changed since Kibana was last started
+ * @returns 'new' | 'updated' | 'unchanged' depending on whether the type has changed
  */
-function isTypeUpdated({
+function checkTypeStatus({
   type,
   mappingVersion,
   indexMeta,
@@ -90,7 +128,7 @@ function isTypeUpdated({
   mappingVersion: string;
   indexMeta: IndexMappingMeta;
   hashToVersionMap: Record<string, string>;
-}): boolean {
+}): 'new' | 'updated' | 'unchanged' {
   const latestMappingsVersion = Semver.parse(mappingVersion);
   if (!latestMappingsVersion) {
     throw new Error(
@@ -104,26 +142,28 @@ function isTypeUpdated({
     if (!indexVersion) {
       // either a new type, and thus there's not need to update + pickup any docs
       // or an old re-enabled type, which will be updated on OUTDATED_DOCUMENTS_TRANSFORM
-      return false;
+      return 'new';
     }
 
     // if the last version where mappings have changed is more recent than the one stored in the index
     // it means that the type has been updated
-    return latestMappingsVersion.compare(indexVersion) === 1;
+    return latestMappingsVersion.compare(indexVersion) === 1 ? 'updated' : 'unchanged';
   } else if (indexMeta.migrationMappingPropertyHashes) {
     const latestHash = indexMeta.migrationMappingPropertyHashes?.[type];
 
     if (!latestHash) {
       // either a new type, and thus there's not need to update + pickup any docs
       // or an old re-enabled type, which will be updated on OUTDATED_DOCUMENTS_TRANSFORM
-      return false;
+      return 'new';
     }
 
     const indexEquivalentVersion = hashToVersionMap[`${type}|${latestHash}`];
-    return !indexEquivalentVersion || latestMappingsVersion.compare(indexEquivalentVersion) === 1;
+    return !indexEquivalentVersion || latestMappingsVersion.compare(indexEquivalentVersion) === 1
+      ? 'updated'
+      : 'unchanged';
   }
 
   // at this point, the mappings do not contain any meta informataion
   // we consider the type has been updated, out of caution
-  return true;
+  return 'updated';
 }
