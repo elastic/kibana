@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { useAsObservable } from './use_as_observable';
 
 describe('useAsObservable', () => {
@@ -52,8 +52,6 @@ describe('useAsObservable', () => {
     await act(async () => {
       rerender('test update');
     });
-
-    await waitFor(() => null);
 
     expect(subscriptionMock).toHaveBeenCalledTimes(2);
     expect(subscriptionMock).toHaveBeenCalledWith('test update');

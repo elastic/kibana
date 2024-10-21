@@ -7,9 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-
-import { act, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
@@ -75,8 +73,6 @@ describe('useStorage', () => {
       setValue(false);
     });
 
-    await waitFor(() => null);
-
     expect(result.current[0]).toBe(false);
     expect(mockSet).toHaveBeenCalledWith('ml.gettingStarted.isDismissed', false);
   });
@@ -93,8 +89,6 @@ describe('useStorage', () => {
     await act(async () => {
       setValue(undefined);
     });
-
-    await waitFor(() => null);
 
     expect(result.current[0]).toBe(undefined);
     expect(mockRemove).toHaveBeenCalledWith('ml.gettingStarted.isDismissed');
@@ -127,8 +121,6 @@ describe('useStorage', () => {
       );
     });
 
-    await waitFor(() => null);
-
     expect(result.current[0]).toBe(undefined);
 
     await act(async () => {
@@ -139,8 +131,6 @@ describe('useStorage', () => {
         })
       );
     });
-
-    await waitFor(() => null);
 
     expect(result.current[0]).toBe(false);
   });

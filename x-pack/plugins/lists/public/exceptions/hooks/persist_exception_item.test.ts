@@ -29,11 +29,16 @@ describe('usePersistExceptionItem', () => {
   const onError = jest.fn();
 
   beforeEach(() => {
+    // setup fake timers before rendering
+    jest.useFakeTimers();
+
     (api.addEndpointExceptionList as jest.Mock).mockResolvedValue(getExceptionListItemSchemaMock());
     (api.updateExceptionListItem as jest.Mock).mockResolvedValue(getExceptionListItemSchemaMock());
   });
 
   afterEach(() => {
+    // restore real timers
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -54,9 +59,6 @@ describe('usePersistExceptionItem', () => {
         setTimeout(() => resolve(getExceptionListItemSchemaMock()), 1000)
       );
     });
-
-    // setup fake timers before rendering
-    jest.useFakeTimers();
 
     const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
@@ -81,8 +83,6 @@ describe('usePersistExceptionItem', () => {
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });
 
-    // restore real timers
-    jest.useRealTimers();
     (api.addExceptionListItem as jest.Mock).mockImplementation(defaultImplementation);
   });
 
