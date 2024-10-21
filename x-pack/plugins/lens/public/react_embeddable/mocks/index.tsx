@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import React from 'react';
 import faker from 'faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
@@ -16,6 +17,7 @@ import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mock
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -222,6 +224,38 @@ export const mockDatasourceMap = (
   };
 };
 
+export function createExpressionRendererMock(): jest.Mock<
+  React.ReactElement,
+  [ReactExpressionRendererProps]
+> {
+  return jest.fn(({ expression }) => (
+    <span data-test-subj="lnsExpressionRenderer">
+      {(expression as string) || 'Expression renderer mock'}
+    </span>
+  ));
+}
+
+function getValidExpressionParams(
+  overrides: Partial<ExpressionWrapperProps> = {}
+): ExpressionWrapperProps {
+  return {
+    ExpressionRenderer: createExpressionRendererMock(),
+    expression: 'test',
+    searchContext: {},
+    handleEvent: jest.fn(),
+    onData$: jest.fn(),
+    onRender$: jest.fn(),
+    addUserMessages: jest.fn(),
+    onRuntimeError: jest.fn(),
+    lensInspector: {
+      getInspectorAdapters: jest.fn(),
+      inspect: jest.fn(),
+      closeInspector: jest.fn(),
+    },
+    ...overrides,
+  };
+}
+
 const LensInternalApiMock: LensInternalApi = {
   dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
   attributes$: new BehaviorSubject<LensRuntimeState['attributes']>(defaultDoc),
@@ -229,7 +263,7 @@ const LensInternalApiMock: LensInternalApi = {
   disableTriggers$: new BehaviorSubject<LensRuntimeState['disableTriggers']>(undefined),
   dataLoading$: new BehaviorSubject<boolean | undefined>(undefined),
   hasRenderCompleted$: new BehaviorSubject<boolean>(true),
-  expressionParams$: new BehaviorSubject<ExpressionWrapperProps | null>(null),
+  expressionParams$: new BehaviorSubject<ExpressionWrapperProps | null>(getValidExpressionParams()),
   expressionAbortController$: new BehaviorSubject<AbortController | undefined>(undefined),
   renderCount$: new BehaviorSubject<number>(0),
   messages$: new BehaviorSubject<UserMessage[]>([]),
