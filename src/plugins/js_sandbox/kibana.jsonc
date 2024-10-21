@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/js-sandbox-plugin",
+  "owner": "@elastic/ml-ui",
+  "description": "A synchronous global stateful event bus",
+  "plugin": {
+    "id": "jsSandbox",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions"
+    ],
+    "optionalPlugins": []
+  }
+}

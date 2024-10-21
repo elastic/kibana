@@ -656,6 +656,7 @@
     "@kbn/io-ts-utils": "link:src/platform/packages/shared/kbn-io-ts-utils",
     "@kbn/ipynb": "link:x-pack/solutions/search/packages/kbn-ipynb",
     "@kbn/item-buffer": "link:src/platform/packages/private/kbn-item-buffer",
+    "@kbn/js-sandbox-plugin": "link:src/plugins/js_sandbox",
     "@kbn/json-schemas": "link:x-pack/platform/packages/private/ml/json_schemas",
     "@kbn/kbn-health-gateway-status-plugin": "link:src/platform/test/health_gateway/plugins/status",
     "@kbn/kbn-sample-panel-action-plugin": "link:src/platform/test/plugin_functional/plugins/kbn_sample_panel_action",

@@ -6004,6 +6004,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/js-sandbox-plugin@link:src/plugins/js_sandbox":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-log-fixture-plugin@link:x-pack/platform/test/plugin_api_integration/plugins/event_log":
   version "0.0.0"
   uid ""
