@@ -51,6 +51,8 @@ export const LogRateAnalysisReduxProvider: FC<
   PropsWithChildren<LogRateAnalysisReduxProviderProps>
 > = ({ children, initialAnalysisStart }) => {
   const { eventBus } = useAiopsAppContext();
+  eventBus.useRegisterEventBus(logRateAnalysisSlice);
+
   const store = useMemo(getReduxStore, []);
 
   useMount(() => {
