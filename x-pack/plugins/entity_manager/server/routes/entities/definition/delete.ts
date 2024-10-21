@@ -10,10 +10,10 @@ import {
   deleteEntityDefinitionQuerySchema,
 } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
-import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
-import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { EntityDefinitionNotFound } from '../../../lib/entities/errors/entity_not_found';
+import { EntitySecurityException } from '../../../lib/entities/errors/entity_security_exception';
+import { InvalidTransformError } from '../../../lib/entities/errors/invalid_transform_error';
+import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
 
 /**
  * @openapi

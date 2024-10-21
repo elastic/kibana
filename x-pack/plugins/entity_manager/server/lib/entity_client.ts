@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import { EntityDefinition, EntityDefinitionUpdate, FindEntitiesQuery } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
@@ -20,6 +20,7 @@ import { uninstallEntityDefinition } from './entities/uninstall_entity_definitio
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
+import { findEntities } from './entities/find_entities';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
@@ -66,7 +67,7 @@ export class EntityClient {
     const definition = await findEntityDefinitionById({
       id,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asCurrentUser,
       includeState: true,
     });
 
@@ -101,10 +102,9 @@ export class EntityClient {
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asCurrentUser,
       soClient: this.options.soClient,
     });
 
@@ -116,7 +116,7 @@ export class EntityClient {
 
     await uninstallEntityDefinition({
       definition,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asSecondaryAuthUser,
       soClient: this.options.soClient,
       logger: this.options.logger,
     });
@@ -148,7 +148,7 @@ export class EntityClient {
     builtIn?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
+      esClient: this.options.clusterClient.asCurrentUser,
       soClient: this.options.soClient,
       page,
       perPage,
@@ -159,6 +159,36 @@ export class EntityClient {
     });
 
     return { definitions };
+  }
+
+  async getEntityDefinition({ id, includeState = false }: { id: string; includeState?: boolean }) {
+    const definition = await findEntityDefinitionById({
+      esClient: this.options.clusterClient.asCurrentUser,
+      soClient: this.options.soClient,
+      id,
+      includeState,
+    });
+
+    return definition;
+  }
+
+  async findEntities({
+    perPage = 10,
+    query = '',
+    searchAfter,
+    sortField = '@timestamp',
+    sortDirection = 'asc',
+  }: FindEntitiesQuery) {
+    return await findEntities(
+      this.options.clusterClient.asCurrentUser,
+      perPage,
+      query,
+      searchAfter,
+      {
+        field: sortField,
+        direction: sortDirection,
+      }
+    );
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
