@@ -67,6 +67,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminUser);
+
+      await esArchiver.unload(archives.ecommerce.data);
+      await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
     });
 
     it(`user can delete a report they've created`, async () => {
