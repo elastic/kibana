@@ -81,11 +81,11 @@ describe('GroupSelection', () => {
 
   const docLinks = {
     links: {
-      dashboard: {
+      visualize: {
         guide: 'test',
       },
     },
-  };
+  } as unknown as DocLinksStart;
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -103,7 +103,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes)}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -118,7 +118,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes)}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -138,7 +138,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -151,7 +151,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes)}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -171,7 +171,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry([..._visTypes, toolsVisType] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -192,7 +192,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={toggleGroups}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -207,7 +207,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
@@ -239,7 +239,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={false}
@@ -259,7 +259,7 @@ describe('GroupSelection', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
+        docLinks={docLinks}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
         showExperimental={true}
