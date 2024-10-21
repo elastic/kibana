@@ -63,7 +63,7 @@ export function GroupSelector() {
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="inventory.groupSelectorDropdown"
+      data-test-subj="groupSelectorDropdown"
       flush="both"
       iconSide="right"
       iconSize="s"
@@ -82,7 +82,7 @@ export function GroupSelector() {
 
   return (
     <EuiPopover
-      data-test-subj="inventory.groupedInventoryPage.groupsPopover"
+      data-test-subj="inventoryGroupsPopover"
       button={button}
       closePopover={closePopover}
       isOpen={isPopoverOpen}
