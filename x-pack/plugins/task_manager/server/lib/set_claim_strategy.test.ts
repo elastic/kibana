@@ -71,67 +71,61 @@ describe('setClaimStrategy', () => {
   });
   for (const isServerless of [true, false]) {
     for (const isCloud of [true, false]) {
-      for (const isElasticStaffOwned of [true, false]) {
-        for (const deploymentId of [undefined, deploymentIdMget, deploymentIdUpdateByQuery]) {
-          for (const configuredStrategy of [CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY]) {
-            test(`should return config as is when claim strategy is already defined: isServerless=${isServerless}, isCloud=${isCloud}, isElasticStaffOwned=${isElasticStaffOwned}, deploymentId=${deploymentId}`, () => {
-              const config = {
-                ...getConfigWithoutClaimStrategy(),
-                claim_strategy: configuredStrategy,
-              };
+      for (const deploymentId of [undefined, deploymentIdMget, deploymentIdUpdateByQuery]) {
+        for (const configuredStrategy of [CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY]) {
+          test(`should return config as is when claim strategy is already defined: isServerless=${isServerless}, isCloud=${isCloud}, deploymentId=${deploymentId}`, () => {
+            const config = {
+              ...getConfigWithoutClaimStrategy(),
+              claim_strategy: configuredStrategy,
+            };
 
-              const returnedConfig = setClaimStrategy({
-                config,
-                logger,
-                isCloud,
-                isServerless,
-                isElasticStaffOwned,
-                deploymentId,
-              });
-
-              expect(returnedConfig).toStrictEqual(config);
-              if (deploymentId) {
-                expect(logger.info).toHaveBeenCalledWith(
-                  `Using claim strategy ${configuredStrategy} as configured for deployment ${deploymentId}`
-                );
-              } else {
-                expect(logger.info).toHaveBeenCalledWith(
-                  `Using claim strategy ${configuredStrategy} as configured`
-                );
-              }
+            const returnedConfig = setClaimStrategy({
+              config,
+              logger,
+              isCloud,
+              isServerless,
+              deploymentId,
             });
-          }
+
+            expect(returnedConfig).toStrictEqual(config);
+            if (deploymentId) {
+              expect(logger.info).toHaveBeenCalledWith(
+                `Using claim strategy ${configuredStrategy} as configured for deployment ${deploymentId}`
+              );
+            } else {
+              expect(logger.info).toHaveBeenCalledWith(
+                `Using claim strategy ${configuredStrategy} as configured`
+              );
+            }
+          });
         }
       }
     }
   }
 
   for (const isCloud of [true, false]) {
-    for (const isElasticStaffOwned of [true, false]) {
-      for (const deploymentId of [undefined, deploymentIdMget, deploymentIdUpdateByQuery]) {
-        test(`should set claim strategy to mget if in serverless: isCloud=${isCloud}, isElasticStaffOwned=${isElasticStaffOwned}, deploymentId=${deploymentId}`, () => {
-          const config = getConfigWithoutClaimStrategy();
-          const returnedConfig = setClaimStrategy({
-            config,
-            logger,
-            isCloud,
-            isServerless: true,
-            isElasticStaffOwned,
-            deploymentId,
-          });
-
-          expect(returnedConfig.claim_strategy).toBe(CLAIM_STRATEGY_MGET);
-          expect(returnedConfig.poll_interval).toBe(MGET_DEFAULT_POLL_INTERVAL);
-
-          if (deploymentId) {
-            expect(logger.info).toHaveBeenCalledWith(
-              `Setting claim strategy to mget for serverless deployment ${deploymentId}`
-            );
-          } else {
-            expect(logger.info).toHaveBeenCalledWith(`Setting claim strategy to mget`);
-          }
+    for (const deploymentId of [undefined, deploymentIdMget, deploymentIdUpdateByQuery]) {
+      test(`should set claim strategy to mget if in serverless: isCloud=${isCloud}, deploymentId=${deploymentId}`, () => {
+        const config = getConfigWithoutClaimStrategy();
+        const returnedConfig = setClaimStrategy({
+          config,
+          logger,
+          isCloud,
+          isServerless: true,
+          deploymentId,
         });
-      }
+
+        expect(returnedConfig.claim_strategy).toBe(CLAIM_STRATEGY_MGET);
+        expect(returnedConfig.poll_interval).toBe(MGET_DEFAULT_POLL_INTERVAL);
+
+        if (deploymentId) {
+          expect(logger.info).toHaveBeenCalledWith(
+            `Setting claim strategy to mget for serverless deployment ${deploymentId}`
+          );
+        } else {
+          expect(logger.info).toHaveBeenCalledWith(`Setting claim strategy to mget`);
+        }
+      });
     }
   }
 
@@ -141,7 +135,6 @@ describe('setClaimStrategy', () => {
       config,
       logger,
       isCloud: false,
-      isElasticStaffOwned: false,
       isServerless: false,
     });
 
@@ -157,7 +150,6 @@ describe('setClaimStrategy', () => {
       config,
       logger,
       isCloud: true,
-      isElasticStaffOwned: false,
       isServerless: false,
     });
 
@@ -173,7 +165,6 @@ describe('setClaimStrategy', () => {
       config,
       logger,
       isCloud: true,
-      isElasticStaffOwned: false,
       isServerless: false,
       deploymentId: deploymentIdUpdateByQuery,
     });
@@ -186,32 +177,12 @@ describe('setClaimStrategy', () => {
     );
   });
 
-  test(`should set claim strategy to mget if cloud, deploymentId does not start with a or b, not serverless and isElasticStaffOwned is true`, () => {
-    const config = getConfigWithoutClaimStrategy();
-    const returnedConfig = setClaimStrategy({
-      config,
-      logger,
-      isCloud: true,
-      isElasticStaffOwned: true,
-      isServerless: false,
-      deploymentId: deploymentIdUpdateByQuery,
-    });
-
-    expect(returnedConfig.claim_strategy).toBe(CLAIM_STRATEGY_MGET);
-    expect(returnedConfig.poll_interval).toBe(MGET_DEFAULT_POLL_INTERVAL);
-
-    expect(logger.info).toHaveBeenCalledWith(
-      `Setting claim strategy to mget for deployment ${deploymentIdUpdateByQuery}`
-    );
-  });
-
   test(`should set claim strategy to mget if cloud and not serverless and deploymentId starts with a or b`, () => {
     const config = getConfigWithoutClaimStrategy();
     const returnedConfig = setClaimStrategy({
       config,
       logger,
       isCloud: true,
-      isElasticStaffOwned: false,
       isServerless: false,
       deploymentId: deploymentIdMget,
     });

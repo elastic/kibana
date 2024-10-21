@@ -19,7 +19,6 @@ interface SetClaimStrategyOpts {
   deploymentId?: string;
   isServerless: boolean;
   isCloud: boolean;
-  isElasticStaffOwned: boolean;
   logger: Logger;
 }
 
@@ -51,10 +50,7 @@ export function setClaimStrategy(opts: SetClaimStrategyOpts): TaskManagerConfig 
   let defaultToMget = false;
 
   if (opts.isCloud && !opts.isServerless && opts.deploymentId) {
-    defaultToMget =
-      opts.deploymentId.startsWith('a') ||
-      opts.deploymentId.startsWith('b') ||
-      opts.isElasticStaffOwned;
+    defaultToMget = opts.deploymentId.startsWith('a') || opts.deploymentId.startsWith('b');
     if (defaultToMget) {
       opts.logger.info(`Setting claim strategy to mget for deployment ${opts.deploymentId}`);
     } else {
