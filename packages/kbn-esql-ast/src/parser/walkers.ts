@@ -194,13 +194,13 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
         const args = [];
         if (clause.ASSIGN()) {
           args.push(createColumn(clause._newName));
-          if (textExistsAndIsValid(clause._enrichField?.getText())) {
+          if (textExistsAndIsValid(clause._enrichField.getText())) {
             args.push(createColumn(clause._enrichField));
           }
         } else {
           // if an explicit assign is not set, create a fake assign with
           // both left and right value with the same column
-          if (textExistsAndIsValid(clause._enrichField?.getText())) {
+          if (textExistsAndIsValid(clause._enrichField.getText())) {
             args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
           }
         }
@@ -459,7 +459,7 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
         if (firstArg) location.min = firstArg.location.min;
         if (lastArg) location.max = lastArg.location.max;
         return option;
-      } else if (textExistsAndIsValid(clause._oldName?.getText())) {
+      } else if (textExistsAndIsValid(clause._oldName.getText())) {
         return createColumn(clause._oldName);
       }
     })
@@ -478,8 +478,11 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
   }
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
+    const functionNameContext = functionExpressionCtx.functionName().MATCH()
+      ? functionExpressionCtx.functionName().MATCH()
+      : functionExpressionCtx.functionName().identifierOrParameter();
     const fn = createFunction(
-      functionExpressionCtx.functionName().identifierOrParameter().getText().toLowerCase(),
+      functionNameContext.getText().toLowerCase(),
       ctx,
       undefined,
       'variadic-call'
