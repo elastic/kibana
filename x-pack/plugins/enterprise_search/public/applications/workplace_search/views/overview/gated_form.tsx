@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -537,10 +537,14 @@ export const WorkplaceSearchGate: React.FC = () => {
     useActions(WorkplaceSearchGateLogic);
 
   const { feature, participateInUXLabs } = useValues(WorkplaceSearchGateLogic);
+  const onSubmitForm = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    formSubmitRequest();
+  }, []);
 
   return (
     <EuiPanel hasShadow={false}>
-      <EuiForm component="form" fullWidth>
+      <EuiForm component="form" fullWidth onSubmit={onSubmitForm}>
         <EuiFormLabel>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.features.Label', {
             defaultMessage: 'What Workplace Search feature are you looking to use?',
@@ -685,12 +689,7 @@ export const WorkplaceSearchGate: React.FC = () => {
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              isDisabled={!feature ?? false}
-              type="submit"
-              fill
-              onClick={() => formSubmitRequest()}
-            >
+            <EuiButton isDisabled={!feature ?? false} type="submit" fill>
               {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
                 defaultMessage: 'Submit',
               })}
