@@ -44,7 +44,7 @@ export const GetAgentPoliciesRequestSchema = {
       ),
       noAgentCount: schema.maybe(
         schema.boolean({
-          meta: { description: 'deprecated use withAgentCount instead' },
+          meta: { description: 'use withAgentCount instead', deprecated: true },
         })
       ), //
       withAgentCount: schema.maybe(
