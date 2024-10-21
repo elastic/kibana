@@ -18,6 +18,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { CoreStart } from '@kbn/core/public';
 import type { RecordsFetchResponse } from '../../types';
 import type { ProfilesManager } from '../../../context_awareness';
 
@@ -28,7 +29,7 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
-export function fetchEsql({
+export async function fetchEsql({
   query,
   inputQuery,
   filters,
@@ -39,6 +40,7 @@ export function fetchEsql({
   data,
   expressions,
   profilesManager,
+  core,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -50,11 +52,52 @@ export function fetchEsql({
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   profilesManager: ProfilesManager;
+  core: CoreStart;
 }): Promise<RecordsFetchResponse> {
   const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
+  if (!('esql' in query)) {
+    throw new Error('No ESQL query provided');
+  }
+  // do some dirty hacking here:
+  const inputString = query.esql;
+
+  // Regular expression to match all FROM_SOURCE calls with their parameters
+  const regex = /FROM_SOURCE\(\s*\"(.+?)\"\s*,\s*\"(.+?)\"\s*\)/g;
+
+  // Counter to track which replacement string to use
+  let replacementIndex = 0;
+
+  const runtimefields: Array<[string, string]> = [];
+
+  // Replace all occurrences of FROM_SOURCE calls with different replacement strings
+  const replacementQuery = inputString.replaceAll(regex, (match, params0, params1) => {
+    // Get the appropriate replacement string based on the index
+    const replacement = params0;
+
+    // Increment the index for the next replacement
+    replacementIndex++;
+    runtimefields.push([params0, params1]);
+
+    return replacement;
+  });
+
+  const newQuery = {
+    esql: replacementQuery,
+  };
+
+  for (const [fieldName, fieldType] of runtimefields) {
+    await core.http.post('/api/add_runtime_field', {
+      body: JSON.stringify({
+        fieldName,
+        fieldType,
+        indexPattern: dataView.name,
+      }),
+    });
+  }
+
   return textBasedQueryStateToAstWithValidation({
     filters,
-    query,
+    query: newQuery,
     time: timeRange,
     dataView,
     inputQuery,
@@ -96,10 +139,18 @@ export function fetchEsql({
             });
           }
         });
-        return lastValueFrom(execution).then(() => {
+        return lastValueFrom(execution).then(async () => {
           if (error) {
             throw new Error(error);
           } else {
+            for (const [fieldName] of runtimefields) {
+              await core.http.post('/api/remove_runtime_field', {
+                body: JSON.stringify({
+                  fieldName,
+                  indexPattern: dataView.name,
+                }),
+              });
+            }
             return {
               records: finalData || [],
               esqlQueryColumns,

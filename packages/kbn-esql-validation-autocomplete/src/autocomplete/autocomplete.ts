@@ -257,7 +257,8 @@ export async function suggest(
       getFieldsMap,
       getPolicyMetadata,
       fullText,
-      offset
+      offset,
+      resourceRetriever
     );
   }
   if (astContext.type === 'list') {
@@ -1056,9 +1057,9 @@ async function getExpressionSuggestionsByType(
   if (
     commands[commands.length - 1].name === 'where' &&
     (commands[commands.length - 1].args.length === 0 ||
-      commands[commands.length - 1].args[0].type === 'column')
+      (commands[commands.length - 1].args[0] as { type: string }).type === 'column')
   ) {
-    const indexPattern = commands[0].args[0].index;
+    const indexPattern = (commands[0].args[0] as { index: string }).index;
     // command.text will be something like WHERE<abc>marker_esql_editor - we need to strip the leading WHERE and remove marker_esql_editor in case it's there
     const valuePrefix = command.text.replace('WHERE', '').replace('marker_esql_editor', '');
     if (valuePrefix.length > 3) {
@@ -1068,16 +1069,18 @@ async function getExpressionSuggestionsByType(
           valuePrefix,
         }),
       });
-      console.log(reverseLookup);
       return [
-        ...reverseLookup.suggestions.map((suggestion: any) => ({
-          label: suggestion,
-          text: suggestion,
-          filterText: suggestion,
-          kind: 'Field',
-          sortText: '1A',
-          detail: '',
-        })),
+        ...(reverseLookup as { suggestions: string[] }).suggestions.map(
+          (suggestion: any) =>
+            ({
+              label: suggestion,
+              text: suggestion,
+              filterText: suggestion,
+              kind: 'Field',
+              sortText: '1A',
+              detail: '',
+            } as SuggestionRawDefinition)
+        ),
         ...uniqBy(suggestions, (suggestion) => suggestion.text),
       ];
     }
@@ -1087,17 +1090,21 @@ async function getExpressionSuggestionsByType(
     commands[commands.length - 1].name === 'where' &&
     commands[commands.length - 1].args.length > 0
   ) {
-    const lastArg =
-      commands[commands.length - 1].args[commands[commands.length - 1].args.length - 1];
+    const lastArg2 = commands[commands.length - 1].args[
+      commands[commands.length - 1].args.length - 1
+    ] as ESQLFunction;
     if (
-      lastArg.subtype === 'binary-expression' &&
-      lastArg.args.length === 2 &&
-      lastArg.args[1].type === 'column' &&
-      lastArg.args[0].type === 'column'
+      lastArg2.subtype === 'binary-expression' &&
+      lastArg2.args.length === 2 &&
+      (lastArg2.args[1] as unknown as { type: string }).type === 'column' &&
+      (lastArg2.args[0] as unknown as { type: string }).type === 'column'
     ) {
-      const indexPattern = commands[0].args[0].index;
-      const valuePrefix = lastArg.args[1].text.replace('marker_esql_editor', '');
-      const fieldName = lastArg.args[0].text;
+      const indexPattern = (commands[0].args[0] as { index: string }).index;
+      const valuePrefix = (lastArg2.args[1] as { text: string }).text.replace(
+        'marker_esql_editor',
+        ''
+      );
+      const fieldName = (lastArg2.args[0] as { text: string }).text;
       const valueLookup = await resourceRetriever?.http?.post(
         `/internal/kibana/suggestions/values/${indexPattern}`,
         {
@@ -1124,7 +1131,9 @@ async function getExpressionSuggestionsByType(
         }
       );
       const localValueLookup = new Set(
-        window.currentESQLData
+        (
+          window as { currentESQLData?: Array<{ flattened: Record<string, unknown> }> }
+        ).currentESQLData
           ?.filter((item) => {
             if (!item.flattened[fieldName]) return false;
             const val = String(item.flattened[fieldName]);
@@ -1132,33 +1141,25 @@ async function getExpressionSuggestionsByType(
           })
           .map((item) => item.flattened[fieldName])
       );
-      // console.log(valueLookup);
       return [
-        ...[...valueLookup, ...localValueLookup.values()].map((suggestion: any) => ({
-          label: suggestion,
-          text: `"${suggestion}"`,
-          filterText: suggestion,
-          kind: 'Field',
-          sortText: '1111A',
-          detail: '',
-        })),
+        ...[...(valueLookup as string[]), ...localValueLookup.values()].map(
+          (suggestion: any) =>
+            ({
+              label: suggestion,
+              text: `"${suggestion}"`,
+              filterText: suggestion,
+              kind: 'Field',
+              sortText: '1111A',
+              detail: '',
+            } as SuggestionRawDefinition)
+        ),
         ...uniqBy(suggestions, (suggestion) => suggestion.text),
       ];
     }
   }
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on text string (it can differ from name)
-  return [
-    {
-      label: 'test',
-      text: 'test',
-      filterText: 'test',
-      kind: 'Field',
-      sortText: '1A',
-      detail: '',
-    },
-    ...uniqBy(suggestions, (suggestion) => suggestion.text),
-  ];
+  return [...uniqBy(suggestions, (suggestion) => suggestion.text)];
 }
 
 async function getBuiltinFunctionNextArgument(
@@ -1373,10 +1374,10 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   fullText: string,
-  offset: number
+  offset: number,
+  resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   // XXXXXXX here it is
-  console.log(node.name);
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
   if (!fnDefinition) {
@@ -1587,7 +1588,44 @@ async function getFunctionArgsSuggestions(
   if (fnDefinition.name === 'count' && !arg) {
     suggestions.push(allStarConstant);
   }
-  console.log(suggestions);
+  if (fnDefinition.name === 'from_source') {
+    const indexPattern = (commands[0].args[0] as unknown as { index: string }).index;
+    const valueLookup = await resourceRetriever?.http?.post(
+      `/internal/kibana/suggestions/values/${indexPattern}`,
+      {
+        headers: {
+          'Elastic-Api-Version': '1',
+        },
+        body: JSON.stringify({
+          query: '',
+          field: 'potential_field_names',
+          fieldMeta: {
+            count: 0,
+            name: 'potential_field_names',
+            type: 'string',
+            esTypes: ['keyword'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+            shortDotsEnable: false,
+            isMapped: true,
+          },
+          method: 'terms_enum',
+        }),
+      }
+    );
+    (valueLookup as string[]).forEach((suggestion: any) => {
+      suggestions.push({
+        label: suggestion,
+        text: `"${suggestion}"`,
+        filterText: suggestion,
+        kind: 'Field',
+        sortText: '1111A',
+        detail: '',
+      });
+    });
+  }
   // XXXX do a special case here for equals
   return suggestions;
 }

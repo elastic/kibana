@@ -156,7 +156,7 @@ export function getDataStateContainer({
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications, profilesManager } = services;
+  const { data, uiSettings, toastNotifications, profilesManager, core } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
 
@@ -231,6 +231,7 @@ export function getDataStateContainer({
             getInternalState: internalStateContainer.getState,
             savedSearch: getSavedSearch(),
             useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+            core,
           };
 
           abortController?.abort();

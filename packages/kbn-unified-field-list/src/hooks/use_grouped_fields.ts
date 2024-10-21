@@ -35,7 +35,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   allFields: T[] | null; // `null` is for loading indicator
   services: {
     dataViews: DataViewsContract;
-    core: Pick<CoreStart, 'docLinks'>;
+    core: CoreStart;
   };
   isAffectedByGlobalFilter?: boolean;
   popularFieldsLimit?: number;
@@ -46,6 +46,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
   additionalFieldGroups?: AdditionalFieldGroups<T>;
+  esqlSourceName?: string;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -74,6 +75,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSelectedFieldFilter,
   getNewFieldsBySpec,
   additionalFieldGroups,
+  esqlSourceName,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -131,6 +133,55 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     [dataViewId, onFilterFieldList]
   );
 
+  const hasPotentialFieldNamesField = allFields?.some(
+    (field) => field.name === 'potential_field_names'
+  );
+
+  const [potentialUnmappedFields, setPotentialUnmappedFields] = useState<string[]>([]);
+
+  useEffect(() => {
+    (async function fetchPotentialFieldNames() {
+      if (hasPotentialFieldNamesField) {
+        const valueLookup = await services.core?.http?.post(
+          `/internal/kibana/suggestions/values/${esqlSourceName}`,
+          {
+            headers: {
+              'Elastic-Api-Version': '1',
+            },
+            body: JSON.stringify({
+              query: fieldListFilters.fieldListFiltersProps.nameFilter || '',
+              field: 'potential_field_names',
+              fieldMeta: {
+                count: 0,
+                name: 'potential_field_names',
+                type: 'string',
+                esTypes: ['keyword'],
+                scripted: false,
+                searchable: true,
+                aggregatable: true,
+                readFromDocValues: true,
+                shortDotsEnable: false,
+                isMapped: true,
+              },
+              method: 'terms_enum',
+            }),
+          }
+        );
+        setPotentialUnmappedFields(
+          (valueLookup as string[]).filter(
+            (value: string) => !allFields?.some((field) => field.name === value)
+          )
+        );
+      }
+    })();
+  }, [
+    allFields,
+    esqlSourceName,
+    fieldListFilters.fieldListFiltersProps.nameFilter,
+    hasPotentialFieldNamesField,
+    services.core?.http,
+  ]);
+
   const unfilteredFieldGroups: FieldListGroups<T> = useMemo(() => {
     const containsData = (field: T) => {
       return dataViewId ? hasFieldDataHandler(dataViewId, field.name) : true;
@@ -187,6 +238,13 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       : [];
 
     const smartFields = additionalFieldGroups?.smartFields || [];
+
+    const syntheticUnmappedFields = potentialUnmappedFields.map((fieldName) => ({
+      name: fieldName,
+      displayName: fieldName,
+      type: 'string',
+      isUnmapped: true,
+    })) as unknown as never[];
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
       SpecialFields: {
@@ -255,8 +313,12 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         ),
       },
       UnmappedFields: {
-        fields: groupedFields.unmappedFields,
-        fieldCount: groupedFields.unmappedFields.length,
+        fields: hasPotentialFieldNamesField
+          ? syntheticUnmappedFields
+          : groupedFields.unmappedFields,
+        fieldCount: hasPotentialFieldNamesField
+          ? syntheticUnmappedFields.length
+          : groupedFields.unmappedFields.length,
         isAffectedByGlobalFilter,
         isAffectedByTimeFilter,
         isInitiallyOpen: false,
@@ -266,9 +328,11 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabel', {
           defaultMessage: 'Unmapped fields',
         }),
-        helpText: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabelHelp', {
-          defaultMessage: "Fields that aren't explicitly mapped to a field data type.",
-        }),
+        helpText: hasPotentialFieldNamesField
+          ? 'Fields that are not explicitly mapped - retrieve using the FROM_SOURCE function'
+          : i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabelHelp', {
+              defaultMessage: "Fields that aren't explicitly mapped to a field data type.",
+            }),
       },
       EmptyFields: {
         fields: groupedFields.emptyFields,
@@ -354,19 +418,21 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     return fieldGroupDefinitions;
   }, [
+    sortedSelectedFields,
     allFieldsModified,
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-    dataView,
-    dataViewId,
-    hasFieldDataHandler,
-    fieldsExistenceInfoUnavailable,
+    popularFieldsLimit,
+    additionalFieldGroups?.smartFields,
+    potentialUnmappedFields,
     isAffectedByGlobalFilter,
     isAffectedByTimeFilter,
-    popularFieldsLimit,
-    sortedSelectedFields,
-    additionalFieldGroups,
+    dataViewId,
+    fieldsExistenceInfoUnavailable,
+    hasPotentialFieldNamesField,
+    onOverrideFieldGroupDetails,
+    hasFieldDataHandler,
+    onSelectedFieldFilter,
+    onSupportedFieldFilter,
+    dataView,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {

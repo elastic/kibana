@@ -58,6 +58,91 @@ export class DiscoverServerPlugin
     const router = core.http.createRouter();
     router.post(
       {
+        path: '/api/add_runtime_field',
+        validate: {
+          body: schema.object({
+            indexPattern: schema.string(),
+            fieldName: schema.string(),
+            fieldType: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // expand index pattern into list of indices
+        const matchingIndices = await esClient.transport.request<Record<string, unknown>>({
+          method: 'GET',
+          path: `/${request.body.indexPattern}`,
+        });
+
+        const indices: string[] = Object.keys(matchingIndices);
+
+        await Promise.all(
+          indices.map(async (index) => {
+            await esClient.transport.request({
+              method: 'PUT',
+              path: `${index}/_mapping`,
+              body: {
+                runtime: {
+                  [request.body.fieldName]: {
+                    type: request.body.fieldType,
+                  },
+                },
+              },
+            });
+          })
+        );
+        return response.ok({
+          body: {
+            field: request.body.fieldName,
+            type: request.body.fieldType,
+          },
+        });
+      }
+    );
+
+    router.post(
+      {
+        path: '/api/remove_runtime_field',
+        validate: {
+          body: schema.object({
+            indexPattern: schema.string(),
+            fieldName: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // expand index pattern into list of indices
+        const matchingIndices = await esClient.transport.request<Record<string, unknown>>({
+          method: 'GET',
+          path: `/${request.body.indexPattern}`,
+        });
+
+        const indices: string[] = Object.keys(matchingIndices);
+
+        await Promise.all(
+          indices.map(async (index) => {
+            await esClient.transport.request({
+              method: 'PUT',
+              path: `${index}/_mapping`,
+              body: {
+                runtime: {
+                  [request.body.fieldName]: null,
+                },
+              },
+            });
+          })
+        );
+        return response.ok({
+          body: {
+            field: request.body.fieldName,
+          },
+        });
+      }
+    );
+    router.post(
+      {
         path: '/api/value_field_suggest',
         validate: {
           body: schema.object({
@@ -68,7 +153,9 @@ export class DiscoverServerPlugin
       },
       async (context, request, response) => {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const r = await esClient.transport.request({
+        const r = await esClient.transport.request<{
+          hits: { hits: Array<{ _source: Record<string, unknown> }> };
+        }>({
           method: 'GET',
           path: `${request.body.indexPattern}/_search`,
           body: {
@@ -87,11 +174,7 @@ export class DiscoverServerPlugin
             sort: [{ '@timestamp': { order: 'desc' } }],
           },
         });
-        console.log(r);
         const docs = r.hits.hits;
-
-        // in the _source, find all fields that start with valuePrefix
-        // if they match, store the field name and the value
 
         const matchingFieldValuePairs = new Map<string, Set<string>>();
 
