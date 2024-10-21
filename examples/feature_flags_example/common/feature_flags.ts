@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const FeatureFlagExampleBoolean = 'example-boolean';
-export const FeatureFlagExampleString = 'example-string';
-export const FeatureFlagExampleNumber = 'example-number';
+export const FeatureFlagExampleBoolean = 'featureFlagsExample.exampleBoolean';
+export const FeatureFlagExampleString = 'featureFlagsExample.exampleString';
+export const FeatureFlagExampleNumber = 'featureFlagsExample.exampleNumber';
