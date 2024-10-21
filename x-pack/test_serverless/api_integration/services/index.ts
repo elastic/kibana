@@ -11,7 +11,6 @@ import { services as svlSharedServices } from '../../shared/services';
 
 import { SamlToolsProvider } from './saml_tools';
 import { SvlCasesServiceProvider } from './svl_cases';
-import { SloApiProvider } from './slo_api';
 import { TransformProvider } from './transform';
 
 import { SvlEnrichPoliciesApi } from './index_management/svl_enrich_policies.api';
@@ -36,7 +35,6 @@ export const services = {
   ...svlSharedServices,
   samlTools: SamlToolsProvider,
   svlCases: SvlCasesServiceProvider,
-  sloApi: SloApiProvider,
   transform: TransformProvider,
   synthtrace: SynthtraceProvider,
   svlEnrichPoliciesApi: SvlEnrichPoliciesApi,
