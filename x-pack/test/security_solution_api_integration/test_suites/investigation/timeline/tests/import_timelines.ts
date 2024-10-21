@@ -6,17 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-
 import { TIMELINE_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
-
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
-import { deleteAllTimelines } from '../utils';
+import { deleteTimelines } from '../../utils/timelines';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
-  const supertest = getService('supertest');
-  const es = getService('es');
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('import timelines', () => {
+    before(async () => {
+      supertest = await utils.createSuperTest();
+    });
+
     describe('creating a timeline', () => {
       const getTimeline = () => {
         return Buffer.from(
@@ -135,15 +138,14 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
           })
         );
       };
-      beforeEach(async () => {});
 
       afterEach(async () => {
-        await deleteAllTimelines(es);
+        await deleteTimelines(supertest);
       });
 
       it("if it doesn't exists", async () => {
         const { body } = await supertest
-          .post(`${TIMELINE_IMPORT_URL}`)
+          .post(TIMELINE_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .attach('file', getTimeline(), 'timelines.ndjson')
           .expect(200);
@@ -257,12 +259,12 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
       };
 
       afterEach(async () => {
-        await deleteAllTimelines(es);
+        await deleteTimelines(supertest);
       });
 
       it("if it doesn't exists", async () => {
         const { body } = await supertest
-          .post(`${TIMELINE_IMPORT_URL}`)
+          .post(TIMELINE_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .attach('file', getTimelineTemplate(), 'timelines.ndjson')
           .expect(200);
@@ -376,17 +378,17 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
       };
 
       afterEach(async () => {
-        await deleteAllTimelines(es);
+        await deleteTimelines(supertest);
       });
 
       it("if it doesn't exists", async () => {
         await supertest
-          .post(`${TIMELINE_IMPORT_URL}`)
+          .post(TIMELINE_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .attach('file', getTimelineTemplate(1), 'timelines.ndjson')
           .expect(200);
         const { body } = await supertest
-          .post(`${TIMELINE_IMPORT_URL}`)
+          .post(TIMELINE_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .attach('file', getTimelineTemplate(2), 'timelines.ndjson')
           .expect(200);
