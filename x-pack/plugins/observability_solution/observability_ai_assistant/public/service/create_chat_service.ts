@@ -14,7 +14,6 @@ import {
   filter,
   from,
   map,
-  combineLatest,
   Observable,
   of,
   OperatorFunction,
@@ -26,7 +25,6 @@ import {
 } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { ChatCompletionChunkEvent, Message, MessageRole } from '../../common';
 import {
   StreamingChatResponseEventType,
@@ -151,7 +149,6 @@ class ChatService {
   private registrations: ChatRegistrationRenderFunction[];
   private systemMessage: string;
   public functions$: BehaviorSubject<FunctionDefinition[]>;
-  private screenContexts$: BehaviorSubject<ObservabilityAIAssistantScreenContext[]>;
 
   constructor({
     abortSignal,
@@ -159,14 +156,12 @@ class ChatService {
     scope$,
     analytics,
     registrations,
-    screenContexts$,
   }: {
     abortSignal: AbortSignal;
     apiClient: ObservabilityAIAssistantAPIClient;
     scope$: BehaviorSubject<AssistantScope[]>;
     analytics: AnalyticsServiceStart;
     registrations: ChatRegistrationRenderFunction[];
-    screenContexts$: BehaviorSubject<ObservabilityAIAssistantScreenContext[]>;
   }) {
     this.functionRegistry = new Map();
     this.renderFunctionRegistry = new Map();
@@ -176,9 +171,8 @@ class ChatService {
     this.analytics = analytics;
     this.registrations = registrations;
     this.systemMessage = '';
-    this.screenContexts$ = screenContexts$;
     this.functions$ = new BehaviorSubject([] as FunctionDefinition[]);
-    combineLatest(scope$, screenContexts$).subscribe(() => {
+    scope$.subscribe(() => {
       this.initialize();
     });
   }
@@ -193,15 +187,11 @@ class ChatService {
   async initialize() {
     this.functionRegistry = new Map();
     const systemMessages: string[] = [];
-    const requiredFunctions = this.screenContexts$.value.flatMap(
-      (context) => context.actions?.flatMap((action) => action.parameters?.required || []) || []
-    );
     const scopePromise = this.apiClient('GET /internal/observability_ai_assistant/functions', {
       signal: this.abortSignal,
       params: {
         query: {
           scopes: this.getScopes(),
-          requiredFunctions,
         },
       },
     }).then(({ functionDefinitions, systemMessage }) => {
@@ -365,14 +355,12 @@ export async function createChatService({
   registrations,
   apiClient,
   scope$,
-  screenContexts$,
 }: {
   analytics: AnalyticsServiceStart;
   signal: AbortSignal;
   registrations: ChatRegistrationRenderFunction[];
   apiClient: ObservabilityAIAssistantAPIClient;
   scope$: BehaviorSubject<AssistantScope[]>;
-  screenContexts$: BehaviorSubject<ObservabilityAIAssistantScreenContext[]>;
 }): Promise<ObservabilityAIAssistantChatService> {
   return new ChatService({
     analytics,
@@ -380,6 +368,5 @@ export async function createChatService({
     scope$,
     registrations,
     abortSignal: setupAbortSignal,
-    screenContexts$,
   });
 }

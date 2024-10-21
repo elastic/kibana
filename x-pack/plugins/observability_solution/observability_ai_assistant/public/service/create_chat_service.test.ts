@@ -18,7 +18,6 @@ import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createChatService } from './create_chat_service';
 import { AssistantScope } from '@kbn/ai-assistant-common';
-import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 
 async function getConcatenatedMessage(
   response$: Observable<StreamingChatResponseEventWithoutError>
@@ -73,7 +72,6 @@ describe('createChatService', () => {
       registrations: [],
       signal: new AbortController().signal,
       scope$: new BehaviorSubject<AssistantScope[]>(['observability']),
-      screenContexts$: new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([]),
     });
   });
 

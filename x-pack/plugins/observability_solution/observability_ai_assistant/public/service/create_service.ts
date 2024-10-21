@@ -64,7 +64,6 @@ export function createService({
         signal,
         registrations,
         scope$,
-        screenContexts$,
       });
     },
     callApi: apiClient,
