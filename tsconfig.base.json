@@ -1804,6 +1804,8 @@
       "@kbn/stdio-dev-helpers/*": ["packages/kbn-stdio-dev-helpers/*"],
       "@kbn/storybook": ["packages/kbn-storybook"],
       "@kbn/storybook/*": ["packages/kbn-storybook/*"],
+      "@kbn/stream-entities-manager-plugin": ["x-pack/plugins/logsai/stream_entities_manager"],
+      "@kbn/stream-entities-manager-plugin/*": ["x-pack/plugins/logsai/stream_entities_manager/*"],
       "@kbn/synthetics-e2e": ["x-pack/plugins/observability_solution/synthetics/e2e"],
       "@kbn/synthetics-e2e/*": ["x-pack/plugins/observability_solution/synthetics/e2e/*"],
       "@kbn/synthetics-plugin": ["x-pack/plugins/observability_solution/synthetics"],

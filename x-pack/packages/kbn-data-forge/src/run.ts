@@ -15,8 +15,10 @@ import { installIndexTemplate } from './lib/install_index_template';
 import { indices } from './lib/indices';
 import { installDefaultComponentTemplate } from './lib/install_default_component_template';
 import { installIngestPipelines } from './lib/install_ingest_pipelines';
+import { installDefaultIngestPipeline } from './lib/install_default_ingest_pipeline';
 
 export async function run(config: Config, client: Client, logger: ToolingLog) {
+  await installDefaultIngestPipeline(config, client, logger);
   await installDefaultComponentTemplate(config, client, logger);
   await installIngestPipelines(config, client, logger);
   await installIndexTemplate(config, client, logger);

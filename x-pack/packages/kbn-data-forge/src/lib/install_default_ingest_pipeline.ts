@@ -23,9 +23,9 @@ export async function installDefaultIngestPipeline(
   client: Client,
   logger: ToolingLog
 ) {
-  logger.info('Installing default ingest pipeline: kbn-data-forge-add-event-ingested');
+  logger.info('Installing default ingest pipeline: kbn-dataforge@default-pipeline');
   return client.ingest.putPipeline({
-    id: 'logs@custom',
+    id: 'kbn-dataforge@default-pipeline',
     processors,
     version: 1,
   });

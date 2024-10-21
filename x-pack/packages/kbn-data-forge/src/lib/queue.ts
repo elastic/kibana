@@ -45,7 +45,7 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
         .bulk({ body, refresh: false })
         .then((resp) => {
           if (resp.errors) {
-            logger.error(`Failed to index: ${resp.errors}`);
+            logger.error(`Failed to index: ${JSON.stringify(resp)}`);
             return callback(new Error('Failed to index'));
           }
           logger.info(

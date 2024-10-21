@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/stream-entities-manager-plugin",
+  "owner": "@elastic/obs-entities",
+  "description": "A manager for Stream Entities",
+  "plugin": {
+    "id": "streamEntitiesManager",
+    "configPath": ["xpack", "streamEntitiesManager"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "security",
+      "encryptedSavedObjects",
+      "usageCollection",
+      "licensing",
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+    ]
+  }
+}

@@ -40,7 +40,7 @@
     },
     "settings": {
       "index": {
-        "final_pipeline": "logs@custom",
+        "default_pipeline": "kbn-dataforge@default-pipeline",
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
