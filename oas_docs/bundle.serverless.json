@@ -41006,7 +41006,6 @@
     },
     "/api/spaces/space": {
       "get": {
-        "description": "Get all spaces",
         "operationId": "%2Fapi%2Fspaces%2Fspace#0",
         "parameters": [
           {
@@ -41022,6 +41021,7 @@
             }
           },
           {
+            "description": "Specifies which authorization checks are applied to the API call. The default value is `any`.",
             "in": "query",
             "name": "purpose",
             "required": false,
@@ -41035,6 +41035,7 @@
             }
           },
           {
+            "description": "When enabled, the API returns any spaces that the user is authorized to access in any capacity and each space will contain the purposes for which the user is authorized. This can be useful to determine which spaces a user can read but not take a specific action in. If the security plugin is not enabled, this parameter has no effect, since no authorization checks take place. This parameter cannot be used in with the `purpose` parameter.",
             "in": "query",
             "name": "include_authorized_purposes",
             "required": true,
@@ -41074,14 +41075,17 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get all spaces",
         "tags": [
           "spaces"
         ]
       },
       "post": {
-        "description": "Create a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace#1",
         "parameters": [
           {
@@ -41117,29 +41121,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   }
@@ -41153,8 +41164,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create a space",
         "tags": [
           "spaces"
         ]
@@ -41162,7 +41177,7 @@
     },
     "/api/spaces/space/{id}": {
       "delete": {
-        "description": "Delete a space",
+        "description": "When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
         "parameters": [
           {
@@ -41188,6 +41203,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41196,14 +41212,20 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Indicates that the request failed."
+          }
+        },
+        "summary": "Delete a space",
         "tags": [
           "spaces"
         ]
       },
       "get": {
-        "description": "Get a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -41219,6 +41241,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41227,14 +41250,17 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get a space",
         "tags": [
           "spaces"
         ]
       },
       "put": {
-        "description": "Update a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
         "parameters": [
           {
@@ -41260,6 +41286,7 @@
             }
           },
           {
+            "description": "The space identifier. You are unable to change the ID with the update operation.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41278,29 +41305,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   }
@@ -41314,8 +41348,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Update a space",
         "tags": [
           "spaces"
         ]
