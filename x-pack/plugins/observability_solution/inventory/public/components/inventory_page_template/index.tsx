@@ -50,7 +50,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useEntityManager();
 
   const handleSuccess = () => {
-    eemEnabled$.next({ eemEnabled: true });
+    eemEnabled$.next({ eem_enabled: true });
     refresh();
     toggleWelcomedModal();
   };
