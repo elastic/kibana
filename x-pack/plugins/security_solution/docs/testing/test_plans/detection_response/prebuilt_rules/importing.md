@@ -12,7 +12,7 @@ Feature: Importing Prebuilt Rules
     When the user imports the rule
     Then the rule should be created or updated
     And the ruleSource type should be "external"
-    And isCustomized should be false
+    And isCustomized should be true
 
   Scenario: Importing a prebuilt rule with a non-existent rule_id
     Given the import payload contains a prebuilt rule with a non-existent rule_id
