@@ -34,6 +34,7 @@ import {
 import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_placement/panel_placement_registry';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DashboardState } from './types';
+import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 
 export function initializePanelsManager(
   initialPanels: DashboardPanelMap,
@@ -212,24 +213,7 @@ export function initializePanelsManager(
       panels: [
         panels$,
         setPanels,
-        (a: DashboardPanelMap, b: DashboardPanelMap) => {
-          const aKeys = Object.keys(a);
-          const bKeys = Object.keys(b);
-          if (!fastIsEqual(aKeys, bKeys)) {
-            return false;
-          }
-
-          for (let i = 0; i < aKeys.length; i++) {
-            const panelId = aKeys[i];
-            const panelA = a[panelId];
-            const panelB = b[panelId];
-            if (panelA.type !== panelB.type || !fastIsEqual(panelA.gridData, panelB.gridData)) {
-              return false;
-            }
-          }
-
-          return true;
-        },
+        arePanelLayoutsEqual,
       ],
     } as StateComparators<Pick<DashboardState, 'panels'>>,
     internalApi: {

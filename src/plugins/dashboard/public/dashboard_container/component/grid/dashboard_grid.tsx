@@ -25,8 +25,8 @@ import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
-import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
@@ -105,7 +105,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+      if (!arePanelLayoutsEqual(panels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
     },
