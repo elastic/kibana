@@ -469,8 +469,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // always failing
-    it.skip('should only run as many instances of a task as its maxConcurrency will allow', async () => {
+    it('should only run as many instances of a task as its maxConcurrency will allow', async () => {
       // should run as there's only one and maxConcurrency on this TaskType is 1
       const firstWithSingleConcurrency = await scheduleTask({
         taskType: 'sampleTaskWithSingleConcurrency',
@@ -762,18 +761,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // flaky
-    it.skip('should continue claiming recurring task even if maxAttempts has been reached', async () => {
+    it('should continue claiming recurring task even if maxAttempts has been reached', async () => {
       const task = await scheduleTask({
         taskType: 'sampleRecurringTaskTimingOut',
         schedule: { interval: '1s' },
         params: {},
       });
 
+      let taskRuns = 0;
+      let taskRetryAt = task.retryAt;
+
       await retry.try(async () => {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
-        expect(scheduledTask.status).to.eql('claiming');
+        if (scheduledTask.retryAt !== taskRetryAt) {
+          taskRuns++;
+          taskRetryAt = scheduledTask.retryAt;
+        }
+        expect(taskRuns).to.be.greaterThan(3);
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });
