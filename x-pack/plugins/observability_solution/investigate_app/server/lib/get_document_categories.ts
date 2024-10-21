@@ -456,7 +456,8 @@ export const createCategorizationRequestParams = ({
             char_filter: [
               {
                 type: 'pattern_replace',
-                pattern: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+                pattern:
+                  '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
                 replacement: '',
               },
             ],
