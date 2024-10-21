@@ -71,7 +71,7 @@ const serverlessIngestionCommand: IngestCodeSnippetFunction = ({
   elasticsearchURL,
   apiKey,
   indexName,
-  sampleDocument,
+  sampleDocuments,
 }) => `from elasticsearch import Elasticsearch, helpers
 
 client = Elasticsearch(
@@ -81,9 +81,7 @@ client = Elasticsearch(
 
 index_name = "${indexName}"
 
-docs = [
-${JSON.stringify(sampleDocument, null, 4)},
-]
+docs = ${JSON.stringify(sampleDocuments, null, 4)}
 
 bulk_response = helpers.bulk(client, docs, index=index_name)
 print(bulk_response)`;
