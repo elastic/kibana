@@ -34,7 +34,7 @@ export const EntitiesList: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const { toggleStatus } = useQueryToggle(ENTITIES_LIST_TABLE_ID);
   const [sorting, setSorting] = useState({
-    field: 'entity.lastSeenTimestamp',
+    field: 'entity.last_seen_timestamp',
     direction: Direction.desc,
   });
 

@@ -67,7 +67,7 @@ const buildIngestPipeline = ({
     {
       set: {
         field: '@timestamp',
-        value: '{{entity.lastSeenTimestamp}}',
+        value: '{{entity.last_seen_timestamp}}',
       },
     },
     {
