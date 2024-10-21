@@ -118,12 +118,18 @@ export const DataTableTimeColumnHeader = ({
   dataViewField,
   headerRowHeight = 1,
   columnLabel,
+  columnName,
+  columnsMeta,
+  renderCustomGridColumnInfoPopover,
 }: {
   dataView: DataView;
   dataViewField?: DataViewField;
   headerRowHeight?: number;
   columnLabel?: string;
-}) => {
+} & Pick<
+  DataTableColumnHeaderProps,
+  'columnName' | 'columnsMeta' | 'renderCustomGridColumnInfoPopover'
+>) => {
   const timeFieldName = columnLabel || (dataViewField?.customLabel ?? dataView.timeFieldName);
   const primaryTimeAriaLabel = i18n.translate(
     'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
@@ -137,15 +143,24 @@ export const DataTableTimeColumnHeader = ({
   });
 
   return (
-    <div
-      aria-label={primaryTimeAriaLabel}
-      css={css`
-        text-align: left;
-      `}
-    >
-      <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-        {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
-      </ColumnHeaderTruncateContainer>
-    </div>
+    <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <div
+          aria-label={primaryTimeAriaLabel}
+          css={css`
+            text-align: left;
+          `}
+        >
+          <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+            {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
+          </ColumnHeaderTruncateContainer>
+        </div>
+      </EuiFlexItem>
+      {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
+        <EuiFlexItem>
+          {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 };

@@ -274,6 +274,9 @@ function buildEuiGridColumn({
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
         columnLabel={columnDisplay}
+        columnName={columnName}
+        columnsMeta={columnsMeta}
+        renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
       />
     );
     if (numberOfColumns > 1) {
