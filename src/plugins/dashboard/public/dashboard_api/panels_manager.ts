@@ -9,7 +9,6 @@
 
 import { BehaviorSubject, merge } from 'rxjs';
 import { v4 } from 'uuid';
-import fastIsEqual from 'fast-deep-equal';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -210,11 +209,7 @@ export function initializePanelsManager(
       untilEmbeddableLoaded,
     },
     comparators: {
-      panels: [
-        panels$,
-        setPanels,
-        arePanelLayoutsEqual,
-      ],
+      panels: [panels$, setPanels, arePanelLayoutsEqual],
     } as StateComparators<Pick<DashboardState, 'panels'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {

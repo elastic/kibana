@@ -44,44 +44,43 @@ export function initializeUnifiedSearchManager(
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-  function setQuery(query: Query | AggregateQuery | undefined) {
+  function setQuery(query: Query | AggregateQuery) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
     }
+  }
+  function setAndSyncQuery(query: Query | AggregateQuery | undefined) {
     const queryOrDefault = query ?? queryString.getDefaultQuery();
-    if (
-      creationOptions?.useUnifiedSearchIntegration &&
-      !fastIsEqual(queryOrDefault, queryString.getQuery())
-    ) {
-      queryString.setQuery(queryOrDefault);
+    setQuery(queryOrDefault);
+    if (creationOptions?.useUnifiedSearchIntegration) {
+      queryString.setQuery(query ?? queryString.getDefaultQuery());
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(undefined);
-  function setRefreshInterval(refreshInterval: RefreshInterval | undefined) {
+  function setRefreshInterval(refreshInterval: RefreshInterval) {
     if (!fastIsEqual(refreshInterval, refreshInterval$.value)) {
       refreshInterval$.next(refreshInterval);
     }
-    if (
-      creationOptions?.useUnifiedSearchIntegration &&
-      timeRestore$.value &&
-      refreshInterval &&
-      !fastIsEqual(refreshInterval, timefilterService.getRefreshInterval())
-    ) {
-      timefilterService.setRefreshInterval(refreshInterval);
+  }
+  function setAndSyncRefreshInterval(refreshInterval: RefreshInterval | undefined) {
+    const refreshIntervalOrDefault =
+      refreshInterval ?? timefilterService.getRefreshIntervalDefaults();
+    setRefreshInterval(refreshIntervalOrDefault);
+    if (creationOptions?.useUnifiedSearchIntegration) {
+      timefilterService.setRefreshInterval(refreshIntervalOrDefault);
     }
   }
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
-  function setTimeRange(timeRange: TimeRange | undefined) {
+  function setTimeRange(timeRange: TimeRange) {
     if (!fastIsEqual(timeRange, timeRange$.value)) {
       timeRange$.next(timeRange);
     }
-    if (
-      creationOptions?.useUnifiedSearchIntegration &&
-      timeRestore$.value &&
-      timeRange &&
-      !fastIsEqual(timeRange, timefilterService.getTime())
-    ) {
-      timefilterService.setTime(timeRange);
+  }
+  function setAndSyncTimeRange(timeRange: TimeRange | undefined) {
+    const timeRangeOrDefault = timeRange ?? timefilterService.getTimeDefaults();
+    setTimeRange(timeRangeOrDefault);
+    if (creationOptions?.useUnifiedSearchIntegration) {
+      timefilterService.setTime(timeRangeOrDefault);
     }
   }
   const timeRestore$ = new BehaviorSubject<boolean | undefined>(
@@ -92,23 +91,28 @@ export function initializeUnifiedSearchManager(
   }
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
+  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[]) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
+  }
+  function setAndSyncUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     const filtersOrDefault = unifiedSearchFilters ?? [];
-    if (
-      creationOptions?.useUnifiedSearchIntegration &&
-      !fastIsEqual(filtersOrDefault, filterManager.getFilters())
-    ) {
+    setUnifiedSearchFilters(filtersOrDefault);
+    if (creationOptions?.useUnifiedSearchIntegration) {
       filterManager.setAppFilters(cloneDeep(filtersOrDefault));
     }
   }
 
-  setQuery(initialState.query);
-  setRefreshInterval(initialState.refreshInterval);
-  setTimeRange(initialState.timeRange);
-  setUnifiedSearchFilters(initialState.filters);
+  setAndSyncQuery(initialState.query);
+  setAndSyncUnifiedSearchFilters(initialState.filters);
+  if (initialState.timeRestore) {
+    setAndSyncRefreshInterval(initialState.refreshInterval);
+    setAndSyncTimeRange(initialState.timeRange);
+  } else {
+    setTimeRange(timefilterService.getTime());
+    setRefreshInterval(timefilterService.getRefreshInterval());
+  }
 
   // --------------------------------------------------------------------------------------
   // Set up control group integration
@@ -193,24 +197,28 @@ export function initializeUnifiedSearchManager(
       },
       query$,
       refreshInterval$,
-      setFilters: setUnifiedSearchFilters,
-      setQuery,
-      setTimeRange,
+      setFilters: setAndSyncUnifiedSearchFilters,
+      setQuery: setAndSyncQuery,
+      setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
     },
     comparators: {
-      filters: [unifiedSearchFilters$, setUnifiedSearchFilters, fastIsEqual],
-      query: [query$, setQuery, fastIsEqual],
+      filters: [unifiedSearchFilters$, setAndSyncUnifiedSearchFilters, fastIsEqual],
+      query: [query$, setAndSyncQuery, fastIsEqual],
       refreshInterval: [
         refreshInterval$,
-        setRefreshInterval,
+        (refreshInterval: RefreshInterval | undefined) => {
+          if (timeRestore$.value) setAndSyncRefreshInterval(refreshInterval);
+        },
         (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
           timeRestore$.value ? fastIsEqual(a, b) : true,
       ],
       timeRange: [
         timeRange$,
-        setTimeRange,
+        (timeRange: TimeRange | undefined) => {
+          if (timeRestore$.value) setAndSyncTimeRange(timeRange);
+        },
         (a: TimeRange | undefined, b: TimeRange | undefined) =>
           timeRestore$.value ? fastIsEqual(a, b) : true,
       ],
@@ -222,12 +230,12 @@ export function initializeUnifiedSearchManager(
       controlGroupReload$,
       panelsReload$,
       reset: (lastSavedState: DashboardState) => {
-        setQuery(lastSavedState.query);
+        setAndSyncQuery(lastSavedState.query);
         setTimeRestore(lastSavedState.timeRestore);
-        setUnifiedSearchFilters(lastSavedState.filters);
+        setAndSyncUnifiedSearchFilters(lastSavedState.filters);
         if (lastSavedState.timeRestore) {
-          setRefreshInterval(lastSavedState.refreshInterval);
-          setTimeRange(lastSavedState.timeRange);
+          setAndSyncRefreshInterval(lastSavedState.refreshInterval);
+          setAndSyncTimeRange(lastSavedState.timeRange);
         }
       },
       getState: () => ({
