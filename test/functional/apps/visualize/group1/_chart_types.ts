@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the expected visualizations types for both recommended and legacy tabs', async function () {
       const expectedRecommendedChartTypes = ['Custom visualization', 'Lens', 'Maps'];
-      const expectedLegacyChartTypes = ['Aggregation-based', 'Markdown text', 'TSVB'];
+      const expectedLegacyChartTypes = ['Aggregation-based', 'TSVB'];
 
       // find all the chart types and make sure there all there
       const chartTypes = await visualize.getVisibleVisTypes();

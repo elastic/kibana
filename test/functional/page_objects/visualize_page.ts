@@ -41,7 +41,6 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -226,11 +225,6 @@ export class VisualizePageObject extends FtrService {
     await this.testSubjects.click('groupModalLegacyTab');
   }
 
-  public async clickMarkdownWidget() {
-    await this.clickLegacyTab();
-    await this.clickVisType('markdown');
-  }
-
   public async clickMetric() {
     await this.clickVisType('metric');
   }
@@ -288,12 +282,10 @@ export class VisualizePageObject extends FtrService {
     return await this.hasVisType('maps');
   }
 
-  public async createSimpleMarkdownViz(vizName: string) {
+  public async createSimpleTSVBViz(vizName: string) {
     await this.gotoVisualizationLandingPage();
     await this.navigateToNewVisualization();
-    await this.clickMarkdownWidget();
-    await this.visEditor.setMarkdownTxt(vizName);
-    await this.visEditor.clickGo();
+    await this.clickVisualBuilder();
     await this.saveVisualization(vizName);
   }
 

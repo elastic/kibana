@@ -128,7 +128,7 @@ describe('GroupSelection', () => {
     expect(screen.queryByRole('tab', { name: /recommended/i })).toBeNull();
   });
 
-  it('should render the aggBased group card if an aggBased group vis is registered', async () => {
+  it('should render tabs and the aggBased group card if an aggBased group vis is registered', async () => {
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',
@@ -141,23 +141,9 @@ describe('GroupSelection', () => {
       tab: 'legacy',
     });
 
+    expect(screen.queryByRole('tab', { name: /legacy/i })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /recommended/i })).toBeInTheDocument();
     expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
-  });
-
-  it('should render the tools group card if a tools group vis is registered', async () => {
-    const toolsVisType = {
-      name: 'vis3',
-      title: 'Vis3',
-      stage: 'production',
-      group: VisGroups.TOOLS,
-
-      ...defaultVisTypeParams,
-    };
-    renderGroupSelectionComponent({
-      tab: 'legacy',
-      visTypesRegistry: visTypesRegistry([..._visTypes, toolsVisType] as BaseVisType[]),
-    });
-    expect(screen.getByTestId('visType-vis3')).toHaveTextContent('Vis3');
   });
 
   it('should call the showMainDialog if the aggBased group card is clicked', async () => {

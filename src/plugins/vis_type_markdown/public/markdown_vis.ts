@@ -21,7 +21,7 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   title: 'Markdown',
   isAccessible: true,
   icon: 'visText',
-  group: VisGroups.LEGACY,
+  group: VisGroups.TOOLS,
   titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
     defaultMessage: 'Markdown text',
   }),

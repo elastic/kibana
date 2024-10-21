@@ -27,7 +27,6 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
-  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
@@ -114,11 +113,10 @@ function GroupSelection({
 
   const aggBasedTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.AGGBASED);
   const legacyTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.LEGACY);
-  const toolsTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.TOOLS);
 
-  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length + toolsTypes.length > 0;
+  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length;
 
-  const [tsvbProps, ...restLegacyProps] = legacyTypes.map((visType) => ({
+  const [tsvbProps] = legacyTypes.map((visType) => ({
     visType: {
       ...visType,
       icon: visType.name === 'metrics' ? 'visualizeApp' : (visType.icon as string),
@@ -169,7 +167,7 @@ function GroupSelection({
               ))}
             </EuiFlexGrid>
           ) : (
-            <EuiFlexGrid columns={3} data-test-subj="visNewDialogGroups">
+            <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
               {tsvbProps ? <VisGroup {...tsvbProps} /> : null}
               {
                 <VisGroup
@@ -192,16 +190,6 @@ function GroupSelection({
                   }}
                 />
               }
-              {restLegacyProps.map((visType) => (
-                <VisGroup {...visType} />
-              ))}
-              {toolsTypes.map((visType) => (
-                <VisGroup
-                  visType={visType}
-                  key={visType.name}
-                  onVisTypeSelected={props.onVisTypeSelected}
-                />
-              ))}
             </EuiFlexGrid>
           )}
 
