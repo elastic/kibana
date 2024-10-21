@@ -58,6 +58,10 @@ describe('Router', () => {
             discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
           },
         },
         (context, req, res) => res.ok()
@@ -80,6 +84,10 @@ describe('Router', () => {
           discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
         },
       });
     });
