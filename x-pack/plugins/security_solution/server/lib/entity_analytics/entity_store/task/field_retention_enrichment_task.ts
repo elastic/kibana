@@ -26,12 +26,12 @@ import {
   getUnitedEntityDefinitionVersion,
 } from '../united_entity_definitions';
 import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
+
+import { getEntitiesIndexName } from '../utils';
 import {
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
-} from '../telemetry/events';
-
-import { getEntitiesIndexName } from '../utils';
+} from '../../../telemetry/event_based/events';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
