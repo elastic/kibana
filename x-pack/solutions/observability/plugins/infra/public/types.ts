@@ -7,6 +7,7 @@
 
 import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -90,7 +91,8 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   dashboard: DashboardStart;
-  embeddable: EmbeddableStart;
+  embeddable?: EmbeddableStart;
+  eventBus: EventBusPluginStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;

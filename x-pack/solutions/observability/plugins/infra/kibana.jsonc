@@ -21,6 +21,7 @@
       "dashboard",
       "discover",
       "embeddable",
+      "eventBus",
       "features",
       "fieldFormats",
       "lens",
