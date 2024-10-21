@@ -24,7 +24,7 @@ describe('EventCounts', () => {
     filters: [],
     from,
     indexNames: [],
-    indexPattern: mockDataViewSpec,
+    dataViewSpec: mockDataViewSpec,
     setQuery: jest.fn(),
     to,
     query: {

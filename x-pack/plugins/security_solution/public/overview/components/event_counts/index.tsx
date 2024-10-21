@@ -34,7 +34,7 @@ const EventCountsComponent: React.FC<Props> = ({
   filters,
   from,
   indexNames,
-  dataViewSpec: indexPattern,
+  dataViewSpec,
   query,
   setQuery,
   to,
@@ -45,22 +45,22 @@ const EventCountsComponent: React.FC<Props> = ({
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: indexPattern,
+        dataViewSpec,
         queries: [query],
         filters: [...filters, ...fieldNameExistsFilter(SecurityPageName.hosts)],
       }),
-    [filters, indexPattern, query, uiSettings]
+    [dataViewSpec, filters, query, uiSettings]
   );
 
   const [networkFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: indexPattern,
+        dataViewSpec,
         queries: [query],
         filters: [...filters, ...sourceOrDestinationIpExistsFilter],
       }),
-    [filters, indexPattern, uiSettings, query]
+    [uiSettings, dataViewSpec, query, filters]
   );
 
   useInvalidFilterQuery({

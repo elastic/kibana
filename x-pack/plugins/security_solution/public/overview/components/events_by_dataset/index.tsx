@@ -78,7 +78,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   filters,
   from,
   headerChildren,
-  dataViewSpec: indexPattern,
+  dataViewSpec,
   onlyField,
   paddingSize,
   query,
@@ -133,13 +133,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     if (filterQueryFromProps == null) {
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
-        dataViewSpec: indexPattern,
+        dataViewSpec,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [filterQueryFromProps, kibana, indexPattern, query, filters]);
+  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,
