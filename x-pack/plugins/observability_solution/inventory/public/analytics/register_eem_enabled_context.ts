@@ -9,7 +9,7 @@ import { AnalyticsServiceSetup } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 
-export let eemEnabled$: BehaviorSubject<{ eemEnabled: boolean }>;
+export let eemEnabled$: BehaviorSubject<{ ['eem_enabled']: boolean }>;
 
 export function registerEemEnabledContext(
   analytics: AnalyticsServiceSetup,
@@ -17,14 +17,14 @@ export function registerEemEnabledContext(
 ) {
   entityManager.entityClient.isManagedEntityDiscoveryEnabled().then(({ enabled }) => {
     eemEnabled$ = new BehaviorSubject({
-      eemEnabled: enabled,
+      ['eem_enabled']: enabled,
     });
 
     analytics.registerContextProvider({
-      name: 'eemEnabled',
+      name: 'eem_enabled',
       context$: eemEnabled$,
       schema: {
-        eemEnabled: {
+        ['eem_enabled']: {
           type: 'boolean',
           _meta: { description: 'Whether EEM is enabled or not.' },
         },
