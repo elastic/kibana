@@ -30,13 +30,12 @@ export const getOwnerFromRuleConsumerProducer = ({
     return OWNER_INFO.securitySolution.id;
   }
 
-  // Fallback to producer if the consumer is alerts or undefined
-  const validRuleConsumerToFound =
-    consumer === AlertConsumers.ALERTS || consumer == null ? producer : consumer;
+  // Fallback to producer if the consumer is alerts
+  const consumerValue = consumer === AlertConsumers.ALERTS ? producer : consumer;
 
   for (const value of Object.values(OWNER_INFO)) {
     const foundConsumer = value.validRuleConsumers?.find(
-      (validConsumer) => validConsumer === validRuleConsumerToFound
+      (validConsumer) => validConsumer === consumerValue || validConsumer === producer
     );
 
     if (foundConsumer) {
