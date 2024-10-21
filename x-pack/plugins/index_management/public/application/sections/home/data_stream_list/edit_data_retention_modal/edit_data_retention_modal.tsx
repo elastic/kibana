@@ -23,6 +23,7 @@ import { has } from 'lodash';
 import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isBiggerThanGlobalMaxRetention } from './validations';
 import {
   useForm,
   useFormData,
@@ -34,6 +35,7 @@ import {
   UseField,
   ToggleField,
   NumericField,
+  fieldValidators,
 } from '../../../../../shared_imports';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
@@ -53,35 +55,6 @@ interface Props {
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
-const convertToMinutes = (value: string) => {
-  const { size, unit } = splitSizeAndUnits(value);
-  const sizeNum = parseInt(size, 10);
-
-  switch (unit) {
-    case 'd':
-      // days to minutes
-      return sizeNum * 24 * 60;
-    case 'h':
-      // hours to minutes
-      return sizeNum * 60;
-    case 'm':
-      // minutes to minutes
-      return sizeNum;
-    case 's':
-      // seconds to minutes
-      return sizeNum / 60;
-    default:
-      throw new Error(`Unknown unit: ${unit}`);
-  }
-};
-
-const isRetentionBiggerThan = (valueA: string, valueB: string) => {
-  const minutesA = convertToMinutes(valueA);
-  const minutesB = convertToMinutes(valueB);
-
-  return minutesA > minutesB;
-};
-
 const configurationFormSchema: FormSchema = {
   dataRetention: {
     type: FIELD_TYPES.TEXT,
@@ -95,53 +68,46 @@ const configurationFormSchema: FormSchema = {
     validations: [
       {
         validator: ({ value, formData, customData }) => {
-          // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
-          if (formData.infiniteRetentionPeriod) {
-            return undefined;
-          }
-
-          // If project level data retention is enabled, we need to enforce the global max retention
-          const { globalMaxRetention, enableProjectLevelRetentionChecks } = customData.value as any;
-          if (enableProjectLevelRetentionChecks) {
-            if (
-              value &&
-              formData.timeUnit &&
-              globalMaxRetention &&
-              isRetentionBiggerThan(`${value}${formData.timeUnit}`, globalMaxRetention)
-            ) {
-              return {
-                message: i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
-                  {
-                    defaultMessage:
-                      'Maximum data retention period on this project is {maxRetention} days.',
-                    // Remove the unit from the globalMaxRetention value
-                    values: { maxRetention: globalMaxRetention.slice(0, -1) },
-                  }
-                ),
-              };
+          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
+          if (!formData.infiniteRetentionPeriod) {
+            // If project level data retention is enabled, we need to enforce the global max retention
+            const { globalMaxRetention, enableProjectLevelRetentionChecks } =
+              customData.value as any;
+            if (enableProjectLevelRetentionChecks) {
+              return isBiggerThanGlobalMaxRetention(value, formData.timeUnit, globalMaxRetention);
             }
           }
-
-          if (!value) {
-            return {
-              message: i18n.translate(
+        },
+      },
+      {
+        validator: (args) => {
+          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
+          if (!args.formData.infiniteRetentionPeriod) {
+            return fieldValidators.emptyField(
+              i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
                 {
                   defaultMessage: 'A data retention value is required.',
                 }
-              ),
-            };
+              )
+            )(args);
           }
-          if (value <= 0) {
-            return {
+        },
+      },
+      {
+        validator: (args) => {
+          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
+          if (!args.formData.infiniteRetentionPeriod) {
+            return fieldValidators.numberGreaterThanField({
+              than: 0,
+              allowEquality: false,
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldNonNegativeError',
                 {
                   defaultMessage: `A positive value is required.`,
                 }
               ),
-            };
+            })(args);
           }
         },
       },
@@ -262,11 +228,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
-  // Whenever the dataRetention or timeUnit field changes, we need to re-validate
+  // Whenever the timeUnit field changes, we need to re-validate
   // the dataRetention field
   useEffect(() => {
     form.validateFields(['dataRetention']);
-  }, [formData.dataRetention, formData.timeUnit, form]);
+  }, [formData.timeUnit, form]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
