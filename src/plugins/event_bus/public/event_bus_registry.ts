@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useMemo, useEffect } from 'react';
 import { Slice } from '@reduxjs/toolkit';
 
 import { searchSlice } from './search_slice';
@@ -42,13 +43,13 @@ const createEventBusRegistry = () => {
     eventBuses.set(slice.name, new EventBus(slice));
   }
 
-  function unregister(name: string): void {
-    const eventBus = eventBuses.get(name);
+  function unregister<S extends Slice>(slice: S): void {
+    const eventBus = eventBuses.get(slice.name);
     if (eventBus === undefined) {
-      throw new Error(`Event bus '${name}' not found`);
+      throw new Error(`Event bus '${slice.name}' not found`);
     }
     (eventBus as EventBus<any>).dispose();
-    eventBuses.delete(name);
+    eventBuses.delete(slice.name);
   }
 
   function get<S extends Slice>(slice: S): EventBus<S> {
@@ -59,10 +60,28 @@ const createEventBusRegistry = () => {
     return eventBus as EventBus<S>;
   }
 
+  // This hook is a helper to register and unregister an event bus
+  // in a React component. It's a convenience method to avoid having to
+  // remember to unregister the event bus when the component is unmounted.
+  function useRegisterEventBus<S extends Slice>(slice: S): void {
+    useMemo(() => {
+      register(slice);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+      return () => {
+        unregister(slice);
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+  }
+
   return {
     register,
     unregister,
     get,
+    useRegisterEventBus,
   };
 };
 
