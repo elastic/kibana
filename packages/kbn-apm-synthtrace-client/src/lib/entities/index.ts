@@ -11,8 +11,20 @@ import { Fields } from '../entity';
 import { serviceEntity } from './service_entity';
 import { hostEntity } from './host_entity';
 import { containerEntity } from './container_entity';
+import {
+  k8sClusterJobEntity,
+  k8sCronJobEntity,
+  k8sDaemonSetEntity,
+  k8sDeploymentEntity,
+  k8sJobSetEntity,
+  k8sNodeEntity,
+  k8sPodEntity,
+  k8sReplicaSetEntity,
+  k8sStatefulSetEntity,
+} from './k8s_entities';
 
 export type EntityDataStreamType = 'metrics' | 'logs' | 'traces';
+export type Schema = 'ecs' | 'otel';
 
 export type EntityFields = Fields &
   Partial<{
@@ -32,4 +44,19 @@ export type EntityFields = Fields &
     [key: string]: any;
   }>;
 
-export const entities = { serviceEntity, hostEntity, containerEntity };
+export const entities = {
+  serviceEntity,
+  hostEntity,
+  containerEntity,
+  k8s: {
+    k8sClusterJobEntity,
+    k8sCronJobEntity,
+    k8sDaemonSetEntity,
+    k8sDeploymentEntity,
+    k8sJobSetEntity,
+    k8sNodeEntity,
+    k8sPodEntity,
+    k8sReplicaSetEntity,
+    k8sStatefulSetEntity,
+  },
+};
