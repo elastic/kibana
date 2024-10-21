@@ -77,6 +77,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       logger,
       getRolesAPIClient: jest.fn(),
       getPrivilegesAPIClient: jest.fn(),
+      getSecurityLicense: jest.fn(),
       eventTracker,
     })
     .mount({
@@ -101,6 +102,7 @@ describe('spacesManagementApp', () => {
         logger,
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: jest.fn(),
         eventTracker,
       })
     ).toMatchInlineSnapshot(`

@@ -467,7 +467,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.geoip', {
       defaultMessage:
-        'Adds geo data based on an IP address. Uses geo data from a Maxmind database file.',
+        'Adds geo data based on an IP address. Uses geo data from a MaxMind database file.',
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geoip', {
