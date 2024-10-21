@@ -217,6 +217,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
             appContextValue={{
               embeddingOrigin: 'observability_log_threshold_alert_details',
               ...pick(services, [
+                'eventBus',
                 'analytics',
                 'application',
                 'data',
