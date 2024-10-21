@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/expect';
+import expect from '@kbn/expect';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -14,7 +14,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const retry = getService('retry');
-  const retryTimeout = 180 * 1000;
+  const retryTimeout = 20 * 1000;
 
   describe('/api/telemetry/v2/config API Telemetry config', function () {
     before(async () => {

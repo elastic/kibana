@@ -248,8 +248,8 @@ export class CoreAppsService {
               if (latestOverrideVersion !== persistedOverrides.version) {
                 this.configService.setDynamicConfigOverrides(persistedOverrides.attributes);
                 latestOverrideVersion = persistedOverrides.version;
+                this.logger.info('Succeeded in applying persisted dynamic config overrides');
               }
-              this.logger.info('Succeeded in applying persisted dynamic config overrides');
             } catch (err) {
               // Potential failures:
               // - The SO document does not exist (404 error) => no need to log
