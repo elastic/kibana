@@ -400,10 +400,20 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Updates the current Host common record applied Policy to a different one from the list
    * of random choices and gives it a random policy response status.
+   *
    */
-  public updateHostPolicyData() {
+  public updateHostPolicyData({
+    excludeInitialPolicy = false,
+  }: Partial<{
+    /** Excludes the initial policy id (non-existent) that endpoint reports when it first is installed */
+    excludeInitialPolicy: boolean;
+  }> = {}) {
     const newInfo = this.commonInfo;
-    newInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    newInfo.Endpoint.policy.applied = this.randomChoice(
+      excludeInitialPolicy
+        ? APPLIED_POLICIES.filter(({ id }) => id !== '00000000-0000-0000-0000-000000000000')
+        : APPLIED_POLICIES
+    );
     newInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
     this.commonInfo = newInfo;
   }
