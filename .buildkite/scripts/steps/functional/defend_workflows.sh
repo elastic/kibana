@@ -9,11 +9,11 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Defend Workflows Cypress tests"
 
-cd x-pack/plugins/security_solution
-
 for version in $(cat versions.json | jq -r '.versions[].version'); do
   node x-pack/plugins/security_solution/scripts/endpoint/agent_downloader --version "$version"
 done
+
+cd x-pack/plugins/security_solution
 
 set +e
 BK_ANALYTICS_API_KEY=$(vault_get security-solution-ci defend-workflows-bk-api-key)
