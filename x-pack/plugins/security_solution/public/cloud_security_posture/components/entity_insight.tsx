@@ -16,6 +16,7 @@ import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks
 import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
+import { AlertsPreview } from './alerts/alerts_preview';
 
 export const EntityInsight = <T,>({
   name,
@@ -59,6 +60,13 @@ export const EntityInsight = <T,>({
   });
 
   const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
+
+  insightContent.push(
+    <>
+      <AlertsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
+      <EuiSpacer size="s" />
+    </>
+  );
 
   if (hasMisconfigurationFindings)
     insightContent.push(
