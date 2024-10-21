@@ -79,6 +79,7 @@ class Otel extends Serializable<OtelDocument> {
         'timestamp.us': 1726580752010657,
         'event.name': 'exception',
         'error.id': `error-${spanId}`,
+        'error.grouping_key': `errorGroup-${spanId}`,
       },
       data_stream: {
         dataset: 'generic.otel',
