@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     apps: integrationConfig.get('apps'),
     screenshots: integrationConfig.get('screenshots'),
     junit: {
-      reportName: 'Task Manager MGet Claimer Functional Tests',
+      reportName: 'Task Manager Update By Query Claimer Functional Tests',
     },
     kbnTestServer: {
       ...integrationConfig.get('kbnTestServer'),

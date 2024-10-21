@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('task_manager with mget task claimer', function taskManagerSuite() {
+  describe('task_manager with update by query task claimer', function taskManagerSuite() {
     loadTestFile(require.resolve('./task_priority'));
     loadTestFile(require.resolve('./background_task_utilization_route'));
     loadTestFile(require.resolve('./metrics_route'));

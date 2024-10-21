@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/sample-task-plugin-mget",
+  "id": "@kbn/sample-task-plugin-update-by-query",
   "owner": "@elastic/response-ops",
   "plugin": {
-    "id": "sampleTaskPluginMget",
+    "id": "sampleTaskPluginUpdateByQuery",
     "server": true,
     "browser": false,
     "requiredPlugins": [

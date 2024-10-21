@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
       expect(health.stats.configuration.value).to.eql({
-        poll_interval: 500,
+        poll_interval: 3000,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           as_workers: 10,
           as_cost: 20,
         },
-        claim_strategy: 'mget',
+        claim_strategy: 'update_by_query',
       });
     });
 
