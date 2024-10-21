@@ -42,7 +42,7 @@ import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { Threshold } from '../threshold';
-import { CustomThresholdRule, CustomThresholdAlert } from '../types';
+import { CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -51,7 +51,6 @@ import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
-  rule: CustomThresholdRule;
 }
 
 // eslint-disable-next-line import/no-default-export
