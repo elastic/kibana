@@ -10,9 +10,41 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
-xpack.fleet.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.osquery.enabled: false
+
+# Enable fleet on search projects for agentless features
+xpack.fleet.enabled: true
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.3'
+xpack.fleet.packages:
+  # fleet_server package installed to publish agent metrics
+  - name: fleet_server
+    version: latest
+# Filter out some observability and security integrations
+xpack.fleet.internal.registry.excludePackages: [
+  # Security integrations
+  'endpoint',
+  'beaconing',
+  'cloud_security_posture',
+  'cloud_defend',
+  'security_detection_engine',
+
+  # Oblt integrations
+  'apm',
+  'synthetics',
+  'synthetics_dashboards',
+
+  # Removed in 8.11 integrations
+  'cisco',
+  'microsoft',
+  'symantec',
+  'cyberark',
+
+  # Profiling integrations
+  'profiler_agent',
+]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -57,7 +89,23 @@ xpack.painless_lab.enabled: false
 
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: true
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        static: 2
+      medium:
+        min: 1
+        max: 32
+        static: 32
+      high:
+        min: 1
+        max: 512
+        static: 512
 xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false

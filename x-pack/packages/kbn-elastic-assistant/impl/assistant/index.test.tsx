@@ -15,7 +15,8 @@ import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
 import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
-import { useLocalStorage, useSessionStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
 import { useFetchCurrentUserConversations } from './api';
@@ -27,7 +28,8 @@ import { omit } from 'lodash';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
-jest.mock('react-use');
+jest.mock('react-use/lib/useLocalStorage');
+jest.mock('react-use/lib/useSessionStorage');
 
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
@@ -244,6 +246,7 @@ describe('Assistant', () => {
       });
     });
   });
+
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
       const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
