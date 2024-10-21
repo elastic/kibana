@@ -6132,7 +6132,8 @@
             "text": "AgentNotFoundError"
           },
           " extends ",
-          "FleetNotFoundError"
+          "FleetNotFoundError",
+          "<{ agentId: string; }>"
         ],
         "path": "x-pack/plugins/fleet/server/errors/index.ts",
         "deprecated": false,
@@ -6156,7 +6157,8 @@
             "text": "FleetUnauthorizedError"
           },
           " extends ",
-          "FleetError"
+          "FleetError",
+          "<unknown>"
         ],
         "path": "x-pack/plugins/fleet/server/errors/index.ts",
         "deprecated": false,
@@ -6397,6 +6399,75 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.AgentClient.getByIds",
+            "type": "Function",
+            "tags": [],
+            "label": "getByIds",
+            "description": [
+              "\nGet multiple agents by id"
+            ],
+            "signature": [
+              "(agentIds: string[], options?: { ignoreMissing?: boolean | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Agent",
+                "text": "Agent"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentClient.getByIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "agentIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentClient.getByIds.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.AgentClient.getByIds.$2.ignoreMissing",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "ignoreMissing",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -7189,6 +7260,47 @@
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.AgentService.asInternalScopedUser",
+            "type": "Function",
+            "tags": [],
+            "label": "asInternalScopedUser",
+            "description": [
+              "\nScoped services to a given space"
+            ],
+            "signature": [
+              "(spaceId: string) => ",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.AgentClient",
+                "text": "AgentClient"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentService.asInternalScopedUser.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
                 "deprecated": false,
