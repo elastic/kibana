@@ -59,10 +59,11 @@ export const getBuiltinCompatibleFunctionDefinition = (
   option: string | undefined,
   argType: FunctionParameterType,
   returnTypes?: FunctionReturnType[],
-  { skipAssign }: { skipAssign?: boolean } = {}
+  { skipAssign, commandsToInclude }: { skipAssign?: boolean; commandsToInclude?: string[] } = {}
 ): SuggestionRawDefinition[] => {
   const compatibleFunctions = [...builtinFunctions, ...getTestFunctions()].filter(
     ({ name, supportedCommands, supportedOptions, signatures, ignoreAsSuggestion }) =>
+      (command === 'where' && commandsToInclude ? commandsToInclude.indexOf(name) > -1 : true) &&
       !ignoreAsSuggestion &&
       (!skipAssign || name !== '=') &&
       (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
