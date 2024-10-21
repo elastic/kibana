@@ -154,7 +154,7 @@ export const parseEsqlQuery = (query: string) => {
   return {
     errors,
     isEsqlQueryAggregating,
-    // non-aggregating query which does not have [metadata], is not a valid one
+    // non-aggregating query which does not have metadata, is not a valid one
     isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(ast),
   };
 };

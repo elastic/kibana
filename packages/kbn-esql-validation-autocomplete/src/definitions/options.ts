@@ -39,7 +39,7 @@ export const metadataOption: CommandOptionsDefinition = {
   validate: (option, command, references) => {
     const messages: ESQLMessage[] = [];
     // need to test the parent command here
-    if (/\[metadata/i.test(command.text)) {
+    if (/metadata/i.test(command.text)) {
       messages.push(
         getMessageFromId({
           messageId: 'metadataBracketsDeprecation',

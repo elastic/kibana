@@ -1741,7 +1741,7 @@ describe('validation logic', () => {
     it('should basically work when all callbacks are passed', async () => {
       const allErrors = await Promise.all(
         fixtures.testCases
-          .filter(({ query }) => query === 'from index [METADATA _id, _source2]')
+          .filter(({ query }) => query === 'from index METADATA _id, _source2')
           .map(({ query }) =>
             validateQuery(
               query,
@@ -1753,7 +1753,7 @@ describe('validation logic', () => {
       );
       for (const [index, { errors }] of Object.entries(allErrors)) {
         expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
-          fixtures.testCases.filter(({ query }) => query === 'from index [METADATA _id, _source2]')[
+          fixtures.testCases.filter(({ query }) => query === 'from index METADATA _id, _source2')[
             Number(index)
           ].error
         );

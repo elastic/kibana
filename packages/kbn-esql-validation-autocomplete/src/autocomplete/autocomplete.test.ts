@@ -102,7 +102,7 @@ describe('autocomplete', () => {
         .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
-      'from a [metadata _id] | /',
+      'from a metadata _id | /',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
         .map(({ name }) => name.toUpperCase() + ' $0')
@@ -114,7 +114,7 @@ describe('autocomplete', () => {
         .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
-      'from a [metadata _id] | eval var0 = a | /',
+      'from a metadata _id | eval var0 = a | /',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
         .map(({ name }) => name.toUpperCase() + ' $0')
