@@ -40,13 +40,17 @@ export const FIELDS_TO_UPGRADE_TO_CURRENT_VERSION = [
   'items_per_search',
 ] as const;
 
-export const NON_UPGRADEABLE_DIFFABLE_FIELDS = [
+export const FIELDS_TO_UPGRADE_TO_TARGET_VERSION = [
   'type',
   'rule_id',
   'version',
   'author',
   'license',
 ] as const;
+
+// Fields which are part of DiffableRule but are not upgradeable
+// and need to be omittted from the DiffableUpgradableFields
+export const NON_UPGRADEABLE_DIFFABLE_FIELDS = ['type', 'rule_id', 'version'] as const;
 
 type NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE = {
   readonly [key in (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number]]: true;
