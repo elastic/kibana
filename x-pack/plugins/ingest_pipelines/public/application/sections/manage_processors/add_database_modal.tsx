@@ -137,7 +137,7 @@ export const AddDatabaseModal = ({
             helpText={
               <FormattedMessage
                 id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.databaseTypeSelectHelpText"
-                defaultMessage="Select the provider you want to use"
+                defaultMessage="Select the provider you want to use."
               />
             }
           >
