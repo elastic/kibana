@@ -38,6 +38,6 @@ export class DataUsageService {
       metricTypes,
       dataStreams,
     });
-    return response.data;
+    return response;
   }
 }

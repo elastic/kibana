@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -21,5 +22,22 @@ export default createTestConfig({
   kbnServerArgs: [
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
+    '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
+    `--xpack.dataUsage.autoops.api.tls.certificate=${path.resolve(
+      __dirname,
+      '../common/data_usage/test_certs',
+      'certificate.crt'
+    )}`,
+    `--xpack.dataUsage.autoops.api.tls.key=${path.resolve(
+      __dirname,
+      '../common/data_usage/test_certs',
+      'key.key'
+    )}`,
+    `--xpack.dataUsage.autoops.api.tls.ca=${path.resolve(
+      __dirname,
+      '../common/data_usage/test_certs',
+      'ca.crt'
+    )}`,
   ],
 });

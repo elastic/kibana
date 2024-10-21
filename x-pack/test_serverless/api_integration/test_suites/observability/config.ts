@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import path from 'path';
 import { createTestConfig } from '../../config.base';
 import { services as apmServices } from './apm_api_integration/common/services';
 import { services as datasetQualityServices } from './dataset_quality_api_integration/common/services';
@@ -26,5 +26,23 @@ export default createTestConfig({
     '--xpack.uptime.service.manifestUrl=mockDevUrl',
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
+    '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.autoops.enabled=true',
+    '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
+    `--xpack.dataUsage.autoops.api.tls.certificate=${path.resolve(
+      __dirname,
+      '../common/data_usage/test_certs',
+      'certificate.crt'
+    )}`,
+    `--xpack.dataUsage.autoops.api.tls.key=${path.resolve(
+      __dirname,
+      '../common/data_usage/test_certs',
+      'key.key'
+    )}`,
+    `--xpack.dataUsage.autoops.api.tls.ca=${path.resolve(
+      __dirname,
+      '../common/data_usage/test_certs',
+      'ca.crt'
+    )}`,
   ],
 });
