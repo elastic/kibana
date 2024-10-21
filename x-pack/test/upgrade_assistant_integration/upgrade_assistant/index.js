@@ -8,5 +8,6 @@
 export default function ({ loadTestFile }) {
   describe('upgrade assistant', function () {
     loadTestFile(require.resolve('./reindexing'));
+    loadTestFile(require.resolve('./api_deprecations').apiDeprecationTests);
   });
 }

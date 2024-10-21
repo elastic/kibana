@@ -21,13 +21,10 @@ const mergeCounter = (counter: CounterEvent, acc?: CoreDeprecatedApiUsageStats) 
       `Failed to merge mismatching counterNames: ${acc.apiId} with ${counter.counterName}`
     );
   }
-
-  const isResolvedCounter = counter.counterType.endsWith(':resolved');
-
-  const totalKey = isResolvedCounter ? 'totalMarkedAsResolved' : 'apiTotalCalls';
-  const lastUpdatedKey = isResolvedCounter ? 'markedAsResolvedLastCalledAt' : 'apiLastCalledAt';
+  const isMarkedCounter = counter.counterType.endsWith(':marked_as_resolved');
 
   const finalCounter = {
+    apiId: counter.counterName,
     apiTotalCalls: 0,
     apiLastCalledAt: 'unknown',
     totalMarkedAsResolved: 0,
@@ -35,13 +32,20 @@ const mergeCounter = (counter: CounterEvent, acc?: CoreDeprecatedApiUsageStats) 
     ...(acc || {}),
   };
 
+  if (isMarkedCounter) {
+    return finalCounter;
+  }
+
+  const isResolvedCounter = counter.counterType.endsWith(':resolved');
+  const totalKey = isResolvedCounter ? 'totalMarkedAsResolved' : 'apiTotalCalls';
+  const lastUpdatedKey = isResolvedCounter ? 'markedAsResolvedLastCalledAt' : 'apiLastCalledAt';
+
   const newPayload = {
     [totalKey]: (finalCounter[totalKey] || 0) + counter.total,
     [lastUpdatedKey]: counter.lastUpdatedAt,
   };
 
   return {
-    apiId: counter.counterName,
     ...finalCounter,
     ...newPayload,
   };

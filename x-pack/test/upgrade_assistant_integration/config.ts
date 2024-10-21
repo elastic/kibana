@@ -6,8 +6,10 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { FtrConfigProviderContext } from '@kbn/test';
+import path from 'node:path';
 
-export default async function ({ readConfigFile }) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/api_integration/config')
@@ -26,7 +28,14 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack Upgrade Assistant Integration Tests',
     },
-    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    kbnTestServer: {
+      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${path.resolve(__dirname, '../../../examples/routing_example')}`,
+        `--plugin-path=${path.resolve(__dirname, '../../../examples/developer_examples')}`,
+      ],
+    },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
       // this archive can not be loaded into 8.0+
