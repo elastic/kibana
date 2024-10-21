@@ -6,16 +6,11 @@
  */
 import React from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
-import {
-  EuiCheckbox,
-  EuiComboBox,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiComboBox, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
+import { OptionalText } from '../components/optional_text';
+import { ParamValueField } from './param_value_field';
 import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { ListParamItem } from './params_list';
 
@@ -61,25 +56,8 @@ export const AddParamForm = ({
           })}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={VALUE_LABEL}
-        isInvalid={Boolean(errors?.value)}
-        error={errors?.value?.message}
-      >
-        <EuiTextArea
-          data-test-subj="syntheticsAddParamFormTextArea"
-          fullWidth
-          aria-label={VALUE_LABEL}
-          {...register('value', {
-            required: {
-              value: true,
-              message: VALUE_REQUIRED,
-            },
-          })}
-        />
-      </EuiFormRow>
-      <EuiFormRow fullWidth label={TAGS_LABEL}>
+      <ParamValueField isEditingItem={isEditingItem} />
+      <EuiFormRow fullWidth label={TAGS_LABEL} labelAppend={<OptionalText />}>
         <Controller
           control={control}
           name="tags"
@@ -102,7 +80,7 @@ export const AddParamForm = ({
           )}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth label={DESCRIPTION_LABEL}>
+      <EuiFormRow fullWidth label={DESCRIPTION_LABEL} labelAppend={<OptionalText />}>
         <EuiFieldText
           data-test-subj="syntheticsAddParamFormFieldText"
           fullWidth
@@ -173,6 +151,6 @@ const KEY_EXISTS = i18n.translate('xpack.synthetics.monitorManagement.param.keyE
   defaultMessage: 'Key already exists',
 });
 
-const VALUE_REQUIRED = i18n.translate('xpack.synthetics.monitorManagement.value.required', {
+export const VALUE_REQUIRED = i18n.translate('xpack.synthetics.monitorManagement.value.required', {
   defaultMessage: 'Value is required',
 });
