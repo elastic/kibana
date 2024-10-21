@@ -25,7 +25,11 @@ import {
   LensInternalApi,
   LensRuntimeState,
 } from '../types';
-import { buildObservableVariable, emptySerializer, getViewMode } from '../helper';
+import {
+  buildObservableVariable,
+  emptySerializer,
+  extractInheritedViewModeObservable,
+} from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
@@ -67,6 +71,10 @@ export function initializeEditApi(
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
+
+  const [viewMode$] = buildObservableVariable<ViewMode>(
+    extractInheritedViewModeObservable(parentApi)
+  );
 
   /**
    * Inline editing section
@@ -117,7 +125,7 @@ export function initializeEditApi(
   const { uiSettings, capabilities, data } = startDependencies;
 
   const canEdit = () => {
-    if (getViewMode(parentApi) !== 'edit') {
+    if (viewMode$.getValue() !== 'edit') {
       return false;
     }
     // check if it's in ES|QL mode
@@ -136,8 +144,6 @@ export function initializeEditApi(
   const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
     ? parentApi.canEditInline
     : true;
-
-  const [viewMode$] = buildObservableVariable<ViewMode>(getViewMode(parentApi) || 'view');
 
   return {
     comparators: {},

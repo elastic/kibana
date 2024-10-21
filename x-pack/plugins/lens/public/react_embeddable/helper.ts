@@ -6,8 +6,10 @@
  */
 
 import {
+  apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
+  ViewMode,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
@@ -78,6 +80,13 @@ export function makeComparator<T extends unknown>(
   return [observable, (newValue: T) => observable.next(newValue), fastIsEqual];
 }
 
+/**
+ * Helper function to either extract an observable from an API or create a new one
+ * with a default value to start with.
+ * Note that extracting from the API will make subscription emit if the value changes upstream
+ * as it keeps the original reference without cloning.
+ * @returns the observable and a comparator to use for detecting "unsaved changes" on it
+ */
 export function buildObservableVariable<T extends unknown>(
   variable: T | PublishingSubject<T>
 ): [BehaviorSubject<T>, ComparatorType<T>] {
@@ -94,4 +103,16 @@ export function isTextBasedLanguage(state: LensRuntimeState) {
 
 export function getViewMode(api: unknown) {
   return apiPublishesViewMode(api) ? getInheritedViewMode(api) : undefined;
+}
+
+export function extractInheritedViewModeObservable(
+  parentApi?: unknown
+): PublishingSubject<ViewMode> {
+  if (apiPublishesViewMode(parentApi)) {
+    return parentApi.viewMode;
+  }
+  if (apiHasParentApi(parentApi)) {
+    return extractInheritedViewModeObservable(parentApi.parentApi);
+  }
+  return new BehaviorSubject<ViewMode>('view');
 }

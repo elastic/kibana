@@ -12,6 +12,7 @@ import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages } from '../user_messages/use_messages';
+import { getViewMode } from '../helper';
 
 export function LensEmbeddableComponent({
   internalApi,
@@ -29,12 +30,15 @@ export function LensEmbeddableComponent({
     renderCount,
     // has the render completed?
     hasRendered,
+    // has view mode changed?
+    latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
-    internalApi.hasRenderCompleted$
+    internalApi.hasRenderCompleted$,
+    api.viewMode
   );
-  const canEdit = Boolean(api.isEditingEnabled?.() && api.viewMode.getValue() === 'edit');
+  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
@@ -44,9 +48,9 @@ export function LensEmbeddableComponent({
   }, [onUnmount]);
 
   // Publish the data attributes only if avaialble/visible
-  const title = !api.hidePanelTitle?.getValue()
-    ? { 'data-title': api.panelTitle?.getValue() }
-    : undefined;
+  const title = api.hidePanelTitle?.getValue()
+    ? undefined
+    : { 'data-title': api.panelTitle?.getValue() };
   const description = api.panelDescription?.getValue()
     ? { 'data-description': api.panelDescription?.getValue() }
     : undefined;
