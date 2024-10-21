@@ -8,8 +8,8 @@
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
+import { CookieCredentials } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
-import { RoleCredentials } from '.';
 import { InternalRequestHeader } from '.';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
@@ -30,7 +30,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async createReportJobInternal(
       jobType: string,
       job: object,
-      roleAuthc: RoleCredentials,
+      cookieCredentials: CookieCredentials,
       internalReqHeader: InternalRequestHeader
     ) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
@@ -39,14 +39,11 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       const { body }: { status: number; body: ReportingJobResponse } = await supertestWithoutAuth
         .post(requestPath)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
+        .set(cookieCredentials)
         .send({ jobParams: rison.encode(job) })
         .expect(200);
 
-      log.info(
-        `ReportingAPI.createReportJobInternal created report job` +
-          ` ${body.job.id} with ApiKey ${roleAuthc.apiKey.name}`
-      );
+      log.info(`ReportingAPI.createReportJobInternal created report job` + ` ${body.job.id}`);
 
       return {
         job: body.job,
@@ -60,7 +57,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async waitForJobToFinish(
       downloadReportPath: string,
-      roleAuthc: RoleCredentials,
+      cookieCredentials: CookieCredentials,
       internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
@@ -74,7 +71,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
             .responseType('blob')
             .set(...API_HEADER)
             .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+            .set(cookieCredentials);
 
           if (response.status === 500) {
             throw new Error(`Report at path ${downloadReportPath} has failed`);
@@ -106,13 +103,13 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async getCompletedJobOutput(
       downloadReportPath: string,
-      roleAuthc: RoleCredentials,
+      cookieCredentials: CookieCredentials,
       internalReqHeader: InternalRequestHeader
     ) {
       const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader);
+        .set(cookieCredentials);
       return response.text as unknown;
     },
 
@@ -121,14 +118,14 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async deleteReport(
       reportId: string,
-      roleAuthc: RoleCredentials,
+      cookieCredentials: CookieCredentials,
       internalReqHeader: InternalRequestHeader
     ) {
       log.debug(`ReportingAPI.deleteReport ${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportId}`);
       const response = await supertestWithoutAuth
         .delete(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + `/${reportId}`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
+        .set(cookieCredentials)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
       return response.text as unknown;

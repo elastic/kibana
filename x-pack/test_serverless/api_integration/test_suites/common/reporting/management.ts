@@ -9,8 +9,9 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/con
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { CookieCredentials } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { InternalRequestHeader } from '../../../../shared/services';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
@@ -21,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const reportingAPI = getService('svlReportingApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
-  let adminUser: RoleCredentials;
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
@@ -36,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
     let path: string;
 
     before(async () => {
-      adminUser = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = samlAuth.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
@@ -55,30 +56,27 @@ export default ({ getService }: FtrProviderContext) => {
           title: 'Ecommerce Data',
           version: '8.15.0',
         },
-        adminUser,
+        cookieCredentials,
         internalReqHeader
       );
 
       path = result.path;
       reportJob = result.job;
 
-      await reportingAPI.waitForJobToFinish(path, adminUser, internalReqHeader);
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
     });
 
     after(async () => {
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminUser);
-
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
     });
 
     it(`user can delete a report they've created`, async () => {
-      const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       const response = await supertestWithoutAuth
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
         .set(...API_HEADER)
         .set(...INTERNAL_HEADER)
-        .set(cookieHeader);
+        .set(cookieCredentials);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ deleted: true });
