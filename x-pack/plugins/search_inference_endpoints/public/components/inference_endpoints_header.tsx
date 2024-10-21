@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPageTemplate, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
 import { docLinks } from '../../common/doc_links';
