@@ -96,7 +96,7 @@ const getESQLDocumentCountStats = async (
 
     const request = {
       params: {
-        query: getESQLWithSafeLimit(aggQuery, ESQL_SAFE_LIMIT),
+        query: getESQLWithSafeLimit(aggQuery, 1),
         ...(filter ? { filter } : {}),
         ...(namedParams.length ? { params: namedParams } : {}),
       },
