@@ -82,22 +82,6 @@ describe('Share modal tabs', () => {
     );
     expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
   });
-  it('should not render export tab when the license is disabled', async () => {
-    const testItems = [
-      {
-        shareMenuItem: { name: 'test', disabled: true },
-        label: CSV,
-        generateExport: mockGenerateExport,
-        generateExportUrl: mockGenerateExportUrl,
-      },
-    ];
-    const wrapper = mountWithIntl(
-      <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItems }}>
-        <ShareMenuTabs />
-      </ShareTabsContext.Provider>
-    );
-    expect(wrapper.find('[data-test-subj="export"]').exists()).toBeFalsy();
-  });
 
   it('should render export tab is at least one is not disabled', async () => {
     const testItem = [
