@@ -22,7 +22,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find public API', () => {
+  describe('find internal API', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
@@ -72,7 +72,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+              )}/internal/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -96,6 +96,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+              const activeSnoozes = match.active_snoozes;
+              const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -135,6 +137,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
+
+                monitoring: match.monitoring,
+                snooze_schedule: match.snooze_schedule,
+                ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                is_snoozed_until: null,
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -186,7 +193,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
+              )}/internal/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -235,7 +242,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                   .get(
                     `${getUrlPrefix(
                       space.id
-                    )}/public/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
+                    )}/internal/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
                   )
                   .auth(user.username, user.password);
 
@@ -282,7 +289,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
+              )}/internal/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -306,6 +313,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+              const activeSnoozes = match.active_snoozes;
+              const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -339,6 +348,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 revision: 0,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
+                monitoring: match.monitoring,
+                snooze_schedule: match.snooze_schedule,
+                ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                is_snoozed_until: null,
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -382,7 +395,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
+              )}/internal/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -413,11 +426,15 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 id: createdAlert.id,
                 actions: [],
                 tags: [myTag],
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               break;
             default:
@@ -459,7 +476,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
+              )}/internal/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -491,12 +508,16 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 actions: [],
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               break;
             default:
@@ -516,7 +537,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 'other'
-              )}/public/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+              )}/internal/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -614,7 +635,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         ]);
       });
     });
-
     describe('stack alerts', () => {
       const ruleTypes = [
         [
