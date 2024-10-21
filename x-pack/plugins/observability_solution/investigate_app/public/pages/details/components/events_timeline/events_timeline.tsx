@@ -11,6 +11,8 @@ import { Chart, Axis, AreaSeries, Position, ScaleType, Settings } from '@elastic
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
 import { getBrushData } from '@kbn/observability-utils/chart/utils';
+import { Group } from '@kbn/observability-alerting-rule-utils';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { AnnotationEvent } from './annotation_event';
 import { TIME_LINE_THEME } from './timeline_theme';
 import { useFetchEvents } from '../../../../hooks/use_fetch_events';
@@ -24,10 +26,20 @@ export const EventsTimeLine = () => {
   const baseTheme = dependencies.start.charts.theme.useChartsBaseTheme();
 
   const { globalParams, updateInvestigationParams } = useInvestigation();
+  const { alert } = useInvestigation();
+
+  const groups = useMemo(
+    () =>
+      (alert?.[ALERT_GROUP] as unknown as Group[])
+        ?.map(({ field }) => `"${field}":"${alert?.[field]}"`)
+        .join(','),
+    [alert]
+  );
 
   const { data: events, isLoading } = useFetchEvents({
     rangeFrom: globalParams.timeRange.from,
     rangeTo: globalParams.timeRange.to,
+    filter: `{${groups}}`,
   });
 
   const chartRef = useRef(null);
