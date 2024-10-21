@@ -156,6 +156,7 @@ export function getDashboardApi({
         });
 
         if (saveResult) {
+          unsavedChangesManager.internalApi.onSave(saveResult.savedState);
           const settings = settingsManager.api.getSettings();
           settingsManager.api.setSettings({
             ...settings,
@@ -166,7 +167,6 @@ export function getDashboardApi({
             title: saveResult.savedState.title,
           });
           savedObjectId$.next(saveResult.id);
-          unsavedChangesManager.internalApi.onSave(saveResult.savedState);
 
           references = saveResult.references ?? [];
         }
