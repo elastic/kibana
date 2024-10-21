@@ -46,16 +46,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain('/management/security/api_keys');
       });
 
-      it('displays the roles management card, and will navigate to the Roles UI', async () => {
-        await pageObjects.svlManagementPage.assertRoleManagementCardExists();
-        await pageObjects.svlManagementPage.clickRoleManagementCard();
-
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/management/security/roles');
-      });
-
-      describe('Organization members', function () {
+      describe('custom roles', function () {
         this.tags('skipSvlOblt'); // Observability will not support custom roles
+
+        it('displays the roles management card, and will navigate to the Roles UI', async () => {
+          await pageObjects.svlManagementPage.assertRoleManagementCardExists();
+          await pageObjects.svlManagementPage.clickRoleManagementCard();
+
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain('/management/security/roles');
+        });
+
         it('displays the Organization members management card, and will navigate to the cloud organization URL', async () => {
           await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
           await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
