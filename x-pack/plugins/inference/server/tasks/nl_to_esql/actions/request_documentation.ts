@@ -5,59 +5,68 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { lastValueFrom, tap, map } from 'rxjs';
 import { InferenceClient, withoutOutputUpdateEvents } from '../../..';
 import { Message } from '../../../../common';
-import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
-import { requestDocumentationSchema } from './shared';
+import { EsqlDocumentBase } from '../doc_base';
 import type { FunctionCallingMode } from '../../../../common/chat_complete';
+import { requestDocumentationSchema } from './shared';
+import type { ActionsOptionsBase } from './types';
 
-export const requestDocumentation = ({
-  outputApi,
+export const requestDocumentationFn = ({
+  client,
   system,
-  messages,
   connectorId,
   functionCalling,
-  toolOptions: { tools, toolChoice },
-}: {
-  outputApi: InferenceClient['output'];
+  docBase,
+  logger,
+  output$,
+}: ActionsOptionsBase & {
+  docBase: EsqlDocumentBase;
   system: string;
-  messages: Message[];
-  connectorId: string;
-  functionCalling?: FunctionCallingMode;
-  toolOptions: ToolOptions;
 }) => {
-  const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
+  return async ({ messages }: { messages: Message[] }) => {
+    const result = await lastValueFrom(
+      client
+        .output('request_documentation', {
+          connectorId,
+          functionCalling,
+          system,
+          previousMessages: messages,
+          input: `Based on the previous conversation, request documentation
+        for commands or functions listed in the ES|QL handbook to help you
+        get the right information needed to generate a query.
 
-  return outputApi('request_documentation', {
-    connectorId,
-    functionCalling,
-    system,
-    previousMessages: messages,
-    input: `Based on the previous conversation, request documentation
-        from the ES|QL handbook to help you get the right information
-        needed to generate a query.
+        Make sure to request documentation for any command or function you think you may use,
+        even if you end up not using all of them.
 
-        Examples for functions and commands:
-        - Do you need to group data? Request \`STATS\`.
-        - Extract data? Request \`DISSECT\` AND \`GROK\`.
+        Example: if you need to...
+        - Group or aggregate data? Request \`STATS\`.
+        - Extract data? Request \`DISSECT\` and \`GROK\`.
         - Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
-
-        ${
-          hasTools
-            ? `### Tools
-
-        The following tools will be available to be called in the step after this.
-
-        \`\`\`json
-        ${JSON.stringify({
-          tools,
-          toolChoice,
-        })}
-        \`\`\``
-            : ''
-        }
+        - Group data by time intervals? Request \`BUCKET\`
       `,
-    schema: requestDocumentationSchema,
-  }).pipe(withoutOutputUpdateEvents());
+          schema: requestDocumentationSchema,
+        })
+        .pipe(
+          withoutOutputUpdateEvents(),
+          map((event) => {
+            const keywords = [...(event.output.commands ?? []), ...(event.output.functions ?? [])];
+            const requestedDocumentation = docBase.getDocumentation(keywords);
+            return {
+              ...event,
+              output: {
+                keywords,
+                requestedDocumentation,
+              },
+            };
+          }),
+          tap((event) => {
+            output$.next(event);
+          })
+        )
+    );
+
+    return result.output;
+  };
 };
