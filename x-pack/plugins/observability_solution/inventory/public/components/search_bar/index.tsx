@@ -57,7 +57,6 @@ export function SearchBar() {
     ({ query, isUpdate }: { query: Query | undefined; isUpdate: boolean | undefined }) => {
       telemetry.reportEntityInventorySearchQuerySubmitted({
         kuery_fields: getKqlFieldNamesFromExpression(query?.query as string),
-        timerange: '',
         action: isUpdate ? 'submit' : 'refresh',
       });
     },

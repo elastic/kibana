@@ -49,12 +49,6 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
         },
       },
     },
-    timerange: {
-      type: 'text',
-      _meta: {
-        description: 'Timerange of the search.',
-      },
-    },
     action: {
       type: 'keyword',
       _meta: {

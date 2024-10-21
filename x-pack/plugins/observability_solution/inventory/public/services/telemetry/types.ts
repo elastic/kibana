@@ -22,7 +22,6 @@ export interface EntityInventoryViewedParams {
 
 export interface EntityInventorySearchQuerySubmittedParams {
   kuery_fields: string[];
-  timerange: string;
   action: 'submit' | 'refresh';
 }
 
