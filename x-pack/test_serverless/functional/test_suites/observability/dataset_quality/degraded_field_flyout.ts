@@ -10,13 +10,13 @@ import moment from 'moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 import {
   createDegradedFieldsRecord,
-  datasetNames,
   defaultNamespace,
   getInitialTestLogs,
   ANOTHER_1024_CHARS,
   MORE_THAN_1024_CHARS,
 } from './data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -28,15 +28,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('svlLogsSynthtraceClient');
+  const esClient = getService('es');
   const retry = getService('retry');
   const to = new Date().toISOString();
-  const degradedDatasetName = datasetNames[2];
+  const degradedDatasetName = 'synth.degraded';
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
-  const degradedDatasetWithLimitsName = 'degraded.dataset.rca';
+  const degradedDatasetWithLimitsName = 'synth.degraded.rca';
   const degradedDatasetWithLimitDataStreamName = `logs-${degradedDatasetWithLimitsName}-${defaultNamespace}`;
   const serviceName = 'test_service';
   const count = 5;
+  const customComponentTemplateName = 'logs-synth@mappings';
 
   describe('Degraded fields flyout', () => {
     before(async () => {
@@ -112,6 +114,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('testing root cause for ignored fields', () => {
       before(async () => {
+        // Create custom component template
+        await synthtrace.createComponentTemplate(
+          customComponentTemplateName,
+          logsSynthMappings(degradedDatasetWithLimitsName)
+        );
+
+        // Create custom index template
+        await esClient.indices.putIndexTemplate({
+          name: degradedDatasetWithLimitDataStreamName,
+          _meta: {
+            managed: false,
+            description: 'custom synth template created by synthtrace tool.',
+          },
+          priority: 500,
+          index_patterns: [degradedDatasetWithLimitDataStreamName],
+          composed_of: [
+            customComponentTemplateName,
+            'logs@mappings',
+            'logs@settings',
+            'ecs@mappings',
+          ],
+          allow_auto_create: true,
+          data_stream: {
+            hidden: false,
+          },
+        });
         // Ingest Degraded Logs with 25 fields
         await synthtrace.index([
           timerange(moment(to).subtract(count, 'minute'), moment(to))
@@ -411,6 +439,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await synthtrace.clean();
+        await esClient.indices.deleteIndexTemplate({
+          name: degradedDatasetWithLimitDataStreamName,
+        });
+        await synthtrace.deleteComponentTemplate(customComponentTemplateName);
       });
     });
   });
