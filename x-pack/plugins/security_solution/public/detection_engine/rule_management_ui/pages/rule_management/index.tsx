@@ -36,7 +36,6 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { RuleFeatureTour } from '../../components/rules_table/feature_tour/rules_feature_tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -175,7 +174,6 @@ const RulesPageComponent: React.FC = () => {
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
           <BlogPostDetectionEngineeringCallout />
-          <RuleFeatureTour />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
