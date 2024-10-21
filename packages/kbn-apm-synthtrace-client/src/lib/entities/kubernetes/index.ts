@@ -12,26 +12,28 @@ import { Serializable } from '../../serializable';
 
 const identityFieldsMap: Record<Schema, Record<K8sEntityType, string[]>> = {
   ecs: {
-    pod: ['kubernetes.pod.name', 'kubernetes.pod.uid'],
+    pod: ['kubernetes.pod.name'],
     cluster: ['orchestrator.cluster.name'],
-    cronJob: ['kubernetes.cronjob.name', 'kubernetes.cronjob.uid'],
-    daemonSet: ['kubernetes.daemonset.name', 'kubernetes.daemonset.uid'],
-    deployment: ['kubernetes.deployment.name', 'kubernetes.deployment.uid'],
-    job: ['kubernetes.job.name', 'kubernetes.job.uid'],
-    node: ['kubernetes.node.name', 'kubernetes.node.uid '],
-    replicaSet: ['kubernetes.replicaset.name', 'kubernetes.replicaset.uid'],
-    statefulSet: ['kubernetes.statefulset.name', 'kubernetes.statefulset.uid'],
+    cronJob: ['kubernetes.cronjob.name'],
+    daemonSet: ['kubernetes.daemonset.name'],
+    deployment: ['kubernetes.deployment.name'],
+    job: ['kubernetes.job.name'],
+    node: ['kubernetes.node.name'],
+    replicaSet: ['kubernetes.replicaset.name'],
+    statefulSet: ['kubernetes.statefulset.name'],
+    container: ['kubernetes.container.id'],
   },
   otel: {
-    pod: ['k8s.pod.name', 'k8s.pod.uid'],
+    pod: ['k8s.pod.name'],
     cluster: ['k8s.cluster.uid'],
-    cronJob: ['k8s.cronjob.name', 'k8s.cronjob.uid'],
-    daemonSet: ['k8s.daemonset.name', 'k8s.daemonset.uid'],
-    deployment: ['k8s.deployment.name', 'k8s.deployment.uid'],
-    job: ['k8s.job.name', 'k8s.job.uid'],
+    cronJob: ['k8s.cronjob.name'],
+    daemonSet: ['k8s.daemonset.name'],
+    deployment: ['k8s.deployment.name'],
+    job: ['k8s.job.name'],
     node: ['k8s.node.uid'],
-    replicaSet: ['k8s.replicaset.name', 'k8s.replicaset.uid'],
-    statefulSet: ['k8s.statefulset.name', 'k8s.statefulset.uid'],
+    replicaSet: ['k8s.replicaset.name'],
+    statefulSet: ['k8s.statefulset.name'],
+    container: ['container.id'],
   },
 };
 
@@ -44,7 +46,8 @@ type K8sEntityType =
   | 'deployment'
   | 'daemonSet'
   | 'cronJob'
-  | 'cluster';
+  | 'cluster'
+  | 'container';
 
 export class K8sEntity extends Serializable<EntityFields> {
   constructor(schema: Schema, fields: EntityFields) {

@@ -8,7 +8,7 @@
  */
 
 import { Schema } from '..';
-import { K8sEntity } from './k8s_entities';
+import { K8sEntity } from '.';
 
 export function k8sJobSetEntity({
   schema,
