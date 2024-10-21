@@ -74,15 +74,15 @@ export function SearchBar() {
 
   const registerEntityTypeFilteredEvent = useCallback(
     ({
-      entityTypesFilter,
-      kueryFilter,
+      filterEntityTypes,
+      filterKuery,
     }: {
-      entityTypesFilter: EntityType[];
-      kueryFilter: string | undefined;
+      filterEntityTypes: EntityType[];
+      filterKuery: string | undefined;
     }) => {
       telemetry.reportEntityInventoryEntityTypeFiltered({
-        entity_types: entityTypesFilter,
-        kuery_fields: kueryFilter ? getKqlFieldNamesFromExpression(kueryFilter) : [],
+        entity_types: filterEntityTypes,
+        kuery_fields: filterKuery ? getKqlFieldNamesFromExpression(filterKuery) : [],
       });
     },
     [telemetry]
@@ -91,7 +91,7 @@ export function SearchBar() {
   const handleEntityTypesChange = useCallback(
     (nextEntityTypes: EntityType[]) => {
       searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
-      registerEntityTypeFilteredEvent({ entityTypesFilter: nextEntityTypes, kueryFilter: kuery });
+      registerEntityTypeFilteredEvent({ filterEntityTypes: nextEntityTypes, filterKuery: kuery });
     },
     [kuery, registerEntityTypeFilteredEvent, searchBarContentSubject$]
   );
