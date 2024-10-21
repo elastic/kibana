@@ -23,6 +23,7 @@ import type {
   LensPublicCallbacks,
 } from '../types';
 import { isTextBasedLanguage } from '../helper';
+import { addLog } from '../logger';
 
 export const prepareEventHandler =
   (
@@ -36,6 +37,7 @@ export const prepareEventHandler =
     if (!uiActions?.getTrigger || disableTriggers) {
       return;
     }
+    addLog(`onEvent$`);
 
     let eventHandler:
       | LensPublicCallbacks['onBrushEnd']

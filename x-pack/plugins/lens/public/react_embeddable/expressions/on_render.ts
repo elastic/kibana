@@ -13,6 +13,7 @@ import { TableInspectorAdapter } from '../../editor_frame_service/types';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { GetStateType, LensApi, LensEmbeddableStartServices } from '../types';
 import { getSuccessfulRequestTimings } from '../../report_performance_metric_util';
+import { addLog } from '../logger';
 
 function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unknown) {
   if (!activeData || !canTrackContentfulRender(parentApi)) {
@@ -59,6 +60,7 @@ export function prepareOnRender(
   dispatchRenderComplete: () => void
 ) {
   return function onRender$() {
+    addLog(`onRender$`);
     let datasourceEvents: string[] = [];
     let visualizationEvents: string[] = [];
     const currentState = getState();

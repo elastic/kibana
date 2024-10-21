@@ -36,6 +36,7 @@ import {
 } from '../types';
 import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
 import { getSearchWarningMessages } from '../../utils';
+import { addLog } from '../logger';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -120,6 +121,9 @@ export function buildUserMessagesHelpers(
 } {
   let runtimeUserMessages: Record<string, UserMessage> = {};
   const addUserMessages = (messages: UserMessage[]) => {
+    if (messages.length) {
+      addLog(`addUserMessages: "${messages.map(({ uniqueId }) => uniqueId).join('", "')}"`);
+    }
     for (const message of messages) {
       runtimeUserMessages[message.uniqueId] = message;
     }
@@ -251,6 +255,9 @@ export function buildUserMessagesHelpers(
             )
           : undefined;
 
+      if (error) {
+        addLog(`Blocking error: ${error?.message}`);
+      }
       if (error?.message !== api.blockingError.getValue()?.message) {
         (api.blockingError as BehaviorSubject<Error | undefined>).next(
           error?.message === '' ? undefined : error

@@ -11,6 +11,7 @@ import { apiHasDisableTriggers } from '@kbn/presentation-publishing';
 import { GetStateType, LensApi, LensEmbeddableStartServices, LensPublicCallbacks } from '../types';
 import { prepareOnRender } from './on_render';
 import { prepareEventHandler } from './on_event';
+import { addLog } from '../logger';
 
 export function prepareCallbacks(
   api: LensApi,
@@ -34,6 +35,7 @@ export function prepareCallbacks(
       dispatchRenderComplete
     ),
     onData: (_data: unknown, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+      addLog(`onData$`);
       onDataUpdate(adapters);
     },
     handleEvent: prepareEventHandler(api, getState, callbacks, services, disableTriggers),
