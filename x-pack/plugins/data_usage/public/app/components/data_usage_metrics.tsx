@@ -52,6 +52,7 @@ export const DataUsageMetrics = () => {
     selectedDataStreams: dataStreamsFromUrl,
     options: {
       enabled: true,
+      retry: false,
     },
   });
 

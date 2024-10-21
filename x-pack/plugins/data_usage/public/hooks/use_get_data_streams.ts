@@ -38,13 +38,13 @@ export const useGetDataUsageDataStreams = ({
     ...options,
     keepPreviousData: true,
     queryFn: async () => {
-      const dataStreamsResponse = await http.get<GetDataUsageDataStreamsResponse>(
-        DATA_USAGE_DATA_STREAMS_API_ROUTE,
-        {
+      const dataStreamsResponse = await http
+        .get<GetDataUsageDataStreamsResponse>(DATA_USAGE_DATA_STREAMS_API_ROUTE, {
           version: '1',
-          // query: {},
-        }
-      );
+        })
+        .catch((error) => {
+          throw error.body;
+        });
 
       const augmentedDataStreamsBasedOnSelectedItems = dataStreamsResponse.reduce<{
         selected: GetDataUsageDataStreamsResponse;

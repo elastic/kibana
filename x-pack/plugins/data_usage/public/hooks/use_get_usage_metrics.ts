@@ -28,16 +28,20 @@ export const useGetDataUsageMetrics = (
     ...options,
     keepPreviousData: true,
     queryFn: async ({ signal }) => {
-      return http.post<UsageMetricsResponseSchemaBody>(DATA_USAGE_METRICS_API_ROUTE, {
-        signal,
-        version: '1',
-        body: JSON.stringify({
-          from: body.from,
-          to: body.to,
-          metricTypes: body.metricTypes,
-          dataStreams: body.dataStreams,
-        }),
-      });
+      return http
+        .post<UsageMetricsResponseSchemaBody>(DATA_USAGE_METRICS_API_ROUTE, {
+          signal,
+          version: '1',
+          body: JSON.stringify({
+            from: body.from,
+            to: body.to,
+            metricTypes: body.metricTypes,
+            dataStreams: body.dataStreams,
+          }),
+        })
+        .catch((error) => {
+          throw error.body;
+        });
     },
   });
 };
