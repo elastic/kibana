@@ -16,7 +16,6 @@ import {
 import { useProfileAccessor } from '../../context_awareness';
 import { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
-import { DiscoverGridColumnInfoPopover } from './discover_grid_column_info_popover';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -63,7 +62,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-      CustomGridColumnInfoPopover={DiscoverGridColumnInfoPopover}
       {...props}
     />
   );

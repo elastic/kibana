@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { CustomGridColumnInfoPopover } from '@kbn/unified-data-table';
+import { RenderCustomGridColumnInfoPopover } from '@kbn/unified-data-table';
 import { UnifiedFieldListItemPopover } from '@kbn/unified-field-list';
 import { DataViewField } from '@kbn/data-plugin/common';
 import { useEuiTheme, EuiButtonIcon } from '@elastic/eui';
@@ -23,7 +23,7 @@ const options = {
   originatingApp: PLUGIN_ID,
 };
 
-export const DiscoverGridColumnInfoPopover: CustomGridColumnInfoPopover = ({
+export const DiscoverGridColumnInfoPopover: RenderCustomGridColumnInfoPopover = ({
   dataView,
   columnName,
   columnsMeta,
@@ -48,6 +48,10 @@ export const DiscoverGridColumnInfoPopover: CustomGridColumnInfoPopover = ({
 
     return dataView?.fields.getByName(columnName);
   }, [dataView, columnName, columnsMeta]);
+
+  if (columnName === '_source') {
+    return null;
+  }
 
   if (!field) {
     return null;

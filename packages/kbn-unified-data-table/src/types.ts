@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -61,8 +61,8 @@ export type CustomGridColumnsConfiguration = Record<
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
 
-export type CustomGridColumnInfoPopover = React.FC<{
+export type RenderCustomGridColumnInfoPopover = (props: {
   dataView: DataView;
   columnName: string;
   columnsMeta?: DataTableColumnsMeta;
-}>;
+}) => ReactElement | null;

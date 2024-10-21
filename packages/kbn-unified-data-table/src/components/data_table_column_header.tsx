@@ -15,7 +15,7 @@ import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/f
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CustomGridColumnInfoPopover, DataTableColumnsMeta } from '../types';
+import type { RenderCustomGridColumnInfoPopover, DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
@@ -25,7 +25,7 @@ interface DataTableColumnHeaderProps {
   columnsMeta?: DataTableColumnsMeta;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
-  CustomGridColumnInfoPopover?: CustomGridColumnInfoPopover;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
 }
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
@@ -35,7 +35,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnsMeta,
   dataView,
   headerRowHeight,
-  CustomGridColumnInfoPopover,
+  renderCustomGridColumnInfoPopover,
 }) => {
   return (
     <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="xs">
@@ -51,13 +51,9 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
           <DataTableColumnTitle columnDisplayName={columnDisplayName} />
         </ColumnHeaderTruncateContainer>
       </EuiFlexItem>
-      {typeof CustomGridColumnInfoPopover === 'function' && columnName ? (
+      {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
         <EuiFlexItem>
-          <CustomGridColumnInfoPopover
-            dataView={dataView}
-            columnName={columnName}
-            columnsMeta={columnsMeta}
-          />
+          {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>

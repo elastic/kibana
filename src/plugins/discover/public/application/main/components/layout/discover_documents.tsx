@@ -50,7 +50,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { map } from 'rxjs';
-import { DiscoverGrid } from '../../../../components/discover_grid';
+import { DiscoverGrid, DiscoverGridColumnInfoPopover } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -511,6 +511,7 @@ function DiscoverDocumentsComponent({
                 onFetchMoreRecords={onFetchMoreRecords}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
+                renderCustomGridColumnInfoPopover={DiscoverGridColumnInfoPopover}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}

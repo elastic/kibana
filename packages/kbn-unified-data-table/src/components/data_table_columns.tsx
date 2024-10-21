@@ -24,7 +24,7 @@ import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../typ
 import type {
   ValueToStringConverter,
   DataTableColumnsMeta,
-  CustomGridColumnInfoPopover,
+  RenderCustomGridColumnInfoPopover,
 } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -119,7 +119,7 @@ function buildEuiGridColumn({
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
-  CustomGridColumnInfoPopover,
+  renderCustomGridColumnInfoPopover,
   columnDisplay,
   onResize,
 }: {
@@ -143,7 +143,7 @@ function buildEuiGridColumn({
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
-  CustomGridColumnInfoPopover?: CustomGridColumnInfoPopover;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
@@ -227,7 +227,7 @@ function buildEuiGridColumn({
           columnsMeta={columnsMeta}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
-          CustomGridColumnInfoPopover={CustomGridColumnInfoPopover}
+          renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
         />
       ) : undefined,
     displayAsText: columnDisplayName,
@@ -321,7 +321,7 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
-  CustomGridColumnInfoPopover,
+  renderCustomGridColumnInfoPopover,
   onResize,
 }: {
   columns: string[];
@@ -346,7 +346,7 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
-  CustomGridColumnInfoPopover?: CustomGridColumnInfoPopover;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -375,7 +375,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
-      CustomGridColumnInfoPopover,
+      renderCustomGridColumnInfoPopover,
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
     })
