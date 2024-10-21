@@ -97,14 +97,10 @@ export async function getErrorGroupMainStatistics({
       ]
     : [];
 
-  const requiredFields = asMutableArray([
-    TRACE_ID,
-    AT_TIMESTAMP,
-    ERROR_GROUP_ID,
-    ERROR_ID,
-  ] as const);
+  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID, ERROR_ID] as const);
 
   const optionalFields = asMutableArray([
+    TRACE_ID,
     ERROR_CULPRIT,
     ERROR_LOG_MESSAGE,
     ERROR_EXC_MESSAGE,
