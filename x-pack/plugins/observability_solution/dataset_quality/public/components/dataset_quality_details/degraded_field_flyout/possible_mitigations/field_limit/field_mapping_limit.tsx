@@ -58,24 +58,6 @@ export function FieldMappingLimit({ isIntegration }: { isIntegration: boolean })
           {fieldLimitMitigationDescriptionText}
         </EuiText>
         <EuiHorizontalRule margin="s" />
-        {degradedFieldAnalysis?.isFieldLimitIssue && (
-          <EuiFlexGroup
-            data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutMitigationFieldsList-mappingLimit`}
-          >
-            <EuiFlexItem grow={1}>
-              <EuiTitle size="xxs">
-                <span>{degradedFieldCurrentFieldLimitColumnName}</span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem
-              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutMitigationFieldValue-mappingLimit"
-              grow={2}
-            >
-              <span>{degradedFieldAnalysis.totalFieldLimit}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
           <p>{fieldLimitMitigationConsiderationText}</p>
 

@@ -52,9 +52,11 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
   const { datasetDetails } = useDatasetQualityDetailsState();
   const { type, name } = datasetDetails;
 
-  const copyText = isIntegration ? `${type}-${name}@custom` : `${type}@custom`;
+  const pipelineName = isIntegration ? `${type}-${name}@custom` : `${type}@custom`;
 
-  const pipelineUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({ pipeline: ' ' });
+  const pipelineUrl = locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ pipeline: pipelineName }, {}, [pipelineName]);
 
   return (
     <EuiPanel hasBorder grow={false}>
@@ -85,12 +87,12 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
             <EuiButtonIcon
               iconType="copy"
               data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
-              onClick={() => copyToClipboard(copyText)}
+              onClick={() => copyToClipboard(pipelineName)}
             />
           }
           readOnly={true}
           aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
-          value={copyText}
+          value={pipelineName}
           data-test-subj="datasetQualityManualMitigationsPipelineName"
           fullWidth
         />
@@ -109,6 +111,7 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
             createEditPipelineLink: (
               <EuiLink
                 data-test-subj="datasetQualityManualMitigationsPipelineLink"
+                data-test-url={pipelineUrl}
                 href={pipelineUrl}
                 target="_blank"
               >

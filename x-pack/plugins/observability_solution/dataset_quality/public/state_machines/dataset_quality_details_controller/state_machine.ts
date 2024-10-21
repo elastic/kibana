@@ -377,7 +377,9 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               },
             },
             mitigations: {
+              initial: 'pending',
               states: {
+                pending: {},
                 savingNewFieldLimit: {
                   invoke: {
                     src: 'saveNewFieldLimit',

@@ -40,11 +40,14 @@ export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit
   };
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup
+      gutterSize="s"
+      data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIncreaseFieldLimitPanel"
+    >
       <EuiFlexItem>
         <EuiFormRow label={fieldLimitMitigationCurrentLimitLabelText}>
           <EuiFieldText
-            data-test-subj="datasetQualityIncreaseFieldMappingLimitFieldText"
+            data-test-subj="datasetQualityIncreaseFieldMappingCurrentLimitFieldText"
             disabled
             value={totalFieldLimit}
           />
@@ -53,7 +56,7 @@ export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit
       <EuiFlexItem>
         <EuiFormRow label={fieldLimitMitigationNewLimitButtonText}>
           <EuiFieldNumber
-            data-test-subj="datasetQualityIncreaseFieldMappingLimitFieldText"
+            data-test-subj="datasetQualityIncreaseFieldMappingProposedLimitFieldText"
             placeholder={fieldLimitMitigationNewLimitPlaceholderText}
             value={newFieldLimit}
             onChange={(e) => validateNewLimit(e.target.value)}

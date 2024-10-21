@@ -58,9 +58,10 @@ export function SuccessCallout() {
       title={fieldLimitMitigationSuccessMessage}
       color="success"
       iconType="checkInCircleFilled"
+      data-test-subj="datasetQualityDetailsDegradedFlyoutNewLimitSetSuccessCallout"
     >
       <EuiLink
-        data-test-subj="datasetQualityNewLimitSetCheckComponentTemplate"
+        data-test-subj="datasetQualityDetailsDegradedFlyoutNewLimitSetCheckComponentTemplate"
         href={componentTemplateUrl}
         target="_blank"
         color="success"

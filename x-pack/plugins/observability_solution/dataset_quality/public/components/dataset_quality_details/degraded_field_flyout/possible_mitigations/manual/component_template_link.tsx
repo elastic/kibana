@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../utils';
@@ -23,20 +23,25 @@ export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegrati
     },
   } = useKibanaContextForPlugin();
 
+  const [templatePath, setTemplatePath] = useState<string | null>(null);
+
   const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
+  const managementAppLocator = locators.get('MANAGEMENT_APP_LOCATOR');
 
-  const customComponentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({
+  useEffect(() => {
+    managementAppLocator
+      ?.getLocation({ indexTemplate: dataStreamSettings?.indexTemplate })
+      .then(({ path }) => setTemplatePath(path));
+  }, [locators, setTemplatePath, dataStreamSettings?.indexTemplate, managementAppLocator]);
+
+  const customComponentTemplateUrl = managementAppLocator?.useUrl({
     componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
       dataStreamSettings?.indexTemplate ?? name
     )}@custom`,
   });
 
-  const indexTemplateUrl = locators
-    .get('MANAGEMENT_APP_LOCATOR')
-    ?.useUrl({ indexTemplate: dataStreamSettings?.indexTemplate });
-
-  const componentTemplateUrl = isIntegration ? customComponentTemplateUrl : indexTemplateUrl;
+  const componentTemplateUrl = isIntegration ? customComponentTemplateUrl : templatePath;
 
   const onClickHandler = useCallback(async () => {
     await application.navigateToApp(MANAGEMENT_APP_ID, {
@@ -49,6 +54,7 @@ export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegrati
     <EuiPanel hasBorder grow={false}>
       <EuiLink
         data-test-subj="datasetQualityManualMitigationsCustomComponentTemplateLink"
+        data-test-url={componentTemplateUrl}
         onClick={onClickHandler}
         target="_blank"
         css={{ width: '100%' }}

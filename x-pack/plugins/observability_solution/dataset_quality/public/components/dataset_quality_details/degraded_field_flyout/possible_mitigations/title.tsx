@@ -17,7 +17,10 @@ export function PossibleMitigationTitle() {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiIcon type="wrench" />
-      <EuiTitle size="xs">
+      <EuiTitle
+        size="xs"
+        data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle"
+      >
         <p>{possibleMitigationTitle}</p>
       </EuiTitle>
       <EuiBetaBadge

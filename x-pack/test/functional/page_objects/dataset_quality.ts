@@ -239,6 +239,18 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    generateBackingIndexNameWithoutVersion({
+      type = 'logs',
+      dataset,
+      namespace = 'default',
+    }: {
+      type: string;
+      dataset: string;
+      namespace: string;
+    }) {
+      return `.ds-${type}-${dataset}-${namespace}-${getCurrentDateFormatted()}`;
+    },
+
     getDatasetsTable(): Promise<WebElementWrapper> {
       return testSubjects.find(testSubjectSelectors.datasetQualityTable);
     },
@@ -553,4 +565,13 @@ async function getDatasetTableHeaderTexts(tableWrapper: WebElementWrapper) {
   return Promise.all(
     headerElementWrappers.map((headerElementWrapper) => headerElementWrapper.getVisibleText())
   );
+}
+
+function getCurrentDateFormatted() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}.${month}.${day}`;
 }
