@@ -51,7 +51,6 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
       AlertConsumers.SLO,
       AlertConsumers.UPTIME,
       AlertConsumers.MONITORING,
-      AlertConsumers.ALERTS,
     ],
   },
   [GENERAL_CASES_OWNER]: {
@@ -65,7 +64,6 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
       AlertConsumers.STACK_ALERTS,
       AlertConsumers.EXAMPLE,
       AlertConsumers.DISCOVER,
-      AlertConsumers.ALERTS,
     ],
   },
 } as const;

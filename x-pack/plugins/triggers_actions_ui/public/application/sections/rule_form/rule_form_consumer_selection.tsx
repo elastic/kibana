@@ -82,6 +82,7 @@ const SINGLE_SELECTION = { asPlainText: true };
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
   const { consumers, errors, onChange, selectedConsumer, initialSelectedConsumer } = props;
   const isInvalid = (errors?.consumer as string[])?.length > 0;
+
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
       if (selected.length > 0) {
@@ -93,6 +94,7 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     },
     [onChange]
   );
+
   const validatedSelectedConsumer = useMemo(() => {
     if (
       selectedConsumer &&
@@ -103,6 +105,7 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     }
     return null;
   }, [selectedConsumer, consumers]);
+
   const selectedOptions = useMemo(
     () =>
       validatedSelectedConsumer
@@ -146,18 +149,10 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (consumers.length === 1) {
-      onChange(consumers[0] as RuleCreationValidConsumer);
-    } else if (consumers.includes(AlertConsumers.OBSERVABILITY)) {
-      onChange(AlertConsumers.OBSERVABILITY as RuleCreationValidConsumer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consumers]);
-
-  if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {
+  if (consumers.length <= 1) {
     return null;
   }
+
   return (
     <EuiFormRow
       fullWidth

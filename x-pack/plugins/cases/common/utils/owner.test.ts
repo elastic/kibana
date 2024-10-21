@@ -80,5 +80,14 @@ describe('owner utils', () => {
 
       expect(owner).toBe(OWNER_INFO.securitySolution.id);
     });
+
+    it('fallbacks to producer when the consumer is alerts', () => {
+      const owner = getOwnerFromRuleConsumerProducer({
+        consumer: AlertConsumers.ALERTS,
+        producer: AlertConsumers.OBSERVABILITY,
+      });
+
+      expect(owner).toBe(OWNER_INFO.observability.id);
+    });
   });
 });
