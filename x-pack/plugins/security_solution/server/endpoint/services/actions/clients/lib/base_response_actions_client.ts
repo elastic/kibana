@@ -587,6 +587,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
+    // FIXME:PT need to ensure we use a index below that has the proper `namespace` when agent type is Endpoint
+    //        Background: Endpoint responses require that the document be written to an index that has the
+    //        correct `namespace` as defined by the Integration/Agent policy adn that logic is not currently implemented.
+
     const doc = this.buildActionResponseEsDoc(options);
 
     this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
@@ -600,7 +604,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       .catch((err) => {
         throw new ResponseActionsClientError(
           `Failed to create action response document: ${err.message}`,
-          err.statusCode ?? 500,
+          500,
           err
         );
       });
@@ -784,19 +788,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    */
   protected async ensureDatastreamIndicesExist(agentIds: string[]): Promise<void> {
     const datastreamIndexNames: string[] = [];
+    let agentPolicyIds: string[] = [];
 
     if (this.agentType === 'endpoint') {
-      // FIXME:PT Follow up: should this be added to fleet services instead?
-
       const fleetServices = this.options.endpointService.getInternalFleetServices();
       const soClient = fleetServices.savedObjects.createInternalScopedSoClient();
       const agents = await fleetServices.agent.getByIds(agentIds);
-      const agentPolicyIds = Array.from(
+
+      agentPolicyIds = Array.from(
         agents.reduce<Set<string>>((acc, agentRecord) => {
           acc.add(agentRecord.policy_id ?? '');
           return acc;
         }, new Set<string>())
       );
+
       const agentPolicies = await fleetServices.agentPolicy.getByIds(soClient, agentPolicyIds, {
         withPackagePolicies: true,
       });
@@ -812,9 +817,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
       const namespaces = Array.from(
         agentPolicies.reduce<Set<string>>((acc, agentPolicy) => {
-          const endpointIntegration: PolicyData | undefined = agentPolicy.package_policies?.find(
-            (packagePolicy) => packagePolicy.package.name === 'endpoint'
-          );
+          const endpointIntegration: PolicyData | undefined = (
+            (agentPolicy.package_policies ?? []) as PolicyData[]
+          ).find((packagePolicy) => packagePolicy.package?.name === 'endpoint');
 
           if (endpointIntegration) {
             acc.add(endpointIntegration.namespace || agentPolicy.namespace);
@@ -824,10 +829,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         }, new Set<string>())
       );
 
-      this.log.debug(
-        () => `Namespaces to check that indexes exist for:\n${JSON.stringify(namespaces, null, 2)}`
-      );
-
       datastreamIndexNames.push(
         ...namespaces.map((namespace) => {
           return `${ENDPOINT_ACTION_RESPONSES_DS}-${namespace}`;
@@ -835,29 +836,39 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       );
     } else {
       // For agent types that are not Endpoint (External EDRs), we check that the `default` namespace indexes exist
-      datastreamIndexNames.push('default');
+      datastreamIndexNames.push(ENDPOINT_ACTION_RESPONSES_INDEX);
     }
 
     if (datastreamIndexNames.length > 0) {
       const esClient = this.options.esClient;
       const indexesCreated: string[] = [];
+      const indexesAlreadyExist: string[] = [];
       const processesDatastreamIndex = async (datastreamIndexName: string) => {
         if (
           !(await esClient.indices.exists({ index: datastreamIndexName }).catch(catchAndWrapError))
         ) {
           await esClient.indices
-            .createDataStream({
-              name: datastreamIndexName,
+            .createDataStream({ name: datastreamIndexName })
+            .then(() => {
+              indexesCreated.push(datastreamIndexName);
             })
             .catch((err) => {
-              throw new ResponseActionsClientError(
-                `Unable to create datastream [${datastreamIndexName}]: ${err.message}]`,
-                500,
-                err
+              // Its possible that between the `.exists()` check and this `.createDataStream()` that
+              // the index could have been created. If thats the case, then just ignore the error.
+              if (err.body?.error?.type === 'resource_already_exists_exception') {
+                indexesAlreadyExist.push(datastreamIndexName);
+                return;
+              }
+
+              // We only log the error here and do not fail the entire action. Reason: at the time of this implementation
+              // the change to the `kibana_system` role (in elasticsearch) might not yet be deployed, thus we just only
+              // log the error and allow the response action to still continue its flow
+              this.log.error(
+                `Attempt to create datastream [${datastreamIndexName}] failed:\n${stringify(err)}`
               );
             });
-
-          indexesCreated.push(datastreamIndexName);
+        } else {
+          indexesAlreadyExist.push(datastreamIndexName);
         }
       };
 
@@ -865,9 +876,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
       if (indexesCreated.length > 0) {
         this.log.info(
-          `Datastream(s) created in support of Fleet Agent policies [${agentPolicyIds.join(
+          `Datastream(s) index created in support of Fleet Agent policies [${agentPolicyIds.join(
             ', '
-          )}] having Elastic Defend integration:\n    ${indexesCreated.join('    \n')}`
+          )}] which include Elastic Defend integration:\n    ${indexesCreated.join('    \n')}`
+        );
+      }
+
+      if (indexesAlreadyExist.length > 0) {
+        this.log.debug(
+          () =>
+            `The following datastream(s) index already exist for Fleet Agent policies [${agentPolicyIds.join(
+              ', '
+            )}]. Nothing to do:\n    ${indexesAlreadyExist.join('    \n')}`
         );
       }
     }
