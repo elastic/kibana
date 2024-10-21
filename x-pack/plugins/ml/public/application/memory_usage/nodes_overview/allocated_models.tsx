@@ -106,7 +106,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       name: (
         <EuiToolTip
           content={i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationTooltip', {
-            defaultMessage: 'number_of_allocations times threads_per_allocation',
+            defaultMessage: 'Number of allocations per node times number of threads per allocation',
           })}
         >
           <span>
