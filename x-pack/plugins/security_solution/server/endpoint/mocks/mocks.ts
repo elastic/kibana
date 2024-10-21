@@ -50,6 +50,7 @@ import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
 import { EndpointMetadataService } from '../services/metadata';
 import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
@@ -99,7 +100,8 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const { esClient, fleetStartServices } = createMockEndpointAppContextServiceStartContract();
+  const { esClient, fleetStartServices, savedObjectsServiceStart } =
+    createMockEndpointAppContextServiceStartContract();
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
@@ -141,6 +143,7 @@ export const createMockEndpointAppContextService = (
     getInternalResponseActionsClient: jest.fn(() => {
       return responseActionsClientMock.create();
     }),
+    savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
