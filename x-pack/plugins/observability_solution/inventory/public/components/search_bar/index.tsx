@@ -63,11 +63,28 @@ export function SearchBar() {
     [telemetry]
   );
 
+  const registerEntityTypeFilteredEvent = useCallback(
+    ({
+      entityTypesFilter,
+      kueryFilter,
+    }: {
+      entityTypesFilter: EntityType[];
+      kueryFilter: string | undefined;
+    }) => {
+      telemetry.reportEntityInventoryEntityTypeFiltered({
+        entity_types: entityTypesFilter,
+        kuery_fields: kueryFilter ? getKqlFieldNamesFromExpression(kueryFilter) : [],
+      });
+    },
+    [telemetry]
+  );
+
   const handleEntityTypesChange = useCallback(
     (nextEntityTypes: EntityType[]) => {
       searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
+      registerEntityTypeFilteredEvent({ entityTypesFilter: nextEntityTypes, kueryFilter: kuery });
     },
-    [kuery, searchBarContentSubject$]
+    [kuery, registerEntityTypeFilteredEvent, searchBarContentSubject$]
   );
 
   const handleQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
