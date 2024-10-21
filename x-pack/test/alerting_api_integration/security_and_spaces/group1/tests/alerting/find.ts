@@ -72,7 +72,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+              )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -186,7 +186,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
+              )}/api/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -235,7 +235,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                   .get(
                     `${getUrlPrefix(
                       space.id
-                    )}/public/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
+                    )}/api/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
                   )
                   .auth(user.username, user.password);
 
@@ -282,7 +282,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
+              )}/api/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -382,7 +382,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
+              )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -459,7 +459,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/public/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
+              )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -516,7 +516,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 'other'
-              )}/public/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+              )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 

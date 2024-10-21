@@ -76,7 +76,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+          )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
         );
 
         expect(response.status).to.eql(200);
@@ -141,7 +141,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         .get(
           `${getUrlPrefix(
             Spaces.other.id
-          )}/public/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+          )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
         )
         .expect(200, {
           page: 1,
@@ -182,7 +182,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?filter=alert.attributes.monitoring.run.calculated_metrics.success_ratio>50`
+          )}/api/alerting/rules/_find?filter=alert.attributes.monitoring.run.calculated_metrics.success_ratio>50`
         );
 
         expect(response.status).to.eql(400);
@@ -195,7 +195,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?sort_field=monitoring.run.calculated_metrics.success_ratio`
+          )}/api/alerting/rules/_find?sort_field=monitoring.run.calculated_metrics.success_ratio`
         );
 
         expect(response.status).to.eql(200);
@@ -208,7 +208,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?search_fields=monitoring.run.calculated_metrics.success_ratio&search=50`
+          )}/api/alerting/rules/_find?search_fields=monitoring.run.calculated_metrics.success_ratio&search=50`
         );
 
         expect(response.status).to.eql(400);
@@ -221,7 +221,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
+          )}/api/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
         );
 
         expect(response.status).to.eql(200);
@@ -231,7 +231,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
       it('should filter on kueryNode parameters', async () => {
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/public/alerting/rules/_find?filter=${JSON.stringify(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?filter=${JSON.stringify(
             fromKueryExpression('alert.attributes.params.strValue:"my b"')
           )}`
         );
@@ -245,7 +245,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?sort_field=params.severity&sort_order=asc`
+          )}/api/alerting/rules/_find?sort_field=params.severity&sort_order=asc`
         );
         expect(response.body.data[0].params.severity).to.equal('low');
         expect(response.body.data[1].params.severity).to.equal('medium');
@@ -256,7 +256,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?search_fields=params.severity&search=medium`
+          )}/api/alerting/rules/_find?search_fields=params.severity&search=medium`
         );
 
         expect(response.status).to.eql(200);
@@ -268,7 +268,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+          )}/api/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
         );
 
         expect(response.status).to.eql(200);
@@ -282,7 +282,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/public/alerting/rules/_find?filter=alert.attributes.mapped_params.risk_score:40`
+          )}/api/alerting/rules/_find?filter=alert.attributes.mapped_params.risk_score:40`
         );
 
         expect(response.status).to.eql(400);
