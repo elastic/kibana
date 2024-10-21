@@ -121,13 +121,6 @@ describe('autocomplete', () => {
     );
   });
 
-  describe('show', () => {
-    testSuggestions('show /', ['INFO']);
-    for (const fn of ['info']) {
-      testSuggestions(`show ${fn} /`, ['| ']);
-    }
-  });
-
   describe('where', () => {
     const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
       scalar: true,

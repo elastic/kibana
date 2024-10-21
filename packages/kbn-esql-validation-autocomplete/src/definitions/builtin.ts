@@ -628,17 +628,16 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    // TODO — this shouldn't be a function or an operator...
-    name: 'info',
+    name: 'order-expression',
     type: 'builtin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
-      defaultMessage: 'Show information about the current ES node',
+      defaultMessage: 'Specify column sorting modifiers',
     }),
-    supportedCommands: ['show'],
+    supportedCommands: ['sort'],
     signatures: [
       {
-        params: [],
-        returnType: 'unknown', // meaningless
+        params: [{ name: 'column', type: 'any' }],
+        returnType: 'void',
       },
     ],
   },
