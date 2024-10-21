@@ -9,7 +9,14 @@ import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plug
 import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
-import { BehaviorSubject, type Subscription, distinctUntilChanged, skip, debounceTime } from 'rxjs';
+import {
+  BehaviorSubject,
+  type Subscription,
+  distinctUntilChanged,
+  skip,
+  debounceTime,
+  pipe,
+} from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { getEditPath } from '../../common/constants';
 import type {
@@ -129,6 +136,7 @@ export function loadEmbeddableData(
     };
 
     const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+      resetMessages();
       updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
@@ -205,6 +213,11 @@ export function loadEmbeddableData(
     internalApi.updateRenderCount();
   }
 
+  // Build a custom operator to be resused for various observables
+  function waitUntilChanged() {
+    return pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0));
+  }
+
   const subscriptions: Subscription[] = [
     // on data change from the parentApi, reload
     fetch$(api).subscribe((data) => {
@@ -230,17 +243,11 @@ export function loadEmbeddableData(
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
     // make sure to debounce one tick to make the refresh work
-    internalApi.attributes$
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
-      .subscribe(() => reload('attributes')),
-    api.savedObjectId
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
-      .subscribe(() => reload('savedObjectId')),
-    internalApi.overrides$
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
-      .subscribe(() => reload('overrides')),
+    internalApi.attributes$.pipe(waitUntilChanged()).subscribe(() => reload('attributes')),
+    api.savedObjectId.pipe(waitUntilChanged()).subscribe(() => reload('savedObjectId')),
+    internalApi.overrides$.pipe(waitUntilChanged()).subscribe(() => reload('overrides')),
     internalApi.disableTriggers$
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
+      .pipe(waitUntilChanged())
       .subscribe(() => reload('disableTriggers')),
   ];
 
