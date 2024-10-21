@@ -1421,7 +1421,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Kibana Platform Security
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
-/x-pack/test_serverless/api_integration/test_suites/security @elastic/kibana-security
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/security/cypress @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/kibana-security
