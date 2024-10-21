@@ -415,6 +415,21 @@ describe('SharingMetaFields', () => {
     `);
   });
 
+  it('Should convert to absolute correctly', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2024-10-21T10:19:31.254Z'));
+
+    const from = 'now-1d/d';
+    const to = 'now-1d/d';
+    const component = <SharingMetaFields from={from} to={to} />;
+
+    expect(shallow(component)).toMatchInlineSnapshot(`
+      <div
+        data-shared-timefilter-duration="2024-10-20T00:00:00-04:00 to 2024-10-20T23:59:59-04:00"
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    `);
+  });
+
   it('Should render the component without data-shared-timefilter-duration if time is not set correctly', () => {
     const component = (
       <SharingMetaFields from="boom" to="now" dateFormat="MMM D, YYYY @ HH:mm:ss.SSS" />
