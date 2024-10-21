@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expect as externalExpect } from 'expect';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -44,7 +45,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     it('GET should get the default config', async () => {
       const { body } = await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200);
 
-      expect(body).to.be(baseConfig);
+      externalExpect(body).toMatchObject(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
