@@ -117,9 +117,8 @@ export class KnowledgeBaseService {
           if (isModelMissingOrUnavailableError(error)) {
             return false;
           }
-          
-          throw error
-          }
+
+          throw error;
         }
       };
 
