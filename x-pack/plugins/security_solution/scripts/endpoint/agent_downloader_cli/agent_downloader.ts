@@ -45,6 +45,7 @@ const downloadAndStoreElasticAgent = async (
 ): Promise<void> => {
   const versionsToDownload = getVersionsToDownload(version);
 
+  // Although we have a list of versions to try downloading, we only need to download one, and will return as soon as it succeeds.
   for (const versionToDownload of versionsToDownload) {
     try {
       const { url } = await getAgentDownloadUrl(versionToDownload, closestMatch, log);
