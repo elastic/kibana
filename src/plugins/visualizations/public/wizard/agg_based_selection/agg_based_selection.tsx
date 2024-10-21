@@ -39,7 +39,7 @@ interface AggBasedSelectionProps {
   openedAsRoot?: boolean;
   onVisTypeSelected: (visType: BaseVisType) => void;
   visTypesRegistry: TypesStart;
-  toggleGroups: (flag: boolean) => void;
+  showMainDialog: (flag: boolean) => void;
 }
 interface AggBasedSelectionState {
   query: string;
@@ -67,7 +67,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
         </EuiModalHeader>
         <EuiModalBody>
           {this.props.openedAsRoot ? null : (
-            <DialogNavigation goBack={() => this.props.toggleGroups(true)} />
+            <DialogNavigation goBack={() => this.props.showMainDialog(true)} />
           )}
           <EuiFieldSearch
             placeholder="Filter"
