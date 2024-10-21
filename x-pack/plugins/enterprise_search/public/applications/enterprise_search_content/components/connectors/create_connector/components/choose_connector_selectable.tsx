@@ -169,6 +169,9 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
             if (value !== selectedConnector?.name) {
               setSearchValue(value);
             }
+            if (value === '') {
+              setSelectedConnector(null);
+            }
           },
           onClick: openPopover,
           onFocus: openPopover,
