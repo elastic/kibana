@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { v4 as uuidV4 } from 'uuid';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { CreateRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
 import { CreateRuleMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
@@ -37,7 +38,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
 
           const siemMigrationClient = ctx.securitySolution.getSiemMigrationsClient();
 
-          const migrationId = 'dummy';
+          const migrationId = uuidV4();
           const timestamp = new Date().toISOString();
 
           const ruleMigrations = originalRules.map<RuleMigration>((originalRule) => ({
