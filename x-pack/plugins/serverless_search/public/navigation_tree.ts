@@ -5,27 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AppDeepLinkId,
-  NavigationTreeDefinition,
-  NodeDefinition,
-} from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-const gettingStartedItem: NodeDefinition<AppDeepLinkId, string, string> = {
-  id: 'gettingStarted',
-  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-    defaultMessage: 'Getting Started',
-  }),
-  link: 'serverlessElasticsearch',
-  spaceBefore: 'm',
-};
-
-export const navigationTree = (
-  homeLink: AppDeepLinkId = 'serverlessElasticsearch' as AppDeepLinkId,
-  showGettingStarted: boolean
-): NavigationTreeDefinition => ({
+export const navigationTree = (): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
@@ -41,7 +25,7 @@ export const navigationTree = (
           title: i18n.translate('xpack.serverlessSearch.nav.home', {
             defaultMessage: 'Home',
           }),
-          link: homeLink,
+          link: 'elasticsearchStart',
           spaceBefore: 'm',
         },
         {
@@ -138,7 +122,40 @@ export const navigationTree = (
             },
           ],
         },
-        ...(showGettingStarted ? [gettingStartedItem] : []),
+        {
+          id: 'analyze',
+          title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
+            defaultMessage: 'Analyze',
+          }),
+          spaceBefore: 'm',
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+          ],
+        },
+        {
+          id: 'otherTools',
+          title: i18n.translate('xpack.serverlessSearch.nav.otherTools', {
+            defaultMessage: 'Other tools',
+          }),
+          spaceBefore: 'm',
+          children: [{ link: 'maps' }],
+        },
+        {
+          id: 'gettingStarted',
+          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+            defaultMessage: 'Getting Started',
+          }),
+          link: 'serverlessElasticsearch',
+          spaceBefore: 'm',
+        },
       ],
     },
   ],
