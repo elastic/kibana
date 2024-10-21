@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, retry } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, of, retry } from 'rxjs';
 
 import { transparentize } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -19,6 +19,7 @@ import {
   ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
+  GridPanelData,
   GridRowData,
   GridSettings,
   PanelInteractionEvent,
@@ -101,9 +102,11 @@ export const useGridLayoutState = ({
     const updatePanelStylesSubscription = combineLatest([
       gridLayoutStateManager.gridLayout$,
       gridLayoutStateManager.activePanel$,
+      gridLayoutStateManager.targetRow$,
+      gridLayoutStateManager.runtimeSettings$,
     ])
       .pipe(
-        map(([gridLayout, activePanel]) => {
+        map(([gridLayout, activePanel, targetRow, runtimeSettings]) => {
           // wait for all panel refs to be ready before continuing
           for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
             const currentRow = gridLayout[rowIndex];
@@ -118,16 +121,22 @@ export const useGridLayoutState = ({
               }
             });
           }
-          return { gridLayout, activePanel };
+          return { gridLayout, activePanel, targetRow, runtimeSettings };
         }),
         retry({ delay: 1 }) // retry until panel references all exist
       )
-      .subscribe(({ gridLayout, activePanel }) => {
-        const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+      .subscribe(({ gridLayout, activePanel, targetRow, runtimeSettings }) => {
         const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
         for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
-          if (activePanel && rowIndex !== currentInteractionEvent?.targetRowIndex) {
+          const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
+          if (!rowRef) return;
+
+          // set the CSS grid + styles of the current row
+          const currentRow = gridLayout[rowIndex];
+          setRowStyles({ rowRef, runtimeSettings, currentRow, targetRow, rowIndex });
+
+          if (activePanel && rowIndex !== targetRow) {
             /**
              * If there is an interaction event happening but the current row is not being targetted, it
              * does not need to be re-rendered; so, skip setting the panel styles of this row.
@@ -138,115 +147,28 @@ export const useGridLayoutState = ({
             continue;
           }
 
-          // re-render the targetted row
-          const currentRow = gridLayout[rowIndex];
+          // set the styles for every panel in the row
           Object.keys(currentRow.panels).forEach((key) => {
-            const panel = currentRow.panels[key];
             const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
             if (!panelRef) {
               return;
             }
 
-            const isResize = currentInteractionEvent?.type === 'resize';
-            if (panel.id === activePanel?.id) {
-              // if the current panel is active, give it fixed positioning depending on the interaction event
-              const { position: draggingPosition } = activePanel;
-
-              if (isResize) {
-                // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-                panelRef.style.width = `${Math.max(
-                  draggingPosition.right - draggingPosition.left,
-                  runtimeSettings.columnPixelWidth
-                )}px`;
-                panelRef.style.height = `${Math.max(
-                  draggingPosition.bottom - draggingPosition.top,
-                  runtimeSettings.rowHeight
-                )}px`;
-
-                // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-                panelRef.style.gridColumnStart = `${panel.column + 1}`;
-                panelRef.style.gridRowStart = `${panel.row + 1}`;
-                panelRef.style.gridColumnEnd = ``;
-                panelRef.style.gridRowEnd = ``;
-              } else {
-                // if the current panel is being dragged, render it with a fixed position + size
-                panelRef.style.position = 'fixed';
-                panelRef.style.left = `${draggingPosition.left}px`;
-                panelRef.style.top = `${draggingPosition.top}px`;
-                panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-                panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
-
-                // undo any "lock to grid" styles
-                panelRef.style.gridColumnStart = ``;
-                panelRef.style.gridRowStart = ``;
-                panelRef.style.gridColumnEnd = ``;
-                panelRef.style.gridRowEnd = ``;
-              }
-            } else {
-              // if the panel is not being dragged and/or resized, undo any fixed position styles
-              panelRef.style.position = '';
-              panelRef.style.left = ``;
-              panelRef.style.top = ``;
-              panelRef.style.width = ``;
-              panelRef.style.height = ``;
-
-              // and render the panel locked to the grid
-              panelRef.style.gridColumnStart = `${panel.column + 1}`;
-              panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-              panelRef.style.gridRowStart = `${panel.row + 1}`;
-              panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
-            }
+            const panel = currentRow.panels[key];
+            setPanelStyles({
+              panelRef,
+              panel,
+              runtimeSettings,
+              activePanel,
+              isResize: currentInteractionEvent?.type === 'resize',
+            });
           });
         }
       });
 
-    /**
-     * on layout changed and/or target row change, update the styles of the grid rows so that they renders as expected
-     */
-    const updateRowStylesSubscription = combineLatest([
-      gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.targetRow$,
-      gridLayoutStateManager.runtimeSettings$,
-    ]).subscribe(([gridLayout, targetRow, runtimeSettings]) => {
-      gridLayout.forEach((row, rowIndex) => {
-        const rowDiv = gridLayoutStateManager.rowRefs.current[rowIndex];
-        if (!rowDiv) return;
-
-        const { gutterSize, columnCount, rowHeight, columnPixelWidth } = runtimeSettings;
-        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
-          return Math.max(acc, panel.row + panel.height);
-        }, 0);
-        const rowCount = maxRow || 1;
-
-        rowDiv.style.gap = `${gutterSize}px`;
-        rowDiv.style.gridTemplateColumns = `repeat(${columnCount}, calc((100% - ${
-          gutterSize * (columnCount - 1)
-        }px) / ${columnCount}))`;
-        rowDiv.style.gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
-
-        if (rowIndex === targetRow) {
-          const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
-
-          rowDiv.style.backgroundPosition = `top -${gutterSize / 2}px left -${gutterSize / 2}px`;
-          rowDiv.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
-            rowHeight + gutterSize
-          }px`;
-          rowDiv.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
-          rowDiv.style.backgroundColor = `${transparentize(euiThemeVars.euiColorSuccess, 0.05)}`;
-        } else {
-          rowDiv.style.backgroundPosition = ``;
-          rowDiv.style.backgroundSize = ``;
-          rowDiv.style.backgroundImage = ``;
-          rowDiv.style.backgroundColor = `transparent`;
-        }
-      });
-    });
-
     return () => {
       resizeSubscription.unsubscribe();
       updatePanelStylesSubscription.unsubscribe();
-      updateRowStylesSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -258,4 +180,113 @@ export const useGridLayoutState = ({
   });
 
   return { gridLayoutStateManager, setDimensionsRef };
+};
+
+const setRowStyles = ({
+  rowRef,
+  runtimeSettings,
+  currentRow,
+  rowIndex,
+  targetRow,
+}: {
+  rowRef?: HTMLDivElement;
+  runtimeSettings: RuntimeGridSettings;
+  currentRow: GridRowData;
+  rowIndex: number;
+  targetRow?: number;
+}) => {
+  if (!rowRef) return;
+
+  const { gutterSize, columnCount, rowHeight, columnPixelWidth } = runtimeSettings;
+  const maxRow = Object.values(currentRow.panels).reduce((acc, panel) => {
+    return Math.max(acc, panel.row + panel.height);
+  }, 0);
+  const rowCount = maxRow || 1;
+
+  // set the CSS grid styles
+  rowRef.style.gap = `${gutterSize}px`;
+  rowRef.style.gridTemplateColumns = `repeat(${columnCount}, calc((100% - ${
+    gutterSize * (columnCount - 1)
+  }px) / ${columnCount}))`;
+  rowRef.style.gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
+
+  if (rowIndex === targetRow) {
+    // apply "targetted row" styles
+    const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
+
+    rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${gutterSize / 2}px`;
+    rowRef.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${rowHeight + gutterSize}px`;
+    rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+  linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
+    rowRef.style.backgroundColor = `${transparentize(euiThemeVars.euiColorSuccess, 0.05)}`;
+  } else {
+    // undo any "targetted row" styles
+    rowRef.style.backgroundPosition = ``;
+    rowRef.style.backgroundSize = ``;
+    rowRef.style.backgroundImage = ``;
+    rowRef.style.backgroundColor = `transparent`;
+  }
+};
+
+const setPanelStyles = ({
+  panelRef,
+  panel,
+  runtimeSettings,
+  activePanel,
+  isResize,
+}: {
+  panelRef: HTMLDivElement;
+  panel: GridPanelData;
+  runtimeSettings: RuntimeGridSettings;
+  activePanel?: ActivePanel;
+  isResize: boolean;
+}) => {
+  if (panel.id === activePanel?.id) {
+    // if the current panel is active, give it fixed positioning depending on the interaction event
+    const { position: draggingPosition } = activePanel;
+
+    if (isResize) {
+      // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+      panelRef.style.width = `${Math.max(
+        draggingPosition.right - draggingPosition.left,
+        runtimeSettings.columnPixelWidth
+      )}px`;
+      panelRef.style.height = `${Math.max(
+        draggingPosition.bottom - draggingPosition.top,
+        runtimeSettings.rowHeight
+      )}px`;
+
+      // undo any "lock to grid" styles **except** for the top left corner, which stays locked
+      panelRef.style.gridColumnStart = `${panel.column + 1}`;
+      panelRef.style.gridRowStart = `${panel.row + 1}`;
+      panelRef.style.gridColumnEnd = ``;
+      panelRef.style.gridRowEnd = ``;
+    } else {
+      // if the current panel is being dragged, render it with a fixed position + size
+      panelRef.style.position = 'fixed';
+      panelRef.style.left = `${draggingPosition.left}px`;
+      panelRef.style.top = `${draggingPosition.top}px`;
+      panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+      panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+
+      // undo any "lock to grid" styles
+      panelRef.style.gridColumnStart = ``;
+      panelRef.style.gridRowStart = ``;
+      panelRef.style.gridColumnEnd = ``;
+      panelRef.style.gridRowEnd = ``;
+    }
+  } else {
+    // if the panel is not being dragged and/or resized, undo any fixed position styles
+    panelRef.style.position = '';
+    panelRef.style.left = ``;
+    panelRef.style.top = ``;
+    panelRef.style.width = ``;
+    panelRef.style.height = ``;
+
+    // and render the panel locked to the grid
+    panelRef.style.gridColumnStart = `${panel.column + 1}`;
+    panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+    panelRef.style.gridRowStart = `${panel.row + 1}`;
+    panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+  }
 };
