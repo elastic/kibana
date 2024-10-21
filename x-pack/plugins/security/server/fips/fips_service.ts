@@ -60,7 +60,7 @@ export class FipsService {
         }
       },
       error: (error) => {
-        this.logger.debug(`Unable to check license: ${error}`);
+        this.logger.debug(`Unable to check test: ${error}`);
       },
     });
   }
