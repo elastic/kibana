@@ -8,15 +8,10 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
-import {
-  UseField,
-  ValidationError,
-  ValidationFunc,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
+import TorqWebhookEndpoint from '@kbn/stack-connectors-plugin/public/connector_types/torq/torq_utils';
 import * as i18n from './translations';
 
 const { urlField, emptyField } = fieldValidators;
@@ -30,21 +25,6 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
     </>
   );
 };
-
-const torqWebhookEndpoint =
-  (message: string) =>
-  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value }] = args as Array<{ value: string }>;
-    const error: ValidationError<ERROR_CODE> = {
-      code: 'ERR_FIELD_FORMAT',
-      formatType: 'URL',
-      message,
-    };
-    if (!isUrl(value)) return error;
-    const hostname = new URL(value).hostname;
-    const isTorqHostname = /^hooks(\.[a-z0-9]+)*\.torq\.io$/.test(hostname);
-    return isTorqHostname ? undefined : error;
-  };
 
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -67,7 +47,7 @@ const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
                   validator: urlField(i18n.URL_INVALID),
                 },
                 {
-                  validator: torqWebhookEndpoint(i18n.URL_NOT_TORQ_WEBHOOK),
+                  validator: TorqWebhookEndpoint(i18n.URL_NOT_TORQ_WEBHOOK),
                 },
               ],
             }}
