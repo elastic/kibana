@@ -9,9 +9,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+
+import {
+  SearchSerializedState,
+  SearchApi,
+} from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
 
 export const GridExample = () => {
   return (
@@ -21,7 +28,22 @@ export const GridExample = () => {
         <EuiPageTemplate.Section color="subdued">
           <GridLayout
             renderPanelContents={(id) => {
-              return <div style={{ padding: 8 }}>{id}</div>;
+              console.log('RENDER PANEL', id);
+              // return <div style={{ padding: 8 }}>{id}</div>;
+              return (
+                <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+                  type={'searchEmbeddableDemo'}
+                  getParentApi={() => ({
+                    getSerializedStateForChild: () => ({
+                      rawState: {
+                        timeRange: undefined,
+                      },
+                      references: [],
+                    }),
+                  })}
+                  hidePanelChrome={true}
+                />
+              );
             }}
             getCreationOptions={() => {
               const initialLayout: GridLayoutData = [

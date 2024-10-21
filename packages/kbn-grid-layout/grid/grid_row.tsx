@@ -7,41 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useMemo, useRef } from 'react';
+import React, { forwardRef } from 'react';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { GridPanel } from './grid_panel';
-import {
-  GridLayoutStateManager,
-  GridRowData,
-  PanelInteractionEvent,
-  RuntimeGridSettings,
-} from './types';
-
-const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
-const getGridBackgroundCSS = (settings: RuntimeGridSettings) => {
-  const { gutterSize, columnPixelWidth, rowHeight } = settings;
-  return css`
-    background-position: top -${gutterSize / 2}px left -${gutterSize / 2}px;
-    background-size: ${columnPixelWidth + gutterSize}px ${rowHeight + gutterSize}px;
-    background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-      linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
-  `;
-};
+import { GridLayoutStateManager, PanelInteractionEvent } from './types';
 
 export const GridRow = forwardRef<
   HTMLDivElement,
   {
     rowIndex: number;
-    rowData: GridRowData;
     toggleIsCollapsed: () => void;
-    targetRowIndex: number | undefined;
-    runtimeSettings: RuntimeGridSettings;
     renderPanelContents: (panelId: string) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
     gridLayoutStateManager: GridLayoutStateManager;
@@ -49,10 +29,7 @@ export const GridRow = forwardRef<
 >(
   (
     {
-      rowData,
       rowIndex,
-      targetRowIndex,
-      runtimeSettings,
       toggleIsCollapsed,
       renderPanelContents,
       setInteractionEvent,
@@ -60,19 +37,8 @@ export const GridRow = forwardRef<
     },
     gridRef
   ) => {
-    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-    const activePanel = useStateFromPublishingSubject(gridLayoutStateManager.activePanel$);
-
-    const { gutterSize, columnCount, rowHeight } = runtimeSettings;
-    const isGridTargeted = activePanel?.id && targetRowIndex === rowIndex;
-
-    // calculate row count based on the number of rows needed to fit all panels
-    const rowCount = useMemo(() => {
-      const maxRow = Object.values(rowData.panels).reduce((acc, panel) => {
-        return Math.max(acc, panel.row + panel.height);
-      }, 0);
-      return maxRow || 1;
-    }, [rowData]);
+    const rowData = useStateFromPublishingSubject(gridLayoutStateManager.rows$[rowIndex]);
+    console.log('rowData', rowData);
 
     return (
       <>
@@ -100,36 +66,25 @@ export const GridRow = forwardRef<
             ref={gridRef}
             css={css`
               display: grid;
-              gap: ${gutterSize}px;
               justify-items: stretch;
-              grid-template-columns: repeat(
-                ${columnCount},
-                calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
-              );
-              grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
-              background-color: ${isGridTargeted
-                ? transparentize(euiThemeVars.euiColorSuccess, 0.05)
-                : 'transparent'};
               transition: background-color 300ms linear;
-              ${isGridTargeted && getGridBackgroundCSS(runtimeSettings)}
             `}
           >
-            {Object.values(rowData.panels).map((panelData) => (
+            {Object.values(rowData.panelIds).map((panelId) => (
               <GridPanel
-                key={panelData.id}
-                panelData={panelData}
-                activePanelId={activePanel?.id}
+                key={panelId}
+                panelId={panelId}
                 renderPanelContents={renderPanelContents}
                 interactionStart={(type, e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelData.id];
+                  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
                   if (!panelRef) return;
 
                   const panelRect = panelRef.getBoundingClientRect();
                   setInteractionEvent({
                     type,
-                    id: panelData.id,
+                    id: panelId,
                     panelDiv: panelRef,
                     targetRowIndex: rowIndex,
                     mouseOffsets: {
@@ -144,7 +99,7 @@ export const GridRow = forwardRef<
                   if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
                     gridLayoutStateManager.panelRefs.current[rowIndex] = {};
                   }
-                  gridLayoutStateManager.panelRefs.current[rowIndex][panelData.id] = element;
+                  gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
                 }}
               />
             ))}

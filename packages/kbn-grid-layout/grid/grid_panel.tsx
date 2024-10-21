@@ -20,23 +20,19 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { GridPanelData, PanelInteractionEvent } from './types';
+import { PanelInteractionEvent } from './types';
 
 export const GridPanel = forwardRef<
   HTMLDivElement,
   {
-    panelData: GridPanelData;
-    activePanelId: string | undefined;
+    panelId: string;
     renderPanelContents: (panelId: string) => React.ReactNode;
     interactionStart: (
       type: PanelInteractionEvent['type'],
       e: React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
   }
->(({ activePanelId, panelData, renderPanelContents, interactionStart }, panelRef) => {
-  const { euiTheme } = useEuiTheme();
-  const thisPanelActive = activePanelId === panelData.id;
-
+>(({ panelId, renderPanelContents, interactionStart }, panelRef) => {
   return (
     <div ref={panelRef}>
       <EuiPanel
@@ -46,15 +42,6 @@ export const GridPanel = forwardRef<
           padding: 0;
           position: relative;
           height: 100%;
-          border: ${thisPanelActive
-            ? `${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiColorSuccess}`
-            : 'auto'};
-          :hover .resizeHandle {
-            opacity: ${Boolean(activePanelId) ? 0 : 1};
-          }
-          :hover .dragHandle {
-            opacity: ${Boolean(activePanelId) ? 0 : 1};
-          }
         `}
       >
         {/* drag handle */}
@@ -119,7 +106,7 @@ export const GridPanel = forwardRef<
             ${useEuiOverflowScroll('x', false)}
           `}
         >
-          {renderPanelContents(panelData.id)}
+          {renderPanelContents(panelId)}
         </div>
       </EuiPanel>
     </div>

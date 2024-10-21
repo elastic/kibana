@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
@@ -29,12 +29,7 @@ export const GridLayout = ({
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
-  const [gridLayout, runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
-    gridLayoutStateManager.gridLayout$,
-    gridLayoutStateManager.runtimeSettings$,
-    gridLayoutStateManager.interactionEvent$
-  );
-
+  const rowCount: number = useStateFromPublishingSubject(gridLayoutStateManager.rowCount$);
   return (
     <>
       <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
@@ -43,24 +38,28 @@ export const GridLayout = ({
             setDimensionsRef(divElement);
           }}
         >
-          {gridLayout.map((rowData, rowIndex) => {
+          {Array.from({ length: rowCount }).map((_, rowIndex) => {
             return (
               <GridRow
-                rowData={rowData}
-                key={rowData.title}
+                key={rowIndex}
                 rowIndex={rowIndex}
-                runtimeSettings={runtimeSettings}
                 renderPanelContents={renderPanelContents}
-                targetRowIndex={interactionEvent?.targetRowIndex}
                 gridLayoutStateManager={gridLayoutStateManager}
                 toggleIsCollapsed={() => {
                   const currentLayout = gridLayoutStateManager.gridLayout$.value;
                   currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
+                  const currentRow = currentLayout[rowIndex];
+                  gridLayoutStateManager.rows$[rowIndex].next({
+                    title: currentRow.title,
+                    isCollapsed: currentRow.isCollapsed,
+                    panelIds: Object.keys(currentRow.panels),
+                  });
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
                   if (nextInteractionEvent?.type === 'drop') {
                     gridLayoutStateManager.activePanel$.next(undefined);
+                    gridLayoutStateManager.targetRow$.next(undefined);
                   }
                   gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                 }}

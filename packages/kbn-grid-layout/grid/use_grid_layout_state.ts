@@ -10,7 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, retry } from 'rxjs';
+
+import { transparentize } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
+
 import {
   ActivePanel,
   GridLayoutData,
@@ -35,6 +39,17 @@ export const useGridLayoutState = ({
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
 
   const gridLayoutStateManager = useMemo(() => {
+    const rowCount$ = new BehaviorSubject<number>(initialLayout.length);
+    const rows$ = initialLayout.reduce((prev, currentRow) => {
+      return [
+        ...prev,
+        new BehaviorSubject({
+          title: currentRow.title,
+          isCollapsed: currentRow.isCollapsed,
+          panelIds: Object.keys(currentRow.panels),
+        }),
+      ];
+    }, []);
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
@@ -43,10 +58,18 @@ export const useGridLayoutState = ({
       ...gridSettings,
       columnPixelWidth: 0,
     });
+    const targetRow$ = new BehaviorSubject<number | undefined>(undefined);
+    const panelIds$ = new BehaviorSubject<string[][]>(
+      initialLayout.map(({ panels }) => Object.keys(panels))
+    );
 
     return {
       rowRefs,
+      rows$,
       panelRefs,
+      rowCount$,
+      targetRow$,
+      panelIds$,
       gridLayout$,
       activePanel$,
       gridDimensions$,
@@ -67,13 +90,14 @@ export const useGridLayoutState = ({
         const columnPixelWidth =
           (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
           gridSettings.columnCount;
+
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
       });
 
     /**
      * on layout change, update the styles of every panel so that it renders as expected
      */
-    const onLayoutChangeSubscription = combineLatest([
+    const updatePanelStylesSubscription = combineLatest([
       gridLayoutStateManager.gridLayout$,
       gridLayoutStateManager.activePanel$,
     ])
@@ -175,9 +199,53 @@ export const useGridLayoutState = ({
         }
       });
 
+    /**
+     * on layout changed and/or target row change, update the styles of the grid rows so that they renders as expected
+     */
+    const updateRowStylesSubscription = combineLatest([
+      gridLayoutStateManager.gridLayout$,
+      gridLayoutStateManager.targetRow$,
+      gridLayoutStateManager.runtimeSettings$,
+    ]).subscribe(([gridLayout, targetRow, runtimeSettings]) => {
+      gridLayout.forEach((row, rowIndex) => {
+        const rowDiv = gridLayoutStateManager.rowRefs.current[rowIndex];
+        if (!rowDiv) return;
+
+        const { gutterSize, columnCount, rowHeight, columnPixelWidth } = runtimeSettings;
+        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
+          return Math.max(acc, panel.row + panel.height);
+        }, 0);
+        const rowCount = maxRow || 1;
+
+        rowDiv.style.gap = `${gutterSize}px`;
+        rowDiv.style.gridTemplateColumns = `repeat(${columnCount}, calc((100% - ${
+          gutterSize * (columnCount - 1)
+        }px) / ${columnCount}))`;
+        rowDiv.style.gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
+
+        if (rowIndex === targetRow) {
+          const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
+
+          rowDiv.style.backgroundPosition = `top -${gutterSize / 2}px left -${gutterSize / 2}px`;
+          rowDiv.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
+            rowHeight + gutterSize
+          }px`;
+          rowDiv.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
+          rowDiv.style.backgroundColor = `${transparentize(euiThemeVars.euiColorSuccess, 0.05)}`;
+        } else {
+          rowDiv.style.backgroundPosition = ``;
+          rowDiv.style.backgroundSize = ``;
+          rowDiv.style.backgroundImage = ``;
+          rowDiv.style.backgroundColor = `transparent`;
+        }
+      });
+    });
+
     return () => {
       resizeSubscription.unsubscribe();
-      onLayoutChangeSubscription.unsubscribe();
+      updatePanelStylesSubscription.unsubscribe();
+      updateRowStylesSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
