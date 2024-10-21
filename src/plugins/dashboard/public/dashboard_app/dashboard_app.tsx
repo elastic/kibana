@@ -52,7 +52,11 @@ import {
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
+import {
+  loadAndRemoveDashboardState,
+  startSyncingExpandedPanelState,
+  startSyncingUnsavedFiltersState,
+} from './url/url_utils';
 
 export interface DashboardAppProps {
   history: History;
@@ -173,6 +177,15 @@ export function DashboardApp({
     const { stopWatchingExpandedPanel } = startSyncingExpandedPanelState({ dashboardApi, history });
     return () => stopWatchingExpandedPanel();
   }, [dashboardApi, history]);
+
+  useEffect(() => {
+    if (!dashboardApi || !unsavedFilters) return;
+    const { stopWatchingUnsavedFilters } = startSyncingUnsavedFiltersState({
+      dashboardApi,
+      history,
+    });
+    return () => stopWatchingUnsavedFilters();
+  }, [dashboardApi, unsavedFilters, history]);
 
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL

@@ -103,10 +103,6 @@ export async function mountApp({
     };
   };
 
-  const getDashboardUnsavedFilters = (routeParams: string) => {
-    return rison.decode(routeParams);
-  };
-
   const renderDashboard = (
     routeProps: RouteComponentProps<{
       id?: string;
@@ -118,8 +114,8 @@ export async function mountApp({
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
-    const formatUnsavedFilters = routeProps.match.params.unsavedFilters
-      ? (getDashboardUnsavedFilters(routeProps.match.params.unsavedFilters) as Filter[])
+    const getUnsavedFilters = routeProps.match.params.unsavedFilters
+      ? routeProps.match.params.unsavedFilters
       : undefined;
     return (
       <DashboardApp
@@ -128,7 +124,9 @@ export async function mountApp({
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
         expandedPanelId={routeProps.match.params.expandedPanelId}
-        unsavedFilters={formatUnsavedFilters}
+        unsavedFilters={
+          getUnsavedFilters ? (rison.decode(getUnsavedFilters) as Filter[]) : undefined
+        }
       />
     );
   };

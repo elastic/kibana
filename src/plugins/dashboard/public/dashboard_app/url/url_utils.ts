@@ -109,3 +109,23 @@ export const startSyncingExpandedPanelState = ({
   const stopWatchingExpandedPanel = () => expandedPanelSubscription.unsubscribe();
   return { stopWatchingExpandedPanel };
 };
+
+export const startSyncingUnsavedFiltersState = ({
+  dashboardApi,
+  history,
+}: {
+  dashboardApi: DashboardApi;
+  history: History;
+}) => {
+  const unsavedFiltersSbscription = dashboardApi?.filters$
+    // skip the first value because we don't want to trigger a history.replace on initial load
+    .pipe(skip(1))
+    .subscribe(() => {
+      history.replace({
+        ...history.location,
+        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId.value)}`,
+      });
+    });
+  const stopWatchingUnsavedFilters = () => unsavedFiltersSbscription.unsubscribe();
+  return { stopWatchingUnsavedFilters };
+};

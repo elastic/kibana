@@ -22,7 +22,7 @@ export const getDashboardListItemLink = (
   kbnUrlStateStorage: IKbnUrlStateStorage,
   id: string,
   timeRestore: boolean,
-  unsavedFilters?: Record<string, { filters: string }>
+  unsavedFilters?: Record<string, { filters: [] }>
 ) => {
   const useHash = coreServices.uiSettings.get('state:storeInSessionStorage'); // use hash
   const unsavedFiltersForUrl =
@@ -31,7 +31,9 @@ export const getDashboardListItemLink = (
       : undefined;
 
   let url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
-    path: `#${createDashboardEditUrl(id, true, unsavedFiltersForUrl)}`,
+    path: `#${createDashboardEditUrl(id)}${
+      Boolean(unsavedFiltersForUrl) ? `/unsavedFilters=${unsavedFiltersForUrl}` : ''
+    }`,
   });
   const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
 
