@@ -17,6 +17,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
+import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { InferenceUsageInfo } from '../../../../types';
@@ -30,12 +32,12 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
   } = useKibana();
   const handleNavigateToIndex = () => {
     if (usageItem.type === 'Index') {
-      application?.navigateToApp('enterprise_search', {
-        path: `content/search_indices/${usageItem.label}`,
+      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
+        path: `search_indices/${usageItem.label}`,
         openInNewTab: true,
       });
     } else if (usageItem.type === 'Pipeline') {
-      application?.navigateToApp('management', {
+      application?.navigateToApp(MANAGEMENT_APP_ID, {
         path: `ingest/ingest_pipelines?pipeline=${usageItem.label}`,
         openInNewTab: true,
       });
