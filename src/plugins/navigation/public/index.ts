@@ -14,12 +14,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
 }
 
-export type {
-  TopNavMenuData,
-  TopNavMenuDataWithIconType,
-  TopNavMenuProps,
-  TopNavMenuBadgeProps,
-} from './top_nav_menu';
+export type { TopNavMenuData, TopNavMenuProps, TopNavMenuBadgeProps } from './top_nav_menu';
 export { TopNavMenu, TopNavMenuItems, TopNavMenuBadges } from './top_nav_menu';
 
 export type {

@@ -8,6 +8,7 @@ import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
@@ -45,7 +46,6 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import { TopNavMenuDataWithIconType } from '@kbn/navigation-plugin/public';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -1455,7 +1455,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
-}) => undefined | TopNavMenuDataWithIconType;
+}) => undefined | TopNavMenuData;
 
 export interface LensCellValueAction {
   id: string;

@@ -204,7 +204,6 @@ describe('Lens App', () => {
           topNavMenuEntryGenerators: [
             () => ({
               label: 'My entry',
-              iconType: 'pencil',
               run: runFn,
             }),
           ],
