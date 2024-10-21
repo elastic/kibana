@@ -9,12 +9,24 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { KbnClient } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 
+export const taskHasRun = async (taskId: string, kbn: KbnClient, after: Date): Promise<boolean> => {
+  const task = await kbn.savedObjects.get({
+    type: 'task',
+    id: taskId,
+  });
+
+  const runAt = new Date(task.attributes.runAt);
+  const status = task.attributes.status;
+
+  return runAt > after && status === TaskStatus.Idle;
+};
+
 export const launchTask = async (
   taskId: string,
   kbn: KbnClient,
   logger: ToolingLog,
   delayMillis: number = 1_000
-) => {
+): Promise<Date> => {
   logger.info(`Launching task ${taskId}`);
   const task = await kbn.savedObjects.get({
     type: 'task',
@@ -35,4 +47,6 @@ export const launchTask = async (
   });
 
   logger.info(`Task ${taskId} launched`);
+
+  return new Date(runAt);
 };

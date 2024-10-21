@@ -21,6 +21,7 @@ import {
   launchTask,
   randomDatastream,
   randomIlmPolicy,
+  taskHasRun,
   waitFor,
 } from '../../../../common/utils/security_solution';
 
@@ -48,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish data stream events', async () => {
-        await launchTask(TASK_ID, kibanaServer, logger);
+        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
 
         const opts = {
           eventTypes: [TELEMETRY_DATA_STREAM_EVENT.eventType],
@@ -64,7 +65,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitFor(
           async () => {
             const eventCount = await ebtServer.getEventCount(opts);
-            return eventCount === 1;
+
+            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+
+            return hasRun && eventCount === 1;
           },
           'waitForTaskToRun',
           logger
@@ -72,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish index stats events', async () => {
-        await launchTask(TASK_ID, kibanaServer, logger);
+        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
 
         const opts = {
           eventTypes: [TELEMETRY_INDEX_STATS_EVENT.eventType],
@@ -86,7 +90,9 @@ export default ({ getService }: FtrProviderContext) => {
           async () => {
             const events = await ebtServer.getEvents(Number.MAX_SAFE_INTEGER, opts);
             const filtered = events.filter((ev) => regex.test(ev.properties.index_name as string));
-            return filtered.length === NUM_INDICES;
+            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+
+            return hasRun && filtered.length === NUM_INDICES;
           },
           'waitForTaskToRun',
           logger
@@ -94,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish cluster stats events', async () => {
-        await launchTask(TASK_ID, kibanaServer, logger);
+        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
 
         const opts = {
           eventTypes: [TELEMETRY_CLUSTER_STATS_EVENT.eventType],
@@ -105,7 +111,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitFor(
           async () => {
             const events = await ebtServer.getEventCount(opts);
-            return events === 1;
+            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+
+            return hasRun && events === 1;
           },
           'waitForTaskToRun',
           logger
@@ -128,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish ilm policy events', async () => {
-        await launchTask(TASK_ID, kibanaServer, logger);
+        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
 
         const opts = {
           eventTypes: [TELEMETRY_ILM_POLICY_EVENT.eventType],
@@ -144,7 +152,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitFor(
           async () => {
             const events = await ebtServer.getEventCount(opts);
-            return events === 1;
+            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+
+            return hasRun && events === 1;
           },
           'waitForTaskToRun',
           logger
@@ -152,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should publish ilm stats events', async () => {
-        await launchTask(TASK_ID, kibanaServer, logger);
+        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
 
         const opts = {
           eventTypes: [TELEMETRY_ILM_STATS_EVENT.eventType],
@@ -168,7 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitFor(
           async () => {
             const events = await ebtServer.getEventCount(opts);
-            return events === NUM_INDICES;
+            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+
+            return hasRun && events === NUM_INDICES;
           },
           'waitForTaskToRun',
           logger
