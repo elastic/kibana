@@ -596,6 +596,16 @@ async function getExpressionSuggestionsByType(
 
   const suggestions: SuggestionRawDefinition[] = [];
 
+  let shouldShowFunctions = true;
+  commands.forEach((c) => {
+    if (c.name === command.name) {
+      const cols = c.args.filter(isColumnItem);
+      const columnWithActiveCursor = cols.find((arg) => arg.name.includes(EDITOR_MARKER));
+      if (columnWithActiveCursor) {
+        shouldShowFunctions = false;
+      }
+    }
+  });
   // in this flow there's a clear plan here from argument definitions so try to follow it
   if (argDef) {
     if (argDef.type === 'column' || argDef.type === 'any' || argDef.type === 'function') {
@@ -722,7 +732,8 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: true,
+              // @todo
+              functions: shouldShowFunctions,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
               literals: argDef.constantOnly,
