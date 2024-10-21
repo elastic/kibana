@@ -1375,6 +1375,7 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
+/x-pack/test/api_integration/apis/logstash @elastic/kibana-core
 /x-pack/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
@@ -1898,7 +1899,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
-/x-pack/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # EUI team
