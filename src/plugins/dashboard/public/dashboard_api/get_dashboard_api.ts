@@ -36,7 +36,7 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { runInteractiveSave } from './run_interactive_save';
+import { openSaveModal } from './open_save_modal';
 
 export function getDashboardApi({
   creationOptions,
@@ -148,7 +148,7 @@ export function getDashboardApi({
       isManaged,
       runInteractiveSave: async () => {
         trackOverlayApi.clearOverlays();
-        const saveResult = await runInteractiveSave({
+        const saveResult = await openSaveModal({
           isManaged,
           lastSavedId: savedObjectId$.value,
           viewMode: viewMode$.value,

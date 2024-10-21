@@ -26,7 +26,7 @@ import { DashboardSaveModal } from '../dashboard_container/embeddable/api/overla
  * @description exclusively for user directed dashboard save actions, also
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
-export async function runInteractiveSave({
+export async function openSaveModal({
   controlGroupReferences,
   dashboardState,
   isManaged,
