@@ -75,7 +75,11 @@ export function ExpressionWrapper({
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
-    <div className={classNames('lnsExpressionRenderer', className)} style={style}>
+    <div
+      className={classNames('lnsExpressionRenderer', className)}
+      style={style}
+      data-test-subj="lens-embeddable"
+    >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding={noPadding ? undefined : 's'}
