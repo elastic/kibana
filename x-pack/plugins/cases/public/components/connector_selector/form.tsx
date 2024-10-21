@@ -60,7 +60,9 @@ export const ConnectorSelector = ({
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
       fullWidth
-      helpText={field.helpText}
+      helpText={
+        'Go to Stack Management > Cases > Settings to add an external incident management system'
+      }
       isInvalid={isInvalid}
       label={field.label}
       labelAppend={field.labelAppend}
