@@ -66,6 +66,28 @@ export class EndpointMetadataService {
   ) {}
 
   /**
+   * Validates that the data retrieved is valid for the current user space. We do this
+   * by just querying fleet to ensure the policy is visible in the current space
+   * (the space is determined from the `soClient`)
+   *
+   * @protected
+   */
+  protected async ensureDataValidForSpace(data: SearchResponse<HostMetadata>): Promise<void> {
+    const agentIds = (data?.hits?.hits || [])
+      .map((hit) => hit._source?.agent.id ?? '')
+      .filter((id) => !!id);
+
+    if (agentIds.length > 0) {
+      this.logger?.debug(
+        `Checking to see if the following agent ids are valid for current space:\n${agentIds.join(
+          '\n'
+        )}`
+      );
+      await this.fleetServices.ensureInCurrentSpace({ agentIds });
+    }
+  }
+
+  /**
    * Retrieve a single endpoint host metadata. Note that the return endpoint document, if found,
    * could be associated with a Fleet Agent that is no longer active. If wanting to ensure the
    * endpoint is associated with an active Fleet Agent, then use `getEnrichedHostMetadata()` instead
@@ -77,6 +99,9 @@ export class EndpointMetadataService {
   async getHostMetadata(endpointId: string): Promise<HostMetadata> {
     const query = getESQueryHostMetadataByID(endpointId);
     const queryResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
+
+    await this.ensureDataValidForSpace(queryResult);
+
     const endpointMetadata = queryResponseToHostResult(queryResult).result;
 
     if (endpointMetadata) {
@@ -99,6 +124,8 @@ export class EndpointMetadataService {
     const searchResult = await this.esClient
       .search<HostMetadata>(query, { ignore: [404] })
       .catch(catchAndWrapError);
+
+    await this.ensureDataValidForSpace(searchResult);
 
     return queryResponseToHostListResult(searchResult).resultList;
   }
@@ -335,6 +362,9 @@ export class EndpointMetadataService {
       unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
         unitedIndexQuery
       );
+      // FYI: we don't need to run the ES search response through `this.ensureDataValidForSpace()` because
+      // the query (`unitedIndexQuery`) above already included a filter with all of the valid policy ids
+      // for the current space - thus data is already coped to the space
     } catch (error) {
       const errorType = error?.meta?.body?.error?.type ?? '';
       if (errorType === 'index_not_found_exception') {
@@ -389,7 +419,6 @@ export class EndpointMetadataService {
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
-
         const runtimeFields: Partial<typeof _agent> = {
           status: doc?.fields?.status?.[0],
           last_checkin: doc?.fields?.last_checkin?.[0],
@@ -415,10 +444,10 @@ export class EndpointMetadataService {
 
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByIDs(endpointIDs);
-    const { body } = await this.esClient.search<HostMetadata>(query, {
-      meta: true,
-    });
-    const hosts = queryResponseToHostListResult(body);
-    return hosts.resultList;
+    const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
+
+    await this.ensureDataValidForSpace(searchResult);
+
+    return queryResponseToHostListResult(searchResult).resultList;
   }
 }
