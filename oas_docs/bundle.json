@@ -7121,11 +7121,12 @@
             }
           },
           {
-            "description": "deprecated use withAgentCount instead",
+            "description": "use withAgentCount instead",
             "in": "query",
             "name": "noAgentCount",
             "required": false,
             "schema": {
+              "deprecated": true,
               "type": "boolean"
             }
           },
