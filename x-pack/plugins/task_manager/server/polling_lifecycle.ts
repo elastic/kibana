@@ -14,7 +14,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, TaskManagerConfig } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
 import {
   TaskMarkRunning,
@@ -141,7 +141,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.pool = new TaskPool({
       logger,
-      strategy: config.claim_strategy!,
+      strategy: config.claim_strategy,
       capacity$: capacityConfiguration$,
       definitions: this.definitions,
     });
@@ -149,7 +149,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.taskClaiming = new TaskClaiming({
       taskStore,
-      strategy: config.claim_strategy!,
+      strategy: config.claim_strategy,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
@@ -238,7 +238,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       usageCounter: this.usageCounter,
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
-      strategy: this.config.claim_strategy!,
+      strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
     });
   };
