@@ -596,16 +596,17 @@ async function getExpressionSuggestionsByType(
 
   const suggestions: SuggestionRawDefinition[] = [];
 
-  let shouldShowFunctions = true;
-  commands.forEach((c) => {
-    if (c.name === command.name) {
-      const cols = c.args.filter(isColumnItem);
-      const columnWithActiveCursor = cols.find((arg) => arg.name.includes(EDITOR_MARKER));
-      if (columnWithActiveCursor) {
-        shouldShowFunctions = false;
-      }
-    }
-  });
+  // When user types and accepts autocomplete suggestion, and cursor is placed at the end of a valid field
+  // we should not show irrelevant functions that might have words matching
+  const columnWithActiveCursor = commands.find(
+    (c) =>
+      c.name === command.name &&
+      command.name === 'eval' &&
+      c.args.some((arg) => isColumnItem(arg) && arg.name.includes(EDITOR_MARKER))
+  );
+
+  const shouldShowFunctions = !columnWithActiveCursor;
+
   // in this flow there's a clear plan here from argument definitions so try to follow it
   if (argDef) {
     if (argDef.type === 'column' || argDef.type === 'any' || argDef.type === 'function') {
@@ -732,7 +733,6 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              // @todo
               functions: shouldShowFunctions,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
