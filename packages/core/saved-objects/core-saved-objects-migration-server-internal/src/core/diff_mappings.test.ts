@@ -123,7 +123,10 @@ describe('diffMappings', () => {
   describe('if there are new or updated types', () => {
     test('returns a changed type', () => {
       getUpdatedRootFieldsMock.mockReturnValueOnce([]);
-      getNewAndUpdatedTypesMock.mockReturnValueOnce(['foo', 'bar']);
+      getNewAndUpdatedTypesMock.mockReturnValueOnce({
+        newTypes: ['baz'],
+        updatedTypes: ['foo'],
+      });
 
       expect(
         diffMappings({
@@ -154,7 +157,10 @@ describe('diffMappings', () => {
   describe('if no root field or types have changed', () => {
     test('returns undefined', () => {
       getUpdatedRootFieldsMock.mockReturnValueOnce([]);
-      getNewAndUpdatedTypesMock.mockReturnValueOnce([]);
+      getNewAndUpdatedTypesMock.mockReturnValueOnce({
+        newTypes: [],
+        updatedTypes: [],
+      });
 
       expect(
         diffMappings({

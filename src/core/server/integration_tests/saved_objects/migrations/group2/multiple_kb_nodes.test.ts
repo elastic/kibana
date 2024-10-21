@@ -239,11 +239,11 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
       )
     ).toEqual([
       {
-        destIndex: `.kibana_migrator_${nextMinor}_001`,
+        destIndex: `${defaultKibanaIndex}_${nextMinor}_001`,
         status: 'patched',
       },
       {
-        destIndex: `.kibana_migrator_split_${nextMinor}_001`,
+        destIndex: `${kibanaSplitIndex}_${nextMinor}_001`,
         status: 'patched',
       },
     ]);

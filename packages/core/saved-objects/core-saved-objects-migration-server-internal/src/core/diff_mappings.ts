@@ -77,7 +77,7 @@ function findChangedProp({
     return updatedFields[0];
   }
 
-  const updatedTypes = getNewAndUpdatedTypes({
+  const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
     indexMeta: indexMappings._meta,
     indexTypes,
     latestMappingsVersions,
@@ -85,6 +85,8 @@ function findChangedProp({
   });
   if (updatedTypes.length) {
     return updatedTypes[0];
+  } else if (newTypes.length) {
+    return newTypes[0];
   }
 
   return undefined;

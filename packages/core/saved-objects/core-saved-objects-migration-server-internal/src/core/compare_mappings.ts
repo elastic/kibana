@@ -42,72 +42,47 @@ interface GetUpdatedTypesParams {
 
 /**
  * Compares the current vs stored mappings' hashes or modelVersions.
- * Returns a list with all the types that have been updated.
+ * Returns 2 lists: one with all the new types and one with the types that have been updated.
  * @param indexMeta The meta information stored in the SO index
  * @param knownTypes The list of SO types that belong to the index and are enabled
  * @param latestMappingsVersions A map holding [type => version] with the latest versions where mappings have changed for each type
  * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
- * @returns the list of types that have been updated (in terms of their mappings)
- */
-export const getUpdatedTypes = ({
-  indexMeta,
-  indexTypes,
-  latestMappingsVersions,
-  hashToVersionMap = {},
-}: GetUpdatedTypesParams): string[] => {
-  if (!indexMeta || (!indexMeta.mappingVersions && !indexMeta.migrationMappingPropertyHashes)) {
-    // if we currently do NOT have meta information stored in the index
-    // we consider that all types have been updated
-    return indexTypes;
-  }
-
-  // If something exists in stored, but is missing in current
-  // we don't care, as it could be a disabled plugin, etc
-  // and keeping stale stuff around is better than migrating unecessesarily.
-  return indexTypes.filter(
-    (type) =>
-      checkTypeStatus({
-        type,
-        mappingVersion: latestMappingsVersions[type],
-        indexMeta,
-        hashToVersionMap,
-      }) === 'updated'
-  );
-};
-
-/**
- * Compares the current vs stored mappings' hashes or modelVersions.
- * Returns a list with all the new types and the types that have been updated.
- * @param indexMeta The meta information stored in the SO index
- * @param knownTypes The list of SO types that belong to the index and are enabled
- * @param latestMappingsVersions A map holding [type => version] with the latest versions where mappings have changed for each type
- * @param hashToVersionMap A map holding information about [md5 => modelVersion] equivalence
- * @returns the list of new types + thosetypes that have been updated (in terms of their mappings)
+ * @returns the lists of new types and updated types
  */
 export const getNewAndUpdatedTypes = ({
   indexMeta,
   indexTypes,
   latestMappingsVersions,
   hashToVersionMap = {},
-}: GetUpdatedTypesParams): string[] => {
+}: GetUpdatedTypesParams) => {
   if (!indexMeta || (!indexMeta.mappingVersions && !indexMeta.migrationMappingPropertyHashes)) {
     // if we currently do NOT have meta information stored in the index
     // we consider that all types have been updated
-    return indexTypes;
+    return { newTypes: [], updatedTypes: indexTypes };
   }
 
   // If something exists in stored, but is missing in current
   // we don't care, as it could be a disabled plugin, etc
   // and keeping stale stuff around is better than migrating unecessesarily.
-  return indexTypes.filter(
-    (type) =>
-      checkTypeStatus({
-        type,
-        mappingVersion: latestMappingsVersions[type],
-        indexMeta,
-        hashToVersionMap,
-      }) !== 'unchanged'
-  );
+  const newTypes: string[] = [];
+  const updatedTypes: string[] = [];
+
+  indexTypes.forEach((type) => {
+    const status = checkTypeStatus({
+      type,
+      mappingVersion: latestMappingsVersions[type],
+      indexMeta,
+      hashToVersionMap,
+    });
+
+    if (status === 'new') {
+      newTypes.push(type);
+    } else if (status === 'updated') {
+      updatedTypes.push(type);
+    }
+  });
+
+  return { newTypes, updatedTypes };
 };
 
 /**
