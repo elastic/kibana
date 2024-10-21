@@ -14,8 +14,6 @@ export interface RuleFieldEditComponentProps {
   resetForm: ResetFormFn;
 }
 
-type SetValidityFn = (isValid: boolean) => void;
-
 type SetFieldValueFn = (fieldName: string, fieldValue: unknown) => void;
 
 export type ResetFormFn = (options?: {
