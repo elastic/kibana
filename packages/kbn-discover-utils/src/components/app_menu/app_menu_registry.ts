@@ -102,10 +102,12 @@ export class AppMenuRegistry {
     // enrich submenus with custom actions
     if (type === AppMenuActionType.secondary || type === AppMenuActionType.custom) {
       [...this.customSubmenuItemsBySubmenuId.entries()].forEach(([submenuId, customActions]) => {
-        const submenuParentItem = actions.find((item) => item.id === submenuId);
-        if (submenuParentItem && isAppMenuActionSubmenu(submenuParentItem)) {
-          submenuParentItem.actions.push(...customActions);
-        }
+        actions = actions.map((item) => {
+          if (item.id === submenuId && isAppMenuActionSubmenu(item)) {
+            return extendSubmenuWithCustomAction(item, customActions);
+          }
+          return item;
+        });
       });
     }
 
@@ -170,6 +172,18 @@ function getAppMenuSubmenuWithAssignedOrder<
     ...appMenuItem,
     order: appMenuItem.order ?? order,
     actions: actionsWithOrder,
+  };
+}
+
+function extendSubmenuWithCustomAction<
+  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
+>(
+  appMenuItem: T,
+  customActions: Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
+): T {
+  return {
+    ...appMenuItem,
+    actions: [...appMenuItem.actions, ...customActions],
   };
 }
 

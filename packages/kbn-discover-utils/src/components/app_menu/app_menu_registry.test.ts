@@ -94,6 +94,10 @@ describe('AppMenuRegistry', () => {
     items = appMenuRegistry.getSortedItems();
     expect(items).toHaveLength(3);
 
+    // calling it again should not add a duplicate
+    items = appMenuRegistry.getSortedItems();
+    expect(items).toHaveLength(3);
+
     submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
     expect(submenuItem.actions).toHaveLength(3);
     expect(items).toMatchSnapshot();
