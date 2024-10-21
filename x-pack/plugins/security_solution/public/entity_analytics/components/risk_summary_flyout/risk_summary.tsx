@@ -36,7 +36,7 @@ import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 import {
-  buildColumns,
+  columnsArray,
   getEntityData,
   getItems,
   isUserRiskData,
@@ -81,7 +81,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const columns = useMemo(() => buildColumns(), []);
+  const columns = useMemo(() => columnsArray, []);
 
   const rows = useMemo(() => getItems(entityData), [entityData]);
 

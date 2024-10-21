@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher } from '@kbn/picomatcher/make_matcher';
 import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
 
@@ -36,6 +36,7 @@ function isValidKbnRefs(refs: unknown): refs is KbnRef[] {
 }
 
 function expand(name: string, patterns: string[], knownPaths: string[]) {
+  const pathsArray = Array.isArray(knownPaths) ? knownPaths : [];
   const matchers = patterns.map((pattern) => ({
     pattern,
     matcher: makeMatcher([pattern]),
@@ -43,7 +44,7 @@ function expand(name: string, patterns: string[], knownPaths: string[]) {
 
   const selected = matchers.map(({ matcher, pattern }) => ({
     pattern,
-    matches: knownPaths.filter(matcher),
+    matches: pathsArray.filter(matcher),
   }));
 
   const noMatches = selected.flatMap((s) => (s.matches.length === 0 ? s.pattern : []));
