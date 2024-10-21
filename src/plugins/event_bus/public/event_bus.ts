@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, map, scan, BehaviorSubject, type Subscription } from 'rxjs';
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  distinctUntilChanged,
+  map,
+  scan,
+  shareReplay,
+  BehaviorSubject,
+  type Observable,
+  type Subscription,
+} from 'rxjs';
 import { isEqual } from 'lodash';
 import { Slice } from '@reduxjs/toolkit';
 
@@ -16,7 +26,7 @@ import { Slice } from '@reduxjs/toolkit';
  * @param value
  * @returns whether the value is a JS primitive.
  */
-function isPrimitive(value: unknown) {
+export function isPrimitive(value: unknown) {
   return value === null || (typeof value !== 'object' && typeof value !== 'function');
 }
 
@@ -26,7 +36,7 @@ function isPrimitive(value: unknown) {
  * @param curr The current value
  * @returns whether the two values are equal
  */
-function customIsEqual(prev: any, curr: any): boolean {
+export function customIsEqual(prev: any, curr: any): boolean {
   if (isPrimitive(prev) && isPrimitive(curr)) {
     // Special handling for NaN
     if (typeof prev === 'number' && typeof curr === 'number') {
@@ -45,30 +55,36 @@ export interface Action<T = any> {
 
 export class EventBus<S extends Slice> {
   public subject: BehaviorSubject<Action>;
+  public state: Observable<ReturnType<S['reducer']>>;
   public slice: S;
   public actions: S['actions'];
+  // workaround for initialization in hook
+  private currentState: ReturnType<S['reducer']>;
+  private currentStateSubscription: Subscription;
 
   constructor(slice: S) {
-    this.subject = new BehaviorSubject<Action>({ type: 'init', payload: null });
+    this.subject = new BehaviorSubject<Action>({ type: '', payload: null });
+    this.state = this.subject.pipe(
+      scan(slice.reducer, slice.getInitialState()),
+      // make sure new subscribers get the latest state
+      shareReplay(1)
+    );
     this.slice = slice;
     this.actions = this.wrapActions(slice.actions);
+
+    this.currentState = slice.getInitialState();
+    this.currentStateSubscription = this.subscribe((state) => {
+      this.currentState = state;
+    });
   }
 
-  // Subscribe to this event bus with an optional selector
-  // without needing to provide the generic type.
-  subscribe(cb: (state: ReturnType<S['reducer']>) => void): Subscription;
-  subscribe(cb: (state: ReturnType<S['reducer']>) => void): Subscription;
-  subscribe<SelectedState>(
-    cb: (selectedState: SelectedState) => void,
-    selector: (state: ReturnType<S['reducer']>) => SelectedState
-  ): Subscription;
+  // Subscribe to this event bus with an optional selector.
   subscribe<SelectedState = ReturnType<S['reducer']>>(
     cb: (state: SelectedState) => void,
     selector?: (state: ReturnType<S['reducer']>) => SelectedState
   ): Subscription {
-    return this.subject
+    return this.state
       .pipe(
-        scan(this.slice.reducer, this.slice.getInitialState()),
         // Apply selector if provided
         map((state) => (selector ? selector(state) : state)),
         // Emit only if the selected state has changed
@@ -77,7 +93,35 @@ export class EventBus<S extends Slice> {
       .subscribe(cb);
   }
 
-  // Wrap actions to automatically dispatch through the event bus
+  // React hook with an optional selector.
+  useState<SelectedState = ReturnType<S['reducer']>>(
+    selector?: (state: ReturnType<S['reducer']>) => SelectedState
+  ): SelectedState {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const o$ = useMemo(
+      () =>
+        this.state.pipe(
+          // Apply selector if provided
+          map((state) => (selector ? selector(state) : state)),
+          // Emit only if the selected state has changed
+          distinctUntilChanged(customIsEqual)
+        ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const initialState = useMemo(
+      () => (selector ? selector(this.currentState) : (this.currentState as SelectedState)),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useObservable(o$, initialState);
+  }
+
+  // Wrap slice actions to automatically dispatch through the event bus
   private wrapActions(actions: S['actions']) {
     return Object.entries(actions).reduce((p, [key, actionCreator]) => {
       p[key as any as keyof S['actions']] = ((...args: any[]) => {
@@ -86,5 +130,12 @@ export class EventBus<S extends Slice> {
       }) as any;
       return p;
     }, {} as S['actions']);
+  }
+
+  // Call this method when unregistering the event bus to make sure
+  // the state subscription is cleaned up.
+  dispose() {
+    this.subject.complete();
+    this.currentStateSubscription.unsubscribe();
   }
 }

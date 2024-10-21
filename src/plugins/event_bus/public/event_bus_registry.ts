@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState, useEffect } from 'react';
 import { Slice } from '@reduxjs/toolkit';
 
 import { searchSlice } from './search_slice';
@@ -22,7 +21,7 @@ import { EventBus } from './event_bus';
  * the type of the slice of the event bus you want to get for proper type safety.
  *
  * Example:
- * const search = eventBusRegistry.get<SearchSlice>('search')
+ * const search = eventBusRegistry.get(searchSlice)
  *
  * Similar to Kibana's plugin depedency management, a different approach would
  * be to define the possible services up front, but that's not possible here
@@ -48,7 +47,7 @@ const createEventBusRegistry = () => {
     if (eventBus === undefined) {
       throw new Error(`Event bus '${name}' not found`);
     }
-    (eventBus as EventBus<any>).subject.complete();
+    (eventBus as EventBus<any>).dispose();
     eventBuses.delete(name);
   }
 
@@ -60,40 +59,10 @@ const createEventBusRegistry = () => {
     return eventBus as EventBus<S>;
   }
 
-  // React hook with an optional selector
-  // without needing to provide the generic type.
-  function useEventBusValue<S extends Slice, SelectedState = ReturnType<S['reducer']>>(
-    slice: S,
-    selector?: (state: ReturnType<S['reducer']>) => SelectedState
-  ): SelectedState {
-    const eventBus = useMemo(() => get<S>(slice), [slice]);
-
-    const initialValue = selector
-      ? selector(eventBus.slice.getInitialState())
-      : eventBus.slice.getInitialState();
-
-    const [eventBusValue, setEventBusValue] = useState<SelectedState>(initialValue);
-
-    useEffect(() => {
-      const subscription = eventBus.subscribe(
-        setEventBusValue,
-        // Workaround to satisfy correct types to be returned
-        selector ?? ((state) => state as SelectedState)
-      );
-
-      return () => {
-        subscription.unsubscribe();
-      };
-    }, [eventBus, selector]);
-
-    return eventBusValue;
-  }
-
   return {
     register,
     unregister,
     get,
-    useEventBusValue,
   };
 };
 
