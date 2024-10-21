@@ -82,13 +82,9 @@ export type RegisterFunction = <
   TArguments = FromSchema<TParameters>
 >(
   definition: FunctionDefinition<TParameters>,
-  respond: RespondFunction<TArguments, TResponse>,
-  scopes: AssistantScope[]
+  respond: RespondFunction<TArguments, TResponse>
 ) => void;
-export type FunctionHandlerRegistry = Map<
-  string,
-  { handler: FunctionHandler; scopes: AssistantScope[] }
->;
+export type FunctionHandlerRegistry = Map<string, { handler: FunctionHandler }>;
 
 export type RegistrationCallback = ({}: {
   signal: AbortSignal;

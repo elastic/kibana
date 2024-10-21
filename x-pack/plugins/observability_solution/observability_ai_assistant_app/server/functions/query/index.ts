@@ -103,8 +103,7 @@ export function registerQueryFunction({
           rows,
         },
       };
-    },
-    ['all']
+    }
   );
   functions.registerFunction(
     {
@@ -188,7 +187,6 @@ export function registerQueryFunction({
           return messageAddEvent;
         })
       );
-    },
-    ['all']
+    }
   );
 }

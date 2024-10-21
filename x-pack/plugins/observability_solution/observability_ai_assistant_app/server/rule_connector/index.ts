@@ -160,6 +160,7 @@ async function executor(
     resources,
     client,
     screenContexts: [],
+    scopes: ['observability'],
   });
   const actionsClient = await (
     await resources.plugins.actions.start()
@@ -227,7 +228,7 @@ If available, include the link of the conversation at the end of your answer.`
             role: MessageRole.System,
             content: getSystemMessageFromInstructions({
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              applicationInstructions: functionClient.getInstructions(['observability']),
+              applicationInstructions: functionClient.getInstructions(),
               userInstructions: [],
               adHocInstructions: [],
             }),

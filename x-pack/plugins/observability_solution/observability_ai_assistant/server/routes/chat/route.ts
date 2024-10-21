@@ -248,6 +248,7 @@ async function chatComplete(
       screenContexts,
       instructions,
       disableFunctions,
+      scopes,
     },
   } = params;
 
@@ -260,6 +261,7 @@ async function chatComplete(
     resources,
     client,
     screenContexts,
+    scopes,
   });
 
   const response$ = client.complete({

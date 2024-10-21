@@ -300,11 +300,13 @@ export class ObservabilityAIAssistantService {
     signal,
     resources,
     client,
+    scopes,
   }: {
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
+    scopes: AssistantScope[];
   }): Promise<ChatFunctionClient> {
     const fnClient = new ChatFunctionClient(screenContexts);
 
@@ -313,6 +315,7 @@ export class ObservabilityAIAssistantService {
       functions: fnClient,
       resources,
       client,
+      scopes,
     };
 
     await Promise.all(

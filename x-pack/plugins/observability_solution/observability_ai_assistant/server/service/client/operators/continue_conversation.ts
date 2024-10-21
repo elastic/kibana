@@ -21,7 +21,6 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
-import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
@@ -138,7 +137,6 @@ function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
   disableFunctions,
-  scopes,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
@@ -147,14 +145,13 @@ function getFunctionDefinitions({
     | {
         except: string[];
       };
-  scopes: AssistantScope[];
 }) {
   if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
   let systemFunctions = functionClient
-    .getFunctions({ scopes })
+    .getFunctions()
     .map((fn) => fn.definition)
     .filter(
       (def) =>
@@ -187,7 +184,6 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
-  scopes,
   useSimulatedFunctionCalling,
 }: {
   messages: Message[];
@@ -205,7 +201,6 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
-  scopes: AssistantScope[];
   useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
@@ -216,12 +211,11 @@ export function continueConversation({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
-    scopes,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(scopes),
+      applicationInstructions: functionClient.getInstructions(),
       userInstructions,
       adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
@@ -350,7 +344,6 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
-              scopes,
               useSimulatedFunctionCalling,
             });
           })

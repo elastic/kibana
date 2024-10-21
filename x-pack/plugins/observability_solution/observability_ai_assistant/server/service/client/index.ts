@@ -217,11 +217,11 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(this.dependencies.scopes),
+                applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
                 adHocInstructions,
                 availableFunctionNames: functionClient
-                  .getFunctions({ scopes: this.dependencies.scopes })
+                  .getFunctions()
                   .map((fn) => fn.definition.name),
               }),
               initialMessages
@@ -301,7 +301,6 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                scopes: this.dependencies.scopes,
                 useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );

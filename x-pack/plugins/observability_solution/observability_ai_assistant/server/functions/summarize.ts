@@ -86,7 +86,6 @@ export function registerSummarizationFunction({
             message: `The document has been stored`,
           },
         }));
-    },
-    ['observability']
+    }
   );
 }
