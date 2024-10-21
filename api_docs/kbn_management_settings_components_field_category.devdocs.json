@@ -401,7 +401,7 @@
             "section": "def-public.ClearQueryLinkProps",
             "text": "ClearQueryLinkProps"
           },
-          ", \"onClearQuery\" | \"fieldCount\">"
+          ", \"fieldCount\" | \"onClearQuery\">"
         ],
         "path": "packages/kbn-management/settings/components/field_category/category.tsx",
         "deprecated": false,

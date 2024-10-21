@@ -15,6 +15,7 @@ import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   DocumentEntryType,
+  DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
@@ -25,7 +26,6 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { AssistantToolParams, GetElser } from '../../types';
 import {
   createKnowledgeBaseEntry,
@@ -54,6 +54,7 @@ import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_l
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
   modelIdOverride?: string;
   v2KnowledgeBaseEnabled?: boolean;
+  manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
@@ -63,6 +64,7 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   v2KnowledgeBaseEnabled: boolean;
+  manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -200,18 +202,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    *
    * @param options
    * @param options.soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
-   * @param options.installEsqlDocs Whether to install ESQL documents as part of setup (e.g. not needed in test env)
    *
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
     soClient,
-    installEsqlDocs = true,
-    installSecurityLabsDocs = true,
+    v2KnowledgeBaseEnabled = true,
   }: {
     soClient: SavedObjectsClientContract;
-    installEsqlDocs?: boolean;
-    installSecurityLabsDocs?: boolean;
+    v2KnowledgeBaseEnabled?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -221,6 +220,28 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug('Starting Knowledge Base setup...');
     this.options.setIsKBSetupInProgress(true);
     const elserId = await this.options.getElserId();
+
+    if (v2KnowledgeBaseEnabled) {
+      // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
+      try {
+        const esClient = await this.options.elasticsearchClientPromise;
+        const legacyESQL = await esClient.deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
+            },
+          },
+        });
+        if (legacyESQL?.total != null && legacyESQL?.total > 0) {
+          this.options.logger.info(
+            `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
+      } catch (e) {
+        this.options.logger.info('No legacy ESQL knowledge base docs to delete');
+      }
+    }
 
     try {
       const isInstalled = await this.isModelInstalled();
@@ -254,17 +275,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-      if (installEsqlDocs) {
-        const kbDocsLoaded = await this.isESQLDocsLoaded();
-        if (!kbDocsLoaded) {
-          this.options.logger.debug(`Loading KB docs...`);
-          await loadESQL(this, this.options.logger);
-        } else {
-          this.options.logger.debug(`Knowledge Base docs already loaded!`);
-        }
-      }
 
-      if (installSecurityLabsDocs) {
+      if (v2KnowledgeBaseEnabled) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
@@ -297,12 +309,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
     const authenticatedUser = this.options.currentUser;
-    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
+
+    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+      throw new Error('User lacks privileges to create global knowledge base entries');
+    }
+
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
         // v1 schema has metadata nested in a `metadata` object
@@ -444,7 +460,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
       this.options.logger.debug(
         () =>
-          `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
+          `getKnowledgeBaseDocuments() - Similarity Search returned [${JSON.stringify(
+            results.length
+          )}] results`
       );
 
       return results;
@@ -452,6 +470,47 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       this.options.logger.error(`Error performing KB Similarity Search: ${e.message}`);
       return [];
     }
+  };
+
+  /**
+   * Returns all global and current user's private `required` document entries.
+   */
+  public getRequiredKnowledgeBaseDocumentEntries = async (): Promise<DocumentEntry[]> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    try {
+      const userFilter = getKBUserFilter(user);
+      const results = await this.findDocuments<EsIndexEntry>({
+        // Note: This is a magic number to set some upward bound as to not blow the context with too
+        // many historical KB entries. Ideally we'd query for all and token trim.
+        perPage: 100,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: `${userFilter} AND type:document AND kb_resource:user AND required:true`,
+      });
+      this.options.logger.debug(
+        `kbDataClient.getRequiredKnowledgeBaseDocumentEntries() - results:\n${JSON.stringify(
+          results
+        )}`
+      );
+
+      if (results) {
+        return transformESSearchToKnowledgeBaseEntry(results.data) as DocumentEntry[];
+      }
+    } catch (e) {
+      this.options.logger.error(
+        `kbDataClient.getRequiredKnowledgeBaseDocumentEntries() - Failed to fetch DocumentEntries`
+      );
+      return [];
+    }
+
+    return [];
   };
 
   /**
@@ -468,12 +527,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
-    // TODO: KB-RBAC check for when `global:true`
+
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
+
+    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+      throw new Error('User lacks privileges to create global knowledge base entries');
+    }
+
     this.options.logger.debug(
       () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );
@@ -492,7 +556,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base
+   * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base.
+   *
+   * Note: Accepts esClient so retrieval can be scoped to the current user as esClient on kbDataClient
+   * is scoped to system user.
    */
   public getAssistantTools = async ({
     assistantToolParams,
@@ -520,7 +587,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         page: 1,
         sortField: 'created_at',
         sortOrder: 'asc',
-        filter: `${userFilter}${` AND type:index`}`, // TODO: Support global tools (no user filter), and filter by space as well
+        filter: `${userFilter} AND type:index`,
       });
       this.options.logger.debug(
         `kbDataClient.getAssistantTools() - results:\n${JSON.stringify(results, null, 2)}`

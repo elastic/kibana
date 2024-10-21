@@ -1053,7 +1053,15 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
-  async changeAndValidateFieldFormat(name: string, fieldType: string) {
+  async changeAndValidateFieldFormat({
+    name,
+    fieldType,
+    expectedPreviewText,
+  }: {
+    name: string;
+    fieldType: string;
+    expectedPreviewText: string;
+  }) {
     await this.filterField(name);
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
@@ -1062,7 +1070,10 @@ export class SettingsPageObject extends FtrService {
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');
-      expect(previewText).to.be('css');
+      expect(previewText).to.eql(
+        expectedPreviewText,
+        `Expected previewText to eql [${expectedPreviewText}], but got: [${previewText}]`
+      );
     });
     await this.closeIndexPatternFieldEditor();
   }

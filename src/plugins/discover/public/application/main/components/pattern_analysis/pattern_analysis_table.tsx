@@ -12,6 +12,7 @@ import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { type EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { pick } from 'lodash';
 import type { LogCategorizationEmbeddableProps } from '@kbn/aiops-plugin/public/components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover';
+import type { AiopsAppContextValue } from '@kbn/aiops-plugin/public/hooks/use_aiops_app_context';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
@@ -63,8 +64,11 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
   return (
     <aiopsService.PatternAnalysisComponent
       props={patternAnalysisComponentProps}
-      deps={services}
-      embeddingOrigin="discover"
+      appContextValue={
+        // TODO We shouldn't cast to `unknown` here, goal is to use feature specific contexts.
+        // See https://github.com/elastic/kibana/pull/194442
+        { embeddingOrigin: 'discover', ...services } as unknown as AiopsAppContextValue
+      }
     />
   );
 };

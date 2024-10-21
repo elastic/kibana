@@ -12,7 +12,9 @@
 import {
   ESQLAstComment,
   ESQLAstQueryExpression,
+  ESQLColumn,
   ESQLCommand,
+  ESQLCommandOption,
   ESQLDecimalLiteral,
   ESQLInlineCast,
   ESQLIntegerLiteral,
@@ -20,7 +22,7 @@ import {
   ESQLLocation,
   ESQLSource,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate } from './types';
+import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**
@@ -38,13 +40,26 @@ export namespace Builder {
   });
 
   export const command = (
-    template: AstNodeTemplate<ESQLCommand>,
+    template: PartialFields<AstNodeTemplate<ESQLCommand>, 'args'>,
     fromParser?: Partial<AstNodeParserFields>
   ): ESQLCommand => {
     return {
       ...template,
       ...Builder.parserFields(fromParser),
+      args: template.args ?? [],
       type: 'command',
+    };
+  };
+
+  export const option = (
+    template: PartialFields<AstNodeTemplate<ESQLCommandOption>, 'args'>,
+    fromParser?: Partial<AstNodeParserFields>
+  ): ESQLCommandOption => {
+    return {
+      ...template,
+      ...Builder.parserFields(fromParser),
+      args: template.args ?? [],
+      type: 'option',
     };
   };
 
@@ -82,6 +97,36 @@ export namespace Builder {
         ...template,
         ...Builder.parserFields(fromParser),
         type: 'source',
+      };
+    };
+
+    export const indexSource = (
+      index: string,
+      cluster?: string,
+      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLSource => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        index,
+        cluster,
+        name: (cluster ? cluster + ':' : '') + index,
+        sourceType: 'index',
+        type: 'source',
+      };
+    };
+
+    export const column = (
+      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLColumn => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        quoted: false,
+        name: template.parts.join('.'),
+        type: 'column',
       };
     };
 

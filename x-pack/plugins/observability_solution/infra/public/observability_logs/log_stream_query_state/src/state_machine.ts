@@ -15,7 +15,7 @@ import { EsQueryConfig } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { actions, ActorRefFrom, createMachine, SpecialTargets, send } from 'xstate';
 import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
-import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
+import { OmitDeprecatedState, sendIfDefined } from '@kbn/xstate-utils';
 import { logStreamQueryNotificationEventSelectors } from './notifications';
 import {
   subscribeToFilterSearchBarChanges,

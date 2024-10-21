@@ -34,8 +34,13 @@ disabled:
 
   # Cypress configs, for now these are still run manually
   - x-pack/test/fleet_cypress/cli_config.ts
+  - x-pack/test/fleet_cypress/cli_config.space_awareness.ts
   - x-pack/test/fleet_cypress/config.ts
+  - x-pack/test/fleet_cypress/config.space_awareness.ts
   - x-pack/test/fleet_cypress/visual_config.ts
+
+  # Default http2 config to use for performance journeys
+  - x-pack/performance/configs/http2_config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -272,6 +277,7 @@ enabled:
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
+  - x-pack/test/functional_search/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
@@ -314,6 +320,7 @@ enabled:
   - x-pack/test/security_api_integration/saml.http2.config.ts
   - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/chips.config.ts
+  - x-pack/test/security_api_integration/features.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
@@ -341,6 +348,7 @@ enabled:
   - x-pack/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
+  - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
   - x-pack/performance/journeys_e2e/login.ts
@@ -354,6 +362,7 @@ enabled:
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_dataview.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
+  - x-pack/performance/journeys_e2e/data_stress_test_lens_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys_e2e/dashboard_listing_page.ts

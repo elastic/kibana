@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         // Index logs for synth-* and apache.access datasets
         await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
-        await createDatasetQualityUserWithRole(security, 'dataset_quality_no_read', []);
+        await createDatasetQualityUserWithRole(security, 'dataset_quality_no_read', [], false);
 
         // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
@@ -197,7 +197,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 async function createDatasetQualityUserWithRole(
   security: ReturnType<DatasetQualityFtrProviderContext['getService']>,
   username: string,
-  indices: Array<{ names: string[]; privileges: string[] }>
+  indices: Array<{ names: string[]; privileges: string[] }>,
+  hasDataQualityPrivileges = true
 ) {
   const role = `${username}-role`;
   const password = `${username}-password`;
@@ -211,6 +212,7 @@ async function createDatasetQualityUserWithRole(
     kibana: [
       {
         feature: {
+          dataQuality: [hasDataQualityPrivileges ? 'all' : 'none'],
           discover: ['all'],
           fleet: ['none'],
         },

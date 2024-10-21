@@ -27,6 +27,10 @@ export const OverviewPingCodec = t.intersection([
   t.partial({
     error: PingErrorType,
     tags: t.array(t.string),
+    service: t.type({
+      name: t.string,
+    }),
+    labels: t.record(t.string, t.string),
   }),
 ]);
 
@@ -49,6 +53,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     updated_at: t.string,
     ping: OverviewPingCodec,
     timestamp: t.string,
+    spaceId: t.string,
   }),
 ]);
 

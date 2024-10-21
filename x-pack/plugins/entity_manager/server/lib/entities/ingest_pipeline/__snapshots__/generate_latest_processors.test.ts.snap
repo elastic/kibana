@@ -37,22 +37,27 @@ Array [
       "field": "entity.identityFields",
       "value": Array [
         "log.logger",
-        "event.category",
       ],
     },
   },
   Object {
+    "set": Object {
+      "field": "entity.id",
+      "value": "{{{entity.identity.log.logger}}}",
+    },
+  },
+  Object {
     "script": Object {
-      "source": "if (ctx.entity?.metadata?.tags.data != null) {
+      "source": "if (ctx.entity?.metadata?.tags?.data != null) {
   ctx.tags = ctx.entity.metadata.tags.data.keySet();
 }
-if (ctx.entity?.metadata?.host?.name.data != null) {
+if (ctx.entity?.metadata?.host?.name?.data != null) {
   if (ctx.host == null) {
     ctx.host = new HashMap();
   }
   ctx.host.name = ctx.entity.metadata.host.name.data.keySet();
 }
-if (ctx.entity?.metadata?.host?.os?.name.data != null) {
+if (ctx.entity?.metadata?.host?.os?.name?.data != null) {
   if (ctx.host == null) {
     ctx.host = new HashMap();
   }
@@ -61,7 +66,7 @@ if (ctx.entity?.metadata?.host?.os?.name.data != null) {
   }
   ctx.host.os.name = ctx.entity.metadata.host.os.name.data.keySet();
 }
-if (ctx.entity?.metadata?.sourceIndex.data != null) {
+if (ctx.entity?.metadata?.sourceIndex?.data != null) {
   ctx.sourceIndex = ctx.entity.metadata.sourceIndex.data.keySet();
 }",
     },
@@ -73,27 +78,10 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
     },
   },
   Object {
-    "dot_expander": Object {
-      "field": "log.logger",
-      "path": "entity.identity.log.logger.top_metric",
-    },
-  },
-  Object {
     "set": Object {
       "field": "log.logger",
-      "value": "{{entity.identity.log.logger.top_metric.log.logger}}",
-    },
-  },
-  Object {
-    "dot_expander": Object {
-      "field": "event.category",
-      "path": "entity.identity.event.category.top_metric",
-    },
-  },
-  Object {
-    "set": Object {
-      "field": "event.category",
-      "value": "{{entity.identity.event.category.top_metric.event.category}}",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
     },
   },
   Object {
@@ -105,7 +93,7 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
   Object {
     "set": Object {
       "field": "entity.displayName",
-      "value": "{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}",
+      "value": "{{log.logger}}",
     },
   },
   Object {
@@ -154,22 +142,27 @@ Array [
       "field": "entity.identityFields",
       "value": Array [
         "log.logger",
-        "event.category",
       ],
     },
   },
   Object {
+    "set": Object {
+      "field": "entity.id",
+      "value": "{{{entity.identity.log.logger}}}",
+    },
+  },
+  Object {
     "script": Object {
-      "source": "if (ctx.entity?.metadata?.tags.data != null) {
+      "source": "if (ctx.entity?.metadata?.tags?.data != null) {
   ctx.tags = ctx.entity.metadata.tags.data.keySet();
 }
-if (ctx.entity?.metadata?.host?.name.data != null) {
+if (ctx.entity?.metadata?.host?.name?.data != null) {
   if (ctx.host == null) {
     ctx.host = new HashMap();
   }
   ctx.host.name = ctx.entity.metadata.host.name.data.keySet();
 }
-if (ctx.entity?.metadata?.host?.os?.name.data != null) {
+if (ctx.entity?.metadata?.host?.os?.name?.data != null) {
   if (ctx.host == null) {
     ctx.host = new HashMap();
   }
@@ -178,7 +171,7 @@ if (ctx.entity?.metadata?.host?.os?.name.data != null) {
   }
   ctx.host.os.name = ctx.entity.metadata.host.os.name.data.keySet();
 }
-if (ctx.entity?.metadata?.sourceIndex.data != null) {
+if (ctx.entity?.metadata?.sourceIndex?.data != null) {
   ctx.sourceIndex = ctx.entity.metadata.sourceIndex.data.keySet();
 }",
     },
@@ -190,27 +183,10 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
     },
   },
   Object {
-    "dot_expander": Object {
-      "field": "log.logger",
-      "path": "entity.identity.log.logger.top_metric",
-    },
-  },
-  Object {
     "set": Object {
       "field": "log.logger",
-      "value": "{{entity.identity.log.logger.top_metric.log.logger}}",
-    },
-  },
-  Object {
-    "dot_expander": Object {
-      "field": "event.category",
-      "path": "entity.identity.event.category.top_metric",
-    },
-  },
-  Object {
-    "set": Object {
-      "field": "event.category",
-      "value": "{{entity.identity.event.category.top_metric.event.category}}",
+      "if": "ctx.entity?.identity?.log?.logger != null",
+      "value": "{{entity.identity.log.logger}}",
     },
   },
   Object {
@@ -222,7 +198,7 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
   Object {
     "set": Object {
       "field": "entity.displayName",
-      "value": "{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}",
+      "value": "{{log.logger}}",
     },
   },
   Object {

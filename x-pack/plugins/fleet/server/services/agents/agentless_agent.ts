@@ -25,11 +25,7 @@ import { appContextService } from '../app_context';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
-import {
-  prependAgentlessApiBasePathToEndpoint,
-  isAgentlessApiEnabled,
-  getDeletionEndpointPath,
-} from '../utils/agentless';
+import { prependAgentlessApiBasePathToEndpoint, isAgentlessApiEnabled } from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -188,7 +184,10 @@ class AgentlessAgentService {
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
-      url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
+      url: prependAgentlessApiBasePathToEndpoint(
+        agentlessConfig,
+        `/deployments/${agentlessPolicyId}`
+      ),
       method: 'DELETE',
       headers: {
         'Content-type': 'application/json',

@@ -9,6 +9,12 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { StackConnectorsPlugin } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { experimentalFeaturesMock } from '../public/mocks';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+jest.mock('../common/experimental_features');
+
+const mockParseExperimentalConfigValue = parseExperimentalConfigValue as jest.Mock;
 
 describe('Stack Connectors Plugin', () => {
   describe('setup()', () => {
@@ -18,6 +24,11 @@ describe('Stack Connectors Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext();
+      mockParseExperimentalConfigValue.mockReturnValue({
+        ...experimentalFeaturesMock,
+        inferenceConnectorOn: true,
+      });
+
       plugin = new StackConnectorsPlugin(context);
       coreSetup = coreMock.createSetup();
     });
@@ -131,7 +142,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(10);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(11);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
