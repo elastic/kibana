@@ -77,8 +77,12 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK = getDataTe
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutInsightsThreatIntelligenceTitleLink');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES =
-  getDataTestSubjectSelector('securitySolutionFlyoutInsightsThreatIntelligenceValue');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_VALUE =
+  getDataTestSubjectSelector('securitySolutionFlyoutInsightsThreatIntelligenceThreatMatchesValue');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE =
+  getDataTestSubjectSelector(
+    'securitySolutionFlyoutInsightsThreatIntelligenceEnrichedWithThreatIntelligenceValue'
+  );
 
 /* Insights Correlations */
 
