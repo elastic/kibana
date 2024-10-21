@@ -87,10 +87,9 @@ export const IngestionSelector: React.FC = () => {
                       }
                     )
                   : i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
+                      'xpack.enterpriseSearch.ingestSelector.method.crawlButtonLabel',
                       {
-                        defaultMessage:
-                          'Discover, extract, and index searchable content from websites and knowledge bases.',
+                        defaultMessage: 'Crawl URL',
                       }
                     )
               }
