@@ -44,7 +44,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     it('GET should get the default config', async () => {
       const { body } = await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200);
 
-      expect(body).toMatchObject(baseConfig);
+      expect(body).to.be(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
