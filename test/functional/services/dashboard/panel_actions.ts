@@ -334,7 +334,7 @@ export class DashboardPanelActionsService extends FtrService {
 
     if (!exists) {
       await this.openContextMenu(wrapper);
-      await this.testSubjects.missingOrFail(testSubject, { allowHidden: true });
+      await this.testSubjects.missingOrFail(testSubject);
       await this.toggleContextMenu(wrapper);
     }
   }
