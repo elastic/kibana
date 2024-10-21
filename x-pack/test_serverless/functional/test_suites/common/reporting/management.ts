@@ -10,8 +10,8 @@ import {
   CSV_REPORT_TYPE_V2,
   JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -20,10 +20,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
-  const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
-  let roleAuthc: RoleCredentials;
-  let roleName: string;
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
@@ -57,8 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Kibana CI and MKI use different users
     before('initialize saved object archive', async () => {
-      roleName = 'admin';
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope(roleName);
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
@@ -66,8 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it(`user sees a job they've created`, async () => {
@@ -76,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       } = await reportingAPI.createReportJobInternal(
         CSV_REPORT_TYPE_V2,
         job,
-        roleAuthc,
+        cookieCredentials,
         internalReqHeader
       );
 

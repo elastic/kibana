@@ -9,9 +9,8 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/con
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
-import { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader } from '../../../../shared/services';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];

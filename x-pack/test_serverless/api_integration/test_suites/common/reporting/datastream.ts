@@ -6,8 +6,8 @@
  */
 
 import { expect } from 'expect';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -15,8 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('svlReportingApi');
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlUserManager = getService('svlUserManager');
-  let roleAuthc: RoleCredentials;
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Data Stream', function () {
     const generatedReports = new Set<string>();
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           title: 'Ecommerce Data',
           version: '8.15.0',
         },
-        roleAuthc,
+        cookieCredentials,
         internalReqHeader
       );
 
@@ -57,19 +57,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       for (const reportId of generatedReports) {
-        await reportingAPI.deleteReport(reportId, roleAuthc, internalReqHeader);
+        await reportingAPI.deleteReport(reportId, cookieCredentials, internalReqHeader);
       }
 
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('uses the datastream configuration', async () => {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader);
+        .set(cookieCredentials);
 
       svlCommonApi.assertResponseStatusCode(200, status, body);
 

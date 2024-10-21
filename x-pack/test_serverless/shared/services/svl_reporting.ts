@@ -15,7 +15,7 @@ import { InternalRequestHeader } from '.';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 
 /**
- * Services to create roles and users for security testing
+ * Services to handle report job lifecycle phases for tests
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
