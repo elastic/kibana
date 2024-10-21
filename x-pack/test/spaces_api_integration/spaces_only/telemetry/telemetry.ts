@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
         unencrypted: true,
         refreshCache: true,
       });
-      console.log({ stats });
 
       expect(stats.stack_stats.kibana.plugins.spaces.disabledFeatures).to.eql({
         guidedOnboardingFeature: 0,
