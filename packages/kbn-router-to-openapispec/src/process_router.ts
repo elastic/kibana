@@ -8,7 +8,7 @@
  */
 
 import type { Router } from '@kbn/core-http-router-server-internal';
-import { getResponseValidation } from '@kbn/core-http-server';
+import { getResponseValidation, AuthzEnabled, AuthzDisabled } from '@kbn/core-http-server';
 import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
@@ -27,10 +27,87 @@ import {
 import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
+interface PrivilegeGroupValue {
+  allRequired: string[];
+  anyRequired: string[];
+}
+
+interface PrivilegeGroups {
+  all: PrivilegeGroupValue;
+  serverless: PrivilegeGroupValue;
+  traditional: PrivilegeGroupValue;
+}
+
+const getFeatureForPrivilege = (privilege: string) => {};
+
+const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: string) => {
+  if (!route?.security?.authz || (route.security.authz as AuthzDisabled).enabled === false) {
+    return '';
+  }
+
+  const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
+  const offeringGroupedPrivileges = privileges.reduce<PrivilegeGroups>(
+    (groups, privilege) => {
+      if (typeof privilege === 'string') {
+        groups.all.allRequired.push(privilege);
+
+        return groups;
+      }
+      const group = (privilege.offering ?? 'all') as keyof PrivilegeGroups;
+
+      groups[group].allRequired.push(...(privilege.allRequired ?? []));
+      groups[group].anyRequired.push(...(privilege.anyRequired ?? []));
+
+      return groups;
+    },
+    {
+      all: { allRequired: [], anyRequired: [] },
+      serverless: { allRequired: [], anyRequired: [] },
+      traditional: { allRequired: [], anyRequired: [] },
+    }
+  );
+
+  const hasAnyOfferingPrivileges = (offering: string) =>
+    offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired.length ||
+    offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired.length;
+
+  const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
+    const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
+    const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+
+    return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
+  };
+
+  if (!hasAnyOfferingPrivileges('serverless') && !hasAnyOfferingPrivileges('traditional')) {
+    const { allRequired, anyRequired } = offeringGroupedPrivileges.all;
+
+    return `[Authz] Route required privileges: ${getPrivilegesDescription(
+      allRequired,
+      anyRequired
+    )}`;
+  }
+
+  const getDescriptionForOffering = (offering: string) => {
+    const allRequired = [
+      ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired,
+      ...offeringGroupedPrivileges.all.allRequired,
+    ];
+    const anyRequired = [
+      ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired,
+      ...offeringGroupedPrivileges.all.anyRequired,
+    ];
+
+    return `Route required privileges for: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
+  };
+
+  return `[Authz] ${getDescriptionForOffering(currentOffering)}`;
+};
+
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
   getOpId: OperationIdCounter,
+  buildFlavour: string,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
@@ -61,9 +138,14 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
+      const authzDescription = extractAuthzDescription(route, buildFlavour);
+      console.log({ route, authzDescription });
+      const description = `${route.options.description ?? ''}${authzDescription}`;
+
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
+        description,
         ...(route.options.description ? { description: route.options.description } : {}),
         ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),

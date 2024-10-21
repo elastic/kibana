@@ -102,6 +102,23 @@ describe('processRouter', () => {
         handler: jest.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
       },
+      {
+        path: '/qux',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+        security: {
+          authz: {
+            requiredPrivileges: [
+              'manage_spaces',
+              {
+                allRequired: ['taskmanager'],
+                anyRequired: ['console'],
+              },
+            ],
+          },
+        },
+      },
     ],
   } as unknown as Router;
 
@@ -116,5 +133,11 @@ describe('processRouter', () => {
       version: '2024-10-31',
     });
     expect(Object.keys(result2.paths!)).toHaveLength(0);
+  });
+  it.only('test required privileges', () => {
+    const result = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2023-10-31',
+    });
+    console.log(result);
   });
 });
