@@ -24,14 +24,6 @@ import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
-import {
-  ApmRuleType,
-  ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  SLO_BURN_RATE_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -57,6 +49,7 @@ import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
 import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../common/constants';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -77,16 +70,7 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
 }
 
-const o11yRuleTypes = [
-  SLO_BURN_RATE_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  ...Object.values(ApmRuleType),
-];
-
-const alertingFeatures = o11yRuleTypes.map((ruleTypeId) => ({
+const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK.map((ruleTypeId) => ({
   ruleTypeId,
   consumers: [observabilityFeatureId, ALERTING_FEATURE_ID],
 }));
