@@ -69,12 +69,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/internal/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-            )
-            .auth(user.username, user.password);
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              search: 'test.noop',
+              search_fields: 'alertTypeId',
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -190,12 +191,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           const perPage = 4;
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/internal/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
-            )
-            .auth(user.username, user.password);
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              per_page: perPage,
+              sort_field: 'createdAt',
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -239,12 +241,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
 
                 const secondResponse = await supertestWithoutAuth
-                  .get(
-                    `${getUrlPrefix(
-                      space.id
-                    )}/internal/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
-                  )
-                  .auth(user.username, user.password);
+                  .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+                  .set('kbn-xsrf', 'foo')
+                  .auth(user.username, user.password)
+                  .send({
+                    per_page: perPage,
+                    sort_field: 'createdAt',
+                    page: 2,
+                  });
 
                 expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
               }
@@ -286,12 +290,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/internal/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
-            )
-            .auth(user.username, user.password);
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              filter: 'alert.attributes.actions:{ actionTypeId: test.noop }',
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -392,12 +396,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/internal/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
-            )
-            .auth(user.username, user.password);
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              filter: 'alert.attributes.alertTypeId:test.restricted-noop',
+              fields: ['tags'],
+              sort_field: 'createdAt',
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -473,12 +479,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/internal/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
-            )
-            .auth(user.username, user.password);
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              filter: 'alert.attributes.alertTypeId:test.restricted-noop',
+              fields: ['tags', 'executionStatus'],
+              sort_field: 'createdAt',
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -534,12 +542,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                'other'
-              )}/internal/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-            )
-            .auth(user.username, user.password);
+            .post(`${getUrlPrefix('other')}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              search: 'test.noop',
+              search_fields: 'alertTypeId',
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
