@@ -29,6 +29,8 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { CreatePolicyDataStreamsOptions } from './handlers/create_policy_datastreams';
+import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
@@ -279,15 +281,31 @@ export const getPackagePolicyUpdateCallback = (
   };
 };
 
-export const getPackagePolicyPostCreateCallback = (
-  logger: Logger,
-  exceptionsClient: ExceptionListClient | undefined
-): PostPackagePolicyPostCreateCallback => {
+export type GetPackagePolicyPostCreateCallbackOptions = {
+  logger: Logger;
+  exceptionsClient: ExceptionListClient | undefined;
+} & Omit<CreatePolicyDataStreamsOptions, 'integrationPolicy'>;
+
+export const getPackagePolicyPostCreateCallback = ({
+  logger,
+  exceptionsClient,
+  esClient,
+  fleetServicesFactory,
+}: GetPackagePolicyPostCreateCallbackOptions): PostPackagePolicyPostCreateCallback => {
   return async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
     // We only care about Endpoint package policies
     if (!exceptionsClient || !isEndpointPackagePolicy(packagePolicy)) {
       return packagePolicy;
     }
+
+    // Check and create internal datastreams for this policy if needed.
+    // NOTE: we don't need for it to complete here, thus no `await`.
+    createPolicyDataStreamsIfNeeded({
+      integrationPolicy: packagePolicy,
+      esClient,
+      fleetServicesFactory,
+      logger,
+    });
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 

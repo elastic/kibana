@@ -185,7 +185,12 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyPostCreate',
-      getPackagePolicyPostCreateCallback(logger, exceptionListsClient)
+      getPackagePolicyPostCreateCallback({
+        logger,
+        exceptionsClient: exceptionListsClient,
+        esClient: this.startDependencies.esClient,
+        fleetServicesFactory: this.fleetServicesFactory,
+      })
     );
 
     registerFleetCallback(
