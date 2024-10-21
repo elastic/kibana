@@ -38,7 +38,6 @@ export const GridRow = forwardRef<
     gridRef
   ) => {
     const rowData = useStateFromPublishingSubject(gridLayoutStateManager.rows$[rowIndex]);
-    console.log('rowData', rowData);
 
     return (
       <>
@@ -70,7 +69,7 @@ export const GridRow = forwardRef<
               transition: background-color 300ms linear;
             `}
           >
-            {Object.values(rowData.panelIds).map((panelId) => (
+            {rowData.panelIds.map((panelId) => (
               <GridPanel
                 key={panelId}
                 panelId={panelId}

@@ -19,6 +19,7 @@ import {
   ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
+  GridRowData,
   GridSettings,
   PanelInteractionEvent,
   RuntimeGridSettings,
@@ -43,13 +44,13 @@ export const useGridLayoutState = ({
     const rows$ = initialLayout.reduce((prev, currentRow) => {
       return [
         ...prev,
-        new BehaviorSubject({
+        new BehaviorSubject<Omit<GridRowData, 'panels'> & { panelIds: string[] }>({
           title: currentRow.title,
           isCollapsed: currentRow.isCollapsed,
           panelIds: Object.keys(currentRow.panels),
         }),
       ];
-    }, []);
+    }, [] as Array<BehaviorSubject<Omit<GridRowData, 'panels'> & { panelIds: string[] }>>);
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
@@ -119,7 +120,7 @@ export const useGridLayoutState = ({
           }
           return { gridLayout, activePanel };
         }),
-        retry({ delay: 10 }) // retry until panel references all exist
+        retry({ delay: 1 }) // retry until panel references all exist
       )
       .subscribe(({ gridLayout, activePanel }) => {
         const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
