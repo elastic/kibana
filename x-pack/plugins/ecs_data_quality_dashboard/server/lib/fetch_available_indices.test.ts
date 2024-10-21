@@ -60,13 +60,7 @@ describe('fetchAvailableIndices', () => {
         endDate,
       });
 
-      expect(result).toEqual({
-        aggregations: {
-          index: {
-            buckets: [{ key: 'logs-2021.10.01' }, { key: 'logs-2021.10.05' }],
-          },
-        },
-      });
+      expect(result).toEqual(['logs-2021.10.01', 'logs-2021.10.05']);
 
       expect(esClientMock.cat.indices).toHaveBeenCalledWith({
         index: 'logs-*',
@@ -97,13 +91,7 @@ describe('fetchAvailableIndices', () => {
         endDate,
       });
 
-      expect(result).toEqual({
-        aggregations: {
-          index: {
-            buckets: [],
-          },
-        },
-      });
+      expect(result).toEqual([]);
     });
   });
 
@@ -119,13 +107,7 @@ describe('fetchAvailableIndices', () => {
         endDate,
       });
 
-      expect(result).toEqual({
-        aggregations: {
-          index: {
-            buckets: [],
-          },
-        },
-      });
+      expect(result).toEqual([]);
     });
   });
 
