@@ -20,7 +20,6 @@ export default createTestConfig({
   // add feature flags
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
-    `--uiSettings.overrides.searchIndices:globalEmptyStateEnabled=true`, // global empty state FF
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
@@ -31,6 +30,12 @@ export default createTestConfig({
   apps: {
     serverlessElasticsearch: {
       pathname: '/app/elasticsearch/getting_started',
+    },
+    serverlessConnectors: {
+      pathname: '/app/connectors',
+    },
+    searchPlayground: {
+      pathname: '/app/search_playground',
     },
     elasticsearchStart: {
       pathname: '/app/elasticsearch/start',
