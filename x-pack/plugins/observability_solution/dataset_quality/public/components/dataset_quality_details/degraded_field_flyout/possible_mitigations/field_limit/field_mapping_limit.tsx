@@ -8,8 +8,6 @@
 import React from 'react';
 import {
   EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -18,7 +16,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
-  degradedFieldCurrentFieldLimitColumnName,
   fieldLimitMitigationConsiderationText,
   fieldLimitMitigationConsiderationText1,
   fieldLimitMitigationConsiderationText2,

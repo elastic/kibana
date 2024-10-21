@@ -13,8 +13,6 @@ import {
   EuiAccordion,
   EuiButtonIcon,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
   EuiPanel,
