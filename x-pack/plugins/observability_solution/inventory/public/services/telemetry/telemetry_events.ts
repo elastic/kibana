@@ -38,7 +38,7 @@ const entityInventoryViewedEventType: TelemetryEvent = {
 };
 
 const searchQuerySubmittedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED,
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED,
   schema: {
     kuery_fields: {
       type: 'array',
