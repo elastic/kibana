@@ -11,8 +11,8 @@ import React from 'react';
 import moment, { Moment } from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 import { isEmpty } from 'lodash';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
