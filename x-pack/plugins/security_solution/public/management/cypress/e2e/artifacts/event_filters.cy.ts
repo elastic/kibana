@@ -41,7 +41,8 @@ describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
     removeAllArtifacts();
   });
 
-  describe('when editing event filter value', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/194135
+  describe.skip('when editing event filter value', () => {
     let eventFiltersMock: ArtifactsFixtureType;
     beforeEach(() => {
       login();

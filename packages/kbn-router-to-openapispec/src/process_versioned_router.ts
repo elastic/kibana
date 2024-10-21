@@ -29,6 +29,7 @@ import {
   extractTags,
   mergeResponseContent,
   getXsrfHeaderForMethod,
+  setXState,
 } from './util';
 
 export const processVersionedRouter = (
@@ -112,6 +113,9 @@ export const processVersionedRouter = (
         parameters,
         operationId: getOpId(route.path),
       };
+
+      setXState(route.options.options?.availability, operation);
+
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
       };

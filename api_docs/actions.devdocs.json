@@ -3794,9 +3794,9 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
-          "ExecuteOptions",
-          "<unknown>, \"actionExecutionId\" | \"request\">) => Promise<",
+          "{ execute: (connectorExecuteParams: ",
+          "ConnectorExecuteParams",
+          ") => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",

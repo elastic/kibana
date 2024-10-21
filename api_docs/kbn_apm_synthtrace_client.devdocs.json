@@ -2746,7 +2746,7 @@
             "label": "osType",
             "description": [],
             "signature": [
-              "\"ios\" | \"android\""
+              "\"android\" | \"ios\""
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
@@ -3049,15 +3049,15 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
-        "id": "def-common.AssetDocument",
+        "id": "def-common.EntityFields",
         "type": "Type",
         "tags": [],
-        "label": "AssetDocument",
+        "label": "EntityFields",
         "description": [],
         "signature": [
-          "ServiceAssetDocument"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ [key: string]: any; 'agent.name': string[]; 'source_data_stream.type': string | string[]; 'source_data_stream.dataset': string | string[]; 'event.ingested': string; sourceIndex: string; 'entity.lastSeenTimestamp': string; 'entity.schemaVersion': string; 'entity.definitionVersion': string; 'entity.displayName': string; 'entity.identityFields': string | string[]; 'entity.id': string; 'entity.type': string; 'entity.definitionId': string; }>"
         ],
-        "path": "packages/kbn-apm-synthtrace-client/src/lib/assets/index.ts",
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3353,6 +3353,125 @@
                   "{ functionName: string; environment: string; agentName: string; serviceName?: string | undefined; architecture?: string | undefined; serverlessType?: \"aws.lambda\" | \"azure.functions\" | undefined; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/serverless_function.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.entities",
+        "type": "Object",
+        "tags": [],
+        "label": "entities",
+        "description": [],
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.entities.serviceEntity",
+            "type": "Function",
+            "tags": [],
+            "label": "serviceEntity",
+            "description": [],
+            "signature": [
+              "({ agentName, dataStreamType, serviceName, environment, entityId, }: { agentName: string[]; serviceName: string; dataStreamType: ",
+              "EntityDataStreamType",
+              "[]; environment?: string | undefined; entityId: string; }) => ServiceEntity"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.serviceEntity.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ agentName: string[]; serviceName: string; dataStreamType: ",
+                  "EntityDataStreamType",
+                  "[]; environment?: string | undefined; entityId: string; }"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/service_entity.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.entities.hostEntity",
+            "type": "Function",
+            "tags": [],
+            "label": "hostEntity",
+            "description": [],
+            "signature": [
+              "({ agentName, dataStreamType, hostName, entityId, }: { agentName: string[]; dataStreamType: ",
+              "EntityDataStreamType",
+              "[]; hostName: string; entityId: string; }) => HostEntity"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.hostEntity.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ agentName: string[]; dataStreamType: ",
+                  "EntityDataStreamType",
+                  "[]; hostName: string; entityId: string; }"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/host_entity.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.entities.containerEntity",
+            "type": "Function",
+            "tags": [],
+            "label": "containerEntity",
+            "description": [],
+            "signature": [
+              "({ agentName, dataStreamType, containerId, entityId, }: { agentName: string[]; dataStreamType: ",
+              "EntityDataStreamType",
+              "[]; containerId: string; entityId: string; }) => ContainerEntity"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.containerEntity.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ agentName: string[]; dataStreamType: ",
+                  "EntityDataStreamType",
+                  "[]; containerId: string; entityId: string; }"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/container_entity.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

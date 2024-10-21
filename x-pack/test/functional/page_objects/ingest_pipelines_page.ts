@@ -7,7 +7,6 @@
 
 import path from 'path';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -132,21 +131,23 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async fillAddDatabaseForm(databaseType: string, databaseName: string, maxmind?: string) {
-      await testSubjects.setValue('databaseTypeSelect', databaseType);
+      await testSubjects.selectValue('databaseTypeSelect', databaseType);
 
-      // Wait for the rest of the fields to get displayed
-      await pageObjects.common.sleep(1000);
-      expect(await testSubjects.exists('databaseNameSelect')).to.be(true);
+      await retry.waitFor('Database name field to be displayed', async () => {
+        return await testSubjects.isDisplayed('databaseNameSelect');
+      });
 
       if (maxmind) {
         await testSubjects.setValue('maxmindField', maxmind);
       }
-      await testSubjects.setValue('databaseNameSelect', databaseName);
+
+      await testSubjects.selectValue('databaseNameSelect', databaseName);
     },
 
     async clickAddDatabaseButton() {
-      // Wait for button to get enabled
-      await pageObjects.common.sleep(1000);
+      await retry.waitFor('Add button to be enabled', async () => {
+        return await testSubjects.isEnabled('addGeoipDatabaseSubmit');
+      });
       await testSubjects.click('addGeoipDatabaseSubmit');
     },
 

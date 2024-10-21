@@ -48,6 +48,7 @@ describe('AlertCountInsight', () => {
     const { getByTestId } = renderAlertCountInsight();
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
+    expect(getByTestId(`${testId}-count`)).toHaveTextContent('177');
   });
 
   it('renders loading spinner if data is being fetched', () => {

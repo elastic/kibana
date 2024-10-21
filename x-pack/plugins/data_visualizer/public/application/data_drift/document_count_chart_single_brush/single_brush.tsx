@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React, { useEffect, useRef, type FC } from 'react';
 
 import * as d3Brush from 'd3-brush';
@@ -310,9 +311,42 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
         mlBrushSelection.exit().remove();
       }
 
+      function updateBrush() {
+        const mlBrushSelection = gBrushes
+          .selectAll('.brush')
+          .data<SingleBrush>(brushes.current, (d) => (d as SingleBrush).id);
+
+        mlBrushSelection.each(function (brushObject, i, n) {
+          const x = d3
+            .scaleLinear()
+            .domain([minRef.current, maxRef.current])
+            .rangeRound([0, widthRef.current]);
+          brushObject.brush.extent([
+            [0, BRUSH_MARGIN],
+            [widthRef.current, BRUSH_HEIGHT - BRUSH_MARGIN],
+          ]);
+
+          brushObject.brush(d3.select(n[i] as SVGGElement));
+          const xStart = x(brushObject.start) ?? 0;
+          const xEnd = x(brushObject.end) ?? 0;
+          brushObject.brush.move(d3.select(n[i] as SVGGElement), [xStart, xEnd]);
+        });
+      }
+
       if (brushes.current.length !== 1) {
         widthRef.current = width;
         newBrush(`${brushId}`, baselineMin, baselineMax);
+      } else if (
+        widthRef.current !== width ||
+        minRef.current !== min ||
+        maxRef.current !== max ||
+        !isEqual(snapTimestampsRef.current, snapTimestamps)
+      ) {
+        widthRef.current = width;
+        minRef.current = min;
+        maxRef.current = max;
+        snapTimestampsRef.current = snapTimestamps;
+        updateBrush();
       }
 
       drawBrushes();

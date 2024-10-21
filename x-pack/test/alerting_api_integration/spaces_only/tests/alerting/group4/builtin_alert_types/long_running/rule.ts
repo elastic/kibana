@@ -110,11 +110,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         });
       });
 
-      const { status, body: rule } = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
-      );
-      expect(status).to.eql(200);
-      expect(rule.execution_status.status).to.eql('active');
+      await retry.try(async () => {
+        const { status, body: rule } = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
+        );
+        expect(status).to.eql(200);
+        expect(rule.execution_status.status).to.eql('active');
+      });
     });
 
     it('still logs alert docs when rule exceeds timeout when cancelAlertsOnRuleTimeout is false on rule type', async () => {

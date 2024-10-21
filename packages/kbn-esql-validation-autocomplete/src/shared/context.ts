@@ -153,7 +153,7 @@ function isBuiltinFunction(node: ESQLFunction) {
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
-    if (node.type === 'literal' && node.literalType === 'string') {
+    if (node.type === 'literal' && node.literalType === 'keyword') {
       // command ... "<here>"
       return { type: 'value' as const, command, node, option, setting };
     }

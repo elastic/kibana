@@ -2088,7 +2088,7 @@
               "\nSetter function for the row count info."
             ],
             "signature": [
-              "(value: React.SetStateAction<",
+              "(info: ",
               {
                 "pluginId": "@kbn/ml-data-grid",
                 "scope": "common",
@@ -2096,28 +2096,35 @@
                 "section": "def-common.RowCountInfo",
                 "text": "RowCountInfo"
               },
-              ">) => void"
+              ") => void"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/ml-data-grid",
                 "id": "def-common.UseDataGridReturnType.setRowCountInfo.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
-                "label": "value",
+                "label": "info",
                 "description": [],
                 "signature": [
-                  "A"
+                  {
+                    "pluginId": "@kbn/ml-data-grid",
+                    "scope": "common",
+                    "docId": "kibKbnMlDataGridPluginApi",
+                    "section": "def-common.RowCountInfo",
+                    "text": "RowCountInfo"
+                  }
                 ],
-                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ml-data-grid",

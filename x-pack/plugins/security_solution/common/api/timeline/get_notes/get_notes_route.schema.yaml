@@ -75,10 +75,11 @@ components:
     AssociatedFilterType:
         type: string
         enum:
-            - document_only
-            - saved_object_only
-            - document_and_saved_object
-            - orphan
+          - all
+          - document_only
+          - saved_object_only
+          - document_and_saved_object
+          - orphan
         description: Filter notes based on their association with a document or saved object.
     DocumentIds:
       oneOf:

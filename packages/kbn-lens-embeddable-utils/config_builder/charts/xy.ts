@@ -51,8 +51,8 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     hideEndzones: true,
     preferredSeriesType: 'line',
     valueLabels: 'hide',
-    emphasizeFitting: config?.emphasizeFitting ?? false,
-    fittingFunction: config?.fittingFunction ?? 'None',
+    emphasizeFitting: config?.emphasizeFitting ?? true,
+    fittingFunction: config?.fittingFunction ?? 'Linear',
     yLeftExtent: {
       mode: config.yBounds?.mode ?? 'full',
       lowerBound: config.yBounds?.lowerBound,

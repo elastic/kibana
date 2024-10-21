@@ -154,7 +154,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await esDeleteAllIndices(dataForgeIndices);
-        await uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true });
         await cleanup({ client: esClient, config: dataForgeConfig, logger });
       });
 
@@ -170,6 +169,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
+        expect(parsedSample.data?.entity.id).to.be('admin-console');
+      });
+
+      it('should delete entities data when specified', async () => {
+        const index = generateLatestIndexName(mockDefinition);
+        expect(await esClient.indices.exists({ index })).to.be(true);
+        await uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true });
+        expect(await esClient.indices.exists({ index })).to.be(false);
       });
     });
   });

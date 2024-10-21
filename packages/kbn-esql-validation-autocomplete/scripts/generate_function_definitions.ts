@@ -52,7 +52,7 @@ const extraFunctions: FunctionDefinition[] = [
           { name: 'value', type: 'any' },
         ],
         minParams: 2,
-        returnType: 'any',
+        returnType: 'unknown',
       },
     ],
     examples: [

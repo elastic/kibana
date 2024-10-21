@@ -53,23 +53,6 @@ export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: num
 }
 
 /**
- * Given a function signature, returns the parameter at the given position.
- *
- * Takes into account variadic functions (minParams), returning the last
- * parameter if the position is greater than the number of parameters.
- *
- * @param signature
- * @param position
- * @returns
- */
-export function getParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
-}
-
-/**
  * Given a function signature, returns the parameter at the given position, even if it's undefined or null
  *
  * @param {params}

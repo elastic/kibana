@@ -2,32 +2,35 @@
 
 exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 .c0 {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-  border-bottom: 1px solid 1px solid #343741;
-}
-
-.c0 . euiDataGridRowCell--controlColumn {
-  height: auto;
-  min-height: 34px;
+  width: 100%;
+  height: 100%;
+  border-bottom: 1px solid #343741;
 }
 
 .c0 .udt--customRow {
   border-radius: 0;
   padding: 6px;
-  max-width: 1200px;
-  width: 85vw;
+  max-width: 1000px;
 }
 
-.c0 .euiCommentEvent__body {
-  background-color: #1d1e24;
+.c0 .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
+  width: 1000px;
+  max-width: 1000px;
+  overflow-x: auto;
+  -webkit-scrollbar-width: thin;
+  -moz-scrollbar-width: thin;
+  -ms-scrollbar-width: thin;
+  scrollbar-width: thin;
+  -webkit-scroll-padding: 0 0 0 0,;
+  -moz-scroll-padding: 0 0 0 0,;
+  -ms-scroll-padding: 0 0 0 0,;
+  scroll-padding: 0 0 0 0,;
 }
 
-.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--firstColumn,
-.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--lastColumn,
-.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--controlColumn,
-.c0:has(.unifiedDataTable__cell--expanded) .udt--customRow {
+.c0 .euiDataGridRow:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--firstColumn,
+.c0 .euiDataGridRow:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--lastColumn,
+.c0 .euiDataGridRow:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--controlColumn,
+.c0 .euiDataGridRow:has(.unifiedDataTable__cell--expanded) .udt--customRow {
   background-color: #2e2d25;
 }
 
@@ -42,47 +45,76 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 
 <div>
   <div
-    class="c0 euiDataGridRow "
-    role="row"
+    class="c0"
   >
     <div
-      class="c1 rawEvent rowCellWrapper rawEvent"
-      role="row"
+      data-eui="EuiAutoSizer"
     >
-      <div>
-        Cell-0-0
+      <div
+        class="variable__list"
+        style="position: relative; height: 600px; width: 1000px; overflow: auto; will-change: transform; direction: ltr; scroll-padding: 0 0 0 0;"
+      >
+        <div
+          class="custom__grid__rows--container"
+          data-test-subj="customGridRowsContainer"
+          style="height: 0px; width: 100%; position: relative;"
+        >
+          <div
+            role="row"
+            style="position: absolute; left: 0px; top: 0px; height: 0px;"
+          >
+            <div
+              class="euiDataGridRow "
+              role="row"
+            >
+              <div
+                class="c1 rawEvent rowCellWrapper rawEvent"
+                role="row"
+              >
+                <div>
+                  Cell-0-0
+                </div>
+                <div>
+                  Cell-0-1
+                </div>
+                <div>
+                  Cell-0-2
+                </div>
+              </div>
+              <div>
+                Cell-0-3
+              </div>
+            </div>
+          </div>
+          <div
+            role="row"
+            style="position: absolute; left: 0px; top: 0px; height: 0px;"
+          >
+            <div
+              class="euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
+              role="row"
+            >
+              <div
+                class="c1 rawEvent rowCellWrapper rawEvent"
+                role="row"
+              >
+                <div>
+                  Cell-1-0
+                </div>
+                <div>
+                  Cell-1-1
+                </div>
+                <div>
+                  Cell-1-2
+                </div>
+              </div>
+              <div>
+                Cell-1-3
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        Cell-0-1
-      </div>
-      <div>
-        Cell-0-2
-      </div>
-    </div>
-    <div>
-      Cell-0-3
-    </div>
-  </div>
-  <div
-    class="c0 euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
-    role="row"
-  >
-    <div
-      class="c1 rawEvent rowCellWrapper rawEvent"
-      role="row"
-    >
-      <div>
-        Cell-1-0
-      </div>
-      <div>
-        Cell-1-1
-      </div>
-      <div>
-        Cell-1-2
-      </div>
-    </div>
-    <div>
-      Cell-1-3
     </div>
   </div>
 </div>

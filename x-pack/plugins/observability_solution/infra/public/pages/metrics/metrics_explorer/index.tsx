@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { WithMetricsExplorerOptionsUrlState } from '../../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
@@ -94,6 +95,7 @@ const MetricsExplorerContent = () => {
 
   return (
     <InfraPageTemplate
+      onboardingFlow={OnboardingFlow.Infra}
       pageHeader={{
         pageTitle: metricsExplorerTitle,
         rightSideItems: [

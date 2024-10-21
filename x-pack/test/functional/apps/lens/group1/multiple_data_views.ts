@@ -33,16 +33,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   function assertMatchesExpectedData(
     state: DebugState,
-    expectedData: Array<Array<{ x: number; y: number }>>
+    expectedData: Array<Array<{ x: number; y: number }>>,
+    chartType: 'bars' | 'lines' = 'bars'
   ) {
-    expect(
-      state?.bars?.map(({ bars }) =>
-        bars.map((bar) => ({
-          x: bar.x,
-          y: Math.floor(bar.y * 100) / 100,
-        }))
-      )
-    ).to.eql(expectedData);
+    if (chartType === 'lines') {
+      expect(
+        state?.lines
+          ?.map(({ points }) =>
+            points
+              .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+              .sort(({ x }, { x: x2 }) => x - x2)
+          )
+          .filter((a) => a.length > 0)
+      ).to.eql(expectedData);
+    } else {
+      expect(
+        state?.bars?.map(({ bars }) =>
+          bars.map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+        )
+      ).to.eql(expectedData);
+    }
   }
 
   describe('lens with multiple data views', () => {
@@ -93,13 +103,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('fieldToggle-DistanceKilometers');
 
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData], 'lines');
     });
 
     it('ignores global filters on layers using a data view without the filter field', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData], 'lines');
       await lens.save(visTitle);
     });
 
@@ -110,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.openSavedVisualization(visTitle);
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedFlightsData], 'lines');
     });
   });
 }

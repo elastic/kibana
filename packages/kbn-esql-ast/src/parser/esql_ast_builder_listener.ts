@@ -120,7 +120,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const metadataContext = ctx.metadata();
     const metadataContent =
       metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
-    if (metadataContent) {
+    if (metadataContent && metadataContent.METADATA()) {
       const option = createOption(
         metadataContent.METADATA().getText().toLowerCase(),
         metadataContent

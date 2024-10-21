@@ -24,7 +24,7 @@ export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
 export const DEFAULT_LATEST_ALERTS = 100;
 
 /** The default maximum number of alerts to be sent as context when generating Attack discoveries */
-export const DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS = 200;
+export const DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS = 100;
 
 export const DEFAULT_KNOWLEDGE_BASE_SETTINGS: KnowledgeBaseConfig = {
   latestAlerts: DEFAULT_LATEST_ALERTS,

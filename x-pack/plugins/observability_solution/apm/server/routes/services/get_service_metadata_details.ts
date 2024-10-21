@@ -9,6 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   CLOUD_AVAILABILITY_ZONE,
@@ -21,6 +22,11 @@ import {
   SERVICE_VERSION,
   FAAS_ID,
   FAAS_TRIGGER_TYPE,
+  AGENT_NAME,
+  TELEMETRY_SDK_LANGUAGE,
+  TELEMETRY_SDK_NAME,
+  AGENT_VERSION,
+  TELEMETRY_SDK_VERSION,
 } from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -158,7 +164,25 @@ export async function getServiceMetadataDetails({
     },
   };
 
-  const response = await apmEventClient.search('get_service_metadata_details', params);
+  const data = await apmEventClient.search('get_service_metadata_details', params);
+
+  if (data.hits.total.value === 0) {
+    return {
+      service: undefined,
+      container: undefined,
+      cloud: undefined,
+    };
+  }
+
+  const response = structuredClone(data);
+  response.hits.hits[0].fields[AGENT_NAME] = getAgentName(
+    data.hits.hits[0]?.fields?.[AGENT_NAME] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_LANGUAGE] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_NAME] as unknown as string | null
+  ) as unknown as unknown[];
+  response.hits.hits[0].fields[AGENT_VERSION] =
+    response.hits.hits[0].fields[AGENT_VERSION] ??
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_VERSION];
 
   const event = unflattenKnownApmEventFields(
     maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
