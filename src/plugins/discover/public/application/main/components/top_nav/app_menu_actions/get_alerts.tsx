@@ -41,7 +41,7 @@ const CreateAlertFlyout: React.FC<{
   getDiscoverParams: () => AppMenuDiscoverParams;
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
-}> = React.memo(({ stateContainer, getDiscoverParams, onFinishAction }) => {
+}> = ({ stateContainer, getDiscoverParams, onFinishAction }) => {
   const query = stateContainer.appState.getState().query;
 
   const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } =
@@ -96,7 +96,7 @@ const CreateAlertFlyout: React.FC<{
     // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
     initialSelectedConsumer: AlertConsumers.LOGS,
   });
-});
+};
 
 export const getAlertsAppMenuItem = ({
   stateContainer,
