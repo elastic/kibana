@@ -42,7 +42,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import type { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
@@ -62,6 +62,7 @@ export const useDiscoverHistogram = ({
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
+  const savedSearchHits$ = savedSearchData$.totalHits$;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -153,10 +154,7 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
-  const setTotalHitsError = useMemo(
-    () => sendErrorTo(savedSearchData$.totalHits$),
-    [savedSearchData$.totalHits$]
-  );
+  const setTotalHitsError = useMemo(() => sendErrorTo(savedSearchHits$), [savedSearchHits$]);
 
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
@@ -172,7 +170,7 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+        const { result: totalHitsResult } = savedSearchHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -180,17 +178,42 @@ export const useDiscoverHistogram = ({
           totalHitsResult &&
           typeof result !== 'number'
         ) {
-          // ignore the histogram initial loading state if discover state already has a total hits value
+          addLog(`[UnifiedHistogram] skip ${status}: total hits > 0 in Discover`, result);
           return;
         }
 
-        // Sync the totalHits$ observable with the unified histogram state
-        savedSearchData$.totalHits$.next({
-          fetchStatus: status.toString() as FetchStatus,
-          result,
-        });
+        const fetchStatus = status.toString() as FetchStatus;
+        if (
+          fetchStatus === FetchStatus.COMPLETE &&
+          savedSearchHits$.getValue().fetchStatus === FetchStatus.COMPLETE &&
+          result !== savedSearchHits$.getValue().result
+        ) {
+          // this is a workaround to make sure the new total hits value is displayed
+          // a different value without a loading state in between would lead to be ignored by useDataState
+          addLog(
+            '[UnifiedHistogram] send loading to totalHits$ to make sure the new value is displayed',
+            { status, result }
+          );
+          savedSearchHits$.next({
+            fetchStatus: FetchStatus.LOADING,
+          });
+        }
+
+        const fetchStatus = status.toString() as FetchStatus;
+
+        // Do not sync the loading state since it's already handled by the saved search
+        if (fetchStatus !== FetchStatus.LOADING) {
+          savedSearchHits$.next({
+            fetchStatus,
+            result,
+          });
+        }
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
+          addLog(
+            '[UnifiedHistogram] ignore the histogram complete/partial state if discover state already has a total hits value',
+            { status, result }
+          );
           return;
         }
 
@@ -205,7 +228,7 @@ export const useDiscoverHistogram = ({
   }, [
     isEsqlMode,
     savedSearchData$.main$,
-    savedSearchData$.totalHits$,
+    savedSearchHits$,
     setTotalHitsError,
     stateContainer.appState,
     unifiedHistogram?.state$,
