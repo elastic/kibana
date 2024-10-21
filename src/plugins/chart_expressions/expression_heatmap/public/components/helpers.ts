@@ -84,10 +84,6 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   return displayStops;
 }
 
-function getId(id: string) {
-  return id;
-}
-
 export function getNumericValue(rowValue: number | number[] | undefined) {
   if (rowValue == null || Array.isArray(rowValue)) {
     return;
