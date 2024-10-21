@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAdminWithApiKey.destroy();
     });
 
-    // The create and update test cases are unique to serverless becuase
+    // The create and update test cases are unique to serverless because
     // setting feature visibility is not possible in serverless
     describe('CRUD', () => {
       after(async () => {

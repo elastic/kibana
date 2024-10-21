@@ -12,14 +12,15 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 /*
- * This file contains the common authorization tests that are applicable to
- * all peroject types. There are two other authorization test files due to
- * divergance of the custom roles feature:
- *  - authorization_custom_roles.ts: custom roles are enabled in search and
- *    security projects, so endpoints related to creating roles are enable.
+ * This file contains authorization tests that...
+ *  - are applicable to all peroject types
+ *  - are applicable to only search and security projects, where custom roles are enabled (role CRUD endpoints are enabled):
+ *       - security/authorization/Roles
+ *       - security/authorization/route access/custom roles
+ *  - are applicable to only observability projects, where custom roles are not enabled (role CRUD endpoints are disabled):
+ *       - security/authorization/route access/disabled/oblt only
  *
- *  - authorization_oblt.ts: custom roles are not enabled in OBLT projects
- *    so endpoints related to creating roles are disabled
+ * The test blocks use skip tags to run only the relevant tests per project type.
  */
 
 function collectSubFeaturesPrivileges(feature: KibanaFeatureConfig) {
