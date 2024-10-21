@@ -20,9 +20,14 @@ import {
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  ALERT_RULE_PARAMETERS,
+} from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   EventAnnotationConfig,
@@ -36,7 +41,6 @@ import { getGroupFilters } from '../../../../../common/custom_threshold_rule/hel
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
-import { AlertParams } from '../../types';
 import { Threshold } from '../threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
@@ -51,7 +55,7 @@ interface AppSectionProps {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
+export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const services = useKibana().services;
   const {
     charts,
@@ -66,10 +70,10 @@ export default function AlertDetailsAppSection({ alert, rule }: AppSectionProps)
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
-  const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
+  const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
@@ -213,7 +217,7 @@ export default function AlertDetailsAppSection({ alert, rule }: AppSectionProps)
         );
       })}
       {hasLogRateAnalysisLicense && (
-        <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
+        <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
       )}
     </EuiFlexGroup>
   );
