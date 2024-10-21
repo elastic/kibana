@@ -325,32 +325,22 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             />
           }
         >
-          <EuiFormRow
-            fullWidth
-            key="space"
-            error={
-              touchedFields.description && validation.description ? validation.description : null
-            }
+          <SpaceSelector
             isDisabled={disabled}
-            isInvalid={Boolean(touchedFields.description && validation.description)}
-          >
-            <SpaceSelector
-              isDisabled={disabled}
-              value={
-                'space_ids' in agentPolicy && agentPolicy.space_ids
-                  ? agentPolicy.space_ids
-                  : [spaceId || 'default']
+            value={
+              'space_ids' in agentPolicy && agentPolicy.space_ids
+                ? agentPolicy.space_ids
+                : [spaceId || 'default']
+            }
+            onChange={(newValue) => {
+              if (newValue.length === 0) {
+                return;
               }
-              onChange={(newValue) => {
-                if (newValue.length === 0) {
-                  return;
-                }
-                updateAgentPolicy({
-                  space_ids: newValue,
-                });
-              }}
-            />
-          </EuiFormRow>
+              updateAgentPolicy({
+                space_ids: newValue,
+              });
+            }}
+          />
         </EuiDescribedFormGroup>
       ) : null}
       <EuiDescribedFormGroup
