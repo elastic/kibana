@@ -7,8 +7,15 @@
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
+import {
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TELEMETRY_SDK_LANGUAGE,
+  TELEMETRY_SDK_NAME,
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
@@ -99,6 +106,16 @@ export async function getServicesWithoutTransactions({
                       field: SERVICE_ENVIRONMENT,
                     },
                   },
+                  telemetryAgentName: {
+                    terms: {
+                      field: TELEMETRY_SDK_LANGUAGE,
+                    },
+                  },
+                  telemetrySdkName: {
+                    terms: {
+                      field: TELEMETRY_SDK_NAME,
+                    },
+                  },
                   latest: {
                     top_metrics: {
                       metrics: [{ field: AGENT_NAME } as const],
@@ -122,7 +139,11 @@ export async function getServicesWithoutTransactions({
         return {
           serviceName: bucket.key as string,
           environments: bucket.environments.buckets.map((envBucket) => envBucket.key as string),
-          agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
+          agentName: getAgentName(
+            bucket.latest.top[0].metrics[AGENT_NAME] as string | null,
+            bucket.telemetryAgentName.buckets[0]?.key as string | null,
+            bucket.telemetrySdkName.buckets[0]?.key as string | null
+          ) as AgentName,
         };
       }) ?? [],
     maxCountExceeded,
