@@ -153,7 +153,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           });
 
         // 5. Get ILM stats and publish them
-        const ilmNames = await publishIlmStats(indices)
+        const ilmNames = await publishIlmStats(indices.slice(0, taskConfig.indices_threshold))
           .then((names) => {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'ilm-stats', names.size);
             return names;
