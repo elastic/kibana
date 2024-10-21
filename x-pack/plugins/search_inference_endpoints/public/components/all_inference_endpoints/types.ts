@@ -63,6 +63,6 @@ export interface InferenceEndpointUI {
 }
 
 export interface InferenceUsageInfo {
-  label: string;
+  id: string;
   type: string;
 }

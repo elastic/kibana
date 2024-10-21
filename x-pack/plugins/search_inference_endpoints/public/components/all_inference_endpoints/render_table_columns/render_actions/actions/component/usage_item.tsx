@@ -22,6 +22,7 @@ import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { InferenceUsageInfo } from '../../../../types';
+import { PIPELINE_URL } from '../../../../constants';
 
 interface UsageProps {
   usageItem: InferenceUsageInfo;
@@ -33,12 +34,12 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
   const handleNavigateToIndex = () => {
     if (usageItem.type === 'Index') {
       application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-        path: `search_indices/${usageItem.label}`,
+        path: `search_indices/${usageItem.id}`,
         openInNewTab: true,
       });
     } else if (usageItem.type === 'Pipeline') {
       application?.navigateToApp(MANAGEMENT_APP_ID, {
-        path: `ingest/ingest_pipelines?pipeline=${usageItem.label}`,
+        path: `${PIPELINE_URL}?pipeline=${usageItem.id}`,
         openInNewTab: true,
       });
     }
@@ -52,7 +53,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
             <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiText size="s">
-                  <EuiTextTruncate text={usageItem.label} />
+                  <EuiTextTruncate text={usageItem.id} />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
