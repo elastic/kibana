@@ -22,7 +22,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 
@@ -54,6 +53,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { JsSandboxComponent } from './js_sandbox_component';
 import type { JsSandboxPluginStart, JsSandboxPluginStartDeps } from './types';
 
 export function registerEmbeddable(
@@ -413,13 +413,6 @@ export const getJsSandboxEmbeddableFactory = (
           ...titleComparators,
           ...jsSandboxControlsComparators,
         }
-      );
-
-      const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => (
-        <EuiText>
-          <h1>Hello World!</h1>
-          <p>{hashedJs}</p>
-        </EuiText>
       );
 
       return {
