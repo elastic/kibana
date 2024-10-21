@@ -113,7 +113,7 @@ export const getFormulaEquivalent = (
       }
 
       return getPipelineSeriesFormula(currentMetric, metrics, subFunctionMetric, {
-        metaValue: nestedMetaValue ? Number(nestedMetaValue?.replace(']', '')) : undefined,
+        metaValue: nestedMetaValue ? Number(nestedMetaValue?.replace(/\]/g, '')) : undefined,
         reducedTimeRange,
         timeShift,
       });
