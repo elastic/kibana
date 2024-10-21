@@ -44,6 +44,7 @@ import { createParserFields } from './helpers';
 import {
   collectAllSourceIdentifiers,
   collectAllFields,
+  collectAllAggFields,
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
@@ -150,8 +151,8 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllFields(ctx.fields(0));
-    const grouping = collectAllFields(ctx.fields(1));
+    const aggregates = collectAllAggFields(ctx.aggFields());
+    const grouping = collectAllFields(ctx.fields());
     if (aggregates && aggregates.length) {
       node.aggregates = aggregates;
     }
@@ -181,10 +182,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFields(ctx.fields(0)));
+      command.args.push(...collectAllAggFields(ctx.aggFields()));
     }
     if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
+      command.args.push(...visitByOption(ctx, ctx.fields()));
     }
   }
 
@@ -198,10 +199,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFields(ctx.fields(0)));
+      command.args.push(...collectAllAggFields(ctx.aggFields()));
     }
     if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
+      command.args.push(...visitByOption(ctx, ctx.fields()));
     }
   }
 
