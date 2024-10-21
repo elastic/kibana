@@ -1,22 +1,22 @@
-# eventBus
+# Event Bus
 
-A Kibana plugin
+Note this is EXPERIMENTAL. Naming is hard! Maybe a better name is `StateRegistry`?
 
----
+This plugin provides a global event registry with support for state management.
+Under the hood it uses Redux toolkit's `createSlice` combined with `rxjs`.
+This means you get the convience of specifying state and actions with `createSlice`,
+but the state management itself is not done via `redux` but a framework agnostic
+registry.
 
-## Development
+The main use cases this was developed for:
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
-
-## Scripts
-
-<dl>
-  <dt><code>yarn kbn bootstrap</code></dt>
-  <dd>Execute this to install node_modules and setup the dependencies in your plugin and in Kibana</dd>
-
-  <dt><code>yarn plugin-helpers build</code></dt>
-  <dd>Execute this to create a distributable version of this plugin that can be installed in Kibana</dd>
-
-  <dt><code>yarn plugin-helpers dev --watch</code></dt>
-    <dd>Execute this to build your plugin ui browser side so Kibana could pick up when started in development</dd>
-</dl>
+- It's not recommended to use multiple redux stores within a single SPA.
+  Redux setup can also be a bit tricky. Setting up a slice with this plugin
+  is a bit simpler and doesn't require another Provider.
+- The stateful event bus allows state management across components. An example
+  would be a classic crossfilter dashboard: On top of a global search filter,
+  each panel may add an additional filter that gets considered by other panels.
+- Because the events and state are "data-only" like redux, events and state
+  could potentially be replayed and persistet. This also allows to use it
+  in a curated way to pass certain events/state across plugin boundaries or
+  into sandboxed enviroments.
