@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import {
   FeatureFeedbackButton,
@@ -19,6 +19,7 @@ import { Welcome } from '../entity_enablement/welcome_modal';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { EmptyState } from '../empty_states/empty_state';
 import { eemEnabled$ } from '../../analytics/register_eem_enabled_context';
+import { useIsLoadingComplete } from '../../hooks/use_is_loading_complete';
 
 const pageTitle = (
   <EuiFlexGroup gutterSize="s">
@@ -64,34 +65,22 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     [inventoryAPIClient]
   );
 
-  const [isLoadingComplete, setIsLoadingComplete] = useState<boolean | undefined>(undefined);
+  const isLoadingComplete = useIsLoadingComplete({
+    loadingStates: [isEnablementLoading, hasDataLoading],
+  });
 
   useEffect(() => {
-    if (isLoadingComplete === undefined && hasDataLoading && isEnablementLoading) {
-      setIsLoadingComplete(false);
-    } else if (isLoadingComplete === false && !hasDataLoading && !isEnablementLoading) {
-      setIsLoadingComplete(true);
-    }
-
     if (isLoadingComplete) {
       const viewState = isEntityManagerEnabled
         ? value.hasData
           ? 'populated'
           : 'empty'
         : 'eem_disabled';
-
       telemetry.reportEntityInventoryViewed({
         view_state: viewState,
       });
     }
-  }, [
-    isEnablementLoading,
-    hasDataLoading,
-    isEntityManagerEnabled,
-    value.hasData,
-    telemetry,
-    isLoadingComplete,
-  ]);
+  }, [isEntityManagerEnabled, value.hasData, telemetry, isLoadingComplete]);
 
   if (isEnablementLoading || hasDataLoading) {
     return (
