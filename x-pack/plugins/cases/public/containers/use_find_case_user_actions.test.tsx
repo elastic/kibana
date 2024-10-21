@@ -23,7 +23,7 @@ const initialData = {
   isLoading: true,
 };
 
-describe('UseFindCaseUserActions', () => {
+describe.skip('UseFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
   const params = {

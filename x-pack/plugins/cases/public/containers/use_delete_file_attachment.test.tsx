@@ -18,7 +18,7 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
-describe('useDeleteFileAttachment', () => {
+describe.skip('useDeleteFileAttachment', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 

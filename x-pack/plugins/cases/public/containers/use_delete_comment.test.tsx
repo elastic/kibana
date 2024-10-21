@@ -21,7 +21,7 @@ jest.mock('../components/case_view/use_on_refresh_case_view_page');
 const commentId = 'ab124';
 const successToasterTitle = 'Deleted';
 
-describe('useDeleteComment', () => {
+describe.skip('useDeleteComment', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 

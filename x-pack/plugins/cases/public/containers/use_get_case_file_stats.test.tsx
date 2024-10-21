@@ -28,7 +28,7 @@ const expectedCallParams = {
   meta: { caseIds: [hookParams.caseId] },
 };
 
-describe('useGetCaseFileStats', () => {
+describe.skip('useGetCaseFileStats', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

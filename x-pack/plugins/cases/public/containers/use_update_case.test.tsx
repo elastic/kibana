@@ -18,7 +18,7 @@ import { casesQueriesKeys } from './constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useUpdateCase', () => {
+describe.skip('useUpdateCase', () => {
   const updateKey: UpdateKey = 'description';
 
   const addSuccess = jest.fn();

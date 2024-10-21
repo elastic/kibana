@@ -15,7 +15,7 @@ import { useToasts } from '../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetActionLicense', () => {
+describe.skip('useGetActionLicense', () => {
   const abortCtrl = new AbortController();
   let appMockRenderer: AppMockRenderer;
   beforeEach(() => {

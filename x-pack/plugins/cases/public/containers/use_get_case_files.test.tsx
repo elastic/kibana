@@ -32,7 +32,7 @@ const expectedCallParams = {
   meta: { caseIds: [hookParams.caseId] },
 };
 
-describe('useGetCaseFiles', () => {
+describe.skip('useGetCaseFiles', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

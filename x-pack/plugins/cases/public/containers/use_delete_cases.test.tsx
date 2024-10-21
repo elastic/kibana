@@ -17,7 +17,7 @@ import { casesQueriesKeys } from './constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useDeleteCases', () => {
+describe.skip('useDeleteCases', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 

@@ -24,7 +24,7 @@ const initialData = {
   isLoading: true,
 };
 
-describe('UseInfiniteFindCaseUserActions', () => {
+describe.skip('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
   const params = {

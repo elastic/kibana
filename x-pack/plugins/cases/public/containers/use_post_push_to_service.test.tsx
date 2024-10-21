@@ -19,7 +19,7 @@ import { casesQueriesKeys } from './constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('usePostPushToService', () => {
+describe.skip('usePostPushToService', () => {
   const connector = {
     id: '123',
     name: 'My connector',

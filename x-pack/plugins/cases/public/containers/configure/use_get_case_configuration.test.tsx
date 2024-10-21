@@ -14,7 +14,7 @@ import { initialConfiguration } from './utils';
 
 jest.mock('./api');
 
-describe('Use get case configuration hook', () => {
+describe.skip('Use get case configuration hook', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

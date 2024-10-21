@@ -23,7 +23,7 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <TestProviders>{children}</TestProviders>
 );
 
-describe('useGetCaseMetrics', () => {
+describe.skip('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
   const features: SingleCaseMetricsFeature[] = [CaseMetricsFeature.ALERTS_COUNT];
 

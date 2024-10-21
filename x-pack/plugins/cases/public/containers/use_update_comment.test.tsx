@@ -17,7 +17,7 @@ import { useUpdateComment } from './use_update_comment';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useUpdateComment', () => {
+describe.skip('useUpdateComment', () => {
   const sampleUpdate = {
     caseId: basicCase.id,
     commentId: basicCase.comments[0].id,

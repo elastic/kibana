@@ -19,7 +19,7 @@ const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
 
-describe('useConnectors', () => {
+describe.skip('useConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

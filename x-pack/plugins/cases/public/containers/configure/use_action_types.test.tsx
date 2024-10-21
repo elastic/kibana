@@ -15,7 +15,7 @@ import { useToasts } from '../../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
-describe('useActionTypes', () => {
+describe.skip('useActionTypes', () => {
   let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();

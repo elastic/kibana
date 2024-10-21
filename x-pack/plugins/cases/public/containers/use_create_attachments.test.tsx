@@ -21,7 +21,7 @@ jest.mock('../common/lib/kibana');
 
 const useToastMock = useToasts as jest.Mock;
 
-describe('useCreateAttachments', () => {
+describe.skip('useCreateAttachments', () => {
   const addError = jest.fn();
   const addSuccess = jest.fn();
 

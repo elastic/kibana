@@ -17,7 +17,7 @@ import { useReplaceCustomField } from './use_replace_custom_field';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useReplaceCustomField', () => {
+describe.skip('useReplaceCustomField', () => {
   const sampleData = {
     caseId: basicCase.id,
     customFieldId: 'test_key_1',

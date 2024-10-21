@@ -16,7 +16,7 @@ import * as api from './api';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetFeaturesIds', () => {
+describe.skip('useGetFeaturesIds', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 

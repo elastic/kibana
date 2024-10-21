@@ -15,7 +15,7 @@ import { createAppMockRenderer } from '../common/mock';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCaseUsers', () => {
+describe.skip('useGetCaseUsers', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

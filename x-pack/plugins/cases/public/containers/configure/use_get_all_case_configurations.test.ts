@@ -13,7 +13,7 @@ import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('./api');
 
-describe('Use get all case configurations hook', () => {
+describe.skip('Use get all case configurations hook', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

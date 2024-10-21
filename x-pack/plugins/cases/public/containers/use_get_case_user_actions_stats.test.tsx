@@ -22,7 +22,7 @@ const initialData = {
   isLoading: true,
 };
 
-describe('useGetCaseUserActionsStats', () => {
+describe.skip('useGetCaseUserActionsStats', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

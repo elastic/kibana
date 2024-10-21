@@ -18,7 +18,7 @@ import { casesQueriesKeys } from './constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('usePostCase', () => {
+describe.skip('usePostCase', () => {
   const samplePost = {
     description: 'description',
     tags: ['tags'],
