@@ -27,27 +27,15 @@ export function GroupedGridWrapper({ field }: Props) {
   const inventoryRoute = useInventoryRouter();
   const pageIndex = (field ? pagination?.[field] : pagination?.unified) ?? 0;
 
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
+  const { refreshSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
 
   useEffectOnce(() => {
-    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refresh();
-        } else {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
-      }
-    );
-    return () => {
-      searchBarContentSubscription.unsubscribe();
-    };
+    const refreshSubscription = refreshSubject$.subscribe(() => refresh());
+
+    return () => refreshSubscription.unsubscribe();
   });
 
   const {

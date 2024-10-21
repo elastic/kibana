@@ -6,6 +6,7 @@
  */
 import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
@@ -13,12 +14,15 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInventoryState } from '../../hooks/use_inventory_state';
+import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
+import { InventorySummary } from './inventory_summary';
 
-export function UnifiedInventoryView() {
+export function UnifiedInventory() {
   const { pagination, setPagination } = useInventoryState();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
+  const { refreshSubject$ } = useInventorySearchBarContext();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, kuery, entityTypes } = query;
   const inventoryRoute = useInventoryRouter();
@@ -27,7 +31,7 @@ export function UnifiedInventoryView() {
   const {
     value = { entities: [] },
     loading,
-    // refresh,
+    refresh,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
@@ -44,6 +48,12 @@ export function UnifiedInventoryView() {
     },
     [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
   );
+
+  useEffectOnce(() => {
+    const refreshSubscription = refreshSubject$.subscribe(() => refresh());
+
+    return () => refreshSubscription.unsubscribe();
+  });
 
   function handlePageChange(nextPage: number) {
     setPagination('unified', nextPage);
@@ -72,19 +82,22 @@ export function UnifiedInventoryView() {
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow>
-        <EntitiesGrid
-          entities={value.entities}
-          loading={loading}
-          sortDirection={sortDirection}
-          sortField={sortField}
-          onChangePage={handlePageChange}
-          onChangeSort={handleSortChange}
-          pageIndex={pageIndex}
-          onFilterByType={handleTypeFilter}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <InventorySummary totalEntities={value.entities.length} />
+      <EuiFlexGroup>
+        <EuiFlexItem grow>
+          <EntitiesGrid
+            entities={value.entities}
+            loading={loading}
+            sortDirection={sortDirection}
+            sortField={sortField}
+            onChangePage={handlePageChange}
+            onChangeSort={handleSortChange}
+            pageIndex={pageIndex}
+            onFilterByType={handleTypeFilter}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }

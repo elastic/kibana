@@ -26,7 +26,6 @@ export interface InventoryGroupAccordionProps {
 export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccordionProps) {
   const { euiTheme } = useEuiTheme();
   const field = group[groupBy];
-  const id = `inventory-group-${groupBy}-${field}`;
   const [open, setOpen] = useState(false);
 
   const onToggle = useCallback(() => {
@@ -37,14 +36,13 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
     <>
       <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
         <EuiAccordion
-          className="inventoryGroupAccordion"
-          data-test-subj={id}
-          id={id}
+          data-test-subj={`inventoryGroup_${groupBy}_${field}`}
+          id={`inventory-group-${groupBy}-${field}`}
           buttonContent={<InventoryGroupPanel field={field} />}
           buttonElement="div"
           extraAction={
             <InventoryPanelBadge
-              data-test-subj="inventory-panel-badge-entities-count"
+              data-test-subj={`inventoryPanelBadgeEntitiesCount_${groupBy}_${field}`}
               name={ENTITIES_COUNT_BADGE}
               value={group.count}
             />

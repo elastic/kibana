@@ -27,7 +27,6 @@ export function InventoryPanelBadge({
       `}
     >
       <span
-        className="inventoryPanelBadge"
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
           margin-right: ${euiTheme.size.s};

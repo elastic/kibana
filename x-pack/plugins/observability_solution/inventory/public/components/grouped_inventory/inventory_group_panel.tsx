@@ -9,7 +9,7 @@ import React from 'react';
 
 export function InventoryGroupPanel({ field }: { field: string }) {
   return (
-    <div data-test-subj={`inventory-group-panel-${field}`} className="inventoryGroupPanel">
+    <div data-test-subj={`inventoryGroupPanel_${field}`}>
       <EuiTitle size="xs">
         <h4>{field}</h4>
       </EuiTitle>

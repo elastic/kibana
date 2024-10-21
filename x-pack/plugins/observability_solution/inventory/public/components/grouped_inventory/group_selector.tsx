@@ -10,7 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { EntityView } from '../../../common/entities';
+import type { EntityView } from '../../../common/entities';
 import { useInventoryState } from '../../hooks/use_inventory_state';
 
 const GROUP_LABELS: Record<EntityView, string> = {
@@ -63,7 +63,7 @@ export function GroupSelector() {
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="group-selector-dropdown"
+      data-test-subj="inventory.groupSelectorDropdown"
       flush="both"
       iconSide="right"
       iconSize="s"
