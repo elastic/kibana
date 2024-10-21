@@ -198,7 +198,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           )}/api/alerting/rules/_find?sort_field=monitoring.run.calculated_metrics.success_ratio`
         );
 
-        expect(response.status).to.eql(200);
+        expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
           'Error find rules: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
         );
