@@ -73,7 +73,7 @@ describe('<ManageProcessors />', () => {
 
         expect(row).toEqual([
           database.name,
-          database.type === 'maxmind' ? 'MaxMind' : 'IPInfo',
+          database.type === 'maxmind' ? 'MaxMind' : 'IPinfo',
           '',
         ]);
       });
@@ -122,7 +122,7 @@ describe('<ManageProcessors />', () => {
       });
     });
 
-    it('creates an IPInfo database when none with the same name exists', async () => {
+    it('creates an IPinfo database when none with the same name exists', async () => {
       const { actions, exists } = testBed;
       const databaseName = 'ASN';
       httpRequestsMockHelpers.setCreateDatabasesResponse({
