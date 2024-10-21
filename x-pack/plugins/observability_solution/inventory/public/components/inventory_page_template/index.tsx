@@ -18,6 +18,7 @@ import { useEntityManager } from '../../hooks/use_entity_manager';
 import { Welcome } from '../entity_enablement/welcome_modal';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { EmptyState } from '../empty_states/empty_state';
+import { eemEnabled$ } from '../../analytics/register_eem_enabled_context';
 
 const pageTitle = (
   <EuiFlexGroup gutterSize="s">
@@ -49,6 +50,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useEntityManager();
 
   const handleSuccess = () => {
+    eemEnabled$.next({ eemEnabled: true });
     refresh();
     toggleWelcomedModal();
   };
