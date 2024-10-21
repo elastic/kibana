@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
@@ -17,10 +16,14 @@ import {
   BASE_POLICY_RESPONSE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
-export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+export function registerPolicyRoutes(
+  router: SecuritySolutionPluginRouter,
+  endpointAppContext: EndpointAppContext
+) {
   const logger = endpointAppContext.logFactory.get('endpointPolicy');
 
   router.versioned
@@ -39,7 +42,7 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       withEndpointAuthz(
         { any: ['canReadSecuritySolution', 'canAccessFleet'] },
         logger,
-        getHostPolicyResponseHandler()
+        getHostPolicyResponseHandler(endpointAppContext.service)
       )
     );
 
