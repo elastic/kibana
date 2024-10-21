@@ -20,8 +20,8 @@ export function k8sCronJobEntity({
 }: {
   schema: Schema;
   name: string;
-  uid: string;
-  clusterName: string;
+  uid?: string;
+  clusterName?: string;
   entityId: string;
   [key: string]: any;
 }) {
