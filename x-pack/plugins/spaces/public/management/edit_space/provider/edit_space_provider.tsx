@@ -15,6 +15,7 @@ import React, {
   useEffect,
   useReducer,
   useRef,
+  useState,
 } from 'react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -41,6 +42,7 @@ export interface EditSpaceProviderRootProps
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   spacesManager: SpacesManager;
+  getIsRoleManagementEnabled: () => Promise<() => boolean | undefined>;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
   getSecurityLicense: () => Promise<SecurityLicense>;
@@ -55,10 +57,14 @@ interface EditSpaceClients {
 export interface EditSpaceServices
   extends Omit<
     EditSpaceProviderRootProps,
-    'getRolesAPIClient' | 'getPrivilegesAPIClient' | 'getSecurityLicense'
+    | 'getRolesAPIClient'
+    | 'getPrivilegesAPIClient'
+    | 'getSecurityLicense'
+    | 'getIsRoleManagementEnabled'
   > {
   invokeClient<R extends unknown>(arg: (clients: EditSpaceClients) => Promise<R>): Promise<R>;
   license?: SecurityLicense;
+  isRoleManagementEnabled: boolean;
 }
 
 export interface EditSpaceStore {
@@ -101,8 +107,15 @@ export const EditSpaceProviderRoot = ({
   children,
   ...services
 }: PropsWithChildren<EditSpaceProviderRootProps>) => {
-  const { logger, getRolesAPIClient, getPrivilegesAPIClient, getSecurityLicense } = services;
+  const {
+    logger,
+    getRolesAPIClient,
+    getPrivilegesAPIClient,
+    getSecurityLicense,
+    getIsRoleManagementEnabled,
+  } = services;
 
+  const [isRoleManagementEnabled, setIsRoleManagementEnabled] = useState<boolean>(false);
   const clients = useRef(Promise.all([getRolesAPIClient(), getPrivilegesAPIClient()]));
   const license = useRef(getSecurityLicense);
 
@@ -162,9 +175,21 @@ export const EditSpaceProviderRoot = ({
     [resolveAPIClients, services.spacesManager]
   );
 
+  getIsRoleManagementEnabled().then((isEnabledFunction) => {
+    const result = isEnabledFunction();
+    setIsRoleManagementEnabled(typeof result === 'undefined' || result);
+  });
+
   return (
     <EditSpaceProvider
-      {...{ ...services, invokeClient, state, dispatch, license: licenseRef.current }}
+      {...{
+        ...services,
+        invokeClient,
+        state,
+        dispatch,
+        license: licenseRef.current,
+        isRoleManagementEnabled,
+      }}
     >
       {children}
     </EditSpaceProvider>
