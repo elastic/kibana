@@ -9,7 +9,7 @@ import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { decode, encode } from '@kbn/rison';
 import { useInventoryParams } from './use_inventory_params';
 import { useInventoryRouter } from './use_inventory_router';
-import { EntityView } from '../../common/entities';
+import type { EntityView } from '../../common/entities';
 
 export function useInventoryState() {
   const { query } = useInventoryParams('/');

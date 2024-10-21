@@ -14,15 +14,19 @@ interface InventorySearchBarContextType {
     entityTypes?: EntityType[];
     refresh: boolean;
   }>;
+  refreshSubject$: Subject<void>;
 }
 
 const InventorySearchBarContext = createContext<InventorySearchBarContextType>({
   searchBarContentSubject$: new Subject(),
+  refreshSubject$: new Subject(),
 });
 
 export function InventorySearchBarContextProvider({ children }: { children: ReactChild }) {
   return (
-    <InventorySearchBarContext.Provider value={{ searchBarContentSubject$: new Subject() }}>
+    <InventorySearchBarContext.Provider
+      value={{ searchBarContentSubject$: new Subject(), refreshSubject$: new Subject() }}
+    >
       {children}
     </InventorySearchBarContext.Provider>
   );
