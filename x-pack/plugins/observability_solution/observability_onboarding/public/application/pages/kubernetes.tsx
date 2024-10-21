@@ -29,6 +29,7 @@ export const KubernetesPage = () => (
               'This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host.',
           }
         )}
+        isTechnicalPreview={true}
       />
     }
   >

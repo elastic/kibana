@@ -41,8 +41,8 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   const {
     services: { http },
   } = useDataVisualizerKibana();
-  const [inferenceServices, setInferenceServices] = useState<EuiSelectOption[]>([]);
-  const [selectedInference, setSelectedInference] = useState<string | undefined>();
+  const [inferenceEndpoints, setInferenceEndpoints] = useState<EuiSelectOption[]>([]);
+  const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<string | undefined>();
   const [selectedFieldOption, setSelectedFieldOption] = useState<string | undefined>();
   const [renameToFieldOption, setRenameToFieldOption] = useState<string>('');
   const [fieldError, setFieldError] = useState<string | undefined>();
@@ -61,17 +61,17 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   useEffect(() => {
     http
-      .fetch<InferenceInferenceEndpointInfo[]>('/internal/data_visualizer/inference_services', {
+      .fetch<InferenceInferenceEndpointInfo[]>('/internal/data_visualizer/inference_endpoints', {
         method: 'GET',
         version: '1',
       })
       .then((response) => {
-        const inferenceServiceOptions = response.map((service) => ({
-          value: service.inference_id,
-          text: service.inference_id,
+        const inferenceEndpointOptions = response.map((endpoint) => ({
+          value: endpoint.inference_id,
+          text: endpoint.inference_id,
         }));
-        setInferenceServices(inferenceServiceOptions);
-        setSelectedInference(inferenceServiceOptions[0]?.value ?? undefined);
+        setInferenceEndpoints(inferenceEndpointOptions);
+        setSelectedInferenceEndpoint(inferenceEndpointOptions[0]?.value ?? undefined);
       });
   }, [http]);
 
@@ -88,7 +88,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       renameToFieldOption === '' ||
       renameToFieldOption === undefined ||
       selectedFieldOption === undefined ||
-      selectedInference === undefined
+      selectedInferenceEndpoint === undefined
     ) {
       return;
     }
@@ -103,7 +103,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
         newMappings.properties![renameToFieldOption ?? selectedFieldOption] = {
           // @ts-ignore types are missing semantic_text
           type: 'semantic_text',
-          inference_id: selectedInference,
+          inference_id: selectedInferenceEndpoint,
         };
         return newMappings;
       },
@@ -138,12 +138,12 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   const isInvalid = useMemo(() => {
     return (
-      !selectedInference ||
+      !selectedInferenceEndpoint ||
       !selectedFieldOption ||
       renameToFieldOption === '' ||
       fieldError !== undefined
     );
-  }, [selectedInference, selectedFieldOption, renameToFieldOption, fieldError]);
+  }, [selectedInferenceEndpoint, selectedFieldOption, renameToFieldOption, fieldError]);
 
   return (
     <>
@@ -185,13 +185,13 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
       <EuiFormRow
         label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.inferenceLabel', {
-          defaultMessage: 'Inference service',
+          defaultMessage: 'Inference endpoint',
         })}
       >
         <EuiSelect
-          options={inferenceServices}
-          value={selectedInference}
-          onChange={(e) => setSelectedInference(e.target.value)}
+          options={inferenceEndpoints}
+          value={selectedInferenceEndpoint}
+          onChange={(e) => setSelectedInferenceEndpoint(e.target.value)}
         />
       </EuiFormRow>
 

@@ -28,4 +28,15 @@ describe('IntegrationsCard', () => {
     );
     expect(getByTestId('loadingInstalledIntegrations')).toBeInTheDocument();
   });
+
+  it('renders the content', () => {
+    const { queryByTestId } = render(
+      <IntegrationsCard
+        {...props}
+        checkCompleteMetadata={{ installedIntegrationsCount: 1, isAgentRequired: false }}
+      />
+    );
+    expect(queryByTestId('loadingInstalledIntegrations')).not.toBeInTheDocument();
+    expect(queryByTestId('integrationsCardGridTabs')).toBeInTheDocument();
+  });
 });

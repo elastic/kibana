@@ -9,6 +9,7 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 
 export interface LastUpdatedAtProps {
@@ -35,6 +36,12 @@ const Updated = React.memo<{ date: number; prefix: string; updatedAt: number }>(
 Updated.displayName = 'Updated';
 
 const prefix = ` ${i18n.UPDATED} `;
+
+const anchorStyles = {
+  css: css`
+    align-self: center;
+  `,
+};
 
 export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
   ({ compact = false, updatedAt, showUpdating = false }) => {
@@ -64,7 +71,10 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
     }, [compact, date, showUpdating, updatedAt]);
 
     return (
-      <EuiToolTip content={<Updated date={date} prefix={prefix} updatedAt={updatedAt} />}>
+      <EuiToolTip
+        content={<Updated date={date} prefix={prefix} updatedAt={updatedAt} />}
+        anchorProps={anchorStyles}
+      >
         <EuiText color="subdued" size="xs" data-test-subj="toolbar-updated-at">
           {updateText}
         </EuiText>
