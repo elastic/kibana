@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { FindMaintenanceWindowsRequestQuery, FindMaintenanceWindowsResponse } from './v1';
+export {
+  findMaintenanceWindowsRequestQuerySchema,
+  findMaintenanceWindowsResponseSchema,
+} from './v1';
