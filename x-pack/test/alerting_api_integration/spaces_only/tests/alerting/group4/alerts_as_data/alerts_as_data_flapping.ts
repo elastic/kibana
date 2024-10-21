@@ -552,6 +552,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 2,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, true, false, true, false, true, false],
@@ -667,6 +669,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 2,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, true, false, true, false, true, false],
