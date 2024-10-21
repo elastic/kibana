@@ -155,10 +155,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         await testSubjects.existOrFail('indexDetailsContent');
         await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
       },
-      async expectUrlShouldChangeTo(tabId: string){
-      const url = await browser.getCurrentUrl();
-       expect(url).to.contain(`tab=${tabId}`);
-      }
+      async expectUrlShouldChangeTo(tabId: string) {
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`tab=${tabId}`);
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
