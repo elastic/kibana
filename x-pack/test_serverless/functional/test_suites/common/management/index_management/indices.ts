@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const testIndexName = `index-ftr-test-${Math.random()}`;
+  const es = getService('es');
 
   describe('Indices', function () {
     before(async () => {
@@ -37,9 +38,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('manage index', function () {
-      after(async () => {
-        await esDeleteAllIndices(testIndexName);
-      });
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the indices tab
@@ -49,6 +47,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.manageIndexContextMenuExists();
       });
       describe('navigate to index detail tabs', function () {
+        before(async () => {
+          await es.indices.create({ index: testIndexName });
+        });
+        after(async () => {
+          await esDeleteAllIndices(testIndexName);
+        });
         this.tags('skipSvlSearch');
         it('navigates to overview', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
