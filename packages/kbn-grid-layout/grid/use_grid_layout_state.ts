@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, of, retry } from 'rxjs';
+import { createRef, useEffect, useMemo, useRef } from 'react';
+import { BehaviorSubject, combineLatest, debounceTime, map, of, retry, skip, tap } from 'rxjs';
 
 import { transparentize } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -64,11 +64,13 @@ export const useGridLayoutState = ({
     const panelIds$ = new BehaviorSubject<string[][]>(
       initialLayout.map(({ panels }) => Object.keys(panels))
     );
+    const dragPreviewRefs = initialLayout.map((row) => createRef<HTMLDivElement>());
 
     return {
       rowRefs,
       rows$,
       panelRefs,
+      dragPreviewRefs,
       rowCount$,
       targetRow$,
       panelIds$,
@@ -100,13 +102,8 @@ export const useGridLayoutState = ({
      * on layout change, update the styles of every panel so that it renders as expected
      */
     const updatePanelStylesSubscription = combineLatest([
-      gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.activePanel$,
-      gridLayoutStateManager.targetRow$,
-      gridLayoutStateManager.runtimeSettings$,
-    ])
-      .pipe(
-        map(([gridLayout, activePanel, targetRow, runtimeSettings]) => {
+      gridLayoutStateManager.gridLayout$.pipe(
+        map((gridLayout) => {
           // wait for all panel refs to be ready before continuing
           for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
             const currentRow = gridLayout[rowIndex];
@@ -121,11 +118,16 @@ export const useGridLayoutState = ({
               }
             });
           }
-          return { gridLayout, activePanel, targetRow, runtimeSettings };
+          return gridLayout;
         }),
         retry({ delay: 1 }) // retry until panel references all exist
-      )
-      .subscribe(({ gridLayout, activePanel, targetRow, runtimeSettings }) => {
+      ),
+      gridLayoutStateManager.runtimeSettings$.pipe(skip(1)),
+      gridLayoutStateManager.activePanel$,
+      gridLayoutStateManager.targetRow$,
+    ])
+      .pipe(skip(1))
+      .subscribe(([gridLayout, runtimeSettings, activePanel, targetRow]) => {
         const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
         for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
@@ -138,11 +140,8 @@ export const useGridLayoutState = ({
 
           if (activePanel && rowIndex !== targetRow) {
             /**
-             * If there is an interaction event happening but the current row is not being targetted, it
+             * If there is an activePanel happening but the current row is not being targetted, it
              * does not need to be re-rendered; so, skip setting the panel styles of this row.
-             *
-             * If there is **no** interaction event, then this is the initial render so the styles of every
-             * panel should be initialized; so, don't skip setting the panel styles.
              */
             continue;
           }
@@ -158,6 +157,7 @@ export const useGridLayoutState = ({
             setPanelStyles({
               panelRef,
               panel,
+              dragPreviewRef: gridLayoutStateManager.dragPreviewRefs[rowIndex].current,
               runtimeSettings,
               activePanel,
               isResize: currentInteractionEvent?.type === 'resize',
@@ -189,25 +189,18 @@ const setRowStyles = ({
   rowIndex,
   targetRow,
 }: {
-  rowRef?: HTMLDivElement;
+  rowRef: HTMLDivElement;
   runtimeSettings: RuntimeGridSettings;
   currentRow: GridRowData;
   rowIndex: number;
   targetRow?: number;
 }) => {
-  if (!rowRef) return;
-
-  const { gutterSize, columnCount, rowHeight, columnPixelWidth } = runtimeSettings;
+  const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
   const maxRow = Object.values(currentRow.panels).reduce((acc, panel) => {
     return Math.max(acc, panel.row + panel.height);
   }, 0);
   const rowCount = maxRow || 1;
 
-  // set the CSS grid styles
-  rowRef.style.gap = `${gutterSize}px`;
-  rowRef.style.gridTemplateColumns = `repeat(${columnCount}, calc((100% - ${
-    gutterSize * (columnCount - 1)
-  }px) / ${columnCount}))`;
   rowRef.style.gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
 
   if (rowIndex === targetRow) {
@@ -230,12 +223,14 @@ const setRowStyles = ({
 
 const setPanelStyles = ({
   panelRef,
+  dragPreviewRef,
   panel,
   runtimeSettings,
   activePanel,
   isResize,
 }: {
   panelRef: HTMLDivElement;
+  dragPreviewRef: HTMLDivElement | null;
   panel: GridPanelData;
   runtimeSettings: RuntimeGridSettings;
   activePanel?: ActivePanel;
@@ -245,6 +240,7 @@ const setPanelStyles = ({
     // if the current panel is active, give it fixed positioning depending on the interaction event
     const { position: draggingPosition } = activePanel;
 
+    panelRef.style.zIndex = `${euiThemeVars.euiZModal}`;
     if (isResize) {
       // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
       panelRef.style.width = `${Math.max(
@@ -275,7 +271,18 @@ const setPanelStyles = ({
       panelRef.style.gridColumnEnd = ``;
       panelRef.style.gridRowEnd = ``;
     }
+
+    // update the drag preview
+    if (dragPreviewRef) {
+      dragPreviewRef.style.display = 'block';
+      dragPreviewRef.style.gridColumnStart = `${panel.column + 1}`;
+      dragPreviewRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+      dragPreviewRef.style.gridRowStart = `${panel.row + 1}`;
+      dragPreviewRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+    }
   } else {
+    panelRef.style.zIndex = '0';
+
     // if the panel is not being dragged and/or resized, undo any fixed position styles
     panelRef.style.position = '';
     panelRef.style.left = ``;
@@ -288,5 +295,10 @@ const setPanelStyles = ({
     panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
     panelRef.style.gridRowStart = `${panel.row + 1}`;
     panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+
+    // update the drag preview
+    if (dragPreviewRef) {
+      dragPreviewRef.style.display = 'none';
+    }
   }
 };

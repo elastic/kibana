@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridPanel } from './grid_panel';
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
@@ -38,6 +39,27 @@ export const GridRow = forwardRef<
     gridRef
   ) => {
     const rowData = useStateFromPublishingSubject(gridLayoutStateManager.rows$[rowIndex]);
+
+    const initialStyles = useMemo(() => {
+      const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
+
+      const { gutterSize, columnCount, rowHeight } = runtimeSettings;
+
+      const maxRow = Object.values(initialRow.panels).reduce((acc, panel) => {
+        return Math.max(acc, panel.row + panel.height);
+      }, 0);
+      const rowCount = maxRow || 1;
+
+      return css`
+        gap: ${gutterSize}px;
+        grid-template-columns: repeat(
+          ${columnCount},
+          calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
+        );
+        grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
+      `;
+    }, [gridLayoutStateManager, rowIndex]);
 
     return (
       <>
@@ -67,12 +89,15 @@ export const GridRow = forwardRef<
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;
+              ${initialStyles};
             `}
           >
             {rowData.panelIds.map((panelId) => (
               <GridPanel
                 key={panelId}
                 panelId={panelId}
+                rowIndex={rowIndex}
+                gridLayoutStateManager={gridLayoutStateManager}
                 renderPanelContents={renderPanelContents}
                 interactionStart={(type, e) => {
                   e.preventDefault();
