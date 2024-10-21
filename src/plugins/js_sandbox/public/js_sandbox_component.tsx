@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, useRef, useState, type FC } from 'react';
 
 /**
  * JS Sandbox Component
@@ -52,57 +52,96 @@ import React, { FC } from 'react';
  * @returns
  */
 export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
+  // TODO Replace with result of user provided ES|QL query
+  // State to manage the data prop that will be passed to the user's component
+  const [data, setData] = useState({
+    message: 'This is the initial predefined data provided by the SPA.',
+  });
+
+  // Ref to store the iframe reference
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
   // The runUserCode function evaluates the provided component code.
   // This function uses eval() to execute user code, but it’s done within
   // the controlled iframe to mitigate security risks.
   const iframeContent = `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <script src="https://unpkg.com/react/umd/react.development.js"></script>
-      <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
-    </head>
-    <body>
-      <div id="root"></div>
-      <script>
-        // Function to evaluate and render user component
-        window.runUserCode = function(userCode) {
-          try {
-            // Wrap the user code to define and use the functional component
-            const wrappedCode = \`
-              (function() {
-                // Evaluate user code to create the component
-                \${userCode}
-                // Assume the user provides a component named "UserComponent"
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+      </head>
+      <body>
+        <div id="root"></div>
+        <script>
+          let UserComponent = () => null;
+
+          // Function to render UserComponent with the provided data
+          const renderUserComponent = function(data) {
+            try {
+              if (typeof UserComponent === 'function') {
                 ReactDOM.render(
-                  React.createElement(UserComponent, null),
+                  React.createElement(UserComponent, { data }),
                   document.getElementById('root')
                 );
-              })();
-            \`;
-            eval(wrappedCode);
-          } catch (e) {
-            console.error('Error:', e);
-          }
-        };
-      </script>
-    </body>
-  </html>
-`;
+              }
+            } catch (e) {
+              console.error('Render Error:', e);
+            }
+          };
+
+          // Function to evaluate and render user component with JSX support
+          const compileUserCode = function(userCode) {
+            try {
+              // Transpile the user code from JSX to JavaScript using Sucrase
+              const transpiledCode = Babel.transform('UserComponent = ' + userCode, {
+                presets: ['react']
+              }).code;
+              console.log('transpiledCode', transpiledCode);
+
+              eval(transpiledCode);
+            } catch (e) {
+              console.error('Error:', e);
+            }
+          };
+
+
+          document.addEventListener('DOMContentLoaded', function(event) {
+            compileUserCode(${JSON.stringify(hashedJs)});
+            console.log('UserComponent', UserComponent);
+
+            ReactDOM.render(
+              React.createElement(UserComponent, null),
+              document.getElementById('root')
+            );
+          });
+
+          // Listen for messages from the parent window
+          window.addEventListener('message', function(event) {
+            if (event.data.type === 'updateData') {
+              renderUserComponent(event.data.payload);
+            }
+          });
+        </script>
+      </body>
+    </html>
+  `;
+
+  // Effect to update the iframe when `data` changes
+  useEffect(() => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'updateData', payload: data }, '*');
+    }
+  }, [data]);
 
   return (
     <iframe
-      title="js_sandbox"
-      // srcdoc allows you to directly define the content that will be inside the iframe
-      srcDoc={iframeContent}
-      // sandbox attribute ensures that the JavaScript is isolated:
-      // - `allow-scripts`: Allows JavaScript execution.
-      // - Excluding `allow-same-origin` means that the code inside cannot
-      //   access cookies or local storage of your site,
-      //   providing additional security.
+      title="JS Sandbox"
+      ref={iframeRef}
       sandbox="allow-scripts"
-      width="100%"
-      height="100%"
+      srcDoc={iframeContent}
+      style={{ width: '100%', height: '100%' }}
     />
   );
 };
