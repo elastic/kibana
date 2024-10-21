@@ -24,7 +24,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-  describe('Search index detail page', () => {
+  describe('Search index detail page', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/196981
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlApiKeys.deleteAPIKeys();
