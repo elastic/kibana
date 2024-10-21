@@ -49,7 +49,10 @@ export function registerAssistantFunctions({
   ruleDataClient: IRuleDataClient;
   plugins: APMRouteHandlerResources['plugins'];
 }): RegistrationCallback {
-  return async ({ resources, functions: { registerFunction } }) => {
+  return async ({ resources, functions: { registerFunction }, scopes }) => {
+    if (!scopes.includes('observability')) {
+      return;
+    }
     const apmRouteHandlerResources: MinimalAPMRouteHandlerResources = {
       context: resources.context,
       request: resources.request,

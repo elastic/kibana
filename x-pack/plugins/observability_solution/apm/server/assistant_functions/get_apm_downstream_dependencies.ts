@@ -67,7 +67,6 @@ export function registerGetApmDownstreamDependenciesFunction({
           randomSampler,
         }),
       };
-    },
-    ['observability']
+    }
   );
 }
