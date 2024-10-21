@@ -17,7 +17,6 @@ import type {
   DashboardSearchIn,
   DashboardSearchOut,
   DashboardSearchOptions,
-  DashboardItem,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
@@ -33,7 +32,7 @@ export interface SearchDashboardsArgs {
 
 export interface SearchDashboardsResponse {
   total: number;
-  hits: DashboardItem[];
+  hits: DashboardSearchOut['hits'];
 }
 
 export async function searchDashboards({

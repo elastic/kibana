@@ -40,7 +40,8 @@ export function createExtractPanelReferencesMigration(
     // Use Content Management to convert the saved object to the DashboardAttributes
     // expected by injectReferences
     const { attributes: parsedAttributes } = savedObjectToItem(
-      doc as unknown as SavedObject<DashboardSavedObjectAttributes>
+      doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
+      false
     );
 
     const injectedAttributes = injectReferences(

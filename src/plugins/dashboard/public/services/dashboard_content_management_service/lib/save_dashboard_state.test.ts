@@ -96,7 +96,7 @@ describe('Save dashboard state', () => {
         ...getSampleDashboardInput(),
         title: 'BooThree',
         panels: { aVerySpecialVeryUniqueId: { type: 'boop' } },
-      } as DashboardContainerInput,
+      } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
     });

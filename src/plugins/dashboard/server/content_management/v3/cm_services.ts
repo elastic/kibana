@@ -23,6 +23,7 @@ import {
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
+  DEFAULT_SHOW_APPLY_SELECTIONS,
 } from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
@@ -48,7 +49,7 @@ export const controlGroupInputSchema = schema.object({
     schema.object(
       {
         type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-        controlConfig: schema.recordOf(schema.string(), schema.any()),
+        controlConfig: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         id: schema.string({
           defaultValue: uuidv4(),
           meta: { description: 'The unique ID of the control.' },
@@ -123,7 +124,7 @@ export const controlGroupInputSchema = schema.object({
   }),
   showApplySelections: schema.boolean({
     meta: { description: 'Show apply selections button in controls.' },
-    defaultValue: false,
+    defaultValue: DEFAULT_SHOW_APPLY_SELECTIONS,
   }),
 });
 
@@ -245,11 +246,10 @@ export const gridDataSchema = schema.object({
     min: 1,
     meta: { description: 'The height of the panel in grid units' },
   }),
-  i: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique identifier of the panel' },
-    })
-  ),
+  i: schema.string({
+    meta: { description: 'The unique identifier of the panel' },
+    defaultValue: uuidv4(),
+  }),
 });
 
 export const panelSchema = schema.object({
@@ -287,11 +287,10 @@ export const panelSchema = schema.object({
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   panelRefName: schema.maybe(schema.string()),
   gridData: gridDataSchema,
-  panelIndex: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique ID of the panel.' },
-    })
-  ),
+  panelIndex: schema.string({
+    meta: { description: 'The unique ID of the panel.' },
+    defaultValue: schema.siblingRef('gridData.i'),
+  }),
   title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
   version: schema.maybe(
     schema.string({

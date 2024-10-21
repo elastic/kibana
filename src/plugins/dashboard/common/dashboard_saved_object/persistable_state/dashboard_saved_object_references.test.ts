@@ -18,7 +18,7 @@ import {
   createInject,
 } from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import type { DashboardAttributes } from '../../../server/content_management';
+import type { DashboardAttributes, DashboardItem } from '../../../server/content_management';
 import { DashboardAttributesAndReferences } from '../../types';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
@@ -74,7 +74,7 @@ describe('extractReferences', () => {
             id: '1',
             title: 'Title 1',
             version: '7.9.1',
-            gridData: { x: 0, y: 0, w: 1, h: 1 },
+            gridData: { x: 0, y: 0, w: 1, h: 1, i: 'panel-1' },
             panelConfig: {},
           },
           {
@@ -83,7 +83,7 @@ describe('extractReferences', () => {
             id: '2',
             title: 'Title 2',
             version: '7.9.1',
-            gridData: { x: 1, y: 1, w: 2, h: 2 },
+            gridData: { x: 1, y: 1, w: 2, h: 2, i: 'panel-2' },
             panelConfig: {},
           },
         ],
@@ -111,6 +111,7 @@ describe('extractReferences', () => {
             Object {
               "gridData": Object {
                 "h": 1,
+                "i": "panel-1",
                 "w": 1,
                 "x": 0,
                 "y": 0,
@@ -125,6 +126,7 @@ describe('extractReferences', () => {
             Object {
               "gridData": Object {
                 "h": 2,
+                "i": "panel-2",
                 "w": 2,
                 "x": 1,
                 "y": 1,
@@ -189,14 +191,14 @@ describe('extractReferences', () => {
             type: 'visualization',
             title: 'Title 1',
             version: '7.9.1',
-            gridData: { x: 0, y: 0, w: 1, h: 1 },
+            gridData: { x: 0, y: 0, w: 1, h: 1, i: 'panel-1' },
             panelConfig: {},
           },
         ],
       },
       references: [],
     };
-    expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
+    expect(extractReferences(doc as unknown as DashboardItem, deps)).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "description": "",
@@ -215,6 +217,7 @@ describe('extractReferences', () => {
             Object {
               "gridData": Object {
                 "h": 1,
+                "i": "panel-1",
                 "w": 1,
                 "x": 0,
                 "y": 0,
@@ -246,17 +249,19 @@ describe('injectReferences', () => {
         {
           type: 'visualization',
           panelRefName: 'panel_0',
+          panelIndex: '0',
           title: 'Title 1',
           version: '7.9.0',
-          gridData: { x: 0, y: 0, w: 1, h: 1 },
+          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
           panelConfig: {},
         },
         {
           type: 'visualization',
           panelRefName: 'panel_1',
+          panelIndex: '1',
           title: 'Title 2',
           version: '7.9.0',
-          gridData: { x: 1, y: 1, w: 2, h: 2 },
+          gridData: { x: 1, y: 1, w: 2, h: 2, i: '1' },
           panelConfig: {},
         },
       ],
@@ -350,14 +355,16 @@ describe('injectReferences', () => {
         {
           type: 'visualization',
           panelRefName: 'panel_0',
+          panelIndex: '0',
           title: 'Title 1',
-          gridData: { x: 0, y: 0, w: 1, h: 1 },
+          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
           panelConfig: {},
         },
         {
           type: 'visualization',
+          panelIndex: '1',
           title: 'Title 2',
-          gridData: { x: 1, y: 1, w: 2, h: 2 },
+          gridData: { x: 1, y: 1, w: 2, h: 2, i: '1' },
           panelConfig: {},
         },
       ],
@@ -427,10 +434,11 @@ describe('injectReferences', () => {
       title: 'test',
       panels: [
         {
+          panelIndex: '0',
           panelRefName: 'panel_0',
           title: 'Title 1',
           type: 'visualization',
-          gridData: { x: 0, y: 0, w: 1, h: 1 },
+          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
           panelConfig: {},
         },
       ],

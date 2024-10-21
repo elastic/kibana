@@ -35,6 +35,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
       useMargins: true,
       description: '',
       uiStateJSON: '{}',
+      optionsJSON: '{}',
       version: 1,
       timeRestore: false,
       kibanaSavedObjectMeta: {
@@ -146,6 +147,7 @@ test('dashboard migration 7.3.0 migrates panels', () => {
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{"filter":[],"highlightAll":true,"version":true}',
       },
+      optionsJSON: '{}',
       panelsJSON:
         '[{"size_x":6,"size_y":3,"panelIndex":1,"type":"visualization","id":"AWtIUP8QRNXhJVz2_Mar","col":1,"row":1}]',
     },

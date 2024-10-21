@@ -183,7 +183,7 @@ export const loadDashboardState = async ({
 
     controlGroupInput: attributes.controlGroupInput,
 
-    version: convertNumberToDashboardVersion(version),
+    ...(version && { version: convertNumberToDashboardVersion(version) }),
   });
 
   return {
