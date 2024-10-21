@@ -88,8 +88,8 @@ export const useDashboardMenuItems = ({
    * initiate interactive dashboard copy action
    */
   const dashboardInteractiveSave = useCallback(() => {
-    dashboardApi.runInteractiveSave(viewMode).then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardApi, viewMode]);
+    dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboardApi]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:

@@ -9,11 +9,7 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import {
-  DashboardReduxState,
-  DashboardStateFromSaveModal,
-  DashboardStateFromSettingsFlyout,
-} from '../types';
+import { DashboardReduxState } from '../types';
 import { DashboardContainerInput } from '../../../common';
 
 export const dashboardContainerReducers = {
@@ -30,39 +26,6 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   // Meta info Reducers
   // ------------------------------------------------------------------------------
-  setStateFromSaveModal: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardStateFromSaveModal>
-  ) => {
-    state.explicitInput.tags = action.payload.tags;
-    state.explicitInput.title = action.payload.title;
-    state.explicitInput.description = action.payload.description;
-    state.explicitInput.timeRestore = action.payload.timeRestore;
-
-    if (action.payload.refreshInterval) {
-      state.explicitInput.refreshInterval = action.payload.refreshInterval;
-    }
-    if (action.payload.timeRange) {
-      state.explicitInput.timeRange = action.payload.timeRange;
-    }
-  },
-
-  setStateFromSettingsFlyout: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardStateFromSettingsFlyout>
-  ) => {
-    state.explicitInput.tags = action.payload.tags;
-    state.explicitInput.title = action.payload.title;
-    state.explicitInput.description = action.payload.description;
-    state.explicitInput.timeRestore = action.payload.timeRestore;
-
-    state.explicitInput.useMargins = action.payload.useMargins;
-    state.explicitInput.syncColors = action.payload.syncColors;
-    state.explicitInput.syncCursor = action.payload.syncCursor;
-    state.explicitInput.syncTooltips = action.payload.syncTooltips;
-    state.explicitInput.hidePanelTitles = action.payload.hidePanelTitles;
-  },
-
   setDescription: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput['description']>

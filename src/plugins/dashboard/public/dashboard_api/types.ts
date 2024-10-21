@@ -157,7 +157,7 @@ export type DashboardApi = CanExpandPanels &
     isEmbeddedExternally: boolean;
     isManaged: boolean;
     panels$: PublishingSubject<DashboardPanelMap>;
-    runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
+    runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;

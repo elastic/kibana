@@ -36,6 +36,7 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { runInteractiveSave } from './run_interactive_save';
 
 export function getDashboardApi({
   creationOptions,
@@ -117,6 +118,8 @@ export function getDashboardApi({
     };
   }
 
+  const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
+
   // Start animating panel transforms 500 ms after dashboard is created.
   setTimeout(() => animatePanelTransforms$.next(true), 500);
 
@@ -129,7 +132,7 @@ export function getDashboardApi({
       ...trackPanel,
       ...unifiedSearchManager.api,
       ...unsavedChangesManager.api,
-      ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
+      ...trackOverlayApi,
       controlGroupApi$,
       fullScreenMode$,
       getAppContext: () => {
@@ -144,7 +147,31 @@ export function getDashboardApi({
       isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
       isManaged,
       runInteractiveSave: async () => {
-        throw new Error('runInteractiveSave not implemented');
+        trackOverlayApi.clearOverlays();
+        const saveResult = await runInteractiveSave({
+          isManaged,
+          lastSavedId: savedObjectId$.value,
+          viewMode: viewMode$.value,
+          ...(await getState()),
+        });
+
+        if (saveResult) {
+          const settings = settingsManager.api.getSettings();
+          settingsManager.api.setSettings({
+            ...settings,
+            hidePanelTitles: settings.hidePanelTitles ?? false,
+            description: saveResult.savedState.description,
+            tags: saveResult.savedState.tags,
+            timeRestore: saveResult.savedState.timeRestore,
+            title: saveResult.savedState.title,
+          });
+          savedObjectId$.next(saveResult.id);
+          unsavedChangesManager.internalApi.onSave(saveResult.savedState);
+
+          references = saveResult.references ?? [];
+        }
+
+        return saveResult;
       },
       runQuickSave: async () => {
         if (isManaged) return;
