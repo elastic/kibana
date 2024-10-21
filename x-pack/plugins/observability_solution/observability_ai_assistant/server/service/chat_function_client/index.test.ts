@@ -34,8 +34,7 @@ describe('chatFunctionClient', () => {
             required: ['foo'],
           },
         },
-        respondFn,
-        ['all']
+        respondFn
       );
     });
 
