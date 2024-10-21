@@ -13,7 +13,6 @@ import {
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-
 import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
@@ -33,15 +32,16 @@ const EXPECTED_KPI_COUNTS = {
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
+  let search: SearchService;
 
   describe('@skipInServerless Timeline Details', () => {
-    let supertest: TestAgent;
-    let search: SearchService;
     before(async () => {
       supertest = await utils.createSuperTest();
       search = await utils.createSearch();
       await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
     });
+
     after(
       async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
     );
