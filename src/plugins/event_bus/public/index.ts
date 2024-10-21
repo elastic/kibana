@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO remove
+export { searchSlice } from './search_slice';
+
 import { EventBusPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
