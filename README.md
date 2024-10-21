@@ -9,7 +9,7 @@ Kibana is your window into the [Elastic Stack](https://www.elastic.co/products).
 - [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
 - [Questions? Problems? Suggestions?](#questions-problems-suggestions)
 
-## Getting Started
+## Getting Started TEST
 
 If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
 
