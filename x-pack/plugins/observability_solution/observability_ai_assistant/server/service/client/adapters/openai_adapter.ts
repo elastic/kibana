@@ -16,6 +16,7 @@ import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_i
 import { LlmApiAdapterFactory } from './types';
 import { parseInlineFunctionCalls } from './simulate_function_calling/parse_inline_function_calls';
 import { getMessagesWithSimulatedFunctionCalling } from './simulate_function_calling/get_messages_with_simulated_function_calling';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../chat_function_client';
 
 function getOpenAIPromptTokenCount({
   messages,
@@ -123,7 +124,10 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
           ...(!!functionsForOpenAI?.length
             ? {
                 tools: functionsForOpenAI.map((fn) => ({
-                  function: pick(fn, 'name', 'description', 'parameters'),
+                  function:
+                    fn.name === GET_DATA_ON_SCREEN_FUNCTION_NAME
+                      ? pick(fn, 'name', 'parameters')
+                      : pick(fn, 'name', 'description', 'parameters'),
                   type: 'function',
                 })),
               }
