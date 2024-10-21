@@ -11,17 +11,15 @@ import { Fields } from '../entity';
 import { serviceEntity } from './service_entity';
 import { hostEntity } from './host_entity';
 import { containerEntity } from './container_entity';
-import {
-  k8sClusterJobEntity,
-  k8sCronJobEntity,
-  k8sDaemonSetEntity,
-  k8sDeploymentEntity,
-  k8sJobSetEntity,
-  k8sNodeEntity,
-  k8sPodEntity,
-  k8sReplicaSetEntity,
-  k8sStatefulSetEntity,
-} from './k8s_entities';
+import { k8sClusterJobEntity } from './kubernetes/cluster_entity';
+import { k8sCronJobEntity } from './kubernetes/cron_job_entity';
+import { k8sDaemonSetEntity } from './kubernetes/daemon_set_entity';
+import { k8sDeploymentEntity } from './kubernetes/deployment_entity';
+import { k8sJobSetEntity } from './kubernetes/job_set_entity';
+import { k8sNodeEntity } from './kubernetes/node_entity';
+import { k8sPodEntity } from './kubernetes/pod_entity';
+import { k8sReplicaSetEntity } from './kubernetes/replica_set';
+import { k8sStatefulSetEntity } from './kubernetes/stateful_set';
 
 export type EntityDataStreamType = 'metrics' | 'logs' | 'traces';
 export type Schema = 'ecs' | 'otel';
