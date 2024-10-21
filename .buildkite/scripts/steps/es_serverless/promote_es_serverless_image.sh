@@ -74,6 +74,7 @@ cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: "Builds Kibana VM images for cache update"
     trigger: kibana-vm-images
+    async: true
     build:
       env:
         IMAGES_CONFIG="kibana/images.yml"
