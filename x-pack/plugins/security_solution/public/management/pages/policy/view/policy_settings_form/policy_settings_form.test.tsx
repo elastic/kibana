@@ -27,6 +27,13 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../../../../common/hooks/use_license');
 
+const mockAllowShowingEventMergingBannerConstantGetter = jest.fn();
+jest.mock('./constants', () => ({
+  get ALLOW_SHOWING_EVENT_MERGING_BANNER() {
+    return mockAllowShowingEventMergingBannerConstantGetter();
+  },
+}));
+
 describe('Endpoint Policy Settings Form', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
 
@@ -50,10 +57,23 @@ describe('Endpoint Policy Settings Form', () => {
       'data-test-subj': 'test',
     };
 
+    mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(false);
+
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
   describe('event merging banner', () => {
+    beforeEach(() => {
+      mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(true);
+    });
+
+    it('should hide the banner if its not allowed to be displayed', () => {
+      mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(false);
+
+      render();
+
+      expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
+    });
     it('should show the event merging banner for 8.16 if it has never been dismissed', () => {
       render();
 
