@@ -15,7 +15,6 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     isLegacyTemplatesEnabled: true,
     isIndexStatsEnabled: true,
     isSizeAndDocCountEnabled: false,
-    isDataStreamStatsEnabled: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
     enableProjectLevelRetentionChecks: false,

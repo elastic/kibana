@@ -265,38 +265,37 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }
       );
     }
-    if (config.enableDataStreamStats) {
-      defaultDetails.push(
-        {
-          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
-            defaultMessage: 'Last updated',
-          }),
-          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
-            defaultMessage: 'The most recent document to be added to the data stream.',
-          }),
-          content: maxTimeStamp ? (
-            humanizeTimeStamp(maxTimeStamp)
-          ) : (
-            <em>
-              {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampNoneMessage', {
-                defaultMessage: `Never`,
-              })}
-            </em>
-          ),
-          dataTestSubj: 'lastUpdatedDetail',
-        },
-        {
-          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
-            defaultMessage: 'Storage size',
-          }),
-          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
-            defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
-          }),
-          content: storageSize,
-          dataTestSubj: 'storageSizeDetail',
-        }
-      );
-    }
+
+    defaultDetails.push(
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
+          defaultMessage: 'Last updated',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
+          defaultMessage: 'The most recent document to be added to the data stream.',
+        }),
+        content: maxTimeStamp ? (
+          humanizeTimeStamp(maxTimeStamp)
+        ) : (
+          <em>
+            {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampNoneMessage', {
+              defaultMessage: `Never`,
+            })}
+          </em>
+        ),
+        dataTestSubj: 'lastUpdatedDetail',
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
+          defaultMessage: 'Storage size',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
+          defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
+        }),
+        content: storageSize,
+        dataTestSubj: 'storageSizeDetail',
+      }
+    );
 
     defaultDetails.push(
       {

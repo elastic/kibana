@@ -82,7 +82,6 @@ const appDependencies = {
     enableLegacyTemplates: true,
     enableIndexActions: true,
     enableIndexStats: true,
-    enableDataStreamStats: true,
     editableIndexSettings: 'all',
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
