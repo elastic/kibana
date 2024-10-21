@@ -56,6 +56,7 @@ export function registerPolicyRoutes(
       access: 'public',
       path: AGENT_POLICY_SUMMARY_ROUTE,
       options: { authRequired: true },
+      deprecated: true,
     })
     .addVersion(
       {
