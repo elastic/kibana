@@ -164,11 +164,12 @@ export const useColumns = (
   const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataView.id);
   const copyToClipBoardAction = useCopyToClipboardAction();
 
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const {
     earliest,
     latest,
     documentStats: { documentCountStats },
-  } = eventBus.useEventBusValue(logRateAnalysisSlice, (state) => ({
+  } = logRateAnalysis.useState((state) => ({
     earliest: state.earliest,
     latest: state.latest,
     documentStats: state.documentStats,
