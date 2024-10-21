@@ -6,7 +6,7 @@ source "$(dirname "$0")/common/util.sh"
 
 if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
   if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
-    echo '--- Downloading Distribution and Plugin artifacts'
+    echo '--- Downloading Distribution'
 
     cd "$WORKSPACE"
 
