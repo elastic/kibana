@@ -111,7 +111,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
-  assistantKnowledgeBaseByDefault: false,
+  assistantKnowledgeBaseByDefault: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.

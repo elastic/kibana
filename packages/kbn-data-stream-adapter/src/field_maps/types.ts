@@ -53,5 +53,6 @@ export interface FieldMap {
     scaling_factor?: number;
     dynamic?: boolean | 'strict';
     properties?: Record<string, { type: string }>;
+    inference_id?: string;
   };
 }

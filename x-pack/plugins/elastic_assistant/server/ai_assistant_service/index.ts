@@ -97,7 +97,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMap, // TODO: use V2 if FF is enabled
+      fieldMap: knowledgeBaseFieldMapV2, // TODO: use V2 if FF is enabled
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -151,7 +151,7 @@ export class AIAssistantService {
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines
+      ...(resource in this.resourceNames.pipelines && !this.hasInitializedV2KnowledgeBase
         ? {
             template: {
               settings: {
@@ -202,7 +202,7 @@ export class AIAssistantService {
         id: this.resourceNames.pipelines.knowledgeBase,
       });
       // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
-      if (!pipelineCreated || this.v2KnowledgeBaseEnabled) {
+      if (!pipelineCreated && !this.v2KnowledgeBaseEnabled) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
         );

@@ -169,6 +169,12 @@ export const knowledgeBaseFieldMapV2: FieldMap = {
     required: false,
   },
   // Embeddings field
+  semantic_text: {
+    type: 'semantic_text',
+    array: false,
+    required: false,
+    inference_id: '.elser-2',
+  },
   vector: {
     type: 'object',
     array: false,
