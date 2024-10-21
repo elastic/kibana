@@ -19,6 +19,8 @@ import { useFetchEntities } from '../../../../hooks/use_fetch_entities';
 import { useFetchLogPatterns } from '../../../../hooks/use_fetch_log_patterns';
 import { getScreenContext } from '../../../../hooks/use_screen_context';
 import { useFetchAPMDependencies } from '../../../../hooks/use_fetch_apm_dependencies';
+import { useFetchEvents } from '../../../../hooks/use_fetch_events';
+
 export interface InvestigationContextualInsight {
   key: string;
   description: string;
@@ -92,13 +94,29 @@ export function AssistantHypothesis({
     serviceName ?? ''
   );
 
+  const { data: deploymentEvents } = useFetchEvents({
+    rangeFrom: investigation
+      ? new Date(investigation.params.timeRange.from).toISOString()
+      : undefined,
+    rangeTo: investigation
+      ? new Date(investigation?.params.timeRange.to ?? '').toISOString()
+      : undefined,
+    filter: `{"annotation.type":"deployment"}`,
+  });
+
   const getInvestigationContextMessages = useCallback(async () => {
-    if (!getContextualInsightMessages || !alert || !investigation) {
+    if (!getContextualInsightMessages || !alert || !investigation || !deploymentEvents) {
       return [];
     }
 
     const instructions = dedent(`
-      ${getScreenContext({ alertDetails: alert, investigation }).screenDescription}
+      ${
+        getScreenContext({
+          alertDetails: alert,
+          investigation,
+          deploymentEvents,
+        }).screenDescription
+      }
       
 ## Current task:
 ${logPatternContent}
@@ -127,6 +145,7 @@ When referencing the log patterns or services, please include the name of the lo
     logPatternContent,
     investigation,
     dependenciesContent,
+    deploymentEvents,
   ]);
 
   if (!ObservabilityAIAssistantContextualInsight) {

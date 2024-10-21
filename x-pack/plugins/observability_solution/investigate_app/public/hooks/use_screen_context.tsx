@@ -7,7 +7,7 @@
 
 import { ALERT_REASON, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import type { GetInvestigationResponse } from '@kbn/investigation-shared';
+import type { GetEventsResponse, GetInvestigationResponse } from '@kbn/investigation-shared';
 import dedent from 'dedent';
 import { useEffect } from 'react';
 import { useKibana } from './use_kibana';
@@ -71,9 +71,11 @@ function getAlertDetailScreenContext(alertDetail: EcsFieldsResponse) {
 export function getScreenContext({
   alertDetails,
   investigation,
+  deploymentEvents,
 }: {
   alertDetails: EcsFieldsResponse;
   investigation: GetInvestigationResponse;
+  deploymentEvents?: GetEventsResponse;
 }) {
   const screenDescription = dedent(`
     The user is looking at the details of an investigation in order to understand the root cause of an issue.
@@ -86,6 +88,20 @@ export function getScreenContext({
     End time: ${new Date(investigation.params.timeRange.to).toISOString()}
 
     ${alertDetails ? getAlertDetailScreenContext(alertDetails) : ''}
+
+    ${
+      deploymentEvents && deploymentEvents.length > 0
+        ? `There is a new version release for the following services: `
+        : ''
+    }
+    ${deploymentEvents?.map(
+      (deployment) =>
+        `
+      ${deployment.source?.['service.name']} ${
+          deployment.source?.['service.version']
+        } at ${new Date(deployment.timestamp).toISOString()}
+      `
+    )}
   `);
 
   return {
