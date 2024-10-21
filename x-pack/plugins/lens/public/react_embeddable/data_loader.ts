@@ -9,7 +9,7 @@ import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plug
 import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
-import { BehaviorSubject, type Subscription, distinctUntilChanged, skip } from 'rxjs';
+import { BehaviorSubject, type Subscription, distinctUntilChanged, skip, debounceTime } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { getEditPath } from '../../common/constants';
 import type {
@@ -219,27 +219,29 @@ export function loadEmbeddableData(
 
       reload('searchContext');
     }),
-    // On state change, reload
-    // this is used to refresh the chart on inline editing
-    // just make sure to avoid to rerender if there's no substantial change
-    internalApi.attributes$
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
-      .subscribe(() => reload('attributes')),
-    api.savedObjectId
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
-      .subscribe(() => reload('savedObjectId')),
-    internalApi.overrides$
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
-      .subscribe(() => reload('overrides')),
-    internalApi.disableTriggers$
-      .pipe(distinctUntilChanged(fastIsEqual), skip(1))
-      .subscribe(() => reload('disableTriggers')),
+    // make sure to reload on viewMode change
     api.viewMode.subscribe(() => {
       // only reload if drilldowns are set
       if (getState().enhancements?.dynamicActions) {
         reload('viewMode');
       }
     }),
+    // On state change, reload
+    // this is used to refresh the chart on inline editing
+    // just make sure to avoid to rerender if there's no substantial change
+    // make sure to debounce one tick to make the refresh work
+    internalApi.attributes$
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
+      .subscribe(() => reload('attributes')),
+    api.savedObjectId
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
+      .subscribe(() => reload('savedObjectId')),
+    internalApi.overrides$
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
+      .subscribe(() => reload('overrides')),
+    internalApi.disableTriggers$
+      .pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0))
+      .subscribe(() => reload('disableTriggers')),
   ];
 
   return {
