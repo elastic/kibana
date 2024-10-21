@@ -1856,10 +1856,16 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicies: AgentPolicy[]
   ) {
-    const allOutputs: OutputsForAgentPolicy[] = await pMap(agentPolicies, async (agentPolicy) => {
-      const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
-      return { agentPolicyId: agentPolicy.id, ...output };
-    });
+    const allOutputs: OutputsForAgentPolicy[] = await pMap(
+      agentPolicies,
+      async (agentPolicy) => {
+        const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+        return { agentPolicyId: agentPolicy.id, ...output };
+      },
+      {
+        concurrency: 50,
+      }
+    );
     return allOutputs;
   }
 
