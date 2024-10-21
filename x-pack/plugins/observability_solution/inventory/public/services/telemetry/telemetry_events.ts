@@ -49,6 +49,15 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
         },
       },
     },
+    entity_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Entity types used in the search.',
+        },
+      },
+    },
     action: {
       type: 'keyword',
       _meta: {

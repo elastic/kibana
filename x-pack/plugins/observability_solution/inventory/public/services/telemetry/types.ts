@@ -22,6 +22,7 @@ export interface EntityInventoryViewedParams {
 
 export interface EntityInventorySearchQuerySubmittedParams {
   kuery_fields: string[];
+  entity_types: Array<'container' | 'host' | 'service'>;
   action: 'submit' | 'refresh';
 }
 

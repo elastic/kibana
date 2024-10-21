@@ -54,10 +54,19 @@ export function SearchBar() {
   }, [syncSearchBarWithUrl]);
 
   const registerSearchSubmittedEvent = useCallback(
-    ({ query, isUpdate }: { query: Query | undefined; isUpdate: boolean | undefined }) => {
+    ({
+      searchQuery,
+      searchIsUpdate,
+      searchEntityTypes,
+    }: {
+      searchQuery: Query | undefined;
+      searchEntityTypes: EntityType[] | undefined;
+      searchIsUpdate: boolean | undefined;
+    }) => {
       telemetry.reportEntityInventorySearchQuerySubmitted({
-        kuery_fields: getKqlFieldNamesFromExpression(query?.query as string),
-        action: isUpdate ? 'submit' : 'refresh',
+        kuery_fields: getKqlFieldNamesFromExpression(searchQuery?.query as string),
+        entity_types: searchEntityTypes || [],
+        action: searchIsUpdate ? 'submit' : 'refresh',
       });
     },
     [telemetry]
@@ -95,7 +104,11 @@ export function SearchBar() {
         refresh: !isUpdate,
       });
 
-      registerSearchSubmittedEvent({ query, isUpdate });
+      registerSearchSubmittedEvent({
+        searchQuery: query,
+        searchEntityTypes: entityTypes,
+        searchIsUpdate: isUpdate,
+      });
     },
     [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$]
   );
