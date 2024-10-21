@@ -242,7 +242,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized`);
+      logger.info(`Entity store initialized for ${entityType}`);
 
       return updated;
     } catch (err) {
@@ -358,6 +358,7 @@ export class EntityStoreDataClient {
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient,
+        logger,
       });
 
       if (deleteData) {
@@ -446,7 +447,7 @@ export class EntityStoreDataClient {
           originalStatus === ENGINE_STATUS.UPDATING
         ) {
           throw new Error(
-            `Error updating entity store: There is an changes already in progress for engine ${id}`
+            `Error updating entity store: There are changes already in progress for engine ${id}`
           );
         }
 
