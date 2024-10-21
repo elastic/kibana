@@ -32,6 +32,7 @@ import {
   Foreach,
   GeoGrid,
   GeoIP,
+  IpLocation,
   Grok,
   Gsub,
   HtmlStrip,
@@ -471,6 +472,24 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geoip', {
+        defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
+        values: {
+          field,
+        },
+      }),
+  },
+  ip_location: {
+    category: processorCategories.DATA_ENRICHMENT,
+    FieldsComponent: IpLocation,
+    docLinkPath: '/geoip-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.ipLocation', {
+      defaultMessage: 'IP Location',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.ipLocation', {
+      defaultMessage: 'Adds geo data based on an IP address.',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.ipLocation', {
         defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
         values: {
           field,
