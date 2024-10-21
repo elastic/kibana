@@ -38,17 +38,15 @@ export class SiemRuleMigrationsService {
     const esClient = this.esClusterClient.asScoped(request).asCurrentUser;
     return {
       create: async (ruleMigrations) => {
-        const dataStreamName = await dataStreamNamePromise;
+        const _index = await dataStreamNamePromise;
         return esClient.bulk({
           refresh: 'wait_for',
-          body: ruleMigrations.flatMap((ruleMigration) => [
-            { create: { _index: dataStreamName } },
-            ruleMigration,
-          ]),
+          body: ruleMigrations.flatMap((ruleMigration) => [{ create: { _index } }, ruleMigration]),
         });
       },
-      find: async () => {
-        // TODO: Implement
+      search: async (term) => {
+        const index = await dataStreamNamePromise;
+        return esClient.search({ index, body: { query: { term } } });
       },
     };
   }

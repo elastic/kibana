@@ -27,7 +27,7 @@ export const CreateRuleMigrationResponse = z.object({
   /**
    * The migration id created.
    */
-  migrationId: z.string(),
+  migration_id: z.string(),
 });
 
 export type GetRuleMigrationResponse = z.infer<typeof GetRuleMigrationResponse>;

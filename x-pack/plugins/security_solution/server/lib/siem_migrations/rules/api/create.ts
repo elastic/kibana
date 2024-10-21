@@ -43,13 +43,13 @@ export const registerSiemRuleMigrationsCreateRoute = (
 
           const ruleMigrations = originalRules.map<RuleMigration>((originalRule) => ({
             '@timestamp': timestamp,
-            migrationId,
+            migration_id: migrationId,
+            original_rule: originalRule,
             status: 'pending',
-            originalRule,
           }));
           await siemMigrationClient.rules.create(ruleMigrations);
 
-          return res.ok({ body: { migrationId } });
+          return res.ok({ body: { migration_id: migrationId } });
         } catch (err) {
           logger.error(err);
           return res.badRequest({

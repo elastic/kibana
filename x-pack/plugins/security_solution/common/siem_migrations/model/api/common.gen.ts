@@ -30,9 +30,9 @@ export const LangSmithOptions = z.object({
   /**
    * The project name.
    */
-  projectName: z.string(),
+  project_name: z.string(),
   /**
-   * The apiKey to use for tracing.
+   * The API key to use for tracing.
    */
-  apiKey: z.string(),
+  api_key: z.string(),
 });

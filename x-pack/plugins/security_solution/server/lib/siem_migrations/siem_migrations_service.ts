@@ -17,7 +17,6 @@ import type {
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
-  // TODO: Make it required when the siemMigrationsEnabled experimental feature is removed
   private rules: SiemRuleMigrationsService;
 
   constructor(private config: ConfigType, logger: Logger, kibanaVersion: string) {

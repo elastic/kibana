@@ -28,9 +28,9 @@ paths:
               schema:
                 type: object
                 required:
-                  - migrationId
+                  - migration_id
                 properties:
-                  migrationId:
+                  migration_id:
                     type: string
                     description: The migration id created.
     get:

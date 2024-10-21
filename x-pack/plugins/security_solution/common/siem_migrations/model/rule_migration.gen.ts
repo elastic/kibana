@@ -44,11 +44,11 @@ export const OriginalRule = z.object({
   /**
    * The original rule query language.
    */
-  queryLanguage: z.string(),
+  query_language: z.string(),
   /**
    * The original rule Mitre Attack technique IDs.
    */
-  mitreAttackIds: z.array(z.string()).optional(),
+  mitre_attack_ids: z.array(z.string()).optional(),
 });
 
 /**
@@ -75,11 +75,11 @@ export const ElasticRule = z.object({
   /**
    * The translated elastic query language.
    */
-  queryLanguage: z.literal('esql').default('esql'),
+  query_language: z.literal('esql').default('esql'),
   /**
    * The Elastic prebuilt rule id matched.
    */
-  prebuiltRuleId: z.string().optional(),
+  prebuilt_rule_id: z.string().optional(),
   /**
    * The Elastic rule id installed as a result.
    */
@@ -98,13 +98,13 @@ export const RuleMigration = z.object({
   /**
    * The migration id.
    */
-  migrationId: z.string(),
-  originalRule: OriginalRule,
-  elasticRule: ElasticRule.optional(),
+  migration_id: z.string().optional(),
+  original_rule: OriginalRule.optional(),
+  elastic_rule: ElasticRule.optional(),
   /**
    * The translation state.
    */
-  translationState: z.enum(['complete', 'partial', 'untranslatable']).optional(),
+  translation_state: z.enum(['complete', 'partial', 'untranslatable']).optional(),
   /**
    * The status of the rule migration.
    */
@@ -116,9 +116,9 @@ export const RuleMigration = z.object({
   /**
    * The moment of the last update
    */
-  updatedAt: z.string().optional(),
+  updated_at: z.string().optional(),
   /**
    * The user who last updated the migration
    */
-  updatedBy: z.string().optional(),
+  updated_by: z.string().optional(),
 });

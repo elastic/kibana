@@ -14,5 +14,5 @@ export const registerSiemRuleMigrationsRoutes = (
   logger: Logger
 ) => {
   registerSiemRuleMigrationsCreateRoute(router, logger);
-  // registerSplunkRuleMigrationsGetRoute(router, logger);
+  // TODO: registerSiemRuleMigrationsGetRoute(router, logger);
 };

@@ -13,12 +13,12 @@ components:
       type: object
       description: The LangSmith options object.
       required:
-        - projectName
-        - apiKey
+        - project_name
+        - api_key
       properties:
-        projectName:
+        project_name:
           type: string
           description: The project name.
-        apiKey:
+        api_key:
           type: string
-          description: The apiKey to use for tracing.
+          description: The API key to use for tracing.

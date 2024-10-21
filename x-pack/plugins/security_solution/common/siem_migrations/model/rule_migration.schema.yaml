@@ -15,7 +15,7 @@ components:
         - title
         - description
         - query
-        - queryLanguage
+        - query_language
       properties:
         id:
           type: string
@@ -34,10 +34,10 @@ components:
         query:
           type: string
           description: The original rule query.
-        queryLanguage:
+        query_language:
           type: string
           description: The original rule query language.
-        mitreAttackIds:
+        mitre_attack_ids:
           type: array
           items:
             type: string
@@ -49,7 +49,7 @@ components:
       required:
         - title
         - query
-        - queryLanguage
+        - query_language
       properties:
         title:
           type: string
@@ -63,13 +63,13 @@ components:
         query:
           type: string
           description: The translated elastic query.
-        queryLanguage:
+        query_language:
           type: string
           description: The translated elastic query language.
           enum:
             - esql
           default: esql
-        prebuiltRuleId:
+        prebuilt_rule_id:
           type: string
           description: The Elastic prebuilt rule id matched.
         id:
@@ -87,14 +87,14 @@ components:
         "@timestamp":
           type: string
           description: The moment of creation
-        migrationId:
+        migration_id:
           type: string
           description: The migration id.
-        originalRule:
+        original_rule:
           $ref: '#/components/schemas/OriginalRule'
-        elasticRule:
+        elastic_rule:
           $ref: '#/components/schemas/ElasticRule'
-        translationState:
+        translation_state:
           type: string
           description: The translation state.
           enum:
@@ -115,9 +115,9 @@ components:
           description: The comments for the migration including a summary from the LLM in markdown.
           items:
             type: string
-        updatedAt:
+        updated_at:
           type: string
           description: The moment of the last update
-        updatedBy:
+        updated_by:
           type: string
           description: The user who last updated the migration
