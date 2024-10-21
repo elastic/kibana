@@ -113,8 +113,8 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
       const params: EntityInventorySearchQuerySubmittedParams = {
         kuery_fields: ['_index'],
-        timerange: 'now-1y/d - now',
         action: 'submit',
+        entity_types: ['container'],
       };
 
       telemetry.reportEntityInventorySearchQuerySubmitted(params);
