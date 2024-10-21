@@ -1108,6 +1108,8 @@
       "@kbn/jest-serializers/*": ["packages/kbn-jest-serializers/*"],
       "@kbn/journeys": ["packages/kbn-journeys"],
       "@kbn/journeys/*": ["packages/kbn-journeys/*"],
+      "@kbn/js-sandbox-plugin": ["src/plugins/js_sandbox"],
+      "@kbn/js-sandbox-plugin/*": ["src/plugins/js_sandbox/*"],
       "@kbn/json-ast": ["packages/kbn-json-ast"],
       "@kbn/json-ast/*": ["packages/kbn-json-ast/*"],
       "@kbn/json-schemas": ["x-pack/platform/packages/private/ml/json_schemas"],
