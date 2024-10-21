@@ -28,7 +28,12 @@ import {
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
-import { getTelemetryEvent, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
+import {
+  getTelemetryEvent,
+  METRIC_TYPE,
+  TelemetryEventTypes,
+  track,
+} from '../../../../common/lib/telemetry';
 import type { StartServices } from '../../../../types';
 
 export interface TakeActionsProps {
@@ -58,7 +63,7 @@ export const useGroupTakeActionsItems = ({
       status: 'open' | 'closed' | 'acknowledged';
       groupByField: string;
     }) => {
-      telemetry.reportAlertsGroupingTakeAction(params);
+      telemetry.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, params);
     },
     [telemetry]
   );

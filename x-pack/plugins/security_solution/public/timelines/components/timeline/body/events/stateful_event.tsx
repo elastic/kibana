@@ -43,6 +43,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../../common/types';
+import { TelemetryEventTypes } from '../../../../../common/lib/telemetry/constants';
 
 interface Props {
   actionsColumnWidth: number;
@@ -179,7 +180,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         },
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
       location: timelineId,
       panel: 'right',
     });

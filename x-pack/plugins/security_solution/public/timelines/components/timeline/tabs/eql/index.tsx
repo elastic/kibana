@@ -63,6 +63,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
+import { TelemetryEventTypes } from '../../../../../common/lib/telemetry/constants';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -184,10 +185,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });

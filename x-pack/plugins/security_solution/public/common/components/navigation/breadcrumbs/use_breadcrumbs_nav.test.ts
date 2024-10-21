@@ -137,12 +137,12 @@ describe('useBreadcrumbsNav', () => {
   });
 
   it('should create breadcrumbs onClick handler', () => {
-    const reportBreadcrumbClickedMock = jest.fn();
+    const reportEventMock = jest.fn();
 
     (kibanaLib.useKibana as jest.Mock).mockImplementation(() => ({
       services: {
         telemetry: {
-          reportBreadcrumbClicked: reportBreadcrumbClickedMock,
+          reportEvent: reportEventMock,
         },
       },
     }));
@@ -157,6 +157,6 @@ describe('useBreadcrumbsNav', () => {
 
     expect(event.preventDefault).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalled();
-    expect(reportBreadcrumbClickedMock).toHaveBeenCalled();
+    expect(reportEventMock).toHaveBeenCalled();
   });
 });

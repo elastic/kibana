@@ -52,6 +52,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
+import { TelemetryEventTypes } from '../../../../../common/lib/telemetry/constants';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
@@ -220,10 +221,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });

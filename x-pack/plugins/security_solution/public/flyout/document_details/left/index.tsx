@@ -23,6 +23,7 @@ import { EventKind } from '../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
 import { LeftPanelTour } from './components/tour';
+import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response' | 'notes';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
@@ -76,7 +77,7 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
         scopeId,
       },
     });
-    telemetry.reportDetailsFlyoutTabClicked({
+    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, {
       location: scopeId,
       panel: 'left',
       tabId,

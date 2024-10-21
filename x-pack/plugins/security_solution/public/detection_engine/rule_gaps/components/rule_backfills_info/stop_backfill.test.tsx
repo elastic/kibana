@@ -25,7 +25,7 @@ const mockUseKibana = useKibana as jest.Mock;
 
 describe('StopBackfill', () => {
   const mockTelemetry = {
-    reportManualRuleRunCancelJob: jest.fn(),
+    reportEvent: jest.fn(),
   };
 
   const addSuccess = jest.fn();
@@ -90,7 +90,7 @@ describe('StopBackfill', () => {
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
-      expect(mockTelemetry.reportManualRuleRunCancelJob).toHaveBeenCalledWith({
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith({
         totalTasks: backfill.total,
         completedTasks: backfill.complete,
         errorTasks: backfill.error,

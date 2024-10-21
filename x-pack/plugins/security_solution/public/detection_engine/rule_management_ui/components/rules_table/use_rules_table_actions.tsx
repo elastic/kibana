@@ -25,6 +25,7 @@ import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_ac
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
+import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
@@ -126,7 +127,7 @@ export const useRulesTableActions = ({
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
         const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-        telemetry.reportManualRuleRunOpenModal({
+        telemetry.reportEvent(TelemetryEventTypes.ManualRuleRunOpenModal, {
           type: 'single',
         });
         if (modalManualRuleRunConfirmationResult === null) {

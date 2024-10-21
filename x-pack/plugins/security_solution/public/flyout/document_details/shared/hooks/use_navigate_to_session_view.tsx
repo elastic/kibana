@@ -12,6 +12,7 @@ import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common'
 import { useKibana } from '../../../../common/lib/kibana';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
+import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
 
 export interface UseNavigateToSessionViewParams {
   /**
@@ -83,7 +84,7 @@ export const useNavigateToSessionView = ({
   const navigateToSessionView = useCallback(() => {
     if (isFlyoutOpen) {
       openLeftPanel(left);
-      telemetry.reportDetailsFlyoutTabClicked({
+      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
         tabId: 'visualize',
@@ -93,7 +94,7 @@ export const useNavigateToSessionView = ({
         right,
         left,
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'left',
       });

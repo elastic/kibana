@@ -45,6 +45,7 @@ import {
   LENS_VISUALIZATION_MIN_WIDTH,
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
+import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -89,7 +90,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
     (isOpen: boolean) => {
       const entity = isUserRiskData(riskData) ? 'user' : 'host';
 
-      telemetry.reportToggleRiskSummaryClicked({
+      telemetry.reportEvent(TelemetryEventTypes.ToggleRiskSummaryClicked, {
         entity,
         action: isOpen ? 'show' : 'hide',
       });

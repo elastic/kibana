@@ -48,6 +48,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
+import { TelemetryEventTypes } from '../../../../../common/lib/telemetry/constants';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -165,7 +166,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             },
           },
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'right',
         });

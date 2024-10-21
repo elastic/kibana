@@ -19,6 +19,7 @@ import {
 } from '../constants/panel_keys';
 import { Flyouts } from '../constants/flyouts';
 import { isTimelineScope } from '../../../../helpers';
+import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
 
 export interface UseNavigateToAnalyzerParams {
   /**
@@ -107,7 +108,7 @@ export const useNavigateToAnalyzer = ({
     if (isFlyoutOpen) {
       openLeftPanel(left);
       openPreviewPanel(preview);
-      telemetry.reportDetailsFlyoutTabClicked({
+      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
         tabId: 'visualize',
@@ -118,7 +119,7 @@ export const useNavigateToAnalyzer = ({
         left,
         preview,
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'left',
       });
