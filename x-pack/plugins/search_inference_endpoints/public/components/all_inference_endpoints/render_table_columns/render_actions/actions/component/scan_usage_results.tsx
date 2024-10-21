@@ -38,7 +38,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
   const {
     services: { application },
   } = useKibana();
-  const handleNavigateToIndex = () => {
+  const handleNavigateToIndexManagement = () => {
     application?.navigateToApp('enterprise_search', {
       path: 'content/search_indices',
       openInNewTab: true,
@@ -72,7 +72,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    onClick={handleNavigateToIndex}
+                    onClick={handleNavigateToIndexManagement}
                     iconType="popout"
                     iconSide="right"
                     iconSize="s"
