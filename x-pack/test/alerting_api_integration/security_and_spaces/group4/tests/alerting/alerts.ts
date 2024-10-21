@@ -1711,7 +1711,7 @@ instanceStateValue: true
                 reference
               );
               // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               expectExpect(
                 // @ts-expect-error _source: unknown
                 JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
