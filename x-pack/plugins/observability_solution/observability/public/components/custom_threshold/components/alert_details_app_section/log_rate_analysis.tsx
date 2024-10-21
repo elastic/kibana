@@ -185,7 +185,6 @@ export function LogRateAnalysis({
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
-            embeddingOrigin="observability_log_threshold_alert_details"
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
@@ -193,23 +192,26 @@ export function LogRateAnalysis({
             barColorOverride={colorTransformer(Color.color0)}
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
-            appDependencies={pick(services, [
-              'analytics',
-              'application',
-              'data',
-              'executionContext',
-              'charts',
-              'fieldFormats',
-              'http',
-              'notifications',
-              'share',
-              'storage',
-              'uiSettings',
-              'unifiedSearch',
-              'theme',
-              'lens',
-              'i18n',
-            ])}
+            appContextValue={{
+              embeddingOrigin: 'observability_custom_threshold_alert_details',
+              ...pick(services, [
+                'analytics',
+                'application',
+                'data',
+                'executionContext',
+                'charts',
+                'fieldFormats',
+                'http',
+                'notifications',
+                'share',
+                'storage',
+                'uiSettings',
+                'unifiedSearch',
+                'theme',
+                'lens',
+                'i18n',
+              ]),
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

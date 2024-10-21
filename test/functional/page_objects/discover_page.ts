@@ -32,6 +32,12 @@ export class DiscoverPageObject extends FtrService {
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  /** Ensures that navigation to discover has completed */
+  public async expectOnDiscover() {
+    await this.testSubjects.existOrFail('discoverNewButton');
+    await this.testSubjects.existOrFail('discoverOpenButton');
+  }
+
   public async getChartTimespan() {
     return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
@@ -444,7 +450,7 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
-  public async findFieldByNameInDocViewer(name: string) {
+  public async findFieldByNameOrValueInDocViewer(name: string) {
     const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
     await fieldSearch.type(name);
   }

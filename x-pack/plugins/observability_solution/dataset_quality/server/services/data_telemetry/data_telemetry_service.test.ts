@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { FetchResult } from '@kbn/task-manager-plugin/server/task_store';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { DataTelemetryEvent } from './types';
-import { BREATHE_DELAY_MEDIUM, MAX_STREAMS_TO_REPORT } from './constants';
+import { DataTelemetryEvent, DataTelemetryObject } from './types';
+import { MAX_STREAMS_TO_REPORT } from './constants';
 import { DataTelemetryService } from './data_telemetry_service';
 
 // Mock the constants module to speed up and simplify the tests
@@ -43,26 +46,41 @@ const SYNTH_DOCS = 6000000;
 describe('DataTelemetryService', () => {
   let service: DataTelemetryService;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockAnalyticsSetup: jest.Mocked<AnalyticsServiceSetup>;
+  let mockUsageCollectionSetup: jest.Mocked<UsageCollectionSetup>;
   let mockTelemetryStart: jest.Mocked<TelemetryPluginStart>;
   let mockLogger: jest.Mocked<Logger>;
   let mockTaskManagerSetup: ReturnType<typeof taskManagerMock.createSetup>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let runTask: ReturnType<typeof setupMocks>['runTask'];
 
-  describe('Data Telemetry Task', () => {
+  let exampleEvent: Partial<DataTelemetryEvent>;
+  let exampleTaskData: DataTelemetryObject;
+  let exampleTaskFetchResult: FetchResult;
+
+  describe('Task and Collector Setup', () => {
     beforeEach(async () => {
       const mocks = setupMocks();
       mockEsClient = mocks.mockEsClient;
       mockLogger = mocks.mockLogger;
-      mockAnalyticsSetup = mocks.mockAnalyticsSetup;
+      mockUsageCollectionSetup = mocks.mockUsageCollectionSetup;
       mockTelemetryStart = mocks.mockTelemetryStart;
       mockTaskManagerSetup = mocks.taskManagerSetup;
       mockTaskManagerStart = mocks.taskManagerStart;
       runTask = mocks.runTask;
 
+      exampleEvent = {
+        doc_count: 555,
+      };
+      exampleTaskData = { data: [exampleEvent as DataTelemetryEvent] };
+      exampleTaskFetchResult = {
+        docs: [{ state: { ran: true, data: [exampleEvent] } } as unknown as ConcreteTaskInstance],
+        versionMap: new Map(),
+      } as FetchResult;
+
+      mockTaskManagerStart.fetch.mockResolvedValue(exampleTaskFetchResult);
+
       service = new DataTelemetryService(mockLogger);
-      service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
+      service.setup(mockTaskManagerSetup, mockUsageCollectionSetup);
       await service.start(
         mockTelemetryStart,
         {
@@ -77,14 +95,49 @@ describe('DataTelemetryService', () => {
       jest.clearAllMocks();
     });
 
+    it('should register usage collection', () => {
+      expect(mockUsageCollectionSetup.makeUsageCollector).toHaveBeenCalledTimes(1);
+      expect(mockUsageCollectionSetup.registerCollector).toHaveBeenCalledTimes(1);
+    });
+
     it('should trigger task runner run method', async () => {
       jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
-      const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+      const collectTelemetryDataSpy = jest.spyOn(service as any, 'collectTelemetryData');
 
       await runTask();
 
-      // Assert collectAndSend is called
-      expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+      // Assert collectTelemetryData is called
+      expect(collectTelemetryDataSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('isReady and fetch of usage collector reflect the correct state', async () => {
+      await runTask();
+
+      const collector = mockUsageCollectionSetup.makeUsageCollector.mock.results[0].value;
+      expect(await collector.isReady()).toBe(true);
+      expect(await collector.fetch()).toEqual(exampleTaskData);
+    });
+
+    it('isReady of usage collector should be false while the task is in progress', async () => {
+      jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
+      const taskRunPromise = runTask();
+
+      const collector = mockUsageCollectionSetup.makeUsageCollector.mock.results[0].value;
+      expect(await collector.isReady()).toBe(false);
+
+      await taskRunPromise;
+    });
+
+    it('isReady of usage collector should be false if collection is stopped', async () => {
+      jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
+      service.stop();
+      await runTask();
+
+      const collector = mockUsageCollectionSetup.makeUsageCollector.mock.results[0].value;
+      expect(await collector.isReady()).toBe(false);
+
+      service.resume();
+      expect(await collector.isReady()).toBe(true);
     });
   });
 
@@ -93,14 +146,14 @@ describe('DataTelemetryService', () => {
       const mocks = setupMocks();
       mockEsClient = mocks.mockEsClient;
       mockLogger = mocks.mockLogger;
-      mockAnalyticsSetup = mocks.mockAnalyticsSetup;
+      mockUsageCollectionSetup = mocks.mockUsageCollectionSetup;
       mockTelemetryStart = mocks.mockTelemetryStart;
       mockTaskManagerSetup = mocks.taskManagerSetup;
       mockTaskManagerStart = mocks.taskManagerStart;
       runTask = mocks.runTask;
 
       service = new DataTelemetryService(mockLogger);
-      service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
+      service.setup(mockTaskManagerSetup, mockUsageCollectionSetup);
       await service.start(
         mockTelemetryStart,
         {
@@ -118,38 +171,36 @@ describe('DataTelemetryService', () => {
     });
 
     it(
-      'should collect and send telemetry after startup and every interval',
+      'should collect telemetry after startup and every interval',
       async () => {
-        const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+        const collectTelemetryDataSpy = jest.spyOn(service as any, 'collectTelemetryData');
 
         await runTask();
-        expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+        expect(collectTelemetryDataSpy).toHaveBeenCalledTimes(1);
 
-        await sleepForBreathDelay();
         expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(1);
 
         await runTask();
-        expect(collectAndSendSpy).toHaveBeenCalledTimes(2);
+        expect(collectTelemetryDataSpy).toHaveBeenCalledTimes(2);
 
-        await sleepForBreathDelay();
         expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(2);
       },
       TEST_TIMEOUT
     );
 
     it(
-      'should stop collecting and sending telemetry if stopped',
+      'should stop collection if telemetry is stopped',
       async () => {
-        const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+        const collectTelemetryDataSpy = jest.spyOn(service as any, 'collectTelemetryData');
 
         await runTask();
-        expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+        expect(collectTelemetryDataSpy).toHaveBeenCalledTimes(1);
 
         service.stop();
 
-        await runTask();
-        await sleepForBreathDelay();
-        expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+        const taskResult = await runTask();
+        expect(taskResult?.state.data).toBeNull();
+        expect(collectTelemetryDataSpy).toHaveBeenCalledTimes(1);
       },
       TEST_TIMEOUT
     );
@@ -159,14 +210,14 @@ describe('DataTelemetryService', () => {
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(false);
 
-        const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+        const collectTelemetryDataSpy = jest.spyOn(service as any, 'collectTelemetryData');
 
         await runTask();
-        expect(collectAndSendSpy).not.toHaveBeenCalled();
+        expect(collectTelemetryDataSpy).not.toHaveBeenCalled();
 
-        await runTask();
-        await sleepForBreathDelay();
-        expect(collectAndSendSpy).not.toHaveBeenCalled();
+        const taskResult = await runTask();
+        expect(taskResult?.state.data).toBeNull();
+        expect(collectTelemetryDataSpy).not.toHaveBeenCalled();
 
         // Assert that logger.debug is called with appropriate message
         expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -194,45 +245,50 @@ describe('DataTelemetryService', () => {
           })),
         });
 
-        await runTask();
-        await sleepForBreathDelay();
+        const taskResult = await runTask();
+        expect(taskResult?.state.data).toBeNull();
         expect(mockEsClient.indices.getMapping).not.toHaveBeenCalled();
       },
       TEST_TIMEOUT
     );
 
     it(
-      'creates and sends the telemetry events',
+      'creates telemetry events',
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
 
-        const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
+        const taskResult = await runTask();
+        expect(taskResult?.state.data).toBeTruthy();
 
-        await runTask();
-        await sleepForBreathDelay();
+        const expectedEvent1 = {
+          doc_count: 4000 + 500 + 200,
+          failure_store_doc_count: 300,
+          index_count: 2 + 1 + 1,
+          failure_store_index_count: 1,
+          namespace_count: 1 + 1,
+          size_in_bytes: 10089898 + 800000 + 500000,
+          pattern_name: 'test',
+          managed_by: ['fleet'],
+          package_name: ['activemq'],
+          beat: [],
+        };
+        const expectedEvent2 = {
+          beat: [],
+          doc_count: 1700,
+          index_count: 3,
+          namespace_count: 2,
+          package_name: [],
+          pattern_name: 'test-2',
+          shipper: 'custom-2',
+          size_in_bytes: 2300000,
+        };
 
-        expect(reportEventsSpy).toHaveBeenCalledTimes(1);
         expect(
-          (
-            reportEventsSpy.mock?.lastCall as [
-              [Partial<DataTelemetryEvent>],
-              [Partial<DataTelemetryEvent>]
-            ]
-          )?.[0]?.[0]
-        ).toEqual(
-          expect.objectContaining({
-            doc_count: 4000 + 500 + 200,
-            failure_store_doc_count: 300,
-            index_count: 2 + 1 + 1,
-            failure_store_index_count: 1,
-            namespace_count: 1 + 1,
-            size_in_bytes: 10089898 + 800000 + 500000,
-            pattern_name: 'test',
-            managed_by: ['fleet'],
-            package_name: ['activemq'],
-            beat: [],
-          })
-        );
+          taskResult?.state.data as [Partial<DataTelemetryEvent>, Partial<DataTelemetryEvent>]
+        ).toEqual([
+          expect.objectContaining(expectedEvent1),
+          expect.objectContaining(expectedEvent2),
+        ]);
       },
       TEST_TIMEOUT
     );
@@ -241,17 +297,14 @@ describe('DataTelemetryService', () => {
       'should not include stats of excluded indices',
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
-        const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
-        await runTask();
-        await sleepForBreathDelay();
+        const taskResult = await runTask();
 
-        expect(reportEventsSpy).toHaveBeenCalledTimes(1);
-        const events = reportEventsSpy.mock?.lastCall as [
-          [Partial<DataTelemetryEvent>],
-          [Partial<DataTelemetryEvent>]
+        const events = taskResult?.state.data as [
+          Partial<DataTelemetryEvent>,
+          Partial<DataTelemetryEvent>
         ];
         // doc_count should be less than SYNTH_DOCS for any event
-        (events[0] ?? []).forEach((event) => {
+        (events ?? []).forEach((event) => {
           expect(event.doc_count).toBeLessThan(SYNTH_DOCS);
         });
       },
@@ -280,14 +333,14 @@ describe('DataTelemetryService', () => {
       const mocks = setupMocks();
       mockEsClient = mocks.mockEsClient;
       mockLogger = mocks.mockLogger;
-      mockAnalyticsSetup = mocks.mockAnalyticsSetup;
+      mockUsageCollectionSetup = mocks.mockUsageCollectionSetup;
       mockTelemetryStart = mocks.mockTelemetryStart;
       mockTaskManagerSetup = mocks.taskManagerSetup;
       mockTaskManagerStart = mocks.taskManagerStart;
       runTask = mocks.runTask;
 
       service = new DataTelemetryService(mockLogger);
-      service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
+      service.setup(mockTaskManagerSetup, mockUsageCollectionSetup);
       await service.start(
         mockTelemetryStart,
         {
@@ -309,15 +362,10 @@ describe('DataTelemetryService', () => {
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
 
-        const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
-
-        await runTask();
-        await sleepForBreathDelay();
-
-        expect(reportEventsSpy).toHaveBeenCalledTimes(1);
-        const lastCall = reportEventsSpy.mock?.lastCall?.[0] as [Partial<DataTelemetryEvent>];
-        expect(lastCall?.[0]?.field_count).toBe(8);
-        expect(lastCall?.[0]?.field_existence).toEqual({
+        const taskResult = await runTask();
+        const firstEvent = (taskResult?.state.data as [Partial<DataTelemetryEvent>])?.[0];
+        expect(firstEvent?.field_count).toBe(8);
+        expect(firstEvent?.field_existence).toEqual({
           'container.id': 3000 + 500,
           'host.name': 3000 + 500,
           message: 3000,
@@ -333,17 +381,12 @@ describe('DataTelemetryService', () => {
     it('should correctly calculate structure levels', async () => {
       jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
 
-      const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
+      const taskResult = await runTask();
+      const secondEvent = (
+        taskResult?.state.data as [Partial<DataTelemetryEvent>, Partial<DataTelemetryEvent>]
+      )?.[1];
 
-      await runTask();
-      await sleepForBreathDelay();
-
-      expect(reportEventsSpy).toHaveBeenCalledTimes(1);
-      const lastCall = reportEventsSpy.mock?.lastCall?.[0] as [
-        Partial<DataTelemetryEvent>,
-        Partial<DataTelemetryEvent>
-      ];
-      expect(lastCall?.[1]?.structure_level).toEqual({
+      expect(secondEvent?.structure_level).toEqual({
         '1': 1000,
         '4': 500,
         '6': 200,
@@ -351,10 +394,6 @@ describe('DataTelemetryService', () => {
     });
   });
 });
-
-function sleepForBreathDelay() {
-  return new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 10));
-}
 
 function setupMocks() {
   const mockEsClient = {
@@ -419,9 +458,7 @@ function setupMocks() {
     error: jest.fn(),
   } as unknown as jest.Mocked<Logger>;
 
-  const mockAnalyticsSetup = {
-    getTelemetryUrl: jest.fn().mockResolvedValue(new URL('https://telemetry.elastic.co')),
-  } as unknown as jest.Mocked<AnalyticsServiceSetup>;
+  const mockUsageCollectionSetup = createUsageCollectionSetupMock();
 
   const mockTelemetryStart = {
     getIsOptedIn: jest.fn().mockResolvedValue(true),
@@ -441,7 +478,7 @@ function setupMocks() {
   return {
     mockEsClient,
     mockLogger,
-    mockAnalyticsSetup,
+    mockUsageCollectionSetup,
     mockTelemetryStart,
     taskManagerSetup,
     taskManagerStart,

@@ -63,6 +63,7 @@ export function registerAlertsValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/alerts/suggestions/values',
+      options: { access: 'internal' },
       validate: AlertsSuggestionsSchema,
     },
     router.handleLegacyErrors(

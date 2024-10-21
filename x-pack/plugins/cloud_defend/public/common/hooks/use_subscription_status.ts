@@ -16,7 +16,7 @@ export const useSubscriptionStatus = () => {
   const { licensing } = useKibana().services;
   const { isCloudEnabled } = useContext(SetupContext);
   return useQuery([SUBSCRIPTION_QUERY_KEY], async () => {
-    const license = await licensing.refresh();
+    const license = await licensing.getLicense();
     return isSubscriptionAllowed(isCloudEnabled, license);
   });
 };

@@ -19,13 +19,20 @@ import {
   type FieldTypeFilterProps,
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import { FieldRow } from './field_row';
 
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
 
 const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
-  defaultMessage: 'Search field names',
+  defaultMessage: 'Search field names or values',
 });
+
+export enum TermMatch {
+  name = 'name',
+  value = 'value',
+  both = 'both',
+}
 
 interface TableFiltersCommonProps {
   // search
@@ -108,12 +115,9 @@ const getStoredFieldTypes = (storage: Storage) => {
   return Array.isArray(parsedFieldTypes) ? parsedFieldTypes : [];
 };
 
-interface UseTableFiltersReturn extends TableFiltersCommonProps {
-  onFilterField: (
-    fieldName: string,
-    fieldDisplayName: string | undefined,
-    fieldType: string | undefined
-  ) => boolean;
+export interface UseTableFiltersReturn extends TableFiltersCommonProps {
+  onFilterField: (row: FieldRow) => boolean;
+  onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
 }
 
 export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
@@ -138,13 +142,34 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
     [storage, setSelectedFieldTypes]
   );
 
-  const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
-    (fieldName, fieldDisplayName, fieldType) => {
-      const term = searchTerm?.trim();
+  const onFindSearchTermMatch: UseTableFiltersReturn['onFindSearchTermMatch'] = useCallback(
+    (row, term) => {
+      const { name, dataViewField } = row;
+
+      let termMatch: TermMatch | null = null;
+
+      if (fieldNameWildcardMatcher({ name, displayName: dataViewField?.customLabel }, term)) {
+        termMatch = TermMatch.name;
+      }
+
       if (
-        term &&
-        !fieldNameWildcardMatcher({ name: fieldName, displayName: fieldDisplayName }, term)
+        (row.formattedAsText || '').toLowerCase().includes(term.toLowerCase()) ||
+        (JSON.stringify(row.flattenedValue) || '').toLowerCase().includes(term.toLowerCase())
       ) {
+        termMatch = termMatch ? TermMatch.both : TermMatch.value;
+      }
+
+      return termMatch;
+    },
+    []
+  );
+
+  const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
+    (row) => {
+      const { fieldType } = row;
+      const term = searchTerm?.trim();
+
+      if (term && !onFindSearchTermMatch(row, term)) {
         return false;
       }
 
@@ -154,7 +179,7 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
 
       return true;
     },
-    [searchTerm, selectedFieldTypes]
+    [searchTerm, selectedFieldTypes, onFindSearchTermMatch]
   );
 
   return useMemo(
@@ -166,7 +191,15 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
       onChangeFieldTypes,
       // the actual filtering function
       onFilterField,
+      onFindSearchTermMatch,
     }),
-    [searchTerm, onChangeSearchTerm, selectedFieldTypes, onChangeFieldTypes, onFilterField]
+    [
+      searchTerm,
+      onChangeSearchTerm,
+      selectedFieldTypes,
+      onChangeFieldTypes,
+      onFilterField,
+      onFindSearchTermMatch,
+    ]
   );
 };

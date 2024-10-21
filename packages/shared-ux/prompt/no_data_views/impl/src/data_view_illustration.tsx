@@ -26,5 +26,14 @@ export const DataViewIllustration = () => {
     }
   `;
 
-  return <img src={svg} css={css} alt="Data view illustration" />;
+  return (
+    <img
+      src={svg}
+      css={css}
+      alt="Data view illustration"
+      data-test-subj="DataViewIllustration"
+      width="110"
+      height="100"
+    />
+  );
 };

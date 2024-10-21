@@ -76,7 +76,7 @@ export const TableRowActions: React.FunctionComponent<{
         onClick={() => {
           onReassignClick();
         }}
-        disabled={!agent.active}
+        disabled={!agent.active || agentPolicy?.supports_agentless === true}
         key="reassignPolicy"
       >
         <FormattedMessage
@@ -107,7 +107,7 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent)}
+        disabled={!isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true}
         onClick={() => {
           onUpgradeClick();
         }}
@@ -138,7 +138,12 @@ export const TableRowActions: React.FunctionComponent<{
       );
     }
 
-    if (authz.fleet.allAgents && agentTamperProtectionEnabled && agent.policy_id) {
+    if (
+      authz.fleet.allAgents &&
+      agentTamperProtectionEnabled &&
+      agent.policy_id &&
+      !agentPolicy?.supports_agentless
+    ) {
       menuItems.push(
         <EuiContextMenuItem
           icon="minusInCircle"

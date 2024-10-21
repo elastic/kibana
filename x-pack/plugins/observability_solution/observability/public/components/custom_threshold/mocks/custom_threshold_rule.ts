@@ -66,6 +66,7 @@ export const buildCustomThresholdRule = (
             {
               name: 'A',
               aggType: Aggregators.COUNT,
+              filter: 'host.name: host-1',
             },
           ],
           threshold: [2000],

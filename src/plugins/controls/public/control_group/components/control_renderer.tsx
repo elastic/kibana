@@ -50,7 +50,7 @@ export const ControlRenderer = <
 
       async function buildControl() {
         const parentApi = getParentApi();
-        const factory = getControlFactory<StateType, ApiType>(type);
+        const factory = await getControlFactory<StateType, ApiType>(type);
         const buildApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType>

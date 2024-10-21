@@ -38,7 +38,6 @@
     },
     "settings": {
       "index": {
-        "final_pipeline": "logs@custom",
         "codec": "best_compression",
         "mapping": {
           "total_fields": {

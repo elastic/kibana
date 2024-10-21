@@ -166,6 +166,9 @@ export interface SignificantItem extends FieldValuePair {
 
   /** Indicates if the significant item is unique within a group. */
   unique?: boolean;
+
+  /** Calculates a numerical value based on bg_count and doc_count for which to sort log rate change */
+  logRateChangeSort?: number;
 }
 
 interface SignificantItemHistogramItemBase {

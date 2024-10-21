@@ -19,10 +19,11 @@ import {
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceAssignedRolesTab } from './edit_space_roles_tab';
-import { EditSpaceProvider } from './provider';
+import { EditSpaceProviderRoot } from './provider';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../security_license.mock';
 
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
@@ -48,10 +49,17 @@ describe('EditSpaceAssignedRolesTab', () => {
   const loadRolesSpy = jest.spyOn(spacesManager, 'getRolesForSpace');
   const toastErrorSpy = jest.spyOn(notifications.toasts, 'addError');
 
-  const TestComponent: React.FC = ({ children }) => {
+  const TestComponent: React.FC<
+    React.PropsWithChildren<{
+      getIsRoleManagementEnabled?: () => Promise<() => boolean | undefined>;
+    }>
+  > = ({ children, ...props }) => {
+    const getIsRoleManagementEnabled =
+      props.getIsRoleManagementEnabled ?? (() => Promise.resolve(() => undefined));
+
     return (
       <IntlProvider locale="en">
-        <EditSpaceProvider
+        <EditSpaceProviderRoot
           capabilities={{
             navLinks: {},
             management: {},
@@ -66,13 +74,15 @@ describe('EditSpaceAssignedRolesTab', () => {
           http={http}
           notifications={notifications}
           overlays={overlays}
+          getIsRoleManagementEnabled={getIsRoleManagementEnabled}
           getPrivilegesAPIClient={getPrivilegeAPIClient}
+          getSecurityLicense={getSecurityLicenseMock}
           theme={theme}
           i18n={i18n}
           logger={logger}
         >
           {children}
-        </EditSpaceProvider>
+        </EditSpaceProviderRoot>
       </IntlProvider>
     );
   };
@@ -114,6 +124,23 @@ describe('EditSpaceAssignedRolesTab', () => {
       expect(toastErrorSpy).toHaveBeenCalledWith(new Error('test error'), {
         title: 'Error: test error',
       });
+    });
+  });
+
+  it('does not load roles if role management is not enabled', async () => {
+    const getIsRoleManagementEnabled = () => Promise.resolve(() => false);
+
+    act(() => {
+      render(
+        <TestComponent getIsRoleManagementEnabled={getIsRoleManagementEnabled}>
+          <EditSpaceAssignedRolesTab space={space} isReadOnly={false} features={[]} />
+        </TestComponent>
+      );
+    });
+
+    await waitFor(() => {
+      expect(loadRolesSpy).not.toHaveBeenCalled();
+      expect(toastErrorSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -20,14 +20,10 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectAPIReferenceDocLinkExists() {
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
     },
-    async expectBackToIndicesButtonExists() {
-      await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
-    },
-    async clickBackToIndicesButton() {
-      await testSubjects.click('backToIndicesButton');
-    },
-    async expectBackToIndicesButtonRedirectsToListPage() {
-      await testSubjects.existOrFail('indicesList');
+    async expectActionItemReplacedWhenHasDocs() {
+      await testSubjects.missingOrFail('ApiReferenceDoc', { timeout: 2000 });
+      await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
+      await testSubjects.existOrFail('viewInDiscoverLink', { timeout: 5000 });
     },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
@@ -82,7 +78,20 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectMoreOptionsOverviewMenuIsShown() {
       await testSubjects.existOrFail('moreOptionsContextMenu');
     },
-    async expectDeleteIndexButtonExists() {
+    async expectToNavigateToPlayground(indexName: string) {
+      await testSubjects.click('moreOptionsPlayground');
+      expect(await browser.getCurrentUrl()).contain(
+        `/search_playground/chat?default-index=${indexName}`
+      );
+      await testSubjects.existOrFail('chatPage');
+    },
+    async expectAPIReferenceDocLinkExistsInMoreOptions() {
+      await testSubjects.existOrFail('moreOptionsApiReference', { timeout: 2000 });
+    },
+    async expectAPIReferenceDocLinkMissingInMoreOptions() {
+      await testSubjects.missingOrFail('moreOptionsApiReference', { timeout: 2000 });
+    },
+    async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
     },
     async clickDeleteIndexButton() {
@@ -102,6 +111,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
 
       await testSubjects.existOrFail('loadingErrorBackToIndicesButton');
       await testSubjects.existOrFail('reloadButton');
+    },
+    async expectIndexNotFoundErrorExists() {
+      const pageLoadErrorElement = await (
+        await testSubjects.find('pageLoadError')
+      ).findByClassName('euiTitle');
+      expect(await pageLoadErrorElement.getVisibleText()).to.contain('Not Found');
     },
     async clickPageReload() {
       await retry.tryForTime(60 * 1000, async () => {
@@ -126,6 +141,78 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     },
     async expectSettingsComponentIsVisible() {
       await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+    },
+    async expectSelectedLanguage(language: string) {
+      await testSubjects.existOrFail('codeExampleLanguageSelect');
+      expect(
+        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
+      ).contain(language);
+    },
+    async selectCodingLanguage(language: string) {
+      await testSubjects.existOrFail('codeExampleLanguageSelect');
+      await testSubjects.click('codeExampleLanguageSelect');
+      await testSubjects.existOrFail(`lang-option-${language}`);
+      await testSubjects.click(`lang-option-${language}`);
+      expect(
+        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
+      ).contain(language);
+    },
+    async codeSampleContainsValue(subject: string, value: string) {
+      const tstSubjId = `${subject}-code-block`;
+      await testSubjects.existOrFail(tstSubjId);
+      expect(await testSubjects.getVisibleText(tstSubjId)).contain(value);
+    },
+    async openConsoleCodeExample() {
+      await testSubjects.existOrFail('tryInConsoleButton');
+      await testSubjects.click('tryInConsoleButton');
+    },
+
+    async expectAPIKeyToBeVisibleInCodeBlock(apiKey: string) {
+      await testSubjects.existOrFail('ingestDataCodeExample-code-block');
+      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
+        apiKey
+      );
+    },
+
+    async clickFirstDocumentDeleteAction() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      await testSubjects.click('deleteDocumentButton');
+    },
+
+    async expectDeleteDocumentActionNotVisible() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.missingOrFail('deleteDocumentButton');
+    },
+    async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
+      const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+      await indexList[indexOfRow].click();
+      await retry.waitFor('index details page title to show up', async () => {
+        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+      });
+    },
+
+    async expectSearchIndexDetailsTabsExists() {
+      await testSubjects.existOrFail('dataTab');
+      await testSubjects.existOrFail('mappingsTab');
+      await testSubjects.existOrFail('settingsTab');
+    },
+
+    async expectBreadcrumbNavigationWithIndexName(indexName: string) {
+      await testSubjects.existOrFail('euiBreadcrumb');
+      expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
+    },
+
+    async clickOnIndexManagementBreadcrumb() {
+      const breadcrumbs = await testSubjects.findAll('breadcrumb');
+      for (const breadcrumb of breadcrumbs) {
+        if ((await breadcrumb.getVisibleText()) === 'Index Management') {
+          await breadcrumb.click();
+          return;
+        }
+      }
     },
   };
 }

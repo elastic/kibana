@@ -17,21 +17,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { DASHBOARD_CONTAINER_TYPE } from '..';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+
 import { DashboardContainerInput } from '../../../common';
+import { DashboardApi } from '../../dashboard_api/types';
+import { embeddableService, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
-import {
-  DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-  DashboardCreationOptions,
-} from '../embeddable/dashboard_container_factory';
+import { DashboardContainerFactoryDefinition } from '../embeddable/dashboard_container_factory';
+import type { DashboardCreationOptions } from '../..';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
-import { DashboardApi } from '../../dashboard_api/types';
-import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -56,8 +52,6 @@ export function DashboardRenderer({
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
   const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
   const [dashboardMissing, setDashboardMissing] = useState(false);
-
-  const { embeddable, screenshotMode } = pluginServices.getServices();
 
   const id = useMemo(() => uuidv4(), []);
 
@@ -93,12 +87,8 @@ export function DashboardRenderer({
     (async () => {
       const creationOptions = await getCreationOptions?.();
 
-      const dashboardFactory = embeddable.getEmbeddableFactory(
-        DASHBOARD_CONTAINER_TYPE
-      ) as DashboardContainerFactory & {
-        create: DashboardContainerFactoryDefinition['create'];
-      };
-      const container = await dashboardFactory?.create(
+      const dashboardFactory = new DashboardContainerFactoryDefinition(embeddableService);
+      const container = await dashboardFactory.create(
         { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
         undefined,
         creationOptions,
@@ -141,7 +131,7 @@ export function DashboardRenderer({
 
   const viewportClasses = classNames(
     'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotMode },
+    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
     { 'dashboardViewport--loading': loading }
   );
 

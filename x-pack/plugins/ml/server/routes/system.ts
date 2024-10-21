@@ -166,14 +166,28 @@ export function systemRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
+      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, client }) => {
         try {
           const body = await mlClient.info();
           const cloudId = cloud?.cloudId;
           const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
 
+          let isMlAutoscalingEnabled = false;
+          try {
+            await client.asInternalUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
+            isMlAutoscalingEnabled = true;
+          } catch (e) {
+            // If doesn't exist, then keep the false
+          }
+
           return response.ok({
-            body: { ...body, cloudId, isCloudTrial },
+            body: {
+              ...body,
+              cloudId,
+              isCloudTrial,
+              cloudUrl: cloud.baseUrl,
+              isMlAutoscalingEnabled,
+            },
           });
         } catch (error) {
           return response.customError(wrapError(error));

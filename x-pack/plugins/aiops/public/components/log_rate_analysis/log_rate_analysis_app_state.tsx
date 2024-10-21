@@ -18,7 +18,7 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
-import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -36,8 +36,8 @@ export interface LogRateAnalysisAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
-  /** App dependencies */
-  appDependencies: AiopsAppDependencies;
+  /** App context value */
+  appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether to show contextual insights */
   showContextualInsights?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
@@ -47,7 +47,7 @@ export interface LogRateAnalysisAppStateProps {
 export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   dataView,
   savedSearch,
-  appDependencies,
+  appContextValue,
   showContextualInsights = false,
   showFrozenDataTierChoice = true,
 }) => {
@@ -60,13 +60,13 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   }
 
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
 
   return (
-    <AiopsAppContext.Provider value={appDependencies}>
+    <AiopsAppContext.Provider value={appContextValue}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <LogRateAnalysisReduxProvider>

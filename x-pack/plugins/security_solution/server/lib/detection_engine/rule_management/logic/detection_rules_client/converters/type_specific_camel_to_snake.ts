@@ -6,7 +6,6 @@
  */
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
-import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
@@ -27,8 +26,9 @@ export const typeSpecificCamelToSnake = (
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     case 'esql': {
@@ -36,8 +36,9 @@ export const typeSpecificCamelToSnake = (
         type: params.type,
         language: params.language,
         query: params.query,
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     case 'threat_match': {
@@ -57,7 +58,9 @@ export const typeSpecificCamelToSnake = (
         threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     case 'query': {
@@ -69,8 +72,9 @@ export const typeSpecificCamelToSnake = (
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     case 'saved_query': {
@@ -82,8 +86,9 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     case 'threshold': {
@@ -106,7 +111,9 @@ export const typeSpecificCamelToSnake = (
         type: params.type,
         anomaly_threshold: params.anomalyThreshold,
         machine_learning_job_id: params.machineLearningJobId,
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     case 'new_terms': {
@@ -119,8 +126,9 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         language: params.language,
         data_view_id: params.dataViewId,
-        alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
-        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
       };
     }
     default: {

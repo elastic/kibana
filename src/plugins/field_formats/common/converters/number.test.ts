@@ -44,4 +44,10 @@ describe('NumberFormat', () => {
     }"
   `);
   });
+
+  test('null input', () => {
+    const formatter = new NumberFormat({}, getConfig);
+    expect(formatter.convert(null)).toMatchInlineSnapshot(`"-"`);
+    expect(formatter.convert(null, 'html')).toMatchInlineSnapshot(`" - "`);
+  });
 });

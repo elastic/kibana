@@ -120,6 +120,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             logsDir: options.logsDir,
             installDir: options.installDir,
             onEarlyExit,
+            extraKbnOpts: [
+              config.get('serverless')
+                ? '--server.versioned.versionResolution=newest'
+                : '--server.versioned.versionResolution=oldest',
+            ],
           });
 
           if (abortCtrl.signal.aborted) {

@@ -27,12 +27,15 @@ export type SupportedLogo =
   | 'mysql'
   | 'postgresql'
   | 'redis'
+  | 'ruby'
   | 'haproxy'
   | 'rabbitmq'
   | 'kafka'
   | 'mongodb'
   | 'apache_tomcat'
-  | 'firehose';
+  | 'firehose'
+  | 'linux'
+  | 'apple';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [
@@ -52,11 +55,14 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
     'mysql',
     'postgresql',
     'redis',
+    'ruby',
     'haproxy',
     'rabbitmq',
     'kafka',
     'mongodb',
     'apache_tomcat',
+    'linux',
+    'apple',
   ].includes(logo);
 }
 

@@ -8,12 +8,23 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
-import { NOTES_COUNT_TEST_ID, NOTES_LOADING_TEST_ID, NOTES_TITLE_TEST_ID } from './test_ids';
+import {
+  NOTES_ADD_NOTE_BUTTON_TEST_ID,
+  NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID,
+  NOTES_COUNT_TEST_ID,
+  NOTES_LOADING_TEST_ID,
+  NOTES_TITLE_TEST_ID,
+} from './test_ids';
 import { FETCH_NOTES_ERROR, Notes } from './notes';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import { ReqStatus } from '../../../../notes';
 import type { Note } from '../../../../../common/api/timeline';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelNotesTab } from '../../left';
+
+jest.mock('@kbn/expandable-flyout');
 
 const mockAddError = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -33,6 +44,8 @@ jest.mock('react-redux', () => {
 
 describe('<Notes />', () => {
   it('should render loading spinner', () => {
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: jest.fn() });
+
     const store = createMockStore({
       ...mockGlobalState,
       notes: {
@@ -58,7 +71,38 @@ describe('<Notes />', () => {
     expect(getByTestId(NOTES_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render number of notes', () => {
+  it('should render Add note button if no notes are present', () => {
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    const button = getByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+
+    button.click();
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: DocumentDetailsLeftPanelKey,
+      path: { tab: LeftPanelNotesTab },
+      params: {
+        id: mockContextValue.eventId,
+        indexName: mockContextValue.indexName,
+        scopeId: mockContextValue.scopeId,
+      },
+    });
+  });
+
+  it('should render number of notes and plus button', () => {
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
     const contextValue = {
       ...mockContextValue,
       eventId: '1',
@@ -72,10 +116,23 @@ describe('<Notes />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId(NOTES_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(NOTES_TITLE_TEST_ID)).toHaveTextContent('Notes');
     expect(getByTestId(NOTES_COUNT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1');
+
+    const button = getByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID);
+
+    expect(button).toBeInTheDocument();
+    button.click();
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: DocumentDetailsLeftPanelKey,
+      path: { tab: LeftPanelNotesTab },
+      params: {
+        id: contextValue.eventId,
+        indexName: mockContextValue.indexName,
+        scopeId: mockContextValue.scopeId,
+      },
+    });
   });
 
   it('should render number of notes in scientific notation for big numbers', () => {

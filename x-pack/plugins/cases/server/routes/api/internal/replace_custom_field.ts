@@ -21,6 +21,9 @@ export const replaceCustomFieldRoute = createCasesRoute({
       custom_field_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'internal',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
