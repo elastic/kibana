@@ -26,7 +26,9 @@ export const getDashboardListItemLink = (
 ) => {
   const useHash = coreServices.uiSettings.get('state:storeInSessionStorage'); // use hash
   const unsavedFiltersForUrl =
-    unsavedFilters && unsavedFilters[id] ? rison.encode(unsavedFilters[id].filters) : undefined;
+    unsavedFilters && unsavedFilters[id] && unsavedFilters[id].filters
+      ? rison.encode(unsavedFilters[id].filters)
+      : undefined;
 
   let url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
     path: `#${createDashboardEditUrl(id, true, unsavedFiltersForUrl)}`,
