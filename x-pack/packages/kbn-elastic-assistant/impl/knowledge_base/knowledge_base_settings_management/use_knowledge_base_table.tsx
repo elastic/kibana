@@ -16,6 +16,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import useAsync from 'react-use/lib/useAsync';
+import { UserProfileAvatarData } from '@kbn/user-profile-components';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
@@ -23,14 +24,21 @@ import { useInlineActions } from '../../assistant/common/components/assistant_se
 import { isSystemEntry } from './helpers';
 
 const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
-  const { currentUserAvatar, userProfileService } = useAssistantContext();
+  const { userProfileService } = useAssistantContext();
 
   const userProfile = useAsync(async () => {
-    const profile = await userProfileService?.bulkGet({ uids: new Set([entry.createdBy]) });
-    return profile?.[0].user.username;
-  }, []);
+    const profile = await userProfileService?.bulkGet<{ avatar: UserProfileAvatarData }>({
+      uids: new Set([entry.createdBy]),
+      dataPath: 'avatar',
+    });
+    return { username: profile?.[0].user.username, avatar: profile?.[0].data.avatar };
+  }, [entry.createdBy]);
 
-  const userName = useMemo(() => userProfile?.value ?? 'Unknown', [userProfile?.value]);
+  const userName = useMemo(
+    () => userProfile?.value?.username ?? 'Unknown',
+    [userProfile?.value?.username]
+  );
+  const userAvatar = userProfile.value?.avatar;
   const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
   const userImage = isSystemEntry(entry) ? (
     <EuiIcon
@@ -40,12 +48,12 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
         margin-right: 14px;
       `}
     />
-  ) : currentUserAvatar?.imageUrl != null ? (
+  ) : userAvatar?.imageUrl != null ? (
     <EuiAvatar
       name={userName}
-      imageUrl={currentUserAvatar.imageUrl}
+      imageUrl={userAvatar.imageUrl}
       size={'s'}
-      color={currentUserAvatar?.color ?? 'subdued'}
+      color={userAvatar.color ?? 'subdued'}
       css={css`
         margin-right: 10px;
       `}
@@ -53,9 +61,9 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   ) : (
     <EuiAvatar
       name={userName}
-      initials={currentUserAvatar?.initials}
+      initials={userAvatar?.initials}
       size={'s'}
-      color={currentUserAvatar?.color ?? 'subdued'}
+      color={userAvatar?.color ?? 'subdued'}
       css={css`
         margin-right: 10px;
       `}
@@ -123,7 +131,6 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_AUTHOR,
-          sortable: ({ users }: KnowledgeBaseEntryResponse) => users[0]?.name,
           render: (entry: KnowledgeBaseEntryResponse) => <AuthorColumn entry={entry} />,
         },
         {
