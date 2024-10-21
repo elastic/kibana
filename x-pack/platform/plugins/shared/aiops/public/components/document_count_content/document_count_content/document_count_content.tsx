@@ -43,8 +43,10 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   const { data, uiSettings, fieldFormats, charts, embeddingOrigin, eventBus } =
     useAiopsAppContext();
 
-  const { documentStats } = eventBus.useEventBusValue(logRateAnalysisSlice);
-  const { sampleProbability, totalCount, documentCountStats } = documentStats;
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
+  const { sampleProbability, totalCount, documentCountStats } = logRateAnalysis.useState(
+    (state) => state.documentStats
+  );
 
   const isCasesEmbedding = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
 

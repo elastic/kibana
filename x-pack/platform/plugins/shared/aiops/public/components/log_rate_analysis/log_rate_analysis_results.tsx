@@ -27,7 +27,6 @@ import { ProgressControls } from '@kbn/aiops-components';
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 import {
   clearAllRowState,
-  setGroupResults,
   useAppDispatch,
   useAppSelector,
   logRateAnalysisSlice,
@@ -105,6 +104,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
+  const { setGroupResults } = eventBus.get(logRateAnalysisSlice).actions;
   const {
     analysisType,
     earliest,
@@ -229,7 +229,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
     // Reset grouping to false and clear all row selections when restarting the analysis.
     if (resetGroupButton) {
-      dispatch(setGroupResults(false));
+      setGroupResults(false);
       // When toggling the group switch, clear all row selections
       dispatch(clearAllRowState());
     }

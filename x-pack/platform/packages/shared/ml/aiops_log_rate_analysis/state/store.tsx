@@ -10,6 +10,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import useMount from 'react-use/lib/useMount';
 
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { streamSlice } from '@kbn/ml-response-stream/client';
 
 import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
@@ -49,11 +50,12 @@ interface LogRateAnalysisReduxProviderProps {
 export const LogRateAnalysisReduxProvider: FC<
   PropsWithChildren<LogRateAnalysisReduxProviderProps>
 > = ({ children, initialAnalysisStart }) => {
+  const { eventBus } = useAiopsAppContext();
   const store = useMemo(getReduxStore, []);
 
   useMount(() => {
     if (initialAnalysisStart) {
-      store.dispatch(logRateAnalysisSlice.actions.setInitialAnalysisStart(initialAnalysisStart));
+      eventBus.get(logRateAnalysisSlice).actions.setInitialAnalysisStart(initialAnalysisStart);
     }
   });
 

@@ -71,8 +71,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onWindowParametersChange,
 }) => {
   const { embeddingOrigin, eventBus } = useAiopsAppContext();
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const { clearSelection, setAutoRunAnalysis, setGroupResults, setInitialAnalysisStart } =
-    eventBus.get(logRateAnalysisSlice).actions;
+    logRateAnalysis.actions;
 
   const dispatch = useAppDispatch();
 
@@ -90,7 +91,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     earliest,
     latest,
     isBrushCleared,
-  } = eventBus.useEventBusValue(logRateAnalysisSlice);
+  } = logRateAnalysis.useState();
 
   // Window parameters stored in the url state use this components
   // `initialAnalysisStart` prop to set the initial params restore from url state.

@@ -7,7 +7,7 @@
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
-import { searchSlice } from '@kbn/event-bus-plugin/public/search_slice';
+import { searchSlice } from '@kbn/event-bus-plugin/public';
 import { logRateAnalysisSlice } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_slice';
 
 import { getChangePointDetectionComponent } from './shared_components';

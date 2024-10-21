@@ -62,8 +62,7 @@ interface LogRateAnalysisPageProps {
 export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
   showContextualInsights = false,
 }) => {
-  const aiopsAppContext = useAiopsAppContext();
-  const { data: dataService, observabilityAIAssistant, eventBus } = aiopsAppContext;
+  const { data: dataService, observabilityAIAssistant, eventBus } = useAiopsAppContext();
   const { setInitialAnalysisStart, setDocumentCountChartData } =
     eventBus.get(logRateAnalysisSlice).actions;
   const { dataView, savedSearch } = useDataSource();

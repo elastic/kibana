@@ -65,8 +65,7 @@ export const DocumentCountChartRedux: FC<DocumentCountChartReduxProps> = memo((p
   const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-  const { documentStats, initialAnalysisStart, isBrushCleared } = eventBus.useEventBusValue(
-    logRateAnalysisSlice,
+  const { documentStats, initialAnalysisStart, isBrushCleared } = logRateAnalysis.useState(
     (state) => ({
       documentStats: state.documentStats,
       initialAnalysisStart: state.initialAnalysisStart,
