@@ -14,13 +14,17 @@ import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import _ from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+interface DomainApiDeprecationDetails extends ApiDeprecationDetails {
+  domainId: string;
+}
+
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return allDeprecations.filter(
     (deprecation) => deprecation.deprecationType === 'api'
-  ) as unknown as ApiDeprecationDetails[];
+  ) as unknown as DomainApiDeprecationDetails[];
 };
 
-export function apiDeprecationTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
