@@ -420,11 +420,11 @@ describe('SharingMetaFields', () => {
 
     const from = 'now-1d/d';
     const to = 'now-1d/d';
-    const component = <SharingMetaFields from={from} to={to} />;
+    const component = <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY @ HH:mm:ss" />;
 
     expect(shallow(component)).toMatchInlineSnapshot(`
       <div
-        data-shared-timefilter-duration="2024-10-20T00:00:00-04:00 to 2024-10-20T23:59:59-04:00"
+        data-shared-timefilter-duration="Oct 20, 2024 @ 00:00:00 to Oct 20, 2024 @ 23:59:59"
         data-test-subj="dataSharedTimefilterDuration"
       />
     `);
