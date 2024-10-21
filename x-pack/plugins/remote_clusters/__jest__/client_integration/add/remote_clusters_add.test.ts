@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, RemoteClustersActions } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
+import { MAX_NODE_CONNECTIONS } from '../../../common/constants';
 
 const notInArray = (array: string[]) => (value: string) => array.indexOf(value) < 0;
 
@@ -277,13 +278,12 @@ describe('Create Remote cluster', () => {
       });
 
       describe('node connections', () => {
-        const maxNodeConnections = 2147483647;
         test('should require a valid number of node connections', async () => {
           await actions.saveButton.click();
 
-          actions.nodeConnectionsInput.setValue(String(maxNodeConnections + 1));
+          actions.nodeConnectionsInput.setValue(String(MAX_NODE_CONNECTIONS + 1));
           expect(actions.getErrorMessages()).toContain(
-            `This number must be equal or less than ${maxNodeConnections}.`
+            `This number must be equal or less than ${MAX_NODE_CONNECTIONS}.`
           );
         });
       });

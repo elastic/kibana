@@ -31,7 +31,7 @@ export const SniffConnection: FunctionComponent<Props> = ({
   const { seeds: seedsError, nodeConnections: nodeError } = fieldsErrors;
   // Show errors if there is a general form error or local errors.
   const areFormErrorsVisible = Boolean(areErrorsVisible && seedsError);
-  const showLocalSheedErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
+  const showLocalSeedErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
   const errorsInLocalSeeds =
     areFormErrorsVisible && seedsError ? localSeedErrors.concat(seedsError) : localSeedErrors;
   const formattedSeeds: EuiComboBoxOptionOption[] = seeds.map((seed: string) => ({ label: seed }));
@@ -109,7 +109,7 @@ export const SniffConnection: FunctionComponent<Props> = ({
             }}
           />
         }
-        isInvalid={showLocalSheedErrors}
+        isInvalid={showLocalSeedErrors}
         error={errorsInLocalSeeds}
         fullWidth
       >
@@ -127,7 +127,7 @@ export const SniffConnection: FunctionComponent<Props> = ({
             onFieldsChange({ seeds: options.map(({ label }) => label) })
           }
           onSearchChange={onSeedsInputChange}
-          isInvalid={showLocalSheedErrors}
+          isInvalid={showLocalSeedErrors}
           fullWidth
           data-test-subj="remoteClusterFormSeedsInput"
         />
