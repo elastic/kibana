@@ -85,7 +85,6 @@ export const LogsTabLogStreamContent = () => {
             query={logsLinkToStreamQuery}
             logView={logView}
           />
-          ]
         </EuiFlexItem>
       </EuiFlexGroup>
 

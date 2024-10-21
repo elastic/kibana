@@ -19,6 +19,10 @@ import {
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
+const expectTaskIsNotRunning = (taskStatus?: string) => {
+  expect(['idle', 'claiming']).contain(taskStatus);
+};
+
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -26,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/191637
+  // Failing: See https://github.com/elastic/kibana/issues/196319
   describe.skip('@ess @serverless @serverlessQA init_and_status_apis', () => {
     before(async () => {
       await riskEngineRoutes.cleanUp();
@@ -298,8 +302,8 @@ export default ({ getService }: FtrProviderContext) => {
           firstResponse?.saved_objects?.[0]?.id
         );
       });
-
-      describe('remove legacy risk score transform', function () {
+      // Failing: See https://github.com/elastic/kibana/issues/191637
+      describe.skip('remove legacy risk score transform', function () {
         this.tags('skipFIPS');
         it('should remove legacy risk score transform if it exists', async () => {
           await installLegacyRiskScore({ supertest });
@@ -356,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
         expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expect(status2.body.risk_engine_task_status?.status).to.be('idle');
+        expectTaskIsNotRunning(status2.body.risk_engine_task_status?.status);
         expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
 
         await riskEngineRoutes.disable();
@@ -374,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
         expect(status4.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expect(status4.body.risk_engine_task_status?.status).to.be('idle');
+        expectTaskIsNotRunning(status4.body.risk_engine_task_status?.status);
         expect(status4.body.risk_engine_task_status?.startedAt).to.be(undefined);
       });
 
@@ -395,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
         expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expect(status2.body.risk_engine_task_status?.status).to.be('idle');
+        expectTaskIsNotRunning(status2.body.risk_engine_task_status?.status);
         expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
       });
     });

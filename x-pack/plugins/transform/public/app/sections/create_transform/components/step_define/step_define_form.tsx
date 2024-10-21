@@ -37,6 +37,8 @@ import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useFieldStatsFlyoutContext } from '@kbn/ml-field-stats-flyout';
 
+import { MAX_ROW_COUNT } from '@kbn/ml-data-grid/lib/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
@@ -126,16 +128,23 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
   const fieldStatsContext = useFieldStatsFlyoutContext();
-  const indexPreviewProps = {
-    ...useIndexData(
-      dataView,
-      transformConfigQuery,
-      runtimeMappings,
-      timeRangeMs,
+
+  const populatedFields = useMemo(
+    () =>
       isPopulatedFields(fieldStatsContext?.populatedFields)
         ? [...fieldStatsContext.populatedFields]
-        : []
-    ),
+        : [],
+    [fieldStatsContext?.populatedFields]
+  );
+
+  const indexPreviewProps = {
+    ...useIndexData({
+      dataView,
+      query: transformConfigQuery,
+      populatedFields,
+      combinedRuntimeMappings: runtimeMappings,
+      timeRangeMs,
+    }),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -280,6 +289,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       timeUpdateSubscription.unsubscribe();
     };
   });
+
+  const rowCountInfoLabel = (
+    <FormattedMessage
+      id="xpack.transform.stepDefineForm.rowCountInfoLabel"
+      defaultMessage="Results are limited to a maximum of {maxRowCount} for preview purposes"
+      values={{ maxRowCount: MAX_ROW_COUNT }}
+    />
+  );
 
   return (
     <div data-test-subj="transformStepDefineForm">
@@ -460,6 +477,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               label={i18n.translate('xpack.transform.stepDefineForm.dataGridLabel', {
                 defaultMessage: 'Source documents',
               })}
+              labelAppend={
+                indexPreviewProps.rowCount === MAX_ROW_COUNT && (
+                  <EuiText size="xs">{rowCountInfoLabel}</EuiText>
+                )
+              }
             >
               <DataGrid {...indexPreviewProps} />
             </EuiFormRow>
@@ -496,6 +518,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           label={i18n.translate('xpack.transform.stepDefineForm.previewLabel', {
             defaultMessage: 'Preview',
           })}
+          labelAppend={
+            previewProps.rowCount === MAX_ROW_COUNT && (
+              <EuiText size="xs">{rowCountInfoLabel}</EuiText>
+            )
+          }
         >
           <>
             <DataGrid {...previewProps} />

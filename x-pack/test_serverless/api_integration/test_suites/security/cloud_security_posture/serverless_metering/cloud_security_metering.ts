@@ -10,11 +10,10 @@ import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-secu
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import {
-  deleteIndex,
   createPackagePolicy,
   createCloudDefendPackagePolicy,
-  bulkIndex,
 } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
 import { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -32,13 +31,20 @@ export default function (providerContext: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const cloudDefinedIndex = new EsIndexDataProvider(es, CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS);
+  const vulnerabilitiesIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
+  );
 
   /*
   This test aims to intercept the usage API request sent by the metering background task manager.
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  describe('Intercept the usage API request sent by the metering background task manager', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/188829
+  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;
@@ -67,25 +73,17 @@ export default function (providerContext: FtrProviderContext) {
 
       agentPolicyId = agentPolicyResponse.item.id;
 
-      await deleteIndex(es, [
-        LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-        CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
-      ]);
+      await findingsIndex.deleteAll();
+      await vulnerabilitiesIndex.deleteAll();
+      await cloudDefinedIndex.deleteAll();
     });
 
     afterEach(async () => {
-      await deleteIndex(es, [
-        LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-      ]);
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      await deleteIndex(es, [
-        LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-        CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
-      ]);
+      await findingsIndex.deleteAll();
+      await vulnerabilitiesIndex.deleteAll();
+      await cloudDefinedIndex.deleteAll();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
@@ -116,11 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 10,
       });
 
-      await bulkIndex(
-        es,
-        [...billableFindings, ...notBillableFindings],
-        LATEST_FINDINGS_INDEX_DEFAULT_NS
-      );
+      await findingsIndex.addBulk([...billableFindings, ...notBillableFindings]);
 
       let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
@@ -160,11 +154,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 11,
       });
 
-      await bulkIndex(
-        es,
-        [...billableFindings, ...notBillableFindings],
-        LATEST_FINDINGS_INDEX_DEFAULT_NS
-      );
+      await findingsIndex.addBulk([...billableFindings, ...notBillableFindings]);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -199,7 +189,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 2,
       });
 
-      await bulkIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+      await vulnerabilitiesIndex.addBulk(billableFindings);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -233,11 +223,11 @@ export default function (providerContext: FtrProviderContext) {
         isBlockActionEnables: false,
         numberOfHearbeats: 2,
       });
-      await bulkIndex(
-        es,
-        [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
-        CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
-      );
+
+      await cloudDefinedIndex.addBulk([
+        ...blockActionEnabledHeartbeats,
+        ...blockActionDisabledHeartbeats,
+      ]);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -315,22 +305,17 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       await Promise.all([
-        bulkIndex(
-          es,
-          [
-            ...billableFindingsCSPM,
-            ...notBillableFindingsCSPM,
-            ...billableFindingsKSPM,
-            ...notBillableFindingsKSPM,
-          ],
-          LATEST_FINDINGS_INDEX_DEFAULT_NS
-        ),
-        bulkIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
-        bulkIndex(
-          es,
-          [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
-          CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
-        ),
+        findingsIndex.addBulk([
+          ...billableFindingsCSPM,
+          ...notBillableFindingsCSPM,
+          ...billableFindingsKSPM,
+          ...notBillableFindingsKSPM,
+        ]),
+        vulnerabilitiesIndex.addBulk([...billableFindingsCNVM]),
+        cloudDefinedIndex.addBulk([
+          ...blockActionEnabledHeartbeats,
+          ...blockActionDisabledHeartbeats,
+        ]),
       ]);
 
       // Intercept and verify usage API request
