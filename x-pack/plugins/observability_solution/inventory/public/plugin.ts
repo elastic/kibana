@@ -28,6 +28,7 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
+import { registerEemEnabledContext } from './analytics/register_eem_enabled_context';
 
 export class InventoryPlugin
   implements
@@ -79,6 +80,7 @@ export class InventoryPlugin
     const sections$ = hideInventory$.pipe(
       map((hideInventory) => {
         if (isEntityCentricExperienceSettingEnabled && !hideInventory) {
+          registerEemEnabledContext(coreSetup.analytics, pluginsSetup.entityManager);
           return [
             {
               label: '',
