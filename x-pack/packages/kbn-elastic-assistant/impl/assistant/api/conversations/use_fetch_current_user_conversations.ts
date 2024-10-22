@@ -15,7 +15,7 @@ import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;
-  perPage: number;
+  per_page: number;
   total: number;
   data: Conversation[];
 }
