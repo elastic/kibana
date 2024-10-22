@@ -258,17 +258,32 @@ export default ({ getService }: FtrProviderContext): void => {
         targetObject['security-rule'].index = ['auditbeat-*'];
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, [targetObject]);
 
-        console.log({ targetObject: JSON.stringify(targetObject, null, 2) });
-
         const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-        console.log({ targetObject: JSON.stringify(reviewResponse, null, 2) });
+        const reviewRuleResponseMap = new Map(
+          reviewResponse.rules.map((upgradeInfo) => [
+            upgradeInfo.rule_id,
+            {
+              tags: upgradeInfo.diff.fields.tags?.merged_version,
+              name: upgradeInfo.diff.fields.name?.merged_version,
+            },
+          ])
+        );
 
         const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
           mode: ModeEnum.ALL_RULES,
           pick_version: 'MERGED',
         });
-        console.log({ performUpgradeResponse: JSON.stringify(performUpgradeResponse, null, 2) });
-      });
+
+        expect(performUpgradeResponse.summary.succeeded).toEqual(1);
+
+        const installedRulesMap = createIdToRuleMap(installedRules.data);
+
+        for (const [ruleId, installedRule] of installedRulesMap) {
+          expect(installedRule.name).toEqual(updatedRulesMap.get(ruleId)?.name);
+          expect(installedRule.name).toEqual(reviewRuleResponseMap.get(ruleId)?.name);
+          expect(installedRule.tags).toEqual(updatedRulesMap.get(ruleId)?.tags);
+          expect(installedRule.tags).toEqual(reviewRuleResponseMap.get(ruleId)?.tags);
+        }
     });
 
     describe('edge cases and unhappy paths', () => {
