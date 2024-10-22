@@ -111,6 +111,7 @@ function initializeAppMenuRegistry() {
       type: AppMenuActionType.primary,
       controlProps: {
         label: 'Action 1',
+        iconType: 'bell',
         onClick: jest.fn(),
       },
     },
