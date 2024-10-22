@@ -30,15 +30,18 @@ import { useFormattedDate } from './use_formatted_date';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
 import { userRequestedAdditionalRelatedEvents } from '../../store/data/action';
+import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 
 export type NodeEventOnClick = ({
   documentId,
   indexName,
   scopeId,
+  isAlert,
 }: {
   documentId: string | undefined;
   indexName: string | undefined;
   scopeId: string;
+  isAlert: boolean;
 }) => () => void;
 
 /**
@@ -128,6 +131,7 @@ export const NodeEventsListItem = memo(function ({
   const expandedEvent = expandDottedObject(event);
   const timestamp = eventModel.eventTimestamp(expandedEvent);
   const eventID = eventModel.eventID(expandedEvent);
+  const isAlert = eventModel.eventKind(expandedEvent)[0] === EventKind.signal;
   const documentId = eventModel.documentID(expandedEvent);
   const indexName = eventModel.indexName(expandedEvent);
   const winlogRecordID = eventModel.winlogRecordID(expandedEvent);
@@ -172,7 +176,7 @@ export const NodeEventsListItem = memo(function ({
       {nodeEventOnClick ? (
         <EuiButtonEmpty
           data-test-subj="resolver:panel:node-events-in-category:event-link"
-          onClick={nodeEventOnClick({ documentId, indexName, scopeId: id })}
+          onClick={nodeEventOnClick({ documentId, indexName, scopeId: id, isAlert })}
         >
           <DescriptiveName event={expandedEvent} />
         </EuiButtonEmpty>
