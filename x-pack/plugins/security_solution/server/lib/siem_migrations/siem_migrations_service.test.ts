@@ -29,15 +29,6 @@ jest.mock('rxjs', () => ({
   ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
 }));
 
-const getConfig = jest.fn(
-  () =>
-    ({
-      experimentalFeatures: {
-        siemMigrationsEnabled: true,
-      },
-    } as ConfigType)
-);
-
 describe('SiemMigrationsService', () => {
   let siemMigrationsService: SiemMigrationsService;
   const kibanaVersion = '8.16.0';
