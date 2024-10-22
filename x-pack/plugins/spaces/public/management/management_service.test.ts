@@ -13,6 +13,7 @@ import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
 import { ManagementService } from './management_service';
 import { getRolesAPIClientMock } from './roles_api_client.mock';
+import { getSecurityLicenseMock } from './security_license.mock';
 import { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
@@ -47,8 +48,10 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: getSecurityLicenseMock,
         eventTracker,
       });
 
@@ -70,8 +73,10 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: getSecurityLicenseMock,
         eventTracker,
       });
     });
@@ -94,8 +99,10 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: getSecurityLicenseMock,
         eventTracker,
       });
 
