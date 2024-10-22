@@ -22,7 +22,7 @@ const mount = (dataView = dataViewMock, isEsqlMode = false) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.actions.setDataView(dataView);
 
-  const getDiscoverParamsMock = () => ({
+  const discoverParamsMock = {
     dataView,
     adHocDataViews: [],
     isEsqlMode,
@@ -30,10 +30,10 @@ const mount = (dataView = dataViewMock, isEsqlMode = false) => {
     onNewSearch: jest.fn(),
     onOpenSavedSearch: jest.fn(),
     onUpdateAdHocDataViews: jest.fn(),
-  });
+  };
 
   const alertsAppMenuItem = getAlertsAppMenuItem({
-    getDiscoverParams: getDiscoverParamsMock,
+    discoverParams: discoverParamsMock,
     stateContainer,
   });
 

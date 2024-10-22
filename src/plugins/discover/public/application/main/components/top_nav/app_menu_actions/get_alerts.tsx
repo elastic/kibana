@@ -38,14 +38,13 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
 }
 
 const CreateAlertFlyout: React.FC<{
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  discoverParams: AppMenuDiscoverParams;
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, getDiscoverParams, onFinishAction }) => {
+}> = ({ stateContainer, discoverParams, onFinishAction }) => {
   const query = stateContainer.appState.getState().query;
 
-  const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } =
-    getDiscoverParams();
+  const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = discoverParams;
   const { triggersActionsUi } = services;
   const timeField = getTimeField(dataView);
 
@@ -100,12 +99,12 @@ const CreateAlertFlyout: React.FC<{
 
 export const getAlertsAppMenuItem = ({
   stateContainer,
-  getDiscoverParams,
+  discoverParams,
 }: {
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  discoverParams: AppMenuDiscoverParams;
   stateContainer: DiscoverStateContainer;
 }): AppMenuActionSubmenuSecondary => {
-  const { dataView, services, isEsqlMode } = getDiscoverParams();
+  const { dataView, services, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
@@ -138,7 +137,7 @@ export const getAlertsAppMenuItem = ({
             return (
               <CreateAlertFlyout
                 {...params}
-                getDiscoverParams={getDiscoverParams}
+                discoverParams={discoverParams}
                 stateContainer={stateContainer}
               />
             );

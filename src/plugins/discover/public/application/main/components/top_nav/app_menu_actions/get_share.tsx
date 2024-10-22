@@ -18,10 +18,10 @@ import { AppMenuDiscoverParams } from './types';
 
 export const getShareAppMenuItem = ({
   stateContainer,
-  getDiscoverParams,
+  discoverParams,
 }: {
   stateContainer: DiscoverStateContainer;
-  getDiscoverParams: () => AppMenuDiscoverParams;
+  discoverParams: AppMenuDiscoverParams;
 }): AppMenuActionPrimary => {
   return {
     id: AppMenuActionId.share,
@@ -36,7 +36,7 @@ export const getShareAppMenuItem = ({
       iconType: 'share',
       testId: 'shareTopNavButton',
       onClick: async ({ anchorElement }) => {
-        const { dataView, isEsqlMode, services } = getDiscoverParams();
+        const { dataView, isEsqlMode, services } = discoverParams;
 
         if (!services.share) {
           return;

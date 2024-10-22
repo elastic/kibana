@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -52,8 +52,8 @@ export const useTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
-  const getDiscoverParams = useCallback(
-    (): AppMenuDiscoverParams => ({
+  const discoverParams: AppMenuDiscoverParams = useMemo(
+    () => ({
       isEsqlMode,
       services,
       dataView,
@@ -82,7 +82,7 @@ export const useTopNavLinks = ({
         !defaultMenu?.alertsItem?.disabled
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
-          getDiscoverParams,
+          discoverParams,
           stateContainer: state,
         });
         items.push(alertsAppMenuItem);
@@ -105,12 +105,12 @@ export const useTopNavLinks = ({
       }
 
       if (!defaultMenu?.shareItem?.disabled) {
-        const shareAppMenuItem = getShareAppMenuItem({ getDiscoverParams, stateContainer: state });
+        const shareAppMenuItem = getShareAppMenuItem({ discoverParams, stateContainer: state });
         items.push(shareAppMenuItem);
       }
 
       return items;
-    }, [getDiscoverParams, state, services, defaultMenu, onOpenInspector]);
+    }, [discoverParams, state, services, defaultMenu, onOpenInspector]);
 
   const appMenuRegistry = useMemo(
     () => new AppMenuRegistry(appMenuPrimaryAndSecondaryItems),
@@ -123,8 +123,8 @@ export const useTopNavLinks = ({
       appMenuRegistry: (registry: AppMenuRegistry) => registry,
     }));
 
-    return getAppMenu(getDiscoverParams());
-  }, [getAppMenuAccessor, getDiscoverParams]);
+    return getAppMenu(discoverParams);
+  }, [getAppMenuAccessor, discoverParams]);
 
   return useMemo(() => {
     const entries = appMenu
