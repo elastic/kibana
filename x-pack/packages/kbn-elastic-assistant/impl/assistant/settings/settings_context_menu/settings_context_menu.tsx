@@ -93,17 +93,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       closePopover();
     }, [closePopover, showAlertSettingsModal]);
 
-    const popoutIcon = (
-      <EuiIcon
-        css={css`
-          margin-left: ${euiThemeVars.euiSizeXS};
-        `}
-        size="s"
-        // TODO: update icon https://github.com/elastic/security-team/issues/10286
-        type="popout"
-      />
-    );
-
     // We are migrating away from the settings modal in favor of the new Stack Management UI
     // Currently behind `assistantKnowledgeBaseByDefault` FF
     const newItems: ReactElement[] = useMemo(
@@ -115,7 +104,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           data-test-subj={'ai-assistant-settings'}
         >
           {i18n.AI_ASSISTANT_SETTINGS}
-          {popoutIcon}
+          <EuiIcon
+            css={css`
+              margin-left: ${euiThemeVars.euiSizeXS};
+            `}
+            size="s"
+            type="popout"
+          />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'knowledge-base'}
@@ -124,7 +119,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           data-test-subj={'knowledge-base'}
         >
           {i18n.KNOWLEDGE_BASE}
-          {popoutIcon}
+          <EuiIcon
+            css={css`
+              margin-left: ${euiThemeVars.euiSizeXS};
+            `}
+            size="s"
+            type="popout"
+          />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
