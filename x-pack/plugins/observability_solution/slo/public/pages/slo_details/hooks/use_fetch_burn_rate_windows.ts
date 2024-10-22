@@ -53,7 +53,7 @@ export const useFetchBurnRateWindows = (slo: SLOWithSummaryResponse) => {
   useEffect(() => {
     if (!isLoading && rules && rules[sloId]) {
       setBurnRateWindows(
-        rules[sloId][0].params?.windows?.map((window) => ({
+        rules[sloId][0]?.params?.windows?.map((window) => ({
           name: window.actionGroup,
           threshold: window.burnRateThreshold,
           longWindow: window.longWindow,

@@ -20,7 +20,7 @@ interface Props {
   isAutoRefreshing?: boolean;
 }
 
-export function BurnRates({ slo, isAutoRefreshing }: Props) {
+export function BurnRatePanel({ slo, isAutoRefreshing }: Props) {
   const burnRateWindows = useFetchBurnRateWindows(slo);
   const [selectedWindow, setSelectedwindow] = useState(burnRateWindows[0]);
   const { isLoading, data } = useFetchSloBurnRates({
