@@ -28,6 +28,7 @@ import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import {
   apiCanLockHoverActions,
+  getViewModeSubject,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
@@ -61,9 +62,10 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const [hasLockedHoverActions, dataViews] = useBatchedOptionalPublishingSubjects(
+  const [hasLockedHoverActions, dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
     api.hasLockedHoverActions$,
-    api.parentApi?.dataViews
+    api.parentApi?.dataViews,
+    getViewModeSubject(api ?? undefined)
   );
 
   return (
@@ -126,7 +128,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         )}
       </EuiForm>
       <EuiPopoverFooter>
-        {!disableEditbutton && (
+        {!disableEditbutton && parentViewMode === 'edit' && (
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
