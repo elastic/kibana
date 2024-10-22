@@ -659,9 +659,9 @@ export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toL
  * @param text
  * @returns
  */
-export function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
+export function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""' | '/*', text: string) {
   const stack = [];
-  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""', '/*': '*/' };
   for (let i = 0; i < text.length; i++) {
     const substr = text.substring(i, i + bracketType.length);
     if (substr === closingBrackets[bracketType] && stack.length) {
@@ -688,6 +688,7 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
   const unclosedRoundBrackets = countBracketsUnclosed('(', query);
   const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
   const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedComments = countBracketsUnclosed('/*', query);
   const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
@@ -703,8 +704,15 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
   }
 
   // if there are unclosed brackets, close them
-  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
+  if (
+    unclosedRoundBrackets ||
+    unclosedSquaredBrackets ||
+    unclosedQuotes ||
+    unclosedTripleQuotes ||
+    unclosedComments
+  ) {
     for (const [char, count] of [
+      ['*/', unclosedComments],
       ['"""', unclosedTripleQuotes],
       ['"', unclosedQuotes],
       [')', unclosedRoundBrackets],
