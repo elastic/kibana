@@ -11,7 +11,6 @@ import React from 'react';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
-import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 interface Props {
   onChange: (entityTypes: string[]) => void;
@@ -19,7 +18,7 @@ interface Props {
 
 const toComboBoxOption = (entityType: string): EuiComboBoxOptionOption<string> => ({
   key: entityType,
-  label: getEntityTypeLabel(entityType),
+  label: entityType,
   'data-test-subj': `entityTypesFilter${entityType}Option`,
 });
 
