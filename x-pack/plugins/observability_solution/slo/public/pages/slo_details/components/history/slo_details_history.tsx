@@ -7,7 +7,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiSuperDatePicker,
   OnRefreshProps,
   OnTimeChangeProps,
@@ -15,10 +14,10 @@ import {
 import DateMath from '@kbn/datemath';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useMemo, useState } from 'react';
-import { BurnRates } from '../burn_rate/burn_rates';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
 import { TimeBounds } from '../../types';
+import { BurnRates } from '../burn_rate/burn_rates';
 import { EventsChartPanel } from '../events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { SloTabId } from '../slo_details';
@@ -55,7 +54,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
   };
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem
           grow
@@ -83,33 +82,29 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <BurnRates
+        slo={slo}
+        isAutoRefreshing={isAutoRefreshing}
+        burnRateOptions={burnRateOptions}
+        selectedTabId={selectedTabId}
+        range={range}
+        onBrushed={onBrushed}
+      />
 
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <BurnRates
-          slo={slo}
-          isAutoRefreshing={isAutoRefreshing}
-          burnRateOptions={burnRateOptions}
-          selectedTabId={selectedTabId}
-          range={range}
-          onBrushed={onBrushed}
-        />
+      <HistoricalDataCharts
+        slo={slo}
+        selectedTabId={selectedTabId}
+        isAutoRefreshing={isAutoRefreshing}
+        range={range}
+        onBrushed={onBrushed}
+      />
 
-        <HistoricalDataCharts
-          slo={slo}
-          selectedTabId={selectedTabId}
-          isAutoRefreshing={isAutoRefreshing}
-          range={range}
-          onBrushed={onBrushed}
-        />
-
-        <EventsChartPanel
-          slo={slo}
-          range={range}
-          selectedTabId={selectedTabId}
-          onBrushed={onBrushed}
-        />
-      </EuiFlexGroup>
-    </>
+      <EventsChartPanel
+        slo={slo}
+        range={range}
+        selectedTabId={selectedTabId}
+        onBrushed={onBrushed}
+      />
+    </EuiFlexGroup>
   );
 }
