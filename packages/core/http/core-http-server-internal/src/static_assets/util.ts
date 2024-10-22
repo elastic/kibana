@@ -14,11 +14,23 @@ function isEmptyPathname(pathname: string): boolean {
 }
 
 function removeTailSlashes(pathname: string): string {
-  return pathname.replace(/\/+$/, '');
+  let updated = pathname;
+
+  while (updated.endsWith('/')) {
+    updated = updated.substring(0, updated.length - 1);
+  }
+
+  return updated;
 }
 
 function removeLeadSlashes(pathname: string): string {
-  return pathname.replace(/^\/+/, '');
+  let updated = pathname;
+
+  while (updated.startsWith('/')) {
+    updated = updated.substring(1);
+  }
+
+  return updated;
 }
 
 export function removeSurroundingSlashes(pathname: string): string {
