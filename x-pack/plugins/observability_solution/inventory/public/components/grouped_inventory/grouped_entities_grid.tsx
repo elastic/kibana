@@ -10,22 +10,26 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import type { EntityColumnIds, EntityType } from '../../../common/entities';
+import {
+  entityPaginationRt,
+  type EntityColumnIds,
+  type EntityType,
+} from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useInventoryState } from '../../hooks/use_inventory_state';
+import { extractPaginationParameter } from '../../utils/extract_pagination_parameter';
 
 interface Props {
   field: string;
 }
 
-export function GroupedGridWrapper({ field }: Props) {
-  const { pagination, setPagination } = useInventoryState();
+export function GroupedEntitiesGrid({ field }: Props) {
   const { query } = useInventoryParams('/');
-  const { sortField, sortDirection, kuery } = query;
+  const { sortField, sortDirection, kuery, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
-  const pageIndex = (field ? pagination?.[field] : pagination?.unified) ?? 0;
+  const pagination = extractPaginationParameter(paginationQuery);
+  const pageIndex = pagination?.[field] ?? 0;
 
   const { refreshSubject$ } = useInventorySearchBarContext();
   const {
@@ -60,7 +64,16 @@ export function GroupedGridWrapper({ field }: Props) {
   );
 
   function handlePageChange(nextPage: number) {
-    setPagination(field ?? 'unified', nextPage);
+    inventoryRoute.replace('/', {
+      path: {},
+      query: {
+        ...query,
+        pagination: entityPaginationRt.encode({
+          ...pagination,
+          [field]: nextPage,
+        }),
+      },
+    });
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {

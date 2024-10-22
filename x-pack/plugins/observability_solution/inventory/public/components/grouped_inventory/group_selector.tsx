@@ -9,15 +9,15 @@ import { EuiPopover, EuiContextMenu, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import type { EntityView } from '../../../common/entities';
-import { useInventoryState } from '../../hooks/use_inventory_state';
+import { useInventoryParams } from '../../hooks/use_inventory_params';
+import { useInventoryRouter } from '../../hooks/use_inventory_router';
 
 const GROUP_LABELS: Record<EntityView, string> = {
   unified: i18n.translate('xpack.inventory.groupedInventoryPage.noneLabel', {
     defaultMessage: 'None',
   }),
-  [ENTITY_TYPE]: i18n.translate('xpack.inventory.groupedInventoryPage.typeLabel', {
+  grouped: i18n.translate('xpack.inventory.groupedInventoryPage.typeLabel', {
     defaultMessage: 'Type',
   }),
 };
@@ -28,18 +28,31 @@ export interface GroupedSelectorProps {
 }
 
 export function GroupSelector() {
-  const { groupBy, setGroupBy } = useInventoryState();
+  const { query } = useInventoryParams('/');
+  const inventoryRoute = useInventoryRouter();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const groupBy = query.view ?? 'grouped';
+
   const onGroupChange = (selected: EntityView) => {
-    setGroupBy(groupBy === selected ? 'unified' : selected);
+    inventoryRoute.replace('/', {
+      path: {},
+      query: {
+        ...query,
+        view: groupBy === selected ? 'unified' : selected,
+      },
+    });
   };
+
   const isGroupSelected = (groupKey: EntityView) => {
     return groupBy === groupKey;
   };
+
   const panels = [
     {
       id: 'firstPanel',
-      title: 'Select grouping',
+      title: i18n.translate('xpack.inventory.groupedInventoryPage.groupSelectorLabel', {
+        defaultMessage: 'Select grouping',
+      }),
       items: [
         {
           'data-test-subj': 'panel-unified',
@@ -49,9 +62,9 @@ export function GroupSelector() {
         },
         {
           'data-test-subj': 'panel-type',
-          name: GROUP_LABELS[ENTITY_TYPE],
-          icon: isGroupSelected(ENTITY_TYPE) ? 'check' : 'empty',
-          onClick: () => onGroupChange(ENTITY_TYPE),
+          name: GROUP_LABELS.grouped,
+          icon: isGroupSelected('grouped') ? 'check' : 'empty',
+          onClick: () => onGroupChange('grouped'),
         },
       ],
     },
@@ -64,7 +77,6 @@ export function GroupSelector() {
   const button = (
     <EuiButtonEmpty
       data-test-subj="groupSelectorDropdown"
-      flush="both"
       iconSide="right"
       iconSize="s"
       iconType="arrowDown"

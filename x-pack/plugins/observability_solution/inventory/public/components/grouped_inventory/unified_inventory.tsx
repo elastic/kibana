@@ -7,25 +7,25 @@
 import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityColumnIds, EntityType } from '../../../common/entities';
+import { EntityColumnIds, EntityType, entityPaginationRt } from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
-import { useInventoryState } from '../../hooks/use_inventory_state';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { InventorySummary } from './inventory_summary';
+import { extractPaginationParameter } from '../../utils/extract_pagination_parameter';
 
 export function UnifiedInventory() {
-  const { pagination, setPagination } = useInventoryState();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
   const { refreshSubject$ } = useInventorySearchBarContext();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, kuery, entityTypes } = query;
+  const { sortDirection, sortField, kuery, entityTypes, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
+  const pagination = extractPaginationParameter(paginationQuery);
   const pageIndex = pagination?.unified ?? 0;
 
   const {
@@ -56,7 +56,16 @@ export function UnifiedInventory() {
   });
 
   function handlePageChange(nextPage: number) {
-    setPagination('unified', nextPage);
+    inventoryRoute.replace('/', {
+      path: {},
+      query: {
+        ...query,
+        pagination: entityPaginationRt.encode({
+          ...pagination,
+          unified: nextPage,
+        }),
+      },
+    });
   }
 
   function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {

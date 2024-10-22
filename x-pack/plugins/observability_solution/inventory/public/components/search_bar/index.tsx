@@ -19,7 +19,7 @@ import { DiscoverButton } from './discover_button';
 import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 
 export function SearchBar() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
+  const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
   const {
     services: {
       unifiedSearch,
@@ -103,8 +103,12 @@ export function SearchBar() {
         searchEntityTypes: entityTypes,
         searchIsUpdate: isUpdate,
       });
+
+      if (!isUpdate) {
+        refreshSubject$.next();
+      }
     },
-    [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$]
+    [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$, refreshSubject$]
   );
 
   return (
