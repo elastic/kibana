@@ -186,12 +186,6 @@ export function useExpressionRenderer(
     }
 
     errorRenderHandlerRef.current = null;
-    return () => {
-      // when the error is fixed, call again the done() handler to kick off a new clean rendering
-      if (!error) {
-        errorRenderHandlerRef.current?.done();
-      }
-    };
   }, [error, hasCustomErrorRenderer]);
 
   return {
