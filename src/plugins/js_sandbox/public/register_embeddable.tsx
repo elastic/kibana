@@ -53,6 +53,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { dashboardCrossfilterSlice } from './dashboard_crossfilter_slice';
 import { JsSandboxComponent } from './js_sandbox_component';
 import type { JsSandboxPluginStart, JsSandboxPluginStartDeps } from './types';
 
@@ -404,6 +405,18 @@ export const getJsSandboxEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
+      const { eventBus } = pluginStart;
+
+      if (eventBus) {
+        try {
+          eventBus.register(dashboardCrossfilterSlice);
+        } catch (e) {
+          // console.error('Failed to register event bus', e);
+        }
+      }
+
+      const dashboardCrossfilter = eventBus.get(dashboardCrossfilterSlice);
+
       const {
         api: timeRangeApi,
         comparators: timeRangeComparators,
@@ -480,7 +493,13 @@ export const getJsSandboxEmbeddableFactory = (
           const [esql] = useBatchedPublishingSubjects(api.esql);
           const [hashedJS] = useBatchedPublishingSubjects(api.hashedJS);
 
-          return <JsSandboxComponent esql={esql} hashedJs={hashedJS} />;
+          return (
+            <JsSandboxComponent
+              esql={esql}
+              hashedJs={hashedJS}
+              crossfilter={dashboardCrossfilter}
+            />
+          );
         },
       };
     },

@@ -18,3 +18,4 @@ export function plugin() {
   return new EventBusPlugin();
 }
 export type { EventBusPluginSetup, EventBusPluginStart } from './types';
+export type { EventBus } from './event_bus';
