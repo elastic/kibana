@@ -215,10 +215,8 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {
         return getSloClientWithRequest({
-          logger: this.logger,
           request,
           soClient: core.savedObjects.getScopedClient(request),
-          spaces: plugins.spaces,
           esClient: internalEsClient,
         });
       },

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-// @ts-ignore
 import type {
   AnalyzeEntityHealthToolMessage,
   RootCauseAnalysisForServiceEvent,
 } from '@kbn/observability-utils-server/llm/service_rca';
 import { MessageRole } from '@kbn/inference-plugin/common';
 import { Required } from 'utility-types';
+// @ts-ignore
 import completeRootCauseAnalysisJson from './complete_root_cause_analysis.json';
 
 export const completeRootCauseAnalysis =
