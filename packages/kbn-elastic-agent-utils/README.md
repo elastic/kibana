@@ -4,6 +4,14 @@ A utility package providing functions for working with Elastic Agents. This pack
 
 ## Functions
 
+- **`getAgentName`**
+
+  ```typescript
+  export function getAgentName(agentName: string | null, telemetryAgentName: string | null, telemetrySdkName: string | null): AgentName;
+  ```
+
+  Tries to get the correct agent name, `agentName` is the first option, if it fails checks if `telemetryAgentName` and `telemetrySdkName` are defined and return them as `telemetrySdkName/telemetryAgentName`, if not, `telemetryAgentName` is returned
+
 - **`isOpenTelemetryAgentName`**
 
   ```typescript

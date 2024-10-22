@@ -145,7 +145,7 @@ export type MetadataField = z.infer<typeof metadataSchema>;
 export const identityFieldsSchema = z
   .object({
     field: z.string(),
-    optional: z.boolean(),
+    optional: z.literal(false),
   })
   .or(z.string().transform((value) => ({ field: value, optional: false })));
 
