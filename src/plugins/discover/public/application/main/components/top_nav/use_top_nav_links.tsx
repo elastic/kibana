@@ -112,30 +112,23 @@ export const useTopNavLinks = ({
       return items;
     }, [discoverParams, state, services, defaultMenu, onOpenInspector]);
 
-  const appMenuRegistry = useMemo(
-    () => new AppMenuRegistry(appMenuPrimaryAndSecondaryItems),
-    [appMenuPrimaryAndSecondaryItems]
-  );
-
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
-  const appMenu = useMemo(() => {
+  const appMenuRegistry = useMemo(() => {
+    const newAppMenuRegistry = new AppMenuRegistry(appMenuPrimaryAndSecondaryItems);
     const getAppMenu = getAppMenuAccessor(() => ({
-      appMenuRegistry: (registry: AppMenuRegistry) => registry,
+      appMenuRegistry: () => newAppMenuRegistry,
     }));
 
-    return getAppMenu(discoverParams);
-  }, [getAppMenuAccessor, discoverParams]);
+    return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+  }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
-    const entries = appMenu
-      .appMenuRegistry(appMenuRegistry)
-      .getSortedItems()
-      .map((appMenuItem) =>
-        convertAppMenuItemToTopNavItem({
-          appMenuItem,
-          services,
-        })
-      );
+    const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
+      convertAppMenuItemToTopNavItem({
+        appMenuItem,
+        services,
+      })
+    );
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**
@@ -217,7 +210,6 @@ export const useTopNavLinks = ({
     return entries;
   }, [
     services,
-    appMenu,
     appMenuRegistry,
     state,
     dataView,
