@@ -171,6 +171,9 @@ export class BasicPrettyPrinter {
       right = resolveItem(right);
 
       if (isProperNode(left) && isProperNode(right)) {
+        if (!!left.formatting || !!right.formatting) {
+          return undefined;
+        }
         if (isIntegerLiteral(left)) {
           if (left.value === 1) {
             return this.simplifyMultiplicationByOne(right, minusCount);
