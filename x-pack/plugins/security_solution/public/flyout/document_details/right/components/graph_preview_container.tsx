@@ -23,8 +23,6 @@ const DEFAULT_TO = 'now/d';
 export const GraphPreviewContainer: React.FC = () => {
   const { dataAsNestedObject, getFieldsData } = useDocumentDetailsContext();
 
-  // const displayGraphPreview = isEnabled && !isPreview && !isPreviewMode;
-
   const { eventIds } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,

@@ -129,6 +129,7 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         zoomOnDoubleClick={isGraphLocked}
         preventScrolling={isGraphLocked}
         nodesDraggable={interactive && isGraphLocked}
+        maxZoom={1.3}
       >
         {interactive && <Controls onInteractiveChange={onInteractiveStateChange} />}
         <Background />
