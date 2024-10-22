@@ -297,15 +297,20 @@ Note: The rule is disabled by default to avoid automatic migrations without an o
 
 **Migrate routes with defined authorization**
 ```sh
-MIGRATE_DISABLED_AUTHZ=false npx eslint --ext .ts --fix --rule "@kbn/eslint/no_deprecated_authz_config:error" path/to/your/folder
+MIGRATE_DISABLED_AUTHZ=false MIGRATE_ENABLED_AUTHZ=true npx eslint --ext .ts --fix path/to/your/folder
+```
+
+**Migrate routes opted out from authorization**
+```sh
+MIGRATE_DISABLED_AUTHZ=true MIGRATE_ENABLED_AUTHZ=false npx eslint --ext .ts --fix path/to/your/folder
 ```
 We encourage you to migrate routes that are opted out from authorization to new config and provide legitimate reason for disabled authorization.
 It is better to migrate routes opted out from authorization iteratively and elaborate on the reasoning. 
 Routes without a compelling reason to opt-out of authorization should plan to introduce them as soon as possible.
 
-**Migrate all routes (including those opted out from authorization)**
+**Migrate all routes**
 ```sh
-MIGRATE_DISABLED_AUTHZ=true npx eslint --ext .ts --fix --rule "@kbn/eslint/no_deprecated_authz_config:error" path/to/your/folder
+MIGRATE_DISABLED_AUTHZ=true MIGRATE_ENABLED_AUTHZ=true npx eslint --ext .ts --fix path/to/your/folder
 ```
 
 ## Questions?
