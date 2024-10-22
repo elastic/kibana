@@ -10,8 +10,10 @@ import type { PieVisualizationState, XYState } from '@kbn/lens-plugin/public';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { UnifiedHistogramVisContext } from '../types';
 
+const LENS_PREFIX = 'lns';
+
 export const getPreferredChartType = (visAttributes: UnifiedHistogramVisContext['attributes']) => {
-  let preferredChartType = visAttributes ? visAttributes?.visualizationType : undefined;
+  let preferredChartType = visAttributes?.visualizationType;
 
   if (preferredChartType === 'lnsXY') {
     preferredChartType = (visAttributes?.state?.visualization as XYState)?.preferredSeriesType;
@@ -20,5 +22,5 @@ export const getPreferredChartType = (visAttributes: UnifiedHistogramVisContext[
     preferredChartType = (visAttributes?.state?.visualization as PieVisualizationState)?.shape;
   }
 
-  return preferredChartType as ChartType;
+  return preferredChartType.replace(LENS_PREFIX, '') as ChartType;
 };
