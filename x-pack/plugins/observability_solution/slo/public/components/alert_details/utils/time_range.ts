@@ -6,7 +6,7 @@
  */
 import type { DateRange } from '@kbn/alerting-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { TimeRange } from '../../../error_rate_chart/use_lens_definition';
+import { TimeRange } from '../../slo/error_rate_chart/use_lens_definition';
 import { BurnRateAlert } from '../types';
 import { getActionGroupWindow } from './alert';
 
