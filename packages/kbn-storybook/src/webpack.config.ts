@@ -86,41 +86,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             loader: require.resolve('@kbn/peggy-loader'),
           },
         },
-        {
-          test: /\.scss$/,
-          exclude: /\.module.(s(a|c)ss)$/,
-          use: [
-            { loader: 'style-loader' },
-            { loader: 'css-loader', options: { importLoaders: 2 } },
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                additionalData(content: string, loaderContext: any) {
-                  const req = JSON.stringify(
-                    loaderContext.utils.contextify(
-                      loaderContext.context || loaderContext.rootContext,
-                      resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
-                    )
-                  );
-                  return `@import ${req};\n${content}`;
-                },
-                implementation: require('sass-embedded'),
-                sassOptions: {
-                  includePaths: [resolve(REPO_ROOT, 'node_modules')],
-                  quietDeps: true,
-                },
-              },
-            },
-          ],
-        },
       ],
     },
     plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
@@ -158,21 +123,23 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       options.presets = [
         require.resolve('@kbn/babel-preset/common_preset'),
         { plugins },
-        ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
-          const tsPreset = getTsPreset(preset);
-          if (!tsPreset) {
-            return preset;
-          }
+        ...((options.presets as Preset[]) ? options.preset : [])
+          .filter(isDesiredPreset)
+          .map((preset) => {
+            const tsPreset = getTsPreset(preset);
+            if (!tsPreset) {
+              return preset;
+            }
 
-          return [
-            tsPreset[0],
-            {
-              ...tsPreset[1],
-              allowNamespaces: true,
-              allowDeclareFields: true,
-            },
-          ];
-        }),
+            return [
+              tsPreset[0],
+              {
+                ...tsPreset[1],
+                allowNamespaces: true,
+                allowDeclareFields: true,
+              },
+            ];
+          }),
       ];
     }
   }

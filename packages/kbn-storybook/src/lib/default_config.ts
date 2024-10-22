@@ -11,6 +11,7 @@ import * as path from 'path';
 import fs from 'fs';
 import type { StorybookConfig } from '@storybook/react-webpack5';
 import webpack from 'webpack';
+import { resolve } from 'path';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
@@ -31,7 +32,53 @@ const IGNORE_GLOBS = [
 ];
 
 export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', "@storybook/addon-webpack5-compiler-babel"],
+  addons: [
+    '@kbn/storybook/preset',
+    '@storybook/addon-a11y',
+    '@storybook/addon-webpack5-compiler-babel',
+    {
+      name: '@storybook/addon-styling-webpack',
+      options: {
+        rules: [
+          {
+            test: /\.scss$/,
+            exclude: /\.module.(s(a|c)ss)$/,
+            use: [
+              { loader: 'style-loader' },
+              { loader: 'css-loader', options: { importLoaders: 2 } },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  postcssOptions: {
+                    config: require.resolve('@kbn/optimizer/postcss.config'),
+                  },
+                },
+              },
+              {
+                loader: 'sass-loader',
+                options: {
+                  additionalData(content: string, loaderContext: any) {
+                    const req = JSON.stringify(
+                      loaderContext.utils.contextify(
+                        loaderContext.context || loaderContext.rootContext,
+                        resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                      )
+                    );
+                    return `@import ${req};\n${content}`;
+                  },
+                  implementation: require('sass-embedded'),
+                  sassOptions: {
+                    includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                    quietDeps: true,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
   // addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx'],
   // stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
@@ -42,19 +89,19 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
-  babel: async (options) => {
-    options.presets.push([
-      require.resolve('@emotion/babel-preset-css-prop'),
-      {
-        // There's an issue where emotion classnames may be duplicated,
-        // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
-        // https://github.com/emotion-js/emotion/issues/2417
-        autoLabel: 'always',
-        labelFormat: '[filename]--[local]',
-      },
-    ]);
-    return options;
-  },
+  // babel: async (options) => {
+  //   options?.presets?.push([
+  //     require.resolve('@emotion/babel-preset-css-prop'),
+  //     {
+  //       // There's an issue where emotion classnames may be duplicated,
+  //       // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+  //       // https://github.com/emotion-js/emotion/issues/2417
+  //       autoLabel: 'always',
+  //       labelFormat: '[filename]--[local]',
+  //     },
+  //   ]);
+  //   return options;
+  // },
   webpackFinal: (config, options) => {
     if (process.env.CI) {
       config.parallelism = 4;

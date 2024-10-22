@@ -1508,6 +1508,7 @@
     "@storybook/addon-controls": "^8.3.5",
     "@storybook/addon-docs": "^8.3.5",
     "@storybook/addon-essentials": "^8.3.5",
+    "@storybook/addon-styling-webpack": "^1.0.0",
     "@storybook/addon-webpack5-compiler-babel": "^3.0.3",
     "@storybook/blocks": "^8.3.5",
     "@storybook/components": "^8.3.5",
