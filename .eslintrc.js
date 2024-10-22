@@ -1980,14 +1980,17 @@ module.exports = {
     },
     {
       files: [
-        'packages/kbn-reporting/common/**',
-        'packages/kbn-reporting/export_types/pdf_common/**',
-        'packages/kbn-reporting/export_types/pdf/**',
-        'packages/kbn-reporting/export_types/png_common/**',
-        'packages/kbn-reporting/export_types/png/**',
-        'packages/kbn-reporting/public/**',
-        'packages/kbn-reporting/server/**',
+        'packages/kbn-reporting/common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/pdf_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/pdf/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/png_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/png/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/public/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/server/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
         'packages/shared-ux/page/analytics_no_data/types/**',
+        'scripts/create_observability_rules.js', // TODO - is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // TODO @kibana/operations - is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // TODO @kibana/operations - is importing "@kbn/screenshotting-plugin" (platform/private)
         'src/plugins/ai_assistant_management/selection/**',
         'src/plugins/dashboard/**',
         'src/plugins/discover/**',
@@ -1995,15 +1998,12 @@ module.exports = {
         'x-pack/examples/exploratory_view_example/**',
         'x-pack/examples/screenshotting_example/**',
         'x-pack/examples/ui_actions_enhanced_examples/**',
-        'x-pack/packages/kbn-ai-assistant/**',
-        'x-pack/packages/observability/alerting_test_data/**',
         'x-pack/packages/security-solution/data_table/**',
         'x-pack/plugins/aiops/**',
         'x-pack/plugins/data_quality/**',
         'x-pack/plugins/ingest_pipelines/**',
         'x-pack/plugins/ml/**',
         'x-pack/plugins/monitoring/**',
-        'x-pack/plugins/observability_solution/apm/ftr_e2e/**',
         'x-pack/plugins/observability_solution/infra/**',
         'x-pack/plugins/observability_solution/inventory/**',
         'x-pack/plugins/observability_solution/investigate_app/**',
@@ -2012,7 +2012,6 @@ module.exports = {
         'x-pack/plugins/observability_solution/metrics_data_access/**',
         'x-pack/plugins/observability_solution/observability_ai_assistant_app/**',
         'x-pack/plugins/observability_solution/observability_ai_assistant_management/**',
-        'x-pack/plugins/observability_solution/observability_onboarding/e2e/**',
         'x-pack/plugins/observability_solution/observability/**',
         'x-pack/plugins/observability_solution/slo/**',
         'x-pack/plugins/observability_solution/synthetics/e2e/**',
