@@ -20,16 +20,8 @@ export default createTestConfig({
   esServerArgs: [],
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
-    `--xpack.cloud.serverless.project_id=fakeprojectid`,
     `--xpack.cloud.serverless.project_name=ES3_FTR_TESTS`,
-    `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
-    `--xpack.cloud.profile_url=/user/settings/`,
-    `--xpack.cloud.billing_url=/billing/overview/`,
-    `--xpack.cloud.deployments_url=/deployments`,
     `--xpack.cloud.deployment_url=/projects/elasticsearch/fakeprojectid`,
-    `--xpack.cloud.users_and_roles_url=/account/members/`,
-    `--xpack.cloud.projects_url=/projects/`,
-    `--xpack.cloud.organization_url=/account/`,
   ],
   apps: {
     serverlessElasticsearch: {
