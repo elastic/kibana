@@ -7120,14 +7120,26 @@
             }
           },
           {
+            "description": "use withAgentCount instead",
             "in": "query",
             "name": "noAgentCount",
+            "required": false,
+            "schema": {
+              "deprecated": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "get policies with agent count",
+            "in": "query",
+            "name": "withAgentCount",
             "required": false,
             "schema": {
               "type": "boolean"
             }
           },
           {
+            "description": "get full policies with package policies populated",
             "in": "query",
             "name": "full",
             "required": false,
