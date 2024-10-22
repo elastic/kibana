@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import React from 'react';
 import {
   UserAvatarTip,
