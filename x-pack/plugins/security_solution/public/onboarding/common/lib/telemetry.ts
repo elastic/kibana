@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from '@kbn/test-suites-src/common/services';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
+
+export const trackOnboardingLinkClick = (linkId: string) => {
+  track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.ONBOARDING}_${linkId}`);
+};
