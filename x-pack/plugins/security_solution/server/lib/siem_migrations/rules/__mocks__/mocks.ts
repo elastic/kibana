@@ -12,7 +12,6 @@ export const createRuleMigrationClient = (): SiemRuleMigrationsClient => ({
   search: jest.fn().mockResolvedValue([]),
 });
 
-export const mockIndexName = 'mocked_data_stream_name';
 export const mockSetup = jest.fn();
 export const mockGetClient = jest.fn().mockReturnValue(createRuleMigrationClient());
 

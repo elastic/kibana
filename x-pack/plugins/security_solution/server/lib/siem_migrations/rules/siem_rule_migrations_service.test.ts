@@ -35,13 +35,13 @@ describe('SiemRuleMigrationsService', () => {
     ruleMigrationsService = new SiemRuleMigrationsService(logger, kibanaVersion);
   });
 
-  it('should instantiate the rule migrations data stream adapter', async () => {
+  it('should instantiate the rule migrations data stream adapter', () => {
     expect(MockRuleMigrationsDataStream).toHaveBeenCalledWith({ kibanaVersion });
   });
 
   describe('setup', () => {
-    it('should set esClusterClient and call dataStreamAdapter.install', async () => {
-      await ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
+    it('should set esClusterClient and call dataStreamAdapter.install', () => {
+      ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
       expect(mockInstall).toHaveBeenCalledWith({
         esClient: esClusterClient.asInternalUser,
@@ -53,7 +53,7 @@ describe('SiemRuleMigrationsService', () => {
 
   describe('getClient', () => {
     let request: KibanaRequest;
-    beforeEach(async () => {
+    beforeEach(() => {
       request = httpServerMock.createKibanaRequest();
     });
 
@@ -66,17 +66,17 @@ describe('SiemRuleMigrationsService', () => {
     });
 
     describe('with setup', () => {
-      beforeEach(async () => {
-        await ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
+      beforeEach(() => {
+        ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
       });
 
-      it('should call installSpace', async () => {
+      it('should call installSpace', () => {
         ruleMigrationsService.getClient({ spaceId: 'default', request });
 
         expect(mockInstallSpace).toHaveBeenCalledWith('default');
       });
 
-      it('should return a client with create and search methods after setup', async () => {
+      it('should return a client with create and search methods after setup', () => {
         const client = ruleMigrationsService.getClient({ spaceId: 'default', request });
 
         expect(client).toHaveProperty('create');
