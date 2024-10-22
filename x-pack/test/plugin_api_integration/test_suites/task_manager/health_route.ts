@@ -125,6 +125,11 @@ export default function ({ getService }: FtrProviderContext) {
   const monitoredAggregatedStatsRefreshRate = 5000;
 
   describe('health', () => {
+    afterEach(async () => {
+      // clean up after each test
+      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+    });
+
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
