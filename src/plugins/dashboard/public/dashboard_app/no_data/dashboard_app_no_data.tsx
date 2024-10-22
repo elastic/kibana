@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
+import useMountedState from 'react-use/lib/useMountedState';
 import { v4 as uuidv4 } from 'uuid';
 import {
   getESQLAdHocDataview,
@@ -49,7 +51,8 @@ export const DashboardAppNoDataPage = ({
     noDataPage: noDataPageService,
     share: shareService,
   };
-
+  const [abortController, setAbortController] = useState(new AbortController());
+  const isMounted = useMountedState();
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
   const AnalyticsNoDataPageKibanaProvider = withSuspense(
     React.lazy(() =>
@@ -63,57 +66,75 @@ export const DashboardAppNoDataPage = ({
     return lensService?.stateHelperApi() ?? Promise.resolve(null);
   }, [lensService]);
 
+  useEffect(() => {
+    return () => {
+      abortController?.abort();
+    };
+  }, [abortController]);
+
   const onTryESQL = useCallback(async () => {
-    if (lensHelpersAsync.value) {
+    abortController?.abort();
+    if (lensHelpersAsync.value && isMounted()) {
+      const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
       const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
       const esqlQuery = getInitialESQLQuery(dataView);
-      const abortController = new AbortController();
 
-      const columns = await getESQLQueryColumns({
-        esqlQuery,
-        search: dataService.search.search,
-        signal: abortController.signal,
-        timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
-      });
+      try {
+        const columns = await getESQLQueryColumns({
+          esqlQuery,
+          search: dataService.search.search,
+          signal: abc.signal,
+          timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
+        });
 
-      // lens suggestions api context
-      const context = {
-        dataViewSpec: dataView?.toSpec(false),
-        fieldName: '',
-        textBasedColumns: columns,
-        query: { esql: esqlQuery },
-      };
-
-      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
-      if (chartSuggestions?.length) {
-        const [suggestion] = chartSuggestions;
-
-        const attrs = getLensAttributesFromSuggestion({
-          filters: [],
-          query: {
-            esql: esqlQuery,
-          },
-          suggestion,
-          dataView,
-        }) as TypedLensByValueInput['attributes'];
-
-        const lensEmbeddableInput = {
-          attributes: attrs,
-          id: generateId(),
+        // lens suggestions api context
+        const context = {
+          dataViewSpec: dataView?.toSpec(false),
+          fieldName: '',
+          textBasedColumns: columns,
+          query: { esql: esqlQuery },
         };
 
-        await embeddableService.getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
-          state: {
-            type: 'lens',
-            input: lensEmbeddableInput,
-          },
-          path: '#/create',
-        });
+        setAbortController(abc);
+
+        const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
+        if (chartSuggestions?.length) {
+          const [suggestion] = chartSuggestions;
+
+          const attrs = getLensAttributesFromSuggestion({
+            filters: [],
+            query: {
+              esql: esqlQuery,
+            },
+            suggestion,
+            dataView,
+          }) as TypedLensByValueInput['attributes'];
+
+          const lensEmbeddableInput = {
+            attributes: attrs,
+            id: generateId(),
+          };
+
+          await embeddableService.getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
+            state: {
+              type: 'lens',
+              input: lensEmbeddableInput,
+            },
+            path: '#/create',
+          });
+        }
+      } catch (error) {
+        coreServices.notifications.toasts.addWarning(
+          i18n.translate('dashboard.noDataviews.esqlRequestWarningMessage', {
+            defaultMessage: 'Unable to load columns. {errorMessage}',
+            values: { errorMessage: error.message },
+          })
+        );
       }
     }
-  }, [lensHelpersAsync.value]);
+  }, [abortController, isMounted, lensHelpersAsync.value]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
