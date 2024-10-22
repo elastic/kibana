@@ -51,22 +51,27 @@ import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
  * @param param0
  * @returns
  */
-export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
+export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esql, hashedJs }) => {
+  console.log('esql', esql);
   const iframeID = useMemo(() => Math.random().toString(36).substring(7), []);
-
-  // TODO Replace with result of user provided ES|QL query
-  // State to manage the data prop that will be passed to the user's component
-  const [data, setData] = useState({
-    message: 'This is the initial predefined data provided by the SPA.',
-  });
 
   const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
 
   // Do not render iframe if user provided string doesn't start with `function(`
   // or if it contains global variables.
   const jsPassesBasicCheck = useMemo(() => {
-    const globals = ['window', 'document', 'localStorage', 'sessionStorage', 'alert'];
-    return hashedJs.startsWith('function(') && !globals.some((global) => hashedJs.includes(global));
+    const notAllowed = [
+      'window',
+      'document',
+      'localStorage',
+      'sessionStorage',
+      'alert',
+      'postMessage',
+      'addEventListener',
+      'removeEventListener',
+      'dispatchEvent',
+    ];
+    return hashedJs.startsWith('function(') && !notAllowed.some((d) => hashedJs.includes(d));
   }, [hashedJs]);
 
   // Ref to store the iframe reference
@@ -91,9 +96,14 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
     <!DOCTYPE html>
     <html>
       <head>
-        <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
-        <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-lite-api@4"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script>
       </head>
       <body>
         <div id="root"></div>
@@ -101,7 +111,18 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
           let UserComponent = () => null;
 
           // Function to render UserComponent with the provided data
-          const renderUserComponent = function(data) {
+          const renderUserComponent = function(dataString) {
+            let data;
+
+            try {
+              data = JSON.parse(dataString);
+            } catch (e) {
+              window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
+                errorType: 'Error parsing data',
+                error: e
+              }});
+            }
+
             try {
               if (typeof UserComponent === 'function') {
                 ReactDOM.render(
@@ -164,7 +185,7 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.source === iframeID) {
         if (event.data.type === 'iframeReady') {
-          iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: data }, '*');
+          iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: esql }, '*');
         } else if (event.data.type === 'error') {
           setError(event.data.payload);
         }
@@ -182,9 +203,9 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
   // Effect to update the iframe when `data` changes
   useEffect(() => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: 'updateData', payload: data }, '*');
+      iframeRef.current.contentWindow.postMessage({ type: 'updateData', payload: esql }, '*');
     }
-  }, [data]);
+  }, [esql]);
 
   return (
     <>
