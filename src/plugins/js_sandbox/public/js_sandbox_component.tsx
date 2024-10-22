@@ -69,9 +69,10 @@ export const JsSandboxComponent: FC<{
 
   const [iframeReady, setIframeReady] = useState(false);
   const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
-  const [data, setData] = useState<any[]>();
+  const [data, setData] = useState<{ data: any[]; dataCrossfilter: any[] }>();
 
   const filters = crossfilter.useState((state) => state.filters);
+  console.log('filters', iframeID, filters);
 
   const panelFilters = useMemo(() => {
     const pfs = cloneDeep(filters);
@@ -96,21 +97,37 @@ export const JsSandboxComponent: FC<{
   // fetch data from ES
   useEffect(() => {
     const fetchData = async () => {
-      const result = await getESQLResults({
-        esqlQuery: esqlWithFilters, // 'FROM kibana_sample_data_logs | LIMIT 10',
+      const resultFull = await getESQLResults({
+        esqlQuery: esql,
         // filter,
         search: dataPlugin.search.search,
         // signal: abortController?.signal,
         // timeRange: { from: fromDate, to: toDate },
       });
 
-      const wideFormat = result.response.values.map((row) => {
+      const wideFormatFull = resultFull.response.values.map((row) => {
         return row.reduce((acc, val, idx) => {
-          acc[result.response.columns[idx].name] = val;
+          acc[resultFull.response.columns[idx].name] = val;
           return acc;
         }, {});
       });
-      setData(wideFormat);
+
+      const resultCrossfilter = await getESQLResults({
+        esqlQuery: esqlWithFilters,
+        // filter,
+        search: dataPlugin.search.search,
+        // signal: abortController?.signal,
+        // timeRange: { from: fromDate, to: toDate },
+      });
+
+      const wideFormatCrossfilter = resultCrossfilter.response.values.map((row) => {
+        return row.reduce((acc, val, idx) => {
+          acc[resultCrossfilter.response.columns[idx].name] = val;
+          return acc;
+        }, {});
+      });
+
+      setData({ data: wideFormatFull, dataCrossfilter: wideFormatCrossfilter });
     };
 
     if (esql !== '') {

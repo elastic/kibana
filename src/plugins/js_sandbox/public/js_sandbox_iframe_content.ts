@@ -52,7 +52,7 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
 
           function updateWidthHeight() {
             width = Math.max(document.documentElement.clientWidth - 32 || 0, window.innerWidth - 32 || 0);
-            height = Math.max(document.documentElement.clientHeight - 48 || 0, window.innerHeight - 48 || 0);
+            height = Math.max(document.documentElement.clientHeight - 54 || 0, window.innerHeight - 54 || 0);
           }
 
           function updateData(dataString) {
@@ -89,7 +89,11 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
             try {
               if (typeof UserComponent === 'function') {
                 ReactDOM.render(
-                  React.createElement(UserComponent, { data, width, height, dispatch }),
+                  React.createElement(UserComponent, {
+                    data: data.data,
+                    crossfilter: data.dataCrossfilter,
+                    width, height, dispatch
+                  }),
                   document.getElementById('root')
                 );
                 window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: null }, '*');
