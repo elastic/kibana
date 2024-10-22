@@ -117,7 +117,8 @@ export class EndpointAppContextService {
     this.savedObjectsFactoryService = savedObjectsFactory;
     this.fleetServicesFactory = new EndpointFleetServicesFactory(
       dependencies.fleetStartServices,
-      savedObjectsFactory
+      savedObjectsFactory,
+      this.createLogger('endpointFleetServices')
     );
 
     this.registerFleetExtensions();
@@ -189,7 +190,9 @@ export class EndpointAppContextService {
         logger,
         exceptionsClient: exceptionListsClient,
         esClient: this.startDependencies.esClient,
-        fleetServicesFactory: this.fleetServicesFactory,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        fleetServicesFactory: this.fleetServicesFactory!,
+        isServerless: this.isServerless(),
       })
     );
 
@@ -221,6 +224,19 @@ export class EndpointAppContextService {
     }
 
     return this.savedObjectsFactoryService;
+  }
+
+  /**
+   * Is kibana running in serverless mode
+   */
+  public isServerless(): boolean {
+    if (!this.setupDependencies) {
+      throw new EndpointAppContentServicesNotSetUpError();
+    }
+
+    // TODO:PT check what this returns when running locally with kibana in serverless emulation
+
+    return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {

@@ -144,6 +144,7 @@ export const createMockEndpointAppContextService = (
       return responseActionsClientMock.create();
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
+    isServerless: jest.fn().mockReturnValue(false),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
