@@ -162,7 +162,7 @@ export const GeoipList: React.FunctionComponent = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.ingestPipelines.manageProcessors.geoip.tableTitle"
-                  defaultMessage="GeoIP"
+                  defaultMessage="IP Location"
                 />
               </h2>
             </EuiTitle>
