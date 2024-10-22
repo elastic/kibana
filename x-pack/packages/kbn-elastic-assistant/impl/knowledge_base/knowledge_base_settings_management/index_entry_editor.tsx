@@ -102,8 +102,6 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       return !!(await dataViews.getExistingIndices([entry.index])).length;
     }, [entry?.index]);
 
-    console.error('indexExists', indexExists);
-
     const indexFields = useAsync(
       async () =>
         dataViews.getFieldsForWildcard({
