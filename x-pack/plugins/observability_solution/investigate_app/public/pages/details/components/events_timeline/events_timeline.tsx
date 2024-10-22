@@ -13,6 +13,7 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { getBrushData } from '@kbn/observability-utils/chart/utils';
 import { Group } from '@kbn/observability-alerting-rule-utils';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { AnnotationEvent } from './annotation_event';
 import { TIME_LINE_THEME } from './timeline_theme';
 import { useFetchEvents } from '../../../../hooks/use_fetch_events';
@@ -28,18 +29,17 @@ export const EventsTimeLine = () => {
   const { globalParams, updateInvestigationParams } = useInvestigation();
   const { alert } = useInvestigation();
 
-  const groups = useMemo(
-    () =>
-      (alert?.[ALERT_GROUP] as unknown as Group[])
-        ?.map(({ field }) => `"${field}":"${alert?.[field]}"`)
-        .join(','),
-    [alert]
-  );
+  const filter = useMemo(() => {
+    const group = (alert?.[ALERT_GROUP] as unknown as Group[])?.find(
+      ({ field }) => field === SERVICE_NAME
+    );
+    return group ? `{"${group.field}":"${alert?.[group.field]}"}` : '';
+  }, [alert]);
 
   const { data: events, isLoading } = useFetchEvents({
     rangeFrom: globalParams.timeRange.from,
     rangeTo: globalParams.timeRange.to,
-    filter: `{${groups}}`,
+    filter,
   });
 
   const chartRef = useRef(null);
