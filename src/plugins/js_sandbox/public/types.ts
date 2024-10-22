@@ -9,6 +9,7 @@
 
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EventBusPluginSetup, EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface JsSandboxPluginSetup {}
@@ -18,10 +19,12 @@ export interface JsSandboxPluginStart {}
 
 export interface JsSandboxPluginSetupDeps {
   embeddable: EmbeddableSetup;
+  eventBus: EventBusPluginSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface JsSandboxPluginStartDeps {
   embeddable: EmbeddableStart;
+  eventBus: EventBusPluginStart;
   uiActions: UiActionsStart;
 }

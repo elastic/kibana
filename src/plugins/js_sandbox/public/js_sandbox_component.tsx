@@ -9,6 +9,9 @@
 
 import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
 
+import type { EventBus } from '@kbn/event-bus-plugin/public';
+
+import type { DashboardCrossfilterSlice } from './dashboard_crossfilter_slice';
 import { getUnableToParseIframeMessage, getIframeContent } from './js_sandbox_iframe_content';
 
 /**
@@ -53,10 +56,17 @@ import { getUnableToParseIframeMessage, getIframeContent } from './js_sandbox_if
  * @param param0
  * @returns
  */
-export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esql, hashedJs }) => {
+export const JsSandboxComponent: FC<{
+  esql: string;
+  hashedJs: string;
+  crossfilter: EventBus<DashboardCrossfilterSlice>;
+}> = ({ esql, hashedJs, crossfilter }) => {
   const iframeID = useMemo(() => Math.random().toString(36).substring(7), []);
 
   const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
+
+  const filters = crossfilter.useState((state) => state.filters);
+  console.log('filters', filters);
 
   // Do not render iframe if user provided string doesn't start with `function(`
   // or if it contains global variables.
@@ -97,7 +107,7 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
         } else if (event.data.type === 'error') {
           setError(event.data.payload);
         } else if (event.data.type === 'crossfilter') {
-          console.log('Host received crossfilter data:', event.data.payload);
+          crossfilter.actions.setCrossfilter({ id: event.data.source, filter: event.data.payload });
         }
       }
     };
