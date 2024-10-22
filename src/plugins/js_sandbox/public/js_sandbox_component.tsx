@@ -109,24 +109,41 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
         <div id="root"></div>
         <script>
           let UserComponent = () => null;
+          let data;
+          let width;
+          let height;
 
-          // Function to render UserComponent with the provided data
-          const renderUserComponent = function(dataString) {
-            let data;
+          function updateWidthHeight() {
+            width = Math.max(document.documentElement.clientWidth - 72 || 0, window.innerWidth - 72 || 0);
+            height = Math.max(document.documentElement.clientHeight - 48 || 0, window.innerHeight - 48 || 0);
+            console.log('dim', width, height);
+          }
 
+          function updateData(dataString) {
             try {
               data = JSON.parse(dataString);
+              return true
             } catch (e) {
               window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
                 errorType: 'Error parsing data',
                 error: e
               }});
+              return false;
             }
+          }
+
+          window.addEventListener('resize', function(event) {
+            renderUserComponent();
+          }, true);
+
+          // Function to render UserComponent with the provided data
+          const renderUserComponent = function() {
+            updateWidthHeight();
 
             try {
               if (typeof UserComponent === 'function') {
                 ReactDOM.render(
-                  React.createElement(UserComponent, { data }),
+                  React.createElement(UserComponent, { data, width, height }),
                   document.getElementById('root')
                 );
                 window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: null }, '*');
@@ -171,7 +188,11 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
           // Listen for messages from the parent window to receive data updates
           window.addEventListener('message', function(event) {
             if (event.data.type === 'updateData' && typeof UserComponent === 'function') {
-              renderUserComponent(event.data.payload);
+              const dataOk = updateData(event.data.payload);
+
+              if (dataOk) {
+                renderUserComponent();
+              }
             }
           });
         </script>

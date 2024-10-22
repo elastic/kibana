@@ -30,20 +30,22 @@ function(props) {
     vl.markBar({ tooltip: true })
       .data(data)
       .encode(
-        vl.x().fieldT("x"),
+        vl.x().fieldT("x").timeUnit('binnedday'),
         vl.y().fieldQ("y"),
         vl.tooltip([vl.fieldT("x"), vl.fieldQ("y")])
       )
-      .width("800")
+      .width(props.width)
+      .height(props.height)
       .render()
       .then(viewElement => {
         // render returns a promise to a DOM element containing the chart
         // viewElement.value contains the Vega View object instance
-        wrapperRef.current.innerHtml = '';
+        const el = wrapperRef.current;
+        while (el.firstChild) el.removeChild(el.firstChild);
         wrapperRef.current.appendChild(viewElement);
       });
     },
-    [props.data]
+    [props.data, props.width, props.height]
   );
 
   return <div ref={wrapperRef} id="myChart" style={{
