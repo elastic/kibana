@@ -67,6 +67,21 @@ const configurationFormSchema: FormSchema = {
     formatters: [fieldFormatters.toInt],
     validations: [
       {
+        validator: ({ value }) => {
+          // TODO: Replace with validator added in https://github.com/elastic/kibana/pull/196527/
+          if (!Number.isInteger(Number(value ?? ''))) {
+            return {
+              message: i18n.translate(
+                'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldIntegerError',
+                {
+                  defaultMessage: 'Only integers are allowed.',
+                }
+              ),
+            };
+          }
+        },
+      },
+      {
         validator: ({ value, formData, customData }) => {
           // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
           if (!formData.infiniteRetentionPeriod) {
