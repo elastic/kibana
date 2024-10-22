@@ -187,16 +187,7 @@ export class EndpointAppContextService {
       )
     );
 
-    registerFleetCallback(
-      'packagePolicyPostCreate',
-      getPackagePolicyPostCreateCallback({
-        logger,
-        exceptionsClient: exceptionListsClient,
-        esClient: this.startDependencies.esClient,
-        fleetServicesFactory,
-        isServerless: this.isServerless(),
-      })
-    );
+    registerFleetCallback('packagePolicyPostCreate', getPackagePolicyPostCreateCallback(this));
 
     registerFleetCallback(
       'packagePolicyUpdate',
@@ -211,10 +202,7 @@ export class EndpointAppContextService {
       )
     );
 
-    registerFleetCallback(
-      'packagePolicyPostUpdate',
-      getPackagePolicyPostUpdateCallback(this, fleetServicesFactory)
-    );
+    registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
 
     registerFleetCallback(
       'packagePolicyPostDelete',

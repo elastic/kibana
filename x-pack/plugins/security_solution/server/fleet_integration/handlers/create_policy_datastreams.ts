@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { Logger } from '@kbn/logging';
 import pMap from 'p-map';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { catchAndWrapError } from '../../endpoint/utils';
 import type { SimpleMemCacheInterface } from '../../endpoint/services/actions/clients/lib/simple_mem_cache';
 import { SimpleMemCache } from '../../endpoint/services/actions/clients/lib/simple_mem_cache';
@@ -16,7 +15,6 @@ import {
   ENDPOINT_ACTION_RESPONSES_DS,
   ENDPOINT_HEARTBEAT_INDEX,
 } from '../../../common/endpoint/constants';
-import type { EndpointFleetServicesFactoryInterface } from '../../endpoint/services/fleet';
 import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import { stringify } from '../../endpoint/utils/stringify';
 
@@ -38,7 +36,7 @@ const buildIndexNameWithNamespace = (
 
 const cache = new SimpleMemCache({
   // Cache of created Datastreams last for 12h, at which point it is checked again.
-  // This is just a safe guard case (for whatever reason) the index is deleted
+  // This is just a safeguard case (for whatever reason) the index is deleted
   // 1.8e+7 ===  hours
   ttl: 1.8e7,
 });
@@ -51,11 +49,9 @@ interface PolicyDataStreamsCreator {
 }
 
 export interface CreatePolicyDataStreamsOptions {
+  endpointServices: EndpointAppContextService;
   esClient: ElasticsearchClient;
-  logger: Logger;
-  fleetServicesFactory: EndpointFleetServicesFactoryInterface;
-  isServerless?: boolean;
-  integrationPolicy: PackagePolicy;
+  endpointPolicyIds: string[];
 }
 
 /**
@@ -63,43 +59,46 @@ export interface CreatePolicyDataStreamsOptions {
  * endpoint writing data to them)
  */
 export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async ({
-  logger,
-  integrationPolicy,
-  isServerless = false,
+  endpointServices,
   esClient,
-  fleetServicesFactory,
+  endpointPolicyIds,
 }: CreatePolicyDataStreamsOptions): Promise<void> => {
+  const logger = endpointServices.createLogger('endpointPolicyDatastreamCreator');
+
   logger.debug(
-    `Checking if datastream need to be created for Endpoint integration policy [${integrationPolicy.name} (${integrationPolicy.id})]]`
+    () =>
+      `Checking if datastreams need to be created for Endpoint integration policy [${endpointPolicyIds.join(
+        ', '
+      )}]`
   );
 
   // FIXME:PT Need to ensure that the datastreams are created in all associated space ids that the policy is shared with
   //          This can be deferred to activity around support of Spaces - team issue: 8199 (epic)
   //          We might need to do much here other than to ensure we can access all policies across all spaces in order to get the namespace value
 
-  const fleetServices = fleetServicesFactory.asInternalUser();
+  const fleetServices = endpointServices.getInternalFleetServices();
   const policyNamespaces = await fleetServices.getPolicyNamespace({
-    integrationPolicies: [integrationPolicy.id],
+    integrationPolicies: endpointPolicyIds,
   });
   const indexesCreated: string[] = [];
   const createErrors: string[] = [];
-  const indicesToCreate: string[] = [
-    ...policyNamespaces.integrationPolicy[integrationPolicy.id]
-      .map((namespace) => {
-        return [
-          buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX, namespace),
-          buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace),
-        ];
-      })
-      .flat(),
-  ];
+  const indicesToCreate: string[] = Object.values(policyNamespaces.integrationPolicy).reduce<
+    string[]
+  >((acc, namespaceList) => {
+    for (const namespace of namespaceList) {
+      acc.push(
+        buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX, namespace),
+        buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace)
+      );
 
-  if (isServerless) {
-    // FIXME:PT DO NOT COMMIT until variable below is updated
-    //       from PR https://github.com/elastic/kibana/pull/197291
+      if (endpointServices.isServerless()) {
+        // FIXME:PT DO NOT COMMIT until variable below is updated from PR https://github.com/elastic/kibana/pull/197291
+        acc.push(ENDPOINT_HEARTBEAT_INDEX);
+      }
+    }
 
-    indicesToCreate.push(ENDPOINT_HEARTBEAT_INDEX);
-  }
+    return acc;
+  }, []);
 
   const processesDatastreamIndex = async (datastreamIndexName: string): Promise<void> => {
     if (cache.get(datastreamIndexName)) {
@@ -132,7 +131,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
 
   logger.debug(
     () =>
-      `checking if the following datastream(s) need to be created:\n    ${indicesToCreate.join(
+      `Checking if the following datastream(s) need to be created:\n    ${indicesToCreate.join(
         '\n    '
       )}`
   );
@@ -141,7 +140,9 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
 
   if (indexesCreated.length > 0) {
     logger.info(
-      `Datastream(s) created in support of Elastic Defend:\n    ${indexesCreated.join('\n    ')}`
+      `Datastream(s) created in support of Elastic Defend policy [${endpointPolicyIds.join(
+        ', '
+      )}]:\n    ${indexesCreated.join('\n    ')}`
     );
   }
 

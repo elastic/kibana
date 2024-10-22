@@ -30,9 +30,7 @@ import type {
   PostAgentPolicyUpdateCallback,
   PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
-import type { EndpointFleetServicesFactoryInterface } from '../endpoint/services/fleet';
 import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
-import type { CreatePolicyDataStreamsOptions } from './handlers/create_policy_datastreams';
 import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
@@ -285,8 +283,7 @@ export const getPackagePolicyUpdateCallback = (
 };
 
 export const getPackagePolicyPostUpdateCallback = (
-  endpointServices: EndpointAppContextService,
-  fleetServicesFactory: EndpointFleetServicesFactoryInterface
+  endpointServices: EndpointAppContextService
 ): PutPackagePolicyPostUpdateCallback => {
   const logger = endpointServices.createLogger('endpointPackagePolicyPostUpdate');
 
@@ -299,29 +296,22 @@ export const getPackagePolicyPostUpdateCallback = (
 
     // The check below will run in the background - we don't need to wait for it
     createPolicyDataStreamsIfNeeded({
-      logger,
-      integrationPolicy: packagePolicy,
+      endpointServices,
       esClient,
-      fleetServicesFactory,
-      isServerless: endpointServices.isServerless(),
+      endpointPolicyIds: [packagePolicy.id],
     });
 
     return packagePolicy;
   };
 };
 
-export type GetPackagePolicyPostCreateCallbackOptions = {
-  logger: Logger;
-  exceptionsClient: ExceptionListClient | undefined;
-} & Pick<CreatePolicyDataStreamsOptions, 'fleetServicesFactory' | 'esClient' | 'isServerless'>;
+export const getPackagePolicyPostCreateCallback = (
+  endpointServices: EndpointAppContextService
+): PostPackagePolicyPostCreateCallback => {
+  const logger = endpointServices.createLogger('endpointPolicyPostCreate');
+  const exceptionsClient = endpointServices.getExceptionListsClient();
 
-export const getPackagePolicyPostCreateCallback = ({
-  logger,
-  exceptionsClient,
-  esClient,
-  fleetServicesFactory,
-}: GetPackagePolicyPostCreateCallbackOptions): PostPackagePolicyPostCreateCallback => {
-  return async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
+  return async (packagePolicy: PackagePolicy, _, esClient): Promise<PackagePolicy> => {
     // We only care about Endpoint package policies
     if (!exceptionsClient || !isEndpointPackagePolicy(packagePolicy)) {
       return packagePolicy;
@@ -330,10 +320,9 @@ export const getPackagePolicyPostCreateCallback = ({
     // Check and create internal datastreams for this policy if needed.
     // NOTE: we don't need for it to complete here, thus no `await`.
     createPolicyDataStreamsIfNeeded({
-      integrationPolicy: packagePolicy,
+      endpointServices,
       esClient,
-      fleetServicesFactory,
-      logger,
+      endpointPolicyIds: [packagePolicy.id],
     });
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
