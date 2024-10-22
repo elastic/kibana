@@ -71,22 +71,20 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
         <Overview slo={slo} />
       </EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          <BurnRates
-            slo={slo}
-            isAutoRefreshing={isAutoRefreshing}
-            burnRateOptions={burnRateOptions}
-            selectedTabId={selectedTabId}
-          />
-        </EuiFlexItem>
+        <BurnRates
+          slo={slo}
+          isAutoRefreshing={isAutoRefreshing}
+          burnRateOptions={burnRateOptions}
+          selectedTabId={selectedTabId}
+        />
+
         <HistoricalDataCharts
           slo={slo}
           selectedTabId={selectedTabId}
           isAutoRefreshing={isAutoRefreshing}
         />
-        <EuiFlexItem>
-          <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
-        </EuiFlexItem>
+
+        <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

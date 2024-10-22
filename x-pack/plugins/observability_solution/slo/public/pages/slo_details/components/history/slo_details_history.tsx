@@ -86,16 +86,15 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
       <EuiSpacer size="l" />
 
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          <BurnRates
-            slo={slo}
-            isAutoRefreshing={isAutoRefreshing}
-            burnRateOptions={burnRateOptions}
-            selectedTabId={selectedTabId}
-            range={range}
-            onBrushed={onBrushed}
-          />
-        </EuiFlexItem>
+        <BurnRates
+          slo={slo}
+          isAutoRefreshing={isAutoRefreshing}
+          burnRateOptions={burnRateOptions}
+          selectedTabId={selectedTabId}
+          range={range}
+          onBrushed={onBrushed}
+        />
+
         <HistoricalDataCharts
           slo={slo}
           selectedTabId={selectedTabId}
@@ -103,14 +102,13 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
           range={range}
           onBrushed={onBrushed}
         />
-        <EuiFlexItem>
-          <EventsChartPanel
-            slo={slo}
-            range={range}
-            selectedTabId={selectedTabId}
-            onBrushed={onBrushed}
-          />
-        </EuiFlexItem>
+
+        <EventsChartPanel
+          slo={slo}
+          range={range}
+          selectedTabId={selectedTabId}
+          onBrushed={onBrushed}
+        />
       </EuiFlexGroup>
     </>
   );
