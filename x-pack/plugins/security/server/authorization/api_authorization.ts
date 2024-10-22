@@ -97,12 +97,12 @@ export function initAPIAuthorization(
       }
 
       for (const reservedPrivilege of requestedReservedPrivileges) {
-        if (reservedPrivilege === ReservedPrivilegesSet.Superuser) {
+        if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
           const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
             request
           ).globally(SUPERUSER_PRIVILEGES);
 
-          kibanaPrivileges[ReservedPrivilegesSet.Superuser] =
+          kibanaPrivileges[ReservedPrivilegesSet.superuser] =
             checkSuperuserPrivilegesResponse.hasAllRequested;
         }
       }

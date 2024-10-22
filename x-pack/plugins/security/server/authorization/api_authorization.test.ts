@@ -6,6 +6,7 @@
  */
 
 import type { RouteSecurity } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
@@ -15,7 +16,6 @@ import {
 
 import { initAPIAuthorization } from './api_authorization';
 import { authorizationMock } from './index.mock';
-import { ReservedPrivilegesSet } from '../../common/types';
 
 describe('initAPIAuthorization', () => {
   test(`protected route when "mode.useRbacForRequest()" returns false continues`, async () => {
@@ -389,7 +389,7 @@ describe('initAPIAuthorization', () => {
       {
         security: {
           authz: {
-            requiredPrivileges: [ReservedPrivilegesSet.Superuser],
+            requiredPrivileges: [ReservedPrivilegesSet.superuser],
           },
         },
         kibanaPrivilegesResponse: { privileges: { kibana: [] }, hasAllRequested: false },
@@ -404,13 +404,13 @@ describe('initAPIAuthorization', () => {
       {
         security: {
           authz: {
-            requiredPrivileges: [ReservedPrivilegesSet.Superuser],
+            requiredPrivileges: [ReservedPrivilegesSet.superuser],
           },
         },
         kibanaPrivilegesResponse: { privileges: { kibana: [] }, hasAllRequested: true },
         asserts: {
           authzResult: {
-            [ReservedPrivilegesSet.Superuser]: true,
+            [ReservedPrivilegesSet.superuser]: true,
           },
         },
       }
