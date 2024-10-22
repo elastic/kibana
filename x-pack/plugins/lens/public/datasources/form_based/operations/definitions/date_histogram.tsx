@@ -23,6 +23,7 @@ import {
 import {
   AggFunctionsMapping,
   AggParamOption,
+  DataPublicPluginStart,
   IndexPatternAggRestrictions,
   search,
   UI_SETTINGS,
@@ -30,6 +31,7 @@ import {
 import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { DateRange } from '../../../../../common/types';
 import { IndexPattern } from '../../../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
@@ -102,7 +104,7 @@ function getTimeZoneAndInterval(
   return { usedField, timeZone, interval };
 }
 
-function mapToEsqlInterval(data, dateRange, _interval: string) {
+function mapToEsqlInterval(data: DataPublicPluginStart, dateRange: DateRange, _interval: string) {
   if (_interval === 'auto') {
     return (
       data.search.aggs.calculateAutoTimeExpression({

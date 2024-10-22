@@ -171,7 +171,7 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
 
     // esql mode variables
-    const canUseESQL = true; // read from a setting
+    const canUseESQL = uiSettings.get(UI_SETTINGS.LENS_GENERATE_ESQL); // read from a setting
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant, data);
