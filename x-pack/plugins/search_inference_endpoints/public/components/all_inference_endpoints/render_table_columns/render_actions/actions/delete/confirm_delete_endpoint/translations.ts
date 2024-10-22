@@ -19,7 +19,7 @@ export const CONFIRM_DELETE_WARNING = i18n.translate(
   'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.confirmQuestion',
   {
     defaultMessage:
-      'Deleting an inference endpoint currently in use will cause failures in the ingest and query attempts.',
+      'Deleting an inference endpoint currently in use will cause failures in ingest and query attempts.',
   }
 );
 
@@ -54,7 +54,7 @@ export const POTENTIAL_FAILURE_LABEL = i18n.translate(
 export const IGNORE_POTENTIAL_ERRORS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.ignoreErrors',
   {
-    defaultMessage: 'Ignore potential errors and force deletion',
+    defaultMessage: 'Ignore errors and force deletion',
   }
 );
 
