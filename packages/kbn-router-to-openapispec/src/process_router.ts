@@ -66,9 +66,9 @@ const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: st
         }
       );
 
-      const hasAnyOfferingPrivileges = (offering: string) =>
-        offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired.length ||
-        offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired.length;
+      const hasAnyOfferingPrivileges = (offering: keyof PrivilegeGroups) =>
+        offeringGroupedPrivileges[offering].allRequired.length ||
+        offeringGroupedPrivileges[offering].anyRequired.length;
 
       const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
         const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
