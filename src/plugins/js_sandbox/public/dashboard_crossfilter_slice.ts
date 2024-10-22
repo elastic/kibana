@@ -33,6 +33,7 @@ export const dashboardCrossfilterSlice = createSlice({
       state: DashboardCrossfilterState,
       action: PayloadAction<SetCrossfilterActionPayload>
     ) => {
+      console.log('----> set filter', action.payload);
       if (action.payload.filter) {
         state.filters[action.payload.id] = action.payload.filter;
       } else {
