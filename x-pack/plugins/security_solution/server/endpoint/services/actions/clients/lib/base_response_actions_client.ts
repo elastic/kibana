@@ -854,7 +854,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
             })
             .catch((err) => {
               // Its possible that between the `.exists()` check and this `.createDataStream()` that
-              // the index could have been created. If thats the case, then just ignore the error.
+              // the index could have been created. If that's the case, then just ignore the error.
               if (err.body?.error?.type === 'resource_already_exists_exception') {
                 indexesAlreadyExist.push(datastreamIndexName);
                 return;

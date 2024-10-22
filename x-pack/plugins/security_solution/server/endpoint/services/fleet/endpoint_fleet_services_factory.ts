@@ -42,7 +42,7 @@ export interface EndpointFleetServicesInterface {
   ensureInCurrentSpace(options: EnsureInCurrentSpaceOptions): Promise<void>;
 
   /**
-   * Retrieves the `namespace` for assigned to Endpoint Integration Policies
+   * Retrieves the `namespace` assigned to Endpoint Integration Policies
    * @param options
    */
   getPolicyNamespace(
@@ -161,7 +161,7 @@ interface FetchEndpointPolicyNamespaceOptions {
   packagePolicyService: PackagePolicyClient;
   agentPolicyService: AgentPolicyServiceInterface;
   /** A list of integration policies IDs */
-  integrationPolicies: PackagePolicy[];
+  integrationPolicies: string[];
 }
 
 interface FetchEndpointPolicyNamespaceResponse {
