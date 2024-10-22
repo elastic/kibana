@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { AIConnector } from '../../connectorland/connector_selector';
@@ -48,7 +47,11 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     refetchCurrentUserConversations,
     refetchPrompts,
   }) => {
-    const { toasts, setSelectedSettingsTab } = useAssistantContext();
+    const {
+      assistantFeatures: { assistantKnowledgeBaseByDefault },
+      toasts,
+      setSelectedSettingsTab,
+    } = useAssistantContext();
 
     // Modal control functions
     const cleanupAndCloseModal = useCallback(() => {
@@ -83,17 +86,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
-          <EuiButtonIcon
-            aria-label={i18n.SETTINGS}
-            data-test-subj="settings"
-            onClick={handleShowConversationSettings}
-            isDisabled={isDisabled}
-            iconType="gear"
-            size="xs"
-            color="text"
-          />
-        </EuiToolTip>
+        {!assistantKnowledgeBaseByDefault && (
+          <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
+            <EuiButtonIcon
+              aria-label={i18n.SETTINGS}
+              data-test-subj="settings"
+              onClick={handleShowConversationSettings}
+              isDisabled={isDisabled}
+              iconType="gear"
+              size="xs"
+              color="text"
+            />
+          </EuiToolTip>
+        )}
 
         {isSettingsModalVisible && (
           <AssistantSettings

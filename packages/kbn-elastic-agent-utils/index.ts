@@ -8,6 +8,7 @@
  */
 
 export {
+  getAgentName,
   isOpenTelemetryAgentName,
   hasOpenTelemetryPrefix,
   isJavaAgentName,

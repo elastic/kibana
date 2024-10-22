@@ -19,7 +19,8 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: "Builds Kibana VM images for cache update"
-    trigger: ci-vm-images
+    trigger: kibana-vm-images
+    async: true
     build:
       env:
         IMAGES_CONFIG="kibana/images.yml"

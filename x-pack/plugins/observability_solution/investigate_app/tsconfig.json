@@ -70,5 +70,6 @@
     "@kbn/observability-utils",
     "@kbn/apm-plugin",
     "@kbn/apm-data-access-plugin",
+    "@kbn/observability-alerting-rule-utils",
   ],
 }

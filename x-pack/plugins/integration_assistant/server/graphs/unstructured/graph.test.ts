@@ -29,11 +29,7 @@ describe('UnstructuredGraph', () => {
     it('Ensures that the graph compiles', async () => {
       // When getUnstructuredGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
-      try {
-        await getUnstructuredGraph({ model, client });
-      } catch (error) {
-        fail(`getUnstructuredGraph threw an error: ${error}`);
-      }
+      await getUnstructuredGraph({ model, client });
     });
   });
 });
