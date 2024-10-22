@@ -10,6 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
@@ -233,6 +234,33 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const MODIFIED_COLUMN: TableColumn = {
+  field: 'rule_source',
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_MODIFIED} />,
+  align: 'center',
+  render: (ruleSource: Rule['rule_source']) => {
+    if (
+      ruleSource == null ||
+      ruleSource.type === 'internal' ||
+      (ruleSource.type === 'external' && ruleSource.is_customized === false)
+    ) {
+      return null;
+    }
+
+    return (
+      <EuiBadge
+        color="hollow"
+        data-test-subj="rulesTableModifiedColumnBadge"
+        aria-label={i18n.MODIFIED_LABEL}
+      >
+        {i18n.MODIFIED_LABEL}
+      </EuiBadge>
+    );
+  },
+  width: '90px',
+  truncateText: true,
+};
+
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
   showManualRuleRunConfirmation,
@@ -265,6 +293,9 @@ export const useRulesColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -282,6 +313,7 @@ export const useRulesColumns = ({
   return useMemo(
     () => [
       ruleNameColumn,
+      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -352,13 +384,14 @@ export const useRulesColumns = ({
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
-      actionsColumn,
-      enabledColumn,
+      ruleNameColumn,
+      isPrebuiltRulesCustomizationEnabled,
+      showRelatedIntegrations,
       executionStatusColumn,
       snoozeColumn,
+      enabledColumn,
       hasCRUDPermissions,
-      ruleNameColumn,
-      showRelatedIntegrations,
+      actionsColumn,
     ]
   );
 };
@@ -380,6 +413,9 @@ export const useMonitoringColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -399,6 +435,7 @@ export const useMonitoringColumns = ({
         ...ruleNameColumn,
         width: '28%',
       },
+      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -503,6 +540,7 @@ export const useMonitoringColumns = ({
       enabledColumn,
       executionStatusColumn,
       hasCRUDPermissions,
+      isPrebuiltRulesCustomizationEnabled,
       ruleNameColumn,
       showRelatedIntegrations,
     ]
