@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { compact } from 'lodash';
+import { isEmpty } from 'lodash';
 import * as i18n from '../../../../../../rule_creation_ui/components/step_about_rule/translations';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
@@ -36,8 +36,10 @@ export function falsePositivesDeserializer(defaultValue: FormData) {
 export function falsePositivesSerializer(formData: FormData): {
   false_positives: RuleFalsePositiveArray;
 } {
+  const falsePositives: RuleFalsePositiveArray = formData.false_positives;
+
   return {
     /* Remove empty items from the falsePositives array */
-    false_positives: compact(formData.falsePositives),
+    false_positives: falsePositives.filter((item) => !isEmpty(item)),
   };
 }

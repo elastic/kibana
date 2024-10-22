@@ -57,6 +57,12 @@ import {
 import { SetupEdit, setupSchema } from './fields/setup';
 import { TagsEdit, tagsSchema } from './fields/tags';
 import { ThreatEdit, threatSchema, threatSerializer } from './fields/threat';
+import {
+  TimelineTemplateEdit,
+  timelineTemplateDeserializer,
+  timelineTemplateSchema,
+  timelineTemplateSerializer,
+} from './fields/timeline_template';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -145,6 +151,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
       return <FieldFormWrapper component={SetupEdit} fieldFormSchema={setupSchema} />;
     case 'tags':
       return <FieldFormWrapper component={TagsEdit} fieldFormSchema={tagsSchema} />;
+    case 'timeline_template':
+      return (
+        <FieldFormWrapper
+          component={TimelineTemplateEdit}
+          fieldFormSchema={timelineTemplateSchema}
+          serializer={timelineTemplateSerializer}
+          deserializer={timelineTemplateDeserializer}
+        />
+      );
     case 'threat':
       return (
         <FieldFormWrapper
