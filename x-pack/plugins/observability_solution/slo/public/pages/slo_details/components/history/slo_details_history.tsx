@@ -7,17 +7,19 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSuperDatePicker,
+  EuiTitle,
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useMemo, useState } from 'react';
+import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../utils/kibana_react';
-import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
 import { TimeBounds } from '../../types';
-import { BurnRates } from '../burn_rate/burn_rates';
 import { EventsChartPanel } from '../events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { SloTabId } from '../slo_details';
@@ -30,7 +32,6 @@ export interface Props {
 
 export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const { uiSettings } = useKibana().services;
-  const { burnRateOptions } = useBurnRateOptions(slo);
   const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
   const [end, setEnd] = useState('now');
 
@@ -82,14 +83,20 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <BurnRates
-        slo={slo}
-        isAutoRefreshing={isAutoRefreshing}
-        burnRateOptions={burnRateOptions}
-        selectedTabId={selectedTabId}
-        range={range}
-        onBrushed={onBrushed}
-      />
+      <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorRatePanel">
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.slo.sloDetailsHistory.h2.errorRatePanelTitle', {
+                  defaultMessage: 'Error rate',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <ErrorRateChart slo={slo} dataTimeRange={range} onBrushed={onBrushed} />
+        </EuiFlexGroup>
+      </EuiPanel>
 
       <HistoricalDataCharts
         slo={slo}

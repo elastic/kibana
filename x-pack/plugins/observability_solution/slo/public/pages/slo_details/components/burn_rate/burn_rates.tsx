@@ -9,19 +9,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { TimeBounds } from '../../types';
-import { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_definition';
-import { SloTabId } from '../slo_details';
-import { BurnRateHeader } from './burn_rate_header';
-import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
+import { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_definition';
+import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
+import { TimeBounds } from '../../types';
 import { BurnRate } from './burn_rate';
+import { BurnRateHeader } from './burn_rate_header';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing?: boolean;
   burnRateOptions: BurnRateOption[];
-  selectedTabId: SloTabId;
   range?: TimeRange;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
@@ -39,14 +37,7 @@ function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; du
   return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
 }
 
-export function BurnRates({
-  slo,
-  isAutoRefreshing,
-  burnRateOptions,
-  selectedTabId,
-  range,
-  onBrushed,
-}: Props) {
+export function BurnRates({ slo, isAutoRefreshing, burnRateOptions, range, onBrushed }: Props) {
   const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
@@ -77,21 +68,18 @@ export function BurnRates({
           burnRateOption={burnRateOption}
           burnRateOptions={burnRateOptions}
           setBurnRateOption={setBurnRateOption}
-          selectedTabId={selectedTabId}
         />
         <EuiFlexGroup direction="row" gutterSize="m">
-          {selectedTabId !== 'history' && (
-            <EuiFlexItem grow={1}>
-              <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={1}>
+            <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={3}>
             <ErrorRateChart
               slo={slo}
               dataTimeRange={dataTimeRange}
               threshold={threshold}
               onBrushed={onBrushed}
-              selectedTabId={selectedTabId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

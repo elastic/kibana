@@ -8,20 +8,13 @@
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SloTabId } from '../slo_details';
 import { BurnRateOption } from './burn_rates';
 interface Props {
   burnRateOption: BurnRateOption;
   setBurnRateOption: (option: BurnRateOption) => void;
   burnRateOptions: BurnRateOption[];
-  selectedTabId: SloTabId;
 }
-export function BurnRateHeader({
-  burnRateOption,
-  burnRateOptions,
-  setBurnRateOption,
-  selectedTabId,
-}: Props) {
+export function BurnRateHeader({ burnRateOption, burnRateOptions, setBurnRateOption }: Props) {
   const onBurnRateOptionChange = (optionId: string) => {
     const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
     setBurnRateOption(selected);
@@ -37,23 +30,21 @@ export function BurnRateHeader({
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      {selectedTabId !== 'history' && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
-              defaultMessage: 'Select the time range',
-            })}
-            options={burnRateOptions.map((opt) => ({
-              id: opt.id,
-              label: opt.label,
-              'aria-label': opt.ariaLabel,
-            }))}
-            idSelected={burnRateOption.id}
-            onChange={onBurnRateOptionChange}
-            buttonSize="compressed"
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
+            defaultMessage: 'Select the time range',
+          })}
+          options={burnRateOptions.map((opt) => ({
+            id: opt.id,
+            label: opt.label,
+            'aria-label': opt.ariaLabel,
+          }))}
+          idSelected={burnRateOption.id}
+          onChange={onBurnRateOptionChange}
+          buttonSize="compressed"
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

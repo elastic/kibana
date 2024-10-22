@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BurnRates } from './burn_rate/burn_rates';
 import { useBurnRateOptions } from '../hooks/use_burn_rate_options';
+import { BurnRates } from './burn_rate/burn_rates';
 import { EventsChartPanel } from './events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
 import { SLODetailsHistory } from './history/slo_details_history';
@@ -75,7 +75,6 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
           slo={slo}
           isAutoRefreshing={isAutoRefreshing}
           burnRateOptions={burnRateOptions}
-          selectedTabId={selectedTabId}
         />
 
         <HistoricalDataCharts
