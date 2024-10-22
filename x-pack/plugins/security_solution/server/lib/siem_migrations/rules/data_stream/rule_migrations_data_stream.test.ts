@@ -35,7 +35,7 @@ describe('SiemRuleMigrationsDataStream', () => {
       new RuleMigrationsDataStream({ kibanaVersion: '8.13.0' });
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       expect(dataStreamSpacesAdapter.setComponentTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana.siem-rule-migrations.mappings' })
+        expect.objectContaining({ name: '.kibana.siem-rule-migrations' })
       );
     });
 
@@ -43,7 +43,7 @@ describe('SiemRuleMigrationsDataStream', () => {
       new RuleMigrationsDataStream({ kibanaVersion: '8.13.0' });
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       expect(dataStreamSpacesAdapter.setIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana.siem-rule-migrations.index-template' })
+        expect.objectContaining({ name: '.kibana.siem-rule-migrations' })
       );
     });
   });

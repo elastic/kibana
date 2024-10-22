@@ -21,10 +21,13 @@ export class SiemRuleMigrationsService {
     this.dataStreamAdapter = new RuleMigrationsDataStream({ kibanaVersion });
   }
 
-  async setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
+  setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
-    await this.dataStreamAdapter.install({ ...params, esClient, logger: this.logger });
+    this.dataStreamAdapter.install({ ...params, esClient, logger: this.logger }).catch((err) => {
+      this.logger.error(`Error installing data stream for rule migrations: ${err.message}`);
+      throw err;
+    });
   }
 
   getClient({ spaceId, request }: SiemRuleMigrationsGetClientParams): SiemRuleMigrationsClient {

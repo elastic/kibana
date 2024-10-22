@@ -24,9 +24,9 @@ export class SiemMigrationsService {
     this.rules = new SiemRuleMigrationsService(logger, kibanaVersion);
   }
 
-  async setup(params: SiemMigrationsSetupParams) {
+  setup(params: SiemMigrationsSetupParams) {
     if (this.config.experimentalFeatures.siemMigrationsEnabled) {
-      await this.rules.setup({ ...params, pluginStop$: this.pluginStop$ });
+      this.rules.setup({ ...params, pluginStop$: this.pluginStop$ });
     }
   }
 
