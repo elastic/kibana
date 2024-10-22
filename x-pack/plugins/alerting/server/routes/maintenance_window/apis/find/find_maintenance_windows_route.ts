@@ -59,8 +59,7 @@ export const findMaintenanceWindowsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
-        const query: FindMaintenanceWindowsRequestQueryV1 = req.query;
-
+        const query: FindMaintenanceWindowsRequestQueryV1 = req.query || {};
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
         const options = transformFindMaintenanceWindowParamsV1(query);

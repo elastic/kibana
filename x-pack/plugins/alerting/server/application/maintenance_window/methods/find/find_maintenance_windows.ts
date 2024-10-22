@@ -19,9 +19,7 @@ export async function findMaintenanceWindows(
   const { savedObjectsClient, logger } = context;
 
   try {
-    if (params) {
-      findMaintenanceWindowsParamsSchema.validate(params);
-    }
+    findMaintenanceWindowsParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating find data - ${error.message}`);
   }

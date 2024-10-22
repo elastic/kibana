@@ -9,20 +9,24 @@ import { schema } from '@kbn/config-schema';
 import { maintenanceWindowResponseSchemaV1 } from '../../../response';
 
 export const findMaintenanceWindowsRequestQuerySchema = schema.object({
-  page: schema.number({
-    defaultValue: 1,
-    min: 1,
-    meta: {
-      description: 'The page number to return.',
-    },
-  }),
-  per_page: schema.number({
-    defaultValue: 10, // should it be 25? should I have max boundery as well
-    min: 0,
-    meta: {
-      description: 'The number of rules to return per page.',
-    },
-  }),
+  page: schema.maybe(
+    schema.number({
+      defaultValue: 1,
+      min: 1,
+      meta: {
+        description: 'The page number to return.',
+      },
+    })
+  ),
+  per_page: schema.maybe(
+    schema.number({
+      defaultValue: 10, // should it be 25? should I have max boundery as well
+      min: 0,
+      meta: {
+        description: 'The number of rules to return per page.',
+      },
+    })
+  ),
 });
 
 export const findMaintenanceWindowsResponseBodySchema = schema.object({
