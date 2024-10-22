@@ -16,6 +16,12 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
     },
+
+    async expectToBeOnIndicesManagement() {
+      const headingText = await testSubjects.getVisibleText('appTitle');
+      expect(headingText).to.be('Index Management');
+    },
+
     async reloadIndices() {
       await testSubjects.click('reloadIndicesButton');
     },

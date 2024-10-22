@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors as parse } from '..';
+import { parse } from '..';
 import { ESQLLiteral } from '../../types';
 
 describe('literal expression', () => {
@@ -24,7 +24,7 @@ describe('literal expression', () => {
     });
   });
 
-  it('decimals vs integers', () => {
+  it('doubles vs integers', () => {
     const text = 'ROW a(1.0, 1)';
     const { ast } = parse(text);
 
@@ -36,7 +36,7 @@ describe('literal expression', () => {
           args: [
             {
               type: 'literal',
-              literalType: 'decimal',
+              literalType: 'double',
             },
             {
               type: 'literal',

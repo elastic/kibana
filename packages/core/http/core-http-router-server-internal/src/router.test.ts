@@ -50,10 +50,18 @@ describe('Router', () => {
           path: '/',
           validate: { body: validation, query: validation, params: validation },
           options: {
-            deprecated: true,
+            deprecated: {
+              documentationUrl: 'https://fake-url.com',
+              reason: { type: 'remove' },
+              severity: 'warning',
+            },
             discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
           },
         },
         (context, req, res) => res.ok()
@@ -68,10 +76,18 @@ describe('Router', () => {
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
         options: {
-          deprecated: true,
+          deprecated: {
+            documentationUrl: 'https://fake-url.com',
+            reason: { type: 'remove' },
+            severity: 'warning',
+          },
           discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
         },
       });
     });
@@ -85,7 +101,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok(),
-        { isVersioned: true }
+        { isVersioned: true, events: false }
       );
       router.get(
         {
@@ -134,40 +150,76 @@ describe('Router', () => {
     }
   );
 
-  it('adds versioned header v2023-10-31 to public, unversioned routes', async () => {
-    const router = new Router('', logger, enhanceWithContext, routerOptions);
-    router.post(
-      {
-        path: '/public',
-        options: {
-          access: 'public',
+  describe('elastic-api-version header', () => {
+    it('adds the header to public, unversioned routes', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.post(
+        {
+          path: '/public',
+          options: {
+            access: 'public',
+          },
+          validate: false,
         },
-        validate: false,
-      },
-      (context, req, res) => res.ok({ headers: { AAAA: 'test' } }) // with some fake headers
-    );
-    router.post(
-      {
-        path: '/internal',
-        options: {
-          access: 'internal',
+        (context, req, res) => res.ok({ headers: { AAAA: 'test' } }) // with some fake headers
+      );
+      router.post(
+        {
+          path: '/internal',
+          options: {
+            access: 'internal',
+          },
+          validate: false,
         },
-        validate: false,
-      },
-      (context, req, res) => res.ok()
-    );
-    const [{ handler: publicHandler }, { handler: internalHandler }] = router.getRoutes();
+        (context, req, res) => res.ok()
+      );
+      const [{ handler: publicHandler }, { handler: internalHandler }] = router.getRoutes();
 
-    await publicHandler(createRequestMock(), mockResponseToolkit);
-    expect(mockResponse.header).toHaveBeenCalledTimes(2);
-    const [first, second] = mockResponse.header.mock.calls
-      .concat()
-      .sort(([k1], [k2]) => k1.localeCompare(k2));
-    expect(first).toEqual(['AAAA', 'test']);
-    expect(second).toEqual(['elastic-api-version', '2023-10-31']);
+      await publicHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(2);
+      const [first, second] = mockResponse.header.mock.calls
+        .concat()
+        .sort(([k1], [k2]) => k1.localeCompare(k2));
+      expect(first).toEqual(['AAAA', 'test']);
+      expect(second).toEqual(['elastic-api-version', '2023-10-31']);
 
-    await internalHandler(createRequestMock(), mockResponseToolkit);
-    expect(mockResponse.header).toHaveBeenCalledTimes(2); // no additional calls
+      await internalHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(2); // no additional calls
+    });
+
+    it('does not add the header to public http resource routes', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.post(
+        {
+          path: '/public',
+          options: {
+            access: 'public',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      router.post(
+        {
+          path: '/public-resource',
+          options: {
+            access: 'public',
+            httpResource: true,
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      const [{ handler: publicHandler }, { handler: resourceHandler }] = router.getRoutes();
+
+      await publicHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1);
+      const [headersTuple] = mockResponse.header.mock.calls;
+      expect(headersTuple).toEqual(['elastic-api-version', '2023-10-31']);
+
+      await resourceHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1); // no additional calls
+    });
   });
 
   it('constructs lazily provided validations once (idempotency)', async () => {

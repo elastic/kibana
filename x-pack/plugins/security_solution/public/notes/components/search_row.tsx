@@ -5,36 +5,42 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiSelect,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import { userSearchedNotes } from '..';
+import { i18n } from '@kbn/i18n';
+import { UserFilterDropdown } from './user_filter_dropdown';
+import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';
+import { userFilterAssociatedNotes, userSearchedNotes } from '..';
+import { AssociatedFilter } from '../../../common/notes/constants';
 
-const SearchRowContainer = styled.div`
-  &:not(:last-child) {
-    margin-bottom: ${(props) => props.theme.eui.euiSizeL};
-  }
-`;
+const FILTER_SELECT = i18n.translate('xpack.securitySolution.notes.management.filterSelect', {
+  defaultMessage: 'Select filter',
+});
 
-SearchRowContainer.displayName = 'SearchRowContainer';
-
-const SearchRowFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
-`;
-
-SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
+const searchBox = {
+  placeholder: 'Search note contents',
+  incremental: false,
+  'data-test-subj': SEARCH_BAR_TEST_ID,
+};
+const associatedNoteSelectOptions: EuiSelectOption[] = [
+  { value: AssociatedFilter.all, text: 'All' },
+  { value: AssociatedFilter.documentOnly, text: 'Attached to document only' },
+  { value: AssociatedFilter.savedObjectOnly, text: 'Attached to timeline only' },
+  { value: AssociatedFilter.documentAndSavedObject, text: 'Attached to document and timeline' },
+  { value: AssociatedFilter.orphan, text: 'Orphan' },
+];
 
 export const SearchRow = React.memo(() => {
   const dispatch = useDispatch();
-  const searchBox = useMemo(
-    () => ({
-      placeholder: 'Search note contents',
-      incremental: false,
-      'data-test-subj': 'notes-search-bar',
-    }),
-    []
-  );
+  const associatedSelectId = useGeneratedHtmlId({ prefix: 'associatedSelectId' });
 
   const onQueryChange = useCallback(
     ({ queryText }: { queryText: string }) => {
@@ -43,14 +49,32 @@ export const SearchRow = React.memo(() => {
     [dispatch]
   );
 
+  const onAssociatedNoteSelectChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      dispatch(userFilterAssociatedNotes(e.target.value as AssociatedFilter));
+    },
+    [dispatch]
+  );
+
   return (
-    <SearchRowContainer>
-      <SearchRowFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
-        </EuiFlexItem>
-      </SearchRowFlexGroup>
-    </SearchRowContainer>
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem>
+        <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <UserFilterDropdown />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSelect
+          id={associatedSelectId}
+          options={associatedNoteSelectOptions}
+          onChange={onAssociatedNoteSelectChange}
+          prepend={FILTER_SELECT}
+          aria-label={FILTER_SELECT}
+          data-test-subj={ASSOCIATED_NOT_SELECT_TEST_ID}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 

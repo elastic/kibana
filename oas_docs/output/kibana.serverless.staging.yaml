@@ -4217,6 +4217,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Mute all alerts
       tags:
         - alerting
@@ -4248,6 +4254,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
       summary: Unmute all alerts
       tags:
         - alerting
@@ -10416,12 +10428,21 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: use withAgentCount instead
+          in: query
           name: noAgentCount
           required: false
           schema:
+            deprecated: true
             type: boolean
-        - in: query
+        - description: get policies with agent count
+          in: query
+          name: withAgentCount
+          required: false
+          schema:
+            type: boolean
+        - description: get full policies with package policies populated
+          in: query
           name: full
           required: false
           schema:
@@ -14573,6 +14594,110 @@ paths:
       summary: ''
       tags:
         - Elastic Agent policies
+  /api/fleet/agent_policies/{agentPolicyId}/outputs:
+    get:
+      description: Get list of outputs associated with agent policy by policy id
+      operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Foutputs#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        type: string
+                      data:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          integrations:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                integrationPolicyName:
+                                  type: string
+                                name:
+                                  type: string
+                                pkgName:
+                                  type: string
+                            type: array
+                          output:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - output
+                      monitoring:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          output:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - output
+                    required:
+                      - monitoring
+                      - data
+                required:
+                  - item
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
       description: Delete agent policy by ID
@@ -14624,6 +14749,128 @@ paths:
                 required:
                   - id
                   - name
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Elastic Agent policies
+  /api/fleet/agent_policies/outputs:
+    post:
+      description: Get list of outputs associated with agent policies
+      operationId: '%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: list of package policy ids
+                  items:
+                    type: string
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agentPolicyId:
+                          type: string
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            integrations:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  integrationPolicyName:
+                                    type: string
+                                  name:
+                                    type: string
+                                  pkgName:
+                                    type: string
+                              type: array
+                            output:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                          required:
+                            - output
+                        monitoring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            output:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                          required:
+                            - output
+                      required:
+                        - monitoring
+                        - data
+                    type: array
+                required:
+                  - items
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -14819,7 +15066,6 @@ paths:
         - Elastic Agents
   /api/fleet/agent-status:
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagent-status#0'
       parameters:
         - description: The version of the API to use
@@ -16522,7 +16768,6 @@ paths:
       tags:
         - Elastic Agent actions
     put:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0'
       parameters:
         - description: The version of the API to use
@@ -18375,7 +18620,6 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment-api-keys:
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#0'
       parameters:
         - description: The version of the API to use
@@ -18407,7 +18651,6 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#1'
       parameters:
         - description: The version of the API to use
@@ -18445,7 +18688,6 @@ paths:
       tags: []
   /api/fleet/enrollment-api-keys/{keyId}:
     delete:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1'
       parameters:
         - description: The version of the API to use
@@ -18472,7 +18714,6 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0'
       parameters:
         - description: The version of the API to use
@@ -20187,7 +20428,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgkey}:
     delete:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3'
       parameters:
         - description: The version of the API to use
@@ -20226,7 +20466,6 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0'
       parameters:
         - description: The version of the API to use
@@ -20267,7 +20506,6 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2'
       parameters:
         - description: The version of the API to use
@@ -20323,7 +20561,6 @@ paths:
       summary: ''
       tags: []
     put:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1'
       parameters:
         - description: The version of the API to use
@@ -33286,7 +33523,6 @@ paths:
         - Fleet service tokens
   /api/fleet/service-tokens:
     post:
-      deprecated: true
       description: Create a service token
       operationId: '%2Fapi%2Ffleet%2Fservice-tokens#0'
       parameters:
@@ -35249,6 +35485,15 @@ paths:
           schema:
             nullable: true
             type: string
+        - in: query
+          name: userFilter
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: associatedFilter
+          schema:
+            $ref: '#/components/schemas/Security_Timeline_API_AssociatedFilterType'
       responses:
         '200':
           content:
@@ -36535,10 +36780,9 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
-  /api/spaces/space:
+  /api/security/role:
     get:
-      description: Get all spaces
-      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      operationId: '%2Fapi%2Fsecurity%2Frole#0'
       parameters:
         - description: The version of the API to use
           in: header
@@ -36549,6 +36793,459 @@ paths:
               - '2023-10-31'
             type: string
         - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
+      responses: {}
+      summary: Get all roles
+      tags:
+        - roles
+  /api/security/role/{name}:
+    delete:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses: {}
+      summary: Delete a role
+      tags:
+        - roles
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+        - in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
+      responses: {}
+      summary: Get a role
+      tags:
+        - roles
+    put:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+        - in: query
+          name: createOnly
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  maxLength: 2048
+                  type: string
+                elasticsearch:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cluster:
+                      items:
+                        type: string
+                      type: array
+                    indices:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          allow_restricted_indices:
+                            type: boolean
+                          field_security:
+                            additionalProperties:
+                              items:
+                                type: string
+                              type: array
+                            type: object
+                          names:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          query:
+                            type: string
+                        required:
+                          - names
+                          - privileges
+                      type: array
+                    remote_cluster:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          clusters:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                        required:
+                          - privileges
+                          - clusters
+                      type: array
+                    remote_indices:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          allow_restricted_indices:
+                            type: boolean
+                          clusters:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          field_security:
+                            additionalProperties:
+                              items:
+                                type: string
+                              type: array
+                            type: object
+                          names:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          query:
+                            type: string
+                        required:
+                          - clusters
+                          - names
+                          - privileges
+                      type: array
+                    run_as:
+                      items:
+                        type: string
+                      type: array
+                kibana:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      base:
+                        anyOf:
+                          - items: {}
+                            type: array
+                          - type: boolean
+                          - type: number
+                          - type: object
+                          - type: string
+                        nullable: true
+                        oneOf:
+                          - items:
+                              type: string
+                            type: array
+                          - items:
+                              type: string
+                            type: array
+                      feature:
+                        additionalProperties:
+                          items:
+                            type: string
+                          type: array
+                        type: object
+                      spaces:
+                        anyOf:
+                          - items:
+                              enum:
+                                - '*'
+                              type: string
+                            maxItems: 1
+                            minItems: 1
+                            type: array
+                          - items:
+                              type: string
+                            type: array
+                        default:
+                          - '*'
+                    required:
+                      - base
+                  type: array
+                metadata:
+                  additionalProperties: {}
+                  type: object
+              required:
+                - elasticsearch
+      responses: {}
+      summary: Create or update a role
+      tags:
+        - roles
+  /api/security/roles:
+    post:
+      operationId: '%2Fapi%2Fsecurity%2Froles#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                roles:
+                  additionalProperties:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        maxLength: 2048
+                        type: string
+                      elasticsearch:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          cluster:
+                            items:
+                              type: string
+                            type: array
+                          indices:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                allow_restricted_indices:
+                                  type: boolean
+                                field_security:
+                                  additionalProperties:
+                                    items:
+                                      type: string
+                                    type: array
+                                  type: object
+                                names:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                query:
+                                  type: string
+                              required:
+                                - names
+                                - privileges
+                            type: array
+                          remote_cluster:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                clusters:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                              required:
+                                - privileges
+                                - clusters
+                            type: array
+                          remote_indices:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                allow_restricted_indices:
+                                  type: boolean
+                                clusters:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                field_security:
+                                  additionalProperties:
+                                    items:
+                                      type: string
+                                    type: array
+                                  type: object
+                                names:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                query:
+                                  type: string
+                              required:
+                                - clusters
+                                - names
+                                - privileges
+                            type: array
+                          run_as:
+                            items:
+                              type: string
+                            type: array
+                      kibana:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            base:
+                              anyOf:
+                                - items: {}
+                                  type: array
+                                - type: boolean
+                                - type: number
+                                - type: object
+                                - type: string
+                              nullable: true
+                              oneOf:
+                                - items:
+                                    type: string
+                                  type: array
+                                - items:
+                                    type: string
+                                  type: array
+                            feature:
+                              additionalProperties:
+                                items:
+                                  type: string
+                                type: array
+                              type: object
+                            spaces:
+                              anyOf:
+                                - items:
+                                    enum:
+                                      - '*'
+                                    type: string
+                                  maxItems: 1
+                                  minItems: 1
+                                  type: array
+                                - items:
+                                    type: string
+                                  type: array
+                              default:
+                                - '*'
+                          required:
+                            - base
+                        type: array
+                      metadata:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - elasticsearch
+                  type: object
+              required:
+                - roles
+      responses: {}
+      summary: Create or update roles
+      tags:
+        - roles
+  /api/spaces/space:
+    get:
+      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: >-
+            Specifies which authorization checks are applied to the API call.
+            The default value is `any`.
+          in: query
           name: purpose
           required: false
           schema:
@@ -36557,7 +37254,15 @@ paths:
               - copySavedObjectsIntoSpace
               - shareSavedObjectsIntoSpace
             type: string
-        - in: query
+        - description: >-
+            When enabled, the API returns any spaces that the user is authorized
+            to access in any capacity and each space will contain the purposes
+            for which the user is authorized. This can be useful to determine
+            which spaces a user can read but not take a specific action in. If
+            the security plugin is not enabled, this parameter has no effect,
+            since no authorization checks take place. This parameter cannot be
+            used in with the `purpose` parameter.
+          in: query
           name: include_authorized_purposes
           required: true
           schema:
@@ -36576,12 +37281,13 @@ paths:
                 x-oas-optional: true
               - type: boolean
                 x-oas-optional: true
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get all spaces
       tags:
         - spaces
     post:
-      description: Create a space
       operationId: '%2Fapi%2Fspaces%2Fspace#1'
       parameters:
         - description: The version of the API to use
@@ -36609,34 +37315,61 @@ paths:
                 _reserved:
                   type: boolean
                 color:
+                  description: >-
+                    The hexadecimal color code used in the space avatar. By
+                    default, the color is automatically generated from the space
+                    name.
                   type: string
                 description:
+                  description: A description for the space.
                   type: string
                 disabledFeatures:
                   default: []
                   items:
+                    description: The list of features that are turned off in the space.
                     type: string
                   type: array
                 id:
+                  description: >-
+                    The space ID that is part of the Kibana URL when inside the
+                    space. Space IDs are limited to lowercase alphanumeric,
+                    underscore, and hyphen characters (a-z, 0-9, _, and -). You
+                    are cannot change the ID with the update operation.
                   type: string
                 imageUrl:
+                  description: >-
+                    The data-URL encoded image to display in the space avatar.
+                    If specified, initials will not be displayed and the color
+                    will be visible as the background color for transparent
+                    images. For best results, your image should be 64x64. Images
+                    will not be optimized by this API call, so care should be
+                    taken when using custom images.
                   type: string
                 initials:
+                  description: >-
+                    One or two characters that are shown in the space avatar. By
+                    default, the initials are automatically generated from the
+                    space name.
                   maxLength: 2
                   type: string
                 name:
+                  description: 'The display name for the space. '
                   minLength: 1
                   type: string
               required:
                 - id
                 - name
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Create a space
       tags:
         - spaces
   /api/spaces/space/{id}:
     delete:
-      description: Delete a space
+      description: >-
+        When you delete a space, all saved objects that belong to the space are
+        automatically deleted, which is permanent and cannot be undone.
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
       parameters:
         - description: The version of the API to use
@@ -36654,17 +37387,21 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
             type: string
-      responses: {}
-      summary: ''
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '404':
+          description: Indicates that the request failed.
+      summary: Delete a space
       tags:
         - spaces
     get:
-      description: Get a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0'
       parameters:
         - description: The version of the API to use
@@ -36675,17 +37412,19 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: path
+        - description: The space identifier.
+          in: path
           name: id
           required: true
           schema:
             type: string
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get a space
       tags:
         - spaces
     put:
-      description: Update a space
       operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1'
       parameters:
         - description: The version of the API to use
@@ -36703,7 +37442,10 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: >-
+            The space identifier. You are unable to change the ID with the
+            update operation.
+          in: path
           name: id
           required: true
           schema:
@@ -36718,29 +37460,54 @@ paths:
                 _reserved:
                   type: boolean
                 color:
+                  description: >-
+                    The hexadecimal color code used in the space avatar. By
+                    default, the color is automatically generated from the space
+                    name.
                   type: string
                 description:
+                  description: A description for the space.
                   type: string
                 disabledFeatures:
                   default: []
                   items:
+                    description: The list of features that are turned off in the space.
                     type: string
                   type: array
                 id:
+                  description: >-
+                    The space ID that is part of the Kibana URL when inside the
+                    space. Space IDs are limited to lowercase alphanumeric,
+                    underscore, and hyphen characters (a-z, 0-9, _, and -). You
+                    are cannot change the ID with the update operation.
                   type: string
                 imageUrl:
+                  description: >-
+                    The data-URL encoded image to display in the space avatar.
+                    If specified, initials will not be displayed and the color
+                    will be visible as the background color for transparent
+                    images. For best results, your image should be 64x64. Images
+                    will not be optimized by this API call, so care should be
+                    taken when using custom images.
                   type: string
                 initials:
+                  description: >-
+                    One or two characters that are shown in the space avatar. By
+                    default, the initials are automatically generated from the
+                    space name.
                   maxLength: 2
                   type: string
                 name:
+                  description: 'The display name for the space. '
                   minLength: 1
                   type: string
               required:
                 - id
                 - name
-      responses: {}
-      summary: ''
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Update a space
       tags:
         - spaces
   /api/status:
@@ -47997,6 +48764,7 @@ components:
         - started
         - stopped
         - updating
+        - error
       type: string
     Security_Entity_Analytics_API_Entity:
       oneOf:
@@ -49401,6 +50169,15 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Timeline_API_AssociatedFilterType:
+      description: Filter notes based on their association with a document or saved object.
+      enum:
+        - all
+        - document_only
+        - saved_object_only
+        - document_and_saved_object
+        - orphan
+      type: string
     Security_Timeline_API_BareNote:
       type: object
       properties:
@@ -51401,6 +52178,7 @@ tags:
   - name: Message Signing Service
   - description: Machine learning
     name: ml
+  - name: roles
   - description: >
       Export sets of saved objects that you want to import into {kib}, resolve
       import errors, and rotate an encryption key for encrypted saved objects
