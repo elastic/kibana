@@ -56,7 +56,7 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, 'usernameX');
+    await userEvent.type(searchInput, 'usernameX', { delay: 10 });
     await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
@@ -65,7 +65,7 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ');
+    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ', { delay: 10 });
     await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ']);
   });
@@ -74,7 +74,7 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, '   usernameX   ');
+    await userEvent.type(searchInput, '   usernameX   ', { delay: 10 });
     await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
@@ -83,7 +83,7 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ');
+    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ', { delay: 10 });
     await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY']);
   });
