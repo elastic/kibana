@@ -39,7 +39,7 @@ export function BurnRateStatus({
   const color = getColor(status);
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="m" />;
+    return <EuiLoadingSpinner size="m" data-test-subj="loadingSpinner" />;
   }
 
   return (
@@ -47,13 +47,13 @@ export function BurnRateStatus({
       <EuiFlexGroup justifyContent="spaceBetween" direction="column" style={{ minHeight: '100%' }}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            <EuiText color="default" size="m">
+            <EuiText color="default" size="m" data-test-subj="title">
               <h5>{getTitle(status)}</h5>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {getSubtitle(shortWindowBurnRate, longWindowBurnRate, selectedWindow)}
+            <EuiText color="subdued" size="s" data-test-subj="description">
+              {getDescription(shortWindowBurnRate, longWindowBurnRate, selectedWindow)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -66,7 +66,7 @@ export function BurnRateStatus({
               titleSize="s"
               textAlign="right"
               isLoading={isLoading}
-              data-test-subj="burnRateThreshold"
+              data-test-subj="threshold"
               description={
                 <EuiTextColor color="default">
                   <span>
@@ -129,7 +129,7 @@ function getTitle(status: Status): string {
   }
 }
 
-function getSubtitle(
+function getDescription(
   shortWindowBurnRate: number,
   longWindowBurnRate: number,
   selectedWindow: BurnRateWindow

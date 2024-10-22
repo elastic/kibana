@@ -7,32 +7,85 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
-
-import { buildSlo } from '../../../../data/slo/slo';
 import { render } from '../../../../utils/test_helper';
+import { DEFAULT_BURN_RATE_WINDOWS } from '../../hooks/use_fetch_burn_rate_windows';
 import { BurnRateStatus } from './burn_rate_status';
 
-describe('BurnRate', () => {
-  it("displays '--' when burn rate is 'undefined'", async () => {
-    const slo = buildSlo();
+describe('BurnRateStatus', () => {
+  it('displays loading spinner when burn rates are being fetched', async () => {
     render(
-      <BurnRateStatus slo={slo} threshold={14.4} longBurnRate={undefined} isLoading={false} />
+      <BurnRateStatus
+        isLoading={true}
+        shortWindowBurnRate={0}
+        longWindowBurnRate={0}
+        selectedWindow={DEFAULT_BURN_RATE_WINDOWS[0]}
+      />
     );
 
-    expect(screen.queryByTestId('sloDetailsBurnRateStat')).toHaveTextContent('--');
+    expect(screen.queryByTestId('loadingSpinner')).toBeDefined();
   });
 
-  it("displays the burn rate value when not 'undefined'", async () => {
-    const slo = buildSlo();
-    render(<BurnRateStatus slo={slo} threshold={14.4} longBurnRate={3.4} isLoading={false} />);
+  it("displays the 'breached' status", async () => {
+    render(
+      <BurnRateStatus
+        isLoading={false}
+        shortWindowBurnRate={18.45}
+        longWindowBurnRate={22.32}
+        selectedWindow={DEFAULT_BURN_RATE_WINDOWS[0]}
+      />
+    );
 
-    expect(screen.queryByTestId('sloDetailsBurnRateStat')).toHaveTextContent('3.4x');
+    expect(screen.queryByTestId('title')).toHaveTextContent('Breached');
+    expect(screen.queryByTestId('description')).toHaveTextContent(
+      'The 1h burn rate is 22.32x and the 5m burn rate is 18.45x.'
+    );
   });
 
-  it("displays the burn rate value when '0'", async () => {
-    const slo = buildSlo();
-    render(<BurnRateStatus slo={slo} threshold={14.4} longBurnRate={0} isLoading={false} />);
+  it("displays the 'recovering' status", async () => {
+    render(
+      <BurnRateStatus
+        isLoading={false}
+        shortWindowBurnRate={1.2}
+        longWindowBurnRate={22.32}
+        selectedWindow={DEFAULT_BURN_RATE_WINDOWS[0]}
+      />
+    );
 
-    expect(screen.queryByTestId('sloDetailsBurnRateStat')).toHaveTextContent('0x');
+    expect(screen.queryByTestId('title')).toHaveTextContent('Recovering');
+    expect(screen.queryByTestId('description')).toHaveTextContent(
+      'The 1h burn rate is 22.32x and the 5m burn rate is 1.2x.'
+    );
+  });
+
+  it("displays the 'Increasing' status", async () => {
+    render(
+      <BurnRateStatus
+        isLoading={false}
+        shortWindowBurnRate={18.45}
+        longWindowBurnRate={1.32}
+        selectedWindow={DEFAULT_BURN_RATE_WINDOWS[0]}
+      />
+    );
+
+    expect(screen.queryByTestId('title')).toHaveTextContent('Increasing');
+    expect(screen.queryByTestId('description')).toHaveTextContent(
+      'The 1h burn rate is 1.32x and the 5m burn rate is 18.45x.'
+    );
+  });
+
+  it("displays the 'Acceptable' status", async () => {
+    render(
+      <BurnRateStatus
+        isLoading={false}
+        shortWindowBurnRate={1.45}
+        longWindowBurnRate={2.32}
+        selectedWindow={DEFAULT_BURN_RATE_WINDOWS[0]}
+      />
+    );
+
+    expect(screen.queryByTestId('title')).toHaveTextContent('Acceptable value');
+    expect(screen.queryByTestId('description')).toHaveTextContent(
+      'The 1h burn rate is 2.32x and the 5m burn rate is 1.45x.'
+    );
   });
 });
