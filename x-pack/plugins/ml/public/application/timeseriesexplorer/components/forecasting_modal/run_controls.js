@@ -99,7 +99,6 @@ export function RunControls({
     mlNodesAvailable,
     jobState
   );
-  console.log('disabledState', disabledState);
 
   const durationInput = (
     <EuiFieldText
@@ -137,41 +136,40 @@ export function RunControls({
       </EuiText>
       <EuiSpacer size="s" />
       <EuiForm>
-        <EuiFlexGroup gutterSize="xl" alignItems="top">
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.runControls.durationLabel"
-                      defaultMessage="Duration"
-                    />
-                  }
-                  fullWidth
-                  isInvalid={!isNewForecastDurationValid}
-                  error={newForecastDurationErrors}
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
-                      defaultMessage="Length of forecast, up to a maximum of {maximumForecastDurationDays} days.
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.runControls.durationLabel"
+                  defaultMessage="Duration"
+                />
+              }
+              fullWidth
+              isInvalid={!isNewForecastDurationValid}
+              error={newForecastDurationErrors}
+              helpText={
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
+                  defaultMessage="Length of forecast, up to a maximum of {maximumForecastDurationDays} days.
                   Use s for seconds, m for minutes, h for hours, d for days, w for weeks."
-                      values={{ maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS }}
-                    />
-                  }
-                >
-                  {disabledState.isDisabledToolTipText === undefined ? (
-                    durationInput
-                  ) : (
-                    <EuiToolTip position="right" content={disabledState.isDisabledToolTipText}>
-                      {durationInput}
-                    </EuiToolTip>
-                  )}
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
+                  values={{ maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS }}
+                />
+              }
+            >
+              {disabledState.isDisabledToolTipText === undefined ? (
+                durationInput
+              ) : (
+                <EuiToolTip position="right" content={disabledState.isDisabledToolTipText}>
+                  {durationInput}
+                </EuiToolTip>
+              )}
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
                 <EuiFormRow
-                  hasEmptyLabelSpace={true}
                   helpText={i18n.translate(
                     'xpack.ml.timeSeriesExplorer.runControls.neverExpireHelpText',
                     {
@@ -193,18 +191,18 @@ export function RunControls({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow hasEmptyLabelSpace>
+                  {disabledState.isDisabledToolTipText === undefined ? (
+                    runButton
+                  ) : (
+                    <EuiToolTip position="left" content={disabledState.isDisabledToolTipText}>
+                      {runButton}
+                    </EuiToolTip>
+                  )}
+                </EuiFormRow>
+              </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              {disabledState.isDisabledToolTipText === undefined ? (
-                runButton
-              ) : (
-                <EuiToolTip position="left" content={disabledState.isDisabledToolTipText}>
-                  {runButton}
-                </EuiToolTip>
-              )}
-            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
