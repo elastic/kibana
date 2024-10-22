@@ -11096,13 +11096,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/opn@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@types/opn/-/opn-5.1.0.tgz#bff7bc371677f4bdbb37884400e03fd81f743927"
-  integrity sha512-TNPrB7Y1xl06zDI0aGyqkgxjhIev3oJ+cdqlZ52MTAHauWpEL/gIUdHebIfRHFZk9IqSBpE2ci1DT48iZH81yg==
-  dependencies:
-    "@types/node" "*"
-
 "@types/ora@^1.3.5":
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/@types/ora/-/ora-1.3.5.tgz#1a08bf64902c1473d3d47de58549a49e07140f1c"
@@ -24900,13 +24893,6 @@ opentracing@^0.14.3:
   version "0.14.4"
   resolved "https://registry.yarnpkg.com/opentracing/-/opentracing-0.14.4.tgz#a113408ea740da3a90fde5b3b0011a375c2e4268"
   integrity sha512-nNnZDkUNExBwEpb7LZaeMeQgvrlO8l4bgY/LvGNZCR0xG/dGWqHqjKrAmR5GUoYo0FIz38kxasvA1aevxWs2CA==
-
-opn@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/opn/-/opn-5.5.0.tgz#fc7164fab56d235904c51c3b27da6758ca3b9bfc"
-  integrity sha512-PqHpggC9bLV0VeWcdKhkpxY+3JTzetLSqTCWL/z/tFIbI6G8JCjondXklT1JinczLz2Xib62sSp0T/gKT4KksA==
-  dependencies:
-    is-wsl "^1.1.0"
 
 optional-js@^2.0.0:
   version "2.1.1"
