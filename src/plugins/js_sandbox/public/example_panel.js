@@ -19,9 +19,14 @@ function(props) {
       });
 
 
-      view.addSignalListener('name1', function(event, item) {
-        console.log('signal', event ,item);
-      })
+      view.addSignalListener('brushX', function(event, item) {
+          console.log('signal', event ,item);
+          if (item.monthdate_date) {
+            props.dispatch(`WHERE @timestamp >= ${item.monthdate_date[0]} AND @timestamp < ${item.monthdate_date[1]}`);
+          } else {
+            props.dispatch('');
+          }
+        })
     },
     view: {
       renderer: "canvas",
@@ -37,7 +42,7 @@ function(props) {
       count: d[0]
     }));
 
-    const brush = vl.selectInterval().encodings('x');
+    const brush = vl.selectInterval().name('brushX').encodings('x');
 
     // now you can use the API!
     const spec = vl.markBar({ tooltip: true })
