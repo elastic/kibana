@@ -7,7 +7,14 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiAccordion, EuiAccordionProps, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiCode,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -104,13 +111,17 @@ elasticsearch:
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.connectorDeployment.p.configFileExplanation"
-              defaultMessage="This command creates a config.yml file in the $HOME/elastic-connectors directory with your specific connector and Elasticsearch details."
+              defaultMessage="This command creates a {configFile} file in the {directory} directory with your specific connector and Elasticsearch details."
+              values={{
+                configFile: <EuiCode>config.yml</EuiCode>,
+                directory: <EuiCode>$HOME/elastic-connectors</EuiCode>,
+              }}
             />
           </p>
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.connectorDeployment.p.exampleConfigFile"
-              defaultMessage="We provide an {exampleConfigLink} for reference in the elastic/connectors repository."
+              defaultMessage="We provide an {exampleConfigLink} for reference in the {repository} repository."
               values={{
                 exampleConfigLink: (
                   <EuiLink
@@ -127,6 +138,7 @@ elasticsearch:
                     )}
                   </EuiLink>
                 ),
+                repository: <EuiCode>elastic/connectors</EuiCode>,
               }}
             />
           </p>
