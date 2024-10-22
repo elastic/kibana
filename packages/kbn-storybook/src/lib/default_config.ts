@@ -20,8 +20,6 @@ const EXTENSIONS = ['.ts', '.js'];
 
 export type { StorybookConfig };
 
-const toPath = (_path: string) => path.join(REPO_ROOT, _path);
-
 // This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
 // changes to packages to cause a refresh in Storybook.
 const IGNORE_GLOBS = [
@@ -32,6 +30,7 @@ const IGNORE_GLOBS = [
 ];
 
 export const defaultConfig: StorybookConfig = {
+  // addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   addons: [
     '@kbn/storybook/preset',
     '@storybook/addon-a11y',
@@ -39,7 +38,8 @@ export const defaultConfig: StorybookConfig = {
     {
       /**
        * This addon replaces rules in the default webpack config
-       * to avoid duplicate rule issues
+       * to avoid duplicate rule issues when directly using the rules
+       * in the webpack config.
        */
       name: '@storybook/addon-styling-webpack',
       options: {
@@ -87,7 +87,6 @@ export const defaultConfig: StorybookConfig = {
       },
     },
   ],
-  // addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   framework: {
     name: '@storybook/react-webpack5',
