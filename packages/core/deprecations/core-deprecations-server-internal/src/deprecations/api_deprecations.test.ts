@@ -109,11 +109,9 @@ describe('#registerApiDeprecationsInfo', () => {
             "apiId": "123|get|/api/test_removed",
             "correctiveActions": Object {
               "manualSteps": Array [
-                "This API will be removed",
-                "This API will be completely removed. You will no longer be able to use it in the future.",
-                "Click the learn more documentation link for more details on addressing the deprecated API.",
-                "Once you are no longer using the deprecated API. You can click on the \\"Mark as Resolved\\" button to track if the API is still getting called.",
-                "The deprecation will be hidden from the Upgrade Assistant unless the deprecated API has been called again.",
+                "Identify the origin of these API calls.",
+                "This API no longer exists and no replacement is available. Delete any requests you have that use this API.",
+                "Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.",
               ],
               "mark_as_resolved_api": Object {
                 "apiTotalCalls": 13,
@@ -128,9 +126,11 @@ describe('#registerApiDeprecationsInfo', () => {
             "documentationUrl": "https://fake-url",
             "domainId": "core.routes-deprecations",
             "level": "critical",
-            "message": "The API GET /api/test_removed/ has been called 13 times. The API was last called on Sunday, September 1, 2024 6:06 AM -04:00.
-        This API has been marked as resolved before. It has been called 12 times since it was marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00.",
-            "title": "The \\"GET /api/test_removed/\\" route will be removed",
+            "message": Array [
+              "The API \\"GET /api/test_removed/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
+            ],
+            "title": "The \\"GET /api/test_removed/\\" route is removed",
           },
         ]
       `);
@@ -156,12 +156,9 @@ describe('#registerApiDeprecationsInfo', () => {
             "apiId": "123|get|/api/test_migrated",
             "correctiveActions": Object {
               "manualSteps": Array [
-                "This API has been migrated to a different API",
-                "This API will be migrated to a different API and will be removed in the future in favor of the other API.",
-                "This API /api/test_migrated/ has been migrated to POST /api/new_path",
-                "Click the learn more documentation link for more details on addressing the deprecated API.",
-                "Once you are no longer using the deprecated API. You can click on the \\"Mark as Resolved\\" button to track if the API is still getting called.",
-                "The deprecation will be hidden from the Upgrade Assistant unless the deprecated API has been called again.",
+                "Identify the origin of these API calls.",
+                "Update the requests to use the following new API instead: \\"POST /api/new_path\\".",
+                "Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.",
               ],
               "mark_as_resolved_api": Object {
                 "apiTotalCalls": 13,
@@ -176,9 +173,11 @@ describe('#registerApiDeprecationsInfo', () => {
             "documentationUrl": "https://fake-url",
             "domainId": "core.routes-deprecations",
             "level": "critical",
-            "message": "The API GET /api/test_migrated/ has been called 13 times. The API was last called on Sunday, September 1, 2024 6:06 AM -04:00.
-        This API has been marked as resolved before. It has been called 12 times since it was marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00.",
-            "title": "The \\"GET /api/test_migrated/\\" route has been migrated to a different API",
+            "message": Array [
+              "The API \\"GET /api/test_migrated/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
+            ],
+            "title": "The \\"GET /api/test_migrated/\\" route is migrated to a different API",
           },
         ]
       `);
@@ -202,12 +201,9 @@ describe('#registerApiDeprecationsInfo', () => {
             "apiId": "123|get|/api/test_bumped",
             "correctiveActions": Object {
               "manualSteps": Array [
-                "This API has a new version bump",
-                "A version bump deprecation means the API has a new version and the current version will be removed in the future in favor of the newer version.",
-                "This API /api/test_bumped/ has a new version \\"444\\".",
-                "Click the learn more documentation link for more details on addressing the deprecated API.",
-                "Once you are no longer using the deprecated API. You can click on the \\"Mark as Resolved\\" button to track if the API is still getting called.",
-                "The deprecation will be hidden from the Upgrade Assistant unless the deprecated API has been called again.",
+                "Identify the origin of these API calls.",
+                "Update the requests to use the following new version of the API instead: \\"444\\".",
+                "Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.",
               ],
               "mark_as_resolved_api": Object {
                 "apiTotalCalls": 13,
@@ -222,9 +218,11 @@ describe('#registerApiDeprecationsInfo', () => {
             "documentationUrl": "https://fake-url",
             "domainId": "core.routes-deprecations",
             "level": "critical",
-            "message": "The API GET /api/test_bumped/ has been called 13 times. The API was last called on Sunday, September 1, 2024 6:06 AM -04:00.
-        This API has been marked as resolved before. It has been called 12 times since it was marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00.",
-            "title": "The \\"GET /api/test_bumped/\\" route has a new version bump",
+            "message": Array [
+              "The API \\"GET /api/test_bumped/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
+            ],
+            "title": "The \\"GET /api/test_bumped/\\" route has a newer version available",
           },
         ]
       `);
@@ -265,11 +263,9 @@ describe('#registerApiDeprecationsInfo', () => {
             "apiId": "123|get|/api/test_never_resolved",
             "correctiveActions": Object {
               "manualSteps": Array [
-                "This API will be removed",
-                "This API will be completely removed. You will no longer be able to use it in the future.",
-                "Click the learn more documentation link for more details on addressing the deprecated API.",
-                "Once you are no longer using the deprecated API. You can click on the \\"Mark as Resolved\\" button to track if the API is still getting called.",
-                "The deprecation will be hidden from the Upgrade Assistant unless the deprecated API has been called again.",
+                "Identify the origin of these API calls.",
+                "This API no longer exists and no replacement is available. Delete any requests you have that use this API.",
+                "Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.",
               ],
               "mark_as_resolved_api": Object {
                 "apiTotalCalls": 13,
@@ -284,8 +280,10 @@ describe('#registerApiDeprecationsInfo', () => {
             "documentationUrl": "https://fake-url",
             "domainId": "core.routes-deprecations",
             "level": "critical",
-            "message": "The API GET /api/test_never_resolved/ has been called 13 times. The API was last called on Sunday, September 1, 2024 6:06 AM -04:00.",
-            "title": "The \\"GET /api/test_never_resolved/\\" route will be removed",
+            "message": Array [
+              "The API \\"GET /api/test_never_resolved/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+            ],
+            "title": "The \\"GET /api/test_never_resolved/\\" route is removed",
           },
         ]
       `);

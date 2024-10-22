@@ -13,9 +13,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 export const getApiDeprecationTitle = (details: RouterDeprecatedRouteDetails) => {
-  const { routePath, routeMethod } = details;
+  const { routePath, routeMethod, routeDeprecationOptions } = details;
+  const deprecationType = routeDeprecationOptions.reason.type;
   const routeWithMethod = `${routeMethod.toUpperCase()} ${routePath}`;
-  const deprecationTypeText = getApiDeprecationTypeText(details);
+  const deprecationTypeText = i18n.translate('core.deprecations.deprecations.apiDeprecationType', {
+    defaultMessage:
+      '{deprecationType, select, remove {is removed} bump {has a newer version available} migrate {is migrated to a different API} other {is deprecated}}',
+    values: { deprecationType },
+  });
 
   return i18n.translate('core.deprecations.deprecations.apiDeprecationInfoTitle', {
     defaultMessage: 'The "{routeWithMethod}" route {deprecationTypeText}',
@@ -26,21 +31,10 @@ export const getApiDeprecationTitle = (details: RouterDeprecatedRouteDetails) =>
   });
 };
 
-export const getApiDeprecationTypeText = (details: RouterDeprecatedRouteDetails) => {
-  const { routeDeprecationOptions } = details;
-  const deprecationType = routeDeprecationOptions.reason.type;
-
-  return i18n.translate('core.deprecations.deprecations.apiDeprecationType', {
-    defaultMessage:
-      '{deprecationType, select, remove {will be removed} bump {has a new version bump} migrate {has been migrated to a different API} other {has been marked as deprecated}}',
-    values: { deprecationType },
-  });
-};
-
 export const getApiDeprecationMessage = (
   details: RouterDeprecatedRouteDetails,
   apiUsageStats: CoreDeprecatedApiUsageStats
-) => {
+): string[] => {
   const { routePath, routeMethod } = details;
   const { apiLastCalledAt, apiTotalCalls, markedAsResolvedLastCalledAt, totalMarkedAsResolved } =
     apiUsageStats;
@@ -52,7 +46,7 @@ export const getApiDeprecationMessage = (
   const messages = [
     i18n.translate('core.deprecations.deprecations.apiDeprecationApiCallsDetailsMessage', {
       defaultMessage:
-        'The API {routeWithMethod} has been called {apiTotalCalls} times. The API was last called on {apiLastCalledAt}.',
+        'The API "{routeWithMethod}" has been called {apiTotalCalls} times. The last call was on {apiLastCalledAt}.',
       values: {
         routeWithMethod,
         apiTotalCalls,
@@ -67,7 +61,7 @@ export const getApiDeprecationMessage = (
         'core.deprecations.deprecations.apiDeprecationPreviouslyMarkedAsResolvedMessage',
         {
           defaultMessage:
-            'This API has been marked as resolved before. It has been called {timeSinceLastResolved} times since it was marked as resolved on {markedAsResolvedLastCalledAt}.',
+            'This issue has been marked as resolved on {markedAsResolvedLastCalledAt} but the API has been called {timeSinceLastResolved, plural, one {# time} other {# times}} since.',
           values: {
             timeSinceLastResolved: diff,
             markedAsResolvedLastCalledAt: moment(markedAsResolvedLastCalledAt).format('LLLL Z'),
@@ -77,18 +71,16 @@ export const getApiDeprecationMessage = (
     );
   }
 
-  return messages.join('\n');
+  return messages;
 };
 
 export const getApiDeprecationsManualSteps = (details: RouterDeprecatedRouteDetails): string[] => {
-  const { routeDeprecationOptions, routePath } = details;
-  const { documentationUrl } = routeDeprecationOptions;
+  const { routeDeprecationOptions } = details;
   const deprecationType = routeDeprecationOptions.reason.type;
 
   const manualSteps = [
     i18n.translate('core.deprecations.deprecations.manualSteps.apiIseprecatedStep', {
-      defaultMessage: 'This API {deprecationTypeText}',
-      values: { deprecationTypeText: getApiDeprecationTypeText(details) },
+      defaultMessage: 'Identify the origin of these API calls.',
     }),
   ];
 
@@ -96,59 +88,43 @@ export const getApiDeprecationsManualSteps = (details: RouterDeprecatedRouteDeta
     case 'bump': {
       const { newApiVersion } = routeDeprecationOptions.reason;
       manualSteps.push(
-        i18n.translate('core.deprecations.deprecations.manualSteps.bumpTypeExplainationStep', {
-          defaultMessage:
-            'A version bump deprecation means the API has a new version and the current version will be removed in the future in favor of the newer version.',
-        }),
         i18n.translate('core.deprecations.deprecations.manualSteps.bumpDetailsStep', {
-          defaultMessage: 'This API {routePath} has a new version "{newApiVersion}".',
-          values: { routePath, newApiVersion },
+          defaultMessage:
+            'Update the requests to use the following new version of the API instead: "{newApiVersion}".',
+          values: { newApiVersion },
         })
       );
       break;
     }
+
     case 'remove': {
       manualSteps.push(
         i18n.translate('core.deprecations.deprecations.manualSteps.removeTypeExplainationStep', {
           defaultMessage:
-            'This API will be completely removed. You will no longer be able to use it in the future.',
+            'This API no longer exists and no replacement is available. Delete any requests you have that use this API.',
         })
       );
       break;
     }
     case 'migrate': {
       const { newApiPath, newApiMethod } = routeDeprecationOptions.reason;
+      const newRouteWithMethod = `${newApiMethod.toUpperCase()} ${newApiPath}`;
+
       manualSteps.push(
-        i18n.translate('core.deprecations.deprecations.manualSteps.migrateTypeExplainationStep', {
-          defaultMessage:
-            'This API will be migrated to a different API and will be removed in the future in favor of the other API.',
-        }),
         i18n.translate('core.deprecations.deprecations.manualSteps.migrateDetailsStep', {
-          defaultMessage: 'This API {routePath} has been migrated to {newApiMethod} {newApiPath}',
-          values: { newApiMethod: newApiMethod.toUpperCase(), newApiPath, routePath },
+          defaultMessage:
+            'Update the requests to use the following new API instead: "{newRouteWithMethod}".',
+          values: { newRouteWithMethod },
         })
       );
       break;
     }
   }
 
-  if (documentationUrl) {
-    manualSteps.push(
-      i18n.translate('core.deprecations.deprecations.manualSteps.documentationStep', {
-        defaultMessage:
-          'Click the learn more documentation link for more details on addressing the deprecated API.',
-      })
-    );
-  }
-
   manualSteps.push(
     i18n.translate('core.deprecations.deprecations.manualSteps.markAsResolvedStep', {
       defaultMessage:
-        'Once you are no longer using the deprecated API. You can click on the "Mark as Resolved" button to track if the API is still getting called.',
-    }),
-    i18n.translate('core.deprecations.deprecations.manualSteps.deprecationWillBeHiddenStep', {
-      defaultMessage:
-        'The deprecation will be hidden from the Upgrade Assistant unless the deprecated API has been called again.',
+        'Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.',
     })
   );
 

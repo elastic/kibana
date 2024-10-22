@@ -22,7 +22,7 @@ export interface BaseDeprecationDetails {
    * The description message to be displayed for the deprecation.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
-  message: string;
+  message: string | string[];
   /**
    * levels:
    * - warning: will not break deployment upon upgrade

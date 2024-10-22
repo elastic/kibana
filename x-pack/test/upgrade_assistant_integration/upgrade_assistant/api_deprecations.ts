@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
             'unversioned|get|/api/routing_example/d/removed_route'
           );
           expectExpect(apiDeprecations[0].title).toEqual(
-            'The "GET /api/routing_example/d/removed_route" route will be removed'
+            'The "GET /api/routing_example/d/removed_route" route is removed'
           );
         },
         undefined,

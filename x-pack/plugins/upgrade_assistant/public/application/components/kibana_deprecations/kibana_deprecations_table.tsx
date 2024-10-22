@@ -92,14 +92,14 @@ interface Props {
   deprecations?: KibanaDeprecationDetails[];
   reload: () => void;
   toggleFlyout: (newFlyoutContent?: KibanaDeprecationDetails) => void;
-  deprecationResolutionState?: DeprecationResolutionState;
+  deprecationResolutionStates: Record<string, DeprecationResolutionState>;
 }
 
 export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations,
   reload,
   toggleFlyout,
-  deprecationResolutionState,
+  deprecationResolutionStates,
 }) => {
   const columns: Array<EuiBasicTableColumn<KibanaDeprecationDetails>> = [
     {
@@ -164,7 +164,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
             deprecationId={deprecation.id}
             isAutomated={Boolean(correctiveActions?.api)}
             canBeMarkedAsResolved={Boolean(correctiveActions?.mark_as_resolved_api)}
-            deprecationResolutionState={deprecationResolutionState}
+            deprecationResolutionState={deprecationResolutionStates[deprecation.id]}
           />
         );
       },

@@ -53,7 +53,7 @@ const i18nTexts = {
   markAsResolvedButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveButtonLabel',
     {
-      defaultMessage: 'Mark As Resolved',
+      defaultMessage: 'Mark as Resolved',
     }
   ),
   retryQuickResolveButtonLabel: i18n.translate(
@@ -140,6 +140,7 @@ export const DeprecationDetailsFlyout = ({
   deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
   const { documentationUrl, message, correctiveActions, title } = deprecation;
+  const messages = Array.isArray(message) ? message : [message];
 
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
   const avilableCorrectiveActions: AvailableCorrectiveActions = {
@@ -184,7 +185,11 @@ export const DeprecationDetailsFlyout = ({
         )}
 
         <EuiText>
-          <p className="eui-textBreakWord">{message}</p>
+          {messages.map((m, i) => (
+            <p key={i} className="eui-textBreakWord">
+              {m}
+            </p>
+          ))}
           {documentationUrl && (
             <p>
               <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />

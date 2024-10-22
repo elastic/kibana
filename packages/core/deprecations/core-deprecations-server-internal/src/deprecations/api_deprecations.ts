@@ -57,9 +57,8 @@ export const createGetApiDeprecations =
         )!;
         const { routeVersion, routePath, routeDeprecationOptions, routeMethod } =
           routeDeprecationDetails;
-        const defaultLevel =
-          routeDeprecationOptions.reason.type === 'remove' ? 'critical' : 'warning';
-        const deprecationLevel = routeDeprecationOptions.severity || defaultLevel;
+
+        const deprecationLevel = routeDeprecationOptions.severity || 'warning';
 
         return {
           apiId,
