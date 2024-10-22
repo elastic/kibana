@@ -8,11 +8,65 @@
  */
 
 import { type Type, schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type {
+  IRouter,
+  ISavedObjectTypeRegistry,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
+
+/**
+ * Some saved object don't have a title field to search against (e.g. the "config" type for advanced settings).
+ * Yet we sill want to be able to search for `"advanced"` in the UI and have the advanced settings doc be returned.
+ * This function searches against the runtime titles of saved objects which have a `management.getTitle()` method.
+ */
+async function searchRuntimeTitle({
+  search: _search,
+  dbSearchResult,
+  typeRegistry,
+  client,
+}: {
+  search?: string;
+  typeRegistry: ISavedObjectTypeRegistry;
+  client: SavedObjectsClientContract;
+  dbSearchResult: v1.SavedObjectWithMetadata[];
+}): Promise<v1.SavedObjectWithMetadata[]> {
+  if (!_search) return [];
+
+  const search = _search.replace(/\*/g, '').trim();
+
+  const typesWithRuntimeTitle = typeRegistry
+    .getAllTypes()
+    .filter((type) => type.management?.searchRuntimeTitle)
+    .map((type) => type.name);
+
+  const findResponse = await client.find<any>({
+    type: typesWithRuntimeTitle,
+    fields: undefined,
+  });
+
+  const dbSearchResultById = dbSearchResult.reduce((acc, so) => {
+    acc[so.id] = so;
+    return acc;
+  }, {} as Record<string, v1.SavedObjectWithMetadata>);
+
+  const searchMatch = findResponse.saved_objects.filter((so) => {
+    const type = typeRegistry.getType(so.type);
+    const title = type?.management?.getTitle?.(so);
+    if (!title) return false;
+
+    const titleMatches = title.toLowerCase().includes(search.toLowerCase());
+
+    return titleMatches
+      ? dbSearchResultById[so.id] === undefined // only return if not already in the db search result
+      : false;
+  });
+
+  return searchMatch.map(toSavedObjectWithMeta);
+}
 
 export const registerFindRoute = (
   router: IRouter,
@@ -34,6 +88,12 @@ export const registerFindRoute = (
   router.get(
     {
       path: '/api/kibana/management/saved_objects/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
@@ -82,14 +142,20 @@ export const registerFindRoute = (
       });
 
       const savedObjects = findResponse.saved_objects.map(toSavedObjectWithMeta);
+      const savedObjectsWithRuntimeTitle = await searchRuntimeTitle({
+        search: query.search,
+        dbSearchResult: savedObjects,
+        typeRegistry,
+        client,
+      });
 
       const response: v1.FindResponseHTTP = {
-        saved_objects: savedObjects.map((so) => {
+        saved_objects: [...savedObjects, ...savedObjectsWithRuntimeTitle].map((so) => {
           const obj = injectMetaAttributes(so, managementService);
           const result = { ...obj, attributes: {} as Record<string, unknown> };
           return result;
         }),
-        total: findResponse.total,
+        total: findResponse.total + savedObjectsWithRuntimeTitle.length,
         per_page: findResponse.per_page,
         page: findResponse.page,
       };

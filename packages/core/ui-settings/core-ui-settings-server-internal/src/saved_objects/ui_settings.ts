@@ -41,6 +41,7 @@ export const uiSettingsType: SavedObjectsType = {
     getTitle(obj) {
       return `Advanced Settings [${obj.id}]`;
     },
+    searchRuntimeTitle: true,
   },
   migrations,
 };
@@ -68,5 +69,6 @@ export const uiSettingsGlobalType: SavedObjectsType = {
     getTitle(obj) {
       return `Global Settings [${obj.id}]`;
     },
+    searchRuntimeTitle: true,
   },
 };
