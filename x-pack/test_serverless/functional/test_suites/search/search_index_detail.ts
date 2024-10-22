@@ -24,7 +24,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-  describe('Search index detail page', () => {
+  describe('Search index detail page', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/196981
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlApiKeys.deleteAPIKeys();
@@ -45,6 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
         await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
         await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkMissingInMoreOptions();
       });
       it('should have embedded dev console', async () => {
         await testHasEmbeddedConsole(pageObjects);
@@ -79,6 +83,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
       });
 
+      it('should have breadcrumb navigation', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectBreadcrumbNavigationWithIndexName(
+          indexName
+        );
+        await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
+        await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+      });
+
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
         await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
@@ -108,7 +121,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
         it('menu action item should be replaced with playground', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectUseInPlaygroundLinkExists();
+          await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
+        });
+        it('should have link to API reference doc link in options menu', async () => {
+          await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
+          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
         });
         it('should have index documents', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
@@ -161,12 +178,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
-        });
-        it('should have link to API reference doc link', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
-        });
-        it('should have link to playground', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectPlaygroundButtonExistsInMoreOptions();
         });
         it('should delete index', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();

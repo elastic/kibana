@@ -18,8 +18,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
   const supertest = getService('supertest');
   const utils = EntityStoreUtils(getService, namespace);
 
-  // Failing: See https://github.com/elastic/kibana/issues/196546
-  describe.skip('@ess Entity Store Engine APIs in non-default space', () => {
+  describe('@ess Entity Store Engine APIs in non-default space', () => {
     const dataView = dataViewRouteHelpersFactory(supertest, namespace);
 
     before(async () => {
@@ -43,22 +42,19 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       });
 
       it('should have installed the expected user resources', async () => {
-        await utils.initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
         await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
         await utils.expectEngineAssetsExist('host');
       });
     });
 
     describe('get and list', () => {
       before(async () => {
-        await Promise.all([
-          utils.initEntityEngineForEntityType('host'),
-          utils.initEntityEngineForEntityType('user'),
-        ]);
+        await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });
 
       after(async () => {
@@ -134,7 +130,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
 
       after(async () => {
@@ -188,7 +184,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
         await api
           .deleteEntityEngine(
@@ -204,7 +200,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       });
 
       it('should delete the user entity engine', async () => {
-        await utils.initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
 
         await api
           .deleteEntityEngine(
