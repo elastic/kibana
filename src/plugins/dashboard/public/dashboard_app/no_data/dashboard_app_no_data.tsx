@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import useMountedState from 'react-use/lib/useMountedState';
 import { v4 as uuidv4 } from 'uuid';
 import {
   getESQLAdHocDataview,
@@ -52,7 +51,6 @@ export const DashboardAppNoDataPage = ({
     share: shareService,
   };
   const [abortController, setAbortController] = useState(new AbortController());
-  const isMounted = useMountedState();
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
   const AnalyticsNoDataPageKibanaProvider = withSuspense(
     React.lazy(() =>
@@ -74,7 +72,7 @@ export const DashboardAppNoDataPage = ({
 
   const onTryESQL = useCallback(async () => {
     abortController?.abort();
-    if (lensHelpersAsync.value && isMounted()) {
+    if (lensHelpersAsync.value) {
       const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
@@ -126,15 +124,17 @@ export const DashboardAppNoDataPage = ({
           });
         }
       } catch (error) {
-        coreServices.notifications.toasts.addWarning(
-          i18n.translate('dashboard.noDataviews.esqlRequestWarningMessage', {
-            defaultMessage: 'Unable to load columns. {errorMessage}',
-            values: { errorMessage: error.message },
-          })
-        );
+        if (error.name !== 'AbortError') {
+          coreServices.notifications.toasts.addWarning(
+            i18n.translate('dashboard.noDataviews.esqlRequestWarningMessage', {
+              defaultMessage: 'Unable to load columns. {errorMessage}',
+              values: { errorMessage: error.message },
+            })
+          );
+        }
       }
     }
-  }, [abortController, isMounted, lensHelpersAsync.value]);
+  }, [abortController, lensHelpersAsync.value]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
