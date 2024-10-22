@@ -50,6 +50,9 @@
     "@kbn/observability-plugin",
     "@kbn/rule-data-utils",
     "@kbn/spaces-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/observability-utils-browser",
+    "@kbn/observability-utils-server",
+    "@kbn/observability-utils-common"
   ]
 }
