@@ -37,9 +37,9 @@ export const defaultConfig: StorybookConfig = {
     '@storybook/addon-webpack5-compiler-babel',
     {
       /**
-       * This addon replaces rules in the default webpack config
-       * to avoid duplicate rule issues when directly using the rules
-       * in the webpack config.
+       * This addon replaces rules in the default SB webpack config
+       * to avoid duplicate rule issues caused by directly using the rules
+       * in the custom webpack config.
        */
       name: '@storybook/addon-styling-webpack',
       options: {
