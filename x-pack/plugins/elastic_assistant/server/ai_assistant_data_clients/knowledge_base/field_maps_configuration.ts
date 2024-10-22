@@ -6,6 +6,8 @@
  */
 import { FieldMap } from '@kbn/data-stream-adapter';
 
+export const ASSISTANT_ELSER_INFERENCE_ID = 'assistant-internal-elser2';
+
 export const knowledgeBaseFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -174,7 +176,7 @@ export const knowledgeBaseFieldMapV2: FieldMap = {
     type: 'semantic_text',
     array: false,
     required: false,
-    inference_id: '.elser-2',
+    inference_id: ASSISTANT_ELSER_INFERENCE_ID,
   },
   vector: {
     type: 'object',

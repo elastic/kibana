@@ -46,6 +46,7 @@ import {
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
 import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
+import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -149,12 +150,32 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     try {
       const esClient = await this.options.elasticsearchClientPromise;
-      await esClient.ml.startTrainedModelDeployment({
-        model_id: elserId,
-        wait_for: 'fully_allocated',
-      });
+      if (this.isV2KnowledgeBaseEnabled) {
+        await esClient.inference.put({
+          task_type: 'sparse_embedding',
+          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+          inference_config: {
+            service: 'elasticsearch',
+            service_settings: {
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 8,
+              },
+              num_threads: 1,
+              model_id: elserId,
+            },
+            task_settings: {},
+          },
+        });
+      } else {
+        await esClient.ml.startTrainedModelDeployment({
+          model_id: elserId,
+          wait_for: 'fully_allocated',
+        });
+      }
     } catch (error) {
-      this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
+      this.options.logger.error(`Error creating ELSER inference endpoint '${elserId}':\n${error}`);
       throw new Error(`Error deploying ELSER model '${elserId}':\n${error}`);
     }
   };

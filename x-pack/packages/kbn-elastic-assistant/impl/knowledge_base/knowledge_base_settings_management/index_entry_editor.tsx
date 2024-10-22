@@ -96,12 +96,20 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       }));
     }, [dataViews]);
 
+    const indexExists = useAsync(async () => {
+      if (!entry?.index?.length) return true;
+
+      return !!(await dataViews.getExistingIndices([entry.index])).length;
+    }, [entry?.index]);
+
+    console.error('indexExists', indexExists);
+
     const indexFields = useAsync(
       async () =>
         dataViews.getFieldsForWildcard({
           pattern: entry?.index ?? '',
         }),
-      []
+      [entry?.index]
     );
 
     const fieldOptions = useMemo(
@@ -251,7 +259,12 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             fullWidth
           />
         </EuiFormRow>
-        <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
+        <EuiFormRow
+          label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
+          fullWidth
+          isInvalid={!indexExists.value}
+          error={!indexExists.value && <>{"Index doesn't exist"}</>}
+        >
           <EuiComboBox
             data-test-subj="index-combobox"
             aria-label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}

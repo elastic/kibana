@@ -26,7 +26,10 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { knowledgeBaseFieldMapV2 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import {
+  knowledgeBaseFieldMap,
+  knowledgeBaseFieldMapV2,
+} from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -94,7 +97,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMapV2, // TODO: use V2 if FF is enabled
+      fieldMap: knowledgeBaseFieldMap,
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -144,11 +147,15 @@ export class AIAssistantService {
       fieldMap,
     });
 
+    console.error('CREATE DATA STREAM', resource, this.v2KnowledgeBaseEnabled);
+
     newDataStream.setIndexTemplate({
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines
+      ...(resource in this.resourceNames.pipelines &&
+      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+      !(resource === 'knowledgeBase' && this.v2KnowledgeBaseEnabled)
         ? {
             template: {
               settings: {
@@ -199,7 +206,12 @@ export class AIAssistantService {
         id: this.resourceNames.pipelines.knowledgeBase,
       });
       // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
-      if (!pipelineCreated && !this.v2KnowledgeBaseEnabled) {
+      if (
+        // Install for v1
+        (!this.v2KnowledgeBaseEnabled && !pipelineCreated) ||
+        // Upgrade from v1 to v2
+        (pipelineCreated && this.v2KnowledgeBaseEnabled)
+      ) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
         );
@@ -207,6 +219,7 @@ export class AIAssistantService {
           esClient,
           id: this.resourceNames.pipelines.knowledgeBase,
           modelId: await this.getElserId(),
+          v2KnowledgeBaseEnabled: this.v2KnowledgeBaseEnabled,
         });
 
         this.options.logger.debug(`Installed ingest pipeline: ${response}`);
