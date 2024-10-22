@@ -473,6 +473,7 @@ export interface IndicesMetadataConfiguration {
   datastreams_threshold: number;
   max_prefixes: number;
   max_group_size: number;
+  min_group_size: number;
 }
 
 export interface PaginationConfiguration {

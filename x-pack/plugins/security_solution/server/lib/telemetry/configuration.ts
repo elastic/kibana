@@ -30,6 +30,7 @@ class TelemetryConfigurationDTO {
     datastreams_threshold: 1000,
     max_prefixes: 10,
     max_group_size: 100,
+    min_group_size: 5,
   };
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;

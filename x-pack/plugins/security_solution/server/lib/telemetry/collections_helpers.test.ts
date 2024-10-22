@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { stagingIndices } from './__mocks__/staging_indices';
-import { type QueryConfig, chunked, chunkedBy, findCommonPrefixes } from './collections_helpers';
+import {
+  type CommonPrefixesConfig,
+  chunked,
+  chunkedBy,
+  findCommonPrefixes,
+} from './collections_helpers';
 
 describe('telemetry.utils.chunked', () => {
   it('should chunk simple case', async () => {
@@ -84,9 +89,10 @@ describe('telemetry.utils.chunkedBy', () => {
 describe('telemetry.utils.findCommonPrefixes', () => {
   it('should find common prefixes in simple case', async () => {
     const indices = ['aaa', 'b', 'aa'];
-    const config: QueryConfig = {
+    const config: CommonPrefixesConfig = {
       maxPrefixes: 10,
       maxGroupSize: 10,
+      minPrefixSize: 1,
     };
 
     const output = findCommonPrefixes(indices, config);
@@ -100,11 +106,31 @@ describe('telemetry.utils.findCommonPrefixes', () => {
     );
   });
 
+  it('should find common prefixes with different minPrefixSize', async () => {
+    const indices = ['.ds-AA-0001', '.ds-AA-0002', '.ds-BB-0003'];
+    const config: CommonPrefixesConfig = {
+      maxPrefixes: 10,
+      maxGroupSize: 3,
+      minPrefixSize: 5,
+    };
+
+    const output = findCommonPrefixes(indices, config);
+
+    expect(output).toHaveLength(2);
+    expect(
+      output.find((v, _) => v.parts.length === 1 && v.parts[0] === '.ds-A')?.indexCount
+    ).toEqual(2);
+    expect(
+      output.find((v, _) => v.parts.length === 1 && v.parts[0] === '.ds-B')?.indexCount
+    ).toEqual(1);
+  });
+
   it('should discard extra indices', async () => {
     const indices = ['aaa', 'aaaaaa', 'aa'];
-    const config: QueryConfig = {
+    const config: CommonPrefixesConfig = {
       maxPrefixes: 1,
       maxGroupSize: 2,
+      minPrefixSize: 3,
     };
 
     const output = findCommonPrefixes(indices, config);
@@ -117,9 +143,10 @@ describe('telemetry.utils.findCommonPrefixes', () => {
 
   it('should group many indices', async () => {
     const indices = stagingIndices;
-    const config: QueryConfig = {
+    const config: CommonPrefixesConfig = {
       maxPrefixes: 8,
       maxGroupSize: 100,
+      minPrefixSize: 3,
     };
 
     const output = findCommonPrefixes(indices, config);

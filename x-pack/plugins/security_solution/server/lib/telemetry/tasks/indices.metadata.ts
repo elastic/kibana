@@ -22,7 +22,7 @@ import {
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
 } from '../event_based/events';
-import type { QueryConfig } from '../collections_helpers';
+import type { CommonPrefixesConfig } from '../collections_helpers';
 import { telemetryConfiguration } from '../configuration';
 import type { ClusterStats, DataStream } from '../indices.metadata.types';
 import { TelemetryCounter } from '../types';
@@ -53,9 +53,10 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       const taskConfig = telemetryConfiguration.indices_metadata_config;
 
       // TODO: not use taskExecutionPeriod, it's just to test the task using the temporary API
-      const queryConfig: QueryConfig = {
+      const queryConfig: CommonPrefixesConfig = {
         maxPrefixes: Number(taskExecutionPeriod.last ?? taskConfig.max_prefixes),
         maxGroupSize: Number(taskExecutionPeriod.current ?? taskConfig.max_group_size),
+        minGroupSize: Number(taskExecutionPeriod.current ?? taskConfig.min_group_size),
       };
 
       const publishClusterStats = (stats: ClusterStats) => {

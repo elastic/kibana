@@ -64,9 +64,10 @@ class Chunked<T> {
   }
 }
 
-export interface QueryConfig {
+export interface CommonPrefixesConfig {
   maxPrefixes: number;
   maxGroupSize: number;
+  minPrefixSize: number;
 }
 
 interface TrieNode {
@@ -76,6 +77,11 @@ interface TrieNode {
   count: number;
   isEnd: boolean;
   id: number;
+}
+
+interface Group {
+  parts: string[];
+  indexCount: number;
 }
 
 function newTrieNode(char: string = '', prefix: string = '', id: number = 0): TrieNode {
@@ -89,19 +95,46 @@ function newTrieNode(char: string = '', prefix: string = '', id: number = 0): Tr
   };
 }
 
-function* idCounter(): Generator<number, number, number> {
-  let id = 0;
-  while (true) {
-    yield id++;
-  }
-}
+/**
+ * Finds and groups common prefixes from a list of strings.
+ *
+ * @param {string[]} indices - An array of strings from which common prefixes will be extracted.
+ * @param {CommonPrefixesConfig} config - A configuration object that defines the rules for grouping.
+ *
+ * The `config` object contains the following properties:
+ *   - maxGroupSize {number}: The maximum number of indices allowed in a group.
+ *   - maxPrefixes {number}: The maximum number of prefix groups to return.
+ *   - minPrefixSize {number}: The minimum length of a prefix required to form a group. It avoid cases like returning
+ *     a single character prefix, e.g., ['.ds-...1', '.ds-....2', ....] -> returns a single group '.'
+ *
+ * @returns {Group[]} - An array of groups where each group contains a list of prefix parts and the count of indices that share that prefix.
+ *
+ * Example usage:
+ *
+ * ```typescript
+ * const indices = ['apple', 'appetizer', 'application', 'banana', 'band', 'bandage'];
+ * const config = {
+ *   maxGroupSize: 5,
+ *   maxPrefixes: 3,
+ *   minPrefixSize: 3
+ * };
+ *
+ * const result = findCommonPrefixes(indices, config);
+ * //result = [
+ * //   { parts: [ 'ban' ], indexCount: 3 },
+ * //   { parts: [ 'app' ], indexCount: 3 }
+ * //]
+ * ```
+ */
 
-interface Group {
-  parts: string[];
-  indexCount: number;
-}
+export function findCommonPrefixes(indices: string[], config: CommonPrefixesConfig): Group[] {
+  const idCounter = function* (): Generator<number, number, number> {
+    let id = 0;
+    while (true) {
+      yield id++;
+    }
+  };
 
-export function findCommonPrefixes(indices: string[], config: QueryConfig): Group[] {
   const idGen = idCounter();
 
   const root = newTrieNode('', '', idGen.next().value);
@@ -125,8 +158,8 @@ export function findCommonPrefixes(indices: string[], config: QueryConfig): Grou
     // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
     const node = nodes.pop()!;
     if (
-      (node.count <= config.maxGroupSize && node.prefix !== '') ||
-      Object.keys(node.children).length === 0
+      (node.count <= config.maxGroupSize && node.prefix.length >= config.minPrefixSize) ||
+      (Object.keys(node.children).length === 0 && node.prefix.length >= config.minPrefixSize)
     ) {
       const group: Group = {
         parts: [node.prefix],

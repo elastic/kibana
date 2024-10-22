@@ -102,7 +102,7 @@ import type {
   Index,
   IndexStats,
 } from './indices.metadata.types';
-import { type QueryConfig, findCommonPrefixes } from './collections_helpers';
+import { type CommonPrefixesConfig, findCommonPrefixes } from './collections_helpers';
 
 export interface ITelemetryReceiver {
   start(
@@ -261,10 +261,16 @@ export interface ITelemetryReceiver {
   getDataStreams(): Promise<DataStream[]>;
   getIndicesStats(
     indices: string[],
-    config: QueryConfig
+    config: CommonPrefixesConfig
   ): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(indices: string[], config: QueryConfig): AsyncGenerator<IlmStats, void, unknown>;
-  getIlmsPolicies(ilms: string[], config: QueryConfig): AsyncGenerator<IlmPolicy, void, unknown>;
+  getIlmsStats(
+    indices: string[],
+    config: CommonPrefixesConfig
+  ): AsyncGenerator<IlmStats, void, unknown>;
+  getIlmsPolicies(
+    ilms: string[],
+    config: CommonPrefixesConfig
+  ): AsyncGenerator<IlmPolicy, void, unknown>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -1418,7 +1424,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       });
   }
 
-  public async *getIndicesStats(indices: string[], config: QueryConfig) {
+  public async *getIndicesStats(indices: string[], config: CommonPrefixesConfig) {
     const es = this.esClient();
 
     this.logger.l('Fetching indices stats', { indices } as LogMeta);
@@ -1466,7 +1472,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsStats(indices: string[], config: QueryConfig) {
+  public async *getIlmsStats(indices: string[], config: CommonPrefixesConfig) {
     const es = this.esClient();
 
     const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
@@ -1505,7 +1511,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[], config: QueryConfig) {
+  public async *getIlmsPolicies(ilms: string[], config: CommonPrefixesConfig) {
     const es = this.esClient();
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
