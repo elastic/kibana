@@ -28,11 +28,7 @@ export function InventoryPanelBadge({
         padding: ${euiTheme.size.base};
       `}
     >
-      <EuiFlexItem
-        css={css`
-          font-weight: ${euiTheme.font.weight.bold};
-        `}
-      >
+      <EuiFlexItem>
         <EuiText
           size="xs"
           css={css`
