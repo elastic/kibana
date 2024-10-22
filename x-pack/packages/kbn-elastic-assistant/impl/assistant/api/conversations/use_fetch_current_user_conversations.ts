@@ -40,13 +40,13 @@ export interface UseFetchCurrentUserConversationsParams {
  */
 const query = {
   page: 1,
-  perPage: 100,
+  per_page: 90,
 };
 
 export const CONVERSATIONS_QUERY_KEYS = [
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   query.page,
-  query.perPage,
+  query.per_page,
   API_VERSIONS.public.v1,
 ];
 
@@ -69,7 +69,7 @@ export const useFetchCurrentUserConversations = ({
     {
       select: (data) => onFetch(data),
       keepPreviousData: true,
-      initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      initialData: { ...query, total: 0, data: [] },
       refetchOnWindowFocus,
       enabled: isAssistantEnabled,
     }
