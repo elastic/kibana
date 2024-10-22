@@ -17,6 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
   describe(`GET ${API_PATH}`, function () {
+    // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is by default
+    this.tags(['skipMKI']);
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
