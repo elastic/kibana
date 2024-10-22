@@ -87,6 +87,12 @@ export const getMonitorsEmbeddableFactory = (
                 initialState: {
                   filters: filters$.getValue(),
                 },
+                title: i18n.translate(
+                  'xpack.synthetics.editSloOverviewEmbeddableTitle.overview.title',
+                  {
+                    defaultMessage: 'Create monitors overview',
+                  }
+                ),
               });
               filters$.next(result.filters);
             } catch (e) {
