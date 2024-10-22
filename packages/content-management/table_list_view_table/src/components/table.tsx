@@ -20,6 +20,7 @@ import {
   Search,
   type EuiTableSelectionType,
   useEuiTheme,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -229,6 +230,17 @@ export function Table<T extends UserContentCommonSchema>({
         'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters,
+      hint: {
+        content: (
+          <FormattedMessage
+            id="contentManagement.tableList.listing.charsNotAllowedHint"
+            defaultMessage="Characters not allowed: {chars}"
+            values={{
+              chars: <EuiCode>()[]&#123;&#125;&lt;&gt;+=\&quot;$#!¿?,;`&apos;/|&</EuiCode>,
+            }}
+          />
+        ),
+      },
     };
   }, [onTableSearchChange, renderCreateButton, renderToolsLeft, searchFilters, searchQuery.query]);
 
