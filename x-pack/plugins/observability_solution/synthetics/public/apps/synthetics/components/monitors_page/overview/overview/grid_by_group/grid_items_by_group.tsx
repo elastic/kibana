@@ -153,11 +153,11 @@ export const GridItemsByGroup = ({
           </>
         );
       })}
-      {selectedGroup.otherValues.items?.length && (
+      {(selectedGroup.otherValues.items ?? []).length > 0 && (
         <WrappedPanel isFullScreen={fullScreenGroup === selectedGroup.otherValues.label}>
           <GroupGridItem
             groupLabel={selectedGroup.otherValues.label}
-            groupMonitors={selectedGroup.otherValues.items}
+            groupMonitors={selectedGroup.otherValues.items ?? []}
             loaded={loaded}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}
