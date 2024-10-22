@@ -9,6 +9,8 @@
 
 import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
 
+import { getUnableToParseIframeMessage, getIframeContent } from './js_sandbox_iframe_content';
+
 /**
  * JS Sandbox Component
  *
@@ -80,125 +82,11 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
   // The transpileUserCode function evaluates the provided component code.
   // This function uses eval() to execute user code, but it’s done within
   // the controlled iframe to mitigate security risks.
-  const iframeContent = useMemo(() => {
-    if (!jsPassesBasicCheck) {
-      return `
-      <!DOCTYPE html>
-      <html>
-        <body>
-          <div id="root">Unable to parse user input</div>
-        </body>
-      </html>
-      `;
-    }
-
-    return `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
-        <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
-        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-lite-api@5.6.0"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script>
-      </head>
-      <body>
-        <div id="root"></div>
-        <script>
-          let UserComponent = () => null;
-          let data;
-          let width;
-          let height;
-
-          function updateWidthHeight() {
-            width = Math.max(document.documentElement.clientWidth - 72 || 0, window.innerWidth - 72 || 0);
-            height = Math.max(document.documentElement.clientHeight - 48 || 0, window.innerHeight - 48 || 0);
-          }
-
-          function updateData(dataString) {
-            try {
-              data = JSON.parse(dataString);
-              return true
-            } catch (e) {
-              window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
-                errorType: 'Error parsing data',
-                error: e
-              }});
-              return false;
-            }
-          }
-
-          window.addEventListener('resize', function(event) {
-            renderUserComponent();
-          }, true);
-
-          // Function to render UserComponent with the provided data
-          const renderUserComponent = function() {
-            updateWidthHeight();
-
-            try {
-              if (typeof UserComponent === 'function') {
-                ReactDOM.render(
-                  React.createElement(UserComponent, { data, width, height }),
-                  document.getElementById('root')
-                );
-                window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: null }, '*');
-              } else {
-                window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
-                  errorType: 'User provided code is not a function',
-                  error: e
-                } }, '*');
-              }
-            } catch (e) {
-              window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
-                errorType: 'Render error',
-                error: e
-              } }, '*');
-            }
-          };
-
-          // Function to evaluate and render user component with JSX support
-          const transpileUserCode = function(userCode) {
-            try {
-              // Transpile the user code from JSX to JavaScript using Babel
-              const transpiledCode = Babel.transform('UserComponent = ' + userCode, {
-                presets: ['react']
-              }).code;
-
-              eval(transpiledCode);
-
-              // iframe sends a "ready" message to the parent
-              window.parent.postMessage({ source: '${iframeID}', type: 'iframeReady' }, '*');
-              } catch (e) {
-              window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
-                errorType: 'Error transpiling user input',
-                error: e
-              } }, '*');
-            }
-          };
-
-          document.addEventListener('DOMContentLoaded', function(event) {
-            transpileUserCode(${JSON.stringify(hashedJs)});
-          });
-
-          // Listen for messages from the parent window to receive data updates
-          window.addEventListener('message', function(event) {
-            if (event.data.type === 'updateData' && typeof UserComponent === 'function') {
-              const dataOk = updateData(event.data.payload);
-
-              if (dataOk) {
-                renderUserComponent();
-              }
-            }
-          });
-        </script>
-      </body>
-    </html>
-  `;
-  }, [jsPassesBasicCheck, hashedJs, iframeID]);
+  const iframeContent = useMemo(
+    () =>
+      jsPassesBasicCheck ? getIframeContent(iframeID, hashedJs) : getUnableToParseIframeMessage(),
+    [jsPassesBasicCheck, hashedJs, iframeID]
+  );
 
   // initial handshake with iframe
   useEffect(() => {
@@ -208,6 +96,8 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
           iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: esql }, '*');
         } else if (event.data.type === 'error') {
           setError(event.data.payload);
+        } else if (event.data.type === 'crossfilter') {
+          console.log('Host received crossfilter data:', event.data.payload);
         }
       }
     };
