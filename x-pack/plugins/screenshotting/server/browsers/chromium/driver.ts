@@ -12,7 +12,6 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
-import open from 'opn';
 import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
