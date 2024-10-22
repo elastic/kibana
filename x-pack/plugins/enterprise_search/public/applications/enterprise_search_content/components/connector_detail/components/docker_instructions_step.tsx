@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiAccordion, EuiAccordionProps, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiAccordionProps, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,10 +16,7 @@ import { CodeBox } from '@kbn/search-api-panels';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
-import {
-  getConnectorTemplate,
-  getRunFromDockerSnippet,
-} from '../../search_index/connector/constants';
+import { getRunFromDockerSnippet } from '../../search_index/connector/constants';
 
 export interface DockerInstructionsStepProps {
   apiKeyData?: ApiKey;
@@ -43,6 +40,19 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
     }
   }, [isWaitingForConnector]);
 
+  const configYamlContent = `connectors:
+  - 
+    connector_id: "${connectorId}"
+    service_type: "${serviceType}"
+    api_key: "${apiKeyData?.encoded ?? ''}"
+elasticsearch:
+  host: "${elasticsearchUrl}"
+  api_key: "${apiKeyData?.encoded ?? ''}"`;
+
+  const escapedConfigYamlContent = configYamlContent.replace(/"/g, '\\"').replace(/\$/g, '\\$');
+
+  const createConfigCommand = `mkdir -p "$HOME/elastic-connectors" && echo "${escapedConfigYamlContent}" > "$HOME/elastic-connectors/config.yml"`;
+
   return (
     <>
       <EuiAccordion
@@ -51,67 +61,88 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
         forceState={isOpen}
         buttonContent={
           <EuiText size="s">
-            <p>
+            <h4>
               {i18n.translate(
-                'xpack.enterpriseSearch.connectorDeployment.p.downloadConfigurationLabel',
+                'xpack.enterpriseSearch.connectorDeployment.dockerInstructionsHeading',
                 {
-                  defaultMessage:
-                    'You can either download the configuration file manually or run the following command',
+                  defaultMessage: 'Docker instructions',
                 }
               )}
-            </p>
+            </h4>
           </EuiText>
         }
       >
         <EuiSpacer />
-        <CodeBox
-          showTopBar={false}
-          languageType="bash"
-          codeSnippet={
-            'curl https://raw.githubusercontent.com/elastic/connectors/main/config.yml.example --output </absolute/path/to>/connectors'
-          }
-        />
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.dockerInstallationNote', {
+              defaultMessage: 'Make sure you have Docker installed on your machine.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiText size="s">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.createConfigFileLabel', {
+              defaultMessage: 'Create configuration file',
+            })}
+          </h5>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.connectorDeployment.p.createConfigFileInstructions',
+              {
+                defaultMessage:
+                  'You need a configuration file with your Elasticsearch and connector details. In your terminal, run the following command to create the config.yml file:',
+              }
+            )}
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <CodeBox showTopBar={false} languageType="bash" codeSnippet={createConfigCommand} />
         <EuiSpacer />
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.connectorDeployment.p.changeOutputPathLabel"
-              defaultMessage="Change the {output} argument value to the path where you want to save the configuration file."
+              id="xpack.enterpriseSearch.connectorDeployment.p.configFileExplanation"
+              defaultMessage="This command creates a config.yml file in the $HOME/elastic-connectors directory with your specific connector and Elasticsearch details."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.connectorDeployment.p.exampleConfigFile"
+              defaultMessage="We provide an {exampleConfigLink} for reference in the elastic/connectors repository."
               values={{
-                output: <EuiCode>--output</EuiCode>,
+                exampleConfigLink: (
+                  <EuiLink
+                    data-test-subj="enterpriseSearchDockerInstructionsStepExampleConfigFileLink"
+                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectorDeployment.exampleConfigLinkText',
+                      {
+                        defaultMessage: 'example config file',
+                      }
+                    )}
+                  </EuiLink>
+                ),
               }}
             />
           </p>
         </EuiText>
         <EuiSpacer />
-        <FormattedMessage
-          id="xpack.enterpriseSearch.connectorDeployment.p.editConfigYamlLabel"
-          defaultMessage="Edit the {configYaml} file and provide the next credentials"
-          values={{
-            configYaml: <EuiCode>config.yml</EuiCode>,
-          }}
-        />
-        <EuiSpacer />
-        <CodeBox
-          showTopBar={false}
-          languageType="yaml"
-          codeSnippet={getConnectorTemplate({
-            apiKeyData,
-            connectorData: {
-              id: connectorId ?? '',
-              service_type: serviceType ?? '',
-            },
-            host: elasticsearchUrl,
-          })}
-        />
-        <EuiSpacer />
-        <EuiText size="m">
+        <EuiText size="s">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.runContainerLabel', {
+              defaultMessage: 'Run container',
+            })}
+          </h5>
           <p>
             {i18n.translate(
               'xpack.enterpriseSearch.connectorDeployment.p.runTheFollowingCommandLabel',
               {
-                defaultMessage:
-                  'Run the following command in your terminal. Make sure you have Docker installed on your machine',
+                defaultMessage: 'Run the following command to start the container:',
               }
             )}
           </p>
