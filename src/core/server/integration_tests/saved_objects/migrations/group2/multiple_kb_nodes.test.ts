@@ -139,7 +139,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
     const typesMap =
       indicesInfo[`${defaultKibanaIndex}_${nextMinor}_001`].mappings?._meta?.indexTypesMap;
-    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'server']); // 'deprecated' no longer present
+    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'recent', 'server']); // 'deprecated' no longer present
     expect(typesMap[kibanaSplitIndex]).toEqual(['basic', 'task']);
   }
 
