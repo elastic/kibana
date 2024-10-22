@@ -27,7 +27,7 @@ describe('Users filter', () => {
   const filterPrefix = 'users-filter';
   let onChangeUsersFilter: jest.Mock;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     onChangeUsersFilter = jest.fn();
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
@@ -57,7 +57,7 @@ describe('Users filter', () => {
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
     await userEvent.type(searchInput, 'usernameX');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -66,7 +66,7 @@ describe('Users filter', () => {
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
     await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ']);
   });
 
@@ -75,7 +75,7 @@ describe('Users filter', () => {
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
     await userEvent.type(searchInput, '   usernameX   ');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -84,7 +84,7 @@ describe('Users filter', () => {
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
     await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY']);
   });
 });
