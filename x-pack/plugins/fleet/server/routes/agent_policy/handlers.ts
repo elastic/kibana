@@ -137,7 +137,8 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const {
       full: withPackagePolicies = false,
-      noAgentCount = false,
+      noAgentCount,
+      withAgentCount,
       format,
       ...restOfQuery
     } = request.query;
@@ -154,7 +155,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     let { items } = agentPoliciesResponse;
     const { total, page, perPage } = agentPoliciesResponse;
 
-    if (fleetContext.authz.fleet.readAgents && !noAgentCount) {
+    if (fleetContext.authz.fleet.readAgents && (noAgentCount === false || withAgentCount)) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
     }
 
