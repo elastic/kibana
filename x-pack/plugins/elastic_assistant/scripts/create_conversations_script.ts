@@ -86,6 +86,18 @@ export const create = async () => {
     const results = await Promise.allSettled(promises);
 
     const successfulResults = results.filter((result) => result.status === 'fulfilled');
+    const errorResults = results.filter(
+      (result) => result.status === 'rejected'
+    ) as PromiseRejectedResult[];
+    const conversationsCreated = successfulResults.length;
+
+    if (count > conversationsCreated) {
+      const errorExample =
+        errorResults.length > 0 ? errorResults[0]?.reason?.message ?? 'unknown' : 'unknown';
+      throw new Error(
+        `Failed to create all conversations. Expected count: ${count}, Created count: ${conversationsCreated}. Reason: ${errorExample}`
+      );
+    }
     logger.info(`Successfully created ${successfulResults.length} conversations.`);
   } catch (e) {
     logger.error(e);
