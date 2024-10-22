@@ -22,9 +22,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiTextArea,
 } from '@elastic/eui';
 
+import { CodeEditor } from '@kbn/code-editor';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -244,9 +244,16 @@ const FormControls: FC<{
         isInvalid={false}
         error={[]}
       >
-        <EuiTextArea
+        <CodeEditor
+          height={300}
+          languageId="javascript"
+          options={{
+            automaticLayout: true,
+            lineNumbers: 'off',
+            tabSize: 2,
+          }}
           value={hashedJS}
-          onChange={(e) => setHashedJS(e.target.value)}
+          onChange={setHashedJS}
           data-test-subj="jsSandboxEmbeddableConfigHashedJS"
         />
       </EuiFormRow>
