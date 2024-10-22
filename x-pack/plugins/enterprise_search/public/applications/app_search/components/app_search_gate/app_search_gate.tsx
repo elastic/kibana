@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -450,10 +450,14 @@ export const AppSearchGate: React.FC = () => {
   const { feature, participateInUXLabs } = useValues(AppSearchGateLogic);
   const { formSubmitRequest, setAdditionalFeedback, setParticipateInUXLabs, setFeature } =
     useActions(AppSearchGateLogic);
+  const onSubmitForm = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    formSubmitRequest();
+  }, []);
   const options = getOptionsFeaturesList();
   return (
     <EuiPanel hasShadow={false}>
-      <EuiForm component="form" fullWidth>
+      <EuiForm component="form" fullWidth onSubmit={onSubmitForm}>
         <EuiFormLabel>
           {i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.features.Label', {
             defaultMessage: 'What App Search feature are you looking to use?',
@@ -598,12 +602,7 @@ export const AppSearchGate: React.FC = () => {
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              isDisabled={!feature ?? false}
-              type="submit"
-              fill
-              onClick={() => formSubmitRequest()}
-            >
+            <EuiButton isDisabled={!feature ?? false} type="submit" fill>
               {i18n.translate('xpack.enterpriseSearch.appSearch.gateForm.submit', {
                 defaultMessage: 'Submit',
               })}
