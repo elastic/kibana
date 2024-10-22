@@ -39,7 +39,7 @@ describe('SiemRuleMigrationsService', () => {
     expect(MockRuleMigrationsDataStream).toHaveBeenCalledWith({ kibanaVersion });
   });
 
-  describe('setup', () => {
+  describe('when setup is called', () => {
     it('should set esClusterClient and call dataStreamAdapter.install', () => {
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
@@ -51,7 +51,7 @@ describe('SiemRuleMigrationsService', () => {
     });
   });
 
-  describe('getClient', () => {
+  describe('when getClient is called', () => {
     let request: KibanaRequest;
     beforeEach(() => {
       request = httpServerMock.createKibanaRequest();

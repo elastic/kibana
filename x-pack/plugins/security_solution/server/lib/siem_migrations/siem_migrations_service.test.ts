@@ -11,19 +11,11 @@ import {
 } from '@kbn/core/server/mocks';
 import { SiemMigrationsService } from './siem_migrations_service';
 import { MockSiemRuleMigrationsService, mockSetup, mockGetClient } from './rules/__mocks__/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
 import type { ConfigType } from '../../config';
 
 jest.mock('./rules/siem_rule_migrations_service');
 
-const mockReplaySubjectNext = jest.fn();
-const mockReplaySubjectComplete = jest.fn();
-const mockReplaySubject$ = jest.fn(() => {
-  return {
-    next: mockReplaySubjectNext,
-    complete: mockReplaySubjectComplete,
-  };
-});
+const mockReplaySubject$ = { next: jest.fn(), complete: jest.fn() };
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
@@ -53,7 +45,7 @@ describe('SiemMigrationsService', () => {
       expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
     });
 
-    describe('setup', () => {
+    describe('when setup is called', () => {
       it('should call siemRuleMigrationsService setup', async () => {
         siemMigrationsService.setup({ esClusterClient, tasksTimeoutMs: 100 });
 
@@ -65,15 +57,19 @@ describe('SiemMigrationsService', () => {
       });
     });
 
-    describe('getClient', () => {
-      let request: KibanaRequest;
-      beforeEach(async () => {
-        request = httpServerMock.createKibanaRequest();
-      });
-
+    describe('when createClient is called', () => {
       it('should create rules client', async () => {
-        const client = siemMigrationsService.createClient({ spaceId: 'default', request });
+        const request = httpServerMock.createKibanaRequest();
+        siemMigrationsService.createClient({ spaceId: 'default', request });
         expect(mockGetClient).toHaveBeenCalledWith({ spaceId: 'default', request });
+      });
+    });
+
+    describe('when stop is called', () => {
+      it('should trigger the pluginStop subject', async () => {
+        siemMigrationsService.stop();
+        expect(mockReplaySubject$.next).toHaveBeenCalled();
+        expect(mockReplaySubject$.complete).toHaveBeenCalled();
       });
     });
   });
@@ -91,7 +87,7 @@ describe('SiemMigrationsService', () => {
       expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
     });
 
-    describe('setup', () => {
+    describe('when setup is called', () => {
       it('should not call siemRuleMigrationsService setup', async () => {
         siemMigrationsService.setup({ esClusterClient, tasksTimeoutMs: 100 });
         expect(mockSetup).not.toHaveBeenCalled();
