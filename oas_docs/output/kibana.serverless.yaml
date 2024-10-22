@@ -15066,7 +15066,6 @@ paths:
         - Elastic Agents
   /api/fleet/agent-status:
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagent-status#0'
       parameters:
         - description: The version of the API to use
@@ -16769,7 +16768,6 @@ paths:
       tags:
         - Elastic Agent actions
     put:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0'
       parameters:
         - description: The version of the API to use
@@ -18622,7 +18620,6 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment-api-keys:
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#0'
       parameters:
         - description: The version of the API to use
@@ -18654,7 +18651,6 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#1'
       parameters:
         - description: The version of the API to use
@@ -18692,7 +18688,6 @@ paths:
       tags: []
   /api/fleet/enrollment-api-keys/{keyId}:
     delete:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1'
       parameters:
         - description: The version of the API to use
@@ -18719,7 +18714,6 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0'
       parameters:
         - description: The version of the API to use
@@ -20434,7 +20428,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgkey}:
     delete:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3'
       parameters:
         - description: The version of the API to use
@@ -20473,7 +20466,6 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0'
       parameters:
         - description: The version of the API to use
@@ -20514,7 +20506,6 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2'
       parameters:
         - description: The version of the API to use
@@ -20570,7 +20561,6 @@ paths:
       summary: ''
       tags: []
     put:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1'
       parameters:
         - description: The version of the API to use
@@ -33533,7 +33523,6 @@ paths:
         - Fleet service tokens
   /api/fleet/service-tokens:
     post:
-      deprecated: true
       description: Create a service token
       operationId: '%2Fapi%2Ffleet%2Fservice-tokens#0'
       parameters:
