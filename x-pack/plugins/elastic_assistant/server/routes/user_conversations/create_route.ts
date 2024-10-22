@@ -14,6 +14,8 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { escapeKuery } from '@kbn/es-query';
+
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
@@ -58,10 +60,13 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const userFilter = currentUser?.username
             ? `name: "${currentUser?.username}"`
             : `id: "${currentUser?.profile_uid}"`;
+
+          const escapedTitle = escapeKuery(request.body.title);
+
           const result = await dataClient?.findDocuments({
             perPage: 100,
             page: 1,
-            filter: `users:{ ${userFilter} } AND title:${request.body.title}`,
+            filter: `users:{ ${userFilter} } AND title:${escapedTitle}`,
             fields: ['title'],
           });
           if (result?.data != null && result.total > 0) {
