@@ -31,6 +31,7 @@ import {
   getFieldMetaFromDatatable,
   isNumericField,
 } from '../../../../common/expressions/datatable/utils';
+import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -78,7 +79,8 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   if (!column) return null;
   if (column.isTransposed) return null;
 
-  const currentData = frame.activeData?.[localState.layerId];
+  const currentData =
+    frame.activeData?.[localState.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
   const datasource = frame.datasourceLayers?.[localState.layerId];
   const { isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
   const meta = getFieldMetaFromDatatable(currentData, accessor);

@@ -117,7 +117,7 @@ export function LensEditConfigurationFlyout({
   useEffect(() => {
     const s = output$?.subscribe(() => {
       const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
+      const adaptersTables = previousAdapters.current?.tables?.tables;
       const [table] = Object.values(adaptersTables || {});
       if (table) {
         // there are cases where a query can return a big amount of columns
