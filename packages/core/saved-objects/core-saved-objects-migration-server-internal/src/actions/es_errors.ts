@@ -12,7 +12,7 @@ import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 export const isWriteBlockException = (errorCause?: ErrorCause): boolean => {
   return (
     errorCause?.type === 'cluster_block_exception' &&
-    hasAllKeywordsInOrder(errorCause?.reason, ['index', 'blocked by: ', '[FORBIDDEN/8', '(api)'])
+    hasAllKeywordsInOrder(errorCause?.reason, ['index [', '] blocked by: [FORBIDDEN/8/', ' (api)]'])
   );
 };
 
@@ -41,7 +41,11 @@ export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean =>
   );
 };
 
-const hasAllKeywordsInOrder = (message: string | undefined, keywords: string[]): boolean => {
+export const hasAllKeywordsInOrder = (message: string | undefined, keywords: string[]): boolean => {
+  if (!message || !keywords.length) {
+    return false;
+  }
+
   const keywordIndices = keywords.map((keyword) => message?.indexOf(keyword) ?? -1);
   // check that all keywords are present and in the right order
   return keywordIndices.every((v, i, a) => v >= 0 && (!i || a[i - 1] <= v));
