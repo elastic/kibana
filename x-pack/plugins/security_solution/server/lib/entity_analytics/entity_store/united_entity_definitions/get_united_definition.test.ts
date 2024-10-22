@@ -59,6 +59,12 @@ describe('getUnitedEntityDefinition', () => {
             "host.name": Object {
               "type": "keyword",
             },
+            "host.os.name": Object {
+              "type": "keyword",
+            },
+            "host.os.type": Object {
+              "type": "keyword",
+            },
             "host.risk.calculated_level": Object {
               "type": "keyword",
             },
@@ -92,6 +98,16 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "host.id",
+              "maxLength": 10,
+              "operation": "collect_values",
+            },
+            Object {
+              "field": "host.os.name",
+              "maxLength": 10,
+              "operation": "collect_values",
+            },
+            Object {
+              "field": "host.os.type",
               "maxLength": 10,
               "operation": "collect_values",
             },
@@ -184,6 +200,22 @@ describe('getUnitedEntityDefinition', () => {
               },
               "destination": "host.id",
               "source": "host.id",
+            },
+            Object {
+              "aggregation": Object {
+                "limit": 10,
+                "type": "terms",
+              },
+              "destination": "host.os.name",
+              "source": "host.os.name",
+            },
+            Object {
+              "aggregation": Object {
+                "limit": 10,
+                "type": "terms",
+              },
+              "destination": "host.os.type",
+              "source": "host.os.type",
             },
             Object {
               "aggregation": Object {
