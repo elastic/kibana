@@ -20,16 +20,9 @@ export const AgentlessAvailableCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
 
-  const onClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      trackOnboardingLinkClick(TELEMETRY_AGENTLESS_LEARN_MORE);
-      /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/
-      window.open(docLinks.links.fleet.agentlessBlog, '_blank');
-    },
-    /* @ts-expect-error */
-    [docLinks.links.fleet.agentlessBlog]
-  );
+  const onClick = useCallback(() => {
+    trackOnboardingLinkClick(TELEMETRY_AGENTLESS_LEARN_MORE);
+  }, []);
 
   /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/
   if (!docLinks.links.fleet.agentlessBlog) {
