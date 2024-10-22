@@ -121,8 +121,10 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   isLoading,
   canUpdate,
 }) => {
+  const selectedKey = customField?.value ? Object.keys(customField.value)[0] : null;
+
   const selectedOptionExists = customFieldConfiguration.options.find(
-    (option) => option.key === customField?.value
+    (option) => option.key === selectedKey
   );
   const initialValue = selectedOptionExists ? customField?.value ?? '' : '';
 

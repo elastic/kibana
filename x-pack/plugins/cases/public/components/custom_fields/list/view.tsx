@@ -18,8 +18,9 @@ const ViewComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   customField,
   configuration,
 }) => {
+  const selectedKey = customField?.value ? Object.keys(customField.value)[0] : null;
   const displayValue =
-    configuration?.options.find((option) => option.key === customField?.value)?.label ?? '-';
+    configuration?.options.find((option) => option.key === selectedKey)?.label ?? '-';
   return (
     <EuiText
       className="eui-textBreakWord"

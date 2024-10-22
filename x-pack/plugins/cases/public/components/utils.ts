@@ -12,8 +12,8 @@ import type {
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ConnectorTypeFields } from '../../common/types/domain';
-import { ConnectorTypes } from '../../common/types/domain';
+import type { ConnectorTypeFields, CustomFieldConfiguration } from '../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
@@ -234,7 +234,15 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = (value: string | boolean) => {
+export const convertCustomFieldValue = (
+  value: string | boolean,
+  configCustomField: CustomFieldConfiguration
+) => {
+  if (configCustomField.type === CustomFieldTypes.LIST) {
+    const listValue = configCustomField.options.find((option) => option.key === value);
+    return { [value as string]: listValue?.label ?? '' };
+  }
+
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
   }
@@ -278,7 +286,16 @@ export const customFieldsFormDeserializer = (
     return null;
   }
 
+  console.log('DESERIALIZE', customFields); //
+
   return customFields.reduce((acc, customField) => {
+    if (customField.type === CustomFieldTypes.LIST) {
+      return {
+        ...acc,
+        [customField.key]: customField.value ? Object.keys(customField.value)[0] : '',
+      };
+    }
+
     const initial = {
       [customField.key]: customField.value,
     };
@@ -299,11 +316,12 @@ export const customFieldsFormSerializer = (
 
   for (const [key, value] of Object.entries(customFields)) {
     const configCustomField = selectedCustomFieldsConfiguration.find((item) => item.key === key);
+
     if (configCustomField) {
       transformedCustomFields.push({
         key: configCustomField.key,
         type: configCustomField.type,
-        value: convertCustomFieldValue(value),
+        value: convertCustomFieldValue(value, configCustomField),
       } as CaseUICustomField);
     }
   }

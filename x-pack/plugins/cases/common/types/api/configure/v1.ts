@@ -86,7 +86,7 @@ export const ListCustomFieldConfigurationRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([rt.string, rt.null]),
+      defaultValue: rt.union([rt.record(rt.string, rt.string), rt.null]),
     })
   ),
 ]);

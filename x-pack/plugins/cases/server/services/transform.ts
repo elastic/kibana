@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseConnector, ConnectorTypeFields } from '../../common/types/domain';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  CaseConnector,
+  CaseCustomFields,
+  ConnectorTypeFields,
+} from '../../common/types/domain';
+import { CustomFieldTypes } from '../../common/types/domain';
+import type { CasePersistedAttributes, CaseTransformedAttributes } from '../common/types/case';
+import type { ConnectorPersisted, ConnectorPersistedFields } from '../common/types/connectors';
 import { getNoneCaseConnector } from '../common/utils';
-import type { ConnectorPersistedFields, ConnectorPersisted } from '../common/types/connectors';
 
 export function findConnectorIdReference(
   name: string,
@@ -94,4 +100,36 @@ export function transformFieldsToESModel(connector: CaseConnector): ConnectorPer
     ],
     []
   );
+}
+
+export function transformCustomFieldsToESModel(customFields: CaseCustomFields) {
+  return customFields.map((customField) => {
+    if (customField.type === CustomFieldTypes.LIST && customField.value) {
+      const [selectedKey] = Object.keys(customField.value);
+      const [value] = Object.values(customField.value);
+      return {
+        type: CustomFieldTypes.LIST,
+        key: `${customField.key}.${selectedKey}`,
+        value,
+      };
+    }
+    return customField;
+  });
+}
+
+export function transformCustomFieldsToExternalModel(
+  customFields: NonNullable<CasePersistedAttributes['customFields']>
+): CaseTransformedAttributes['customFields'] {
+  return customFields.map((customField) => {
+    if (customField.type === CustomFieldTypes.LIST && customField.value) {
+      const [key, selectedKey] = customField.key.split('.');
+      const label = customField.value;
+      return {
+        ...customField,
+        key,
+        value: { [selectedKey]: label },
+      };
+    }
+    return customField;
+  });
 }
