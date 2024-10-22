@@ -12,7 +12,6 @@ import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
 import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
-  type EntityType,
   type Entity,
   type EntityColumnIds,
 } from '../../../common/entities';
@@ -31,7 +30,7 @@ export async function getLatestEntities({
   inventoryEsClient: ObservabilityElasticsearchClient;
   sortDirection: 'asc' | 'desc';
   sortField: EntityColumnIds;
-  entityTypes?: EntityType[];
+  entityTypes?: string[];
   kuery?: string;
 }) {
   // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.

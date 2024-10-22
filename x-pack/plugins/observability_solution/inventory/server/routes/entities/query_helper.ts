@@ -6,9 +6,8 @@
  */
 
 import { ENTITY_DEFINITION_ID, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { EntityType } from '../../../common/entities';
 
-export const getEntityTypesWhereClause = (entityTypes: EntityType[]) =>
+export const getEntityTypesWhereClause = (entityTypes: string[]) =>
   `WHERE ${ENTITY_TYPE} IN (${entityTypes.map((entityType) => `"${entityType}"`).join()})`;
 
 export const getBuiltinEntityDefinitionIdESQLWhereClause = () =>

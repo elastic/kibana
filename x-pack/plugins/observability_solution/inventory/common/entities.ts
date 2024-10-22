@@ -67,8 +67,8 @@ export const defaultEntityDefinitions = [
   BUILTIN_CONTAINERS_FROM_ECS_DATA,
 ];
 
-const entityArrayRt = t.array(entityTypeRt);
-export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
+const entityArrayRt = t.array(t.string);
+export const entityTypesRt = new t.Type<string[], string, unknown>(
   'entityTypesRt',
   entityArrayRt.is,
   (input, context) => {

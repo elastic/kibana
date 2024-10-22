@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EntityType } from '../../common/entities';
 
-export function getEntityTypeLabel(entityType: EntityType) {
+export function getEntityTypeLabel(entityType: string) {
   switch (entityType) {
     case 'service':
       return i18n.translate('xpack.inventory.entityType.serviceLabel', {
@@ -23,8 +22,6 @@ export function getEntityTypeLabel(entityType: EntityType) {
         defaultMessage: 'Host',
       });
     default:
-      return i18n.translate('xpack.inventory.entityType.naLabel', {
-        defaultMessage: 'N/A',
-      });
+      return entityType;
   }
 }

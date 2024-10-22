@@ -18,7 +18,7 @@ interface Props {
   onChange: (entityTypes: EntityType[]) => void;
 }
 
-const toComboBoxOption = (entityType: EntityType): EuiComboBoxOptionOption<EntityType> => ({
+const toComboBoxOption = (entityType: string): EuiComboBoxOptionOption<EntityType> => ({
   key: entityType,
   label: getEntityTypeLabel(entityType),
   'data-test-subj': `entityTypesFilter${entityType}Option`,
