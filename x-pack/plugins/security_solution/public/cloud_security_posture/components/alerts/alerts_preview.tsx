@@ -113,7 +113,7 @@ export const AlertsPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={alertStats} />
+              <DistributionBar stats={alertStats.reverse()} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
