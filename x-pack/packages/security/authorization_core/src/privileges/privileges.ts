@@ -11,7 +11,11 @@ import type {
   FeatureKibanaPrivileges,
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
-import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
+import type {
+  FeaturesPluginSetup,
+  KibanaFeature,
+  SubFeaturePrivilegeIterator,
+} from '@kbn/features-plugin/server';
 import {
   getMinimalPrivilegeId,
   isMinimalPrivilegeId,
@@ -247,7 +251,10 @@ export function privilegesFactory(
         }, {}),
       };
     },
-    getFeatureForPrivilege(searchTerm: string) {
+    getFeatureForPrivilege(
+      searchTerm: string,
+      subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator
+    ) {
       const features = featuresService.getKibanaFeatures();
       const result: string[] = [];
 
@@ -260,16 +267,10 @@ export function privilegesFactory(
           result.push(`${feature.id}.read`);
         }
 
-        if (feature.subFeatures) {
-          feature.subFeatures.forEach((subFeature) => {
-            subFeature.privilegeGroups.forEach((group) => {
-              group.privileges.forEach((privilege) => {
-                if (privilege.api?.includes(searchTerm)) {
-                  result.push(`${feature.id}.${privilege.id}`);
-                }
-              });
-            });
-          });
+        for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, () => true)) {
+          if (subFeaturePrivilege.api?.includes(searchTerm)) {
+            result.push(`${feature.id}.${subFeaturePrivilege.id}`);
+          }
         }
       });
 
