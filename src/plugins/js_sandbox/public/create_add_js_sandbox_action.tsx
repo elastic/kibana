@@ -60,7 +60,10 @@ export function createAddJsSandboxAction(
         const { resolveEmbeddableJsSandboxUserInput } = await import('./register_embeddable');
 
         const initialState: JsSandboxEmbeddableState = {
-          hashedJS: '',
+          esql: '',
+          hashedJS: `function() {
+        return <p>Here be dragons.</p>
+      }`,
         };
 
         const embeddable = await presentationContainerParent.addNewPanel<

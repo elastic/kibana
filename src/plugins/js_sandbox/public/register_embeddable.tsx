@@ -66,6 +66,7 @@ export function registerEmbeddable(
 }
 
 export interface JsSandboxEmbeddableState extends SerializedTitles, SerializedTimeRange {
+  esql: string;
   hashedJS: string;
 }
 
@@ -76,6 +77,7 @@ export type JsSandboxEmbeddableApi = DefaultEmbeddableApi<JsSandboxEmbeddableSta
   JsSandboxComponentApi;
 
 export interface JsSandboxComponentApi {
+  esql: PublishingSubject<JsSandboxEmbeddableState['esql']>;
   hashedJS: PublishingSubject<JsSandboxEmbeddableState['hashedJS']>;
   updateUserInput: (update: JsSandboxEmbeddableState) => void;
 }
@@ -86,27 +88,28 @@ export type JsSandboxEmbeddableCustomState = Omit<
 >;
 
 const initializeJsSandboxControls = (rawState: JsSandboxEmbeddableState) => {
+  const esql = new BehaviorSubject(rawState.esql);
   const hashedJS = new BehaviorSubject(rawState.hashedJS);
 
   const updateUserInput = (update: JsSandboxEmbeddableCustomState) => {
+    esql.next(update.esql);
     hashedJS.next(update.hashedJS);
   };
 
   const serializeJsSandboxChartState = (): JsSandboxEmbeddableCustomState => {
     return {
+      esql: esql.getValue(),
       hashedJS: hashedJS.getValue(),
     };
   };
 
   const jsSandboxControlsComparators: StateComparators<JsSandboxEmbeddableCustomState> = {
+    esql: [esql, (arg) => esql.next(arg)],
     hashedJS: [hashedJS, (arg) => hashedJS.next(arg)],
   };
 
   return {
-    jsSandboxControlsApi: {
-      hashedJS,
-      updateUserInput,
-    } as unknown as JsSandboxComponentApi,
+    jsSandboxControlsApi: { esql, hashedJS, updateUserInput } as unknown as JsSandboxComponentApi,
     serializeJsSandboxChartState,
     jsSandboxControlsComparators,
   };
@@ -128,7 +131,12 @@ const JsSandboxEmbeddableInitializer: FC<JsSandboxEmbeddableInitializerProps> = 
   isNewPanel,
 }) => {
   const [formInput, setFormInput] = useState<JsSandboxEmbeddableState>(
-    (initialInput ?? { hashedJS: '' }) as JsSandboxEmbeddableState
+    (initialInput ?? {
+      esql: '',
+      hashedJS: `function() {
+        return <p>Here be dragons.</p>
+      }`,
+    }) as JsSandboxEmbeddableState
   );
   const [isFormValid, setIsFormValid] = useState(true);
 
@@ -141,14 +149,11 @@ const JsSandboxEmbeddableInitializer: FC<JsSandboxEmbeddableInitializerProps> = 
     };
   }, [formInput]);
 
-  useEffect(
-    function previewChanges() {
-      if (isFormValid && updatedProps.hashedJS !== undefined) {
-        onPreview(updatedProps);
-      }
-    },
-    [isFormValid, onPreview, updatedProps]
-  );
+  function previewChanges() {
+    if (isFormValid && updatedProps.hashedJS !== undefined) {
+      onPreview(updatedProps);
+    }
+  }
 
   return (
     <>
@@ -179,6 +184,20 @@ const JsSandboxEmbeddableInitializer: FC<JsSandboxEmbeddableInitializerProps> = 
             onChange={setFormInput}
             onValidationChange={setIsFormValid}
           />
+          <EuiButton
+            size="s"
+            onClick={() => previewChanges()}
+            aria-label={i18n.translate('jsSandbox.embeddable.config.previewFlyoutAriaLabel', {
+              defaultMessage: 'Preview',
+            })}
+            isDisabled={!isFormValid}
+            data-test-subj="jsSandboxEmbeddableConfigPreviewButton"
+          >
+            <FormattedMessage
+              id="jsSandbox.embeddable.config.previewLabel"
+              defaultMessage="Preview"
+            />
+          </EuiButton>
         </EuiForm>
       </EuiFlyoutBody>
 
@@ -225,6 +244,7 @@ const FormControls: FC<{
   onChange: (update: JsSandboxEmbeddableState) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
+  const [esql, setEsql] = useState(formInput.esql);
   const [hashedJS, setHashedJS] = useState(formInput.hashedJS);
 
   useEffect(() => {
@@ -232,14 +252,42 @@ const FormControls: FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hashedJS]);
 
+  useEffect(() => {
+    onChange({ ...formInput, esql });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [esql]);
+
   return (
     <>
       <EuiFormRow
+        label={i18n.translate('jsSandbox.embeddable.config.esqlLabel', {
+          defaultMessage: 'ES|QL',
+        })}
+        helpText={i18n.translate('jsSandbox.embeddable.config.esqlHelpText', {
+          defaultMessage: 'See the ES|QL documentation for more information.',
+        })}
+        isInvalid={false}
+        error={[]}
+      >
+        <CodeEditor
+          height={150}
+          languageId="json"
+          options={{
+            automaticLayout: true,
+            lineNumbers: 'off',
+            tabSize: 2,
+          }}
+          value={esql}
+          onChange={setEsql}
+          data-test-subj="jsSandboxEmbeddableConfigEsql"
+        />
+      </EuiFormRow>
+      <EuiFormRow
         label={i18n.translate('jsSandbox.embeddable.config.hashedJSLabel', {
-          defaultMessage: 'Hashed JS',
+          defaultMessage: 'JS component',
         })}
         helpText={i18n.translate('jsSandbox.embeddable.config.hashedJSHelpText', {
-          defaultMessage: 'Hashed JS help text',
+          defaultMessage: 'Your custom component. Supports JSX.',
         })}
         isInvalid={false}
         error={[]}
@@ -429,9 +477,10 @@ export const getJsSandboxEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
+          const [esql] = useBatchedPublishingSubjects(api.esql);
           const [hashedJS] = useBatchedPublishingSubjects(api.hashedJS);
 
-          return <JsSandboxComponent hashedJs={hashedJS} />;
+          return <JsSandboxComponent esql={esql} hashedJs={hashedJS} />;
         },
       };
     },
