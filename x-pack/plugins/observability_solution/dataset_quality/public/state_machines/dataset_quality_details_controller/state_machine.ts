@@ -389,7 +389,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     },
                     onError: {
                       target: 'done',
-                      actions: 'notifySaveNewFieldLimitError',
+                      actions: ['storeErrorResponse', 'notifySaveNewFieldLimitError'],
                     },
                   },
                 },
@@ -538,6 +538,9 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             return 'data' in event ? { fieldLimitResponse: event.data } : {};
           }
         ),
+        storeErrorResponse: assign(() => {
+          return { fieldLimitResponse: { error: true } };
+        }),
         resetFieldLimitServerResponse: assign(() => ({
           newFieldLimit: undefined,
           fieldLimitResponse: undefined,

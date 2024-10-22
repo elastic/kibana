@@ -186,7 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('returns "createdOn", "integration", "indexTemplate" and "lastBackingIndexName" correctly when available for non integration', async () => {
+      it('returns "createdOn", "integration", "indexTemplate" and "lastBackingIndexName" correctly when available for integration', async () => {
         const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
           esClient,
           syntheticsDataStreamName

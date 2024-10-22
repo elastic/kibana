@@ -10,6 +10,8 @@ import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import {
   fieldLimitMitigationFailedMessage,
   fieldLimitMitigationFailedMessageDescription,
+  fieldLimitMitigationPartiallyFailedMessage,
+  fieldLimitMitigationPartiallyFailedMessageDescription,
   fieldLimitMitigationRolloverButton,
   fieldLimitMitigationSuccessComponentTemplateLinkText,
   fieldLimitMitigationSuccessMessage,
@@ -20,10 +22,15 @@ import { useKibanaContextForPlugin } from '../../../../../utils';
 
 export function MessageCallout() {
   const { isSavingNewFieldLimitInProgress, newFieldLimitResult } = useDegradedFields();
-  const { isComponentTemplateUpdated, isLatestBackingIndexUpdated } = newFieldLimitResult ?? {};
+  const { isComponentTemplateUpdated, isLatestBackingIndexUpdated, error } =
+    newFieldLimitResult ?? {};
   const isSuccess = Boolean(isComponentTemplateUpdated) && Boolean(isLatestBackingIndexUpdated);
   const isPartialSuccess =
     Boolean(isComponentTemplateUpdated) && !Boolean(isLatestBackingIndexUpdated);
+
+  if (error) {
+    return <ErrorCallout />;
+  }
 
   if (!isSavingNewFieldLimitInProgress && isSuccess) {
     return <SuccessCallout />;
@@ -76,11 +83,11 @@ export function ManualRolloverCallout() {
   const { triggerRollover } = useDegradedFields();
   return (
     <EuiCallOut
-      title={fieldLimitMitigationFailedMessage}
+      title={fieldLimitMitigationPartiallyFailedMessage}
       color="danger"
       iconType="checkInCircleFilled"
     >
-      <p>{fieldLimitMitigationFailedMessageDescription}</p>
+      <p>{fieldLimitMitigationPartiallyFailedMessageDescription}</p>
       <EuiButton
         data-test-subj="datasetQualityNewLimitSetManualRollover"
         onClick={triggerRollover}
@@ -91,6 +98,19 @@ export function ManualRolloverCallout() {
       >
         {fieldLimitMitigationRolloverButton}
       </EuiButton>
+    </EuiCallOut>
+  );
+}
+
+export function ErrorCallout() {
+  return (
+    <EuiCallOut
+      title={fieldLimitMitigationFailedMessage}
+      color="danger"
+      iconType="error"
+      data-test-subj="datasetQualityDetailsNewFieldLimitErrorCallout"
+    >
+      <p>{fieldLimitMitigationFailedMessageDescription}</p>
     </EuiCallOut>
   );
 }

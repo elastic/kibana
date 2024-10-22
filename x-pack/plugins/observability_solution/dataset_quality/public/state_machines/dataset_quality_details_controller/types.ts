@@ -96,7 +96,7 @@ export interface WithNewFieldLimit {
 }
 
 export interface WithNewFieldLimitResponse {
-  fieldLimitResponse: UpdateFieldLimitResponse;
+  fieldLimitResponse: UpdateFieldLimitResponse | { error: boolean };
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<

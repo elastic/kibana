@@ -630,15 +630,29 @@ export const fieldLimitMitigationSuccessComponentTemplateLinkText = i18n.transla
   }
 );
 
-export const fieldLimitMitigationFailedMessage = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessage',
+export const fieldLimitMitigationPartiallyFailedMessage = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationPartiallyFailedMessage',
   {
     defaultMessage: 'Changes not applied to new data',
   }
 );
 
+export const fieldLimitMitigationFailedMessage = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessage',
+  {
+    defaultMessage: 'Changes not applied',
+  }
+);
+
 export const fieldLimitMitigationFailedMessageDescription = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationFailedMessageDescription',
+  {
+    defaultMessage: 'Failed to set new limit',
+  }
+);
+
+export const fieldLimitMitigationPartiallyFailedMessageDescription = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.fieldLimitMitigationPartiallyFailedMessageDescription',
   {
     defaultMessage:
       'The component template was successfully updated with the new field limit, but the changes were not applied to the most recent backing index. Perform a rollover to apply your changes to new data.',

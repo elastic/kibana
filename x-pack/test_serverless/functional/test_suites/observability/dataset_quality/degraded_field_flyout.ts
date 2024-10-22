@@ -755,7 +755,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const newFieldLimitValue = await newFieldLimitInput.getAttribute('value');
           const newFieldLimit = parseInt(newFieldLimitValue, 10);
-          const newFieldLimitDisabledStatus = await newFieldLimitInput.getAttribute('disabled');
 
           // Should be 30% more the current limit
           const newLimit = Math.round(currentFieldLimit * 1.3);
@@ -803,6 +802,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const invalidStatus = await newFieldLimitInput.getAttribute('aria-invalid');
 
           expect(invalidStatus).to.be('true');
+        });
+
+        it('should validate and show error callout when API call fails', async () => {
+          await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: nginxAccessDataStreamName,
+            expandedDegradedField: 'cloud.project.id',
+          });
+
+          const applyButton = await testSubjects.find(
+            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+          );
+
+          await applyButton.click();
+
+          await retry.tryForTime(5000, async () => {
+            // Should display the error callout
+            await testSubjects.existOrFail('datasetQualityDetailsNewFieldLimitErrorCallout');
+          });
+
+          await PageObjects.svlCommonPage.loginAsAdmin();
         });
 
         it('should let user increase the field limit for integrations', async () => {

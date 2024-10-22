@@ -212,7 +212,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         { body: JSON.stringify({ newFieldLimit }) }
       )
       .catch((error) => {
-        throw new DatasetQualityError(`Failed to set new Limit": ${error}`, error);
+        throw new DatasetQualityError(`Failed to set new Limit: ${error.message}`, error);
       });
 
     const decodedResponse = decodeOrThrow(

@@ -98,10 +98,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      expect(resp.body.isComponentTemplateUpdated).to.be(false);
-      expect(resp.body.isLatestBackingIndexUpdated).to.be(false);
-      expect(resp.body.customComponentTemplateName).to.be('');
-      expect(resp.body.error).to.be('Data stream does not exists');
+      expect(resp.body.statusCode).to.be(400);
+      expect(resp.body.message).to.be(
+        `Data stream does not exists. Received value "${invalidDataStreamName}"`
+      );
     });
 
     it('should update last backing index and custom component template', async () => {

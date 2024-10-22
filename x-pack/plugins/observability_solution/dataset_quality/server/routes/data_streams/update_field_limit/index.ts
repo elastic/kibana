@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { badRequest } from '@hapi/boom';
 import { createDatasetQualityESClient } from '../../../utils';
 import { updateComponentTemplate } from './update_component_template';
 import { updateLastBackingIndexSettings } from './update_settings_last_backing_index';
@@ -29,12 +30,7 @@ export async function updateFieldLimit({
   });
 
   if (!lastBackingIndexName || !indexTemplate) {
-    return {
-      isComponentTemplateUpdated: false,
-      isLatestBackingIndexUpdated: false,
-      customComponentTemplateName: '',
-      error: 'Data stream does not exists',
-    };
+    throw badRequest(`Data stream does not exists. Received value "${dataStream}"`);
   }
 
   const {
@@ -43,13 +39,8 @@ export async function updateFieldLimit({
     error: errorUpdatingComponentTemplate,
   } = await updateComponentTemplate({ datasetQualityESClient, indexTemplate, newFieldLimit });
 
-  if (!isComponentTemplateUpdated) {
-    return {
-      isComponentTemplateUpdated,
-      isLatestBackingIndexUpdated: false,
-      customComponentTemplateName: componentTemplateName,
-      error: errorUpdatingComponentTemplate,
-    };
+  if (errorUpdatingComponentTemplate) {
+    throw badRequest(errorUpdatingComponentTemplate);
   }
 
   const { acknowledged: isLatestBackingIndexUpdated, error: errorUpdatingBackingIndex } =
