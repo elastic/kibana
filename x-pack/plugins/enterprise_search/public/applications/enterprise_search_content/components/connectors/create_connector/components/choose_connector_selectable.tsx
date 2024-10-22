@@ -17,6 +17,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -36,6 +37,7 @@ interface OptionData {
 export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps> = ({
   selfManaged,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
     []
   );
@@ -156,6 +158,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           setSelectedConnector(allConnectors[keySelected]);
         }}
         renderOption={renderOption}
+        rowHeight={(euiTheme.base / 2) * 5}
       />
     </EuiFlexItem>
   );
