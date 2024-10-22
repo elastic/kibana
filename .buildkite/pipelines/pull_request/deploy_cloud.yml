@@ -7,6 +7,7 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
     timeout_in_minutes: 30
     soft_fail: true
     retry:

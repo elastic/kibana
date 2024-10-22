@@ -7,6 +7,7 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -22,6 +23,7 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
     timeout_in_minutes: 60
     parallelism: 2
     retry:
