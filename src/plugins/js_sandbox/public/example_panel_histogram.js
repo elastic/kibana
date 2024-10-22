@@ -12,17 +12,9 @@ function(props) {
       // initialize tooltip handler
       view.tooltip(new vegaTooltip.Handler().call);
 
-      view.addEventListener('click', function(event, item) {
-          // event is the event listener
-          // item is the active scenegraph
-        console.log('CLICK', event, item);
-      });
-
-
       view.addSignalListener('brushX', function(event, item) {
-          console.log('signal', event ,item);
           if (item.monthdate_date) {
-            props.dispatch(`WHERE @timestamp >= ${item.monthdate_date[0]} AND @timestamp < ${item.monthdate_date[1]}`);
+            props.dispatch(`WHERE @timestamp >= "${new Date(item.monthdate_date[0]).toISOString().replace('2012-', '2024-')}" AND @timestamp < "${new Date(item.monthdate_date[1]).toISOString().replace('2012-', '2024-')}"`);
           } else {
             props.dispatch('');
           }
@@ -37,10 +29,7 @@ function(props) {
     // register vega and vega-lite with the API
     vl.register(vega, vegaLite, options);
 
-    const data = props.data.values.map((d) => ({
-      date: d[1],
-      count: d[0]
-    }));
+    const data = props.data;
 
     const brush = vl.selectInterval().name('brushX').encodings('x');
 
@@ -55,11 +44,11 @@ function(props) {
       )
       .width(props.width)
       .height(props.height)
+      .autosize({ type: 'fit-x'})
       .params(brush)
 
       spec.render()
       .then((viewElement) => {
-        console.log('other', null);
         // render returns a promise to a DOM element containing the chart
         // viewElement.value contains the Vega View object instance
         const el = wrapperRef.current;

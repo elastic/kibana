@@ -8,8 +8,11 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
+import { cloneDeep } from 'lodash';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EventBus } from '@kbn/event-bus-plugin/public';
+import { appendWhereClauseToESQLQuery, getESQLResults } from '@kbn/esql-utils';
 
 import type { DashboardCrossfilterSlice } from './dashboard_crossfilter_slice';
 import { getUnableToParseIframeMessage, getIframeContent } from './js_sandbox_iframe_content';
@@ -60,13 +63,61 @@ export const JsSandboxComponent: FC<{
   esql: string;
   hashedJs: string;
   crossfilter: EventBus<DashboardCrossfilterSlice>;
-}> = ({ esql, hashedJs, crossfilter }) => {
+  data: DataPublicPluginStart;
+}> = ({ esql, hashedJs, crossfilter, data: dataPlugin }) => {
   const iframeID = useMemo(() => Math.random().toString(36).substring(7), []);
 
+  const [iframeReady, setIframeReady] = useState(false);
   const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
+  const [data, setData] = useState<any[]>();
 
   const filters = crossfilter.useState((state) => state.filters);
-  console.log('filters', filters);
+
+  const panelFilters = useMemo(() => {
+    const pfs = cloneDeep(filters);
+    delete pfs[iframeID];
+    return pfs;
+  }, [filters, iframeID]);
+
+  const esqlWithFilters = useMemo(() => {
+    const els = esql.split('|').map((d) => d.trim());
+    Object.values(panelFilters).forEach((filter) => {
+      els.splice(1, 0, filter);
+    });
+    return els.join('\n| ');
+  }, [esql, panelFilters]);
+
+  // reset iframe state when js changes
+  useEffect(() => {
+    setIframeReady(false);
+    // setError(null);
+  }, [hashedJs]);
+
+  // fetch data from ES
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await getESQLResults({
+        esqlQuery: esqlWithFilters, // 'FROM kibana_sample_data_logs | LIMIT 10',
+        // filter,
+        search: dataPlugin.search.search,
+        // signal: abortController?.signal,
+        // timeRange: { from: fromDate, to: toDate },
+      });
+
+      const wideFormat = result.response.values.map((row) => {
+        return row.reduce((acc, val, idx) => {
+          acc[result.response.columns[idx].name] = val;
+          return acc;
+        }, {});
+      });
+      setData(wideFormat);
+    };
+
+    if (esql !== '') {
+      fetchData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [esqlWithFilters]);
 
   // Do not render iframe if user provided string doesn't start with `function(`
   // or if it contains global variables.
@@ -103,7 +154,7 @@ export const JsSandboxComponent: FC<{
     const handleMessage = (event: MessageEvent) => {
       if (event.data.source === iframeID) {
         if (event.data.type === 'iframeReady') {
-          iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: esql }, '*');
+          setIframeReady(true);
         } else if (event.data.type === 'error') {
           setError(event.data.payload);
         } else if (event.data.type === 'crossfilter') {
@@ -122,10 +173,13 @@ export const JsSandboxComponent: FC<{
 
   // Effect to update the iframe when `data` changes
   useEffect(() => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: 'updateData', payload: esql }, '*');
+    if (iframeReady && data && iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        { type: 'updateData', payload: JSON.stringify(data) },
+        '*'
+      );
     }
-  }, [esql]);
+  }, [iframeReady, iframeID, data]);
 
   return (
     <>
