@@ -450,6 +450,7 @@ describe('rule_add', () => {
             },
           ],
           enabledInLicense: true,
+          category: 'my-category',
           defaultActionGroupId: 'threshold.fired',
           minimumLicenseRequired: 'basic',
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },

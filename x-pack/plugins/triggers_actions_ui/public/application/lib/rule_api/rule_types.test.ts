@@ -30,6 +30,7 @@ describe('loadRuleTypes', () => {
         authorizedConsumers: {},
         minimumLicenseRequired: 'basic',
         enabledInLicense: true,
+        category: 'my-category',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
