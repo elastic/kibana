@@ -1,4 +1,5 @@
 - input: cel
+  template_path: cel.yml.hbs
   title: |
     {{ data_stream_title }}
   description: |
@@ -42,18 +43,8 @@
       show_user: true
       multi: false
       required: true
-      default: |
-        # // Fetch the agent's public IP every minute and note when the last request was made.
-        # // It does not use the Resource URL configuration value.
-        # bytes(get("https://api.ipify.org/?format=json").Body).as(body, {
-        #     "events": [body.decode_json().with({
-        #         "last_requested_at": has(state.cursor) && has(state.cursor.last_requested_at) ?
-        #             state.cursor.last_requested_at
-        #         :
-        #             now
-        #     })],
-        #     "cursor": {"last_requested_at": now}
-        # })
+      default: | {% for programLine in program %}
+        {{ programLine }}{% endfor %}
     - name: state
       type: yaml
       title: Initial CEL evaluation state
@@ -62,7 +53,9 @@
         More information can be found in the [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html#input-state-cel).
       show_user: true
       multi: false
-      required: false
+      required: false{% if state %}
+      default: | {% for key, value in state %}
+        {{ key }} : {% if value %}{{ value }}{% else %}""{% endif %}{% endfor %}{% endif %}
     - name: regexp
       type: yaml
       title: Defined Regular Expressions
@@ -135,7 +128,9 @@
         in logs. This may leak secrets, so list sensitive state fields in this configuration.
       show_user: true
       multi: true
-      required: false
+      required: false{% if redact.length > 0 %}
+      default: {% for redactVar in redact %}
+        - {{ redactVar }}{% endfor %}{% endif %}
     - name: delete_redacted_fields
       type: bool
       title: Delete redacted fields
@@ -314,21 +309,6 @@
       show_user: false
       multi: false
       required: false
-    - name: processors
-      type: yaml
-      title: Processors
-      multi: false
-      required: false
-      show_user: false
-      description: >
-        Processors are used to reduce the number of fields in the exported event or to enhance the event with metadata. This executes in the agent before the logs are parsed. See [Processors](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) for details.
-    - name: tags
-      type: text
-      title: Tags
-      multi: true
-      show_user: false
-      default:
-        - forwarded
     - name: enable_request_tracer
       type: bool
       title: Enable request tracing

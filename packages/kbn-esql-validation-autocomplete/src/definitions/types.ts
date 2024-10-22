@@ -100,12 +100,14 @@ export const isParameterType = (str: string | undefined): str is FunctionParamet
 
 /**
  * This is the return type of a function definition.
+ *
+ * TODO: remove `any`
  */
-export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'unknown' | 'any';
 
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
   str !== 'unsupported' &&
-  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
+  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
@@ -172,7 +174,7 @@ export interface CommandBaseDefinition {
       name: string;
       type: string;
       optional?: boolean;
-      innerTypes?: string[];
+      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;

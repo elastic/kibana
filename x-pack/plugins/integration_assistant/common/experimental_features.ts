@@ -8,8 +8,10 @@
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
-  // Leaving this in here until we have a 'real' experimental feature
-  testFeature: false,
+  /**
+   * Enables whether the user is able to utilize the LLM to generate the CEL input configuration.
+   */
+  generateCel: false,
 };
 
 /**
