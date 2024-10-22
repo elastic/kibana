@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -67,9 +67,8 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
     <EuiFlexGroup direction="column" gutterSize="xl">
       <SloRemoteCallout slo={slo} />
       <SloHealthCallout slo={slo} />
-      <EuiFlexItem>
-        <Overview slo={slo} />
-      </EuiFlexItem>
+      <Overview slo={slo} />
+
       <EuiFlexGroup direction="column" gutterSize="l">
         <BurnRates
           slo={slo}
