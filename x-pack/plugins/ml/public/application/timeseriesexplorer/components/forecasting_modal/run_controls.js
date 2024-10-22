@@ -173,12 +173,12 @@ export function RunControls({
                   helpText={i18n.translate(
                     'xpack.ml.timeSeriesExplorer.runControls.neverExpireHelpText',
                     {
-                      defaultMessage:
-                        'When selected, forecast results will be retained indefinitely. If disabled, forecasts will be retained for 14 days.',
+                      defaultMessage: 'If disabled, forecasts will be retained for 14 days.',
                     }
                   )}
                 >
                   <EuiSwitch
+                    data-test-subj="mlModalForecastNeverExpireSwitch"
                     disabled={disabledState.isDisabled}
                     label={i18n.translate(
                       'xpack.ml.timeSeriesExplorer.runControls.neverExpireLabel',
