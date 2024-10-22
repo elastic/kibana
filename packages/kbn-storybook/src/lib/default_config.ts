@@ -37,9 +37,17 @@ export const defaultConfig: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-webpack5-compiler-babel',
     {
+      /**
+       * This addon replaces rules in the default webpack config
+       * to avoid duplicate rule issues
+       */
       name: '@storybook/addon-styling-webpack',
       options: {
         rules: [
+          {
+            test: /\.css$/,
+            use: ['style-loader', 'css-loader'],
+          },
           {
             test: /\.scss$/,
             exclude: /\.module.(s(a|c)ss)$/,
