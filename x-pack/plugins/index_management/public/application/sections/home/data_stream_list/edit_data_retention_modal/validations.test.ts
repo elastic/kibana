@@ -9,9 +9,9 @@ import { isBiggerThanGlobalMaxRetention } from './validations';
 
 describe('isBiggerThanGlobalMaxRetention', () => {
   it('should return undefined if any argument is missing', () => {
-    expect(isBiggerThanGlobalMaxRetention(undefined, 'd', '30d')).toBeUndefined();
-    expect(isBiggerThanGlobalMaxRetention(10, undefined, '30d')).toBeUndefined();
-    expect(isBiggerThanGlobalMaxRetention(10, 'd', undefined)).toBeUndefined();
+    expect(isBiggerThanGlobalMaxRetention('', 'd', '30d')).toBeUndefined();
+    expect(isBiggerThanGlobalMaxRetention(10, '', '30d')).toBeUndefined();
+    expect(isBiggerThanGlobalMaxRetention(10, 'd', '')).toBeUndefined();
   });
 
   it('should return an error message if retention is bigger than global max retention (in days)', () => {

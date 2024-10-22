@@ -38,9 +38,9 @@ const isRetentionBiggerThan = (valueA: string, valueB: string) => {
 };
 
 export const isBiggerThanGlobalMaxRetention = (
-  retentionValue,
-  retentionTimeUnit,
-  globalMaxRetention
+  retentionValue: string | number,
+  retentionTimeUnit: string,
+  globalMaxRetention: string
 ) => {
   if (!retentionValue || !retentionTimeUnit || !globalMaxRetention) {
     return undefined;
