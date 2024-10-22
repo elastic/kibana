@@ -212,7 +212,7 @@ export const EditSpace: FC<PageProps> = ({
       >
         <EuiFlexItem grow={true} css={{ flexBasis: '100%', width: '100%' }}>
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={{marginTop: "4px"}}>
               <HeaderAvatar />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
@@ -252,6 +252,7 @@ export const EditSpace: FC<PageProps> = ({
                       <SpaceSolutionBadge
                         solution={solution}
                         data-test-subj={`space-solution-badge-${solution}`}
+                        css={{marginTop: "4px"}}
                       />
                     ) : null}
                     {userActiveSpace?.id === id ? (
