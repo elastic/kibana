@@ -127,8 +127,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
           </EuiFormRow>
         )}
       </EuiForm>
-      <EuiPopoverFooter>
-        {!disableEditbutton && parentViewMode === 'edit' && (
+      {!disableEditbutton && parentViewMode === 'edit' && (
+        <EuiPopoverFooter>
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
@@ -147,8 +147,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-      </EuiPopoverFooter>
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
 }
