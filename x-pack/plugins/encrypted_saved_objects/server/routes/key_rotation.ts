@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ReservedPrivilegesSet } from '@kbn/security-plugin/common';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 
 import type { RouteDefinitionParams } from '.';
 
@@ -42,7 +42,7 @@ export function defineKeyRotationRoutes({
       },
       security: {
         authz: {
-          requiredPrivileges: [ReservedPrivilegesSet.Superuser],
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
         },
       },
       options: {

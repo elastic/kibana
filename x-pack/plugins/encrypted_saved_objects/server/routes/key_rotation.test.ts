@@ -7,7 +7,7 @@
 
 import { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';
-import { kibanaResponseFactory } from '@kbn/core/server';
+import { kibanaResponseFactory, ReservedPrivilegesSet } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from './index.mock';
@@ -43,6 +43,11 @@ describe('Key rotation routes', () => {
     });
 
     it('correctly defines route.', () => {
+      expect(routeConfig.security).toEqual({
+        authz: {
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
+        },
+      });
       expect(routeConfig.options).toEqual({
         access: 'public',
         tags: ['oas-tag:saved objects'],

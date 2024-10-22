@@ -8,6 +8,7 @@
  */
 
 import { validRouteSecurity } from './security_route_config_validator';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 
 describe('RouteSecurity validation', () => {
   it('should pass validation for valid route security with authz enabled and valid required privileges', () => {
@@ -282,13 +283,25 @@ describe('RouteSecurity validation', () => {
       authz: {
         requiredPrivileges: [
           { anyRequired: ['privilege1', 'privilege1'], allRequired: ['privilege4'] },
-          { anyRequired: ['privilege5', 'superuser'] },
+          { anyRequired: ['privilege5', ReservedPrivilegesSet.superuser] },
         ],
       },
     };
 
     expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: superuser privileges set cannot be used in anyRequired"`
+      `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
+    );
+  });
+
+  it('should fail validation when allRequired combines superuser privileges set with other privileges', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [ReservedPrivilegesSet.superuser, 'privilege1'],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
     );
   });
 });

@@ -14,18 +14,18 @@ import type {
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 
-import { API_OPERATION_PREFIX, SUPER_USER_PRIVILEGES } from '../../common/constants';
-import { ReservedPrivilegesSet } from '../../common/types';
+import { API_OPERATION_PREFIX, SUPERUSER_PRIVILEGES } from '../../common/constants';
 
 const isAuthzDisabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzDisabled => {
   return (authz as AuthzDisabled)?.enabled === false;
 };
 
 const isReservedPrivilegeSet = (privilege: string): privilege is ReservedPrivilegesSet => {
-  return Object.values(ReservedPrivilegesSet).includes(privilege as ReservedPrivilegesSet);
+  return Object.hasOwn(ReservedPrivilegesSet, privilege);
 };
 
 export function initAPIAuthorization(
@@ -81,31 +81,26 @@ export function initAPIAuthorization(
       );
 
       const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-      const checkPrivilegesIfNotEmpty = async () => {
-        if (requestedPrivileges.length === 0) {
-          return;
-        }
-
-        const apiActions = requestedPrivileges.map((permission) => actions.api.get(permission));
-
-        return await checkPrivileges({ kibana: apiActions });
-      };
-
       const privilegeToApiOperation = (privilege: string) =>
         privilege.replace(API_OPERATION_PREFIX, '');
 
-      const checkPrivilegesResponse = await checkPrivilegesIfNotEmpty();
       const kibanaPrivileges: Record<string, boolean> = {};
 
-      for (const kbPrivilege of checkPrivilegesResponse?.privileges?.kibana ?? []) {
-        kibanaPrivileges[privilegeToApiOperation(kbPrivilege.privilege)] = kbPrivilege.authorized;
+      if (requestedPrivileges.length > 0) {
+        const checkPrivilegesResponse = await checkPrivileges({
+          kibana: requestedPrivileges.map((permission) => actions.api.get(permission)),
+        });
+
+        for (const kbPrivilege of checkPrivilegesResponse.privileges.kibana) {
+          kibanaPrivileges[privilegeToApiOperation(kbPrivilege.privilege)] = kbPrivilege.authorized;
+        }
       }
 
       for (const reservedPrivilege of requestedReservedPrivileges) {
         if (reservedPrivilege === ReservedPrivilegesSet.Superuser) {
           const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
             request
-          ).globally(SUPER_USER_PRIVILEGES);
+          ).globally(SUPERUSER_PRIVILEGES);
 
           kibanaPrivileges[ReservedPrivilegesSet.Superuser] =
             checkSuperuserPrivilegesResponse.hasAllRequested;
