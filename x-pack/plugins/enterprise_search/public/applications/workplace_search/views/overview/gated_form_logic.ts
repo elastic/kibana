@@ -36,7 +36,10 @@ export const WorkplaceSearchGateLogic = kea<
     setParticipateInUXLabs: (participateInUXLabs) => ({ participateInUXLabs }),
   },
   connect: {
-    actions: [UpdateGatedFormDataApiLogic, ['makeRequest as submitGatedFormDataRequest']],
+    actions: [
+      UpdateGatedFormDataApiLogic,
+      ['makeRequest as submitGatedFormDataRequest', 'apiSuccess as submitGatedFormSuccess'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     formSubmitRequest: () => {
@@ -48,6 +51,9 @@ export const WorkplaceSearchGateLogic = kea<
           participateInUXLabs: values?.participateInUXLabs,
         });
       }
+    },
+    submitGatedFormSuccess: () => {
+      window.location.reload();
     },
   }),
   path: ['enterprise_search', 'workplace_search', 'gate_form'],
