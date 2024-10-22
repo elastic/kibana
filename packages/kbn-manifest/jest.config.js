@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// this configures the protected eslint rules on our codebase that can't be disabled
-export const PROTECTED_RULES = new Set([
-  '@kbn/disable/no_protected_eslint_disable',
-  '@kbn/disable/no_naked_eslint_disable',
-  '@kbn/imports/no_unused_imports',
-  '@kbn/imports/no_group_crossing_imports',
-  '@kbn/imports/no_group_crossing_manifests',
-]);
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-manifest'],
+};

@@ -8,14 +8,16 @@
     ]
   },
   "include": [
-    "**/*.ts"
-  ],
-  "kbn_references": [
-    "@kbn/import-resolver",
-    "@kbn/repo-info",
-    "@kbn/repo-packages",
+    "**/*.ts",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-info",
+    "@kbn/repo-packages",
+    "@kbn/safer-lodash-set",
+    "@kbn/tooling-log",
   ]
 }
