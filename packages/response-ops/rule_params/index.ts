@@ -9,7 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
-  defaultValue: {},
-  meta: { description: 'The parameters for the rule.' },
-});
+const getSchema = (options?: Record<string, unknown>) =>
+  schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+    ...options,
+    meta: { description: 'The parameters for the rule.' },
+  });
+
+export const getRuleParamsSchema = () => getSchema();
+export const getRuleParamsSchemaWithDefaultValue = () => getSchema({ defaultValue: {} });

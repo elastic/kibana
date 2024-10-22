@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import { getRuleParamsSchema } from '@kbn/response-ops-rule-params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
@@ -495,7 +495,7 @@ export const ruleResponseSchema = schema.object({
   }),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
-  params: ruleParamsSchema,
+  params: getRuleParamsSchema(),
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduled_task_id: schema.maybe(
     schema.string({
