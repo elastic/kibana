@@ -6,7 +6,7 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { LensApi } from '../..';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi } from '../types';
@@ -26,26 +26,21 @@ export function LensEmbeddableComponent({
   const [
     // Pick up updated params from the observable
     expressionParams,
-    // used for functional tests
-    renderCount,
-    // has the render completed?
-    hasRendered,
     // has view mode changed?
     latestViewMode,
-  ] = useBatchedPublishingSubjects(
-    internalApi.expressionParams$,
-    internalApi.renderCount$,
-    internalApi.hasRenderCompleted$,
-    api.viewMode
-  );
+  ] = useBatchedPublishingSubjects(internalApi.expressionParams$, api.viewMode);
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
   // On unmount call all the cleanups
   useEffect(() => {
+    if (rootRef.current) {
+      internalApi.registerNode(rootRef.current);
+    }
     return onUnmount;
-  }, [onUnmount]);
+  }, [internalApi, onUnmount]);
 
   // Publish the data attributes only if avaialble/visible
   const title = api.hidePanelTitle?.getValue()
@@ -58,11 +53,10 @@ export function LensEmbeddableComponent({
   return (
     <div
       style={{ width: '100%', height: '100%' }}
-      data-rendering-count={renderCount}
-      data-render-complete={hasRendered}
       {...title}
       {...description}
       data-shared-item
+      ref={rootRef}
     >
       {expressionParams == null ? null : <ExpressionWrapper {...expressionParams} />}
       <UserMessages

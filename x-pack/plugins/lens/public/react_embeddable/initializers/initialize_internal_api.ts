@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { buildObservableVariable } from '../helper';
 import type {
   ExpressionWrapperProps,
@@ -21,6 +22,7 @@ export function initializeInternalApi(
   initialState: LensRuntimeState,
   parentApi: unknown
 ): LensInternalApi {
+  const renderCompleteDispatcher = new RenderCompleteDispatcher();
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
@@ -49,10 +51,18 @@ export function initializeInternalApi(
     expressionAbortController$,
     renderCount$,
     dataViews: dataViews$,
+    registerNode: (el: HTMLElement) => renderCompleteDispatcher.setEl(el),
+    dispatchError: () => renderCompleteDispatcher.dispatchError(),
     // This function is used to force a re-render of the component (i.e. to refresh user messages)
     updateRenderCount: () => renderCount$.next(renderCount$.getValue() + 1),
-    dispatchRenderStart: () => hasRenderCompleted$.next(false),
-    dispatchRenderComplete: () => hasRenderCompleted$.next(true),
+    dispatchRenderStart: () => {
+      renderCompleteDispatcher.dispatchInProgress();
+      hasRenderCompleted$.next(false);
+    },
+    dispatchRenderComplete: () => {
+      renderCompleteDispatcher.dispatchComplete();
+      hasRenderCompleted$.next(true);
+    },
     updateExpressionParams: (newParams: ExpressionWrapperProps | null) =>
       expressionParams$.next(newParams),
     updateDataLoading: (newDataLoading: boolean | undefined) => dataLoading$.next(newDataLoading),

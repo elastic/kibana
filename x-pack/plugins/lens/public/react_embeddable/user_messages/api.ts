@@ -259,6 +259,9 @@ export function buildUserMessagesHelpers(
         addLog(`Blocking error: ${error?.message}`);
       }
       if (error?.message !== api.blockingError.getValue()?.message) {
+        if (error?.message) {
+          internalApi.dispatchError();
+        }
         (api.blockingError as BehaviorSubject<Error | undefined>).next(
           error?.message === '' ? undefined : error
         );

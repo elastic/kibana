@@ -278,6 +278,8 @@ const LensInternalApiMock: LensInternalApi = {
   updateDataViews: jest.fn(),
   updateMessages: jest.fn(),
   resetAllMessages: jest.fn(),
+  dispatchError: jest.fn(),
+  registerNode: jest.fn(),
 };
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
