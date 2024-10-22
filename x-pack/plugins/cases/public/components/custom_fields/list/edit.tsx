@@ -122,7 +122,6 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   canUpdate,
 }) => {
   const selectedKey = customField?.value ? Object.keys(customField.value)[0] : null;
-
   const selectedOptionExists = customFieldConfiguration.options.find(
     (option) => option.key === selectedKey
   );
@@ -147,7 +146,15 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
     const { isValid, data } = await formState.submit();
 
     if (isValid) {
-      const value = isEmpty(data.value) ? null : data.value;
+      const keyToSubmit = isEmpty(data.value) ? null : data.value;
+      const value =
+        keyToSubmit === null
+          ? null
+          : {
+              [keyToSubmit]:
+                customFieldConfiguration.options.find((option) => option.key === keyToSubmit)
+                  ?.label ?? '',
+            };
 
       onSubmit({
         ...customField,

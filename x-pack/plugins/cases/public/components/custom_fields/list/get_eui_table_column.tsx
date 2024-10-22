@@ -19,13 +19,16 @@ export const getEuiTableColumn = ({
 }: Pick<ListCustomFieldConfiguration, 'label' | 'options'>): CustomFieldEuiTableColumn => ({
   name: label,
   width: '250px',
-  render: (customField: CaseCustomField) => (
-    <p
-      className="eui-textTruncate"
-      data-test-subj={`list-custom-field-column-view-${customField.key}`}
-    >
-      {options.find((option) => option.key === customField.value)?.label ?? null}
-    </p>
-  ),
+  render: (customField: CaseCustomField) => {
+    const selectedKey = customField.value ? Object.keys(customField.value)[0] : null;
+    return (
+      <p
+        className="eui-textTruncate"
+        data-test-subj={`list-custom-field-column-view-${customField.key}`}
+      >
+        {options.find((option) => option.key === selectedKey)?.label ?? null}
+      </p>
+    );
+  },
   'data-test-subj': 'list-custom-field-column',
 });

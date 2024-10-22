@@ -34,11 +34,12 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
   convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
   getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
   convertValueToDisplayText: (
-    value: string | null,
+    value: { [x: string]: string } | null,
     configuration: ListCustomFieldConfiguration
   ) => {
     if (!value) return '';
-    const option = configuration.options.find((opt) => opt.key === value);
+    const selectedKey = Object.keys(value)[0];
+    const option = configuration.options.find((opt) => opt.key === selectedKey);
     return option?.label ?? '';
   },
 });
