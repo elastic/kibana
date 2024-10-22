@@ -11,6 +11,17 @@ function(props) {
     init: (view) => {
       // initialize tooltip handler
       view.tooltip(new vegaTooltip.Handler().call);
+
+      view.addEventListener('click', function(event, item) {
+          // event is the event listener
+          // item is the active scenegraph
+        console.log('CLICK', event, item);
+      });
+
+
+      view.addSignalListener('name1', function(event, item) {
+        console.log('signal', event ,item);
+      })
     },
     view: {
       renderer: "canvas",
@@ -22,22 +33,28 @@ function(props) {
     vl.register(vega, vegaLite, options);
 
     const data = props.data.values.map((d) => ({
-      x: d[1],
-      y: d[0]
+      date: d[1],
+      count: d[0]
     }));
 
+    const brush = vl.selectInterval().encodings('x');
+
     // now you can use the API!
-    vl.markBar({ tooltip: true })
+    const spec = vl.markBar({ tooltip: true })
       .data(data)
       .encode(
-        vl.x().fieldT("x").timeUnit('binnedday'),
-        vl.y().fieldQ("y"),
-        vl.tooltip([vl.fieldT("x"), vl.fieldQ("y")])
+        // https://vega.github.io/vega-lite/docs/timeunit.html
+        vl.x().timeMD('date').axis({title: 'Date'}),
+        vl.y().sum("count"),
+        vl.tooltip([vl.fieldT("date"), vl.fieldQ("count")])
       )
       .width(props.width)
       .height(props.height)
-      .render()
-      .then(viewElement => {
+      .params(brush)
+
+      spec.render()
+      .then((viewElement) => {
+        console.log('other', null);
         // render returns a promise to a DOM element containing the chart
         // viewElement.value contains the Vega View object instance
         const el = wrapperRef.current;
