@@ -196,6 +196,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             // time_zone: timezone,
             locale,
             include_execution_metadata: true,
+            // include_ccs_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(

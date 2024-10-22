@@ -8,6 +8,7 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
+      "data",
       "embeddable",
       "eventBus",
       "uiActions"

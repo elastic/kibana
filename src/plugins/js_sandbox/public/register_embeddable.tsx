@@ -272,7 +272,7 @@ const FormControls: FC<{
       >
         <CodeEditor
           height={150}
-          languageId="json"
+          languageId="esql"
           options={{
             automaticLayout: true,
             lineNumbers: 'off',
@@ -405,7 +405,7 @@ export const getJsSandboxEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const { eventBus } = pluginStart;
+      const { data, eventBus } = pluginStart;
 
       if (eventBus) {
         try {
@@ -498,6 +498,7 @@ export const getJsSandboxEmbeddableFactory = (
               esql={esql}
               hashedJs={hashedJS}
               crossfilter={dashboardCrossfilter}
+              data={data}
             />
           );
         },

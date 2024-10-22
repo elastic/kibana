@@ -27,10 +27,10 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
         <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0"></script>
         <script src="https://cdn.jsdelivr.net/npm/vega-lite-api@5.6.0"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-tooltip@0.34.0"></script>
       </head>
       <body>
         <div id="root"></div>
@@ -51,7 +51,7 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
           let height;
 
           function updateWidthHeight() {
-            width = Math.max(document.documentElement.clientWidth - 72 || 0, window.innerWidth - 72 || 0);
+            width = Math.max(document.documentElement.clientWidth - 32 || 0, window.innerWidth - 32 || 0);
             height = Math.max(document.documentElement.clientHeight - 48 || 0, window.innerHeight - 48 || 0);
           }
 
