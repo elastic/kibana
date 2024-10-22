@@ -12,6 +12,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 import { SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const packageApi = getService('packageApi');
 
@@ -44,9 +45,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('Integrations', () => {
+    let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
         {
@@ -56,12 +59,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
+    after(async () => {
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+    });
+
     describe('gets the installed integrations', () => {
       before(async () => {
         await Promise.all(
           integrationPackages.map((pkg) =>
             packageApi.installPackage({
-              roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+              roleAuthc: adminRoleAuthc,
               pkg,
             })
           )
@@ -86,10 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         async () =>
           await Promise.all(
             integrationPackages.map((pkg) =>
-              packageApi.uninstallPackage({
-                roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-                pkg,
-              })
+              packageApi.uninstallPackage({ roleAuthc: adminRoleAuthc, pkg })
             )
           )
       );
@@ -99,10 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         await Promise.all(
           customIntegrations.map((customIntegration: CustomIntegration) =>
-            packageApi.installCustomIntegration({
-              roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-              customIntegration,
-            })
+            packageApi.installCustomIntegration({ roleAuthc: adminRoleAuthc, customIntegration })
           )
         );
       });
@@ -126,7 +127,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await Promise.all(
             customIntegrations.map((customIntegration: CustomIntegration) =>
               packageApi.uninstallPackage({
-                roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+                roleAuthc: adminRoleAuthc,
                 pkg: customIntegration.integrationName,
               })
             )

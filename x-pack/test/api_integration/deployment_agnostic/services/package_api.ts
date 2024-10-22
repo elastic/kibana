@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SupertestWithRoleScopeType } from '.';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface CustomIntegration {
   integrationName: string;
@@ -17,52 +18,50 @@ export interface IntegrationDataset {
   type: 'logs' | 'metrics' | 'synthetics' | 'traces';
 }
 
-export function PackageApiProvider() {
+export function PackageApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   return {
     async installCustomIntegration({
-      roleScopedSupertestWithCookieCredentials,
+      roleAuthc,
       customIntegration,
     }: {
-      roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType;
+      roleAuthc: RoleCredentials;
       customIntegration: CustomIntegration;
     }) {
       const { integrationName, datasets } = customIntegration;
 
-      const { body } = await roleScopedSupertestWithCookieCredentials
+      const { body } = await supertestWithoutAuth
         .post(`/api/fleet/epm/custom_integrations`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({ integrationName, datasets });
       return body;
     },
-    async installPackage({
-      roleScopedSupertestWithCookieCredentials,
-      pkg,
-    }: {
-      roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType;
-      pkg: string;
-    }) {
+    async installPackage({ roleAuthc, pkg }: { roleAuthc: RoleCredentials; pkg: string }) {
       const {
         body: {
           item: { latestVersion: version },
         },
-      } = await roleScopedSupertestWithCookieCredentials
+      } = await supertestWithoutAuth
         .get(`/api/fleet/epm/packages/${pkg}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({ force: true });
 
-      const { body } = await roleScopedSupertestWithCookieCredentials
+      const { body } = await supertestWithoutAuth
         .post(`/api/fleet/epm/packages/${pkg}/${version}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({ force: true });
       return body;
     },
-    async uninstallPackage({
-      roleScopedSupertestWithCookieCredentials,
-      pkg,
-    }: {
-      roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType;
-      pkg: string;
-    }) {
-      const { body } = await roleScopedSupertestWithCookieCredentials.delete(
-        `/api/fleet/epm/packages/${pkg}`
-      );
+    async uninstallPackage({ roleAuthc, pkg }: { roleAuthc: RoleCredentials; pkg: string }) {
+      const { body } = await supertestWithoutAuth
+        .delete(`/api/fleet/epm/packages/${pkg}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
       return body;
     },
   };
