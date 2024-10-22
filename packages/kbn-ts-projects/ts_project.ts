@@ -36,7 +36,6 @@ function isValidKbnRefs(refs: unknown): refs is KbnRef[] {
 }
 
 function expand(name: string, patterns: string[], knownPaths: string[]) {
-  const pathsArray = Array.isArray(knownPaths) ? knownPaths : [];
   const matchers = patterns.map((pattern) => ({
     pattern,
     matcher: makeMatcher([pattern]),
@@ -44,7 +43,7 @@ function expand(name: string, patterns: string[], knownPaths: string[]) {
 
   const selected = matchers.map(({ matcher, pattern }) => ({
     pattern,
-    matches: pathsArray.filter(matcher),
+    matches: knownPaths.filter(matcher),
   }));
 
   const noMatches = selected.flatMap((s) => (s.matches.length === 0 ? s.pattern : []));
