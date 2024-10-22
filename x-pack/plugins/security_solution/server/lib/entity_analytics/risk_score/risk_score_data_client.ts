@@ -22,6 +22,7 @@ import {
   getIndexPatternDataStream,
   getTransformOptions,
   mappingComponentName,
+  nameSpaceAwareMappingComponentName,
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
@@ -103,12 +104,41 @@ export class RiskScoreDataClient {
         namespace,
       };
 
+      // Check if there are any existing component templates with the namespace in the name
+
+      const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
+        name: mappingComponentName,
+      });
+
+      // If present then copy the contents to a new component template with the namespace in the name
+      if (oldComponentTemplateExists === true) {
+        const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate({
+          name: mappingComponentName,
+        });
+
+        const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
+        const newComponentTemplateName = nameSpaceAwareMappingComponentName(namespace);
+        await esClient.cluster.putComponentTemplate({
+          name: newComponentTemplateName,
+          body: oldComponentTemplate.component_template,
+        });
+      }
+
+      // Delete the component template without the namespace in the name
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      );
+
+      // Update the new component template with the required data
       await Promise.all([
         createOrUpdateComponentTemplate({
           logger: this.options.logger,
           esClient,
           template: {
-            name: mappingComponentName,
+            name: nameSpaceAwareMappingComponentName(namespace),
             _meta: {
               managed: true,
             },
@@ -121,6 +151,7 @@ export class RiskScoreDataClient {
         }),
       ]);
 
+      // Reference the new component template in the index template
       await createOrUpdateIndexTemplate({
         logger: this.options.logger,
         esClient,
@@ -129,7 +160,7 @@ export class RiskScoreDataClient {
           body: {
             data_stream: { hidden: true },
             index_patterns: [indexPatterns.alias],
-            composed_of: [mappingComponentName],
+            composed_of: [nameSpaceAwareMappingComponentName(namespace)],
             template: {
               lifecycle: {},
               settings: {
@@ -230,6 +261,17 @@ export class RiskScoreDataClient {
         { ignore: [404] }
       )
       .catch(addError);
+
+    if (namespace !== 'default') {
+      await esClient.cluster
+        .deleteComponentTemplate(
+          {
+            name: nameSpaceAwareMappingComponentName(namespace),
+          },
+          { ignore: [404] }
+        )
+        .catch(addError);
+    }
 
     await esClient.cluster
       .deleteComponentTemplate(
