@@ -52,7 +52,6 @@ import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
  * @returns
  */
 export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esql, hashedJs }) => {
-  console.log('esql', esql);
   const iframeID = useMemo(() => Math.random().toString(36).substring(7), []);
 
   const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
@@ -67,7 +66,8 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
       'sessionStorage',
       'alert',
       'postMessage',
-      'addEventListener',
+      // used by Vega
+      // 'addEventListener',
       'removeEventListener',
       'dispatchEvent',
     ];
@@ -116,7 +116,6 @@ export const JsSandboxComponent: FC<{ esql: string; hashedJs: string }> = ({ esq
           function updateWidthHeight() {
             width = Math.max(document.documentElement.clientWidth - 72 || 0, window.innerWidth - 72 || 0);
             height = Math.max(document.documentElement.clientHeight - 48 || 0, window.innerHeight - 48 || 0);
-            console.log('dim', width, height);
           }
 
           function updateData(dataString) {
