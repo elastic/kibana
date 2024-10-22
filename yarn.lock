@@ -5671,6 +5671,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/manifest@link:packages/kbn-manifest":
+  version "0.0.0"
+  uid ""
+
 "@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
   version "0.0.0"
   uid ""
