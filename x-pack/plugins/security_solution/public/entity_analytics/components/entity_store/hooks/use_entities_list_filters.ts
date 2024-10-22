@@ -70,7 +70,6 @@ export const useEntitiesListFilters = ({
                   },
                 },
               ]),
-              minimum_should_match: 1,
             },
           },
         ]

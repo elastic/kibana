@@ -27,6 +27,7 @@ import { AssetCriticalityFilter } from '../asset_criticality/asset_criticality_f
 import { useEntitiesListQuery } from './hooks/use_entities_list_query';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
+import type { EntitySourceTag } from './types';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -40,7 +41,7 @@ export const EntitiesList: React.FC = () => {
 
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
-  const [selectedSources, setSelectedSources] = useState<EntitySource[]>([]);
+  const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,

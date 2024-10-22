@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
@@ -13,19 +14,33 @@ import type {
   Entity,
   UserEntity,
 } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import { EntitySourceTag } from './types';
 
 export const isUserEntity = (record: Entity): record is UserEntity =>
   !!(record as UserEntity)?.user;
 
-export const sourceFieldToTag = (source: string): EntitySourceTag => {
+export const sourceFieldToText = (source: string) => {
   if (source.match(`^${RISK_SCORE_INDEX_PATTERN}`)) {
-    return EntitySourceTag.risk;
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.riskDescription"
+        defaultMessage="Risk"
+      />
+    );
   }
 
   if (source.match(`^${ASSET_CRITICALITY_INDEX_PATTERN}`)) {
-    return EntitySourceTag.criticality;
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.criticalityDescription"
+        defaultMessage="Asset Criticality"
+      />
+    );
   }
 
-  return EntitySourceTag.events;
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.eventDescription"
+      defaultMessage="Events"
+    />
+  );
 };
