@@ -91,12 +91,13 @@ const getESQLDocumentCountStats = async (
       ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
         timeFieldName
       )}))
-    | stats rows = count(*) by _timestamp_`
+    | stats rows = count(*) by _timestamp_
+    | LIMIT 1000`
     );
 
     const request = {
       params: {
-        query: getESQLWithSafeLimit(aggQuery, 1),
+        query: aggQuery,
         ...(filter ? { filter } : {}),
         ...(namedParams.length ? { params: namedParams } : {}),
       },
