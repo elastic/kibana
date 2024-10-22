@@ -3927,7 +3927,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.ts"
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.ts"
               },
               {
                 "plugin": "alerting",
@@ -5262,38 +5262,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/get_rule_state.test.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
                 "plugin": "features",
                 "path": "x-pack/plugins/features/server/routes/index.test.ts"
               },
@@ -5724,6 +5692,38 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -13412,6 +13412,22 @@
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.availability",
+            "type": "Object",
+            "tags": [],
+            "label": "availability",
+            "description": [
+              "\nBased on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)\nKibana APIs can also specify some metadata about API availability.\n\nThis setting is only applicable if your route `access` is `public`.\n"
+            ],
+            "signature": [
+              "{ stability?: \"experimental\" | \"beta\" | \"stable\" | undefined; since?: string | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -15786,6 +15802,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -15879,7 +15899,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -16190,7 +16210,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -17333,7 +17353,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -17480,7 +17500,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -17779,7 +17799,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -20680,7 +20700,7 @@
             "section": "def-server.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+          "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -20764,7 +20784,7 @@
                 "section": "def-server.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+              "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
