@@ -48,14 +48,14 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
           registry.registerCustomAction({
             id: 'example-custom-root-submenu',
             type: AppMenuActionType.custom,
-            label: 'Root Submenu',
+            label: 'Custom Submenu',
             testId: 'example-custom-root-submenu',
             actions: [
               {
                 id: 'example-custom-root-action11',
                 type: AppMenuActionType.custom,
                 controlProps: {
-                  label: 'Root Custom action 11',
+                  label: 'Custom action 11 (from Root profile)',
                   testId: 'example-custom-root-action11',
                   onClick: ({ onFinishAction }) => {
                     alert('Example Root Custom action 11 clicked');
@@ -67,7 +67,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 id: 'example-custom-root-action12',
                 type: AppMenuActionType.custom,
                 controlProps: {
-                  label: 'Root Custom action 12',
+                  label: 'Custom action 12 (from Root profile)',
                   testId: 'example-custom-root-action12',
                   onClick: ({ onFinishAction }) => {
                     // This is an example of a custom action that opens a flyout or any other custom modal.
