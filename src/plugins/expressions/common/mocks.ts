@@ -15,7 +15,7 @@ export const createMockExecutionContext = <
   ExtraAdapters extends Adapters = Adapters
 >(
   extraContext: ExtraContext = {} as ExtraContext,
-  extraAdapters: ExtraAdapters
+  extraAdapters: ExtraAdapters = {} as ExtraAdapters
 ): ExecutionContext<ExtraAdapters> & ExtraContext => {
   const executionContext = {
     getSearchContext: jest.fn(),
