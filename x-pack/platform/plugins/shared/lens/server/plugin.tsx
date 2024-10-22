@@ -16,6 +16,7 @@ import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-
 import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
+  UI_SETTINGS,
 } from '@kbn/data-plugin/server';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -30,6 +31,8 @@ import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embedda
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -140,6 +143,20 @@ export class LensServerPlugin
       .catch((error) => {
         this.logger.error(error);
       });
+
+    core.uiSettings.register({
+      [UI_SETTINGS.LENS_GENERATE_ESQL]: {
+        name: i18n.translate('xpack.lens.generateESQLSetting.name', {
+          defaultMessage: 'Generate ESQL',
+        }),
+        value: false,
+        description: i18n.translate('xpack.lens.generateESQLSetting.description', {
+          defaultMessage:
+            'When set to true lens will try to generate ESQL for its queries rather than DSL',
+        }),
+        schema: schema.boolean(),
+      },
+    });
 
     return {
       lensEmbeddableFactory,
