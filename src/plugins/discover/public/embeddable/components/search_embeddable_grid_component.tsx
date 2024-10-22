@@ -148,7 +148,6 @@ export function SearchEmbeddableGridComponent({
     settings: grid,
   });
 
-  // here
   const dataSource = useMemo(
     () => createDataSource({ dataView, query: savedSearchQuery }),
     [dataView, savedSearchQuery]
