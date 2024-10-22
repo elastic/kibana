@@ -470,6 +470,7 @@ describe('Lens App', () => {
         newCopyOnSave = false,
         comesFromDashboard = true,
         switchToAddToDashboardNone = false,
+        saveAndReturn = false,
       }: {
         newCopyOnSave?: boolean;
         newTitle?: string;
@@ -511,6 +512,10 @@ describe('Lens App', () => {
             ...preloadedState,
           },
         });
+        if (saveAndReturn) {
+          await userEvent.click(screen.getByTestId('lnsApp_saveAndReturnButton'));
+          return;
+        }
         await clickSaveButton();
         await waitForModalVisible();
         if (newCopyOnSave) {
@@ -570,7 +575,7 @@ describe('Lens App', () => {
         });
 
         expect(querySaveAndReturnButton()).toBeEnabled();
-        expect(querySaveButton()).toHaveTextContent('Save to library');
+        expect(querySaveButton()).not.toBeInTheDocument();
       });
 
       it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
@@ -586,14 +591,15 @@ describe('Lens App', () => {
         });
 
         expect(querySaveAndReturnButton()).toBeEnabled();
-        expect(querySaveButton()).toHaveTextContent('Save as');
+        expect(querySaveButton()).not.toBeInTheDocument();
       });
 
       it('applies all changes on-save', async () => {
+        const savedObjectId = faker.random.uuid();
         const { lensStore } = await save({
-          savedObjectId: undefined,
-          newCopyOnSave: false,
-          newTitle: 'hello there',
+          savedObjectId,
+          prevSavedObjectId: 'prevId',
+          comesFromDashboard: false,
           preloadedState: {
             applyChangesCounter: 0,
           },
@@ -700,10 +706,10 @@ describe('Lens App', () => {
         await save({
           savedObjectId: defaultSavedObjectId,
           prevSavedObjectId: defaultSavedObjectId,
+          comesFromDashboard: false,
           preloadedState: {
             isSaveable: true,
             persistedDoc: getLensDocumentMock({ savedObjectId: defaultSavedObjectId }),
-            isLinkedToOriginatingApp: true,
             filters: [pinned, unpinned],
           },
         });
@@ -716,7 +722,7 @@ describe('Lens App', () => {
             state: expect.objectContaining({ filters: expectedFilters }),
           }),
           [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
-          undefined
+          defaultSavedObjectId
         );
       });
 
@@ -724,10 +730,11 @@ describe('Lens App', () => {
         await save({
           savedObjectId: defaultSavedObjectId,
           prevSavedObjectId: defaultSavedObjectId,
+          newCopyOnSave: true,
+          comesFromDashboard: false,
           preloadedState: {
             isSaveable: true,
             persistedDoc: { savedObjectId: defaultSavedObjectId } as unknown as LensDocument,
-            isLinkedToOriginatingApp: true,
           },
         });
 
@@ -749,39 +756,33 @@ describe('Lens App', () => {
           savedObjectId: undefined,
           newCopyOnSave: false,
           newTitle: 'hello there',
+          saveAndReturn: true,
         });
-        expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
-          expect.objectContaining({
-            title: 'hello there',
-          }),
-          [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
-          undefined
-        );
+
         expect(props.redirectToOrigin).toHaveBeenCalledWith({
-          state: expect.objectContaining({ savedObjectId: defaultSavedObjectId }),
+          state: expect.objectContaining({ savedObjectId: undefined }),
           isCopied: false,
         });
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
         const mockedConsoleDir = jest.spyOn(console, 'dir').mockImplementation(() => {}); // mocked console.dir to avoid messages in the console when running tests
-
         services.attributeService.saveToLibrary = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
 
-        props.incomingState = {
-          originatingApp: 'dashboards',
-        };
-
-        await renderApp({
+        const { lensStore } = await renderApp({
           preloadedState: {
             isSaveable: true,
-            isLinkedToOriginatingApp: true,
           },
         });
+
         await clickSaveButton();
-        await userEvent.type(screen.getByTestId('savedObjectTitle'), 'hello there');
+        await waitForModalVisible();
+
+        await userEvent.click(screen.getByLabelText('None'));
+
+        await userEvent.type(screen.getByTestId('savedObjectTitle'), `test`);
         await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
         await waitToLoad();
 
@@ -793,12 +794,8 @@ describe('Lens App', () => {
       });
 
       it('does not show the copy button on first save', async () => {
-        props.incomingState = {
-          originatingApp: 'dashboards',
-        };
-
         await renderApp({
-          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: false },
         });
         await clickSaveButton();
         await waitForModalVisible();

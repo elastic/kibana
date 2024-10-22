@@ -42,16 +42,19 @@ import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
-  showSaveAndReturn,
   showReplaceInDashboard,
   showReplaceInCanvas,
+  isDefaultSaveButtonEnabled,
+  actions,
 }: {
   contextFromEmbeddable: boolean | undefined;
-  showSaveAndReturn: boolean;
   showReplaceInDashboard: boolean;
   showReplaceInCanvas: boolean;
+  isDefaultSaveButtonEnabled?: boolean;
+  actions: LensTopNavActions;
 }) {
-  if (showSaveAndReturn) {
+  const disableSaveAndReturn = !actions.saveAndReturn.enabled;
+  if (actions.saveAndReturn.visible) {
     return {
       label: contextFromEmbeddable
         ? i18n.translate('xpack.lens.app.saveAndReplace', {
@@ -66,6 +69,8 @@ function getSaveButtonMeta({
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
+      disableButton: disableSaveAndReturn,
+      run: actions.saveAndReturn.execute,
     };
   }
 
@@ -81,6 +86,8 @@ function getSaveButtonMeta({
         defaultMessage:
           'Replace legacy visualization with lens visualization and return to the dashboard',
       }),
+      disableButton: disableSaveAndReturn,
+      run: actions.saveAndReturn.execute,
     };
   }
 
@@ -96,8 +103,23 @@ function getSaveButtonMeta({
         defaultMessage:
           'Replace legacy visualization with lens visualization and return to the canvas',
       }),
+      disableButton: disableSaveAndReturn,
+      run: actions.saveAndReturn.execute,
     };
   }
+  return {
+    label: i18n.translate('xpack.lens.app.save', {
+      defaultMessage: 'Save',
+    }),
+    iconType: 'save',
+    emphasize: true,
+    testId: 'lnsApp_saveButton',
+    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
+      defaultMessage: 'Save the current lens visualization',
+    }),
+    disableButton: !isDefaultSaveButtonEnabled,
+    run: actions.showSaveModal.execute,
+  };
 }
 
 function getLensTopNavConfig(options: {
@@ -122,24 +144,6 @@ function getLensTopNavConfig(options: {
     isByValueMode,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
-
-  const showSaveAndReturn = actions.saveAndReturn.visible;
-
-  const enableSaveButton =
-    savingToLibraryPermitted ||
-    (savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
-
-  const saveButtonLabel = isByValueMode
-    ? i18n.translate('xpack.lens.app.addToLibrary', {
-        defaultMessage: 'Save to library',
-      })
-    : actions.saveAndReturn.visible
-    ? i18n.translate('xpack.lens.app.saveAs', {
-        defaultMessage: 'Save as',
-      })
-    : i18n.translate('xpack.lens.app.save', {
-        defaultMessage: 'Save',
-      });
 
   if (contextOriginatingApp && !actions.cancel.visible) {
     topNavMenu.push({
@@ -228,34 +232,18 @@ function getLensTopNavConfig(options: {
     });
   }
 
-  topNavMenu.push({
-    label: saveButtonLabel,
-    iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
-      ? 'save'
-      : undefined,
-    emphasize: showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn,
-    run: actions.showSaveModal.execute,
-    testId: 'lnsApp_saveButton',
-    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
-      defaultMessage: 'Save the current lens visualization',
-    }),
-    disableButton: !enableSaveButton,
-  });
+  const isDefaultSaveButtonEnabled =
+    savingToLibraryPermitted || (savingToDashboardPermitted && !isByValueMode);
 
-  const saveButtonMeta = getSaveButtonMeta({
-    showSaveAndReturn,
-    showReplaceInDashboard,
-    showReplaceInCanvas,
-    contextFromEmbeddable,
-  });
-
-  if (saveButtonMeta) {
-    topNavMenu.push({
-      ...saveButtonMeta,
-      run: actions.saveAndReturn.execute,
-      disableButton: !actions.saveAndReturn.enabled,
-    });
-  }
+  topNavMenu.push(
+    getSaveButtonMeta({
+      showReplaceInDashboard,
+      showReplaceInCanvas,
+      contextFromEmbeddable,
+      isDefaultSaveButtonEnabled,
+      actions,
+    })
+  );
 
   return topNavMenu;
 }
