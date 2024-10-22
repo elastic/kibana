@@ -88,8 +88,7 @@ export const defaultConfig: StorybookConfig = {
     },
   ],
   // addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
-  stories: ['../**/*.stories.tsx'],
-  // stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
+  stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   framework: {
     name: '@storybook/react-webpack5',
     options: {},
