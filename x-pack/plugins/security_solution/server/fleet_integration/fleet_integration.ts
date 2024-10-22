@@ -284,7 +284,7 @@ export const getPackagePolicyUpdateCallback = (
 export type GetPackagePolicyPostCreateCallbackOptions = {
   logger: Logger;
   exceptionsClient: ExceptionListClient | undefined;
-} & Omit<CreatePolicyDataStreamsOptions, 'integrationPolicy'>;
+} & Pick<CreatePolicyDataStreamsOptions, 'fleetServicesFactory' | 'esClient' | 'isServerless'>;
 
 export const getPackagePolicyPostCreateCallback = ({
   logger,

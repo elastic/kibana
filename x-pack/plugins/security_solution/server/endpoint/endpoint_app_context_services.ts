@@ -209,6 +209,8 @@ export class EndpointAppContextService {
       )
     );
 
+    // FIXME:PT is there a POST update extension point?
+
     registerFleetCallback(
       'packagePolicyPostDelete',
       getPackagePolicyDeleteCallback(exceptionListsClient, soClient)
