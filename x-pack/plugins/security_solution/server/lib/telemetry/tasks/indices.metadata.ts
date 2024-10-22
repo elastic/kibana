@@ -52,11 +52,10 @@ export function createTelemetryIndicesMetadataTaskConfig() {
 
       const taskConfig = telemetryConfiguration.indices_metadata_config;
 
-      // TODO: not use taskExecutionPeriod, it's just to test the task using the temporary API
       const queryConfig: CommonPrefixesConfig = {
-        maxPrefixes: Number(taskExecutionPeriod.last ?? taskConfig.max_prefixes),
-        maxGroupSize: Number(taskExecutionPeriod.current ?? taskConfig.max_group_size),
-        minGroupSize: Number(taskExecutionPeriod.current ?? taskConfig.min_group_size),
+        maxPrefixes: Number(taskConfig.max_prefixes),
+        maxGroupSize: Number(taskConfig.max_group_size),
+        minPrefixSize: Number(taskConfig.min_group_size),
       };
 
       const publishClusterStats = (stats: ClusterStats) => {
