@@ -9,11 +9,12 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header, svlCommonPage } = getPageObjects([
+  const { common, discover, header, timePicker, svlCommonPage } = getPageObjects([
     'common',
     'timePicker',
     'discover',
     'header',
+    'timePicker',
     'svlCommonPage',
   ]);
   const esArchiver = getService('esArchiver');
@@ -37,6 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToActualUrl('discover', `?_a=${state}`, {
         ensureCurrentUrl: false,
       });
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
@@ -52,6 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToActualUrl('discover', `?_a=${state}`, {
         ensureCurrentUrl: false,
       });
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
