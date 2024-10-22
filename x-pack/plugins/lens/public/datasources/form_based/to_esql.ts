@@ -77,6 +77,8 @@ export function getESQLForLayer(
         },
       ];
 
+      if (!def.toESQL) return undefined;
+
       let metricESQL =
         `${esAggsId} = ` +
         def.toESQL!(
@@ -138,6 +140,8 @@ export function getESQLForLayer(
       if (col.operationType === 'date_histogram') {
         esAggsId = (col as DateHistogramIndexPatternColumn).sourceField;
       }
+
+      if (!def.toESQL) return undefined;
 
       esAggsIdMap[esAggsId] = [
         {
