@@ -33,7 +33,7 @@ export const EventsTimeLine = () => {
     const group = (alert?.[ALERT_GROUP] as unknown as Group[])?.find(
       ({ field }) => field === SERVICE_NAME
     );
-    return group ? `{"${group.field}":"${alert?.[group.field]}"}` : '';
+    return group ? `{"${SERVICE_NAME}":"${alert?.[SERVICE_NAME]}"}` : '';
   }, [alert]);
 
   const { data: events, isLoading } = useFetchEvents({
