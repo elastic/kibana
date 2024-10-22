@@ -95,7 +95,7 @@ const markAsResolvedI18nTexts = {
   resolutionCellTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.markAsResolvedCellTooltipLabel',
     {
-      defaultMessage: 'This issue can be resolved marked as resolved.',
+      defaultMessage: 'This issue can be marked as resolved.',
     }
   ),
 };
