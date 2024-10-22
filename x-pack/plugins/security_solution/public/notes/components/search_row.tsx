@@ -31,14 +31,14 @@ const searchBox = {
   'data-test-subj': SEARCH_BAR_TEST_ID,
 };
 const associatedNoteSelectOptions: EuiSelectOption[] = [
-  { value: AssociatedFilter.all, text: 'All notes' },
-  { value: AssociatedFilter.documentOnly, text: 'Attached to alerts/events only' },
-  { value: AssociatedFilter.savedObjectOnly, text: 'Attached to Timelines only' },
+  { value: AssociatedFilter.all, text: 'Anything or nothing' },
+  { value: AssociatedFilter.documentOnly, text: 'Alerts or events only' },
+  { value: AssociatedFilter.savedObjectOnly, text: 'Timelines only' },
   {
     value: AssociatedFilter.documentAndSavedObject,
-    text: 'Attached to alerts/events and Timelines only',
+    text: 'Alerts or events and Timelines only',
   },
-  { value: AssociatedFilter.orphan, text: 'Unattached notes' },
+  { value: AssociatedFilter.orphan, text: 'Nothing' },
 ];
 
 export const SearchRow = React.memo(() => {

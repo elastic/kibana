@@ -15,7 +15,7 @@ import { ActionIconItem } from './action_icon_item';
 const NOTES_DISABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
   {
-    defaultMessage: 'Notes may not be added here while editing a template timeline',
+    defaultMessage: 'Notes cannot be added here while editing a template Timeline.',
   }
 );
 const NOTES_ADD_TOOLTIP = i18n.translate(

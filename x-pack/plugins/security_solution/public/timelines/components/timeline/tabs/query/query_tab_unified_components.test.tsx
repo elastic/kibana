@@ -918,7 +918,7 @@ describe('query tab with unified timeline', () => {
           await waitFor(() => {
             expect(screen.getByTestId('timeline-notes-tool-tip')).toBeInTheDocument();
             expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-              '1 note available. Click to view it & add more.'
+              '1 note available. Click to view it and add more.'
             );
           });
         },
@@ -975,7 +975,7 @@ describe('query tab with unified timeline', () => {
           await waitFor(() => {
             expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
             expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-              '1 note available. Click to view it & add more.'
+              '1 note available. Click to view it and add more.'
             );
           });
         },
