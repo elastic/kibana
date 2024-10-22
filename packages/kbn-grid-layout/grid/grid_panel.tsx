@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { forwardRef } from 'react';
+
 import {
   EuiIcon,
   EuiPanel,
   euiFullHeight,
   transparentize,
   useEuiOverflowScroll,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { forwardRef } from 'react';
+
 import { GridPanelData, PanelInteractionEvent } from './types';
 
 export const GridPanel = forwardRef<
@@ -31,6 +34,7 @@ export const GridPanel = forwardRef<
     ) => void;
   }
 >(({ activePanelId, panelData, renderPanelContents, interactionStart }, panelRef) => {
+  const { euiTheme } = useEuiTheme();
   const thisPanelActive = activePanelId === panelData.id;
 
   return (
@@ -68,8 +72,8 @@ export const GridPanel = forwardRef<
             height: ${euiThemeVars.euiSizeL};
             z-index: ${euiThemeVars.euiZLevel3};
             margin-left: ${euiThemeVars.euiSizeS};
-            border: 1px solid ${euiThemeVars.euiBorderColor};
-            background-color: ${euiThemeVars.euiColorEmptyShade};
+            border: 1px solid ${euiTheme.border.color};
+            background-color: ${euiTheme.colors.emptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
             &:hover {
               cursor: grab;
