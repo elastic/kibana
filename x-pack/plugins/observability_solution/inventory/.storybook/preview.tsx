@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+import { addDecorator } from '@storybook/react';
+import * as jest from 'jest-mock';
+import { KibanaReactStorybookDecorator } from './storybook_decorator';
+
+// @ts-ignore
+window.jest = jest;
+
+addDecorator(KibanaReactStorybookDecorator);
