@@ -38,6 +38,7 @@ Array [
     "actions": Array [
       Object {
         "controlProps": Object {
+          "iconType": "heart",
           "label": "Action 3.1",
           "onClick": [MockFunction],
         },
@@ -62,6 +63,7 @@ Array [
   },
   Object {
     "controlProps": Object {
+      "iconType": "bell",
       "label": "Action 1",
       "onClick": [MockFunction],
     },
@@ -87,6 +89,7 @@ Array [
     "actions": Array [
       Object {
         "controlProps": Object {
+          "iconType": "heart",
           "label": "Action 3.1",
           "onClick": [MockFunction],
         },
@@ -120,6 +123,7 @@ Array [
   },
   Object {
     "controlProps": Object {
+      "iconType": "bell",
       "label": "Action 1",
       "onClick": [MockFunction],
     },

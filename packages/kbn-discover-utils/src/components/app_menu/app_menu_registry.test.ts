@@ -133,6 +133,7 @@ function initializeAppMenuRegistry() {
           type: AppMenuActionType.secondary,
           controlProps: {
             label: 'Action 3.1',
+            iconType: 'heart',
             onClick: jest.fn(),
           },
         },
