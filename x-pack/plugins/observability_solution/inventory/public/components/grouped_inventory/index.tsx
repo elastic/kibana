@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
 import type { Subject } from 'rxjs';
@@ -59,18 +59,14 @@ export function GroupedInventory() {
   return (
     <>
       <InventorySummary totalEntities={totalEntities} totalGroups={value.groups.length} />
-      <EuiFlexGroup>
-        <EuiFlexItem grow>
-          <EuiSpacer size="m" />
-          {value.groups.map((group) => (
-            <InventoryGroupAccordion
-              key={`${value.groupBy}-${group[value.groupBy]}`}
-              group={group}
-              groupBy={value.groupBy}
-            />
-          ))}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {value.groups.map((group) => (
+        <InventoryGroupAccordion
+          key={`${value.groupBy}-${group[value.groupBy]}`}
+          group={group}
+          groupBy={value.groupBy}
+        />
+      ))}
     </>
   );
 }

@@ -8,22 +8,18 @@ import React, { useEffect } from 'react';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useInventoryState } from '../../hooks/use_inventory_state';
 import { UnifiedInventory } from '../../components/grouped_inventory/unified_inventory';
 import { GroupedInventory } from '../../components/grouped_inventory';
 
 export function InventoryPage() {
-  const { groupBy } = useInventoryState();
   const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
   const inventoryRoute = useInventoryRouter();
   const { query } = useInventoryParams('/');
 
   useEffect(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refreshSubject$.next();
-        } else {
+      ({ refresh, ...queryParams }) => {
+        if (!refresh) {
           inventoryRoute.push('/', {
             path: {},
             query: { ...query, ...queryParams },
@@ -39,5 +35,5 @@ export function InventoryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, refreshSubject$, searchBarContentSubject$]);
 
-  return groupBy === 'unified' ? <UnifiedInventory /> : <GroupedInventory />;
+  return query.view === 'unified' ? <UnifiedInventory /> : <GroupedInventory />;
 }
