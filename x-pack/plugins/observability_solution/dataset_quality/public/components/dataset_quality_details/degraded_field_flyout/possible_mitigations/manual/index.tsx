@@ -6,19 +6,34 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
 import { useDatasetQualityDetailsState } from '../../../../../hooks';
 import { CreateEditComponentTemplateLink } from './component_template_link';
 import { CreateEditPipelineLink } from './pipeline_link';
+import { otherMitigationsLoadingAriaText } from '../../../../../../common/translations';
 
 export function ManualMitigations() {
-  const { integrationDetails } = useDatasetQualityDetailsState();
+  const { integrationDetails, loadingState, dataStreamSettings } = useDatasetQualityDetailsState();
+  const isIntegrationPresentInSettings = dataStreamSettings?.integration;
   const isIntegration = !!integrationDetails?.integration;
+  const { dataStreamSettingsLoading, integrationDetailsLoadings } = loadingState;
+
+  const hasIntegrationCheckCompleted =
+    !dataStreamSettingsLoading &&
+    ((isIntegrationPresentInSettings && !integrationDetailsLoadings) ||
+      !isIntegrationPresentInSettings);
+
   return (
-    <>
+    <EuiSkeletonRectangle
+      isLoading={!hasIntegrationCheckCompleted}
+      contentAriaLabel={otherMitigationsLoadingAriaText}
+      width="100%"
+      height={300}
+      borderRadius="none"
+    >
       <CreateEditComponentTemplateLink isIntegration={isIntegration} />
       <EuiSpacer size="s" />
       <CreateEditPipelineLink isIntegration={isIntegration} />
-    </>
+    </EuiSkeletonRectangle>
   );
 }

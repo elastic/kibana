@@ -40,9 +40,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const serviceName = 'test_service';
   const count = 5;
   const customComponentTemplateName = 'logs-synth@mappings';
-  const customComponentTemplateNameNginx = 'logs-nginx.access@custom';
 
   const nginxAccessDatasetName = 'nginx.access';
+  const customComponentTemplateNameNginx = 'logs-nginx.access@custom';
   const nginxAccessDataStreamName = `${type}-${nginxAccessDatasetName}-${defaultNamespace}`;
   const nginxPkg = {
     name: 'nginx',

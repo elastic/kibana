@@ -588,6 +588,13 @@ export const fieldLimitMitigationApplyButtonText = i18n.translate(
   }
 );
 
+export const otherMitigationsLoadingAriaText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsLoadingText',
+  {
+    defaultMessage: 'Loading possible mitigations',
+  }
+);
+
 export const otherMitigationsCustomComponentTemplate = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomComponentTemplate',
   {
