@@ -13,16 +13,10 @@ export {
   CoreVersionedRouter,
   ALLOWED_PUBLIC_VERSION,
   unwrapVersionedResponseBodyValidation,
-  type VersionedRouterRoute,
   type HandlerResolutionStrategy,
 } from './src/versioned_router';
 export { Router } from './src/router';
-export type {
-  RouterOptions,
-  InternalRegistrar,
-  InternalRegistrarOptions,
-  InternalRouterRoute,
-} from './src/router';
+export type { RouterOptions, InternalRegistrar, InternalRegistrarOptions } from './src/router';
 export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';
 export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';

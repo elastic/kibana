@@ -25,9 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const indexName = 'test-my-index';
 
   describe('Search index detail page', function () {
-    // fails on MKI, see https://github.com/elastic/kibana/issues/196981
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlApiKeys.deleteAPIKeys();
@@ -120,6 +117,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
+        it('should have index documents', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        });
         it('menu action item should be replaced with playground', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
         });
@@ -127,8 +127,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
         });
-        it('should have index documents', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        it('should have one document in quick stats', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
         });
         it('should have with data tabs', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
@@ -148,6 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
           await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
           await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
         });
       });
 
