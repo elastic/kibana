@@ -7,26 +7,14 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EntityStoreUtils, elasticAssetCheckerFactory } from '../../utils';
+import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
-  const {
-    expectTransformExists,
-    expectTransformNotFound,
-    expectEnrichPolicyExists,
-    expectEnrichPolicyNotFound,
-    expectComponentTemplateExists,
-    expectComponentTemplateNotFound,
-    expectIngestPipelineExists,
-    expectIngestPipelineNotFound,
-  } = elasticAssetCheckerFactory(getService);
 
   const utils = EntityStoreUtils(getService);
-
-  // TODO: unskip once permissions issue is resolved
-  describe.skip('@ess Entity Store Engine APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
@@ -44,30 +32,19 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have installed the expected user resources', async () => {
-        await utils.initEntityEngineForEntityType('user');
-
-        await expectTransformExists('entities-v1-latest-ea_default_user_entity_store');
-        await expectEnrichPolicyExists('entity_store_field_retention_user_default_v1');
-        await expectComponentTemplateExists(`ea_default_user_entity_store-latest@platform`);
-        await expectIngestPipelineExists(`ea_default_user_entity_store-latest@platform`);
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
+        await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
-        await utils.initEntityEngineForEntityType('host');
-
-        await expectTransformExists('entities-v1-latest-ea_default_host_entity_store');
-        await expectEnrichPolicyExists('entity_store_field_retention_host_default_v1');
-        await expectComponentTemplateExists(`ea_default_host_entity_store-latest@platform`);
-        await expectIngestPipelineExists(`ea_default_host_entity_store-latest@platform`);
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
+        await utils.expectEngineAssetsExist('host');
       });
     });
 
     describe('get and list', () => {
       before(async () => {
-        await Promise.all([
-          utils.initEntityEngineForEntityType('host'),
-          utils.initEntityEngineForEntityType('user'),
-        ]);
+        await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });
 
       after(async () => {
@@ -137,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
 
       after(async () => {
@@ -179,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
         await api
           .deleteEntityEngine({
@@ -188,14 +165,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-latest-ea_default_host_entity_store');
-        await expectEnrichPolicyNotFound('entity_store_field_retention_host_default_v1');
-        await expectComponentTemplateNotFound(`ea_default_host_entity_store-latest@platform`);
-        await expectIngestPipelineNotFound(`ea_default_host_entity_store-latest@platform`);
+        await utils.expectEngineAssetsDoNotExist('host');
       });
 
       it('should delete the user entity engine', async () => {
-        await utils.initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
 
         await api
           .deleteEntityEngine({
@@ -204,16 +178,13 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-latest-ea_default_user_entity_store');
-        await expectEnrichPolicyNotFound('entity_store_field_retention_user_default_v1');
-        await expectComponentTemplateNotFound(`ea_default_user_entity_store-latest@platform`);
-        await expectIngestPipelineNotFound(`ea_default_user_entity_store-latest@platform`);
+        await utils.expectEngineAssetsDoNotExist('user');
       });
     });
 
     describe('apply_dataview_indices', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
 
       after(async () => {

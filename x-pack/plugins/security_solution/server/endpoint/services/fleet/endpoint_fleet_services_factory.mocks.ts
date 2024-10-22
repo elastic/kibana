@@ -9,15 +9,19 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import type { SavedObjectsClientFactory } from '../saved_objects';
-import type { EndpointFleetServicesFactoryInterface } from './endpoint_fleet_services_factory';
+import type {
+  EndpointFleetServicesFactoryInterface,
+  EndpointInternalFleetServicesInterface,
+} from './endpoint_fleet_services_factory';
 import { EndpointFleetServicesFactory } from './endpoint_fleet_services_factory';
 import { createSavedObjectsClientFactoryMock } from '../saved_objects/saved_objects_client_factory.mocks';
 
-interface EndpointFleetServicesFactoryInterfaceMocked
+export type EndpointInternalFleetServicesInterfaceMocked =
+  DeeplyMockedKeys<EndpointInternalFleetServicesInterface>;
+
+export interface EndpointFleetServicesFactoryInterfaceMocked
   extends EndpointFleetServicesFactoryInterface {
-  asInternalUser: () => DeeplyMockedKeys<
-    ReturnType<EndpointFleetServicesFactoryInterface['asInternalUser']>
-  >;
+  asInternalUser: () => EndpointInternalFleetServicesInterfaceMocked;
 }
 
 interface CreateEndpointFleetServicesFactoryMockOptions {
@@ -36,11 +40,19 @@ export const createEndpointFleetServicesFactoryMock = (
     savedObjects = createSavedObjectsClientFactoryMock().service,
   } = dependencies;
 
+  const serviceFactoryMock = new EndpointFleetServicesFactory(
+    fleetDependencies,
+    savedObjects
+  ) as unknown as EndpointFleetServicesFactoryInterfaceMocked;
+
+  const fleetInternalServicesMocked = serviceFactoryMock.asInternalUser();
+  jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
+
+  const asInternalUserSpy = jest.spyOn(serviceFactoryMock, 'asInternalUser');
+  asInternalUserSpy.mockReturnValue(fleetInternalServicesMocked);
+
   return {
-    service: new EndpointFleetServicesFactory(
-      fleetDependencies,
-      savedObjects
-    ) as unknown as EndpointFleetServicesFactoryInterfaceMocked,
+    service: serviceFactoryMock,
     dependencies: { fleetDependencies, savedObjects },
   };
 };

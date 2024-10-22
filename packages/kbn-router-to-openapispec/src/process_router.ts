@@ -23,9 +23,11 @@ import {
   getVersionedHeaderParam,
   mergeResponseContent,
   prepareRoutes,
+  setXState,
 } from './util';
 import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { CustomOperationObject } from './type';
 
 interface PrivilegeGroupValue {
   allRequired: string[];
@@ -145,16 +147,19 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
+
       const authzDescription = extractAuthzDescription(route, buildFlavour);
 
       const description = `${route.options.description ?? ''}${authzDescription}`;
 
-      const operation: OpenAPIV3.OperationObject = {
+      const hasDeprecations = !!route.options.deprecated;
+     
+      const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
         description,
         ...(route.options.description ? { description: route.options.description } : {}),
-        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: !!validationSchemas?.body
           ? {
@@ -169,6 +174,8 @@ export const processRouter = (
         parameters,
         operationId: getOpId(route.path),
       };
+
+      setXState(route.options.availability, operation);
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
