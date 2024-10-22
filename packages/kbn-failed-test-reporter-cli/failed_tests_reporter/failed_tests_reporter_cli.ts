@@ -164,7 +164,6 @@ run(
             pipeline,
             prependTitle
           );
-          console.log(`Issue : ${JSON.stringify(newIssue)}`);
           existingIssues.addNewlyCreated(failure, newIssue);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {
