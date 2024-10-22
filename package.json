@@ -635,6 +635,7 @@
     "@kbn/management-settings-types": "link:packages/kbn-management/settings/types",
     "@kbn/management-settings-utilities": "link:packages/kbn-management/settings/utilities",
     "@kbn/management-test-plugin": "link:test/plugin_functional/plugins/management_test_plugin",
+    "@kbn/manifest": "link:packages/kbn-manifest",
     "@kbn/mapbox-gl": "link:packages/kbn-mapbox-gl",
     "@kbn/maps-custom-raster-source-plugin": "link:x-pack/examples/third_party_maps_source_example",
     "@kbn/maps-ems-plugin": "link:src/plugins/maps_ems",
