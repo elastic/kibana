@@ -78,15 +78,25 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return euiCallOutHeader.getVisibleText();
     },
 
+    async isPromptPage() {
+      return await testSubjects.exists('apiKeysCreatePromptButton');
+    },
+
     async getApiKeysFirstPromptTitle() {
       const titlePromptElem = await find.byCssSelector('.euiEmptyPrompt .euiTitle');
       return await titlePromptElem.getVisibleText();
     },
 
+    async deleteApiKeyByName(apiKeyName: string) {
+      await testSubjects.click(`apiKeysTableDeleteAction-${apiKeyName}`);
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.waitForDeleted(`apiKeyRowName-${apiKeyName}`);
+    },
+
     async deleteAllApiKeyOneByOne() {
-      const hasApiKeysToDelete = await testSubjects.exists('apiKeysTableDeleteAction');
+      const hasApiKeysToDelete = await testSubjects.exists('*apiKeysTableDeleteAction');
       if (hasApiKeysToDelete) {
-        const apiKeysToDelete = await testSubjects.findAll('apiKeysTableDeleteAction');
+        const apiKeysToDelete = await testSubjects.findAll('*apiKeysTableDeleteAction');
         for (const element of apiKeysToDelete) {
           await element.click();
           await testSubjects.click('confirmModalConfirmButton');
@@ -111,6 +121,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
 
     async ensureApiKeyExists(apiKeyName: string) {
       await testSubjects.existOrFail(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async doesApiKeyExist(apiKeyName: string) {
+      return await testSubjects.exists(`apiKeyRowName-${apiKeyName}`);
     },
 
     async getMetadataSwitch() {

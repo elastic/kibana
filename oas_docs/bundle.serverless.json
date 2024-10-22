@@ -5077,6 +5077,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Mute all alerts",
@@ -5124,6 +5133,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Unmute all alerts",
@@ -7103,14 +7121,26 @@
             }
           },
           {
+            "description": "use withAgentCount instead",
             "in": "query",
             "name": "noAgentCount",
+            "required": false,
+            "schema": {
+              "deprecated": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "get policies with agent count",
+            "in": "query",
+            "name": "withAgentCount",
             "required": false,
             "schema": {
               "type": "boolean"
             }
           },
           {
+            "description": "get full policies with package policies populated",
             "in": "query",
             "name": "full",
             "required": false,
@@ -40975,10 +41005,9 @@
         ]
       }
     },
-    "/api/spaces/space": {
+    "/api/security/role": {
       "get": {
-        "description": "Get all spaces",
-        "operationId": "%2Fapi%2Fspaces%2Fspace#0",
+        "operationId": "%2Fapi%2Fsecurity%2Frole#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40994,6 +41023,698 @@
           },
           {
             "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get all roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/security/role/{name}": {
+      "delete": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Delete a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "get": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "put": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "maxLength": 2048,
+                    "type": "string"
+                  },
+                  "elasticsearch": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "cluster": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "indices": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allow_restricted_indices": {
+                              "type": "boolean"
+                            },
+                            "field_security": {
+                              "additionalProperties": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "type": "object"
+                            },
+                            "names": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "query": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "names",
+                            "privileges"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "remote_cluster": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "clusters": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "privileges",
+                            "clusters"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "remote_indices": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allow_restricted_indices": {
+                              "type": "boolean"
+                            },
+                            "clusters": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "field_security": {
+                              "additionalProperties": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "type": "object"
+                            },
+                            "names": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "query": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "clusters",
+                            "names",
+                            "privileges"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "run_as": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "kibana": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "base": {
+                          "anyOf": [
+                            {
+                              "items": {},
+                              "type": "array"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "object"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
+                          "nullable": true,
+                          "oneOf": [
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ]
+                        },
+                        "feature": {
+                          "additionalProperties": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "type": "object"
+                        },
+                        "spaces": {
+                          "anyOf": [
+                            {
+                              "items": {
+                                "enum": [
+                                  "*"
+                                ],
+                                "type": "string"
+                              },
+                              "maxItems": 1,
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ],
+                          "default": [
+                            "*"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "base"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "metadata": {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "elasticsearch"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Create or update a role",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/security/roles": {
+      "post": {
+        "operationId": "%2Fapi%2Fsecurity%2Froles#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "roles": {
+                    "additionalProperties": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "description": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "elasticsearch": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "cluster": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "indices": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "allow_restricted_indices": {
+                                    "type": "boolean"
+                                  },
+                                  "field_security": {
+                                    "additionalProperties": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "names": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "query": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "names",
+                                  "privileges"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "remote_cluster": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "clusters": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  }
+                                },
+                                "required": [
+                                  "privileges",
+                                  "clusters"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "remote_indices": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "allow_restricted_indices": {
+                                    "type": "boolean"
+                                  },
+                                  "clusters": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "field_security": {
+                                    "additionalProperties": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "names": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "query": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "clusters",
+                                  "names",
+                                  "privileges"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "run_as": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "kibana": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "base": {
+                                "anyOf": [
+                                  {
+                                    "items": {},
+                                    "type": "array"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ],
+                                "nullable": true,
+                                "oneOf": [
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                ]
+                              },
+                              "feature": {
+                                "additionalProperties": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "type": "object"
+                              },
+                              "spaces": {
+                                "anyOf": [
+                                  {
+                                    "items": {
+                                      "enum": [
+                                        "*"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "maxItems": 1,
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                ],
+                                "default": [
+                                  "*"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "base"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "metadata": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "elasticsearch"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "roles"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Create or update roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/spaces/space": {
+      "get": {
+        "operationId": "%2Fapi%2Fspaces%2Fspace#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Specifies which authorization checks are applied to the API call. The default value is `any`.",
+            "in": "query",
             "name": "purpose",
             "required": false,
             "schema": {
@@ -41006,6 +41727,7 @@
             }
           },
           {
+            "description": "When enabled, the API returns any spaces that the user is authorized to access in any capacity and each space will contain the purposes for which the user is authorized. This can be useful to determine which spaces a user can read but not take a specific action in. If the security plugin is not enabled, this parameter has no effect, since no authorization checks take place. This parameter cannot be used in with the `purpose` parameter.",
             "in": "query",
             "name": "include_authorized_purposes",
             "required": true,
@@ -41045,14 +41767,17 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get all spaces",
         "tags": [
           "spaces"
         ]
       },
       "post": {
-        "description": "Create a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace#1",
         "parameters": [
           {
@@ -41088,29 +41813,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   }
@@ -41124,8 +41856,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create a space",
         "tags": [
           "spaces"
         ]
@@ -41133,7 +41869,7 @@
     },
     "/api/spaces/space/{id}": {
       "delete": {
-        "description": "Delete a space",
+        "description": "When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
         "parameters": [
           {
@@ -41159,6 +41895,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41167,14 +41904,20 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Indicates that the request failed."
+          }
+        },
+        "summary": "Delete a space",
         "tags": [
           "spaces"
         ]
       },
       "get": {
-        "description": "Get a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -41190,6 +41933,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41198,14 +41942,17 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get a space",
         "tags": [
           "spaces"
         ]
       },
       "put": {
-        "description": "Update a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
         "parameters": [
           {
@@ -41231,6 +41978,7 @@
             }
           },
           {
+            "description": "The space identifier. You are unable to change the ID with the update operation.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41249,29 +41997,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   }
@@ -41285,8 +42040,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Update a space",
         "tags": [
           "spaces"
         ]
@@ -41436,6 +42195,9 @@
     },
     {
       "name": "Message Signing Service"
+    },
+    {
+      "name": "roles"
     },
     {
       "name": "spaces"

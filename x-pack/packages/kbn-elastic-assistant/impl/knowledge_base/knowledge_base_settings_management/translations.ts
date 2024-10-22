@@ -168,20 +168,6 @@ export const ENTRY_NAME_INPUT_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const ENTRY_SPACE_INPUT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySpaceInputLabel',
-  {
-    defaultMessage: 'Space',
-  }
-);
-
-export const ENTRY_SPACE_INPUT_PLACEHOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySpaceInputPlaceholder',
-  {
-    defaultMessage: 'Select',
-  }
-);
-
 export const SHARING_PRIVATE_OPTION_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.sharingPrivateOptionLabel',
   {
@@ -211,6 +197,13 @@ export const DELETE_ENTRY_CONFIRMATION_TITLE = (title: string) =>
       defaultMessage: 'Delete "{title}"?',
     }
   );
+
+export const DELETE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryContent',
+  {
+    defaultMessage: "You will not be able to recover this knowledge base entry once it's deleted.",
+  }
+);
 
 export const ENTRY_MARKDOWN_INPUT_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryMarkdownInputText',
@@ -258,8 +251,15 @@ export const ENTRY_DESCRIPTION_INPUT_LABEL = i18n.translate(
 export const ENTRY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionHelpLabel',
   {
+    defaultMessage: 'Describe when this custom knowledge should be used during a conversation.',
+  }
+);
+
+export const ENTRY_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionPlaceholder',
+  {
     defaultMessage:
-      'A description of the type of data in this index and/or when the assistant should look for data here.',
+      'Example: "Use this index to answer any question related to asset information."',
   }
 );
 
@@ -273,7 +273,16 @@ export const ENTRY_QUERY_DESCRIPTION_INPUT_LABEL = i18n.translate(
 export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
   {
-    defaultMessage: 'Any instructions for extracting the search query from the user request.',
+    defaultMessage:
+      'Describe what query should be constructed by the model to retrieve this custom knowledge.',
+  }
+);
+
+export const ENTRY_QUERY_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionPlaceholder',
+  {
+    defaultMessage:
+      'Example: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
   }
 );
 

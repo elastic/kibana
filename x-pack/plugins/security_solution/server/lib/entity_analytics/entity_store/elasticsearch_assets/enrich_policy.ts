@@ -10,11 +10,13 @@ import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/type
 import { getEntitiesIndexName } from '../utils';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
+type DefinitionMetadata = Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>;
+
 export const getFieldRetentionEnrichPolicyName = ({
   namespace,
   entityType,
   version,
-}: Pick<UnitedEntityDefinition, 'namespace' | 'entityType' | 'version'>): string => {
+}: DefinitionMetadata): string => {
   return `entity_store_field_retention_${entityType}_${namespace}_v${version}`;
 };
 
@@ -48,7 +50,7 @@ export const executeFieldRetentionEnrichPolicy = async ({
   unitedDefinition,
   logger,
 }: {
-  unitedDefinition: UnitedEntityDefinition;
+  unitedDefinition: DefinitionMetadata;
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<{ executed: boolean }> => {
@@ -70,10 +72,36 @@ export const executeFieldRetentionEnrichPolicy = async ({
 export const deleteFieldRetentionEnrichPolicy = async ({
   unitedDefinition,
   esClient,
+  logger,
+  attempts = 5,
+  delayMs = 2000,
 }: {
+  unitedDefinition: DefinitionMetadata;
   esClient: ElasticsearchClient;
-  unitedDefinition: UnitedEntityDefinition;
+  logger: Logger;
+  attempts?: number;
+  delayMs?: number;
 }) => {
   const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
-  return esClient.enrich.deletePolicy({ name }, { ignore: [404] });
+  let currentAttempt = 1;
+  while (currentAttempt <= attempts) {
+    try {
+      await esClient.enrich.deletePolicy({ name }, { ignore: [404] });
+      return;
+    } catch (e) {
+      // a 429 status code indicates that the enrich policy is being executed
+      if (currentAttempt === attempts || e.statusCode !== 429) {
+        logger.error(
+          `Error deleting enrich policy ${name}: ${e.message} after ${currentAttempt} attempts`
+        );
+        throw e;
+      }
+
+      logger.info(
+        `Enrich policy ${name} is being executed, waiting for it to finish before deleting`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      currentAttempt++;
+    }
+  }
 };
