@@ -465,7 +465,7 @@ export function checkFunctionArgMatchesDefinition(
     const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
       ? validHit.type
       : [validHit.type];
-    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
+    return wrappedTypes.some((ct) => ct === argType || ct === 'null');
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
