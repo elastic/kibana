@@ -9,7 +9,7 @@ import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar'
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getKqlFieldNamesFromExpression, Query } from '@kbn/es-query';
+import { Query } from '@kbn/es-query';
 import { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
@@ -17,6 +17,7 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
 import { DiscoverButton } from './discover_button';
+import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 
 export function SearchBar() {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
@@ -64,7 +65,7 @@ export function SearchBar() {
       searchIsUpdate?: boolean;
     }) => {
       telemetry.reportEntityInventorySearchQuerySubmitted({
-        kuery_fields: getKqlFieldNamesFromExpression(searchQuery?.query as string),
+        kuery_fields: getKqlFieldsWithFallback(searchQuery?.query as string),
         entity_types: searchEntityTypes || [],
         action: searchIsUpdate ? 'submit' : 'refresh',
       });
@@ -82,7 +83,7 @@ export function SearchBar() {
     }) => {
       telemetry.reportEntityInventoryEntityTypeFiltered({
         entity_types: filterEntityTypes,
-        kuery_fields: filterKuery ? getKqlFieldNamesFromExpression(filterKuery) : [],
+        kuery_fields: filterKuery ? getKqlFieldsWithFallback(filterKuery) : [],
       });
     },
     [telemetry]
