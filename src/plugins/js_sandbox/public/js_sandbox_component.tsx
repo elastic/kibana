@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState, type FC } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
 
 /**
  * JS Sandbox Component
@@ -52,11 +52,22 @@ import React, { useEffect, useRef, useState, type FC } from 'react';
  * @returns
  */
 export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
+  const iframeID = useMemo(() => Math.random().toString(36).substring(7), []);
+
   // TODO Replace with result of user provided ES|QL query
   // State to manage the data prop that will be passed to the user's component
   const [data, setData] = useState({
     message: 'This is the initial predefined data provided by the SPA.',
   });
+
+  const [error, setError] = useState<{ errorType: string; error: Error } | null>(null);
+
+  // Do not render iframe if user provided string doesn't start with `function(`
+  // or if it contains global variables.
+  const jsPassesBasicCheck = useMemo(() => {
+    const globals = ['window', 'document', 'localStorage', 'sessionStorage', 'alert'];
+    return hashedJs.startsWith('function(') && !globals.some((global) => hashedJs.includes(global));
+  }, [hashedJs]);
 
   // Ref to store the iframe reference
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -64,12 +75,24 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
   // The transpileUserCode function evaluates the provided component code.
   // This function uses eval() to execute user code, but it’s done within
   // the controlled iframe to mitigate security risks.
-  const iframeContent = `
+  const iframeContent = useMemo(() => {
+    if (!jsPassesBasicCheck) {
+      return `
+      <!DOCTYPE html>
+      <html>
+        <body>
+          <div id="root">Unable to parse user input</div>
+        </body>
+      </html>
+      `;
+    }
+
+    return `
     <!DOCTYPE html>
     <html>
       <head>
-        <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
-        <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
       </head>
       <body>
@@ -85,11 +108,18 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
                   React.createElement(UserComponent, { data }),
                   document.getElementById('root')
                 );
+                window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: null }, '*');
               } else {
-                console.error('User provided code is not a function');
+                window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
+                  errorType: 'User provided code is not a function',
+                  error: e
+                } }, '*');
               }
             } catch (e) {
-              console.error('Render Error:', e);
+              window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
+                errorType: 'Render error',
+                error: e
+              } }, '*');
             }
           };
 
@@ -100,36 +130,44 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
               const transpiledCode = Babel.transform('UserComponent = ' + userCode, {
                 presets: ['react']
               }).code;
-              console.log('transpiledCode', transpiledCode);
 
               eval(transpiledCode);
-            } catch (e) {
-              console.error('Error transpiling user input:', e);
+
+              // iframe sends a "ready" message to the parent
+              window.parent.postMessage({ source: '${iframeID}', type: 'iframeReady' }, '*');
+              } catch (e) {
+              window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
+                errorType: 'Error transpiling user input',
+                error: e
+              } }, '*');
             }
           };
 
           document.addEventListener('DOMContentLoaded', function(event) {
             transpileUserCode(${JSON.stringify(hashedJs)});
-            // iframe sends a "ready" message to the parent
-            window.parent.postMessage({ type: 'iframeReady' }, '*');
           });
 
           // Listen for messages from the parent window to receive data updates
           window.addEventListener('message', function(event) {
             if (event.data.type === 'updateData' && typeof UserComponent === 'function') {
-              renderUserComponent(data);
+              renderUserComponent(event.data.payload);
             }
           });
         </script>
       </body>
     </html>
   `;
+  }, [jsPassesBasicCheck, hashedJs, iframeID]);
 
   // initial handshake with iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'iframeReady') {
-        iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: data }, '*');
+      if (event.data.source === iframeID) {
+        if (event.data.type === 'iframeReady') {
+          iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: data }, '*');
+        } else if (event.data.type === 'error') {
+          setError(event.data.payload);
+        }
       }
     };
 
@@ -149,12 +187,20 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
   }, [data]);
 
   return (
-    <iframe
-      title="JS Sandbox"
-      ref={iframeRef}
-      sandbox="allow-scripts"
-      srcDoc={iframeContent}
-      style={{ width: '100%', height: '100%' }}
-    />
+    <>
+      {jsPassesBasicCheck && error && (
+        <div>
+          <h2>Error: {error.errorType}</h2>
+          <pre>{error.error.message}</pre>
+        </div>
+      )}
+      <iframe
+        title="JS Sandbox"
+        ref={iframeRef}
+        sandbox="allow-scripts"
+        srcDoc={iframeContent}
+        style={{ width: '100%', height: '100%' }}
+      />
+    </>
   );
 };
