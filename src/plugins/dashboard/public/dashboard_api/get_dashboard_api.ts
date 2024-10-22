@@ -61,8 +61,11 @@ export function getDashboardApi({
     id: string
   ) => undefined;
   const trackPanel = initializeTrackPanel(untilEmbeddableLoadedBreakCircularDep);
-  const panelsManager = initializePanelsManager(initialState.panels, trackPanel, (id: string) =>
-    getReferencesForPanelId(id, references)
+  const panelsManager = initializePanelsManager(
+    initialState.panels,
+    trackPanel,
+    (id: string) => getReferencesForPanelId(id, references),
+    (references: Reference[]) => references.push(...references)
   );
   untilEmbeddableLoadedBreakCircularDep = panelsManager.api.untilEmbeddableLoaded;
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);

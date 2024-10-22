@@ -8,7 +8,9 @@
  */
 
 import { BehaviorSubject, merge } from 'rxjs';
+import { filter, map, max } from 'lodash';
 import { v4 } from 'uuid';
+import { asyncForEach } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -17,8 +19,17 @@ import {
   apiHasSerializableState,
 } from '@kbn/presentation-containers';
 import { DefaultEmbeddableApi, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { StateComparators, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import {
+  StateComparators,
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiPublishesPanelTitle,
+  apiPublishesUnsavedChanges,
+  getPanelTitle,
+  stateHasTitles,
+} from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
@@ -34,11 +45,14 @@ import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
+import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
+import { placeClonePanel } from '../dashboard_container/panel_placement';
 
 export function initializePanelsManager(
   initialPanels: DashboardPanelMap,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
-  getReferencesForPanelId: (id: string) => Reference[]
+  getReferencesForPanelId: (id: string) => Reference[],
+  pushReferences: (references: Reference[]) => void
 ) {
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
@@ -76,6 +90,77 @@ export function initializePanelsManager(
         }
       });
     });
+  }
+
+  async function getDashboardPanelFromId(panelId: string) {
+    const panel = panels$.value[panelId];
+    const child = children$.value[panelId];
+    if (!child || !panel) throw new PanelNotFoundError();
+    const serialized = apiHasSerializableState(child)
+      ? await child.serializeState()
+      : { rawState: {} };
+    return {
+      type: panel.type,
+      explicitInput: { ...panel.explicitInput, ...serialized.rawState },
+      gridData: panel.gridData,
+      references: serialized.references,
+    };
+  }
+
+  async function getPanelTitles(): Promise<string[]> {
+    const titles: string[] = [];
+    await asyncForEach(Object.keys(panels$.value), async (id) => {
+      const childApi = await untilEmbeddableLoaded(id);
+      const title = apiPublishesPanelTitle(childApi) ? getPanelTitle(childApi) : '';
+      if (title) titles.push(title);
+    });
+    return titles;
+  }
+
+  async function duplicateReactEmbeddableInput(
+    childApi: unknown,
+    panelToClone: DashboardPanelState,
+    panelTitles: string[]
+  ) {
+    const id = v4();
+    const lastTitle = apiPublishesPanelTitle(childApi) ? getPanelTitle(childApi) ?? '' : '';
+    const newTitle = getClonedPanelTitle(panelTitles, lastTitle);
+
+    /**
+     * For react embeddables that have library transforms, we need to ensure
+     * to clone them with serialized state and references.
+     *
+     * TODO: remove this section once all by reference capable react embeddables
+     * use in-place library transforms
+     */
+    if (apiHasLibraryTransforms(childApi)) {
+      const byValueSerializedState = await childApi.getByValueState();
+      if (panelToClone.references) {
+        pushReferences(prefixReferencesFromPanel(id, panelToClone.references));
+      }
+      return {
+        type: panelToClone.type,
+        explicitInput: {
+          ...byValueSerializedState,
+          title: newTitle,
+          id,
+        },
+      };
+    }
+
+    const runtimeSnapshot = (() => {
+      if (apiHasInPlaceLibraryTransforms(childApi)) return childApi.getByValueRuntimeSnapshot();
+      return apiHasSnapshottableState(childApi) ? childApi.snapshotRuntimeState() : {};
+    })();
+    if (stateHasTitles(runtimeSnapshot)) runtimeSnapshot.title = newTitle;
+
+    setRuntimeStateForChild(id, runtimeSnapshot);
+    return {
+      type: panelToClone.type,
+      explicitInput: {
+        id,
+      },
+    };
   }
 
   return {
@@ -134,20 +219,41 @@ export function initializePanelsManager(
       },
       canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
       children$,
-      getDashboardPanelFromId: async (panelId: string) => {
-        const panel = panels$.value[panelId];
-        const child = children$.value[panelId];
-        if (!child || !panel) throw new PanelNotFoundError();
-        const serialized = apiHasSerializableState(child)
-          ? await child.serializeState()
-          : { rawState: {} };
-        return {
-          type: panel.type,
-          explicitInput: { ...panel.explicitInput, ...serialized.rawState },
-          gridData: panel.gridData,
-          references: serialized.references,
+      duplicatePanel: async (idToDuplicate: string) => {
+        const panelToClone = await getDashboardPanelFromId(idToDuplicate);
+
+        const duplicatedPanelState = await duplicateReactEmbeddableInput(
+          children$.value[idToDuplicate],
+          panelToClone,
+          await getPanelTitles()
+        );
+
+        coreServices.notifications.toasts.addSuccess({
+          title: dashboardClonePanelActionStrings.getSuccessMessage(),
+          'data-test-subj': 'addObjectToContainerSuccess',
+        });
+
+        const { newPanelPlacement, otherPanels } = placeClonePanel({
+          width: panelToClone.gridData.w,
+          height: panelToClone.gridData.h,
+          currentPanels: panels$.value,
+          placeBesideId: panelToClone.explicitInput.id,
+        });
+
+        const newPanel = {
+          ...duplicatedPanelState,
+          gridData: {
+            ...newPanelPlacement,
+            i: duplicatedPanelState.explicitInput.id,
+          },
         };
+
+        setPanels({
+          ...otherPanels,
+          [newPanel.explicitInput.id]: newPanel,
+        });
       },
+      getDashboardPanelFromId,
       getPanelCount: () => {
         return Object.keys(panels$.value).length;
       },
@@ -270,4 +376,27 @@ export function initializePanelsManager(
       },
     },
   };
+}
+
+function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
+  if (rawTitle === '') return '';
+
+  const clonedTag = dashboardClonePanelActionStrings.getClonedTag();
+  const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
+  const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
+  const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
+  const similarTitles = filter(panelTitles, (title: string) => {
+    return title.startsWith(baseTitle);
+  });
+
+  const cloneNumbers = map(similarTitles, (title: string) => {
+    if (title.match(cloneRegex)) return 0;
+    const cloneTag = title.match(cloneNumberRegex);
+    return cloneTag ? parseInt(cloneTag[0].replace(/[^0-9.]/g, ''), 10) : -1;
+  });
+  const similarBaseTitlesCount = max(cloneNumbers) || 0;
+
+  return similarBaseTitlesCount < 0
+    ? baseTitle + ` (${clonedTag})`
+    : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
 }
