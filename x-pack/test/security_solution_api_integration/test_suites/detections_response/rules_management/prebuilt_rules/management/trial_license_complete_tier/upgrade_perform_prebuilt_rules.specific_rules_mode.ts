@@ -776,7 +776,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Create resolved values different from current values
         const resolvedValues: { [key: string]: unknown } = {
-          exceptions_list: [],
           alert_suppression: {
             group_by: ['test'],
             duration: { value: 10, unit: 'm' as const },
