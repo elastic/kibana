@@ -15,6 +15,8 @@ import type {
   ConfigSchema,
 } from './types';
 
+export { ChatCompletionEventType, MessageRole } from '../common/chat_complete';
+
 export { httpResponseIntoObservable } from './util/http_response_into_observable';
 
 export type { InferencePublicSetup, InferencePublicStart };

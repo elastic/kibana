@@ -10,7 +10,8 @@
     "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    ".storybook/**/*.{ts,tsx}"
   ],
   "kbn_references": [
     "@kbn/es-types",
@@ -69,6 +70,11 @@
     "@kbn/cloud-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant-common",
+    "@kbn/observability-utils-server",
+    "@kbn/observability-utils-common",
+    "@kbn/charts-plugin",
+    "@kbn/slo-plugin",
+    "@kbn/spaces-plugin",
   ],
   "exclude": [
     "target/**/*"

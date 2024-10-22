@@ -6,7 +6,7 @@
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
-import { excludeTiersQuery } from '@kbn/observability-utils/es/queries/exclude_tiers_query';
+import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 
 export function getDataTierFilterCombined({
   filter,

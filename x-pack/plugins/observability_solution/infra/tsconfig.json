@@ -114,7 +114,6 @@
     "@kbn/management-settings-ids",
     "@kbn/core-ui-settings-common",
     "@kbn/entityManager-plugin",
-    "@kbn/observability-utils",
     "@kbn/entities-schema",
     "@kbn/zod"
   ],

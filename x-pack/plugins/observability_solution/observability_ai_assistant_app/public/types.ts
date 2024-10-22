@@ -31,9 +31,14 @@ import type {
   AIAssistantManagementSelectionPluginPublicStart,
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
+import type { ChartsPluginStart, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityAIAssistantAppPublicStart {}
+export interface ObservabilityAIAssistantAppPublicStart {
+  RootCauseAnalysisContainer: React.ExoticComponent<
+    React.ComponentProps<typeof RootCauseAnalysisContainer>
+  >;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicSetup {}
 
@@ -49,6 +54,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  charts: ChartsPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -62,4 +68,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   ml: MlPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
+  charts: ChartsPluginSetup;
 }

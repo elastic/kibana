@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository-utils/src/format_request';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { InvestigateAppServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
@@ -25,15 +25,15 @@ export type InvestigateAppAPIClientOptions = Omit<
   signal: AbortSignal | null;
 };
 
-export type InvestigateAppAPIClient = RouteRepositoryClient<
+export type InvestigateAppRepositoryClient = RouteRepositoryClient<
   InvestigateAppServerRouteRepository,
   InvestigateAppAPIClientOptions
->['fetch'];
+>;
 
-export type AutoAbortedInvestigateAppAPIClient = RouteRepositoryClient<
+export type AutoAbortedInvestigateAppRepositoryClient = RouteRepositoryClient<
   InvestigateAppServerRouteRepository,
   Omit<InvestigateAppAPIClientOptions, 'signal'>
->['fetch'];
+>;
 
 export type InvestigateAppAPIEndpoint = keyof InvestigateAppServerRouteRepository;
 
@@ -45,19 +45,6 @@ export type APIReturnType<TEndpoint extends InvestigateAppAPIEndpoint> = ReturnO
 export type InvestigateAppAPIClientRequestParamsOf<TEndpoint extends InvestigateAppAPIEndpoint> =
   ClientRequestParamsOf<InvestigateAppServerRouteRepository, TEndpoint>;
 
-export function createCallInvestigateAppAPI(core: CoreStart | CoreSetup) {
-  return ((endpoint, options) => {
-    const { params } = options as unknown as {
-      params?: Partial<Record<string, any>>;
-    };
-
-    const { method, pathname, version } = formatRequest(endpoint, params?.path);
-
-    return core.http[method](pathname, {
-      ...options,
-      body: params && params.body ? JSON.stringify(params.body) : undefined,
-      query: params?.query,
-      version,
-    });
-  }) as InvestigateAppAPIClient;
+export function createInvestigateAppRepositoryClient(core: CoreStart | CoreSetup) {
+  return createRepositoryClient(core) as InvestigateAppRepositoryClient;
 }

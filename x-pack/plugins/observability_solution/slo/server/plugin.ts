@@ -34,17 +34,24 @@ import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { KibanaRequest } from '@kbn/core/server';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
-import { SloConfig } from '.';
+import { SloClient, SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings';
+import { getSloClientWithRequest } from './client';
 
-export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
+export interface SloPluginStart {
+  getSloClientWithRequest: (request: KibanaRequest) => SloClient;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SloPluginSetup {}
 
 export interface PluginSetup {
   alerting: PluginSetupContract;
@@ -193,6 +200,8 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       this.logger,
       config
     );
+
+    return {};
   }
 
   public start(core: CoreStart, plugins: PluginStart) {
@@ -202,6 +211,18 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     this.sloOrphanCleanupTask
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
+
+    return {
+      getSloClientWithRequest: (request: KibanaRequest) => {
+        return getSloClientWithRequest({
+          logger: this.logger,
+          request,
+          soClient: core.savedObjects.getScopedClient(request),
+          spaces: plugins.spaces,
+          esClient: internalEsClient,
+        });
+      },
+    };
   }
 
   public stop() {}

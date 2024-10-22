@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/observability-utils-browser",
+  "owner": "@elastic/observability-ui"
+}

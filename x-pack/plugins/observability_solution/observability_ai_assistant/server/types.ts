@@ -26,6 +26,7 @@ import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
+import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantServerSetup {
@@ -52,6 +53,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   cloud?: CloudSetup;
   serverless?: ServerlessPluginSetup;
   alerting: AlertingPluginSetup;
+  inference: InferenceServerSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -65,4 +67,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   cloud?: CloudStart;
   serverless?: ServerlessPluginStart;
   alerting: AlertingPluginStart;
+  inference: InferenceServerStart;
 }

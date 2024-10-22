@@ -21,6 +21,9 @@ export { withoutOutputUpdateEvents } from '../common/output/without_output_updat
 export type { InferenceClient } from './types';
 export { naturalLanguageToEsql } from './tasks/nl_to_esql';
 
+export type { ChatCompletionResponse } from '../common/chat_complete';
+export type { ToolOptions } from '../common/chat_complete/tools';
+
 export type { InferenceServerSetup, InferenceServerStart };
 
 export const plugin: PluginInitializer<

@@ -28,15 +28,7 @@ type KeyOfSource<T> = Record<
   (T extends Record<string, { terms: { missing_bucket: true } }> ? null : never) | string | number
 >;
 
-type KeysOfSources<T extends any[]> = T extends [any]
-  ? KeyOfSource<T[0]>
-  : T extends [any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
-  : T extends [any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
-  : T extends [any, any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
-  : Record<string, null | string | number>;
+type KeysOfSources<T extends any[]> = KeyOfSource<ValuesType<Pick<T, number>>>;
 
 type CompositeKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends {
@@ -673,6 +665,17 @@ export interface ESQLColumn {
 }
 
 export type ESQLRow = unknown[];
+
+export type ESQLLookupTableColumns = Record<
+  string,
+  { long: Array<number | null> } | { keyword: Array<string | null> }
+>;
+
+export type ESQLLookupTables = Record<string, ESQLLookupTableColumns>;
+
+export interface ESQLRequest extends estypesWithoutBodyKey.EsqlQueryRequest {
+  tables?: ESQLLookupTables;
+}
 
 export interface ESQLSearchResponse {
   columns: ESQLColumn[];

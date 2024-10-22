@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import dedent from 'dedent';
-import {
-  ALERT_RULE_PARAMETERS,
-  ALERT_START,
-  ALERT_RULE_CATEGORY,
-  ALERT_REASON,
-} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { EntityWithSource } from '@kbn/investigation-shared';
-import React, { useCallback } from 'react';
+import type { RootCauseAnalysisForServiceEvent } from '@kbn/observability-utils-server/llm/service_rca';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import { ALERT_START } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import moment from 'moment';
+import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
-import { useFetchEntities } from '../../../../hooks/use_fetch_entities';
 
 export interface InvestigationContextualInsight {
   key: string;
@@ -27,96 +22,104 @@ export interface InvestigationContextualInsight {
 export function AssistantHypothesis({ investigationId }: { investigationId: string }) {
   const { alert } = useInvestigation();
   const {
+    core: { notifications },
+    services: { investigateAppRepositoryClient },
     dependencies: {
       start: {
-        observabilityAIAssistant: {
-          ObservabilityAIAssistantContextualInsight,
-          getContextualInsightMessages,
-        },
+        observabilityAIAssistant: { useGenAIConnectors },
+        observabilityAIAssistantApp: { RootCauseAnalysisContainer },
       },
     },
   } = useKibana();
-  const { data: entitiesData } = useFetchEntities({
-    investigationId,
-    serviceName: alert?.['service.name'] ? `${alert?.['service.name']}` : undefined,
-    serviceEnvironment: alert?.['service.environment']
-      ? `${alert?.['service.environment']}`
-      : undefined,
-    hostName: alert?.['host.name'] ? `${alert?.['host.name']}` : undefined,
-    containerId: alert?.['container.id'] ? `${alert?.['container.id']}` : undefined,
-  });
 
-  const getAlertContextMessages = useCallback(async () => {
-    if (!getContextualInsightMessages || !alert) {
-      return [];
-    }
+  const { loading: loadingConnector, selectedConnector } = useGenAIConnectors();
 
-    const entities = entitiesData?.entities ?? [];
+  const serviceName = alert?.['service.name'] as string | undefined;
 
-    const entityContext = entities?.length
-      ? `
-      Alerts can optionally be associated with entities. Entities can be services, hosts, containers, or other resources. Entities can have metrics associated with them. 
-      
-      The alert that triggered this investigation is associated with the following entities: ${entities
-        .map((entity, index) => {
-          return dedent(`
-            ## Entity ${index + 1}:
-            ${formatEntityMetrics(entity)};
-          `);
-        })
-        .join('/n/n')}`
-      : '';
+  const [events, setEvents] = useState<RootCauseAnalysisForServiceEvent[]>([]);
+  const [loading, setLoading] = useState(false);
 
-    return getContextualInsightMessages({
-      message: `I am investigating a failure in my system. I was made aware of the failure by an alert and I am trying to understand the root cause of the issue.`,
-      instructions: dedent(
-        `I'm an SRE. I am investigating a failure in my system. I was made aware of the failure via an alert. Your current task is to help me identify the root cause of the failure in my system.
+  const runRootCauseAnalysis = ({
+    alert: nonNullishAlert,
+    connectorId,
+    serviceName: nonNullishServiceName,
+  }: {
+    alert: EcsFieldsResponse;
+    connectorId: string;
+    serviceName: string;
+  }) => {
+    const start = moment(nonNullishAlert[ALERT_START]);
 
-        The rule that triggered the alert is a ${
-          alert[ALERT_RULE_CATEGORY]
-        } rule. The alert started at ${alert[ALERT_START]}. The alert reason is ${
-          alert[ALERT_REASON]
-        }. The rule parameters are ${JSON.stringify(ALERT_RULE_PARAMETERS)}.
+    const minutesSinceStart = Math.abs(moment().diff(start)) / 1000 / 60;
 
-        ${entityContext}
+    const minutesBeforeAlertStart = Math.min(30, Math.max(5, Math.ceil(minutesSinceStart)));
 
-        Based on the alert details, suggest a root cause and next steps to mitigate the issue. 
-        
-        I do not have the alert details or entity details in front of me, so be sure to repeat the alert reason (${
-          alert[ALERT_REASON]
-        }), when the alert was triggered (${
-          alert[ALERT_START]
-        }), and the entity metrics in your response.
+    const rangeFrom = moment(nonNullishAlert[ALERT_START])
+      .subtract(minutesBeforeAlertStart, 'minute')
+      .toISOString();
 
-        When displaying the entity metrics, please convert the metrics to a human-readable format. For example, convert "logRate" to "Log Rate" and "errorRate" to "Error Rate".
-        `
-      ),
-    });
-  }, [alert, getContextualInsightMessages, entitiesData?.entities]);
+    const rangeTo = new Date().toISOString();
 
-  if (!ObservabilityAIAssistantContextualInsight) {
+    const signal = new AbortController().signal;
+
+    setLoading(true);
+
+    investigateAppRepositoryClient
+      .stream('POST /internal/observability/investigation/root_cause_analysis', {
+        params: {
+          body: {
+            connectorId,
+            context: `The user is investigating an alert for the ${serviceName} service,
+            and wants to find the root cause. Here is the alert:
+            
+            ${JSON.stringify(alert)}`,
+            rangeFrom,
+            rangeTo,
+            serviceName: nonNullishServiceName,
+          },
+        },
+        signal,
+      })
+      .subscribe({
+        next: (event) => {
+          setEvents((prev) => {
+            if ('type' in event.event && event.event.type === 'chatCompletionChunk') {
+              return prev;
+            }
+            return prev.concat(event.event);
+          });
+        },
+        error: (error) => {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.investigateApp.assistantHypothesis.failedToLoadAnalysis', {
+              defaultMessage: `Failed to load analysis`,
+            }),
+          });
+          setLoading(false);
+        },
+        complete: () => {
+          setLoading(false);
+        },
+      });
+  };
+
+  if (!serviceName) {
     return null;
   }
 
-  return alert && entitiesData ? (
-    <ObservabilityAIAssistantContextualInsight
-      title={i18n.translate(
-        'xpack.investigateApp.assistantHypothesis.observabilityAIAssistantContextualInsight.helpMeInvestigateThisLabel',
-        { defaultMessage: 'Help me investigate this failure' }
-      )}
-      messages={getAlertContextMessages}
+  return (
+    <RootCauseAnalysisContainer
+      events={events}
+      loading={loading || loadingConnector}
+      onStartAnalysisClick={() => {
+        if (alert && selectedConnector && serviceName) {
+          runRootCauseAnalysis({
+            alert,
+            connectorId: selectedConnector,
+            serviceName,
+          });
+        }
+      }}
     />
-  ) : null;
+  );
 }
-const formatEntityMetrics = (entity: EntityWithSource): string => {
-  const entityMetrics = Object.entries(entity.metrics)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(', ');
-  const entitySources = entity.sources.map((source) => source.dataStream).join(', ');
-  return dedent(`
-    Entity name: ${entity.displayName}; 
-    Entity type: ${entity.type}; 
-    Entity metrics: ${entityMetrics}; 
-    Entity data streams: ${entitySources}
-  `);
-};

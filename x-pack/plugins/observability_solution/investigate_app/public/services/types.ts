@@ -7,8 +7,10 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { EsqlService } from './esql';
+import type { InvestigateAppRepositoryClient } from '../api';
 
 export interface InvestigateAppServices {
   esql: EsqlService;
   charts: ChartsPluginStart;
+  investigateAppRepositoryClient: InvestigateAppRepositoryClient;
 }
