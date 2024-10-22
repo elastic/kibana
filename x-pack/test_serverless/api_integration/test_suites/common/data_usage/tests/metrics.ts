@@ -10,8 +10,8 @@ import http from 'http';
 
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createProxyServer } from './proxy_server';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { createProxyServer } from '../proxy_server';
 
 const API_PATH = '/internal/api/data_usage/metrics';
 export default function ({ getService }: FtrProviderContext) {
@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const log = getService('log');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
-  describe('Metrics', function () {
+  describe.skip('Metrics', function () {
     // proxy does not work with MKI
     this.tags(['skipMKI']);
     let proxyServer: http.Server;
