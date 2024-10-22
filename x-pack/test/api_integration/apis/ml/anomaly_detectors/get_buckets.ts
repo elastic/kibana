@@ -50,10 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobId);
       const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(jobId);
 
-      // @ts-expect-error not full interface
       await ml.api.createAnomalyDetectionJob(jobConfig);
 
-      // @ts-expect-error not full interface
       await ml.api.createDatafeed(datafeedConfig);
 
       await ml.api.openAnomalyDetectionJob(jobId);
