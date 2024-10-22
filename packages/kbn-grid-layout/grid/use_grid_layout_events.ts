@@ -7,254 +7,192 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, retry } from 'rxjs';
+import { useEffect, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import { transparentize } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
+import { resolveGridRow } from './resolve_grid_row';
+import { GridLayoutStateManager, GridPanelData } from './types';
 
-import {
-  ActivePanel,
-  GridLayoutData,
-  GridLayoutStateManager,
-  GridSettings,
-  PanelInteractionEvent,
-  RuntimeGridSettings,
-} from './types';
+export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
+  return (
+    a?.id === b?.id &&
+    a?.column === b?.column &&
+    a?.row === b?.row &&
+    a?.width === b?.width &&
+    a?.height === b?.height
+  );
+};
 
-export const useGridLayoutState = ({
-  getCreationOptions,
+export const useGridLayoutEvents = ({
+  gridLayoutStateManager,
 }: {
-  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
-}): {
   gridLayoutStateManager: GridLayoutStateManager;
-  setDimensionsRef: (instance: HTMLDivElement | null) => void;
-} => {
-  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+}) => {
+  const mouseClientPosition = useRef({ x: 0, y: 0 });
+  const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
-
-  const gridLayoutStateManager = useMemo(() => {
-    const rowCount$ = new BehaviorSubject<number>(initialLayout.length);
-    const rows$ = initialLayout.reduce((prev, currentRow) => {
-      return [
-        ...prev,
-        new BehaviorSubject({
-          title: currentRow.title,
-          isCollapsed: currentRow.isCollapsed,
-          panelIds: Object.keys(currentRow.panels),
-        }),
-      ];
-    }, []);
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
-    const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
-    const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
-    const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
-      ...gridSettings,
-      columnPixelWidth: 0,
-    });
-    const targetRow$ = new BehaviorSubject<number | undefined>(undefined);
-    const panelIds$ = new BehaviorSubject<string[][]>(
-      initialLayout.map(({ panels }) => Object.keys(panels))
-    );
-
-    return {
-      rowRefs,
-      rows$,
-      panelRefs,
-      rowCount$,
-      targetRow$,
-      panelIds$,
-      gridLayout$,
-      activePanel$,
-      gridDimensions$,
-      runtimeSettings$,
-      interactionEvent$,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // -----------------------------------------------------------------------------------------
+  // Set up drag events
+  // -----------------------------------------------------------------------------------------
   useEffect(() => {
-    /**
-     * debounce width changes to avoid unnecessary column width recalculation.
-     */
-    const resizeSubscription = gridLayoutStateManager.gridDimensions$
-      .pipe(debounceTime(250))
-      .subscribe((dimensions) => {
-        const elementWidth = dimensions.width ?? 0;
-        const columnPixelWidth =
-          (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
-          gridSettings.columnCount;
+    const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
+    const calculateUserEvent = (e: Event) => {
+      if (!interactionEvent$.value || interactionEvent$.value.type === 'drop') return;
+      e.preventDefault();
+      e.stopPropagation();
 
-        gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
-      });
+      const gridRowElements = gridLayoutStateManager.rowRefs.current;
 
-    /**
-     * on layout change, update the styles of every panel so that it renders as expected
-     */
-    const updatePanelStylesSubscription = combineLatest([
-      gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.activePanel$,
-    ])
-      .pipe(
-        map(([gridLayout, activePanel]) => {
-          // wait for all panel refs to be ready before continuing
-          for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
-            const currentRow = gridLayout[rowIndex];
-            Object.keys(currentRow.panels).forEach((key) => {
-              const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
-              if (!panelRef && !currentRow.isCollapsed) {
-                throw new Error(
-                  i18n.translate('kbnGridLayout.panelRefNotFoundError', {
-                    defaultMessage: 'Panel reference does not exist', // the retry will catch this error
-                  })
-                );
-              }
-            });
+      const interactionEvent = interactionEvent$.value;
+      const isResize = interactionEvent?.type === 'resize';
+
+      const currentLayout = gridLayout$.value;
+      const currentGridData = (() => {
+        if (!interactionEvent) return;
+        for (const row of currentLayout) {
+          if (row.panels[interactionEvent.id]) return row.panels[interactionEvent.id];
+        }
+      })();
+
+      if (!runtimeSettings$.value || !gridRowElements || !currentGridData) {
+        return;
+      }
+
+      const mouseTargetPixel = {
+        x: mouseClientPosition.current.x,
+        y: mouseClientPosition.current.y,
+      };
+      const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
+      const previewRect = {
+        left: isResize ? panelRect.left : mouseTargetPixel.x - interactionEvent.mouseOffsets.left,
+        top: isResize ? panelRect.top : mouseTargetPixel.y - interactionEvent.mouseOffsets.top,
+        bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
+        right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
+      };
+      gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
+
+      // find the grid that the preview rect is over
+      const previewBottom =
+        previewRect.top + gridLayoutStateManager.runtimeSettings$.value.rowHeight;
+      const lastRowIndex = interactionEvent?.targetRowIndex;
+      const targetRowIndex = (() => {
+        if (isResize) return lastRowIndex;
+
+        let highestOverlap = -Infinity;
+        let highestOverlapRowIndex = -1;
+        gridRowElements.forEach((row, index) => {
+          if (!row) return;
+          const rowRect = row.getBoundingClientRect();
+          const overlap =
+            Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
+          if (overlap > highestOverlap) {
+            highestOverlap = overlap;
+            highestOverlapRowIndex = index;
           }
-          return { gridLayout, activePanel };
-        }),
-        retry({ delay: 10 }) // retry until panel references all exist
-      )
-      .subscribe(({ gridLayout, activePanel }) => {
-        const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-        const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+        });
+        return highestOverlapRowIndex;
+      })();
+      const hasChangedGridRow = targetRowIndex !== lastRowIndex;
+      if (gridLayoutStateManager.targetRow$.getValue() !== targetRowIndex) {
+        gridLayoutStateManager.targetRow$.next(targetRowIndex);
+      }
 
-        for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
-          if (activePanel && rowIndex !== currentInteractionEvent?.targetRowIndex) {
-            /**
-             * If there is an interaction event happening but the current row is not being targetted, it
-             * does not need to be re-rendered; so, skip setting the panel styles of this row.
-             *
-             * If there is **no** interaction event, then this is the initial render so the styles of every
-             * panel should be initialized; so, don't skip setting the panel styles.
-             */
-            continue;
-          }
+      // re-render when the target row changes
+      if (hasChangedGridRow) {
+        interactionEvent$.next({
+          ...interactionEvent,
+          targetRowIndex,
+        });
+        gridLayoutStateManager.targetRow$.next(targetRowIndex);
+      }
 
-          // re-render the targetted row
-          const currentRow = gridLayout[rowIndex];
-          Object.keys(currentRow.panels).forEach((key) => {
-            const panel = currentRow.panels[key];
-            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][key];
-            if (!panelRef) {
-              return;
-            }
+      // calculate the requested grid position
+      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
+      const targetedGridRow = gridRowElements[targetRowIndex];
+      const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
+      const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
 
-            const isResize = currentInteractionEvent?.type === 'resize';
-            if (panel.id === activePanel?.id) {
-              // if the current panel is active, give it fixed positioning depending on the interaction event
-              const { position: draggingPosition } = activePanel;
+      const maxColumn = isResize ? columnCount : columnCount - currentGridData.width;
 
-              if (isResize) {
-                // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-                panelRef.style.width = `${Math.max(
-                  draggingPosition.right - draggingPosition.left,
-                  runtimeSettings.columnPixelWidth
-                )}px`;
-                panelRef.style.height = `${Math.max(
-                  draggingPosition.bottom - draggingPosition.top,
-                  runtimeSettings.rowHeight
-                )}px`;
+      const localXCoordinate = isResize
+        ? previewRect.right - targetedGridLeft
+        : previewRect.left - targetedGridLeft;
+      const localYCoordinate = isResize
+        ? previewRect.bottom - targetedGridTop
+        : previewRect.top - targetedGridTop;
 
-                // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-                panelRef.style.gridColumnStart = `${panel.column + 1}`;
-                panelRef.style.gridRowStart = `${panel.row + 1}`;
-                panelRef.style.gridColumnEnd = ``;
-                panelRef.style.gridRowEnd = ``;
-              } else {
-                // if the current panel is being dragged, render it with a fixed position + size
-                panelRef.style.position = 'fixed';
-                panelRef.style.left = `${draggingPosition.left}px`;
-                panelRef.style.top = `${draggingPosition.top}px`;
-                panelRef.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-                panelRef.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+      const targetColumn = Math.min(
+        Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
+        maxColumn
+      );
+      const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
-                // undo any "lock to grid" styles
-                panelRef.style.gridColumnStart = ``;
-                panelRef.style.gridRowStart = ``;
-                panelRef.style.gridColumnEnd = ``;
-                panelRef.style.gridRowEnd = ``;
-              }
-            } else {
-              // if the panel is not being dragged and/or resized, undo any fixed position styles
-              panelRef.style.position = '';
-              panelRef.style.left = ``;
-              panelRef.style.top = ``;
-              panelRef.style.width = ``;
-              panelRef.style.height = ``;
+      const requestedGridData = { ...currentGridData };
+      if (isResize) {
+        requestedGridData.width = Math.max(targetColumn - requestedGridData.column, 1);
+        requestedGridData.height = Math.max(targetRow - requestedGridData.row, 1);
+      } else {
+        requestedGridData.column = targetColumn;
+        requestedGridData.row = targetRow;
+      }
 
-              // and render the panel locked to the grid
-              panelRef.style.gridColumnStart = `${panel.column + 1}`;
-              panelRef.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-              panelRef.style.gridRowStart = `${panel.row + 1}`;
-              panelRef.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
-            }
+      // resolve the new grid layout
+      if (
+        hasChangedGridRow ||
+        !isGridDataEqual(requestedGridData, lastRequestedPanelPosition.current)
+      ) {
+        lastRequestedPanelPosition.current = { ...requestedGridData };
+
+        // remove the panel from the row it's currently in.
+        const nextLayout = currentLayout.map((row, rowIndex) => {
+          const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
+          return { ...row, panels: { ...otherPanels } };
+        });
+
+        // resolve destination grid
+        const destinationGrid = nextLayout[targetRowIndex];
+        const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedGridData);
+        nextLayout[targetRowIndex] = resolvedDestinationGrid;
+
+        // resolve origin grid
+        if (hasChangedGridRow) {
+          const originGrid = nextLayout[lastRowIndex];
+          const resolvedOriginGrid = resolveGridRow(originGrid);
+          nextLayout[lastRowIndex] = resolvedOriginGrid;
+        }
+        if (!deepEqual(currentLayout, nextLayout)) {
+          gridLayout$.next(nextLayout);
+          gridLayoutStateManager.rowCount$.next(nextLayout.length);
+          nextLayout.forEach((row, rowIndex) => {
+            if (
+              !(
+                row.title === currentLayout[rowIndex].title &&
+                row.isCollapsed === currentLayout[rowIndex].isCollapsed &&
+                JSON.stringify(Object.keys(row.panels).sort()) ===
+                  JSON.stringify(Object.keys(currentLayout[rowIndex].panels).sort())
+              )
+            )
+              gridLayoutStateManager.rows$[rowIndex].next({
+                title: row.title,
+                isCollapsed: row.isCollapsed,
+                panelIds: Object.keys(row.panels),
+              });
           });
         }
-      });
+      }
+    };
 
-    /**
-     * on layout changed and/or target row change, update the styles of the grid rows so that they renders as expected
-     */
-    const updateRowStylesSubscription = combineLatest([
-      gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.targetRow$,
-      gridLayoutStateManager.runtimeSettings$,
-    ]).subscribe(([gridLayout, targetRow, runtimeSettings]) => {
-      gridLayout.forEach((row, rowIndex) => {
-        const rowDiv = gridLayoutStateManager.rowRefs.current[rowIndex];
-        if (!rowDiv) return;
+    const onMouseMove = (e: MouseEvent) => {
+      mouseClientPosition.current = { x: e.clientX, y: e.clientY };
+      calculateUserEvent(e);
+    };
 
-        const { gutterSize, columnCount, rowHeight, columnPixelWidth } = runtimeSettings;
-        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
-          return Math.max(acc, panel.row + panel.height);
-        }, 0);
-        const rowCount = maxRow || 1;
-
-        rowDiv.style.gap = `${gutterSize}px`;
-        rowDiv.style.gridTemplateColumns = `repeat(${columnCount}, calc((100% - ${
-          gutterSize * (columnCount - 1)
-        }px) / ${columnCount}))`;
-        rowDiv.style.gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
-
-        if (rowIndex === targetRow) {
-          const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
-
-          rowDiv.style.backgroundPosition = `top -${gutterSize / 2}px left -${gutterSize / 2}px`;
-          rowDiv.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
-            rowHeight + gutterSize
-          }px`;
-          rowDiv.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
-          rowDiv.style.backgroundColor = `${transparentize(euiThemeVars.euiColorSuccess, 0.05)}`;
-        } else {
-          rowDiv.style.backgroundPosition = ``;
-          rowDiv.style.backgroundSize = ``;
-          rowDiv.style.backgroundImage = ``;
-          rowDiv.style.backgroundColor = `transparent`;
-        }
-      });
-    });
-
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('scroll', calculateUserEvent);
     return () => {
-      resizeSubscription.unsubscribe();
-      updatePanelStylesSubscription.unsubscribe();
-      updateRowStylesSubscription.unsubscribe();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('scroll', calculateUserEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const { ref: setDimensionsRef } = useResizeObserver<HTMLDivElement>({
-    onResize: (dimensions) => {
-      gridLayoutStateManager.gridDimensions$.next(dimensions);
-    },
-  });
-
-  return { gridLayoutStateManager, setDimensionsRef };
 };

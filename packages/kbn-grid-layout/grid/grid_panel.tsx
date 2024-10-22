@@ -40,6 +40,8 @@ export const GridPanel = forwardRef<
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
+    const { euiTheme } = useEuiTheme();
+
     const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
     // set initial styles based on state at mount to prevent styles from "blipping"
@@ -169,8 +171,8 @@ export const GridPanel = forwardRef<
                 height: ${euiThemeVars.euiSizeL};
                 z-index: ${euiThemeVars.euiZLevel3};
                 margin-left: ${euiThemeVars.euiSizeS};
-                border: 1px solid ${euiThemeVars.euiBorderColor};
-                background-color: ${euiThemeVars.euiColorEmptyShade};
+                border: 1px solid ${euiTheme.border.color};
+                background-color: ${euiTheme.colors.emptyShade};
                 border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
                 &:hover {
                   cursor: grab;
