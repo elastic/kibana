@@ -52,7 +52,6 @@ const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: st
 
             return groups;
           }
-          console.log({ privilege });
 
           const group = (privilege.offering ?? 'all') as keyof PrivilegeGroups;
 
