@@ -9,8 +9,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { UserProfile } from './user_profile';
 
+import type { UserProfile } from './user_profile';
 import { UserProfilesPopover } from './user_profiles_popover';
 
 const userProfiles: UserProfile[] = [

@@ -5077,6 +5077,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Mute all alerts",
@@ -5124,6 +5133,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Unmute all alerts",
@@ -7103,14 +7121,26 @@
             }
           },
           {
+            "description": "use withAgentCount instead",
             "in": "query",
             "name": "noAgentCount",
+            "required": false,
+            "schema": {
+              "deprecated": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "get policies with agent count",
+            "in": "query",
+            "name": "withAgentCount",
             "required": false,
             "schema": {
               "type": "boolean"
             }
           },
           {
+            "description": "get full policies with package policies populated",
             "in": "query",
             "name": "full",
             "required": false,
@@ -19328,6 +19358,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -19716,7 +19767,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -19793,6 +19845,27 @@
                           "description": {
                             "type": "string"
                           },
+                          "discovery": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "download": {
                             "type": "string"
                           },
@@ -20181,7 +20254,8 @@
                           "type": {
                             "enum": [
                               "integration",
-                              "input"
+                              "input",
+                              "content"
                             ],
                             "type": "string"
                           },
@@ -21769,6 +21843,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -22197,7 +22292,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -22329,6 +22425,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -22757,7 +22874,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23279,6 +23397,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -23707,7 +23846,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -23827,6 +23967,27 @@
                         "description": {
                           "type": "string"
                         },
+                        "discovery": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "fields": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "download": {
                           "type": "string"
                         },
@@ -24255,7 +24416,8 @@
                         "type": {
                           "enum": [
                             "integration",
-                            "input"
+                            "input",
+                            "content"
                           ],
                           "type": "string"
                         },
@@ -26018,7 +26180,7 @@
     },
     "/api/fleet/logstash_api_keys": {
       "post": {
-        "description": "Generate Logstash API keyy",
+        "description": "Generate Logstash API key",
         "operationId": "%2Fapi%2Ffleet%2Flogstash_api_keys#0",
         "parameters": [
           {
@@ -40127,6 +40289,22 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "delete_unenrolled_agents": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
+                        },
                         "fleet_server_hosts": {
                           "items": {
                             "type": "string"
@@ -40173,7 +40351,6 @@
                         }
                       },
                       "required": [
-                        "prerelease_integrations_enabled",
                         "id"
                       ],
                       "type": "object"
@@ -40272,6 +40449,22 @@
                   "additional_yaml_config": {
                     "type": "string"
                   },
+                  "delete_unenrolled_agents": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "is_preconfigured": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "is_preconfigured"
+                    ],
+                    "type": "object"
+                  },
                   "fleet_server_hosts": {
                     "items": {
                       "format": "uri",
@@ -40311,6 +40504,22 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "delete_unenrolled_agents": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "is_preconfigured": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "is_preconfigured"
+                          ],
+                          "type": "object"
+                        },
                         "fleet_server_hosts": {
                           "items": {
                             "type": "string"
@@ -40357,7 +40566,6 @@
                         }
                       },
                       "required": [
-                        "prerelease_integrations_enabled",
                         "id"
                       ],
                       "type": "object"
@@ -40800,7 +41008,28 @@
     "/api/security/role": {
       "get": {
         "operationId": "%2Fapi%2Fsecurity%2Frole#0",
-        "parameters": [],
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {},
         "summary": "Get all roles",
         "tags": [
@@ -40872,6 +41101,14 @@
             "schema": {
               "minLength": 1,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -41461,7 +41698,7 @@
     },
     "/api/spaces/_copy_saved_objects": {
       "post": {
-        "description": "Copy saved objects to spaces",
+        "description": "It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.",
         "operationId": "%2Fapi%2Fspaces%2F_copy_saved_objects#0",
         "parameters": [
           {
@@ -41495,14 +41732,17 @@
                 "properties": {
                   "compatibilityMode": {
                     "default": false,
+                    "description": "Apply various adjustments to the saved objects that are being copied to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with copied saved objects. This option cannot be used with the `createNewCopies` option.",
                     "type": "boolean"
                   },
                   "createNewCopies": {
                     "default": true,
+                    "description": "Create new copies of saved objects, regenerate each object identifier, and reset the origin. When used, potential conflict errors are avoided.  This option cannot be used with the `overwrite` and `compatibilityMode` options.",
                     "type": "boolean"
                   },
                   "includeReferences": {
                     "default": false,
+                    "description": "When set to true, all saved objects related to the specified saved objects will also be copied into the target spaces.",
                     "type": "boolean"
                   },
                   "objects": {
@@ -41510,9 +41750,11 @@
                       "additionalProperties": false,
                       "properties": {
                         "id": {
+                          "description": "The identifier of the saved object to copy.",
                           "type": "string"
                         },
                         "type": {
+                          "description": "The type of the saved object to copy.",
                           "type": "string"
                         }
                       },
@@ -41526,10 +41768,12 @@
                   },
                   "overwrite": {
                     "default": false,
+                    "description": "When set to true, all conflicts are automatically overridden. When a saved object with a matching type and identifier exists in the target space, that version is replaced with the version from the source space. This option cannot be used with the `createNewCopies` option.",
                     "type": "boolean"
                   },
                   "spaces": {
                     "items": {
+                      "description": "The identifiers of the spaces where you want to copy the specified objects.",
                       "type": "string"
                     },
                     "type": "array"
@@ -41545,13 +41789,14 @@
           }
         },
         "responses": {},
-        "summary": "",
-        "tags": []
+        "summary": "Copy saved objects between spaces",
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/_disable_legacy_url_aliases": {
       "post": {
-        "description": "Disable legacy URL aliases",
         "operationId": "%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0",
         "parameters": [
           {
@@ -41588,12 +41833,15 @@
                       "additionalProperties": false,
                       "properties": {
                         "sourceId": {
+                          "description": "The alias source object identifier. This is the legacy object identifier.",
                           "type": "string"
                         },
                         "targetSpace": {
+                          "description": "The space where the alias target object exists.",
                           "type": "string"
                         },
                         "targetType": {
+                          "description": "The type of alias target object. ",
                           "type": "string"
                         }
                       },
@@ -41616,13 +41864,15 @@
           }
         },
         "responses": {},
-        "summary": "",
-        "tags": []
+        "summary": "Disable legacy URL aliases",
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/_get_shareable_references": {
       "post": {
-        "description": "Get shareable references",
+        "description": "Collect references and space contexts for saved objects.",
         "operationId": "%2Fapi%2Fspaces%2F_get_shareable_references#0",
         "parameters": [
           {
@@ -41683,13 +41933,15 @@
           }
         },
         "responses": {},
-        "summary": "",
-        "tags": []
+        "summary": "Get shareable references",
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/_resolve_copy_saved_objects_errors": {
       "post": {
-        "description": "Resolve conflicts copying saved objects",
+        "description": "Overwrite saved objects that are returned as errors from the copy saved objects to space API.",
         "operationId": "%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0",
         "parameters": [
           {
@@ -41758,22 +42010,28 @@
                         "additionalProperties": false,
                         "properties": {
                           "createNewCopy": {
+                            "description": "Creates new copies of the saved objects, regenerates each object ID, and resets the origin.",
                             "type": "boolean"
                           },
                           "destinationId": {
+                            "description": "Specifies the destination identifier that the copied object should have, if different from the current identifier.",
                             "type": "string"
                           },
                           "id": {
+                            "description": "The saved object identifier.",
                             "type": "string"
                           },
                           "ignoreMissingReferences": {
+                            "description": "When set to true, any missing references errors are ignored.",
                             "type": "boolean"
                           },
                           "overwrite": {
                             "default": false,
+                            "description": "When set to true, the saved object from the source space overwrites the conflicting object in the destination space.",
                             "type": "boolean"
                           },
                           "type": {
+                            "description": "The saved object type.",
                             "type": "string"
                           }
                         },
@@ -41798,13 +42056,13 @@
           }
         },
         "responses": {},
-        "summary": "",
+        "summary": "Resolve conflicts copying saved objects",
         "tags": []
       }
     },
     "/api/spaces/_update_objects_spaces": {
       "post": {
-        "description": "Update saved objects in spaces",
+        "description": "Update one or more saved objects to add or remove them from some spaces.",
         "operationId": "%2Fapi%2Fspaces%2F_update_objects_spaces#0",
         "parameters": [
           {
@@ -41841,9 +42099,11 @@
                       "additionalProperties": false,
                       "properties": {
                         "id": {
+                          "description": "The identifier of the saved object to update.",
                           "type": "string"
                         },
                         "type": {
+                          "description": "The type of the saved object to update.",
                           "type": "string"
                         }
                       },
@@ -41857,12 +42117,14 @@
                   },
                   "spacesToAdd": {
                     "items": {
+                      "description": "The identifiers of the spaces the saved objects should be added to or removed from.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "spacesToRemove": {
                     "items": {
+                      "description": "The identifiers of the spaces the saved objects should be added to or removed from.",
                       "type": "string"
                     },
                     "type": "array"
@@ -41879,13 +42141,14 @@
           }
         },
         "responses": {},
-        "summary": "",
-        "tags": []
+        "summary": "Update saved objects in spaces",
+        "tags": [
+          "spaces"
+        ]
       }
     },
     "/api/spaces/space": {
       "get": {
-        "description": "Get all spaces",
         "operationId": "%2Fapi%2Fspaces%2Fspace#0",
         "parameters": [
           {
@@ -41901,6 +42164,7 @@
             }
           },
           {
+            "description": "Specifies which authorization checks are applied to the API call. The default value is `any`.",
             "in": "query",
             "name": "purpose",
             "required": false,
@@ -41914,6 +42178,7 @@
             }
           },
           {
+            "description": "When enabled, the API returns any spaces that the user is authorized to access in any capacity and each space will contain the purposes for which the user is authorized. This can be useful to determine which spaces a user can read but not take a specific action in. If the security plugin is not enabled, this parameter has no effect, since no authorization checks take place. This parameter cannot be used in with the `purpose` parameter.",
             "in": "query",
             "name": "include_authorized_purposes",
             "required": true,
@@ -41953,14 +42218,17 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get all spaces",
         "tags": [
           "spaces"
         ]
       },
       "post": {
-        "description": "Create a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace#1",
         "parameters": [
           {
@@ -41996,29 +42264,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   },
@@ -42041,8 +42316,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create a space",
         "tags": [
           "spaces"
         ]
@@ -42050,7 +42329,7 @@
     },
     "/api/spaces/space/{id}": {
       "delete": {
-        "description": "Delete a space",
+        "description": "When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
         "parameters": [
           {
@@ -42076,6 +42355,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -42084,14 +42364,20 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Indicates that the request failed."
+          }
+        },
+        "summary": "Delete a space",
         "tags": [
           "spaces"
         ]
       },
       "get": {
-        "description": "Get a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -42107,6 +42393,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -42115,14 +42402,17 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get a space",
         "tags": [
           "spaces"
         ]
       },
       "put": {
-        "description": "Update a space",
         "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
         "parameters": [
           {
@@ -42148,6 +42438,7 @@
             }
           },
           {
+            "description": "The space identifier. You are unable to change the ID with the update operation.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -42166,29 +42457,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   },
@@ -42211,8 +42509,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Update a space",
         "tags": [
           "spaces"
         ]

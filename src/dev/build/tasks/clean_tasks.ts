@@ -56,6 +56,7 @@ export const CleanExtraFilesFromModules: Task = {
 
           // docs
           '**/doc',
+          '!**/yaml/dist/**/doc', // yaml package store code under doc https://github.com/eemeli/yaml/issues/384
           '**/docs',
           '**/README',
           '**/CONTRIBUTING.md',

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { set, omit, unset } from 'lodash';
+import { omit, unset } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {

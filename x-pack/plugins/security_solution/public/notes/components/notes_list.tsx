@@ -10,6 +10,7 @@ import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elast
 import { useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { DeleteConfirmModal } from './delete_confirm_modal';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import { DeleteNoteButtonIcon } from './delete_note_button';
@@ -17,7 +18,11 @@ import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
-import { ReqStatus, selectCreateNoteStatus } from '../store/notes.slice';
+import {
+  ReqStatus,
+  selectCreateNoteStatus,
+  selectNotesTablePendingDeleteIds,
+} from '../store/notes.slice';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
@@ -59,41 +64,51 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
+  const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
+  const isDeleteModalVisible = pendingDeleteIds.length > 0;
+
   return (
-    <EuiCommentList>
-      {notes.map((note, index) => (
-        <EuiComment
-          data-test-subj={`${NOTES_COMMENT_TEST_ID}-${index}`}
-          key={note.noteId}
-          username={note.createdBy}
-          timestamp={<>{note.created && <FormattedRelative value={new Date(note.created)} />}</>}
-          event={ADDED_A_NOTE}
-          actions={
-            <>
-              {note.eventId && !options?.hideFlyoutIcon && (
-                <OpenFlyoutButtonIcon eventId={note.eventId} timelineId={note.timelineId} />
-              )}
-              {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (
-                <OpenTimelineButtonIcon note={note} index={index} />
-              )}
-              {canDeleteNotes && <DeleteNoteButtonIcon note={note} index={index} />}
-            </>
-          }
-          timelineAvatar={
-            <EuiAvatar
-              data-test-subj={`${NOTE_AVATAR_TEST_ID}-${index}`}
-              size="l"
-              name={note.updatedBy || '?'}
-            />
-          }
-        >
-          <MarkdownRenderer>{note.note || ''}</MarkdownRenderer>
-        </EuiComment>
-      ))}
-      {createStatus === ReqStatus.Loading && (
-        <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
-      )}
-    </EuiCommentList>
+    <>
+      <EuiCommentList>
+        {notes.map((note, index) => (
+          <EuiComment
+            data-test-subj={`${NOTES_COMMENT_TEST_ID}-${index}`}
+            key={note.noteId}
+            username={note.createdBy}
+            timestamp={<>{note.created && <FormattedRelative value={new Date(note.created)} />}</>}
+            event={ADDED_A_NOTE}
+            actions={
+              <>
+                {note.eventId && !options?.hideFlyoutIcon && (
+                  <OpenFlyoutButtonIcon
+                    eventId={note.eventId}
+                    timelineId={note.timelineId}
+                    iconType="arrowRight"
+                  />
+                )}
+                {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (
+                  <OpenTimelineButtonIcon note={note} index={index} />
+                )}
+                {canDeleteNotes && <DeleteNoteButtonIcon note={note} index={index} />}
+              </>
+            }
+            timelineAvatar={
+              <EuiAvatar
+                data-test-subj={`${NOTE_AVATAR_TEST_ID}-${index}`}
+                size="l"
+                name={note.updatedBy || '?'}
+              />
+            }
+          >
+            <MarkdownRenderer>{note.note || ''}</MarkdownRenderer>
+          </EuiComment>
+        ))}
+        {createStatus === ReqStatus.Loading && (
+          <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
+        )}
+      </EuiCommentList>
+      {isDeleteModalVisible && <DeleteConfirmModal />}
+    </>
   );
 });
 

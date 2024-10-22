@@ -17,7 +17,7 @@ function getMetadataSourceField({ aggregation, destination, source }: MetadataFi
   if (aggregation.type === 'terms') {
     return `ctx.entity.metadata.${destination}.data.keySet()`;
   } else if (aggregation.type === 'top_value') {
-    return `ctx.entity.metadata.${destination}.top_value["${destination}"]`;
+    return `ctx.entity.metadata.${destination}.top_value["${source}"]`;
   }
 }
 
@@ -35,19 +35,19 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }
 
   return definition.metadata.reduce((acc, metadata) => {
-    const destination = metadata.destination;
+    const { destination, source } = metadata;
     const optionalFieldPath = destination.replaceAll('.', '?.');
 
     if (metadata.aggregation.type === 'terms') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}.data != null) {
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.data != null) {
           ${mapDestinationToPainless(metadata)}
         }
       `;
       return `${acc}\n${next}`;
     } else if (metadata.aggregation.type === 'top_value') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${destination}"] != null) {
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
           ${mapDestinationToPainless(metadata)}
         }
       `;
@@ -59,30 +59,13 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 }
 
 function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
-  return definition.identityFields
-    .map((identityField) => {
-      const setProcessor = {
-        set: {
-          field: identityField.field,
-          value: `{{entity.identity.${identityField.field}.top_metric.${identityField.field}}}`,
-        },
-      };
-
-      if (!identityField.field.includes('.')) {
-        return [setProcessor];
-      }
-
-      return [
-        {
-          dot_expander: {
-            field: identityField.field,
-            path: `entity.identity.${identityField.field}.top_metric`,
-          },
-        },
-        setProcessor,
-      ];
-    })
-    .flat();
+  return definition.identityFields.map((key) => ({
+    set: {
+      if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
+      field: key.field,
+      value: `{{entity.identity.${key.field}}}`,
+    },
+  }));
 }
 
 function getCustomIngestPipelines(definition: EntityDefinition) {
@@ -156,6 +139,16 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
+    {
+      set: {
+        field: 'entity.id',
+        value: definition.identityFields
+          .map((identityField) => identityField.field)
+          .sort()
+          .map((identityField) => `{{{entity.identity.${identityField}}}}`)
+          .join('-'),
+      },
+    },
     ...(definition.staticFields != null
       ? Object.keys(definition.staticFields).map((field) => ({
           set: { field, value: definition.staticFields![field] },
@@ -177,8 +170,8 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         ignore_missing: true,
       },
     },
+    // This must happen AFTER we lift the identity fields into the root of the document
     {
-      // This must happen AFTER we lift the identity fields into the root of the document
       set: {
         field: 'entity.displayName',
         value: definition.displayNameTemplate,

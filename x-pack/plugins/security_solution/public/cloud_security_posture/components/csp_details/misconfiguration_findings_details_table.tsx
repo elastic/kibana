@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiIcon, EuiPanel, EuiLink, EuiText, EuiBasicTable } from '@elastic/eui';
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
@@ -18,7 +18,7 @@ import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_n
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import {
-  ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS,
+  ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
   NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
@@ -58,7 +58,13 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
  */
 export const MisconfigurationFindingsDetailsTable = memo(
   ({ fieldName, queryName }: { fieldName: 'host.name' | 'user.name'; queryName: string }) => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS);
+    useEffect(() => {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.COUNT,
+        ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS
+      );
+    }, []);
+
     const { data } = useMisconfigurationFindings({
       query: buildEntityFlyoutPreviewQuery(fieldName, queryName),
       sort: [],
@@ -190,6 +196,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
+            data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
           />
         </EuiPanel>
       </>

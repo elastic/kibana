@@ -25,6 +25,7 @@ export const indexTemplates: {
     template: {
       settings: {
         mode: 'logsdb',
+        default_pipeline: 'logs@default-pipeline',
       },
     },
     priority: 500,

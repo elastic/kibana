@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-import { AlertsSettings } from '../alerts/settings/alerts_settings';
+import { AlertsSettings } from '../assistant/settings/alerts_settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';
@@ -36,13 +36,14 @@ const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-bas
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
+  modalMode?: boolean;
 }
 
 /**
  * Knowledge Base Settings -- set up the Knowledge Base and configure RAG on alerts
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
+  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, modalMode = false }) => {
     const { http, toasts } = useAssistantContext();
     const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
@@ -113,7 +114,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiTitle size={'s'}>
+        <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
           <h2>
             {i18n.SETTINGS_TITLE}{' '}
             <EuiBetaBadge iconType={'beaker'} label={i18n.SETTINGS_BADGE} size="s" color="hollow" />
@@ -194,10 +195,12 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
         <EuiSpacer size="s" />
 
-        <AlertsSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-        />
+        {!modalMode && (
+          <AlertsSettings
+            knowledgeBase={knowledgeBase}
+            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+          />
+        )}
       </>
     );
   }

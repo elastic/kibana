@@ -8,10 +8,7 @@
 import semver from 'semver';
 import expect from '@kbn/expect';
 import { entityLatestSchema } from '@kbn/entities-schema';
-import {
-  entityDefinition as mockDefinition,
-  entityDefinitionWithBackfill as mockBackfillDefinition,
-} from '@kbn/entityManager-plugin/server/lib/entities/helpers/fixtures';
+import { entityDefinition as mockDefinition } from '@kbn/entityManager-plugin/server/lib/entities/helpers/fixtures';
 import { PartialConfig, cleanup, generate } from '@kbn/data-forge';
 import { generateLatestIndexName } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -33,8 +30,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Entity definitions', () => {
     describe('definitions installations', () => {
       it('can install multiple definitions', async () => {
+        const mockDefinitionDup = { ...mockDefinition, id: 'mock_definition_dup' };
         await installDefinition(supertest, { definition: mockDefinition });
-        await installDefinition(supertest, { definition: mockBackfillDefinition });
+        await installDefinition(supertest, { definition: mockDefinitionDup });
 
         const { definitions } = await getInstalledDefinitions(supertest);
         expect(definitions.length).to.eql(2);
@@ -49,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(
           definitions.some(
             (definition) =>
-              definition.id === mockBackfillDefinition.id &&
+              definition.id === mockDefinitionDup.id &&
               definition.state.installed === true &&
               definition.state.running === true
           )
@@ -57,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await Promise.all([
           uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true }),
-          uninstallDefinition(supertest, { id: mockBackfillDefinition.id, deleteData: true }),
+          uninstallDefinition(supertest, { id: mockDefinitionDup.id, deleteData: true }),
         ]);
       });
 
@@ -89,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: mockDefinition.id,
           update: {
             version: incVersion!,
-            history: {
+            latest: {
               timestampField: '@updatedTimestampField',
             },
           },
@@ -99,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
           definitions: [updatedDefinition],
         } = await getInstalledDefinitions(supertest);
         expect(updatedDefinition.version).to.eql(incVersion);
-        expect(updatedDefinition.history.timestampField).to.eql('@updatedTimestampField');
+        expect(updatedDefinition.latest.timestampField).to.eql('@updatedTimestampField');
 
         await uninstallDefinition(supertest, { id: mockDefinition.id });
       });
@@ -114,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: mockDefinition.id,
           update: {
             version: '1.0.0',
-            history: {
+            latest: {
               timestampField: '@updatedTimestampField',
             },
           },
@@ -156,7 +154,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await esDeleteAllIndices(dataForgeIndices);
-        await uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true });
         await cleanup({ client: esClient, config: dataForgeConfig, logger });
       });
 
@@ -172,6 +169,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
+        expect(parsedSample.data?.entity.id).to.be('admin-console');
+      });
+
+      it('should delete entities data when specified', async () => {
+        const index = generateLatestIndexName(mockDefinition);
+        expect(await esClient.indices.exists({ index })).to.be(true);
+        await uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true });
+        expect(await esClient.indices.exists({ index })).to.be(false);
       });
     });
   });
