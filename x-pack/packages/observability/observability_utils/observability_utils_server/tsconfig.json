@@ -26,5 +26,6 @@
     "@kbn/rule-data-utils",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/inference-plugin",
+    "@kbn/logging",
   ]
 }
