@@ -200,10 +200,9 @@ export class DashboardPlugin
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
             map(async ({ state }) => {
-              const { isFilterPinned } = await import('@kbn/es-query');
               return {
                 ...state,
-                filters: state.filters?.filter(isFilterPinned),
+                filters: state.filters,
               };
             })
           ),

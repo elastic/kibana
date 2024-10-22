@@ -10,8 +10,10 @@
 import type { QueryState } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 
+import { Filter } from '@kbn/es-query';
 import {
   DASHBOARD_APP_ID,
+  DASHBOARD_STATE_STORAGE_KEY,
   GLOBAL_STATE_STORAGE_KEY,
   createDashboardEditUrl,
 } from '../../dashboard_constants';
@@ -20,7 +22,8 @@ import { coreServices } from '../../services/kibana_services';
 export const getDashboardListItemLink = (
   kbnUrlStateStorage: IKbnUrlStateStorage,
   id: string,
-  timeRestore: boolean
+  timeRestore: boolean,
+  unsavedFilters: Record<string, { filters: Filter[] }>
 ) => {
   const useHash = coreServices.uiSettings.get('state:storeInSessionStorage'); // use hash
 
@@ -34,5 +37,17 @@ export const getDashboardListItemLink = (
     delete globalStateInUrl.refreshInterval;
   }
   url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
+
+  if (unsavedFilters && unsavedFilters[id] && unsavedFilters[id].filters) {
+    const appStateInUrl = kbnUrlStateStorage.get<QueryState>(DASHBOARD_STATE_STORAGE_KEY) || {};
+    appStateInUrl.filters = unsavedFilters[id].filters;
+
+    url = setStateToKbnUrl<QueryState>(
+      DASHBOARD_STATE_STORAGE_KEY,
+      appStateInUrl,
+      { useHash },
+      url
+    );
+  }
   return url;
 };

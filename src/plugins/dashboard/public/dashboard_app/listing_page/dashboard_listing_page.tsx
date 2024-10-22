@@ -23,12 +23,14 @@ import {
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { DASHBOARD_STATE_SESSION_KEY } from '../../services/dashboard_backup_service';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
   redirectTo: DashboardRedirect;
   initialFilter?: string;
   title?: string;
+  spaceId?: string;
 }
 
 export const DashboardListingPage = ({
@@ -36,6 +38,7 @@ export const DashboardListingPage = ({
   redirectTo,
   initialFilter,
   kbnUrlStateStorage,
+  spaceId,
 }: DashboardListingPageProps) => {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
@@ -93,6 +96,12 @@ export const DashboardListingPage = ({
     return null;
   }
 
+  // pull the filters off the session storage and put in the url if they exist
+  const unsavedFiltersToUrl = JSON.parse(
+    sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) ?? '[]'
+  );
+  const unsavedFilters = spaceId && unsavedFiltersToUrl ? unsavedFiltersToUrl[spaceId] : undefined;
+
   return (
     <>
       {showNoDataPage && (
@@ -106,7 +115,7 @@ export const DashboardListingPage = ({
             redirectTo({ destination: 'dashboard', id, editMode: viewMode === ViewMode.EDIT });
           }}
           getDashboardUrl={(id, timeRestore) => {
-            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
+            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore, unsavedFilters);
           }}
         />
       )}
