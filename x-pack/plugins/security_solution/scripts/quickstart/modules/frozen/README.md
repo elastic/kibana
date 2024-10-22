@@ -1,7 +1,8 @@
 ## Creating Frozen Data
 
-This module provides utilities to quickly move data to the frozen tier for testing. The main API call that accomplishes this is `ilm.moveToStep`, however, there's setup that must be done first to make the index ready. The basic process to go from nothing to having data in frozen is: 0. Set `{"persistent": {"indices.lifecycle.poll_interval": "10s"}}` in the cluster settings. This setting is 10m by default, which makes it take a long time for indices to fully move to frozen.
+This module provides utilities to quickly move data to the frozen tier for testing. The main API call that accomplishes this is `ilm.moveToStep`, however, there's setup that must be done first to make the index ready. The basic process to go from nothing to having data in frozen is:
 
+0. Set `{"persistent": {"indices.lifecycle.poll_interval": "10s"}}` in the cluster settings. This setting is 10m by default, which makes it take a long time for indices to fully move to frozen.
 1. Create an ILM policy with at least `hot` and `frozen` phases
 2. Create an index template that uses the ILM policy from step 1 (ideally make it a data stream template)
 3. Index documents into the index/datastream controlled by the index template from step 2
