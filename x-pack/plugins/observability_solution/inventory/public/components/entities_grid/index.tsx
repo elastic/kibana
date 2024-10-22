@@ -26,7 +26,6 @@ import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
-import { useKibana } from '../../hooks/use_kibana';
 import { EntityName } from './entity_name';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
@@ -55,10 +54,6 @@ export function EntitiesGrid({
   onChangeSort,
   onFilterByType,
 }: Props) {
-  const {
-    services: { telemetry },
-  } = useKibana();
-
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
       const lastItem = last(newSortingColumns);
@@ -67,16 +62,6 @@ export function EntitiesGrid({
       }
     },
     [onChangeSort]
-  );
-
-  const onEntityNameClick = useCallback(
-    ({ entityType }: { entityType: EntityType }) => {
-      telemetry.reportEntityViewClicked({
-        view_type: 'detail',
-        entity_type: entityType,
-      });
-    },
-    [telemetry]
   );
 
   const showAlertsColumn = useMemo(
@@ -142,19 +127,12 @@ export function EntitiesGrid({
             />
           );
         case ENTITY_DISPLAY_NAME:
-          return (
-            <EntityName
-              entity={entity}
-              onClick={() => {
-                onEntityNameClick({ entityType });
-              }}
-            />
-          );
+          return <EntityName entity={entity} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onEntityNameClick, onFilterByType]
+    [entities, onFilterByType]
   );
 
   if (loading) {
