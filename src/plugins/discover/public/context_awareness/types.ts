@@ -324,8 +324,8 @@ export interface Profile {
    * And it supports opening custom flyouts and any other modals on the click.
    * `getAppMenu` can be configured in both root and data source profiles.
    * Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
-   * @param params The doc viewer extension parameters
-   * @returns The doc viewer extension
+   * @param params The app menu extension parameters
+   * @returns The app menu extension
    */
   getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
 }
