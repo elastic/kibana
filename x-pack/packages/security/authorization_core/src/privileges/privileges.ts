@@ -247,7 +247,8 @@ export function privilegesFactory(
         }, {}),
       };
     },
-    getFeatureForPrivilege(features: KibanaFeature[], searchTerm: string) {
+    getFeatureForPrivilege(searchTerm: string) {
+      const features = featuresService.getKibanaFeatures();
       const result: string[] = [];
 
       features.forEach((feature) => {
