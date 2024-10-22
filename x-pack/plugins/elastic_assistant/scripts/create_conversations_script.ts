@@ -10,6 +10,7 @@ import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import {
+  API_VERSIONS,
   ConversationCreateProps,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 } from '@kbn/elastic-assistant-common';
@@ -57,6 +58,9 @@ export const create = async () => {
     }
 
     logger.info(`Creating ${count} conversations...`);
+    if (count > 999) {
+      logger.info(`This may take a couple of minutes...`);
+    }
 
     const promises = Array.from({ length: count }, (_, i) =>
       limit(() =>
@@ -87,8 +91,8 @@ export const create = async () => {
     logger.error(e);
   }
 };
-// Set the concurrency limit (e.g., 10 requests at a time)
-const limit = pLimit(10);
+// Set the concurrency limit (e.g., 50 requests at a time)
+const limit = pLimit(50);
 
 // Retry helper function
 const retryRequest = async (
@@ -137,6 +141,7 @@ export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 const requestHeaders = {
   'kbn-xsrf': 'xxx',
   'Content-Type': 'application/json',
+  'elastic-api-version': API_VERSIONS.public.v1,
 };
 
 function removeTrailingSlash(url: string) {
