@@ -9,10 +9,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Defend Workflows Cypress tests"
 
-for version in $(cat versions.json | jq -r '.versions[].version'); do
-  node x-pack/plugins/security_solution/scripts/endpoint/agent_downloader --version "$version"
-done
-
 cd x-pack/plugins/security_solution
 
 set +e
