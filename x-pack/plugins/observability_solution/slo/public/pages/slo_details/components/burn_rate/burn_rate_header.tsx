@@ -8,7 +8,7 @@
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SloTabId } from '../../../pages/slo_details/components/slo_details';
+import { SloTabId } from '../slo_details';
 import { BurnRateOption } from './burn_rates';
 interface Props {
   burnRateOption: BurnRateOption;

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { toDuration, toMinutes } from '../../../utils/slo/duration';
+import { toDuration, toMinutes } from '../../../../utils/slo/duration';
 
 export interface BurnRateParams {
   slo: SLODefinitionResponse;

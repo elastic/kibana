@@ -8,7 +8,7 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { BurnRateOption } from '../../../components/slo/burn_rate/burn_rates';
+import { BurnRateOption } from '../components/burn_rate/burn_rates';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 
 export const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [

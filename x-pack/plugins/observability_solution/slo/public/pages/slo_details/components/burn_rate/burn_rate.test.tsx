@@ -8,8 +8,8 @@
 import { screen } from '@testing-library/react';
 import React from 'react';
 
-import { buildSlo } from '../../../data/slo/slo';
-import { render } from '../../../utils/test_helper';
+import { buildSlo } from '../../../../data/slo/slo';
+import { render } from '../../../../utils/test_helper';
 import { BurnRate } from './burn_rate';
 
 describe('BurnRate', () => {

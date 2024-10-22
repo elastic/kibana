@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BurnRates } from '../../../components/slo/burn_rate/burn_rates';
+import { BurnRates } from './burn_rate/burn_rates';
 import { useBurnRateOptions } from '../hooks/use_burn_rate_options';
 import { EventsChartPanel } from './events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
