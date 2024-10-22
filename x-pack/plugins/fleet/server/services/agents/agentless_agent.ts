@@ -35,7 +35,7 @@ import { appContextService } from '../app_context';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
-import { prependAgentlessApiBasePathToEndpoint, isAgentlessApiEnabled } from '../utils/agentless';
+import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -179,7 +179,7 @@ class AgentlessAgentService {
       `[Agentless API] Start deleting agentless agent for agent policy ${requestConfigDebugStatus}`
     );
 
-    if (!isAgentlessApiEnabled) {
+    if (!isAgentlessEnabled) {
       logger.error(
         '[Agentless API] Agentless API is not supported. Deleting agentless agent is not supported in non-cloud or non-serverless environments'
       );
