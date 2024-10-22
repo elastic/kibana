@@ -154,7 +154,7 @@ export class VisualReportingSoftDisabledError extends ReportingError {
 }
 
 export class ReportingSavedObjectNotFoundError extends ReportingError {
-  static code = 'reporting_saved_object_not_found' as const;
+  static code = 'reporting_saved_object_not_found_error' as const;
   public get code(): string {
     return ReportingSavedObjectNotFoundError.code;
   }
