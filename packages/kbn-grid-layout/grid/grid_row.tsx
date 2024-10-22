@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react';
+import { combineLatest, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -40,16 +41,18 @@ export const GridRow = forwardRef<
   ) => {
     const rowData = useStateFromPublishingSubject(gridLayoutStateManager.rows$[rowIndex]);
 
-    const initialStyles = useMemo(() => {
-      const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
-
-      const { gutterSize, columnCount, rowHeight } = runtimeSettings;
-
-      const maxRow = Object.values(initialRow.panels).reduce((acc, panel) => {
+    const getRowCount = useCallback(() => {
+      const row = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
+      const maxRow = Object.values(row.panels).reduce((acc, panel) => {
         return Math.max(acc, panel.row + panel.height);
       }, 0);
-      const rowCount = maxRow || 1;
+      return maxRow || 1;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rowIndex]);
+
+    const initialStyles = useMemo(() => {
+      const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+      const { gutterSize, columnCount, rowHeight } = runtimeSettings;
 
       return css`
         gap: ${gutterSize}px;
@@ -57,9 +60,55 @@ export const GridRow = forwardRef<
           ${columnCount},
           calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
         );
-        grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
+        grid-template-rows: repeat(${getRowCount()}, ${rowHeight}px);
       `;
-    }, [gridLayoutStateManager, rowIndex]);
+    }, [gridLayoutStateManager, getRowCount]);
+
+    useEffect(
+      () => {
+        const subscription = combineLatest([
+          gridLayoutStateManager.targetRow$,
+          gridLayoutStateManager.gridLayout$,
+          gridLayoutStateManager.runtimeSettings$,
+        ])
+          .pipe(skip(1))
+          .subscribe(([targetRow, gridLayout, runtimeSettings]) => {
+            const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
+            if (!rowRef) return;
+
+            const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
+
+            rowRef.style.gridTemplateRows = `repeat(${getRowCount()}, ${rowHeight}px)`;
+            if (rowIndex === targetRow) {
+              // apply "targetted row" styles
+              const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
+              rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
+                gutterSize / 2
+              }px`;
+              rowRef.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${
+                rowHeight + gutterSize
+              }px`;
+              rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+        linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
+              rowRef.style.backgroundColor = `${transparentize(
+                euiThemeVars.euiColorSuccess,
+                0.05
+              )}`;
+            } else {
+              // undo any "targetted row" styles
+              rowRef.style.backgroundPosition = ``;
+              rowRef.style.backgroundSize = ``;
+              rowRef.style.backgroundImage = ``;
+              rowRef.style.backgroundColor = `transparent`;
+            }
+          });
+        return () => {
+          subscription.unsubscribe();
+        };
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [rowIndex]
+    );
 
     return (
       <>

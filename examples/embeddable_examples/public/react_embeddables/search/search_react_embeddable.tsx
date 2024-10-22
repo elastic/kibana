@@ -34,7 +34,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
       );
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       if (!defaultDataView) {

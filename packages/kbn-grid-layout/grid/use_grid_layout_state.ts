@@ -122,21 +122,20 @@ export const useGridLayoutState = ({
         }),
         retry({ delay: 1 }) // retry until panel references all exist
       ),
-      gridLayoutStateManager.runtimeSettings$.pipe(skip(1)),
       gridLayoutStateManager.activePanel$,
       gridLayoutStateManager.targetRow$,
     ])
       .pipe(skip(1))
-      .subscribe(([gridLayout, runtimeSettings, activePanel, targetRow]) => {
+      .subscribe(([gridLayout, activePanel, targetRow]) => {
+        const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
         const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
         for (let rowIndex = 0; rowIndex < gridLayout.length; rowIndex++) {
-          const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
-          if (!rowRef) return;
+          // const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
+          // if (!rowRef) return;
 
           // set the CSS grid + styles of the current row
           const currentRow = gridLayout[rowIndex];
-          setRowStyles({ rowRef, runtimeSettings, currentRow, targetRow, rowIndex });
 
           if (activePanel && rowIndex !== targetRow) {
             /**
@@ -185,45 +184,6 @@ export const useGridLayoutState = ({
   });
 
   return { gridLayoutStateManager, setDimensionsRef };
-};
-
-const setRowStyles = ({
-  rowRef,
-  runtimeSettings,
-  currentRow,
-  rowIndex,
-  targetRow,
-}: {
-  rowRef: HTMLDivElement;
-  runtimeSettings: RuntimeGridSettings;
-  currentRow: GridRowData;
-  rowIndex: number;
-  targetRow?: number;
-}) => {
-  const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-  const maxRow = Object.values(currentRow.panels).reduce((acc, panel) => {
-    return Math.max(acc, panel.row + panel.height);
-  }, 0);
-  const rowCount = maxRow || 1;
-
-  rowRef.style.gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
-
-  if (rowIndex === targetRow) {
-    // apply "targetted row" styles
-    const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
-
-    rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${gutterSize / 2}px`;
-    rowRef.style.backgroundSize = ` ${columnPixelWidth + gutterSize}px ${rowHeight + gutterSize}px`;
-    rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-  linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
-    rowRef.style.backgroundColor = `${transparentize(euiThemeVars.euiColorSuccess, 0.05)}`;
-  } else {
-    // undo any "targetted row" styles
-    rowRef.style.backgroundPosition = ``;
-    rowRef.style.backgroundSize = ``;
-    rowRef.style.backgroundImage = ``;
-    rowRef.style.backgroundColor = `transparent`;
-  }
 };
 
 const setPanelStyles = ({
