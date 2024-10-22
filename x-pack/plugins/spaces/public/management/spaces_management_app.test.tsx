@@ -75,8 +75,10 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
       config,
       logger,
+      getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
       getRolesAPIClient: jest.fn(),
       getPrivilegesAPIClient: jest.fn(),
+      getSecurityLicense: jest.fn(),
       eventTracker,
     })
     .mount({
@@ -99,8 +101,10 @@ describe('spacesManagementApp', () => {
         getStartServices: coreMock.createSetup().getStartServices as any,
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: jest.fn(),
         eventTracker,
       })
     ).toMatchInlineSnapshot(`

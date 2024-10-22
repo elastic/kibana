@@ -39,7 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  describe('discover esql view', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/196866
+  describe.skip('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -268,6 +269,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');

@@ -45,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
         await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
         await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkMissingInMoreOptions();
       });
       it('should have embedded dev console', async () => {
         await testHasEmbeddedConsole(pageObjects);
@@ -117,10 +118,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
         it('menu action item should be replaced with playground', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectUseInPlaygroundLinkExists();
+          await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
+        });
+        it('should have link to API reference doc link in options menu', async () => {
+          await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
+          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
         });
         it('should have index documents', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        });
+        it('should have one document in quick stats', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
         });
         it('should have with data tabs', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
@@ -140,6 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
           await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
           await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
         });
       });
 
@@ -166,12 +175,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
-        });
-        it('should have link to API reference doc link', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
-        });
-        it('should have link to playground', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectPlaygroundButtonExistsInMoreOptions();
         });
         it('should delete index', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
