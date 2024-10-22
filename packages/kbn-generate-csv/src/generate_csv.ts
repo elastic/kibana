@@ -248,7 +248,7 @@ export class CsvGenerator {
           const reportingError = new ReportingSavedObjectNotFoundError(err);
           throw createTaskRunError(reportingError, TaskErrorSource.USER);
         }
-        throw new Error(err);
+        throw err;
       }
     };
 
