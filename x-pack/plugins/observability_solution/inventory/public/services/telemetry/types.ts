@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type { EntityType } from '../../../common/entities';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -22,17 +23,17 @@ export interface EntityInventoryViewedParams {
 
 export interface EntityInventorySearchQuerySubmittedParams {
   kuery_fields: string[];
-  entity_types: Array<'container' | 'host' | 'service'>;
+  entity_types: EntityType[];
   action: 'submit' | 'refresh';
 }
 
 export interface EntityInventoryEntityTypeFilteredParams {
   kuery_fields: string[];
-  entity_types: Array<'container' | 'host' | 'service'>;
+  entity_types: EntityType[];
 }
 
 export interface EntityViewClickedParams {
-  entity_type: 'container' | 'host' | 'service';
+  entity_type: EntityType;
   view_type: 'detail' | 'flyout';
 }
 
