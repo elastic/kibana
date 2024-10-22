@@ -326,6 +326,7 @@ module.exports = {
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
+    '@kbn/eslint/no_deprecated_authz_config': 'error',
 
     'no-new-func': 'error',
     'no-implied-eval': 'error',
