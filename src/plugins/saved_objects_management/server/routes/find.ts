@@ -45,7 +45,6 @@ async function searchRuntimeTitle({
 
   const findResponse = await client.find<any>({
     type: typesWithRuntimeTitle,
-    fields: undefined,
   });
 
   const dbSearchResultById = dbSearchResult.reduce((acc, so) => {
