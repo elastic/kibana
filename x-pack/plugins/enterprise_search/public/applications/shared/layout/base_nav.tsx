@@ -8,14 +8,17 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
+import {
+  ENTERPRISE_SEARCH_APP_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
+  SEARCH_ELASTICSEARCH,
+  SEARCH_VECTOR_SEARCH,
+  SEARCH_SEMANTIC_SEARCH,
+  SEARCH_AI_SEARCH,
+} from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
-import {
-  ELASTICSEARCH_PLUGIN,
-  AI_SEARCH_PLUGIN,
-  VECTOR_SEARCH_PLUGIN,
-  SEMANTIC_SEARCH_PLUGIN,
-} from '../../../../common/constants';
+import { VECTOR_SEARCH_PLUGIN, SEMANTIC_SEARCH_PLUGIN } from '../../../../common/constants';
 
 import { ClassicNavItem, BuildClassicNavParameters } from '../types';
 
@@ -37,7 +40,7 @@ export const buildBaseClassicNavItems = ({
       </EuiText>
     ),
     navLink: {
-      link: 'enterpriseSearch',
+      link: ENTERPRISE_SEARCH_APP_ID,
       shouldShowActiveForSubroutes: true,
     },
   });
@@ -119,7 +122,7 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Behavioral Analytics',
         }),
         navLink: {
-          link: 'enterpriseSearchAnalytics',
+          link: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
           shouldNotCreateHref: true,
         },
       },
@@ -165,8 +168,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'Elasticsearch',
         }),
         navLink: {
+          link: SEARCH_ELASTICSEARCH,
           shouldNotCreateHref: true,
-          to: ELASTICSEARCH_PLUGIN.URL,
         },
       },
       {
@@ -174,8 +177,8 @@ export const buildBaseClassicNavItems = ({
         id: 'vectorSearch',
         name: VECTOR_SEARCH_PLUGIN.NAME,
         navLink: {
+          link: SEARCH_VECTOR_SEARCH,
           shouldNotCreateHref: true,
-          to: VECTOR_SEARCH_PLUGIN.URL,
         },
       },
       {
@@ -183,8 +186,8 @@ export const buildBaseClassicNavItems = ({
         id: 'semanticSearch',
         name: SEMANTIC_SEARCH_PLUGIN.NAME,
         navLink: {
+          link: SEARCH_SEMANTIC_SEARCH,
           shouldNotCreateHref: true,
-          to: SEMANTIC_SEARCH_PLUGIN.URL,
         },
       },
       {
@@ -194,8 +197,8 @@ export const buildBaseClassicNavItems = ({
           defaultMessage: 'AI Search',
         }),
         navLink: {
+          link: SEARCH_AI_SEARCH,
           shouldNotCreateHref: true,
-          to: AI_SEARCH_PLUGIN.URL,
         },
       },
     ],

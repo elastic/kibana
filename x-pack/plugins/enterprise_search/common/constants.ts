@@ -15,6 +15,10 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
+  SEARCH_ELASTICSEARCH,
+  SEARCH_VECTOR_SEARCH,
+  SEARCH_SEMANTIC_SEARCH,
+  SEARCH_AI_SEARCH,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -58,7 +62,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 };
 
 export const AI_SEARCH_PLUGIN = {
-  ID: 'enterpriseSearchAISearch',
+  ID: SEARCH_AI_SEARCH,
   NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
     defaultMessage: 'AI Search',
   }),
@@ -91,7 +95,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'enterpriseSearchElasticsearch',
+  ID: SEARCH_ELASTICSEARCH,
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -167,7 +171,7 @@ export const VECTOR_SEARCH_PLUGIN = {
     defaultMessage:
       'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
-  ID: 'enterpriseSearchVectorSearch',
+  ID: SEARCH_VECTOR_SEARCH,
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
     defaultMessage: 'Vector Search',
@@ -184,7 +188,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
     defaultMessage:
       'Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
   }),
-  ID: 'enterpriseSearchSemanticSearch',
+  ID: SEARCH_SEMANTIC_SEARCH,
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.SemanticSearch.productName', {
     defaultMessage: 'Semantic Search',
