@@ -188,11 +188,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (!field || field?.type === 'document') {
       esql = `COUNT(*)`;
     } else {
-      esql = `COUNT(${field.name})`;
+      esql = `COUNT(${sanitazeESQLInput(field.name)})`;
     }
     if (column.filter) {
       if (column.filter.language === 'kquery') return undefined;
-      return undefined; // esql += ` WHERE QSTR("${column.filter.query}")`;
+      return undefined; // esql += ` WHERE QSTR("${sanitazeESQLInput(column.filter.query)}")`;
     }
 
     return esql;
