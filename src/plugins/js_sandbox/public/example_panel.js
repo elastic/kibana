@@ -1,4 +1,4 @@
-function (props) {
+function(props) {
   const wrapperRef = React.useRef(null);
   // Based on this example:
   // https://observablehq.com/@vega/vega-lite-api
@@ -13,7 +13,7 @@ function (props) {
       view.tooltip(new vegaTooltip.Handler().call);
     },
     view: {
-      renderer: 'canvas',
+      renderer: "canvas",
     },
   };
 
@@ -23,31 +23,31 @@ function (props) {
 
     const data = props.data.values.map((d) => ({
       x: d[1],
-      y: d[0],
+      y: d[0]
     }));
-    console.log('data', data);
 
     // now you can use the API!
     vl.markBar({ tooltip: true })
       .data(data)
-      .encode(vl.x().fieldT('x'), vl.y().fieldQ('y'), vl.tooltip([vl.fieldT('x'), vl.fieldQ('y')]))
+      .encode(
+        vl.x().fieldT("x"),
+        vl.y().fieldQ("y"),
+        vl.tooltip([vl.fieldT("x"), vl.fieldQ("y")])
+      )
+      .width("800")
       .render()
-      .then((viewElement) => {
+      .then(viewElement => {
         // render returns a promise to a DOM element containing the chart
         // viewElement.value contains the Vega View object instance
         wrapperRef.current.innerHtml = '';
         wrapperRef.current.appendChild(viewElement);
       });
-  }, [props.data]);
-
-  return (
-    <div
-      ref={wrapperRef}
-      id="myChart"
-      style={{
-        width: '100%',
-        height: '100%',
-      }}
-    />
+    },
+    [props.data]
   );
-};
+
+  return <div ref={wrapperRef} id="myChart" style={{
+    width: "100%",
+    height: "100%",
+  }}></div>;
+}
