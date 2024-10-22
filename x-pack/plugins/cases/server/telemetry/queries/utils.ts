@@ -58,7 +58,7 @@ export const getAlertsCountsAggregationQuery = (savedObjectType: string) => ({
         { from: 'now-1M', to: 'now' },
       ],
     },
-    aggs: {
+    aggregations: {
       topAlertsPerBucket: {
         cardinality: {
           field: `${savedObjectType}.attributes.alertId`,

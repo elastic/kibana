@@ -30,7 +30,7 @@ describe('alerts', () => {
           ],
         },
         references: { cases: { max: { value: 1 } } },
-        additionalAggsResult: { value: 5 },
+        uniqueAlertCommentsCount: { value: 5 },
       },
     });
 
@@ -78,6 +78,13 @@ describe('alerts', () => {
                 },
               ],
             },
+            aggregations: {
+              topAlertsPerBucket: {
+                cardinality: {
+                  field: 'cases-comments.attributes.alertId',
+                },
+              },
+            },
           },
           references: {
             aggregations: {
@@ -87,10 +94,22 @@ describe('alerts', () => {
                     terms: {
                       field: 'cases-comments.references.id',
                     },
+                    aggregations: {
+                      reverse: {
+                        reverse_nested: {},
+                        aggregations: {
+                          topAlerts: {
+                            cardinality: {
+                              field: 'cases-comments.attributes.alertId',
+                            },
+                          },
+                        },
+                      },
+                    },
                   },
                   max: {
                     max_bucket: {
-                      buckets_path: 'ids._count',
+                      buckets_path: 'ids>reverse.topAlerts',
                     },
                   },
                 },
@@ -105,7 +124,7 @@ describe('alerts', () => {
               path: 'cases-comments.references',
             },
           },
-          additionalAggsResult: {
+          uniqueAlertCommentsCount: {
             cardinality: {
               field: 'cases-comments.attributes.alertId',
             },
