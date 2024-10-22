@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -14,7 +15,6 @@ import { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_
 import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
 import { TimeBounds } from '../../types';
 import { BurnRate } from './burn_rate';
-import { BurnRateHeader } from './burn_rate_header';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -61,14 +61,40 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions, range, onBru
     (curr) => curr.name === burnRateOption.windowName
   )?.burnRate;
 
+  const onBurnRateOptionChange = (optionId: string) => {
+    const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
+    setBurnRateOption(selected);
+  };
+
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
       <EuiFlexGroup direction="column" gutterSize="m">
-        <BurnRateHeader
-          burnRateOption={burnRateOption}
-          burnRateOptions={burnRateOptions}
-          setBurnRateOption={setBurnRateOption}
-        />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.slo.burnRates.h2.burnRatePanelTitle', {
+                  defaultMessage: 'Burn rate',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
+                defaultMessage: 'Select the time range',
+              })}
+              options={burnRateOptions.map((opt) => ({
+                id: opt.id,
+                label: opt.label,
+                'aria-label': opt.ariaLabel,
+              }))}
+              idSelected={burnRateOption.id}
+              onChange={onBurnRateOptionChange}
+              buttonSize="compressed"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem grow={1}>
             <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
