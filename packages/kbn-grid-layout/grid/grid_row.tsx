@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
@@ -17,7 +17,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridPanel } from './grid_panel';
-import { GridLayoutStateManager, PanelInteractionEvent } from './types';
+import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
 
 export const GridRow = forwardRef<
   HTMLDivElement,
@@ -41,16 +41,19 @@ export const GridRow = forwardRef<
   ) => {
     const rowData = useStateFromPublishingSubject(gridLayoutStateManager.rows$[rowIndex]);
 
-    const getRowCount = useCallback(() => {
-      const row = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
-      const maxRow = Object.values(row.panels).reduce((acc, panel) => {
-        return Math.max(acc, panel.row + panel.height);
-      }, 0);
-      return maxRow || 1;
+    const getRowCount = useCallback(
+      (row: GridRowData) => {
+        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
+          return Math.max(acc, panel.row + panel.height);
+        }, 0);
+        return maxRow || 1;
+      },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rowIndex]);
+      [rowIndex]
+    );
 
     const initialStyles = useMemo(() => {
+      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
       const { gutterSize, columnCount, rowHeight } = runtimeSettings;
 
@@ -60,13 +63,13 @@ export const GridRow = forwardRef<
           ${columnCount},
           calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
         );
-        grid-template-rows: repeat(${getRowCount()}, ${rowHeight}px);
+        grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
       `;
-    }, [gridLayoutStateManager, getRowCount]);
+    }, [gridLayoutStateManager, getRowCount, rowIndex]);
 
     useEffect(
       () => {
-        const subscription = combineLatest([
+        const styleSubscription = combineLatest([
           gridLayoutStateManager.targetRow$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
@@ -78,7 +81,9 @@ export const GridRow = forwardRef<
 
             const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
-            rowRef.style.gridTemplateRows = `repeat(${getRowCount()}, ${rowHeight}px)`;
+            rowRef.style.gridTemplateRows = `repeat(${getRowCount(
+              gridLayout[rowIndex]
+            )}, ${rowHeight}px)`;
             if (rowIndex === targetRow) {
               // apply "targetted row" styles
               const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
@@ -103,7 +108,7 @@ export const GridRow = forwardRef<
             }
           });
         return () => {
-          subscription.unsubscribe();
+          styleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

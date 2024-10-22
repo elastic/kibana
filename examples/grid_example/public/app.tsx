@@ -10,14 +10,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import { AppMountParameters } from '@kbn/core-application-browser';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 
 import {
-  SearchSerializedState,
   SearchApi,
+  SearchSerializedState,
 } from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
 
 export const GridExample = () => {
