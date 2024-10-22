@@ -16,7 +16,10 @@ import {
   type Entity,
   type EntityColumnIds,
 } from '../../../common/entities';
-import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
+import {
+  getBuiltinEntityDefinitionIdESQLWhereClause,
+  getEntityTypesWhereClause,
+} from './query_helper';
 
 export async function getLatestEntities({
   inventoryEsClient,
@@ -34,13 +37,20 @@ export async function getLatestEntities({
   // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
   const entitiesSortField = sortField === 'alertsCount' ? ENTITY_LAST_SEEN : sortField;
 
+  const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
+  const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
+
+  if (entityTypes) {
+    where.push(getEntityTypesWhereClause(entityTypes));
+  }
+
+  const sort = `SORT ${entitiesSortField} ${sortDirection}`;
+  const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
+
+  const query = [from, ...where, sort, limit].join(' | ');
+
   const request = {
-    query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | ${getEntityTypesWhereClause(entityTypes)}
-     | ${getEntityDefinitionIdWhereClause()}
-     | SORT ${entitiesSortField} ${sortDirection}
-     | LIMIT ${MAX_NUMBER_OF_ENTITIES}
-     `,
+    query,
     filter: {
       bool: {
         filter: [...kqlQuery(kuery)],
