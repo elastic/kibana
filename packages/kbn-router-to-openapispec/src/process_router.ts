@@ -27,8 +27,6 @@ import {
 import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
-import { KibanaFeature } from '@kbn/features-plugin/server';
-
 interface PrivilegeGroupValue {
   allRequired: string[];
   anyRequired: string[];
@@ -41,66 +39,74 @@ interface PrivilegeGroups {
 }
 
 const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: string) => {
-  if (!route?.security?.authz || (route.security.authz as AuthzDisabled).enabled === false) {
-    return '';
-  }
-
-  const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
-  const offeringGroupedPrivileges = privileges.reduce<PrivilegeGroups>(
-    (groups, privilege) => {
-      if (typeof privilege === 'string') {
-        groups.all.allRequired.push(privilege);
-
-        return groups;
-      }
-      const group = (privilege.offering ?? 'all') as keyof PrivilegeGroups;
-
-      groups[group].allRequired.push(...(privilege.allRequired ?? []));
-      groups[group].anyRequired.push(...(privilege.anyRequired ?? []));
-
-      return groups;
-    },
-    {
-      all: { allRequired: [], anyRequired: [] },
-      serverless: { allRequired: [], anyRequired: [] },
-      traditional: { allRequired: [], anyRequired: [] },
+  if (route.security) {
+    if (!('authz' in route.security) || (route.security.authz as AuthzDisabled).enabled === false) {
+      return false;
     }
-  );
+    if ('authz' in route.security) {
+      const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
+      const offeringGroupedPrivileges = privileges.reduce<PrivilegeGroups>(
+        (groups, privilege) => {
+          if (typeof privilege === 'string') {
+            groups.all.allRequired.push(privilege);
 
-  const hasAnyOfferingPrivileges = (offering: string) =>
-    offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired.length ||
-    offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired.length;
+            return groups;
+          }
+          const group = (privilege.offering ?? 'all') as keyof PrivilegeGroups;
 
-  const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
-    const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
-    const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+          groups[group].allRequired.push(...(privilege.allRequired ?? []));
+          groups[group].anyRequired.push(...(privilege.anyRequired ?? []));
 
-    return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
-  };
+          return groups;
+        },
+        {
+          all: { allRequired: [], anyRequired: [] },
+          serverless: { allRequired: [], anyRequired: [] },
+          traditional: { allRequired: [], anyRequired: [] },
+        }
+      );
 
-  if (!hasAnyOfferingPrivileges('serverless') && !hasAnyOfferingPrivileges('traditional')) {
-    const { allRequired, anyRequired } = offeringGroupedPrivileges.all;
+      const hasAnyOfferingPrivileges = (offering: string) =>
+        offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired.length ||
+        offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired.length;
 
-    return `[Authz] Route required privileges: ${getPrivilegesDescription(
-      allRequired,
-      anyRequired
-    )}`;
+      const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
+        const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
+        const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+
+        return `${allDescription}${
+          allDescription && anyDescription ? ' AND ' : ''
+        }${anyDescription}`;
+      };
+
+      if (!hasAnyOfferingPrivileges('serverless') && !hasAnyOfferingPrivileges('traditional')) {
+        const { allRequired, anyRequired } = offeringGroupedPrivileges.all;
+
+        return `[Authz] Route required privileges: ${getPrivilegesDescription(
+          allRequired,
+          anyRequired
+        )}`;
+      }
+
+      const getDescriptionForOffering = (offering: string) => {
+        const allRequired = [
+          ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired,
+          ...offeringGroupedPrivileges.all.allRequired,
+        ];
+        const anyRequired = [
+          ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired,
+          ...offeringGroupedPrivileges.all.anyRequired,
+        ];
+
+        return `Route required privileges for: ${getPrivilegesDescription(
+          allRequired,
+          anyRequired
+        )}.`;
+      };
+
+      return `[Authz] ${getDescriptionForOffering(currentOffering)}`;
+    }
   }
-
-  const getDescriptionForOffering = (offering: string) => {
-    const allRequired = [
-      ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired,
-      ...offeringGroupedPrivileges.all.allRequired,
-    ];
-    const anyRequired = [
-      ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired,
-      ...offeringGroupedPrivileges.all.anyRequired,
-    ];
-
-    return `Route required privileges for: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
-  };
-
-  return `[Authz] ${getDescriptionForOffering(currentOffering)}`;
 };
 
 export const processRouter = (
@@ -139,7 +145,7 @@ export const processRouter = (
       }
 
       const authzDescription = extractAuthzDescription(route, buildFlavour);
-      console.log({ route, authzDescription });
+
       const description = `${route.options.description ?? ''}${authzDescription}`;
 
       const operation: OpenAPIV3.OperationObject = {
