@@ -19,8 +19,11 @@ import { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 import { ServiceNameBadgeWithActions } from './service_name_badge_with_actions';
 
-const dataTestSubj = 'serviceNameCell';
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
+const dataTestSubj = 'serviceNameCell';
+const agentIconStyle = css`
+  margin-right: ${euiThemeVars.euiSizeXS};
+`;
 
 export const getServiceNameCell =
   (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
@@ -34,13 +37,7 @@ export const getServiceNameCell =
 
     const getIcon = () => (
       <EuiToolTip position="left" content={agentName} repositionOnScroll={true}>
-        <AgentIcon
-          agentName={agentName}
-          size="m"
-          css={css`
-            margin-right: ${euiThemeVars.euiSizeXS};
-          `}
-        />
+        <AgentIcon agentName={agentName} size="m" css={agentIconStyle} />
       </EuiToolTip>
     );
 
