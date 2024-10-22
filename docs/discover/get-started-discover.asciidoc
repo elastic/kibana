@@ -6,9 +6,6 @@ Learn how to use *Discover* to:
 - **Explore** the fields and content of that data in depth.
 - **Present** your findings in a visualization.
 
-At the end of this tutorial, you’ll be ready to start exploring with your own
-data in *Discover*.
-
 *Prerequisites:*
 
 - If you don’t already have {kib}, https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[start a free trial] on Elastic Cloud.
@@ -20,34 +17,36 @@ and <<kibana-concepts-analysts, {kib} concepts>>.
 
 [float]
 [[find-the-data-you-want-to-use]]
-=== Find your data
+=== Load data into Discover
 
-Tell {kib} where to find the data you want to explore, and then specify the time range in which to view that data.
+Select the data you want to explore, and then specify the time range in which to view that data.
 
-. Find **Discover** in the navigation menu or by using the <<kibana-navigation-search,global search bar>>.
+. Find **Discover** in the navigation menu or by using the <<kibana-navigation-search,global search field>>.
 
-. Select the data you want to work with.
+. Select the data view that contains the data you want to explore.
 +
-{kib} uses a <<data-views,{data-source}>> to tell it where to find
-your {es} data.
-To view the ecommerce sample data, open the {data-source} menu, and then select **Kibana Sample Data Ecommerce**.
+TIP: {kib} requires a <<data-views,{data-source}>> to access your Elasticsearch data. A {data-source} can point to one or more indices, {ref}/data-streams.html[data streams], or {ref}/alias.html[index aliases]. When adding data to {es} using one of the many integrations available, some data views are created automatically most of the time, but you can also create your own.
++
+If you're using sample data, data views are automatically created and are ready to use.
 +
 [role="screenshot"]
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width="40%"]
 
-+
-To create a data view for your own data,
-click *Create a data view*.
-For details, refer to <<data-views, Create a data view.>>
-
-. Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
+. If needed, adjust the <<set-time-filter,time range>>, for example by setting it to the *Last 7 days*.
 +
 The range selection is based on the default time field in your data.
 If you are using the sample data, this value was set when you added the data.
 If you are using your own data, and it does not have a time field, the range selection is not available.
 
-. To view the count of documents for a given time in the specified range,
-click and drag the mouse over the chart.
+**Discover** is populated with your data and you can view various areas with different information:
+
+* All fields detected are listed in a dedicated panel.
+* A chart allows you to visualize your data. 
+* A table that shows all the data matching your data view.
+By default, the table includes a column for the time field and a column that lists all other fields in the document.
+You can modify the document table to display your fields of interest.
+
+You can later filter the data that shows in the chart and in the table by specifying a query and changing the time range.
 
 [float]
 [[explore-fields-in-your-data]]
@@ -55,69 +54,38 @@ click and drag the mouse over the chart.
 
 **Discover** provides utilities designed to help you make sense of your data:
 
-* a list of all the fields extracted from the data.
-* a table
-that shows all the documents that match your search.
-By default, the document table includes a column for the time field and a column that lists all other fields in the document.
-You can modify the document table to display your fields of interest.
-
 . In the sidebar, check the available fields. It's very common to have hundreds of fields. Use the search at the top of that sidebar to look for specific terms in the field names.
 +
 In this example, we've entered `ma` in the search field to find the `manufacturer` field.
 +
 [role="screenshot"]
-image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
+image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=40%]
 +
 TIP: You can use wildcards in field searches.  For example, `goe*dest` finds `geo.dest` and `geo.src.dest`.
 
-. In the *Available fields* list, click `manufacturer` to view its most popular values.
+. Select a field to view its most frequent values.
 +
 **Discover** shows the top 10 values and the number of records used to calculate those values.
 
-. Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
-You can also drag the field from the *Available fields* list into the document table.
+. Select the *Plus* icon to add fields to the results table.
+You can also drag them from the list into the table.
 +
 [role="screenshot"]
 image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
-
-. Find the `customer_first_name` and `customer_last_name` fields and add
-them to the document table. Your table should look similar to this:
++
+When you add fields to the table, the **Summary** column that was summarizing each result's data is replaced.
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
+. Arrange the view to your liking to display the fields and data you care most about using the various display options of **Discover**. For example, you can change the order and size of columns, expand the table to be in full screen or collapse the chart and the list of fields.
 
-. Optionally try out these actions:
-+
-* To rearrange the table columns, click a
-column header, and then select *Move left* or *Move right*.
-+
-* To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
-+
-* To view more of the document table,
-click
-image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
-to open the *Chart options* menu,
-and then select *Hide chart*.
-+
-* For keyboard shortcuts on the document table, click
-image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
-+
-* To set the row height to one or more lines, or automatically
-adjust the height to fit the contents, click
-image:images/row-height-icon.png[icon to open the Row height pop-up, width=24px].
-+
-* To toggle the table in and out of fullscreen mode, click the fullscreen icon
-image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
-
-
-
-
+. **Save** your changes to be able to open the same view later on and explore your data further.
 
 
 [float]
 [[add-field-in-discover]]
-=== Add a field to your {data-source}
+==== Add a field to your {data-source}
 
 What happens if you forgot to define an important value as a separate field? Or, what if you
 want to combine two fields and treat them as one? This is where {ref}/runtime.html[runtime fields] come into play.
@@ -125,7 +93,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. In the sidebar, click *Add a field*.
+. In the sidebar, select *Add a field*.
 
 . In the *Create field* form, enter `hello` for the name.
 
