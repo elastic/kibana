@@ -61,7 +61,7 @@ export const remove = (ast: ESQLAstQueryExpression, index: number = 0): ESQLComm
     return;
   }
 
-  const success = generic.removeCommand(ast, command);
+  const success = !!generic.removeCommand(ast, command);
 
   if (!success) {
     return;

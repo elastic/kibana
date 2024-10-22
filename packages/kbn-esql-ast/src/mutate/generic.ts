@@ -254,34 +254,34 @@ export const removeCommandOption = (
  *
  * @param ast The root AST node to search for command arguments.
  * @param node The argument AST node to remove.
- * @returns Returns true if the argument was removed, false otherwise.
+ * @returns Returns the command that the argument was removed from, if any.
  */
 export const removeCommandArgument = (
   ast: ESQLAstQueryExpression,
   node: ESQLProperNode
-): boolean => {
+): ESQLCommand | undefined => {
   return new Visitor()
-    .on('visitCommand', (ctx): boolean => {
+    .on('visitCommand', (ctx): ESQLCommand | undefined => {
       const args = ctx.node.args;
       const length = args.length;
 
       for (let i = 0; i < length; i++) {
         if (args[i] === node) {
           args.splice(i, 1);
-          return true;
+          return ctx.node;
         }
       }
 
-      return false;
+      return undefined;
     })
-    .on('visitQuery', (ctx): boolean => {
-      for (const success of ctx.visitCommands()) {
-        if (success) {
-          return true;
+    .on('visitQuery', (ctx): ESQLCommand | undefined => {
+      for (const cmd of ctx.visitCommands()) {
+        if (cmd) {
+          return cmd;
         }
       }
 
-      return false;
+      return undefined;
     })
     .visitQuery(ast);
 };

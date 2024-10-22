@@ -20,6 +20,7 @@ import {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLocation,
+  ESQLOrderExpression,
   ESQLSource,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
@@ -127,6 +128,20 @@ export namespace Builder {
         quoted: false,
         name: template.parts.join('.'),
         type: 'column',
+      };
+    };
+
+    export const order = (
+      operand: ESQLColumn,
+      template: Omit<AstNodeTemplate<ESQLOrderExpression>, 'name' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLOrderExpression => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        args: [operand],
+        type: 'order',
       };
     };
 

@@ -671,7 +671,7 @@ const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression 
     return arg;
   }
 
-  return createOrderExpression(ctx, arg, order, nulls);
+  return createOrderExpression(ctx, arg as ESQLColumn, order, nulls);
 };
 
 export function visitOrderExpressions(
