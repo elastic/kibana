@@ -99,6 +99,7 @@ export function RunControls({
     mlNodesAvailable,
     jobState
   );
+  console.log('disabledState', disabledState);
 
   const durationInput = (
     <EuiFieldText
@@ -136,10 +137,10 @@ export function RunControls({
       </EuiText>
       <EuiSpacer size="s" />
       <EuiForm>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xl" alignItems="top">
+          <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem>
                 <EuiFormRow
                   label={
                     <FormattedMessage
@@ -168,17 +169,19 @@ export function RunControls({
                   )}
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiFormRow
+                  hasEmptyLabelSpace={true}
                   helpText={i18n.translate(
                     'xpack.ml.timeSeriesExplorer.runControls.neverExpireHelpText',
                     {
                       defaultMessage:
-                        'When not selected, created forecasts will expire after 14 days.',
+                        'When selected, forecast results will be retained indefinitely. If disabled, forecasts will be retained for 14 days.',
                     }
                   )}
                 >
                   <EuiSwitch
+                    disabled={disabledState.isDisabled}
                     label={i18n.translate(
                       'xpack.ml.timeSeriesExplorer.runControls.neverExpireLabel',
                       {
