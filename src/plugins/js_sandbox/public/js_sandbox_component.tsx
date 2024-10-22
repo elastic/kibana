@@ -29,7 +29,7 @@ import React, { useEffect, useRef, useState, type FC } from 'react';
  *
  * User Code Wrapping:
  * - The user input is required to provide a functional component.
- * - The `runUserCode` function evaluates the provided component code.
+ * - The `transpileUserCode` function evaluates the provided component code.
  * - This function uses eval() to execute user code, but it’s done within the
  *   controlled iframe to mitigate security risks.
  * - After evaluating the user code, it attempts to render a UserComponent
@@ -61,7 +61,7 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
   // Ref to store the iframe reference
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // The runUserCode function evaluates the provided component code.
+  // The transpileUserCode function evaluates the provided component code.
   // This function uses eval() to execute user code, but it’s done within
   // the controlled iframe to mitigate security risks.
   const iframeContent = `
@@ -85,6 +85,8 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
                   React.createElement(UserComponent, { data }),
                   document.getElementById('root')
                 );
+              } else {
+                console.error('User provided code is not a function');
               }
             } catch (e) {
               console.error('Render Error:', e);
@@ -92,9 +94,9 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
           };
 
           // Function to evaluate and render user component with JSX support
-          const compileUserCode = function(userCode) {
+          const transpileUserCode = function(userCode) {
             try {
-              // Transpile the user code from JSX to JavaScript using Sucrase
+              // Transpile the user code from JSX to JavaScript using Babel
               const transpiledCode = Babel.transform('UserComponent = ' + userCode, {
                 presets: ['react']
               }).code;
@@ -102,31 +104,42 @@ export const JsSandboxComponent: FC<{ hashedJs: string }> = ({ hashedJs }) => {
 
               eval(transpiledCode);
             } catch (e) {
-              console.error('Error:', e);
+              console.error('Error transpiling user input:', e);
             }
           };
 
-
           document.addEventListener('DOMContentLoaded', function(event) {
-            compileUserCode(${JSON.stringify(hashedJs)});
-            console.log('UserComponent', UserComponent);
-
-            ReactDOM.render(
-              React.createElement(UserComponent, null),
-              document.getElementById('root')
-            );
+            transpileUserCode(${JSON.stringify(hashedJs)});
+            // iframe sends a "ready" message to the parent
+            window.parent.postMessage({ type: 'iframeReady' }, '*');
           });
 
-          // Listen for messages from the parent window
+          // Listen for messages from the parent window to receive data updates
           window.addEventListener('message', function(event) {
-            if (event.data.type === 'updateData') {
-              renderUserComponent(event.data.payload);
+            if (event.data.type === 'updateData' && typeof UserComponent === 'function') {
+              renderUserComponent(data);
             }
           });
         </script>
       </body>
     </html>
   `;
+
+  // initial handshake with iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'iframeReady') {
+        iframeRef.current?.contentWindow?.postMessage({ type: 'updateData', payload: data }, '*');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Effect to update the iframe when `data` changes
   useEffect(() => {
