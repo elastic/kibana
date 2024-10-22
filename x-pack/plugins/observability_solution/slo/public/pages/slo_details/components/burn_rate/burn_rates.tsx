@@ -12,56 +12,41 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
-import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
-import { BurnRate } from './burn_rate';
+import { BurnRateWindow, useFetchBurnRateWindows } from '../../hooks/use_fetch_burn_rate_windows';
+import { BurnRateStatus } from './burn_rate_status';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing?: boolean;
 }
 
-export interface BurnRateOption {
-  id: string;
-  label: string;
-  windowName: string;
-  threshold: number;
-  duration: number;
-  ariaLabel: string;
-}
-
-function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; duration: string }> {
-  return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
-}
-
 export function BurnRates({ slo, isAutoRefreshing }: Props) {
-  const { burnRateOptions } = useBurnRateOptions(slo);
-  const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
+  const burnRateWindows = useFetchBurnRateWindows(slo);
+  const [selectedWindow, setSelectedwindow] = useState(burnRateWindows[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
     shouldRefetch: isAutoRefreshing,
-    windows: getWindowsFromOptions(burnRateOptions),
+    windows: toPayload(burnRateWindows),
   });
 
   useEffect(() => {
-    if (burnRateOptions.length > 0) {
-      setBurnRateOption(burnRateOptions[0]);
+    if (burnRateWindows.length > 0) {
+      setSelectedwindow(burnRateWindows[0]);
     }
-  }, [burnRateOptions]);
+  }, [burnRateWindows]);
 
-  const dataTimeRange = {
-    from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
-    to: new Date(),
+  const onBurnRateOptionChange = (windowName: string) => {
+    const selected = burnRateWindows.find((opt) => opt.name === windowName) ?? burnRateWindows[0];
+    setSelectedwindow(selected);
   };
 
-  const threshold = burnRateOption.threshold;
-  const burnRate = data?.burnRates.find(
-    (curr) => curr.name === burnRateOption.windowName
-  )?.burnRate;
-
-  const onBurnRateOptionChange = (optionId: string) => {
-    const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
-    setBurnRateOption(selected);
-  };
+  const threshold = selectedWindow.threshold;
+  const longWindowBurnRate =
+    data?.burnRates.find((curr) => curr.name === longWindowName(selectedWindow.name))?.burnRate ??
+    0;
+  const shortWindowbBurnRate =
+    data?.burnRates.find((curr) => curr.name === shortWindowName(selectedWindow.name))?.burnRate ??
+    0;
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
@@ -81,12 +66,12 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
               legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
                 defaultMessage: 'Select the time range',
               })}
-              options={burnRateOptions.map((opt) => ({
-                id: opt.id,
-                label: opt.label,
-                'aria-label': opt.ariaLabel,
+              options={burnRateWindows.map((burnRateWindow) => ({
+                id: burnRateWindow.name,
+                label: burnRateWindowLabel(burnRateWindow),
+                'aria-label': burnRateWindowLabel(burnRateWindow),
               }))}
-              idSelected={burnRateOption.id}
+              idSelected={selectedWindow.name}
               onChange={onBurnRateOptionChange}
               buttonSize="compressed"
             />
@@ -94,14 +79,51 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem grow={1}>
-            <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
+            <BurnRateStatus
+              selectedWindow={selectedWindow}
+              shortWindowBurnRate={shortWindowbBurnRate}
+              longWindowBurnRate={longWindowBurnRate}
+              isLoading={isLoading}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
+            <ErrorRateChart
+              slo={slo}
+              dataTimeRange={{
+                from: moment()
+                  .subtract(selectedWindow.longWindow.value, selectedWindow.longWindow.unit)
+                  .toDate(),
+                to: new Date(),
+              }}
+              threshold={threshold}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );
 }
+
+const burnRateWindowLabel = (option: BurnRateWindow) =>
+  i18n.translate('xpack.slo.burnRates.optionLabel', {
+    defaultMessage: '{duration, plural, one {# hour} other {# hours}}',
+    values: { duration: option.longWindow.value },
+  });
+
+const longWindowName = (window: string) => `${window}_LONG`;
+const shortWindowName = (window: string) => `${window}_SHORT`;
+const toPayload = (
+  burnRateWindows: BurnRateWindow[]
+): Array<{ name: string; duration: string }> => {
+  return burnRateWindows.flatMap((window) => [
+    {
+      name: longWindowName(window.name),
+      duration: `${window.longWindow.value}${window.longWindow.unit}`,
+    },
+    {
+      name: shortWindowName(window.name),
+      duration: `${window.shortWindow.value}${window.shortWindow.unit}`,
+    },
+  ]);
+};
