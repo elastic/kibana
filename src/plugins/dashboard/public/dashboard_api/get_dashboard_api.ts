@@ -19,7 +19,7 @@ export interface InitialComponentState {
   lastSavedInput: DashboardContainerInput;
   lastSavedId: string | undefined;
   managed: boolean;
-  fullScreenMode: boolean | undefined;
+  fullScreenMode: boolean;
 }
 
 export function getDashboardApi(
