@@ -241,7 +241,7 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-custom-2"]');
-    const switchAction = activeRow.find('EuiButtonIcon[data-test-subj="Custom 2-switchSpace"]');
+    const switchAction = activeRow.find('EuiButtonIcon[data-test-subj="custom-2-switchSpace"]');
     expect(switchAction.prop('isDisabled')).toBe(true);
   });
 
@@ -273,7 +273,7 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     const nonActiveRow = wrapper.find('[data-test-subj="spacesListTableRow-default"]');
-    const switchAction = nonActiveRow.find('EuiButtonIcon[data-test-subj="Default-switchSpace"]');
+    const switchAction = nonActiveRow.find('EuiButtonIcon[data-test-subj="default-switchSpace"]');
     expect(switchAction.prop('isDisabled')).toBe(false);
   });
 

@@ -59,6 +59,8 @@ export const SeriesTypes = {
   BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
+export const defaultSeriesType = SeriesTypes.BAR_STACKED;
+
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export interface AxesSettingsConfig {

@@ -39,23 +39,25 @@ describe('EntityStoreDataClient', () => {
     sortOrder: 'asc' as SortOrder,
   };
 
+  const emptySearchResponse = {
+    took: 0,
+    timed_out: false,
+    _shards: {
+      total: 0,
+      successful: 0,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: 0,
+      hits: [],
+    },
+  };
+
   describe('search entities', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      esClientMock.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 0,
-          successful: 0,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 0,
-          hits: [],
-        },
-      });
+      esClientMock.search.mockResolvedValue(emptySearchResponse);
     });
 
     it('searches in the entities store indices', async () => {
@@ -132,6 +134,48 @@ describe('EntityStoreDataClient', () => {
       const response = await dataClient.searchEntities(defaultSearchParams);
 
       expect(response.inspect).toMatchSnapshot();
+    });
+
+    it('returns searched entity record', async () => {
+      const fakeEntityRecord = { entity_record: true, asset: { criticality: 'low' } };
+
+      esClientMock.search.mockResolvedValue({
+        ...emptySearchResponse,
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _index: '.entities.v1.latest.security_host_default',
+              _source: fakeEntityRecord,
+            },
+          ],
+        },
+      });
+
+      const response = await dataClient.searchEntities(defaultSearchParams);
+
+      expect(response.records[0]).toEqual(fakeEntityRecord);
+    });
+
+    it("returns empty asset criticality when criticality value is 'deleted'", async () => {
+      const fakeEntityRecord = { entity_record: true };
+
+      esClientMock.search.mockResolvedValue({
+        ...emptySearchResponse,
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _index: '.entities.v1.latest.security_host_default',
+              _source: { asset: { criticality: 'deleted' }, ...fakeEntityRecord },
+            },
+          ],
+        },
+      });
+
+      const response = await dataClient.searchEntities(defaultSearchParams);
+
+      expect(response.records[0]).toEqual(fakeEntityRecord);
     });
   });
 });

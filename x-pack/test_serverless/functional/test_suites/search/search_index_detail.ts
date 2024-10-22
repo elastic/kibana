@@ -130,6 +130,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have index documents', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
         });
+        it('should have one document in quick stats', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
+        });
         it('should have with data tabs', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
           await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
@@ -148,6 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
           await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
           await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
         });
       });
 

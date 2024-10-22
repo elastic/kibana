@@ -45,7 +45,7 @@ export const getTagsFromReferences = (references: SavedObjectReference[], allTag
 };
 
 export const convertTagNameToId = (tagName: string, allTags: Tag[]): string | undefined => {
-  const found = allTags.find((tag) => tag.name === tagName);
+  const found = allTags.find((tag) => tag.name.toLowerCase() === tagName.toLowerCase());
   return found?.id;
 };
 

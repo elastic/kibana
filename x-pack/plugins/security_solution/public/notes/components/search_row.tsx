@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSearchBar,
@@ -16,17 +15,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
-import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
-import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
-import { userFilterAssociatedNotes, userFilterUsers, userSearchedNotes } from '..';
+import { UserFilterDropdown } from './user_filter_dropdown';
+import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';
+import { userFilterAssociatedNotes, userSearchedNotes } from '..';
 import { AssociatedFilter } from '../../../common/notes/constants';
 
-export const USERS_DROPDOWN = i18n.translate('xpack.securitySolution.notes.usersDropdownLabel', {
-  defaultMessage: 'Users',
-});
 const FILTER_SELECT = i18n.translate('xpack.securitySolution.notes.management.filterSelect', {
   defaultMessage: 'Select filter',
 });
@@ -55,26 +49,6 @@ export const SearchRow = React.memo(() => {
     [dispatch]
   );
 
-  const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
-    searchTerm: '',
-  });
-  const users = useMemo(
-    () =>
-      (userProfiles || []).map((userProfile: UserProfileWithAvatar) => ({
-        label: userProfile.user.full_name || userProfile.user.username,
-      })),
-    [userProfiles]
-  );
-
-  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<string>>>();
-  const onChange = useCallback(
-    (user: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedUser(user);
-      dispatch(userFilterUsers(user.length > 0 ? user[0].label : ''));
-    },
-    [dispatch]
-  );
-
   const onAssociatedNoteSelectChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       dispatch(userFilterAssociatedNotes(e.target.value as AssociatedFilter));
@@ -88,15 +62,7 @@ export const SearchRow = React.memo(() => {
         <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiComboBox
-          prepend={USERS_DROPDOWN}
-          singleSelection={{ asPlainText: true }}
-          options={users}
-          selectedOptions={selectedUser}
-          onChange={onChange}
-          isLoading={isLoadingSuggestedUsers}
-          data-test-subj={USER_SELECT_TEST_ID}
-        />
+        <UserFilterDropdown />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSelect

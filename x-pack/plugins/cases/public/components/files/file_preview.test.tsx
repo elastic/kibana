@@ -16,7 +16,8 @@ import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mo
 import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
-describe('FilePreview', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/182364
+describe.skip('FilePreview', () => {
   let user: UserEvent;
   let appMockRender: AppMockRenderer;
 

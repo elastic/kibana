@@ -168,20 +168,6 @@ export const ENTRY_NAME_INPUT_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const ENTRY_SPACE_INPUT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySpaceInputLabel',
-  {
-    defaultMessage: 'Space',
-  }
-);
-
-export const ENTRY_SPACE_INPUT_PLACEHOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySpaceInputPlaceholder',
-  {
-    defaultMessage: 'Select',
-  }
-);
-
 export const SHARING_PRIVATE_OPTION_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.sharingPrivateOptionLabel',
   {
@@ -272,7 +258,8 @@ export const ENTRY_DESCRIPTION_HELP_LABEL = i18n.translate(
 export const ENTRY_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionPlaceholder',
   {
-    defaultMessage: 'Use this index to answer any question related to asset information.',
+    defaultMessage:
+      'Example: "Use this index to answer any question related to asset information."',
   }
 );
 
@@ -295,7 +282,7 @@ export const ENTRY_QUERY_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionPlaceholder',
   {
     defaultMessage:
-      'Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects.',
+      'Example: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
   }
 );
 

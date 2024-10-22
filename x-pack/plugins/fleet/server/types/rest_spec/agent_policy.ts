@@ -20,33 +20,59 @@ import { validateKuery } from '../../routes/utils/filter_utils';
 import { BulkRequestBodySchema } from './common';
 
 export const GetAgentPoliciesRequestSchema = {
-  query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1 })),
-    perPage: schema.maybe(schema.number({ defaultValue: 20 })),
-    sortField: schema.maybe(schema.string()),
-    sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-    showUpgradeable: schema.maybe(schema.boolean()),
-    kuery: schema.maybe(
-      schema.string({
-        validate: (value: string) => {
-          const validationObj = validateKuery(
-            value,
-            [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-            AGENT_POLICY_MAPPINGS,
-            true
-          );
-          if (validationObj?.error) {
-            return validationObj?.error;
-          }
-        },
-      })
-    ),
-    noAgentCount: schema.maybe(schema.boolean()),
-    full: schema.maybe(schema.boolean()),
-    format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
-    ),
-  }),
+  query: schema.object(
+    {
+      page: schema.maybe(schema.number({ defaultValue: 1 })),
+      perPage: schema.maybe(schema.number({ defaultValue: 20 })),
+      sortField: schema.maybe(schema.string()),
+      sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+      showUpgradeable: schema.maybe(schema.boolean()),
+      kuery: schema.maybe(
+        schema.string({
+          validate: (value: string) => {
+            const validationObj = validateKuery(
+              value,
+              [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
+              AGENT_POLICY_MAPPINGS,
+              true
+            );
+            if (validationObj?.error) {
+              return validationObj?.error;
+            }
+          },
+        })
+      ),
+      noAgentCount: schema.maybe(
+        schema.boolean({
+          meta: { description: 'use withAgentCount instead', deprecated: true },
+        })
+      ), //
+      withAgentCount: schema.maybe(
+        schema.boolean({
+          meta: { description: 'get policies with agent count' },
+        })
+      ),
+      full: schema.maybe(
+        schema.boolean({
+          meta: { description: 'get full policies with package policies populated' },
+        })
+      ),
+      format: schema.maybe(
+        schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      ),
+    },
+    {
+      validate: (query) => {
+        if (
+          query.perPage &&
+          query.perPage > 100 &&
+          (query.full || query.noAgentCount === false || query.withAgentCount === true)
+        ) {
+          return 'perPage should be less or equal to 100 when fetching full policies or agent count.';
+        }
+      },
+    }
+  ),
 };
 
 export const BulkGetAgentPoliciesRequestSchema = {
@@ -145,3 +171,17 @@ export const GetK8sManifestRequestSchema = {
 export const GetK8sManifestResponseScheme = schema.object({
   item: schema.string(),
 });
+
+export const GetAgentPolicyOutputsRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};
+
+export const GetListAgentPolicyOutputsRequestSchema = {
+  body: schema.object({
+    ids: schema.arrayOf(schema.string(), {
+      meta: { description: 'list of package policy ids' },
+    }),
+  }),
+};

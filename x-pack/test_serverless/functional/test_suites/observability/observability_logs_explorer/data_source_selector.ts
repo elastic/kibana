@@ -214,25 +214,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should sort the integrations list by the clicked sorting option', async () => {
           // Test ascending order
-          await PageObjects.observabilityLogsExplorer.clickSortButtonBy('asc');
-
           await retry.try(async () => {
+            await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
+            await PageObjects.observabilityLogsExplorer.clickSortButtonBy('asc');
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
             expect(integrations).to.eql(initialPackagesTexts);
           });
 
           // Test descending order
-          await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
-
           await retry.try(async () => {
+            await PageObjects.observabilityLogsExplorer.clickSortButtonBy('asc');
+            await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
             expect(integrations).to.eql(initialPackagesTexts.slice().reverse());
           });
 
           // Test back ascending order
-          await PageObjects.observabilityLogsExplorer.clickSortButtonBy('asc');
-
           await retry.try(async () => {
+            await PageObjects.observabilityLogsExplorer.clickSortButtonBy('desc');
+            await PageObjects.observabilityLogsExplorer.clickSortButtonBy('asc');
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
             expect(integrations).to.eql(initialPackagesTexts);
           });

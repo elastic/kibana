@@ -47,7 +47,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
       [
         'dev_metrics',
         'metadata',
-        'dev_match',
         'mv_expand',
         'stats',
         'dev_inlinestats',
@@ -75,6 +74,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'asc',
         'desc',
         'nulls_order',
+        'match',
       ],
       euiThemeVars.euiColorAccentText,
       true // isBold

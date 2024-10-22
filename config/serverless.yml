@@ -155,7 +155,7 @@ server.versioned.versionResolution: newest
 server.versioned.strictClientVersionCheck: false
 
 # Enforce single "default" space and disable feature visibility controls
-xpack.spaces.maxSpaces: 1
+xpack.spaces.maxSpaces: 100
 xpack.spaces.allowFeatureVisibility: false
 xpack.spaces.allowSolutionVisibility: false
 

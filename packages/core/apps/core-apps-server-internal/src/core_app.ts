@@ -248,6 +248,7 @@ export class CoreAppsService {
               if (latestOverrideVersion !== persistedOverrides.version) {
                 this.configService.setDynamicConfigOverrides(persistedOverrides.attributes);
                 latestOverrideVersion = persistedOverrides.version;
+                this.logger.info('Succeeded in applying persisted dynamic config overrides');
               }
             } catch (err) {
               // Potential failures:

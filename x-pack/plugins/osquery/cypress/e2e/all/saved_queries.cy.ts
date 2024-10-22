@@ -43,9 +43,7 @@ import {
 import { ServerlessRoleName } from '../../support/roles';
 import { getAdvancedButton } from '../../screens/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/195453
-// Failing: See https://github.com/elastic/kibana/issues/195453
-describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -94,20 +92,18 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
       cy.getBySel('dataGridColumnSelectorButton').click();
       cy.get('[data-popover-open="true"]').should('be.visible');
-      cy.getBySel('dataGridColumnSelectorToggleColumnVisibility-osquery.cmdline').click();
-      cy.getBySel('dataGridColumnSelectorToggleColumnVisibility-osquery.cwd').click();
-      cy.getBySel(
-        'dataGridColumnSelectorToggleColumnVisibility-osquery.disk_bytes_written.number'
-      ).click();
+      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.cmdline').click();
+      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.cwd').click();
+      cy.getBySel('dataGridColumnSelectorColumnItem-osquery.disk_bytes_written.number').click();
       cy.getBySel('dataGridColumnSelectorButton').click();
       cy.get('[data-popover-open="true"]').should('not.exist');
-      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // change pagination
       cy.getBySel('pagination-button-next').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('pagination-button-next').click();
-      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // enter fullscreen
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
@@ -118,7 +114,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       // sorting
       cy.getBySel('dataGridHeaderCellActionButton-osquery.egid').click({ force: true });
       cy.contains(/Sort A-Z$/).click();
-      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
+      cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Enter fullscreen$/).should('exist');
 

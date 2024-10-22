@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -16,7 +16,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
@@ -87,11 +87,12 @@ export type RendererFunction<RenderArgs, Result = RendererResult> = (args: Rende
 
 export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   criteria: CustomMetricExpressionParams[];
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: CustomThresholdSearchSourceFields;
   groupBy?: string | string[];
 }
 export interface CustomThresholdAlertFields {
   [ALERT_GROUP]?: Array<{ field: string; value: string }>;
+  [ALERT_RULE_PARAMETERS]: CustomThresholdRuleTypeParams;
 }
 
 export const expressionTimestampsRT = rt.type({

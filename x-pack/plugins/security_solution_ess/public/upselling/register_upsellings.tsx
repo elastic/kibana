@@ -12,6 +12,7 @@ import {
   ALERT_SUPPRESSION_RULE_FORM,
   UPGRADE_ALERT_ASSIGNMENTS,
   UPGRADE_INVESTIGATION_GUIDE,
+  UPGRADE_NOTES_MANAGEMENT_USER_FILTER,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   MessageUpsellings,
@@ -131,5 +132,10 @@ export const upsellingMessages: UpsellingMessages = [
     id: 'alert_suppression_rule_details',
     minimumLicenseRequired: 'platinum',
     message: ALERT_SUPPRESSION_RULE_DETAILS,
+  },
+  {
+    id: 'note_management_user_filter',
+    minimumLicenseRequired: 'platinum',
+    message: UPGRADE_NOTES_MANAGEMENT_USER_FILTER('Platinum'),
   },
 ];

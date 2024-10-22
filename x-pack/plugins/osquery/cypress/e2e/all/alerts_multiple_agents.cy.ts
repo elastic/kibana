@@ -15,7 +15,8 @@ import {
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170157
+describe.skip(
   'Alert Event Details - dynamic params',
   {
     tags: ['@ess', '@serverless'],

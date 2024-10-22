@@ -11,6 +11,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 
 import { AssistantSettingsButton } from './assistant_settings_button';
 import { welcomeConvo } from '../../mock/conversation';
+import { CONVERSATIONS_TAB } from './const';
 
 const setIsSettingsModalVisible = jest.fn();
 const onConversationSelected = jest.fn();
@@ -31,6 +32,7 @@ const testProps = {
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
+  assistantFeatures: {},
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');
@@ -55,6 +57,13 @@ jest.mock('./assistant_settings', () => ({
 describe('AssistantSettingsButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('Clicking the settings gear opens the conversations tab', () => {
+    const { getByTestId } = render(<AssistantSettingsButton {...testProps} />);
+    fireEvent.click(getByTestId('settings'));
+    expect(setSelectedSettingsTab).toHaveBeenCalledWith(CONVERSATIONS_TAB);
+    expect(setIsSettingsModalVisible).toHaveBeenCalledWith(true);
   });
 
   it('Settings modal is visible and calls correct actions per click', () => {

@@ -36,10 +36,10 @@ test('can walk all functions', () => {
 
 test('can find assignment expression', () => {
   const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
-  const { ast } = parse(query);
+  const { root } = parse(query);
   const functions: ESQLFunction[] = [];
 
-  Walker.walk(ast, {
+  Walker.walk(root, {
     visitFunction: (fn) => {
       if (fn.name === '=') {
         functions.push(fn);

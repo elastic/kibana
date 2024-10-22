@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
+import { chunk, groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
 import pMap from 'p-map';
@@ -61,6 +61,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
+  OutputsForAgentPolicy,
 } from '../types';
 import {
   AGENT_POLICY_INDEX,
@@ -74,6 +75,7 @@ import type {
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
+  IntegrationsOutput,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -85,6 +87,7 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
   AgentlessPolicyExistsRequestError,
+  OutputNotFoundError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -1775,6 +1778,95 @@ class AgentPolicyService {
         });
       },
     });
+  }
+
+  // Get all the outputs per agent policy
+  public async getAllOutputsForPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy
+  ) {
+    const logger = appContextService.getLogger();
+
+    const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
+      outputService.getDefaultDataOutputId(soClient),
+      outputService.getDefaultMonitoringOutputId(soClient),
+    ]);
+
+    if (!defaultDataOutputId) {
+      throw new OutputNotFoundError('Default output is not setup');
+    }
+
+    const dataOutputId = agentPolicy.data_output_id || defaultDataOutputId;
+    const monitoringOutputId =
+      agentPolicy.monitoring_output_id || defaultMonitoringOutputId || dataOutputId;
+
+    const outputIds = uniq([dataOutputId, monitoringOutputId]);
+
+    const fetchedOutputs = await outputService.bulkGet(outputIds, {
+      ignoreNotFound: true,
+    });
+
+    const dataOutput = fetchedOutputs.find((output) => output.id === dataOutputId);
+    const monitoringOutput = fetchedOutputs.find((output) => output.id === monitoringOutputId);
+
+    let integrationsDataOutputs: IntegrationsOutput[] = [];
+    if (agentPolicy?.package_policies) {
+      const integrationsWithOutputs = agentPolicy.package_policies.filter(
+        (pkgPolicy) => !!pkgPolicy?.output_id
+      );
+      integrationsDataOutputs = await pMap(
+        integrationsWithOutputs,
+        async (pkgPolicy) => {
+          if (pkgPolicy?.output_id) {
+            try {
+              const output = await outputService.get(soClient, pkgPolicy.output_id);
+              return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
+            } catch (error) {
+              logger.error(
+                `error while retrieving output with id "${pkgPolicy.output_id}": ${error}`
+              );
+            }
+          }
+          return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id ?? '' };
+        },
+        {
+          concurrency: 20,
+        }
+      );
+    }
+    const outputs: OutputsForAgentPolicy = {
+      monitoring: {
+        output: {
+          name: monitoringOutput?.name ?? '',
+          id: monitoringOutput?.id ?? '',
+        },
+      },
+      data: {
+        output: {
+          name: dataOutput?.name ?? '',
+          id: dataOutput?.id ?? '',
+        },
+        integrations: integrationsDataOutputs ?? [],
+      },
+    };
+    return outputs;
+  }
+
+  public async listAllOutputsForPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicies: AgentPolicy[]
+  ) {
+    const allOutputs: OutputsForAgentPolicy[] = await pMap(
+      agentPolicies,
+      async (agentPolicy) => {
+        const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+        return { agentPolicyId: agentPolicy.id, ...output };
+      },
+      {
+        concurrency: 50,
+      }
+    );
+    return allOutputs;
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
