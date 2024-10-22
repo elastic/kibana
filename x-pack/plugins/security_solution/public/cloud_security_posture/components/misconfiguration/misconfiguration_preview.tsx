@@ -229,6 +229,7 @@ export const MisconfigurationsPreview = ({
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
+            data-test-subj={'securitySolutionFlyoutInsightsMisconfigurationsTitleText'}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"
