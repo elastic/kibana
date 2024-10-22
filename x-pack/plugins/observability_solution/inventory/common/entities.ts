@@ -19,6 +19,7 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
+import { decode, encode } from '@kbn/rison';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
@@ -37,9 +38,47 @@ export const entityColumnIdsRt = t.union([
 
 export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
 
-export const entityViewRt = t.union([t.literal('unified'), t.literal(ENTITY_TYPE)]);
+export const entityViewRt = t.union([t.literal('unified'), t.literal('grouped')]);
+
+const isPaginationRecord = (input: unknown): input is Record<string, number> => {
+  if (typeof input === 'object' && input !== null) {
+    for (const value of Object.values(input)) {
+      if (typeof value !== 'number') {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const entityPaginationRt = new t.Type<Record<string, number>, string, unknown>(
+  'entityPaginationRt',
+  isPaginationRecord,
+  (input, context) => {
+    if (typeof input === 'string') {
+      try {
+        const decoded = decode(input);
+        if (isPaginationRecord(decoded)) {
+          return t.success(decoded);
+        } else {
+          return t.failure(input, context);
+        }
+      } catch (e) {
+        return t.failure(input, context);
+      }
+    } else if (isPaginationRecord(input)) {
+      return t.success(input);
+    }
+    return t.failure(input, context);
+  },
+  (o) => encode(o)
+);
 
 export type EntityView = t.TypeOf<typeof entityViewRt>;
+
+export type EntityPagination = t.TypeOf<typeof entityPaginationRt>;
 
 export type EntityType = t.TypeOf<typeof entityTypeRt>;
 
@@ -125,5 +164,5 @@ export type Entity = ServiceEntity | HostEntity | ContainerEntity;
 export type EntityGroup = {
   count: number;
 } & {
-  [Field in keyof Entity]?: Entity[Field];
+  [key: string]: any;
 };

@@ -7,15 +7,14 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiAccordion, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { InventoryGroupPanel } from './inventory_group_panel';
-import { GroupedGridWrapper } from './grouped_grid_wrapper';
+import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { GroupedEntitiesGrid } from './grouped_entities_grid';
 import { EntityGroup } from '../../../common/entities';
 import { InventoryPanelBadge } from './inventory_panel_badge';
 
 const ENTITIES_COUNT_BADGE = i18n.translate(
   'xpack.inventory.inventoryGroupPanel.entitiesBadgeLabel',
-  { defaultMessage: 'Entities' }
+  { defaultMessage: 'Entities:' }
 );
 
 export interface InventoryGroupAccordionProps {
@@ -38,7 +37,11 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
         <EuiAccordion
           data-test-subj={`inventoryGroup_${groupBy}_${field}`}
           id={`inventory-group-${groupBy}-${field}`}
-          buttonContent={<InventoryGroupPanel field={field} />}
+          buttonContent={
+            <EuiTitle size="xs">
+              <h4>{field}</h4>
+            </EuiTitle>
+          }
           buttonElement="div"
           extraAction={
             <InventoryPanelBadge
@@ -63,7 +66,7 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
           hasShadow={false}
           paddingSize="m"
         >
-          <GroupedGridWrapper field={field} />
+          <GroupedEntitiesGrid field={field} />
         </EuiPanel>
       )}
       <EuiSpacer size="s" />
