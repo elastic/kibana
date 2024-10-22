@@ -41,7 +41,7 @@ interface PrivilegeGroups {
 const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: string) => {
   if (route.security) {
     if (!('authz' in route.security) || (route.security.authz as AuthzDisabled).enabled === false) {
-      return false;
+      return '';
     }
     if ('authz' in route.security) {
       const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
@@ -52,6 +52,8 @@ const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: st
 
             return groups;
           }
+          console.log({ privilege });
+
           const group = (privilege.offering ?? 'all') as keyof PrivilegeGroups;
 
           groups[group].allRequired.push(...(privilege.allRequired ?? []));
