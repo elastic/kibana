@@ -9,16 +9,16 @@
 
 import {
   AppMenuActionBase,
-  AppMenuActionCustom,
   AppMenuActionSubmenuBase,
   AppMenuActionSubmenuCustom,
-  AppMenuActionSubmenuHorizontalRule,
+  AppMenuSubmenuHorizontalRule,
   AppMenuActionSubmenuSecondary,
   AppMenuActionType,
   AppMenuItem,
   AppMenuItemCustom,
   AppMenuItemPrimary,
   AppMenuItemSecondary,
+  AppMenuSubmenuActionCustom,
 } from './types';
 
 export class AppMenuRegistry {
@@ -32,7 +32,7 @@ export class AppMenuRegistry {
    */
   private customSubmenuItemsBySubmenuId: Map<
     string,
-    Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
+    Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>
   >;
 
   constructor(primaryAndSecondaryActions: Array<AppMenuItemPrimary | AppMenuItemSecondary>) {
@@ -81,11 +81,14 @@ export class AppMenuRegistry {
    * @param submenuId
    * @param appMenuItem
    */
-  public registerCustomActionUnderSubmenu(submenuId: string, appMenuItem: AppMenuActionCustom) {
+  public registerCustomActionUnderSubmenu(
+    submenuId: string,
+    appMenuItem: AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule
+  ) {
     this.customSubmenuItemsBySubmenuId.set(submenuId, [
       ...(this.customSubmenuItemsBySubmenuId.get(submenuId) ?? []).filter(
-        // prevent duplicates
-        (item) => !(item.id === appMenuItem.id && item.type === AppMenuActionType.custom)
+        // prevent duplicates and allow overrides
+        (item) => item.id !== appMenuItem.id
       ),
       appMenuItem,
     ]);
@@ -104,7 +107,7 @@ export class AppMenuRegistry {
       [...this.customSubmenuItemsBySubmenuId.entries()].forEach(([submenuId, customActions]) => {
         actions = actions.map((item) => {
           if (item.id === submenuId && isAppMenuActionSubmenu(item)) {
-            return extendSubmenuWithCustomAction(item, customActions);
+            return extendSubmenuWithCustomActions(item, customActions);
           }
           return item;
         });
@@ -175,11 +178,11 @@ function getAppMenuSubmenuWithAssignedOrder<
   };
 }
 
-function extendSubmenuWithCustomAction<
+function extendSubmenuWithCustomActions<
   T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
 >(
   appMenuItem: T,
-  customActions: Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
+  customActions: Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>
 ): T {
   return {
     ...appMenuItem,

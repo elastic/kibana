@@ -135,6 +135,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             order: 101,
             controlProps: {
               label: 'Create SLO (Custom action)',
+              iconType: 'visGauge',
               testId: 'example-custom-action-under-alerts',
               onClick: ({ onFinishAction }) => {
                 // This is an example of a custom action that opens a flyout or any other custom modal.
@@ -154,7 +155,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             id: 'example-custom-action5',
             type: AppMenuActionType.custom,
             controlProps: {
-              label: 'Custom action (from Data source profile)',
+              label: 'Custom action (from Data Source profile)',
               onClick: ({ onFinishAction }) => {
                 alert('Example Data source action under root submenu clicked');
                 onFinishAction();

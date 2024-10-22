@@ -9,6 +9,7 @@
 
 import React from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { EuiButtonIconProps } from '@elastic/eui';
 
 export interface AppMenuControlOnClickParams {
   anchorElement: HTMLElement;
@@ -25,7 +26,13 @@ export type AppMenuControlProps = Pick<
     | undefined;
 };
 
-export type AppMenuControlIconOnlyProps = AppMenuControlProps & Pick<TopNavMenuData, 'iconType'>;
+export type AppMenuControlWithIconProps = AppMenuControlProps & {
+  iconType: EuiButtonIconProps['iconType'];
+};
+
+interface ControlWithOptionalIcon {
+  iconType?: EuiButtonIconProps['iconType'];
+}
 
 export enum AppMenuActionId {
   new = 'new',
@@ -56,6 +63,14 @@ export interface AppMenuActionSecondary extends AppMenuActionBase {
 }
 
 /**
+ * A secondary submenu action
+ */
+export interface AppMenuSubmenuActionSecondary
+  extends Omit<AppMenuActionSecondary, 'controlProps'> {
+  readonly controlProps: AppMenuControlProps & ControlWithOptionalIcon;
+}
+
+/**
  * A custom menu action
  */
 export interface AppMenuActionCustom extends AppMenuActionBase {
@@ -64,17 +79,24 @@ export interface AppMenuActionCustom extends AppMenuActionBase {
 }
 
 /**
+ * A custom submenu action
+ */
+export interface AppMenuSubmenuActionCustom extends Omit<AppMenuActionCustom, 'controlProps'> {
+  readonly controlProps: AppMenuControlProps & ControlWithOptionalIcon;
+}
+
+/**
  * A primary menu action (with icon only)
  */
 export interface AppMenuActionPrimary extends AppMenuActionBase {
   readonly type: AppMenuActionType.primary;
-  readonly controlProps: AppMenuControlIconOnlyProps;
+  readonly controlProps: AppMenuControlWithIconProps;
 }
 
 /**
  * A horizontal rule between menu items
  */
-export interface AppMenuActionSubmenuHorizontalRule extends AppMenuActionBase {
+export interface AppMenuSubmenuHorizontalRule extends AppMenuActionBase {
   readonly type: AppMenuActionType.submenuHorizontalRule;
   readonly testId?: TopNavMenuData['testId'];
 }
@@ -91,8 +113,10 @@ export interface AppMenuActionSubmenuBase<T = AppMenuActionSecondary | AppMenuAc
   readonly description?: TopNavMenuData['description'];
   readonly testId?: TopNavMenuData['testId'];
   readonly actions: T extends AppMenuActionSecondary
-    ? Array<AppMenuActionSecondary | AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>
-    : Array<AppMenuActionCustom | AppMenuActionSubmenuHorizontalRule>;
+    ? Array<
+        AppMenuSubmenuActionSecondary | AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule
+      >
+    : Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>;
 }
 
 /**

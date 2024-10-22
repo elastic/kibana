@@ -77,6 +77,7 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         toolTipContent={
           typeof controlProps.tooltip === 'function' ? controlProps.tooltip() : controlProps.tooltip
         }
+        icon={controlProps.iconType}
         href={controlProps.href}
         onClick={async () => {
           const result = await controlProps.onClick?.({

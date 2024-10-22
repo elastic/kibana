@@ -126,6 +126,7 @@ export const getAlertsAppMenuItem = ({
           label: i18n.translate('discover.alerts.createSearchThreshold', {
             defaultMessage: 'Create search threshold rule',
           }),
+          iconType: 'bell',
           testId: 'discoverCreateAlertButton',
           disableButton: !hasTimeFieldName,
           tooltip: hasTimeFieldName
@@ -155,6 +156,7 @@ export const getAlertsAppMenuItem = ({
           label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
             defaultMessage: 'Manage rules and connectors',
           }),
+          iconType: 'tableOfContents',
           testId: 'discoverManageAlertsButton',
           href: services.application.getUrlForApp(
             'management/insightsAndAlerting/triggersActions/rules'
