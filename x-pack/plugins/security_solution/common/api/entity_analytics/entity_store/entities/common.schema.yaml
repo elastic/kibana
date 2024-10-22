@@ -9,11 +9,11 @@ components:
     UserEntity:
       type: object
       required:
-        - "@timestamp"
+        - '@timestamp'
         - user
         - entity
       properties:
-        "@timestamp":
+        '@timestamp':
           type: string
           format: date-time
         entity:
@@ -22,12 +22,10 @@ components:
             - name
             - source
           properties:
-            name: 
+            name:
               type: string
             source:
-              type: array
-              items:
-                type: string
+              type: string
         user:
           type: object
           properties:
@@ -71,11 +69,11 @@ components:
     HostEntity:
       type: object
       required:
-        - "@timestamp"
+        - '@timestamp'
         - host
         - entity
       properties:
-        "@timestamp":
+        '@timestamp':
           type: string
           format: date-time
         entity:
@@ -84,7 +82,7 @@ components:
             - name
             - source
           properties:
-            name: 
+            name:
               type: string
             source:
               type: string
