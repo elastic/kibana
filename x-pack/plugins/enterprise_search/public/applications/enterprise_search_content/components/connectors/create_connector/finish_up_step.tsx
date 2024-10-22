@@ -343,7 +343,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     }
                   )}
                   onClick={() => {
-                    application.navigateToUrl(http.basePath.prepend(`${DEV_TOOLS_CONSOLE_PATH}`));
+                    application.navigateToUrl(http.basePath.prepend(DEV_TOOLS_CONSOLE_PATH));
                   }}
                   display="subdued"
                 />
