@@ -15,6 +15,7 @@ import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
+import { EuiBreakpointSize } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
 import { TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
@@ -51,6 +52,12 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
    * ```
    */
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+
+  /**
+   * A list of named breakpoints at which to show the popover version. If this is not provided, the top nav
+   * menu items will use the default set of ['xs', 's']
+   */
+  popoverBreakpoints?: EuiBreakpointSize[];
 };
 
 /*
@@ -76,7 +83,13 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function renderMenu(className: string): ReactElement | null {
-    return <TopNavMenuItems config={config} className={className} />;
+    return (
+      <TopNavMenuItems
+        config={config}
+        className={className}
+        popoverBreakpoints={props.popoverBreakpoints}
+      />
+    );
   }
 
   function renderSearchBar(): ReactElement | null {
