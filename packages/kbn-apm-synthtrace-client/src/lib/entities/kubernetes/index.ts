@@ -10,7 +10,7 @@
 import type { EntityFields, Schema } from '..';
 import { Serializable } from '../../serializable';
 
-const identityFieldsMap: Record<Schema, Record<K8sEntityType, string[]>> = {
+const identityFieldsMap: Record<Schema, Record<string, string[]>> = {
   ecs: {
     pod: ['kubernetes.pod.name'],
     cluster: ['orchestrator.cluster.name'],
@@ -37,21 +37,13 @@ const identityFieldsMap: Record<Schema, Record<K8sEntityType, string[]>> = {
   },
 };
 
-type K8sEntityType =
-  | 'stateful_set'
-  | 'replica_set'
-  | 'pod'
-  | 'node'
-  | 'job'
-  | 'deployment'
-  | 'daemon_set'
-  | 'cron_job'
-  | 'cluster'
-  | 'container';
-
 export class K8sEntity extends Serializable<EntityFields> {
   constructor(schema: Schema, fields: EntityFields) {
-    const entityType = fields['entity.type'] as K8sEntityType;
+    const entityType = fields['entity.type'];
+    if (entityType === undefined) {
+      throw new Error(`Entity type not defined: ${entityType}`);
+    }
+
     const entityTypeWithSchema = `kubernetes_${entityType}_${schema}`;
     super({
       ...fields,
@@ -68,7 +60,7 @@ function getDisplayName({
   fields,
 }: {
   schema: Schema;
-  entityType: K8sEntityType;
+  entityType: string;
   fields: EntityFields;
 }) {
   const identityFields = identityFieldsMap[schema][entityType];
