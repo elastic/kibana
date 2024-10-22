@@ -246,13 +246,12 @@ export const EditSpace: FC<PageProps> = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={{marginTop: "4px"}}>
                   <div>
                     {shouldShowSolutionBadge ? (
                       <SpaceSolutionBadge
                         solution={solution}
                         data-test-subj={`space-solution-badge-${solution}`}
-                        css={{marginTop: "4px"}}
                       />
                     ) : null}
                     {userActiveSpace?.id === id ? (
