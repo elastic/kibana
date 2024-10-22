@@ -28,7 +28,10 @@ import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys'
 import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
+  PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { EndpointFleetServicesFactoryInterface } from '../endpoint/services/fleet';
+import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
 import type { CreatePolicyDataStreamsOptions } from './handlers/create_policy_datastreams';
 import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
@@ -278,6 +281,32 @@ export const getPackagePolicyUpdateCallback = (
     newEndpointPackagePolicy.meta.billable = isBillablePolicy(newEndpointPackagePolicy);
 
     return endpointIntegrationData;
+  };
+};
+
+export const getPackagePolicyPostUpdateCallback = (
+  endpointServices: EndpointAppContextService,
+  fleetServicesFactory: EndpointFleetServicesFactoryInterface
+): PutPackagePolicyPostUpdateCallback => {
+  const logger = endpointServices.createLogger('endpointPackagePolicyPostUpdate');
+
+  return async (packagePolicy, _, esClient) => {
+    if (!isEndpointPackagePolicy(packagePolicy)) {
+      return packagePolicy;
+    }
+
+    logger.debug(`Processing endpoint integration policy (post update): ${packagePolicy.id}`);
+
+    // The check below will run in the background - we don't need to wait for it
+    createPolicyDataStreamsIfNeeded({
+      logger,
+      integrationPolicy: packagePolicy,
+      esClient,
+      fleetServicesFactory,
+      isServerless: endpointServices.isServerless(),
+    });
+
+    return packagePolicy;
   };
 };
 

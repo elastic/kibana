@@ -75,6 +75,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
 
   // FIXME:PT Need to ensure that the datastreams are created in all associated space ids that the policy is shared with
   //          This can be deferred to activity around support of Spaces - team issue: 8199 (epic)
+  //          We might need to do much here other than to ensure we can access all policies across all spaces in order to get the namespace value
 
   const fleetServices = fleetServicesFactory.asInternalUser();
   const policyNamespaces = await fleetServices.getPolicyNamespace({
@@ -94,6 +95,9 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
   ];
 
   if (isServerless) {
+    // FIXME:PT DO NOT COMMIT until variable below is updated
+    //       from PR https://github.com/elastic/kibana/pull/197291
+
     indicesToCreate.push(ENDPOINT_HEARTBEAT_INDEX);
   }
 
@@ -128,7 +132,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
 
   logger.debug(
     () =>
-      `checking if the following datastream need to be created:\n    ${indicesToCreate.join(
+      `checking if the following datastream(s) need to be created:\n    ${indicesToCreate.join(
         '\n    '
       )}`
   );
@@ -137,7 +141,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
 
   if (indexesCreated.length > 0) {
     logger.info(
-      `Datastream(s) created in support of Elastic Defend:\n    ${indexesCreated.join('    \n')}`
+      `Datastream(s) created in support of Elastic Defend:\n    ${indexesCreated.join('\n    ')}`
     );
   }
 

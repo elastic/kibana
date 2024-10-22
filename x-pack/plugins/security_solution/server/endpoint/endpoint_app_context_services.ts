@@ -35,6 +35,7 @@ import {
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
+  getPackagePolicyPostUpdateCallback,
   getPackagePolicyUpdateCallback,
 } from '../fleet_integration/fleet_integration';
 import type { ManifestManager } from './services/artifacts';
@@ -160,6 +161,8 @@ export class EndpointAppContextService {
     const endpointMetadataService = this.getEndpointMetadataService();
     const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const fleetServicesFactory = this.fleetServicesFactory!;
 
     registerFleetCallback(
       'agentPolicyCreate',
@@ -190,8 +193,7 @@ export class EndpointAppContextService {
         logger,
         exceptionsClient: exceptionListsClient,
         esClient: this.startDependencies.esClient,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        fleetServicesFactory: this.fleetServicesFactory!,
+        fleetServicesFactory,
         isServerless: this.isServerless(),
       })
     );
@@ -209,7 +211,10 @@ export class EndpointAppContextService {
       )
     );
 
-    // FIXME:PT is there a POST update extension point?
+    registerFleetCallback(
+      'packagePolicyPostUpdate',
+      getPackagePolicyPostUpdateCallback(this, fleetServicesFactory)
+    );
 
     registerFleetCallback(
       'packagePolicyPostDelete',
