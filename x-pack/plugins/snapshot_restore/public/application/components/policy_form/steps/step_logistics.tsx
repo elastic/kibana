@@ -58,7 +58,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const disableToolTip = (component: ReactElement): ReactElement => {
     return policy?.isManagedPolicy ? (
       <EuiToolTip
-        content="This field is disabled because you are editing a managed policy."
+        content={i18n.translate('xpack.snapshotRestore.policyForm.disableToolTipContent', {
+          defaultMessage: 'This field is disabled because you are editing a managed policy.',
+        })}
         display="block"
       >
         {component}

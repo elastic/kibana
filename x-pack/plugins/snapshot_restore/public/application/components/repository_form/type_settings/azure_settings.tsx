@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactElement } from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
@@ -14,11 +14,11 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
+import { DisableToolTip } from '../../repository_disable_tooltip';
 
 interface Props {
   repository: AzureRepository;
@@ -62,19 +62,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
     });
   };
 
-  const disableToolTip = (component: ReactElement): ReactElement => {
-    return isManagedRepository ? (
-      <EuiToolTip
-        content="This field is disabled because you are editing a managed repository."
-        display="block"
-      >
-        {component}
-      </EuiToolTip>
-    ) : (
-      component
-    );
-  };
-
   return (
     <Fragment>
       {/* Client field */}
@@ -108,19 +95,22 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
-          {disableToolTip(
-            <EuiFieldText
-              defaultValue={client || ''}
-              fullWidth
-              onChange={(e) => {
-                updateRepositorySettings({
-                  client: e.target.value,
-                });
-              }}
-              data-test-subj="clientInput"
-              disabled={isManagedRepository}
-            />
-          )}
+          <DisableToolTip
+            isManagedRepository={isManagedRepository}
+            component={
+              <EuiFieldText
+                defaultValue={client || ''}
+                fullWidth
+                onChange={(e) => {
+                  updateRepositorySettings({
+                    client: e.target.value,
+                  });
+                }}
+                data-test-subj="clientInput"
+                disabled={isManagedRepository}
+              />
+            }
+          />
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -155,19 +145,22 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.container)}
           error={settingErrors.container}
         >
-          {disableToolTip(
-            <EuiFieldText
-              defaultValue={container || ''}
-              fullWidth
-              onChange={(e) => {
-                updateRepositorySettings({
-                  container: e.target.value,
-                });
-              }}
-              data-test-subj="containerInput"
-              disabled={isManagedRepository}
-            />
-          )}
+          <DisableToolTip
+            isManagedRepository={isManagedRepository}
+            component={
+              <EuiFieldText
+                defaultValue={container || ''}
+                fullWidth
+                onChange={(e) => {
+                  updateRepositorySettings({
+                    container: e.target.value,
+                  });
+                }}
+                data-test-subj="containerInput"
+                disabled={isManagedRepository}
+              />
+            }
+          />
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -202,19 +195,22 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
-          {disableToolTip(
-            <EuiFieldText
-              defaultValue={basePath || ''}
-              fullWidth
-              onChange={(e) => {
-                updateRepositorySettings({
-                  basePath: e.target.value,
-                });
-              }}
-              data-test-subj="basePathInput"
-              disabled={isManagedRepository}
-            />
-          )}
+          <DisableToolTip
+            isManagedRepository={isManagedRepository}
+            component={
+              <EuiFieldText
+                defaultValue={basePath || ''}
+                fullWidth
+                onChange={(e) => {
+                  updateRepositorySettings({
+                    basePath: e.target.value,
+                  });
+                }}
+                data-test-subj="basePathInput"
+                disabled={isManagedRepository}
+              />
+            }
+          />
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
