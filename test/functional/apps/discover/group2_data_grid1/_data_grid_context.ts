@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('navigates to context view from embeddable', async () => {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
-      await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'png' });
+      await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'jpg' });
       await header.waitUntilLoadingHasFinished();
       await discover.saveSearch('my search');
       await header.waitUntilLoadingHasFinished();
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('document table length', nrOfDocs);
         return nrOfDocs === 6;
       });
-      await filterBar.hasFilter('extension.raw', 'png', false);
+      await filterBar.hasFilter('extension.raw', 'jpg', false);
     });
   });
 }
