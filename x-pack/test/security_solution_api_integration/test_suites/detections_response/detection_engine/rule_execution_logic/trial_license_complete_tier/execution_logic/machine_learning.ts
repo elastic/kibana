@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('classifies ml job missing errors as user errors', async () => {
+    it('@skipInServerlessMKI classifies ml job missing errors as user errors', async () => {
       await getMetricsRequest(request, true);
       const badRule: MachineLearningRuleCreateProps = {
         ...rule,
@@ -333,7 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
       });
 
-      it('should be enriched alert with criticality_level', async () => {
+      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
