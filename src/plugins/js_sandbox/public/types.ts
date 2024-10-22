@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EventBusPluginSetup, EventBusPluginStart } from '@kbn/event-bus-plugin/public';
@@ -18,12 +19,14 @@ export interface JsSandboxPluginSetup {}
 export interface JsSandboxPluginStart {}
 
 export interface JsSandboxPluginSetupDeps {
+  data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   eventBus: EventBusPluginSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface JsSandboxPluginStartDeps {
+  data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   eventBus: EventBusPluginStart;
   uiActions: UiActionsStart;
