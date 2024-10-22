@@ -11,17 +11,13 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
-import { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_definition';
 import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
-import { TimeBounds } from '../../types';
-import { BurnRate } from './burn_rate';
 import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
+import { BurnRate } from './burn_rate';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing?: boolean;
-  range?: TimeRange;
-  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
 export interface BurnRateOption {
@@ -37,7 +33,7 @@ function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; du
   return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
 }
 
-export function BurnRates({ slo, isAutoRefreshing, range, onBrushed }: Props) {
+export function BurnRates({ slo, isAutoRefreshing }: Props) {
   const { burnRateOptions } = useBurnRateOptions(slo);
   const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
   const { isLoading, data } = useFetchSloBurnRates({
@@ -47,12 +43,12 @@ export function BurnRates({ slo, isAutoRefreshing, range, onBrushed }: Props) {
   });
 
   useEffect(() => {
-    if (burnRateOptions.length) {
+    if (burnRateOptions.length > 0) {
       setBurnRateOption(burnRateOptions[0]);
     }
   }, [burnRateOptions]);
 
-  const dataTimeRange = range ?? {
+  const dataTimeRange = {
     from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
     to: new Date(),
   };
@@ -102,12 +98,7 @@ export function BurnRates({ slo, isAutoRefreshing, range, onBrushed }: Props) {
           </EuiFlexItem>
 
           <EuiFlexItem grow={3}>
-            <ErrorRateChart
-              slo={slo}
-              dataTimeRange={dataTimeRange}
-              threshold={threshold}
-              onBrushed={onBrushed}
-            />
+            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

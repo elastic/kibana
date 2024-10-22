@@ -8,8 +8,9 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { BurnRateOption } from '../components/burn_rate/burn_rates';
+import { useEffect, useState } from 'react';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { BurnRateOption } from '../components/burn_rate/burn_rates';
 
 export const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [
   {
@@ -71,22 +72,31 @@ export const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [
 ];
 
 export const useBurnRateOptions = (slo: SLOWithSummaryResponse) => {
-  const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
-  const burnRateOptions =
-    rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
-      id: htmlIdGenerator()(),
-      label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-        defaultMessage: '{duration, plural, one {# hour} other {# hours}}',
-        values: { duration: window.longWindow.value },
-      }),
-      ariaLabel: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-        defaultMessage: '{duration, plural, one {# hour} other {# hours}}',
-        values: { duration: window.longWindow.value },
-      }),
-      windowName: window.actionGroup,
-      threshold: window.burnRateThreshold,
-      duration: window.longWindow.value,
-    })) ?? DEFAULT_BURN_RATE_OPTIONS;
+  const sloId = slo.id;
+  const [burnRateOptions, setBurnRateOptions] =
+    useState<BurnRateOption[]>(DEFAULT_BURN_RATE_OPTIONS);
+  const { data: rules, isLoading } = useFetchRulesForSlo({ sloIds: [sloId] });
 
-  return { burnRateOptions };
+  useEffect(() => {
+    if (!isLoading && rules && rules[sloId]) {
+      setBurnRateOptions(
+        rules[sloId][0].params?.windows?.map((window) => ({
+          id: htmlIdGenerator()(),
+          label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
+            defaultMessage: '{duration, plural, one {# hour} other {# hours}}',
+            values: { duration: window.longWindow.value },
+          }),
+          ariaLabel: i18n.translate('xpack.slo.burnRates.fromRange.label', {
+            defaultMessage: '{duration, plural, one {# hour} other {# hours}}',
+            values: { duration: window.longWindow.value },
+          }),
+          windowName: window.actionGroup,
+          threshold: window.burnRateThreshold,
+          duration: window.longWindow.value,
+        })) ?? DEFAULT_BURN_RATE_OPTIONS
+      );
+    }
+  }, [rules, sloId, isLoading]);
+
+  return { isLoading, burnRateOptions };
 };
