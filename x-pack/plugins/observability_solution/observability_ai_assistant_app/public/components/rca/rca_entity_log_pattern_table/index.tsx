@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -32,53 +33,6 @@ const badgeClassName = css`
 `;
 
 const PER_PAGE = 5;
-
-function getRelevanceColor(
-  relevance: 'normal' | 'unusual' | 'warning' | 'critical'
-): React.ComponentProps<typeof EuiBadge>['color'] {
-  switch (relevance) {
-    case 'normal':
-      return 'plain';
-
-    case 'critical':
-      return 'danger';
-
-    case 'warning':
-      return 'warning';
-
-    case 'unusual':
-      return 'primary';
-  }
-}
-
-function getSignificanceColor(
-  significance: 'high' | 'medium' | 'low' | null
-): React.ComponentProps<typeof EuiBadge>['color'] {
-  switch (significance) {
-    case 'high':
-      return 'critical';
-
-    case 'medium':
-      return 'warning';
-
-    case 'low':
-    case null:
-      return 'plain';
-  }
-}
-
-function relevanceToInt(relevance: 'normal' | 'unusual' | 'warning' | 'critical') {
-  switch (relevance) {
-    case 'normal':
-      return 0;
-    case 'unusual':
-      return 1;
-    case 'warning':
-      return 2;
-    case 'critical':
-      return 3;
-  }
-}
 
 export function RootCauseAnalysisEntityLogPatternTable({
   entity,
@@ -161,11 +115,7 @@ export function RootCauseAnalysisEntityLogPatternTable({
         ),
         width: '128px',
         render: (_, { change }) => {
-          return (
-            <EuiBadge className={badgeClassName} color={getSignificanceColor(change.significance)}>
-              {change.significance ?? 'No change'}
-            </EuiBadge>
-          );
+          return getChangeBadge(change);
         },
       },
       {
@@ -175,8 +125,18 @@ export function RootCauseAnalysisEntityLogPatternTable({
           'xpack.observabilityAiAssistant.rca.logPatternTable.trendColumnTitle',
           { defaultMessage: 'Trend' }
         ),
-        render: (_, { timeseries }) => {
-          return <SparkPlot timeseries={timeseries} type="bar" />;
+        render: (_, { timeseries, change }) => {
+          return (
+            <SparkPlot
+              timeseries={timeseries}
+              annotations={getAnnotationsFromChangePoint({
+                timeseries,
+                change,
+                theme,
+              })}
+              type="bar"
+            />
+          );
         },
       },
     ];
@@ -258,5 +218,82 @@ export function RootCauseAnalysisEntityLogPatternTable({
         }}
       />
     </EuiFlexGroup>
+  );
+}
+
+function getRelevanceColor(relevance: 'normal' | 'unusual' | 'warning' | 'critical') {
+  switch (relevance) {
+    case 'normal':
+      return 'plain';
+
+    case 'critical':
+      return 'danger';
+
+    case 'warning':
+      return 'warning';
+
+    case 'unusual':
+      return 'primary';
+  }
+}
+
+function getSignificanceColor(significance: 'high' | 'medium' | 'low' | null) {
+  switch (significance) {
+    case 'high':
+      return 'danger';
+
+    case 'medium':
+      return 'warning';
+
+    case 'low':
+    case null:
+      return 'plain';
+  }
+}
+
+function relevanceToInt(relevance: 'normal' | 'unusual' | 'warning' | 'critical') {
+  switch (relevance) {
+    case 'normal':
+      return 0;
+    case 'unusual':
+      return 1;
+    case 'warning':
+      return 2;
+    case 'critical':
+      return 3;
+  }
+}
+
+function getAnnotationsFromChangePoint({
+  change,
+  theme,
+  timeseries,
+}: {
+  change: AnalyzedLogPattern['change'];
+  theme: EuiThemeComputed<{}>;
+  timeseries: Array<{ x: number; y: number }>;
+}): Required<React.ComponentProps<typeof SparkPlot>['annotations']> {
+  if (!change.change_point || !change.type) {
+    return [];
+  }
+
+  const color = getSignificanceColor(change.significance);
+
+  return [
+    {
+      color: color === 'plain' ? theme.colors.subduedText : theme.colors[color],
+      id: '1',
+      icon: '*',
+      label: <EuiBadge color="hollow">{change.type}</EuiBadge>,
+      x: timeseries[change.change_point].x,
+    },
+  ];
+}
+
+export function getChangeBadge(change: AnalyzedLogPattern['change']) {
+  return (
+    <EuiBadge className={badgeClassName} color={getSignificanceColor(change.significance)}>
+      {change.significance ?? 'No change'}
+    </EuiBadge>
   );
 }

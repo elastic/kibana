@@ -5,21 +5,39 @@
  * 2.0.
  */
 import {
+  AnnotationDomainType,
   BarSeries,
   Chart,
   CurveType,
+  LineAnnotation,
   LineSeries,
   PartialTheme,
+  Position,
   ScaleType,
   Settings,
   Tooltip,
-  LineAnnotation,
-  AnnotationDomainType,
-  Position,
 } from '@elastic/charts';
-import React from 'react';
+import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-service';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React from 'react';
 import { useChartTheme } from '../../hooks/use_chart_theme';
+import { useKibana } from '../../hooks/use_kibana';
+
+function AnnotationTooltip({ timestamp, label }: { timestamp: number; label: React.ReactNode }) {
+  const dateFormat = useKibana().services.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
+  const formattedTime = moment(timestamp).format(dateFormat);
+
+  return (
+    <EuiPanel paddingSize="s">
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiText size="xs">{formattedTime}</EuiText>
+        <EuiText size="xs">{label}</EuiText>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
 
 export function SparkPlot({
   type,
@@ -34,7 +52,7 @@ export function SparkPlot({
     x: number;
     color: string;
     icon: React.ReactNode;
-    label: string;
+    label: React.ReactNode;
   }>;
   compressed?: boolean;
 }) {
@@ -91,8 +109,9 @@ export function SparkPlot({
       {annotations?.map((annotation) => {
         return (
           <LineAnnotation
+            key={annotation.id}
             id={annotation.id}
-            dataValues={[{ dataValue: annotation.x, header: annotation.label }]}
+            dataValues={[{ dataValue: annotation.x, header: '' }]}
             domainType={AnnotationDomainType.XDomain}
             marker={annotation.icon}
             markerPosition={Position.Bottom}
@@ -101,6 +120,14 @@ export function SparkPlot({
                 strokeWidth: 2,
                 stroke: annotation.color,
               },
+            }}
+            customTooltip={({ datum }) => {
+              return (
+                <AnnotationTooltip
+                  timestamp={(datum as { dataValue: number }).dataValue}
+                  label={annotation.label}
+                />
+              );
             }}
           />
         );
