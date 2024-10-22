@@ -25,4 +25,19 @@ describe('suggestions in comments', () => {
     const { assertSuggestions } = await setup('^');
     assertSuggestions('FROM index | EVAL /* ^', []);
   });
+
+  test('suggests next to comments', async () => {
+    const { suggest } = await setup('^');
+    expect((await suggest('FROM index | EVAL ^/* */')).length).toBeGreaterThan(0);
+    expect((await suggest('FROM index | EVAL /* */^')).length).toBeGreaterThan(0);
+    expect((await suggest('FROM index | EVAL ^// a comment')).length).toBeGreaterThan(0);
+    expect((await suggest('FROM index | EVAL // a comment\n^')).length).toBeGreaterThan(0);
+  });
+
+  test('handles multiple comments', async () => {
+    const { assertSuggestions } = await setup('^');
+    assertSuggestions('FROM index | EVAL /* comment1 */ x + /* comment2 ^ */ 1', []);
+    assertSuggestions('FROM index | EVAL /* ^ comment1 */ x + /* comment2 ^ */ 1', []);
+    assertSuggestions('FROM index | EVAL /* comment1 */ x + /* comment2 */ 1 // comment3 ^', []);
+  });
 });

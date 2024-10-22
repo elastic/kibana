@@ -155,7 +155,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
-    if (node.location.min <= offset && node.location.max >= offset) {
+    if (node.location.min <= offset && node.location.max > offset) {
       inComment = true;
     }
   });
@@ -163,10 +163,6 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   if (inComment) {
     return {
       type: 'comment' as const,
-      command: undefined,
-      node: undefined,
-      option: undefined,
-      setting: undefined,
     };
   }
 

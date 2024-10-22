@@ -112,7 +112,7 @@ import {
 } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
-import { countBracketsUnclosed } from '../shared/helpers';
+import { countUnclosedParens } from '../shared/helpers';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
@@ -1844,7 +1844,7 @@ async function getOptionArgsSuggestions(
         );
         // Checks if cursor is still within function ()
         // by checking if the marker editor/cursor is within an unclosed parenthesis
-        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
+        const canHaveAssignment = countUnclosedParens(innerText) === 0;
 
         if (option.name === 'by') {
           // Add quick snippet for for stats ... by bucket(<>)
