@@ -1196,28 +1196,39 @@ describe('autocomplete', () => {
         );
 
         describe('escaped field names', () => {
-          // This isn't actually the behavior we want, but this test is here
-          // to make sure no weird suggestions start cropping up in this case.
-          testSuggestions(`FROM a | ${commandName} \`foo.bar\`/`, ['foo.bar'], undefined, [
-            [{ name: 'foo.bar', type: 'double' }],
-          ]);
-          // @todo re-enable these tests when we can use AST to support this case
-          testSuggestions.skip(
+          testSuggestions(
             `FROM a | ${commandName} \`foo.bar\`/`,
-            ['foo.bar, ', 'foo.bar | '],
+            ['`foo.bar`, ', '`foo.bar` | '],
             undefined,
-            [[{ name: 'foo.bar', type: 'double' }]]
+            [
+              [
+                { name: 'foo.bar', type: 'double' },
+                { name: 'baz', type: 'date' }, // added so that we get a comma suggestion
+              ],
+            ]
           );
-          testSuggestions.skip(
-            `FROM a | ${commandName} \`foo\`.\`bar\`/`,
-            ['foo.bar, ', 'foo.bar | '],
+          testSuggestions(
+            `FROM a | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
+            ['`foo````bar``baz`, ', '`foo````bar``baz` | '],
             undefined,
-            [[{ name: 'foo.bar', type: 'double' }]]
+            [
+              [
+                { name: 'foo``bar`baz', type: 'double' },
+                { name: 'baz', type: 'date' }, // added so that we get a comma suggestion
+              ],
+            ]
           );
-          testSuggestions.skip(`FROM a | ${commandName} \`any#Char$Field\`/`, [
+          testSuggestions(`FROM a | ${commandName} \`any#Char$Field\`/`, [
             '`any#Char$Field`, ',
             '`any#Char$Field` | ',
           ]);
+          // @todo enable this test when we can use AST to support this case
+          testSuggestions.skip(
+            `FROM a | ${commandName} \`foo\`.\`bar\`/`,
+            ['`foo`.`bar`, ', '`foo`.`bar` | '],
+            undefined,
+            [[{ name: 'foo.bar', type: 'double' }]]
+          );
         });
 
         // Subsequent fields
@@ -1251,41 +1262,33 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
-      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: { start: 36, end: 36 } },
       '!= $0',
-      '< $0',
-      '<= $0',
       '== $0',
-      '> $0',
-      '>= $0',
       'IN $0',
+      'AND $0',
+      'NOT',
+      'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
       { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
-      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
-      '< $0',
-      '<= $0',
+      { text: '!= $0', rangeToReplace: { start: 32, end: 32 } },
       '== $0',
-      '> $0',
-      '>= $0',
       'IN $0',
+      'AND $0',
+      'NOT',
+      'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
       'IS NULL',
-      '% $0',
-      '* $0',
-      '+ $0',
-      '- $0',
-      '/ $0',
       '!= $0',
-      '< $0',
-      '<= $0',
       '== $0',
-      '> $0',
-      '>= $0',
       'IN $0',
+      'AND $0',
+      'NOT',
+      'OR $0',
     ]);
     describe('dot-separated field names', () => {
       testSuggestions(
