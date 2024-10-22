@@ -45,31 +45,30 @@ export class K8sEntity extends Serializable<EntityFields> {
     }
 
     const entityTypeWithSchema = `kubernetes_${entityType}_${schema}`;
+    const identityFields = identityFieldsMap[schema][entityType];
+    if (identityFields === undefined || identityFields.length === 0) {
+      throw new Error(
+        `Identity fields not defined for schema: ${schema} and entity type: ${entityType}`
+      );
+    }
+
     super({
       ...fields,
       'entity.type': entityTypeWithSchema,
       'entity.definitionId': `builtin_${entityTypeWithSchema}`,
-      'entity.displayName': getDisplayName({ schema, entityType, fields }),
+      'entity.identityFields': identityFields,
+      'entity.displayName': getDisplayName({ identityFields, fields }),
     });
   }
 }
 
 function getDisplayName({
-  schema,
-  entityType,
+  identityFields,
   fields,
 }: {
-  schema: Schema;
-  entityType: string;
+  identityFields: string[];
   fields: EntityFields;
 }) {
-  const identityFields = identityFieldsMap[schema][entityType];
-  if (identityFields === undefined) {
-    throw new Error(
-      `Identity fields not defined for schema: ${schema} and entity type: ${entityType}`
-    );
-  }
-
   return identityFields
     .map((field) => fields[field])
     .filter((_) => _)
