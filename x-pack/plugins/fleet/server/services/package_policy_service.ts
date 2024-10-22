@@ -177,6 +177,8 @@ export interface PackagePolicyClient {
       ? PackagePolicy
       : A extends 'packagePolicyUpdate'
       ? UpdatePackagePolicy
+      : A extends 'packagePolicyPostUpdate'
+      ? PackagePolicy
       : NewPackagePolicy,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -191,6 +193,8 @@ export interface PackagePolicyClient {
       ? PackagePolicy
       : A extends 'packagePolicyUpdate'
       ? UpdatePackagePolicy
+      : A extends 'packagePolicyPostUpdate'
+      ? PackagePolicy
       : NewPackagePolicy
   >;
 

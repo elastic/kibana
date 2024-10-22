@@ -60,6 +60,14 @@ export type PutPackagePolicyUpdateCallback = (
   request?: KibanaRequest
 ) => Promise<UpdatePackagePolicy>;
 
+export type PutPackagePolicyPostUpdateCallback = (
+  packagePolicy: PackagePolicy,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  context?: RequestHandlerContext,
+  request?: KibanaRequest
+) => Promise<PackagePolicy>;
+
 export type PostAgentPolicyCreateCallback = (
   agentPolicy: NewAgentPolicy
 ) => Promise<NewAgentPolicy>;
@@ -79,7 +87,12 @@ export type ExternalCallbackPostDelete = [
   'packagePolicyPostDelete',
   PostPackagePolicyPostDeleteCallback
 ];
+
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
+export type ExternalCallbackPostUpdate = [
+  'packagePolicyPostUpdate',
+  PutPackagePolicyPostUpdateCallback
+];
 
 export type ExternalCallbackAgentPolicyCreate = [
   'agentPolicyCreate',
@@ -99,6 +112,7 @@ export type ExternalCallback =
   | ExternalCallbackDelete
   | ExternalCallbackPostDelete
   | ExternalCallbackUpdate
+  | ExternalCallbackPostUpdate
   | ExternalCallbackAgentPolicyCreate
   | ExternalCallbackAgentPolicyUpdate;
 

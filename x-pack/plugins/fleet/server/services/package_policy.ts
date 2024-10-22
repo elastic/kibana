@@ -1091,9 +1091,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([...bumpPromises, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
+
     logger.debug(`Package policy ${id} update completed`);
 
-    return newPolicy;
+    // Run external post-update callbacks and return
+    return packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostUpdate',
+      newPolicy,
+      soClient,
+      esClient
+    );
   }
 
   public async bulkUpdate(
@@ -1938,6 +1945,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? PackagePolicy
       : A extends 'packagePolicyCreate'
       ? NewPackagePolicy
+      : A extends 'packagePolicyPostUpdate'
+      ? PackagePolicy
       : never,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1952,6 +1961,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? PackagePolicy
       : A extends 'packagePolicyCreate'
       ? NewPackagePolicy
+      : A extends 'packagePolicyPostUpdate'
+      ? PackagePolicy
       : never
   >;
   public async runExternalCallbacks(
@@ -2001,6 +2012,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   request
                 );
                 updatedNewData = PackagePolicySchema.validate(result) as NewPackagePolicy;
+              } else if (externalCallbackType === 'packagePolicyPostUpdate') {
+                result = await (callback as PostPackagePolicyPostUpdateCallback)(
+                  updatedNewData as PackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+                updatedNewData = PackagePolicySchema.validate(result) as PackagePolicy;
               } else {
                 result = await (callback as PostPackagePolicyCreateCallback)(
                   updatedNewData as NewPackagePolicy,
