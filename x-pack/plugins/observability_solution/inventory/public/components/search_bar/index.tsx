@@ -59,9 +59,9 @@ export function SearchBar() {
       searchIsUpdate,
       searchEntityTypes,
     }: {
-      searchQuery: Query | undefined;
-      searchEntityTypes: EntityType[] | undefined;
-      searchIsUpdate: boolean | undefined;
+      searchQuery?: Query;
+      searchEntityTypes?: EntityType[];
+      searchIsUpdate?: boolean;
     }) => {
       telemetry.reportEntityInventorySearchQuerySubmitted({
         kuery_fields: getKqlFieldNamesFromExpression(searchQuery?.query as string),
@@ -78,7 +78,7 @@ export function SearchBar() {
       filterKuery,
     }: {
       filterEntityTypes: EntityType[];
-      filterKuery: string | undefined;
+      filterKuery?: string;
     }) => {
       telemetry.reportEntityInventoryEntityTypeFiltered({
         entity_types: filterEntityTypes,
