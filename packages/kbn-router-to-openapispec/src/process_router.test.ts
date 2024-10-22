@@ -104,6 +104,7 @@ describe('processRouter', () => {
       },
       {
         path: '/qux',
+        method: 'post',
         options: {},
         handler: jest.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
@@ -123,21 +124,39 @@ describe('processRouter', () => {
   } as unknown as Router;
 
   it('only provides routes for version 2023-10-31', () => {
-    const result1 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
-      version: '2023-10-31',
-    });
+    const result1 = processRouter(
+      testRouter,
+      new OasConverter(),
+      createOperationIdCounter(),
+      'traditional',
+      {
+        version: '2023-10-31',
+      }
+    );
 
-    expect(Object.keys(result1.paths!)).toHaveLength(3);
+    expect(Object.keys(result1.paths!)).toHaveLength(4);
 
-    const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+    const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), '', {
       version: '2024-10-31',
     });
     expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
-  it.only('test required privileges', () => {
-    const result = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
-      version: '2023-10-31',
-    });
-    console.log(JSON.stringify(result, null, 2));
+
+  it('updates description with privileges required', () => {
+    const result = processRouter(
+      testRouter,
+      new OasConverter(),
+      createOperationIdCounter(),
+      'traditional',
+      {
+        version: '2023-10-31',
+      }
+    );
+
+    expect(result.paths['/qux']?.post).toBeDefined();
+
+    expect(result.paths['/qux']?.post?.description).toEqual(
+      '[Authz] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console]'
+    );
   });
 });
