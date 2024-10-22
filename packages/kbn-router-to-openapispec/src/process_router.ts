@@ -147,13 +147,12 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-
       const authzDescription = extractAuthzDescription(route, buildFlavour);
 
       const description = `${route.options.description ?? ''}${authzDescription}`;
 
       const hasDeprecations = !!route.options.deprecated;
-     
+
       const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
