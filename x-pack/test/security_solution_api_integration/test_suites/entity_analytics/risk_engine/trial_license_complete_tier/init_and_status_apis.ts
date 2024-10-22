@@ -34,7 +34,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
-  
     before(async () => {
       await spaces.create({
         id: customSpaceName,
