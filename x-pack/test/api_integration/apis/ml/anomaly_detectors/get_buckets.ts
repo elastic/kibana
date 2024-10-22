@@ -67,7 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('should get buckets with correct structure for a job', async () => {
