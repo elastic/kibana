@@ -320,17 +320,6 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationServices.navIsOpen",
-            "type": "boolean",
-            "tags": [],
-            "label": "navIsOpen",
-            "description": [],
-            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
             "id": "def-public.NavigationServices.navigateToUrl",
             "type": "Function",
             "tags": [],

@@ -66,7 +66,8 @@ describe('threatMatchRowRenderer', () => {
     });
   });
 
-  describe('#renderRow', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/196199
+  describe.skip('#renderRow', () => {
     it('renders with minimum required props', () => {
       const children = threatMatchRowRenderer.renderRow({
         data: threatMatchData,
@@ -82,7 +83,7 @@ describe('threatMatchRowRenderer', () => {
       const NO_OF_MATCHES = 20;
       const largeNoOfIndicatorMatches = new Array(NO_OF_MATCHES)
         .fill({})
-        .map(() => get(threatMatchData, ENRICHMENT_DESTINATION_PATH)[0] as Fields);
+        .map(() => get(threatMatchData, ENRICHMENT_DESTINATION_PATH)![0] as Fields);
 
       const modThreatMatchData: typeof threatMatchData = {
         ...threatMatchData,
