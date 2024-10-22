@@ -140,6 +140,7 @@ export const knowledgeBaseFieldMapV2: FieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    copy_to: 'semantic_text',
   },
   // Discriminator: 'document' | 'index'
   type: {

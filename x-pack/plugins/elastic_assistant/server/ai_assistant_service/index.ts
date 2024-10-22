@@ -151,7 +151,7 @@ export class AIAssistantService {
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines && !this.hasInitializedV2KnowledgeBase
+      ...(resource in this.resourceNames.pipelines
         ? {
             template: {
               settings: {
