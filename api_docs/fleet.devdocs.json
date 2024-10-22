@@ -22777,7 +22777,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              " & { noAgentCount?: boolean | undefined; full?: boolean | undefined; }"
+              " & { noAgentCount?: boolean | undefined; withAgentCount?: boolean | undefined; full?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
             "deprecated": false,
