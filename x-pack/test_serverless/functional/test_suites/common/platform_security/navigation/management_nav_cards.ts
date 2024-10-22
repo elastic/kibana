@@ -56,13 +56,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const url = await browser.getCurrentUrl();
           expect(url).to.contain('/management/security/roles');
         });
+      });
+
+      describe('organization members', function () {
+        // Observability will not support custom roles
+        // Cannot test cloud link on MKI (will redirect to login)
+        this.tags(['skipSvlOblt', 'failsOnMKI']);
 
         it('displays the Organization members management card, and will navigate to the cloud organization URL', async () => {
           await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
           await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
 
           const url = await browser.getCurrentUrl();
-          // `--xpack.cloud.organization_url: '/account/members'`,
           expect(url).to.contain('/account/members');
         });
       });
