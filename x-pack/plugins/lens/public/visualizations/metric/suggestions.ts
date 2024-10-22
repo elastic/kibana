@@ -30,6 +30,8 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
 
   const bucketedColumns = table.columns.filter(({ operation }) => operation.isBucketed);
 
+  const hasInterval = bucketedColumns.some(({ operation }) => operation.scale === 'interval');
+
   const unsupportedColumns = table.columns.filter(
     ({ operation }) => !supportedDataTypes.has(operation.dataType) && !operation.isBucketed
   );
@@ -59,11 +61,10 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
     },
-    title: metricLabel,
+    title: metricColumns[0]?.operation.label || metricLabel,
     previewIcon: IconChartMetric,
     score: 0.5,
-    // don't show suggestions since we're in tech preview
-    hide: true,
+    hide: hasInterval,
   };
 
   const accessorMappings: Pick<MetricVisualizationState, 'metricAccessor' | 'breakdownByAccessor'> =
@@ -72,7 +73,11 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       breakdownByAccessor: bucketedColumns[0]?.columnId,
     };
 
-  baseSuggestion.score += 0.01 * Object.values(accessorMappings).filter(Boolean).length;
+  baseSuggestion.score = Number(
+    (baseSuggestion.score + 0.01 * Object.values(accessorMappings).filter(Boolean).length).toFixed(
+      2
+    )
+  );
 
   const suggestion = {
     ...baseSuggestion,

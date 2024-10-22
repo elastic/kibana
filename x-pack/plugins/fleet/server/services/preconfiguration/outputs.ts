@@ -74,7 +74,6 @@ export async function createOrUpdatePreconfiguredOutputs(
   }
 
   const existingOutputs = await outputService.bulkGet(
-    soClient,
     outputs.map(({ id }) => id),
     { ignoreNotFound: true }
   );
