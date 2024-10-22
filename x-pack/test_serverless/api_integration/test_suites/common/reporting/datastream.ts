@@ -6,7 +6,11 @@
  */
 
 import { expect } from 'expect';
-import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import {
+  CookieCredentials,
+  InternalRequestHeader,
+  RoleCredentials,
+} from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,6 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('svlReportingApi');
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   const samlAuth = getService('samlAuth');
   let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
@@ -29,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Data Stream', function () {
     const generatedReports = new Set<string>();
     before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
 
@@ -68,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(internalReqHeader)
-        .set(cookieCredentials);
+        .set(roleAuthc.apiKeyHeader); // use API key since the datastream management API is a public endpoint
 
       svlCommonApi.assertResponseStatusCode(200, status, body);
 
