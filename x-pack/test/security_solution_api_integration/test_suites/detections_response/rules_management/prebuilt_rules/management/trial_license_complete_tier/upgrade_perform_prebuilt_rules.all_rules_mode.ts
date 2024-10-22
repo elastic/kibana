@@ -246,6 +246,29 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(installedRule.tags).toEqual(reviewRuleResponseMap.get(ruleId)?.tags);
         }
       });
+
+      it.only('correctly upgrades rules with DataSource diffs to their MERGED versions', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [queryRule]);
+        await installPrebuiltRules(es, supertest);
+
+        const targetObject = cloneDeep(queryRule);
+        targetObject['security-rule'].version += 1;
+        targetObject['security-rule'].name = TARGET_NAME;
+        targetObject['security-rule'].tags = TARGET_TAGS;
+        targetObject['security-rule'].index = ['auditbeat-*'];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [targetObject]);
+
+        console.log({ targetObject: JSON.stringify(targetObject, null, 2) });
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        console.log({ targetObject: JSON.stringify(reviewResponse, null, 2) });
+
+        const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
+          mode: ModeEnum.ALL_RULES,
+          pick_version: 'MERGED',
+        });
+        console.log({ performUpgradeResponse: JSON.stringify(performUpgradeResponse, null, 2) });
+      });
     });
 
     describe('edge cases and unhappy paths', () => {
