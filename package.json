@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.17.25",
+  "version": "7.17.26",
   "branch": "7.17",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
