@@ -313,7 +313,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     }
                   )}
                   onClick={() => {
-                    application.navigateToUrl(http.basePath.prepend(`${ELASTICSEARCH_PLUGIN.URL}`));
+                    application.navigateToUrl(http.basePath.prepend(ELASTICSEARCH_PLUGIN.URL));
                   }}
                   display="subdued"
                 />
