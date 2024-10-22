@@ -50,7 +50,7 @@ export function NavControl() {
   const service = useAIAssistantAppService();
 
   const {
-    services: { application, http, notifications, observabilityAIAssistant },
+    services: { notifications, observabilityAIAssistant },
   } = useKibana();
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);

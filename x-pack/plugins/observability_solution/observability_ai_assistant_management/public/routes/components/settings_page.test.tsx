@@ -16,7 +16,7 @@ const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
 
 describe('Settings Page', () => {
   const appContextValue = {
-    config: { spacesEnabled: true, visibilityEnabled: true },
+    config: { spacesEnabled: true, visibilityEnabled: true, logSourcesEnabled: true },
     setBreadcrumbs: () => {},
   };
   useKnowledgeBaseMock.mockReturnValue({

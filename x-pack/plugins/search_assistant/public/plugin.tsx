@@ -55,6 +55,10 @@ export class SearchAssistantPlugin
     });
     const isEnabled = appService.isEnabled();
 
+    if (!isEnabled) {
+      return {};
+    }
+
     coreStart.chrome.navControls.registerRight({
       mount: (element) => {
         ReactDOM.render(
