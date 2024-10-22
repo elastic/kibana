@@ -12,6 +12,7 @@ import type { ListResult, ListWithKuery, BulkGetResult } from './common';
 export interface GetAgentPoliciesRequest {
   query: ListWithKuery & {
     noAgentCount?: boolean;
+    withAgentCount?: boolean;
     full?: boolean;
   };
 }
