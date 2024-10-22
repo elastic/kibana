@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('health', () => {
     afterEach(async () => {
       // clean up after each test
-      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+      return await request.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     it('should return basic configuration of task manager', async () => {
