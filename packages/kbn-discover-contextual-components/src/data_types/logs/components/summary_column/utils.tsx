@@ -16,8 +16,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { LogDocument, ResourceFields } from '@kbn/discover-utils/src';
-import { getAvailableResourceFields } from '@kbn/discover-utils/src/data_types/logs/utils/get_available_resource_fields';
+import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 /**
@@ -59,7 +58,7 @@ const resourceCustomComponentsMap: Partial<
 };
 
 export interface ResourceFieldDescriptor {
-  ResourceBadge: React.ComponentType<Omit<FieldBadgeWithActionsProps, 'core' | 'share'>>;
+  ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
   Icon?: () => JSX.Element;
   name: keyof ResourceFields;
   value: string;

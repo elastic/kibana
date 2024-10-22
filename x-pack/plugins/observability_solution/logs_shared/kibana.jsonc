@@ -14,7 +14,6 @@
       "fieldFormats", 
       "dataViews",
       "discoverShared",
-      "discover",
       "logsDataAccess",
       "observabilityShared",
       "share",

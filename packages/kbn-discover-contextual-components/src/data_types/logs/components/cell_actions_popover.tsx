@@ -160,9 +160,15 @@ export function CellActionsPopover({
 export interface FieldBadgeWithActionsProps
   extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
   icon?: EuiBadgeProps['iconType'];
+}
+
+interface FieldBadgeWithActionsDependencies {
   core?: CoreStart;
   share?: SharePluginStart;
 }
+
+export type FieldBadgeWithActionsPropsAndDependencies = FieldBadgeWithActionsProps &
+  FieldBadgeWithActionsDependencies;
 
 export function FieldBadgeWithActions({
   icon,
@@ -170,7 +176,7 @@ export function FieldBadgeWithActions({
   property,
   renderValue,
   value,
-}: FieldBadgeWithActionsProps) {
+}: FieldBadgeWithActionsPropsAndDependencies) {
   return (
     <CellActionsPopover
       onFilter={onFilter}

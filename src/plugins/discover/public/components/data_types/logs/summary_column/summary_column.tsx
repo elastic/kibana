@@ -9,7 +9,7 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
-import { AllSummaryColumnProps } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column';
+import { AllSummaryColumnProps } from '@kbn/discover-contextual-components';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const LazySummaryColumn = dynamic(

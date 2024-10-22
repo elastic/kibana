@@ -8,7 +8,7 @@
  */
 
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
-import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
+import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components';
 import { getSummaryColumn } from '../../../../../components/data_types/logs/summary_column';
 import {
   LOG_LEVEL_FIELDS,
