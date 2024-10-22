@@ -33,7 +33,6 @@ export interface Props {
 }
 export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const { burnRateOptions } = useBurnRateOptions(slo);
-
   const [range, setRange] = useState<{ from: Date; to: Date }>({
     from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
@@ -50,7 +49,21 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
     return () => clearInterval(intervalId);
   }, [isAutoRefreshing]);
 
-  return selectedTabId === OVERVIEW_TAB_ID ? (
+  if (selectedTabId === HISTORY_TAB_ID) {
+    return (
+      <SLODetailsHistory
+        slo={slo}
+        isAutoRefreshing={isAutoRefreshing}
+        selectedTabId={selectedTabId}
+      />
+    );
+  }
+
+  if (selectedTabId === ALERTS_TAB_ID) {
+    return <SloDetailsAlerts slo={slo} />;
+  }
+
+  return (
     <EuiFlexGroup direction="column" gutterSize="xl">
       <SloRemoteCallout slo={slo} />
       <SloHealthCallout slo={slo} />
@@ -76,13 +89,5 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
-  ) : selectedTabId === ALERTS_TAB_ID ? (
-    <SloDetailsAlerts slo={slo} />
-  ) : (
-    <SLODetailsHistory
-      slo={slo}
-      isAutoRefreshing={isAutoRefreshing}
-      selectedTabId={selectedTabId}
-    />
   );
 }
