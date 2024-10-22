@@ -52,6 +52,7 @@ export const GridRow = forwardRef<
       [rowIndex]
     );
 
+    // set initial styles based on state at mount to prevent styles from "blipping"
     const initialStyles = useMemo(() => {
       const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
@@ -74,7 +75,7 @@ export const GridRow = forwardRef<
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
         ])
-          .pipe(skip(1))
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe(([targetRow, gridLayout, runtimeSettings]) => {
             const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
             if (!rowRef) return;
@@ -84,6 +85,7 @@ export const GridRow = forwardRef<
             rowRef.style.gridTemplateRows = `repeat(${getRowCount(
               gridLayout[rowIndex]
             )}, ${rowHeight}px)`;
+
             if (rowIndex === targetRow) {
               // apply "targetted row" styles
               const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
@@ -181,28 +183,6 @@ export const GridRow = forwardRef<
                 }}
               />
             ))}
-
-            {/* render the drag preview if this row is currently being targetted */}
-            {isGridTargeted && (
-              <div
-                ref={dragPreviewRef}
-                css={css`
-                  pointer-events: none;
-                  border-radius: ${euiThemeVars.euiBorderRadius};
-                  background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
-                  transition: opacity 100ms linear;
-
-                  grid-column-start: ${rowData.panels[activePanel.id].column + 1};
-                  grid-column-end: ${rowData.panels[activePanel.id].column +
-                  1 +
-                  rowData.panels[activePanel.id].width};
-                  grid-row-start: ${rowData.panels[activePanel.id].row + 1};
-                  grid-row-end: ${rowData.panels[activePanel.id].row +
-                  1 +
-                  rowData.panels[activePanel.id].height};
-                `}
-              />
-            )}
           </div>
         )}
       </>
