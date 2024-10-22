@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContainerEntity, HostEntity, ServiceEntity } from '../../../common/entities';
+import type { Entity } from '../../../common/entities';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
@@ -27,7 +27,7 @@ describe('getIdentityFields', () => {
     expect(result.size).toBe(0);
   });
   it('should return a Map with unique entity types and their respective identity fields', () => {
-    const serviceEntity: ServiceEntity = {
+    const serviceEntity: Entity = {
       'agent.name': 'node',
       'entity.identityFields': ['service.name', 'service.environment'],
       'service.name': 'my-service',
@@ -35,7 +35,7 @@ describe('getIdentityFields', () => {
       ...commonEntityFields,
     };
 
-    const hostEntity: HostEntity = {
+    const hostEntity: Entity = {
       'entity.identityFields': ['host.name'],
       'host.name': 'my-host',
       'entity.type': 'host',
@@ -43,7 +43,7 @@ describe('getIdentityFields', () => {
       ...commonEntityFields,
     };
 
-    const containerEntity: ContainerEntity = {
+    const containerEntity: Entity = {
       'entity.identityFields': 'container.id',
       'host.name': 'my-host',
       'entity.type': 'container',

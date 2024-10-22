@@ -12,7 +12,7 @@ import {
   ENTITY_ID,
   ENTITY_LAST_SEEN,
 } from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityType } from '../../../../common/entities';
+import { Entity } from '../../../../common/entities';
 
 const idGenerator = () => {
   let id = 0;
@@ -31,7 +31,7 @@ function generateRandomTimestamp() {
   return randomDate.toISOString();
 }
 
-const getEntity = (entityType: EntityType) => ({
+const getEntity = (entityType: string) => ({
   [ENTITY_LAST_SEEN]: generateRandomTimestamp(),
   [ENTITY_TYPE]: entityType,
   [ENTITY_DISPLAY_NAME]: faker.person.fullName(),

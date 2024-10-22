@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EntityType } from '../../common/entities';
 import { getEntityTypeLabel } from './get_entity_type_label';
 
 describe('getEntityTypeLabel', () => {
@@ -24,8 +23,8 @@ describe('getEntityTypeLabel', () => {
     expect(label).toBe('Host');
   });
 
-  it('should return "N/A" for an unknown entityType', () => {
-    const label = getEntityTypeLabel('foo' as EntityType);
-    expect(label).toBe('N/A');
+  it('should return entity type for an unknown entityType', () => {
+    const label = getEntityTypeLabel('foo');
+    expect(label).toBe('foo');
   });
 });

@@ -10,12 +10,6 @@ import {
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 import {
-  HOST_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  AGENT_NAME,
-  CLOUD_PROVIDER,
-  CONTAINER_ID,
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
@@ -26,12 +20,6 @@ import {
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
-export const entityTypeRt = t.union([
-  t.literal('service'),
-  t.literal('host'),
-  t.literal('container'),
-]);
-
 export const entityColumnIdsRt = t.union([
   t.literal(ENTITY_DISPLAY_NAME),
   t.literal(ENTITY_LAST_SEEN),
@@ -40,8 +28,6 @@ export const entityColumnIdsRt = t.union([
 ]);
 
 export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
-
-export type EntityType = t.TypeOf<typeof entityTypeRt>;
 
 export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
 
@@ -56,16 +42,6 @@ export const ENTITIES_LATEST_ALIAS = entitiesIndexPattern({
 //   type: '*',
 //   dataset: ENTITY_LATEST,
 // });
-
-const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
-const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
-const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
-
-export const defaultEntityDefinitions = [
-  BUILTIN_SERVICES_FROM_ECS_DATA,
-  BUILTIN_HOSTS_FROM_ECS_DATA,
-  BUILTIN_CONTAINERS_FROM_ECS_DATA,
-];
 
 const entityArrayRt = t.array(t.string);
 export const entityTypesRt = new t.Type<string[], string, unknown>(
@@ -90,37 +66,13 @@ export const entityTypesRt = new t.Type<string[], string, unknown>(
   (arr) => arr.join()
 );
 
-interface BaseEntity {
+export interface Entity {
   [ENTITY_LAST_SEEN]: string;
   [ENTITY_ID]: string;
-  [ENTITY_TYPE]: EntityType;
+  [ENTITY_TYPE]: string;
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_DEFINITION_ID]: string;
   [ENTITY_IDENTITY_FIELDS]: string | string[];
   alertsCount?: number;
   [key: string]: any;
 }
-
-/**
- * These types are based on service, host and container from the built in definition.
- */
-export interface ServiceEntity extends BaseEntity {
-  [ENTITY_TYPE]: 'service';
-  [SERVICE_NAME]: string;
-  [SERVICE_ENVIRONMENT]?: string | string[] | null;
-  [AGENT_NAME]: string | string[] | null;
-}
-
-export interface HostEntity extends BaseEntity {
-  [ENTITY_TYPE]: 'host';
-  [HOST_NAME]: string;
-  [CLOUD_PROVIDER]: string | string[] | null;
-}
-
-export interface ContainerEntity extends BaseEntity {
-  [ENTITY_TYPE]: 'container';
-  [CONTAINER_ID]: string;
-  [CLOUD_PROVIDER]: string | string[] | null;
-}
-
-export type Entity = ServiceEntity | HostEntity | ContainerEntity;

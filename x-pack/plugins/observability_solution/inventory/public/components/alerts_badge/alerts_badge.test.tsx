@@ -9,7 +9,7 @@ import { type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { render, screen } from '@testing-library/react';
 import { AlertsBadge } from './alerts_badge';
 import * as useKibana from '../../hooks/use_kibana';
-import { HostEntity, ServiceEntity } from '../../../common/entities';
+import type { Entity } from '../../../common/entities';
 
 describe('AlertsBadge', () => {
   jest.spyOn(useKibana, 'useKibana').mockReturnValue({
@@ -27,7 +27,7 @@ describe('AlertsBadge', () => {
   });
 
   it('render alerts badge for a host entity', () => {
-    const entity: HostEntity = {
+    const entity: Entity = {
       'entity.lastSeenTimestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'host',
@@ -45,7 +45,7 @@ describe('AlertsBadge', () => {
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
   it('render alerts badge for a service entity', () => {
-    const entity: ServiceEntity = {
+    const entity: Entity = {
       'entity.lastSeenTimestamp': 'foo',
       'agent.name': 'node',
       'entity.id': '1',
@@ -64,7 +64,7 @@ describe('AlertsBadge', () => {
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
   });
   it('render alerts badge for a service entity with multiple identity fields', () => {
-    const entity: ServiceEntity = {
+    const entity: Entity = {
       'entity.lastSeenTimestamp': 'foo',
       'agent.name': 'node',
       'entity.id': '1',

@@ -7,7 +7,7 @@
 
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { ENTITIES_LATEST_ALIAS, EntityType } from '../../../common/entities';
+import { ENTITIES_LATEST_ALIAS } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
 export async function getEntityTypes({
@@ -22,5 +22,5 @@ export async function getEntityTypes({
     `,
   });
 
-  return entityTypesEsqlResponse.values.map(([_, val]) => val as EntityType);
+  return entityTypesEsqlResponse.values.map(([_, val]) => val as string);
 }

@@ -8,17 +8,16 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EntityType } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 interface Props {
-  onChange: (entityTypes: EntityType[]) => void;
+  onChange: (entityTypes: string[]) => void;
 }
 
-const toComboBoxOption = (entityType: string): EuiComboBoxOptionOption<EntityType> => ({
+const toComboBoxOption = (entityType: string): EuiComboBoxOptionOption<string> => ({
   key: entityType,
   label: getEntityTypeLabel(entityType),
   'data-test-subj': `entityTypesFilter${entityType}Option`,
@@ -44,7 +43,7 @@ export function EntityTypesControls({ onChange }: Props) {
   const selectedOptions = entityTypes.map(toComboBoxOption);
 
   return (
-    <EuiComboBox<EntityType>
+    <EuiComboBox<string>
       data-test-subj="entityTypesFilterComboBox"
       isLoading={loading}
       css={css`
@@ -61,7 +60,7 @@ export function EntityTypesControls({ onChange }: Props) {
       options={options}
       selectedOptions={selectedOptions}
       onChange={(newOptions) => {
-        onChange(newOptions.map((option) => option.key as EntityType));
+        onChange(newOptions.map((option) => option.key!));
       }}
       isClearable
     />

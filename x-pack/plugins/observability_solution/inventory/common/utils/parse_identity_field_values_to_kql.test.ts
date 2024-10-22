@@ -11,7 +11,7 @@ import {
   ENTITY_ID,
   ENTITY_LAST_SEEN,
 } from '@kbn/observability-shared-plugin/common';
-import { HostEntity, ServiceEntity } from '../entities';
+import type { Entity } from '../entities';
 import { parseIdentityFieldValuesToKql } from './parse_identity_field_values_to_kql';
 
 const commonEntityFields = {
@@ -24,7 +24,7 @@ const commonEntityFields = {
 
 describe('parseIdentityFieldValuesToKql', () => {
   it('should return the value when identityFields is a single string', () => {
-    const entity: ServiceEntity = {
+    const entity: Entity = {
       'agent.name': 'node',
       'entity.identityFields': 'service.name',
       'service.name': 'my-service',
@@ -37,7 +37,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   });
 
   it('should return values when identityFields is an array of strings', () => {
-    const entity: ServiceEntity = {
+    const entity: Entity = {
       'agent.name': 'node',
       'entity.identityFields': ['service.name', 'service.environment'],
       'service.name': 'my-service',
@@ -51,7 +51,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   });
 
   it('should return an empty string if identityFields is empty string', () => {
-    const entity: ServiceEntity = {
+    const entity: Entity = {
       'agent.name': 'node',
       'entity.identityFields': '',
       'service.name': 'my-service',
@@ -63,7 +63,7 @@ describe('parseIdentityFieldValuesToKql', () => {
     expect(result).toEqual('');
   });
   it('should return an empty array if identityFields is empty array', () => {
-    const entity: ServiceEntity = {
+    const entity: Entity = {
       'agent.name': 'node',
       'entity.identityFields': [],
       'service.name': 'my-service',
@@ -76,7 +76,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   });
 
   it('should ignore fields that are not present in the entity', () => {
-    const entity: HostEntity = {
+    const entity: Entity = {
       'entity.identityFields': ['host.name', 'foo.bar'],
       'host.name': 'my-host',
       'entity.type': 'host',

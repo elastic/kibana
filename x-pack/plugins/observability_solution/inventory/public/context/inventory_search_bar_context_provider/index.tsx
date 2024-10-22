@@ -6,12 +6,11 @@
  */
 import React, { createContext, useContext, type ReactChild } from 'react';
 import { Subject } from 'rxjs';
-import { EntityType } from '../../../common/entities';
 
 interface InventorySearchBarContextType {
   searchBarContentSubject$: Subject<{
     kuery?: string;
-    entityTypes?: EntityType[];
+    entityTypes?: string[];
     refresh: boolean;
   }>;
 }
