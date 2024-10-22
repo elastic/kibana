@@ -397,7 +397,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Repalce {RouteDeprecationInfo}
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(
@@ -619,7 +619,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Repalce {RouteDeprecationInfo}
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(

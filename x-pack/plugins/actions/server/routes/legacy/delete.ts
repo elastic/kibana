@@ -32,7 +32,7 @@ export const deleteActionRoute = (
         summary: `Delete a connector`,
         description: 'WARNING: When you delete a connector, it cannot be recovered.',
         tags: ['oas-tag:connectors'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Repalce {RouteDeprecationInfo}
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
       validate: {
