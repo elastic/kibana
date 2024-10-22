@@ -68,7 +68,6 @@ export interface GridLayoutStateManager {
   rowCount$: BehaviorSubject<number>;
 
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
-  dragPreviewRefs: Array<React.MutableRefObject<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
 }
 

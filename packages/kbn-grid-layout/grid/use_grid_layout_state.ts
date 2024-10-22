@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { createRef, useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, of, retry, skip, tap } from 'rxjs';
+import { useEffect, useMemo, useRef } from 'react';
+import { BehaviorSubject, debounceTime } from 'rxjs';
 
-import { transparentize } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import {
   ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
-  GridPanelData,
   GridRowData,
   GridSettings,
   PanelInteractionEvent,
@@ -64,13 +60,11 @@ export const useGridLayoutState = ({
     const panelIds$ = new BehaviorSubject<string[][]>(
       initialLayout.map(({ panels }) => Object.keys(panels))
     );
-    const dragPreviewRefs = initialLayout.map((row) => createRef<HTMLDivElement>());
 
     return {
       rowRefs,
       rows$,
       panelRefs,
-      dragPreviewRefs,
       rowCount$,
       targetRow$,
       panelIds$,
