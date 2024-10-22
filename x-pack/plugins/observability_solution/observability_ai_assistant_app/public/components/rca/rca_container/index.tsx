@@ -66,10 +66,14 @@ export function RootCauseAnalysisContainer({
       return getToolResponseErrorItem(response);
     }
     if ('instructions' in message.response) {
-      return message.response.analysis ? (
+      const analysis = message.response.analysis;
+      const data = 'data' in message ? message.data : undefined;
+      return analysis && data ? (
         <RootCauseAnalysisEntityInvestigation
-          summary={message.response.analysis?.summary}
-          entity={message.response.analysis?.entity}
+          summary={analysis.summary}
+          entity={analysis.entity}
+          ownPatterns={data.attachments.ownPatterns}
+          patternsFromOtherEntities={data.attachments.patternsFromOtherEntities}
         />
       ) : (
         <RootCauseAnalysisStepItem

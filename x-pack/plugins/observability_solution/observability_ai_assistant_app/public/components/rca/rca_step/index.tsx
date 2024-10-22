@@ -47,7 +47,7 @@ export function RootCauseAnalysisStepItem({
         <EuiFlexItem grow={false}>
           {loading ? <EuiLoadingSpinner size="s" /> : <EuiIcon type={iconType || 'logoElastic'} />}
         </EuiFlexItem>
-        <EuiFlexItem grow>
+        <EuiFlexItem grow={false}>
           <EuiText size="s" className={css``}>
             {label}
           </EuiText>

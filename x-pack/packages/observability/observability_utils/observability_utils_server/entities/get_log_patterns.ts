@@ -16,11 +16,13 @@ import {
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis';
 import { ChangePointType } from '@kbn/es-types/src';
 import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_label';
+import { partition } from 'lodash';
 import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 import { kqlQuery } from '../es/queries/kql_query';
 import { rangeQuery } from '../es/queries/range_query';
 
 interface FieldPatternResultBase {
+  field: string;
   count: number;
   pattern: string;
   regex: string;
@@ -48,13 +50,6 @@ export type FieldPatternResult<TChanges extends boolean | undefined = undefined>
 
 export type FieldPatternResultWithChanges = FieldPatternResult<true>;
 
-export interface FieldPatternsResponse<TChanges extends boolean | undefined = undefined> {
-  field: string;
-  patterns: Array<FieldPatternResult<TChanges>>;
-}
-
-export type FieldPatternsResponseWithChanges = FieldPatternsResponse<true>;
-
 interface CategorizeTextOptions {
   query: QueryDslQueryContainer;
   metadata: string[];
@@ -78,7 +73,7 @@ export async function runCategorizeTextAggregation<
   TChanges extends boolean | undefined = undefined
 >(
   options: CategorizeTextOptions & { changes?: TChanges }
-): Promise<Array<FieldPatternsResponse<TChanges>>>;
+): Promise<Array<FieldPatternResult<TChanges>>>;
 
 export async function runCategorizeTextAggregation({
   esClient,
@@ -92,7 +87,7 @@ export async function runCategorizeTextAggregation({
   size,
   start,
   end,
-}: CategorizeTextOptions & { changes?: boolean }): Promise<Array<FieldPatternsResponse<boolean>>> {
+}: CategorizeTextOptions & { changes?: boolean }): Promise<Array<FieldPatternResult<boolean>>> {
   const aggs = Object.fromEntries(
     fields.map(
       (
@@ -212,41 +207,38 @@ export async function runCategorizeTextAggregation({
 
   const fieldAggregates = response.aggregations;
 
-  return Object.entries(fieldAggregates).map(([fieldName, aggregate]) => {
+  return Object.entries(fieldAggregates).flatMap(([fieldName, aggregate]) => {
     const buckets = aggregate.buckets;
 
-    return {
-      field: fieldName,
-      patterns: buckets.map((bucket) => {
-        return {
-          count: bucket.doc_count,
-          pattern: bucket.key,
-          regex: bucket.regex,
-          sample: bucket.sample.hits.hits[0].fields![fieldName][0] as string,
-          highlight: bucket.sample.hits.hits[0].highlight ?? {},
-          metadata: bucket.sample.hits.hits[0].fields!,
-          firstOccurrence: new Date(bucket.minTimestamp.value!).toISOString(),
-          lastOccurrence: new Date(bucket.maxTimestamp.value!).toISOString(),
-          ...('timeseries' in bucket
-            ? {
-                timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
-                  x: dateBucket.key,
-                  y: dateBucket.doc_count,
-                })),
-                change: Object.entries(bucket.changes.type).map(([changePointType, change]) => {
-                  return {
-                    key: bucket.changes.bucket?.key,
-                    type: changePointType,
-                    significance:
-                      change.p_value !== undefined ? pValueToLabel(change.p_value) : null,
-                    ...change,
-                  };
-                })[0],
-              }
-            : {}),
-        };
-      }),
-    };
+    return buckets.map((bucket) => {
+      return {
+        field: fieldName,
+        count: bucket.doc_count,
+        pattern: bucket.key,
+        regex: bucket.regex,
+        sample: bucket.sample.hits.hits[0].fields![fieldName][0] as string,
+        highlight: bucket.sample.hits.hits[0].highlight ?? {},
+        metadata: bucket.sample.hits.hits[0].fields!,
+        firstOccurrence: new Date(bucket.minTimestamp.value!).toISOString(),
+        lastOccurrence: new Date(bucket.maxTimestamp.value!).toISOString(),
+        ...('timeseries' in bucket
+          ? {
+              timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.doc_count,
+              })),
+              change: Object.entries(bucket.changes.type).map(([changePointType, change]) => {
+                return {
+                  key: bucket.changes.bucket?.key,
+                  type: changePointType,
+                  significance: change.p_value !== undefined ? pValueToLabel(change.p_value) : null,
+                  ...change,
+                };
+              })[0],
+            }
+          : {}),
+      };
+    });
   });
 }
 
@@ -262,7 +254,7 @@ interface LogPatternOptions {
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
   options: LogPatternOptions & { changes?: TChanges }
-): Promise<Array<FieldPatternsResponse<TChanges>>>;
+): Promise<Array<FieldPatternResult<TChanges>>>;
 
 export async function getLogPatterns({
   esClient,
@@ -273,7 +265,7 @@ export async function getLogPatterns({
   changes,
   metadata = [],
   fields,
-}: LogPatternOptions & { changes?: boolean }): Promise<Array<FieldPatternsResponse<boolean>>> {
+}: LogPatternOptions & { changes?: boolean }): Promise<Array<FieldPatternResult<boolean>>> {
   const fieldCapsResponse = await esClient.fieldCaps('get_field_caps_for_log_pattern_analysis', {
     fields,
     index_filter: {
@@ -340,6 +332,13 @@ export async function getLogPatterns({
         return [];
       }
 
+      // TODO: log patterns that are too complicated
+      const [_, uncomplicatedLogPatterns] = partition(topMessagePatterns, (pattern) => {
+        const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
+        // elasticsearch will barf because the query is too complex
+        return complexity > 25;
+      });
+
       const rareMessagePatterns = await runCategorizeTextAggregation({
         esClient,
         index,
@@ -350,23 +349,16 @@ export async function getLogPatterns({
           bool: {
             filter: kqlQuery(kuery),
             must_not: [
-              ...topMessagePatterns.flatMap(({ field, patterns }) => {
-                return patterns.flatMap((pattern) => {
-                  const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
-                  // elasticsearch will barf because the query is too complex
-                  if (complexity >= 25) {
-                    return [];
-                  }
-                  return [
-                    {
-                      regexp: {
-                        [field]: {
-                          value: pattern.regex,
-                        },
+              ...uncomplicatedLogPatterns.flatMap((pattern) => {
+                return [
+                  {
+                    regexp: {
+                      [pattern.field]: {
+                        value: pattern.regex,
                       },
                     },
-                  ];
-                });
+                  },
+                ];
               }),
             ],
           },
@@ -378,11 +370,9 @@ export async function getLogPatterns({
         metadata,
       });
 
-      return [...topMessagePatterns, ...rareMessagePatterns];
+      return [...uncomplicatedLogPatterns, ...rareMessagePatterns];
     })
   );
 
-  return allPatterns.flat().filter((fieldPatternResponse) => {
-    return fieldPatternResponse.patterns.length > 0;
-  });
+  return allPatterns.flat();
 }

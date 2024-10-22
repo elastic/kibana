@@ -8,19 +8,24 @@
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { InferenceClient, withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
+import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { castArray, groupBy, mapValues, pick } from 'lodash';
 import pLimit from 'p-limit';
 import { lastValueFrom } from 'rxjs';
-import { highlightPatternFromRegex } from '@kbn/observability-utils-common/llm/log_analysis/highlight_patterns_from_regex';
-import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { Logger } from '@kbn/logging';
 import { analyzeDocuments } from '../../entities/analyze_documents';
 import { getDataStreamsForEntity } from '../../entities/get_data_streams_for_entity';
 import { getAlertsForEntity } from '../../entities/signals/get_alerts_for_entity';
 import { getSlosForEntity } from '../../entities/signals/get_slos_for_entity';
 import { ObservabilityElasticsearchClient } from '../../es/client/create_observability_es_client';
-import { AnalyzeLogPatternOutput, analyzeLogPatterns } from '../analyze_log_patterns';
+import {
+  AnalyzedLogPattern,
+  AnalyzeLogPatternOutput,
+  analyzeLogPatterns,
+} from '../analyze_log_patterns';
 import { RCA_SYSTEM_PROMPT_BASE, RCA_TIMELINE_GUIDE } from './system_prompt_base';
 
 const SYSTEM_PROMPT_ADDENDUM = `# Guide: Investigating an Entity
@@ -176,6 +181,37 @@ it’s not slowing down authentication requests.
 cascading failures for requests to \`/api/submit\`.
 `;
 
+function serializePatterns(patterns: AnalyzedLogPattern[], entityFields?: string[]) {
+  const groupedPatterns = groupBy(patterns, (pattern) => pattern.field);
+
+  return Object.entries(groupedPatterns)
+    .map(([field, patternsForField]) => {
+      return `## Field: \`${field}\`
+
+      ${JSON.stringify({
+        patterns: patternsForField.map((pattern) => {
+          return {
+            regex: pattern.regex,
+            sample: pattern.sample,
+            lastSeen: pattern.lastOccurrence,
+            change: pattern.change,
+            count: pattern.count,
+            relevance: pattern.relevance,
+            ...(entityFields?.length
+              ? {
+                  entity: mapValues(
+                    pick(pattern.metadata, entityFields),
+                    (value) => castArray(value)[0] as string
+                  ),
+                }
+              : {}),
+          };
+        }),
+      })}`;
+    })
+    .join('\n\n');
+}
+
 export interface EntityHealthAnalysis {
   entity: Record<string, string>;
   summary: string;
@@ -207,6 +243,7 @@ export interface EntityHealthAnalysisParameters {
   connectorId: string;
   context: string;
   entity: Record<string, string>;
+  logger: Logger;
 }
 
 export async function analyzeEntityHealth(
@@ -223,7 +260,7 @@ export async function analyzeEntityHealth(
 
   const allAnalysis = await analyzeDataStreamsForEntity({ ...parameters, kuery, dataStreams });
 
-  const { ownPatternCategories, relevantPatternsFromOtherEntities } = await analyzeLogPatterns({
+  const { ownPatterns, patternsFromOtherEntities } = await analyzeLogPatterns({
     ...parameters,
     allAnalysis,
     entity,
@@ -236,23 +273,7 @@ export async function analyzeEntityHealth(
 
     ## Log patterns from entity
 
-    ${ownPatternCategories
-      .map(({ label, patterns }) => {
-        return `### \`${label}
-        
-      ${patterns
-        .map(
-          (pattern) =>
-            `- ${JSON.stringify({
-              sample: highlightPatternFromRegex(pattern.regex, pattern.sample),
-              lastSeen: pattern.lastOccurrence,
-              change: pattern.change,
-              count: pattern.count,
-            })}`
-        )
-        .join('\n')}`;
-      })
-      .join('\n\n')}
+    ${serializePatterns(ownPatterns)}
 
     ## SLOs
     ${slos.length ? `${JSON.stringify(slos)}` : 'No SLOs'}
@@ -262,15 +283,7 @@ export async function analyzeEntityHealth(
     
     ### Possibly relevant log patterns from other entities
 
-    ${relevantPatternsFromOtherEntities.map((pattern) => {
-      return `- ${JSON.stringify({
-        sample: highlightPatternFromRegex(pattern.regex, pattern.sample),
-        lastSeen: pattern.lastOccurrence,
-        change: pattern.change,
-        count: pattern.count,
-        metadata: pattern.metadata,
-      })}`;
-    })}
+    ${serializePatterns(ownPatterns, Object.keys(entity))}
     `;
 
   const { content: healthStatusSummary } = await lastValueFrom(
@@ -303,8 +316,8 @@ export async function analyzeEntityHealth(
       slos,
       context,
       allAnalysis,
-      ownPatternCategories,
-      relevantPatternsFromOtherEntities,
+      ownPatterns,
+      patternsFromOtherEntities,
     },
   };
 }

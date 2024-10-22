@@ -18,5 +18,9 @@ export const completeRootCauseAnalysis =
   completeRootCauseAnalysisJson as RootCauseAnalysisForServiceEvent[];
 
 export const controllerEntityHealthAnalysis = completeRootCauseAnalysis.find(
-  (event) => 'role' in event && event.role === MessageRole.Tool && 'analysis' in event.response
+  (event) =>
+    'role' in event &&
+    event.role === MessageRole.Tool &&
+    'analysis' in event.response &&
+    event.response.analysis?.entity['service.name'] === 'cartservice'
 ) as Required<AnalyzeEntityHealthToolMessage, 'data'>;

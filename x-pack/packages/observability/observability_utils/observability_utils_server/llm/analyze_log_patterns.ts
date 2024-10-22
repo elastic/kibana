@@ -10,21 +10,18 @@ import { formatValueForKql } from '@kbn/observability-utils-common/es/format_val
 import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import { highlightPatternFromRegex } from '@kbn/observability-utils-common/llm/log_analysis/highlight_patterns_from_regex';
 import { ShortIdTable } from '@kbn/observability-utils-common/llm/short_id_table';
-import { compact } from 'lodash';
+import { compact, groupBy } from 'lodash';
 import { last, lastValueFrom, map } from 'rxjs';
-import {
-  FieldPatternResult,
-  FieldPatternsResponse,
-  getLogPatterns,
-} from '../entities/get_log_patterns';
+import { FieldPatternResultWithChanges, getLogPatterns } from '../entities/get_log_patterns';
 import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 
+type LogPatternRelevance = 'normal' | 'unusual' | 'warning' | 'critical';
+
+export type AnalyzedLogPattern = FieldPatternResultWithChanges & { relevance: LogPatternRelevance };
+
 export interface AnalyzeLogPatternOutput {
-  ownPatternCategories: Array<{
-    label: string;
-    patterns: Array<FieldPatternResult<true>>;
-  }>;
-  relevantPatternsFromOtherEntities: Array<FieldPatternResult<true>>;
+  ownPatterns: AnalyzedLogPattern[];
+  patternsFromOtherEntities: AnalyzedLogPattern[];
 }
 
 export async function analyzeLogPatterns({
@@ -109,32 +106,25 @@ export async function analyzeLogPatterns({
   ]);
   const patternIdLookupTable = new ShortIdTable();
 
-  const patternsWithIds = [...logPatternsFromEntity, ...logPatternsFromElsewhere].map(
-    ({ field, patterns }) => {
-      return {
-        field,
-        patterns: patterns.map((pattern) => {
-          return {
-            ...pattern,
-            shortId: patternIdLookupTable.take(pattern.regex),
-          };
-        }),
-      };
-    }
-  );
+  const patternsWithIds = [...logPatternsFromEntity, ...logPatternsFromElsewhere].map((pattern) => {
+    return {
+      ...pattern,
+      shortId: patternIdLookupTable.take(pattern.regex),
+    };
+  });
 
-  const allPatterns = patternsWithIds.flatMap(({ patterns }) => patterns);
+  const patternsByRegex = new Map(patternsWithIds.map((pattern) => [pattern.regex, pattern]));
 
-  const patternsByRegex = new Map(allPatterns.map((pattern) => [pattern.regex, pattern]));
+  const serializedOwnEntity = JSON.stringify(entity);
 
-  const [ownPatternCategories, relevantPatternsFromOtherEntities] = await Promise.all([
+  const [ownPatterns, patternsFromOtherEntities] = await Promise.all([
     logPatternsFromEntity.length ? categorizeOwnPatterns() : [],
     logPatternsFromElsewhere.length ? selectRelevantPatternsFromOtherEntities() : [],
   ]);
 
   return {
-    ownPatternCategories,
-    relevantPatternsFromOtherEntities,
+    ownPatterns,
+    patternsFromOtherEntities,
   };
 
   function categorizeOwnPatterns() {
@@ -157,7 +147,7 @@ export async function analyzeLogPatterns({
 
             ## Log patterns:
 
-            ${logPatternsFromEntity.map(preparePatternsForLlm).join('\n\n')}
+            ${preparePatternsForLlm(logPatternsFromEntity)}
           `,
           schema: {
             type: 'object',
@@ -167,8 +157,9 @@ export async function analyzeLogPatterns({
                 items: {
                   type: 'object',
                   properties: {
-                    label: {
+                    relevance: {
                       type: 'string',
+                      enum: ['normal', 'unusual', 'warning', 'critical'],
                     },
                     shortIds: {
                       type: 'array',
@@ -179,7 +170,7 @@ export async function analyzeLogPatterns({
                       },
                     },
                   },
-                  required: ['label', 'shortIds'],
+                  required: ['relevance', 'shortIds'],
                 },
               },
             },
@@ -190,11 +181,13 @@ export async function analyzeLogPatterns({
           last(),
           withoutOutputUpdateEvents(),
           map((outputEvent) => {
-            return outputEvent.output.categories.map((category) => {
-              return {
-                label: category.label,
-                patterns: mapIdsBackToPatterns(category.shortIds),
-              };
+            return outputEvent.output.categories.flatMap((category) => {
+              return mapIdsBackToPatterns(category.shortIds).map((pattern) => {
+                return {
+                  ...pattern,
+                  relevance: category.relevance,
+                };
+              });
             });
           })
         )
@@ -208,55 +201,86 @@ export async function analyzeLogPatterns({
           connectorId,
           system: systemPrompt,
           input: `Based on the following log patterns that
-            are NOT from ${JSON.stringify(entity)},
-            select those that might be relevant to the entity,
-            based on the provided entity and context.
+            are NOT from ${serializedOwnEntity}, group these
+            patterns into the following categories:
 
-            Only select patterns that mention the entity that
-            is being investigated.
+            - irrelevant (patterns that are not related to
+            ${serializedOwnEntity})
+            - normals (patterns that are relevant for
+            ${serializedOwnEntity} but are indicative of normal
+            operations
+            - warning (patterns that are relevant for
+            ${serializedOwnEntity} that indicate something is
+            in an unexpected state)
+            - critical (patterns that are relevant for
+            ${serializedOwnEntity} that indicate a critical issue
+            with the entity)
 
             ## Log patterns:
 
-            ${logPatternsFromElsewhere.map(preparePatternsForLlm).join('\n\n')}
+            ${preparePatternsForLlm(logPatternsFromElsewhere)}
           `,
           schema: {
             type: 'object',
             properties: {
-              relevantPatterns: {
+              categories: {
                 type: 'array',
                 items: {
                   type: 'object',
                   properties: {
-                    shortId: {
+                    relevance: {
                       type: 'string',
+                      enum: ['irrelevant', 'normal', 'unusual', 'warning', 'critical'],
+                    },
+                    shortIds: {
+                      type: 'array',
+                      description:
+                        'The pattern IDs you want to group here. Use the pattern short ID.',
+                      items: {
+                        type: 'string',
+                      },
                     },
                   },
-                  required: ['shortId'],
+                  required: ['relevance', 'shortIds'],
                 },
               },
             },
-            required: ['relevantPatterns'],
+            required: ['categories'],
           } as const,
         })
         .pipe(
           withoutOutputUpdateEvents(),
           last(),
           map((outputEvent) => {
-            return mapIdsBackToPatterns(
-              outputEvent.output.relevantPatterns.map(({ shortId }) => shortId)
-            );
+            return outputEvent.output.categories.flatMap((category) => {
+              return mapIdsBackToPatterns(category.shortIds).flatMap((pattern) => {
+                if (category.relevance === 'irrelevant') {
+                  return [];
+                }
+                return [
+                  {
+                    ...pattern,
+                    relevance: category.relevance,
+                  },
+                ];
+              });
+            });
           })
         )
     );
   }
 
-  function preparePatternsForLlm({ field, patterns }: FieldPatternsResponse<true>) {
-    return `### \`${field}\`
+  function preparePatternsForLlm(patterns: FieldPatternResultWithChanges[]): string {
+    const groupedByField = groupBy(patterns, (pattern) => pattern.field);
+
+    return Object.entries(groupedByField)
+      .map(([field, patternsForField]) => {
+        return `### \`${field}\`
         
         #### Patterns
         
         ${JSON.stringify(
-          patterns.map((pattern) => {
+          patternsForField.map((pattern) => {
             const patternWithHighlights = highlightPatternFromRegex(pattern.regex, pattern.sample);
             return {
               shortId: patternIdLookupTable.take(pattern.regex),
@@ -270,6 +294,8 @@ export async function analyzeLogPatterns({
           })
         )}
         `;
+      })
+      .join('\n\n');
   }
 
   function mapIdsBackToPatterns(ids?: string[]) {

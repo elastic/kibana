@@ -81,6 +81,7 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       sloSummaryIndices,
       spaceId,
       context,
+      logger,
     }).pipe(
       switchMap((event) => {
         return of({

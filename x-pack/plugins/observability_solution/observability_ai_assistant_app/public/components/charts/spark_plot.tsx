@@ -25,6 +25,7 @@ export function SparkPlot({
   type,
   timeseries,
   annotations,
+  compressed,
 }: {
   type: 'line' | 'bar';
   timeseries: Array<{ x: number; y: number | null }>;
@@ -35,6 +36,7 @@ export function SparkPlot({
     icon: React.ReactNode;
     label: string;
   }>;
+  compressed?: boolean;
 }) {
   const defaultChartTheme = useChartTheme();
 
@@ -56,7 +58,7 @@ export function SparkPlot({
     <Chart
       size={{
         width: 128,
-        height: 64,
+        height: compressed ? 64 : 48,
       }}
     >
       <Settings

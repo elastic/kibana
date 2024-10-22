@@ -4,32 +4,109 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { formatInteger } from '@kbn/observability-utils-common/format/integer';
-import type { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
-import type { EntityHealthAnalysis } from '@kbn/observability-utils-server/llm/service_rca/analyze_entity_health';
-import React, { useMemo } from 'react';
 import { highlightPatternFromRegex } from '@kbn/observability-utils-common/llm/log_analysis/highlight_patterns_from_regex';
+import type { AnalyzedLogPattern } from '@kbn/observability-utils-server/llm/analyze_log_patterns';
+import type { EntityHealthAnalysis } from '@kbn/observability-utils-server/llm/service_rca/analyze_entity_health';
+import React, { useMemo, useState } from 'react';
+import { orderBy } from 'lodash';
 import { useTheme } from '../../../hooks/use_theme';
+import { SparkPlot } from '../../charts/spark_plot';
+
+const badgeClassName = css`
+  width: 100%;
+  .euiBadge__content {
+    justify-content: center;
+  }
+`;
+
+const PER_PAGE = 5;
+
+function getRelevanceColor(
+  relevance: 'normal' | 'unusual' | 'warning' | 'critical'
+): React.ComponentProps<typeof EuiBadge>['color'] {
+  switch (relevance) {
+    case 'normal':
+      return 'plain';
+
+    case 'critical':
+      return 'danger';
+
+    case 'warning':
+      return 'warning';
+
+    case 'unusual':
+      return 'primary';
+  }
+}
+
+function getSignificanceColor(
+  significance: 'high' | 'medium' | 'low' | null
+): React.ComponentProps<typeof EuiBadge>['color'] {
+  switch (significance) {
+    case 'high':
+      return 'critical';
+
+    case 'medium':
+      return 'warning';
+
+    case 'low':
+    case null:
+      return 'plain';
+  }
+}
+
+function relevanceToInt(relevance: 'normal' | 'unusual' | 'warning' | 'critical') {
+  switch (relevance) {
+    case 'normal':
+      return 0;
+    case 'unusual':
+      return 1;
+    case 'warning':
+      return 2;
+    case 'critical':
+      return 3;
+  }
+}
 
 export function RootCauseAnalysisEntityLogPatternTable({
-  ownPatternCategories,
-  relevantPatternsFromOtherEntities,
-}: Pick<
-  EntityHealthAnalysis['attachments'],
-  'ownPatternCategories' | 'relevantPatternsFromOtherEntities'
->) {
+  entity,
+  ownPatterns,
+  patternsFromOtherEntities,
+}: Pick<EntityHealthAnalysis['attachments'], 'ownPatterns' | 'patternsFromOtherEntities'> & {
+  entity: Record<string, string>;
+}) {
   const theme = useTheme();
 
-  const columns = useMemo((): Array<EuiBasicTableColumn<FieldPatternResultWithChanges>> => {
+  const [showUsualPatterns, setShowUsualPatterns] = useState(false);
+
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const columns = useMemo((): Array<EuiBasicTableColumn<AnalyzedLogPattern>> => {
     return [
       {
-        field: 'change',
+        field: 'relevance',
         name: '',
-        render: (_, {}) => {
-          return <></>;
+        width: '128px',
+        render: (_, { relevance, metadata }) => {
+          const color = getRelevanceColor(relevance);
+
+          return (
+            <EuiBadge className={badgeClassName} color={color}>
+              {relevance}
+            </EuiBadge>
+          );
         },
       },
       {
@@ -38,7 +115,7 @@ export function RootCauseAnalysisEntityLogPatternTable({
           'xpack.observabilityAiAssistant.rca.logPatternTable.messageColumnTitle',
           { defaultMessage: 'Message' }
         ),
-        render: (_, { pattern, regex, sample }) => {
+        render: (_, { regex, sample }) => {
           return (
             <EuiText
               size="xs"
@@ -62,6 +139,7 @@ export function RootCauseAnalysisEntityLogPatternTable({
           'xpack.observabilityAiAssistant.rca.logPatternTable.countColumnTitle',
           { defaultMessage: 'Count' }
         ),
+        width: '96px',
         render: (_, { count }) => {
           return (
             <EuiText
@@ -75,16 +153,110 @@ export function RootCauseAnalysisEntityLogPatternTable({
           );
         },
       },
+      {
+        field: 'change',
+        name: i18n.translate(
+          'xpack.observabilityAiAssistant.rca.logPatternTable.changeColumnTitle',
+          { defaultMessage: 'Change' }
+        ),
+        width: '128px',
+        render: (_, { change }) => {
+          return (
+            <EuiBadge className={badgeClassName} color={getSignificanceColor(change.significance)}>
+              {change.significance ?? 'No change'}
+            </EuiBadge>
+          );
+        },
+      },
+      {
+        field: 'timeseries',
+        width: '128px',
+        name: i18n.translate(
+          'xpack.observabilityAiAssistant.rca.logPatternTable.trendColumnTitle',
+          { defaultMessage: 'Trend' }
+        ),
+        render: (_, { timeseries }) => {
+          return <SparkPlot timeseries={timeseries} type="bar" />;
+        },
+      },
     ];
   }, [theme]);
 
-  const items = useMemo(() => {
-    return [
-      ...ownPatternCategories.flatMap(({ label, patterns }) => {
-        return patterns;
-      }),
-    ];
-  }, [ownPatternCategories, relevantPatternsFromOtherEntities]);
+  const allPatterns = useMemo(() => {
+    return [...ownPatterns, ...patternsFromOtherEntities];
+  }, [ownPatterns, patternsFromOtherEntities]);
 
-  return <EuiBasicTable tableLayout="auto" columns={columns} items={items} />;
+  const items = useMemo(() => {
+    return allPatterns.filter((pattern) => {
+      if (!showUsualPatterns) {
+        return pattern.relevance !== 'normal';
+      }
+      return pattern;
+    });
+  }, [allPatterns, showUsualPatterns]);
+
+  const visibleItems = useMemo(() => {
+    const start = pageIndex * PER_PAGE;
+    return orderBy(items, (item) => relevanceToInt(item.relevance), 'desc').slice(
+      start,
+      start + PER_PAGE
+    );
+  }, [pageIndex, items]);
+
+  const paginationOptions = useMemo(() => {
+    return {
+      pageIndex,
+      totalItemCount: items.length,
+      pageSize: PER_PAGE,
+    };
+  }, [pageIndex, items.length]);
+
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexItem grow>
+          <EuiText size="s">
+            {i18n.translate(
+              'xpack.observabilityAiAssistant.rootCauseAnalysisEntityInvestigation.logPatternsTableTitle',
+              {
+                defaultMessage: 'Showing {count} of {total} log patterns',
+                values: {
+                  total: items.length,
+                  count: visibleItems.length,
+                },
+              }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+            <EuiCheckbox
+              id={`show_usual_patterns_${JSON.stringify(entity)}`}
+              checked={showUsualPatterns}
+              onChange={() => {
+                setShowUsualPatterns((prev) => !prev);
+              }}
+            />
+            <EuiText size="xs">
+              {i18n.translate(
+                'xpack.observabilityAiAssistant.rca.logPatternTable.showUsualPatternsCheckbox',
+                {
+                  defaultMessage: 'Show unremarkable patterns',
+                }
+              )}
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiBasicTable
+        tableLayout="auto"
+        columns={columns}
+        items={visibleItems}
+        pagination={paginationOptions}
+        onChange={(criteria) => {
+          setPageIndex(criteria.page.index);
+        }}
+      />
+    </EuiFlexGroup>
+  );
 }

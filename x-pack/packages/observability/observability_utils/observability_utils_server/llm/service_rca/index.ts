@@ -214,6 +214,7 @@ export function runRootCauseAnalysisForService({
   connectorId,
   inferenceClient,
   context,
+  logger,
 }: Omit<EntityHealthAnalysisParameters, 'entity'> & {
   serviceName: string;
 }): Observable<RootCauseAnalysisForServiceEvent> {
@@ -261,6 +262,8 @@ export function runRootCauseAnalysisForService({
         ...toolCalls.map((toolCall) => {
           function catchToolCallError<T>(): OperatorFunction<T, T | ToolErrorMessage> {
             return catchError((error) => {
+              logger.error(`Failed executing task: ${error.message}`);
+              logger.error(JSON.stringify({ error, toolCall }));
               const toolErrorMessage: ToolErrorMessage = {
                 role: MessageRole.Tool,
                 response: {
@@ -386,6 +389,7 @@ export function runRootCauseAnalysisForService({
                   rulesClient,
                   sloSummaryIndices,
                   spaceId,
+                  logger,
                 })
               ).pipe(
                 switchMap((entityHealthAnalysis) => {

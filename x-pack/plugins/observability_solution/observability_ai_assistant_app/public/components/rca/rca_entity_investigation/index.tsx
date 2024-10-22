@@ -7,40 +7,61 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiAccordion,
   EuiFlexGroup,
-  EuiHorizontalRule,
+  EuiFlexItem,
   EuiMarkdownFormat,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import type { EntityHealthAnalysis } from '@kbn/observability-utils-server/llm/service_rca/analyze_entity_health';
 import { EntityBadge } from '../entity_badge';
+import { RootCauseAnalysisEntityLogPatternTable } from '../rca_entity_log_pattern_table';
 
 export function RootCauseAnalysisEntityInvestigation({
   summary,
   entity,
+  ownPatterns,
+  patternsFromOtherEntities,
 }: {
   summary: string;
   entity: Record<string, string>;
-}) {
+} & Pick<EntityHealthAnalysis['attachments'], 'ownPatterns' | 'patternsFromOtherEntities'>) {
   return (
     <EuiPanel hasBorder paddingSize="l">
-      <EuiFlexGroup direction="column">
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate(
-                'xpack.observabilityAiAssistant.rootCauseAnalysisEntityInvestigation.title',
-                {
-                  defaultMessage: 'Investigation',
-                }
-              )}
-            </h2>
-          </EuiTitle>
-          <EntityBadge entity={entity} />
+      <EuiAccordion
+        id={`panel_${JSON.stringify(entity)}`}
+        buttonContent={
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate(
+                  'xpack.observabilityAiAssistant.rootCauseAnalysisEntityInvestigation.title',
+                  {
+                    defaultMessage: 'Investigation',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
+            <EuiFlexItem grow={false}>
+              <EntityBadge entity={entity} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <EuiSpacer size="l" />
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiPanel color="subdued" paddingSize="l">
+            <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+          </EuiPanel>
+          <RootCauseAnalysisEntityLogPatternTable
+            entity={entity}
+            ownPatterns={ownPatterns}
+            patternsFromOtherEntities={patternsFromOtherEntities}
+          />
         </EuiFlexGroup>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xl" />
-      <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+      </EuiAccordion>
     </EuiPanel>
   );
 }
