@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export interface PublishesReload {
-  reload$: Subject<void>;
+  reload$: Observable<void>;
 }
 
 export const apiPublishesReload = (unknownApi: null | unknown): unknownApi is PublishesReload => {

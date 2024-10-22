@@ -45,22 +45,14 @@ export async function createDashboardApi({
     creationOptions,
   });
   if (!initializeResult) return;
-  const { input: initialState, searchSessionId } = initializeResult;
+  const { input: initialState } = initializeResult;
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     initialState,
     savedObjectResult,
     savedObjectId,
-    searchSessionId,
   });
-
-  // --------------------------------------------------------------------------------------
-  // Start the diffing integration after all other integrations are set up.
-  // --------------------------------------------------------------------------------------
-  /* untilDashboardReady().then((dashboardApi) => {
-    startDiffingDashboardState.bind(dashboardApi)(creationOptions);
-  });*/
 
   dashboardApiReady$.next(api);
   return { api, cleanup, internalApi };

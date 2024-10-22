@@ -304,36 +304,6 @@ export const initializeDashboard = async ({
     )
   );*/
 
-  // --------------------------------------------------------------------------------------
-  // Set up search sessions integration.
-  // --------------------------------------------------------------------------------------
-  let initialSearchSessionId;
-  /* if (searchSessionSettings) {
-    const { sessionIdToRestore } = searchSessionSettings;
-
-    // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      dataService.search.session.continue(incomingEmbeddable.searchSessionId);
-    }
-    if (sessionIdToRestore) {
-      dataService.search.session.restore(sessionIdToRestore);
-    }
-    const existingSession = dataService.search.session.getSessionId();
-
-    initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddable
-        ? existingSession
-        : dataService.search.session.start());
-
-    untilDashboardReady().then(async (container) => {
-      await container.untilContainerInitialized();
-      startDashboardSearchSessionIntegration.bind(container)(
-        creationOptions?.searchSessionSettings
-      );
-    });
-  }*/
-
   if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
@@ -346,5 +316,5 @@ export const initializeDashboard = async ({
     contentInsightsClient.track(loadDashboardReturn.dashboardId, 'viewed');
   }
 
-  return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
+  return { input: initialDashboardInput };
 };

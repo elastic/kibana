@@ -137,6 +137,7 @@ export type DashboardApi = CanExpandPanels &
   Pick<PublishesPanelTitle, 'panelTitle'> &
   PublishesReload &
   PublishesSavedObjectId &
+  PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &
   PublishesViewMode &

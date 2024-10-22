@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import { omit } from 'lodash';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
@@ -37,6 +37,7 @@ import { initializeDataLoadingManager } from './data_loading_manager';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { openSaveModal } from './open_save_modal';
+import { initializeSearchSessionManager } from './search_session_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -65,7 +66,7 @@ export function getDashboardApi({
     initialState.panels,
     trackPanel,
     (id: string) => getReferencesForPanelId(id, references),
-    (references: Reference[]) => references.push(...references)
+    (refs: Reference[]) => references.push(...refs)
   );
   untilEmbeddableLoadedBreakCircularDep = panelsManager.api.untilEmbeddableLoaded;
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
@@ -126,86 +127,101 @@ export function getDashboardApi({
   // Start animating panel transforms 500 ms after dashboard is created.
   setTimeout(() => animatePanelTransforms$.next(true), 500);
 
+  const dashboardApi = {
+    ...dataLoadingManager.api,
+    ...dataViewsManager.api,
+    ...panelsManager.api,
+    ...settingsManager.api,
+    ...trackPanel,
+    ...unifiedSearchManager.api,
+    ...unsavedChangesManager.api,
+    ...trackOverlayApi,
+    controlGroupApi$,
+    fullScreenMode$,
+    getAppContext: () => {
+      const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);
+      return {
+        ...embeddableAppContext,
+        currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
+      };
+    },
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
+    isManaged,
+    runInteractiveSave: async () => {
+      trackOverlayApi.clearOverlays();
+      const saveResult = await openSaveModal({
+        isManaged,
+        lastSavedId: savedObjectId$.value,
+        viewMode: viewMode$.value,
+        ...(await getState()),
+      });
+
+      if (saveResult) {
+        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
+        const settings = settingsManager.api.getSettings();
+        settingsManager.api.setSettings({
+          ...settings,
+          hidePanelTitles: settings.hidePanelTitles ?? false,
+          description: saveResult.savedState.description,
+          tags: saveResult.savedState.tags,
+          timeRestore: saveResult.savedState.timeRestore,
+          title: saveResult.savedState.title,
+        });
+        savedObjectId$.next(saveResult.id);
+
+        references = saveResult.references ?? [];
+      }
+
+      return saveResult;
+    },
+    runQuickSave: async () => {
+      if (isManaged) return;
+      const { controlGroupReferences, dashboardState, panelReferences } = await getState();
+      const saveResult = await getDashboardContentManagementService().saveDashboardState({
+        controlGroupReferences,
+        currentState: dashboardState,
+        panelReferences,
+        saveOptions: {},
+        lastSavedId: savedObjectId$.value,
+      });
+
+      unsavedChangesManager.internalApi.onSave(dashboardState);
+      references = saveResult.references ?? [];
+
+      return;
+    },
+    savedObjectId: savedObjectId$,
+    setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
+    setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
+    setViewMode: (viewMode: ViewMode) => {
+      // block the Dashboard from entering edit mode if this Dashboard is managed.
+      if (isManaged && viewMode?.toLowerCase() === 'edit') {
+        return;
+      }
+      viewMode$.next(viewMode);
+    },
+    type: DASHBOARD_API_TYPE as 'dashboard',
+    uuid: v4(),
+    viewMode: viewMode$,
+  } as Omit<DashboardApi, 'reload$' | 'searchSessionId$'>;
+
+  const searchSessionManager = initializeSearchSessionManager(
+    creationOptions?.searchSessionSettings,
+    creationOptions?.getIncomingEmbeddable,
+    {
+      ...dashboardApi,
+      reload$: merge(
+        unifiedSearchManager.internalApi.controlGroupReload$,
+        unifiedSearchManager.internalApi.panelsReload$
+      ),
+    }
+  );
+
   return {
     api: {
-      ...dataLoadingManager.api,
-      ...dataViewsManager.api,
-      ...panelsManager.api,
-      ...settingsManager.api,
-      ...trackPanel,
-      ...unifiedSearchManager.api,
-      ...unsavedChangesManager.api,
-      ...trackOverlayApi,
-      controlGroupApi$,
-      fullScreenMode$,
-      getAppContext: () => {
-        const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(
-          savedObjectId$.value
-        );
-        return {
-          ...embeddableAppContext,
-          currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
-        };
-      },
-      isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
-      isManaged,
-      runInteractiveSave: async () => {
-        trackOverlayApi.clearOverlays();
-        const saveResult = await openSaveModal({
-          isManaged,
-          lastSavedId: savedObjectId$.value,
-          viewMode: viewMode$.value,
-          ...(await getState()),
-        });
-
-        if (saveResult) {
-          unsavedChangesManager.internalApi.onSave(saveResult.savedState);
-          const settings = settingsManager.api.getSettings();
-          settingsManager.api.setSettings({
-            ...settings,
-            hidePanelTitles: settings.hidePanelTitles ?? false,
-            description: saveResult.savedState.description,
-            tags: saveResult.savedState.tags,
-            timeRestore: saveResult.savedState.timeRestore,
-            title: saveResult.savedState.title,
-          });
-          savedObjectId$.next(saveResult.id);
-
-          references = saveResult.references ?? [];
-        }
-
-        return saveResult;
-      },
-      runQuickSave: async () => {
-        if (isManaged) return;
-        const { controlGroupReferences, dashboardState, panelReferences } = await getState();
-        const saveResult = await getDashboardContentManagementService().saveDashboardState({
-          controlGroupReferences,
-          currentState: dashboardState,
-          panelReferences,
-          saveOptions: {},
-          lastSavedId: savedObjectId$.value,
-        });
-
-        unsavedChangesManager.internalApi.onSave(dashboardState);
-        references = saveResult.references ?? [];
-
-        return;
-      },
-      savedObjectId: savedObjectId$,
-      setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
-      setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
-      setViewMode: (viewMode: ViewMode) => {
-        // block the Dashboard from entering edit mode if this Dashboard is managed.
-        if (isManaged && viewMode?.toLowerCase() === 'edit') {
-          return;
-        }
-        viewMode$.next(viewMode);
-      },
-      type: DASHBOARD_API_TYPE as 'dashboard',
-      uuid: v4(),
-      viewMode: viewMode$,
-    } as Omit<DashboardApi, 'reload$'>,
+      ...dashboardApi,
+      ...searchSessionManager.api,
+    },
     internalApi: {
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
@@ -234,6 +250,7 @@ export function getDashboardApi({
     cleanup: () => {
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
+      searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
     },
