@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { RawAction, ActionTypeExecutorResult } from '../../../../types';
-import { getSystemActionKibanaPrivileges } from '../../../../lib/get_system_action_kibana_privileges';
+import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import {
@@ -30,7 +30,7 @@ export async function execute(
     (await getAuthorizationModeBySource(context.unsecuredSavedObjectsClient, source)) ===
     AuthorizationMode.RBAC
   ) {
-    const additionalPrivileges = getSystemActionKibanaPrivileges(context, actionId, params);
+    const additionalPrivileges = getActionKibanaPrivileges(context, actionId, params);
     let actionTypeId: string | undefined;
 
     try {

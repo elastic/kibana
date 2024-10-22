@@ -8,7 +8,7 @@
 import { ActionsClientContext } from '../actions_client';
 import { ExecuteOptions } from './action_executor';
 
-export function getSystemActionKibanaPrivileges(
+export function getActionKibanaPrivileges(
   context: ActionsClientContext,
   connectorId: string,
   params?: ExecuteOptions['params']
@@ -17,11 +17,8 @@ export function getSystemActionKibanaPrivileges(
     (connector) => connector.id === connectorId
   );
 
-  const additionalPrivileges = inMemoryConnector?.isSystemAction
-    ? context.actionTypeRegistry.getSystemActionKibanaPrivileges(
-        inMemoryConnector.actionTypeId,
-        params
-      )
+  const additionalPrivileges = inMemoryConnector
+    ? context.actionTypeRegistry.getActionKibanaPrivileges(inMemoryConnector.actionTypeId, params)
     : [];
 
   return additionalPrivileges;

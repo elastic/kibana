@@ -22,6 +22,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/connector_feature_config';
+import { CONNECTORS_EDR_EXECUTE_PRIVILEGE } from '@kbn/actions-plugin/server/feature';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
   renderMustacheObject,
@@ -248,6 +249,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
     },
     renderParameterTemplates,
     executor: curry(executor)({ publicBaseUrl }),
+    getKibanaPrivileges: () => [CONNECTORS_EDR_EXECUTE_PRIVILEGE],
   };
 }
 

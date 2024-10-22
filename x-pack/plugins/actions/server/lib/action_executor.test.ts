@@ -1370,7 +1370,7 @@ describe('System actions', () => {
       getKibanaPrivileges: () => ['test/create'],
     });
     connectorTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
-    connectorTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+    connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
     await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
 
@@ -1387,7 +1387,7 @@ describe('System actions', () => {
       getKibanaPrivileges: () => ['test/create'],
     });
     connectorTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
-    connectorTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+    connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
     await actionExecutor.execute({
       ...executeParams,
@@ -1395,7 +1395,7 @@ describe('System actions', () => {
       actionId: 'system-connector-.cases',
     });
 
-    expect(connectorTypeRegistry.getSystemActionKibanaPrivileges).toHaveBeenCalledWith('.cases', {
+    expect(connectorTypeRegistry.getActionKibanaPrivileges).toHaveBeenCalledWith('.cases', {
       foo: 'bar',
     });
 
