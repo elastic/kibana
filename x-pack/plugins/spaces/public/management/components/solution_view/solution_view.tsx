@@ -163,6 +163,7 @@ export const SolutionView: FunctionComponent<Props> = ({
               onChange={(solution) => {
                 onChange({ ...space, solution });
               }}
+              fullWidth={true}
               placeholder={i18n.translate(
                 'xpack.spaces.management.navigation.solutionViewDefaultValue',
                 { defaultMessage: 'Select solution view' }
