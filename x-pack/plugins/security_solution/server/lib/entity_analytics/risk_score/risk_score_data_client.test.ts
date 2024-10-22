@@ -44,7 +44,6 @@ describe('RiskScoreDataClient', () => {
   let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-  // const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const totalFieldsLimit = 1000;
 
   beforeEach(() => {
@@ -57,14 +56,8 @@ describe('RiskScoreDataClient', () => {
       soClient: mockSavedObjectClient,
       namespace: 'default',
     };
-    const optionsWithNamespace = {
-      logger,
-      kibanaVersion: '8.9.0',
-      esClient,
-      soClient: mockSavedObjectClient,
-      namespace: 'space-1',
-    };
     riskScoreDataClient = new RiskScoreDataClient(options);
+    const optionsWithNamespace = { ...options, namespace: 'space-1' };
     riskScoreDataClientWithNameSpace = new RiskScoreDataClient(optionsWithNamespace);
   });
 
@@ -330,6 +323,7 @@ describe('RiskScoreDataClient', () => {
       };
 
       // Default namespace
+      esClient.cluster.existsComponentTemplate.mockResolvedValue(false);
       await riskScoreDataClient.init();
       assertComponentTemplate('default');
       assertIndexTemplate('default');
@@ -338,6 +332,7 @@ describe('RiskScoreDataClient', () => {
       assertTransform('default');
 
       // Space-1 namespace
+      esClient.cluster.existsComponentTemplate.mockResolvedValue(false);
       await riskScoreDataClientWithNameSpace.init();
       assertComponentTemplate('space-1');
       assertIndexTemplate('space-1');
@@ -514,7 +509,7 @@ describe('RiskScoreDataClient', () => {
       expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(1);
       expect(esClient.indices.deleteDataStream).toHaveBeenCalledTimes(1);
       expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
-      expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledTimes(2);
       expect(errors).toEqual([]);
     });
 

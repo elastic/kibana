@@ -129,7 +129,7 @@ export const riskScoreFieldMap: FieldMap = {
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';
-export const nameSpaceAwareMappingComponentName = (namespace: string): string => {
+export const nameSpaceAwareMappingsComponentName = (namespace: string): string => {
   return `${mappingComponentName}-${namespace}`;
 };
 export const totalFieldsLimit = 1000;

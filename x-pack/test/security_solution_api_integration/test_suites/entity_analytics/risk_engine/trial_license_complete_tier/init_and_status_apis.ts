@@ -23,33 +23,20 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
   const customSpaceName = 'ea-customspace-it';
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const riskEngineRoutesWithNamespace = riskEngineRouteHelpersFactory(supertest, customSpaceName);
   const log = getService('log');
 
-  const createNamespace = async (spaceName: string) => {
-    const response = await supertest.post('/api/spaces/space').set('kbn-xsrf', 'true').send({
-      id: spaceName,
-      name: spaceName,
-      description: 'Space for ${spaceName}',
-      disabledFeatures: [],
-    });
-
-    // console.log(response.body)
-  };
-
-  const deleteNameSpace = async (spaceName: string) => {
-    const response = await supertest
-      .delete(`/api/spaces/space/${spaceName}`)
-      .set('kbn-xsrf', 'true');
-
-    // console.log(response.body)
-  };
-
   describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
     before(async () => {
-      await createNamespace(customSpaceName);
+      await spaces.create({
+        id: customSpaceName,
+        name: customSpaceName,
+        description: 'Space for ${customSpaceName}',
+        disabledFeatures: [],
+      });
       await riskEngineRoutes.cleanUp();
       await riskEngineRoutesWithNamespace.cleanUp();
     });
@@ -59,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
       await riskEngineRoutesWithNamespace.cleanUp();
       await clearLegacyTransforms({ es, log });
       await clearLegacyDashboards({ supertest, log });
-      await deleteNameSpace(customSpaceName);
+      await spaces.delete(customSpaceName);
     });
 
     describe('init api', () => {
