@@ -9,6 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
@@ -98,7 +99,16 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
   );
 };
 
-const dateFormatter = (when: string) => moment(when).format('MMMM D, YYYY [at] h:mm A');
+const formatDate = (time: string) => {
+  const locale = i18n.getLocale();
+  const timeZone = moment().tz();
+
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone,
+  }).format(new Date(time));
+};
 
 const ActivityCard = ({
   what,
@@ -128,7 +138,7 @@ const ActivityCard = ({
               id="contentManagement.contentEditor.activity.lastUpdatedByDateTime"
               defaultMessage="on {dateTime}"
               values={{
-                dateTime: dateFormatter(when),
+                dateTime: formatDate(when),
               }}
             />
           </EuiText>
