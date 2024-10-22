@@ -15,12 +15,16 @@ import {
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import type { FindMaintenanceWindowsResult } from '../../../../application/maintenance_window/methods/find/types';
 import type { FindMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/find';
-import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
+// import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 import {
   findMaintenanceWindowsRequestQuerySchemaV1,
-  findMaintenanceWindowsResponseSchemaV1,
+  findMaintenanceWindowsResponseBodySchemaV1,
   type FindMaintenanceWindowsRequestQueryV1,
 } from '../../../../../common/routes/maintenance_window/apis/find';
+import {
+  transformFindMaintenanceWindowParamsV1,
+  transformFindMaintenanceWindowResponseV1,
+} from './transforms';
 
 export const findMaintenanceWindowsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -35,7 +39,7 @@ export const findMaintenanceWindowsRoute = (
         },
         response: {
           200: {
-            body: () => findMaintenanceWindowsResponseSchemaV1,
+            body: () => findMaintenanceWindowsResponseBodySchemaV1,
             description: 'Indicates a successful call.',
           },
           400: {
@@ -55,25 +59,17 @@ export const findMaintenanceWindowsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
-        const { page, per_page: perPage }: FindMaintenanceWindowsRequestQueryV1 = req.query; // rewrite transform
+        const query: FindMaintenanceWindowsRequestQueryV1 = req.query;
 
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
-        const result: FindMaintenanceWindowsResult = await maintenanceWindowClient.find({
-          page,
-          perPage,
-        });
+        const options = transformFindMaintenanceWindowParamsV1(query);
+        const findResult: FindMaintenanceWindowsResult = await maintenanceWindowClient.find(
+          options
+        );
 
-        const response: { body: FindMaintenanceWindowsResponseV1 } = {
-          body: {
-            data: result.data.map((maintenanceWindow) =>
-              transformMaintenanceWindowToResponseV1(maintenanceWindow)
-            ),
-            total: result.data.length,
-            page: result.page,
-            per_page: result.perPage,
-          },
-        };
+        const response: FindMaintenanceWindowsResponseV1 =
+          transformFindMaintenanceWindowResponseV1(findResult);
 
         return res.ok(response);
       })

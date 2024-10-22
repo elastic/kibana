@@ -7,5 +7,5 @@
 
 export {
   findMaintenanceWindowsRequestQuerySchema,
-  findMaintenanceWindowsResponseSchema,
+  findMaintenanceWindowsResponseBodySchema,
 } from './v1';

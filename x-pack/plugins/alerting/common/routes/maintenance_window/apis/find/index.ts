@@ -7,18 +7,20 @@
 
 export {
   findMaintenanceWindowsRequestQuerySchema,
-  findMaintenanceWindowsResponseSchema,
+  findMaintenanceWindowsResponseBodySchema,
 } from './schemas/latest';
 export type {
   FindMaintenanceWindowsRequestQuery,
+  FindMaintenanceWindowsResponseBody,
   FindMaintenanceWindowsResponse,
 } from './types/latest';
 
 export {
   findMaintenanceWindowsRequestQuerySchema as findMaintenanceWindowsRequestQuerySchemaV1,
-  findMaintenanceWindowsResponseSchema as findMaintenanceWindowsResponseSchemaV1,
+  findMaintenanceWindowsResponseBodySchema as findMaintenanceWindowsResponseBodySchemaV1,
 } from './schemas/v1';
 export type {
   FindMaintenanceWindowsRequestQuery as FindMaintenanceWindowsRequestQueryV1,
+  FindMaintenanceWindowsResponseBody as FindMaintenanceWindowsResponseBodyV1,
   FindMaintenanceWindowsResponse as FindMaintenanceWindowsResponseV1,
 } from './types/v1';

@@ -29,10 +29,12 @@ export async function findMaintenanceWindows(
   try {
     const result = await findMaintenanceWindowSo({
       savedObjectsClient,
-      savedObjectsFindOptions: params || {},
+      ...(params ? { savedObjectsFindOptions: params } : {}),
     });
 
     return {
+      page: result.page,
+      perPage: result.per_page,
       data: result.saved_objects.map((so) =>
         transformMaintenanceWindowAttributesToMaintenanceWindow({
           attributes: so.attributes,

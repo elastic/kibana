@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type {
-  FindMaintenanceWindowsRequestQuery,
-  FindMaintenanceWindowsResponseBody,
-  FindMaintenanceWindowsResponse,
-} from './v1';
+export * from './v1';
