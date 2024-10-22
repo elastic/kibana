@@ -86,9 +86,10 @@ const createClickHandler =
         !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
       ) {
         event.preventDefault();
-        action.execute(context);
       }
-    } else action.execute(context);
+    }
+    (event.currentTarget as HTMLElement).blur();
+    action.execute(context);
   };
 
 export const PresentationPanelHoverActions = ({
