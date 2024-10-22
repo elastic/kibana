@@ -61,7 +61,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
     },
-    title: metricLabel,
+    title: metricColumns[0]?.operation.label || metricLabel,
     previewIcon: IconChartMetric,
     score: 0.5,
     hide: hasInterval,
