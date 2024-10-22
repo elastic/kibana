@@ -58,7 +58,7 @@ describe('commands.sort', () => {
     it('returns a single column expression', () => {
       const src = 'FROM index | SORT a';
       const { root } = parse(src);
-      const list = [...commands.sort.list(root)];
+      const list = [...commands.sort.list(root)].map(([node]) => node);
 
       expect(list.length).toBe(1);
       expect(list[0]).toMatchObject({
@@ -70,7 +70,7 @@ describe('commands.sort', () => {
     it('returns a single order expression', () => {
       const src = 'FROM index | SORT a ASC';
       const { root } = parse(src);
-      const list = [...commands.sort.list(root)];
+      const list = [...commands.sort.list(root)].map(([node]) => node);
 
       expect(list.length).toBe(1);
       expect(list[0]).toMatchObject({
@@ -88,7 +88,7 @@ describe('commands.sort', () => {
       const src =
         'FROM index | SORT a ASC, b DESC, c | LIMIT 123 | SORT d | EVAL 1 | SORT e NULLS FIRST, f NULLS LAST';
       const { root } = parse(src);
-      const list = [...commands.sort.list(root)];
+      const list = [...commands.sort.list(root)].map(([node]) => node);
 
       expect(list).toMatchObject([
         {
@@ -141,7 +141,7 @@ describe('commands.sort', () => {
     it('can skip one order expression', () => {
       const src = 'FROM index | SORT b DESC, a ASC';
       const { root } = parse(src);
-      const list = [...commands.sort.list(root, 1)];
+      const list = [...commands.sort.list(root, 1)].map(([node]) => node);
 
       expect(list.length).toBe(1);
       expect(list[0]).toMatchObject({
@@ -168,7 +168,7 @@ describe('commands.sort', () => {
     it('can find a single sort expression', () => {
       const src = 'FROM index | SORT a';
       const { root } = parse(src);
-      const node = commands.sort.find(root, 'a')!;
+      const [node] = commands.sort.find(root, 'a')!;
 
       expect(node).toMatchObject({
         type: 'column',
@@ -179,7 +179,7 @@ describe('commands.sort', () => {
     it('can find a single sort (order) expression', () => {
       const src = 'FROM index | SORT b ASC';
       const { root } = parse(src);
-      const node = commands.sort.find(root, 'b')!;
+      const [node] = commands.sort.find(root, 'b')!;
 
       expect(node).toMatchObject({
         type: 'order',
@@ -196,8 +196,8 @@ describe('commands.sort', () => {
       const src =
         'FROM index | SORT a, b ASC | STATS agg() | SORT c DESC, d, e NULLS FIRST | LIMIT 10';
       const { root } = parse(src);
-      const node1 = commands.sort.find(root, 'b')!;
-      const node2 = commands.sort.find(root, 'd')!;
+      const [node1] = commands.sort.find(root, 'b')!;
+      const [node2] = commands.sort.find(root, 'd')!;
 
       expect(node1).toMatchObject({
         type: 'order',
@@ -217,7 +217,7 @@ describe('commands.sort', () => {
     it('can select second order expression with the same name', () => {
       const src = 'FROM index | SORT b ASC | STATS agg() | SORT b DESC';
       const { root } = parse(src);
-      const node = commands.sort.find(root, 'b', 1)!;
+      const [node] = commands.sort.find(root, 'b', 1)!;
 
       expect(node).toMatchObject({
         type: 'order',
@@ -230,27 +230,38 @@ describe('commands.sort', () => {
         ],
       });
     });
-  });
 
-  it('can find multipart columns', () => {
-    const src = 'FROM index | SORT hello, b.a ASC, a.b, c, c.d | STATS agg() | SORT b DESC';
-    const { root } = parse(src);
-    const node1 = commands.sort.find(root, ['b', 'a'])!;
-    const node2 = commands.sort.find(root, ['a', 'b'])!;
+    it('can find multipart columns', () => {
+      const src = 'FROM index | SORT hello, b.a ASC, a.b, c, c.d | STATS agg() | SORT b DESC';
+      const { root } = parse(src);
+      const [node1] = commands.sort.find(root, ['b', 'a'])!;
+      const [node2] = commands.sort.find(root, ['a', 'b'])!;
 
-    expect(node1).toMatchObject({
-      type: 'order',
-      order: 'ASC',
-      args: [
-        {
-          type: 'column',
-          parts: ['b', 'a'],
-        },
-      ],
+      expect(node1).toMatchObject({
+        type: 'order',
+        order: 'ASC',
+        args: [
+          {
+            type: 'column',
+            parts: ['b', 'a'],
+          },
+        ],
+      });
+      expect(node2).toMatchObject({
+        type: 'column',
+        parts: ['a', 'b'],
+      });
     });
-    expect(node2).toMatchObject({
-      type: 'column',
-      parts: ['a', 'b'],
+
+    it('returns the parent sort command of the found order expression', () => {
+      const src = 'FROM index | SORT hello, b.a ASC, a.b, c, c.d | STATS agg() | SORT b DESC';
+      const { root } = parse(src);
+      const [node1, command1] = commands.sort.find(root, ['b', 'a'])!;
+      const [node2, command2] = commands.sort.find(root, ['a', 'b'])!;
+
+      expect(command1).toBe(command2);
+      expect(!!command1.args.find((arg) => arg === node1)).toBe(true);
+      expect(!!command2.args.find((arg) => arg === node2)).toBe(true);
     });
   });
 

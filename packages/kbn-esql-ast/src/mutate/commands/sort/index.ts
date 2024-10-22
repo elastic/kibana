@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder } from '../../../builder';
+// import { Builder } from '../../../builder';
 import {
   ESQLAstQueryExpression,
   ESQLColumn,
@@ -19,7 +19,7 @@ import { Predicate } from '../../types';
 import * as util from '../../util';
 import * as generic from '../../generic';
 
-export type SortExpressions = ESQLOrderExpression | ESQLColumn;
+export type SortExpression = ESQLOrderExpression | ESQLColumn;
 
 /**
  * Iterates through all sort commands starting from the beginning of the query.
@@ -53,21 +53,21 @@ export const listCommands = (
 export const list = (
   ast: ESQLAstQueryExpression,
   skip: number = 0
-): IterableIterator<SortExpressions> => {
+): IterableIterator<[sortExpression: SortExpression, sortCommand: ESQLCommand]> => {
   return new Visitor()
-    .on('visitSortCommand', function* (ctx): IterableIterator<SortExpressions> {
+    .on('visitSortCommand', function* (ctx): IterableIterator<[SortExpression, ESQLCommand]> {
       for (const argument of ctx.arguments()) {
         if (argument.type === 'order' || argument.type === 'column') {
           if (skip) {
             skip--;
           } else {
-            yield argument;
+            yield [argument, ctx.node];
           }
         }
       }
     })
-    .on('visitCommand', function* (): IterableIterator<SortExpressions> {})
-    .on('visitQuery', function* (ctx): IterableIterator<SortExpressions> {
+    .on('visitCommand', function* (): IterableIterator<[SortExpression, ESQLCommand]> {})
+    .on('visitQuery', function* (ctx): IterableIterator<[SortExpression, ESQLCommand]> {
       for (const command of ctx.visitCommands()) {
         yield* command;
       }
@@ -77,9 +77,9 @@ export const list = (
 
 export const findByPredicate = (
   ast: ESQLAstQueryExpression,
-  predicate: Predicate<SortExpressions>,
+  predicate: Predicate<[sortExpression: SortExpression, sortCommand: ESQLCommand]>,
   index?: number
-): SortExpressions | undefined => {
+): [sortExpression: SortExpression, sortCommand: ESQLCommand] | undefined => {
   return util.findByPredicate(list(ast, index), predicate);
 };
 
@@ -87,10 +87,10 @@ export const find = (
   ast: ESQLAstQueryExpression,
   parts: string | string[],
   index: number = 0
-): SortExpressions | undefined => {
+): [sortExpression: SortExpression, sortCommand: ESQLCommand] | undefined => {
   const arrParts = typeof parts === 'string' ? [parts] : parts;
 
-  return findByPredicate(ast, (node) => {
+  return findByPredicate(ast, ([node]) => {
     let isMatch = false;
     if (node.type === 'column') {
       isMatch = util.cmpArr(node.parts, arrParts);
@@ -117,13 +117,14 @@ export const remove = (
   ast: ESQLAstQueryExpression,
   parts: string | string[],
   index?: number
-): SortExpressions | undefined => {
-  const node = find(ast, parts, index);
+): [sortExpression: SortExpression, sortCommand: ESQLCommand] | undefined => {
+  const tuple = find(ast, parts, index);
 
-  if (!node) {
+  if (!tuple) {
     return undefined;
   }
 
+  const [node] = tuple;
   const cmd = generic.removeCommandArgument(ast, node);
 
   if (cmd) {
@@ -132,14 +133,24 @@ export const remove = (
     }
   }
 
-  return cmd ? node : undefined;
+  return cmd ? tuple : undefined;
 };
 
+// /**
+//  *
+//  * ```
+//  * FROM index | SORT a, b | LIMIT 10 | SORT c, d
+//  * ```
+//  *
+//  * @param ast
+//  * @param parts
+//  * @param index
+//  * @returns
+//  */
 // export const insert = (
 //   ast: ESQLAstQueryExpression,
-//   indexName: string,
-//   clusterName?: string,
-//   index: number = -1
+//   parts: string | string[],
+//   index?: number
 // ): ESQLSource | undefined => {
 //   const command = generic.findCommandByName(ast, 'from');
 
