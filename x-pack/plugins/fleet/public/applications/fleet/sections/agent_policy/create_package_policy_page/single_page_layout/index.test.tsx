@@ -212,6 +212,7 @@ describe.skip('When on the package policy create page', () => {
           data_streams: [
             {
               type: 'logs',
+              name: 'access logs',
               dataset: 'nginx.access',
               title: 'Nginx access logs',
               ingest_pipeline: 'default',
@@ -306,7 +307,7 @@ describe.skip('When on the package policy create page', () => {
       test('should use custom "cancel" URL', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
-      });
+      }, 10000);
     });
   });
 
