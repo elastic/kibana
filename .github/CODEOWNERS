@@ -663,7 +663,9 @@ x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-l
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/observability/observability_utils @elastic/observability-ui
+x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
+x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
+x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
