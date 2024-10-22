@@ -147,6 +147,10 @@ export function getDashboardApi({
     },
     isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
     isManaged,
+    reload$: merge(
+      unifiedSearchManager.internalApi.controlGroupReload$,
+      unifiedSearchManager.internalApi.panelsReload$
+    ),
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
       const saveResult = await openSaveModal({
@@ -203,18 +207,12 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     viewMode: viewMode$,
-  } as Omit<DashboardApi, 'reload$' | 'searchSessionId$'>;
+  } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const searchSessionManager = initializeSearchSessionManager(
     creationOptions?.searchSessionSettings,
     creationOptions?.getIncomingEmbeddable,
-    {
-      ...dashboardApi,
-      reload$: merge(
-        unifiedSearchManager.internalApi.controlGroupReload$,
-        unifiedSearchManager.internalApi.panelsReload$
-      ),
-    }
+    dashboardApi
   );
 
   return {

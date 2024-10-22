@@ -67,15 +67,10 @@ export function DashboardRenderer({
           return;
         }
 
-        const api = {
-          ...results.api,
-          reload$: results.internalApi.panelsReload$,
-        };
-
         cleanupDashboardApi = results.cleanup;
-        setDashboardApi(api);
+        setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.(api);
+        onApiAvailable?.(results.api);
       })
       .catch((err) => {
         if (!canceled) setError(err);
