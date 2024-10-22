@@ -66,7 +66,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={props.query}
-        filters={props.filters}
+        filters={props.filters} // here
       />
     ),
     [
