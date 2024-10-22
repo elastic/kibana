@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { EuiButtonIconProps } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export interface AppMenuControlOnClickParams {
   anchorElement: HTMLElement;
@@ -27,11 +27,11 @@ export type AppMenuControlProps = Pick<
 };
 
 export type AppMenuControlWithIconProps = AppMenuControlProps & {
-  iconType: EuiButtonIconProps['iconType'];
+  iconType: EuiIconType;
 };
 
 interface ControlWithOptionalIcon {
-  iconType?: EuiButtonIconProps['iconType'];
+  iconType?: EuiIconType;
 }
 
 export enum AppMenuActionId {
