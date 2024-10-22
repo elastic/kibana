@@ -43,7 +43,6 @@ export const getDashboardListItemLink = (
     sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) ?? '[]'
   );
   const unsavedFilters = spaceId && unsavedFiltersToUrl ? unsavedFiltersToUrl[spaceId] : undefined;
-
   if (unsavedFilters && unsavedFilters[id] && unsavedFilters[id].filters) {
     const appStateInUrl = kbnUrlStateStorage.get<QueryState>(DASHBOARD_STATE_STORAGE_KEY) || {};
     appStateInUrl.filters = unsavedFilters[id].filters;
