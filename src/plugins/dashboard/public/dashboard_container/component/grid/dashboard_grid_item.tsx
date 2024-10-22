@@ -92,17 +92,20 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTop =
+    const dashboardContainerTopOffset =
       (document.querySelector('.dashboardContainer') as HTMLDivElement)?.offsetTop || 0;
+    const globalNavTopOffset =
+      (document.querySelector('#app-fixed-viewport') as HTMLDivElement)?.offsetTop || 0;
 
     const focusStyles = blurPanel
       ? css`
           pointer-events: none;
           opacity: 0.25;
         `
-      : // TODO: use a variable for global nav offset
-        css`
-          scroll-margin-top: ${dashboardContainerTop + 96 + DASHBOARD_MARGIN_SIZE}px;
+      : css`
+          scroll-margin-top: ${dashboardContainerTopOffset +
+          globalNavTopOffset +
+          DASHBOARD_MARGIN_SIZE}px;
         `;
 
     const renderedEmbeddable = useMemo(() => {
