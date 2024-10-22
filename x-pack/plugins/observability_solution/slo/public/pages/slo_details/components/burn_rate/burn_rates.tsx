@@ -15,11 +15,11 @@ import { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_
 import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
 import { TimeBounds } from '../../types';
 import { BurnRate } from './burn_rate';
+import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing?: boolean;
-  burnRateOptions: BurnRateOption[];
   range?: TimeRange;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
@@ -37,7 +37,8 @@ function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; du
   return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
 }
 
-export function BurnRates({ slo, isAutoRefreshing, burnRateOptions, range, onBrushed }: Props) {
+export function BurnRates({ slo, isAutoRefreshing, range, onBrushed }: Props) {
+  const { burnRateOptions } = useBurnRateOptions(slo);
   const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
@@ -73,7 +74,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions, range, onBru
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate('xpack.slo.burnRates.h2.burnRatePanelTitle', {
+                {i18n.translate('xpack.slo.burnRates.burnRatePanelTitle', {
                   defaultMessage: 'Burn rate',
                 })}
               </h2>

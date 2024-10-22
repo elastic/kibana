@@ -9,7 +9,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { useBurnRateOptions } from '../hooks/use_burn_rate_options';
 import { BurnRates } from './burn_rate/burn_rates';
 import { EventsChartPanel } from './events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
@@ -32,7 +31,6 @@ export interface Props {
   selectedTabId: SloTabId;
 }
 export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
-  const { burnRateOptions } = useBurnRateOptions(slo);
   const [range, setRange] = useState<{ from: Date; to: Date }>({
     from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
@@ -70,11 +68,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
       <Overview slo={slo} />
 
       <EuiFlexGroup direction="column" gutterSize="l">
-        <BurnRates
-          slo={slo}
-          isAutoRefreshing={isAutoRefreshing}
-          burnRateOptions={burnRateOptions}
-        />
+        <BurnRates slo={slo} isAutoRefreshing={isAutoRefreshing} />
 
         <HistoricalDataCharts
           slo={slo}
