@@ -14,7 +14,7 @@ import { InventoryPanelBadge } from './inventory_panel_badge';
 
 const ENTITIES_COUNT_BADGE = i18n.translate(
   'xpack.inventory.inventoryGroupPanel.entitiesBadgeLabel',
-  { defaultMessage: 'Entities:' }
+  { defaultMessage: 'Entities' }
 );
 
 export interface InventoryGroupAccordionProps {
