@@ -31,6 +31,7 @@ export {
   getQueryColumnsFromESQLQuery,
   isESQLColumnSortable,
   TextBasedLanguages,
+  sanitazeESQLInput,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

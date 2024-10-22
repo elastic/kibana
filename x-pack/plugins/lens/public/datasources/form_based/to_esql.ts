@@ -187,7 +187,7 @@ export function getESQLForLayer(
       );
     });
 
-  if (buckets) {
+  if (buckets.length > 0) {
     esql += ` BY ${buckets.join(', ')}`;
 
     if (buckets.some((b) => b.includes('undefined'))) return;

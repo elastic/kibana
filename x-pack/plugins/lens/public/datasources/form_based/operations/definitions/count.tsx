@@ -12,6 +12,7 @@ import { EuiSwitch, EuiText } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { TimeScaleUnit } from '../../../../../common/expressions';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
@@ -193,11 +194,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (!field || field?.type === 'document') {
       esql = `COUNT(*)`;
     } else {
-      esql = `COUNT(${field.name})`;
+      esql = `COUNT(${sanitazeESQLInput(field.name)})`;
     }
     if (column.filter) {
       if (column.filter.language === 'kquery') return undefined;
-      return undefined; // esql += ` WHERE QSTR("${column.filter.query}")`;
+      return undefined; // esql += ` WHERE QSTR("${sanitazeESQLInput(column.filter.query)}")`;
     }
 
     return esql;

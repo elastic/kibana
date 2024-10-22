@@ -31,6 +31,7 @@ import {
 import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { DateRange } from '../../../../../common/types';
 import { IndexPattern } from '../../../../types';
 import { updateColumnParam } from '../layer_helpers';
@@ -201,7 +202,11 @@ export const dateHistogramOperation: OperationDefinition<
 
     if (timeZone || column.params?.includeEmptyRows) return;
 
-    return `BUCKET(${column.sourceField}, ${mapToEsqlInterval(data, dateRange, interval)})`;
+    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
+      data,
+      dateRange,
+      interval
+    )})`;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
@@ -145,7 +146,7 @@ export const rangeOperation: OperationDefinition<
       (uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS) - MIN_HISTOGRAM_BARS) / 2;
     const maxBars =
       column.params.maxBars === AUTO_BARS ? maxBarsDefaultValue : column.params.maxBars;
-    return `BUCKET(${column.sourceField}, ${maxBars})`;
+    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${maxBars})`;
   },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;

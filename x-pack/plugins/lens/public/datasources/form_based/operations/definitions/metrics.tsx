@@ -24,6 +24,7 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -224,7 +225,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     toESQL: (column, columnId, _indexPattern, layer) => {
       if (column.timeShift) return;
-      return `${typeToESQLFn[type]}(${column.sourceField})`;
+      return `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`;
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
