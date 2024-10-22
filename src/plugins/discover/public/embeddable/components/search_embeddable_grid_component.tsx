@@ -17,7 +17,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import { Filter } from '@kbn/es-query';
 import {
   FetchContext,
   useBatchedOptionalPublishingSubjects,
@@ -27,7 +26,8 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-
+import { Filter } from '@kbn/es-query';
+import { isFunction } from 'lodash';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
@@ -69,8 +69,6 @@ export function SearchEmbeddableGridComponent({
     savedSearch,
     savedSearchId,
     interceptedWarnings,
-    initialSavedSearchQuery,
-    initialSavedSearchFilters,
     fetchContext,
     rows,
     totalHitCount,
@@ -81,8 +79,6 @@ export function SearchEmbeddableGridComponent({
     api.savedSearch$,
     api.savedObjectId,
     api.fetchWarnings$,
-    api.query$,
-    api.filters$,
     api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
@@ -90,26 +86,20 @@ export function SearchEmbeddableGridComponent({
     stateManager.grid
   );
 
-  // `initialSavedSearchQuery` and `initialSavedSearchFilters` are the initial values from the saved search SO
-  // `fetchContext?.query` and `fetchContext?.filters` seems to be Dashboard's query and filters
-  // And there is also `savedSearch.searchSource.getField('query')` and `savedSearch.searchSource.getField('filter')`
+  // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
+  // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
 
-  // Then which one should we use for the Surrounding Docs page and cell actions?
-
-  // ?
-  const query = initialSavedSearchQuery;
-  const filters = initialSavedSearchFilters;
-
-  console.log(
-    fetchContext?.query,
-    initialSavedSearchQuery,
-    savedSearch.searchSource.getField('query')
-  );
-  console.log(
-    fetchContext?.filters,
-    initialSavedSearchFilters,
-    savedSearch.searchSource.getField('filter')
-  );
+  const savedSearchQuery = savedSearch?.searchSource?.getField('query');
+  const savedSearchFilters: Filter[] | undefined = useMemo(() => {
+    let filters = savedSearch?.searchSource?.getField('filter');
+    if (filters && isFunction(filters)) {
+      filters = filters();
+    }
+    if (!filters) {
+      return undefined;
+    }
+    return Array.isArray(filters) ? filters : [filters];
+  }, [savedSearch]);
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
     useBatchedOptionalPublishingSubjects(
@@ -159,7 +149,10 @@ export function SearchEmbeddableGridComponent({
   });
 
   // here
-  const dataSource = useMemo(() => createDataSource({ dataView, query }), [dataView, query]);
+  const dataSource = useMemo(
+    () => createDataSource({ dataView, query: savedSearchQuery }),
+    [dataView, savedSearchQuery]
+  );
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
     [fetchContext]
@@ -168,8 +161,8 @@ export function SearchEmbeddableGridComponent({
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
-    query, // here
-    filters, // here
+    query: savedSearchQuery,
+    filters: savedSearchFilters,
     timeRange,
   });
 
@@ -251,8 +244,7 @@ export function SearchEmbeddableGridComponent({
       <DiscoverDocTableEmbeddableMemoized
         {...sharedProps}
         {...onStateEditedProps}
-        // here
-        filters={savedSearch.searchSource.getField('filter') as Filter[]}
+        filters={savedSearchFilters}
         isEsqlMode={isEsql}
         isLoading={Boolean(loading)}
         sharedItemTitle={panelTitle || savedSearchTitle}
@@ -281,8 +273,8 @@ export function SearchEmbeddableGridComponent({
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
-      query={savedSearch.searchSource.getField('query')} // here
-      filters={undefined} // here?
+      query={savedSearchQuery}
+      filters={savedSearchFilters}
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
