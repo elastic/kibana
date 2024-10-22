@@ -10,7 +10,6 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
-xpack.fleet.enabled: false
 xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
