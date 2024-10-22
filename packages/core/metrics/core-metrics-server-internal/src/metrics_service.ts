@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, forkJoin, map, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, ReplaySubject, zip } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
@@ -88,11 +88,11 @@ export class MetricsService
       .pipe(
         map((metrics) => metrics.process.event_loop_utilization.utilization),
         (elu$) =>
-          forkJoin({
-            short: elu$.pipe(exponentialMovingAverage(ELU_SHORT, collectionInterval)),
-            medium: elu$.pipe(exponentialMovingAverage(ELU_MEDIUM, collectionInterval)),
-            long: elu$.pipe(exponentialMovingAverage(ELU_LONG, collectionInterval)),
-          })
+          zip(
+            elu$.pipe(exponentialMovingAverage(ELU_SHORT, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(ELU_MEDIUM, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(ELU_LONG, collectionInterval))
+          ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
       )
       .subscribe(this.elu$);
     registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
