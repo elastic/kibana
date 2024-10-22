@@ -8,5 +8,5 @@
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 
 export const trackOnboardingLinkClick = (linkId: string) => {
-  track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.ONBOARDING}${linkId}`);
+  track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.ONBOARDING}_${linkId}`);
 };
