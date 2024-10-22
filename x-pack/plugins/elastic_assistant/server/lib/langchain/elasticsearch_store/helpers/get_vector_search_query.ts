@@ -37,9 +37,11 @@ export const getVectorSearchQuery = ({
     must_not: [...mustNotTerms],
     must: [
       {
-        semantic: {
-          field: 'semantic_text',
-          query,
+        text_expansion: {
+          'vector.tokens': {
+            model_id: modelId,
+            model_text: query,
+          },
         },
       },
     ],

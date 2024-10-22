@@ -175,7 +175,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         });
       }
     } catch (error) {
-      this.options.logger.error(`Error creating ELSER inference endpoint '${elserId}':\n${error}`);
+      this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
       throw new Error(`Error deploying ELSER model '${elserId}':\n${error}`);
     }
   };

@@ -147,8 +147,6 @@ export class AIAssistantService {
       fieldMap,
     });
 
-    console.error('CREATE DATA STREAM', resource, this.v2KnowledgeBaseEnabled);
-
     newDataStream.setIndexTemplate({
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
