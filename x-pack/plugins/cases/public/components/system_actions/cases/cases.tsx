@@ -30,7 +30,7 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
     selectMessage: i18n.CASE_ACTION_DESC,
     actionTypeTitle: CASES_CONNECTOR_TITLE,
     actionConnectorFields: null,
-    isExperimental: true,
+    isExperimental: false,
     validateParams: async (
       actionParams: CasesActionParams
     ): Promise<GenericValidationResult<unknown>> => {

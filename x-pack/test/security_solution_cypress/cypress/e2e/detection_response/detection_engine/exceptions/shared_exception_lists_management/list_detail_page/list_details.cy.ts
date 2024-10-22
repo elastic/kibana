@@ -41,8 +41,7 @@ const getExceptionList1 = () => ({
 
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
-// FLAKY: https://github.com/elastic/kibana/issues/180740
-describe.skip('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
 
