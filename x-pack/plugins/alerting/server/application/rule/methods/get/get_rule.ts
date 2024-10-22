@@ -18,7 +18,7 @@ import { RulesClientContext } from '../../../../rules_client/types';
 import { formatLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { GetRuleParams } from './types';
-import { getRuleParamsSchema } from './schemas';
+import { ruleParamsSchema } from './schemas';
 import { getRuleSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { RuleParams } from '../../types';
@@ -36,7 +36,7 @@ export async function getRule<Params extends RuleParams = never>(
   } = params;
 
   try {
-    getRuleParamsSchema.validate(params);
+    ruleParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating get data - ${error.message}`);
   }

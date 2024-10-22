@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getRuleParamsSchemaWithDefaultValue } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaWithDefaultValue } from '@kbn/response-ops-rule-params';
 import { validateDuration } from '../../../validation';
 import {
   notifyWhenSchema,
@@ -24,7 +24,7 @@ export const createRuleDataSchema = schema.object(
     consumer: schema.string(),
     tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
     throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
-    params: getRuleParamsSchemaWithDefaultValue(),
+    params: ruleParamsSchemaWithDefaultValue,
     schedule: schema.object({
       interval: schema.string({ validate: validateDuration }),
     }),
