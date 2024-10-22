@@ -35,6 +35,16 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
       <body>
         <div id="root"></div>
         <script>
+          const debounce = (callback, wait) => {
+            let timeoutId = null;
+            return (...args) => {
+              window.clearTimeout(timeoutId);
+              timeoutId = window.setTimeout(() => {
+                callback.apply(null, args);
+              }, wait);
+            };
+          }
+
           let UserComponent = () => null;
           let data;
           let width;
@@ -58,7 +68,7 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
             }
           }
 
-          function dispatch(crossfilter) {
+          const dispatch = debounce((crossfilter) => {
             if (typeof crossfilter === 'string') {
               window.parent.postMessage(
                 { source: '${iframeID}', type: 'crossfilter', payload: crossfilter }, '*'
@@ -66,7 +76,7 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
             } else {
               console.error('Crossfilter data must be a string');
             }
-          }
+          }, 50);
 
           window.addEventListener('resize', function(event) {
             renderUserComponent();
