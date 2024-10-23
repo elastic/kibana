@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { entityLatestSchema } from '@kbn/entities-schema';
+import { ENTITY_LATEST, entitiesAliasPattern, entityLatestSchema } from '@kbn/entities-schema';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
@@ -44,11 +44,10 @@ export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
 
 export const MAX_NUMBER_OF_ENTITIES = 500;
 
-export const ENTITIES_LATEST_ALIAS = '.entities.v1.latest*';
-// entitiesAliasPattern({
-//   type: '*',
-//   dataset: ENTITY_LATEST,
-// });
+export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
+  type: '*',
+  dataset: ENTITY_LATEST,
+});
 
 const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
 const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
