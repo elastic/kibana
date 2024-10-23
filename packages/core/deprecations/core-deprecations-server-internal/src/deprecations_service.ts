@@ -19,9 +19,11 @@ import type {
   DeprecationRegistryProvider,
   DeprecationsClient,
 } from '@kbn/core-deprecations-server';
+import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
+import { registerApiDeprecationsInfo, registerConfigDeprecationsInfo } from './deprecations';
 
 export interface InternalDeprecationsServiceStart {
   /**
@@ -40,6 +42,7 @@ export type InternalDeprecationsServiceSetup = DeprecationRegistryProvider;
 /** @internal */
 export interface DeprecationsSetupDeps {
   http: InternalHttpServiceSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 /** @internal */
@@ -55,7 +58,10 @@ export class DeprecationsService
     this.configService = coreContext.configService;
   }
 
-  public async setup({ http }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
+  public async setup({
+    http,
+    coreUsageData,
+  }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
     this.logger.debug('Setting up Deprecations service');
 
     const config = await firstValueFrom(
@@ -69,8 +75,18 @@ export class DeprecationsService
       },
     });
 
-    registerRoutes({ http });
-    this.registerConfigDeprecationsInfo(this.deprecationsFactory);
+    registerRoutes({ http, coreUsageData });
+
+    registerConfigDeprecationsInfo({
+      deprecationsFactory: this.deprecationsFactory,
+      configService: this.configService,
+    });
+
+    registerApiDeprecationsInfo({
+      deprecationsFactory: this.deprecationsFactory,
+      http,
+      coreUsageData,
+    });
 
     const deprecationsFactory = this.deprecationsFactory;
     return {
@@ -87,6 +103,7 @@ export class DeprecationsService
     if (!this.deprecationsFactory) {
       throw new Error('`setup` must be called before `start`');
     }
+
     return {
       asScopedToClient: this.createScopedDeprecations(),
     };
@@ -106,36 +123,5 @@ export class DeprecationsService
         }),
       };
     };
-  }
-
-  private registerConfigDeprecationsInfo(deprecationsFactory: DeprecationsFactory) {
-    const handledDeprecatedConfigs = this.configService.getHandledDeprecatedConfigs();
-
-    for (const [domainId, deprecationsContexts] of handledDeprecatedConfigs) {
-      const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
-      deprecationsRegistry.registerDeprecations({
-        getDeprecations: () => {
-          return deprecationsContexts.map(
-            ({
-              configPath,
-              title = `${domainId} has a deprecated setting`,
-              level,
-              message,
-              correctiveActions,
-              documentationUrl,
-            }) => ({
-              configPath,
-              title,
-              level,
-              message,
-              correctiveActions,
-              documentationUrl,
-              deprecationType: 'config',
-              requireRestart: true,
-            })
-          );
-        },
-      });
-    }
   }
 }
