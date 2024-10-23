@@ -38,9 +38,12 @@ export function createMonitorsOverviewPanelAction(
       const initialState = await openMonitorConfiguration({
         coreStart,
         pluginStart,
-        title: i18n.translate('xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.overview.title', {
-          defaultMessage: 'Create monitors overview',
-        }),
+        title: i18n.translate(
+          'xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.overview.title',
+          {
+            defaultMessage: 'Create monitors overview',
+          }
+        ),
       });
       try {
         embeddable.addNewPanel({
