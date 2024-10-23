@@ -31,11 +31,16 @@ import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
-import type { SharingSavedObjectProps } from '../types';
+import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
 import { getViewMode } from './helper';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { addLog } from './logger';
+
+const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
+  'visualization',
+  'visualizationOnEmbeddable',
+];
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -75,13 +80,14 @@ export function loadEmbeddableData(
   );
 
   const onRenderComplete = () => {
-    updateMessages(getUserMessages('embeddableBadge'));
-    const hasErrored = updateBlockingErrors();
-    if (hasErrored) {
-      internalApi.dispatchError();
-    } else {
-      internalApi.dispatchRenderComplete();
-    }
+    updateMessages(
+      getUserMessages('embeddableBadge').concat(
+        getUserMessages(blockingMessageDisplayLocations, {
+          severity: 'error',
+        })
+      )
+    );
+    internalApi.dispatchRenderComplete();
   };
 
   const unifiedSearch$ = new BehaviorSubject<

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
+import { groupBy } from 'lodash';
 import { useMemo } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LensInternalApi } from '../types';
 
 export function useMessages({ messages$ }: LensInternalApi) {
   const latestMessages = useStateFromPublishingSubject(messages$);
-  return useMemo(
-    () => partition(latestMessages, ({ severity }) => severity !== 'info'),
-    [latestMessages]
-  );
+  return useMemo(() => groupBy(latestMessages, ({ severity }) => severity), [latestMessages]);
 }

@@ -42,7 +42,7 @@ export function LensEmbeddableComponent({
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const [warningOrErrors, infoMessages] = useMessages(internalApi);
+  const { error = [], warning = [], info = [] } = useMessages(internalApi);
 
   // On unmount call all the cleanups
   useEffect(() => {
@@ -79,10 +79,13 @@ export function LensEmbeddableComponent({
       data-shared-item
       ref={rootRef}
     >
-      {expressionParams == null ? null : <ExpressionWrapper {...expressionParams} />}
+      {expressionParams == null || error.length ? null : (
+        <ExpressionWrapper {...expressionParams} />
+      )}
       <UserMessages
-        warningOrErrors={warningOrErrors}
-        infoMessages={infoMessages}
+        blockingErrors={error}
+        warningOrErrors={warning}
+        infoMessages={info}
         canEdit={canEdit}
       />
     </div>

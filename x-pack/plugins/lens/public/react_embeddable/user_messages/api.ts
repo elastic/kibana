@@ -19,7 +19,6 @@ import {
   UserMessage,
   FramePublicAPI,
   SharingSavedObjectProps,
-  UserMessagesDisplayLocationId,
 } from '../../types';
 import {
   getActiveDatasourceIdFromDoc,
@@ -37,11 +36,6 @@ import {
 import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
 import { getSearchWarningMessages } from '../../utils';
 import { addLog } from '../logger';
-
-const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
-  'visualization',
-  'visualizationOnEmbeddable',
-];
 
 function getUpdatedState(
   getVisualizationContext: VisualizationContextHelper['getVisualizationContext'],
@@ -227,6 +221,13 @@ export function buildUserMessagesHelpers(
     addUserMessages,
     resetMessages,
     getUserMessages,
+    /**
+     * Here pass all the messages that comes directly from the Lens validation/info system
+     * who includes:
+     * * configuration errors (i.e. missing fields)
+     * * warning messages (badge related)
+     * * info messages (badge related)
+     */
     updateMessages: (messages: UserMessage[]) => {
       // update the messages only if something changed
       const existingMessages = new Set(
@@ -239,11 +240,11 @@ export function buildUserMessagesHelpers(
         internalApi.updateMessages(messages);
       }
     },
-    updateBlockingErrors: (
-      blockingMessages: UserMessage[] | Error = getUserMessages(blockingMessageDisplayLocations, {
-        severity: 'error',
-      })
-    ) => {
+    /**
+     * This type of errors are those who need to be rendered in the embeddable native error panel
+     * like runtime errors.
+     */
+    updateBlockingErrors: (blockingMessages: UserMessage[] | Error = []) => {
       const error =
         blockingMessages instanceof Error
           ? blockingMessages
