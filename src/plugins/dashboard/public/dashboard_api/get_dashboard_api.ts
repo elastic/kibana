@@ -13,6 +13,7 @@ import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/presentation-publishing';
+import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -41,11 +42,13 @@ import { initializeSearchSessionManager } from './search_session_manager';
 
 export function getDashboardApi({
   creationOptions,
+  incomingEmbeddable,
   initialState,
   savedObjectResult,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
+  incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
@@ -56,13 +59,17 @@ export function getDashboardApi({
   const isManaged = savedObjectResult?.managed ?? false;
   let references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
-  const viewMode$ = new BehaviorSubject<ViewMode>(initialState.viewMode);
+  // view mode must always be edit to recieve an embeddable.
+  const viewMode$ = new BehaviorSubject<ViewMode>(
+    incomingEmbeddable ? 'edit' : initialState.viewMode
+  );
 
   let untilEmbeddableLoadedBreakCircularDep: (id: string) => Promise<undefined> = async (
     id: string
   ) => undefined;
   const trackPanel = initializeTrackPanel(untilEmbeddableLoadedBreakCircularDep);
   const panelsManager = initializePanelsManager(
+    incomingEmbeddable,
     initialState.panels,
     trackPanel,
     (id: string) => getReferencesForPanelId(id, references),
@@ -211,7 +218,7 @@ export function getDashboardApi({
 
   const searchSessionManager = initializeSearchSessionManager(
     creationOptions?.searchSessionSettings,
-    creationOptions?.getIncomingEmbeddable,
+    incomingEmbeddable,
     dashboardApi
   );
 

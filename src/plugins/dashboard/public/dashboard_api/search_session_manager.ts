@@ -8,20 +8,20 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { DashboardApi, DashboardCreationOptions } from './types';
 import { dataService } from '../services/kibana_services';
 import { startDashboardSearchSessionIntegration } from '../dashboard_container/embeddable/create/search_sessions/start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
-  getIncomingEmbeddable: DashboardCreationOptions['getIncomingEmbeddable'],
+  incomingEmbeddable: EmbeddablePackageState | undefined,
   dashboardApi: Omit<DashboardApi, 'searchSessionId$'>
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   if (searchSessionSettings) {
-    const incomingEmbeddable = getIncomingEmbeddable?.();
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.

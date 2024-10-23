@@ -8,21 +8,11 @@
  */
 
 import { cloneDeep, omit } from 'lodash';
-import { v4 } from 'uuid';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import {
-  DashboardContainerInput,
-  DashboardPanelMap,
-  DashboardPanelState,
-} from '../../../../common';
-import {
-  DEFAULT_DASHBOARD_INPUT,
-  DEFAULT_PANEL_HEIGHT,
-  DEFAULT_PANEL_WIDTH,
-  PanelPlacementStrategy,
-} from '../../../dashboard_constants';
+import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
@@ -33,7 +23,6 @@ import {
 } from '../../../services/dashboard_content_management_service/types';
 import { embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import type { DashboardCreationOptions } from '../../..';
@@ -52,11 +41,8 @@ export const initializeDashboard = async ({
 }) => {
   const dashboardBackupService = getDashboardBackupService();
 
-  const {
-    getInitialInput,
-    validateLoadedSavedObject,
-    useSessionStorageIntegration,
-  } = creationOptions ?? {};
+  const { getInitialInput, validateLoadedSavedObject, useSessionStorageIntegration } =
+    creationOptions ?? {};
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -172,108 +158,6 @@ export const initializeDashboard = async ({
     dashboard.savedObjectReferences = loadDashboardReturn?.references;
     dashboard.controlGroupInput = loadDashboardReturn?.dashboardInput?.controlGroupInput;
   });
-
-  // --------------------------------------------------------------------------------------
-  // Place the incoming embeddable if there is one
-  // --------------------------------------------------------------------------------------
-  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  if (incomingEmbeddable) {
-    const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
-      container.setScrollToPanelId(id);
-      container.setHighlightPanelId(id);
-    };
-
-    initialDashboardInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
-    if (
-      incomingEmbeddable.embeddableId &&
-      Boolean(initialDashboardInput.panels[incomingEmbeddable.embeddableId])
-    ) {
-      // this embeddable already exists, we will update the explicit input.
-      const panelToUpdate = initialDashboardInput.panels[incomingEmbeddable.embeddableId];
-      const sameType = panelToUpdate.type === incomingEmbeddable.type;
-
-      panelToUpdate.type = incomingEmbeddable.type;
-      const nextRuntimeState = {
-        // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
-        ...(sameType ? panelToUpdate.explicitInput : {}),
-
-        ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId,
-
-        // maintain hide panel titles setting.
-        hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
-      };
-      if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
-        panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
-        runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
-      } else {
-        panelToUpdate.explicitInput = nextRuntimeState;
-      }
-
-      untilDashboardReady().then((container) =>
-        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
-      );
-    } else {
-      // otherwise this incoming embeddable is brand new and can be added after the dashboard container is created.
-
-      untilDashboardReady().then(async (container) => {
-        const createdEmbeddable = await (async () => {
-          // if there is no width or height we can add the panel using the default behaviour.
-          if (!incomingEmbeddable.size) {
-            return await container.addNewPanel<{ uuid: string }>({
-              panelType: incomingEmbeddable.type,
-              initialState: incomingEmbeddable.input,
-            });
-          }
-
-          // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
-          const { width, height } = incomingEmbeddable.size;
-          const currentPanels = container.getInput().panels;
-          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-          const { newPanelPlacement } = runPanelPlacementStrategy(
-            PanelPlacementStrategy.findTopLeftMostOpenSpace,
-            {
-              width: width ?? DEFAULT_PANEL_WIDTH,
-              height: height ?? DEFAULT_PANEL_HEIGHT,
-              currentPanels,
-            }
-          );
-          const newPanelState: DashboardPanelState = (() => {
-            if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
-              runtimePanelsToRestore[embeddableId] = incomingEmbeddable.input;
-              return {
-                explicitInput: { id: embeddableId },
-                type: incomingEmbeddable.type,
-                gridData: {
-                  ...newPanelPlacement,
-                  i: embeddableId,
-                },
-              };
-            }
-            return {
-              explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
-              type: incomingEmbeddable.type,
-              gridData: {
-                ...newPanelPlacement,
-                i: embeddableId,
-              },
-            };
-          })();
-          container.updateInput({
-            panels: {
-              ...container.getInput().panels,
-              [newPanelState.explicitInput.id]: newPanelState,
-            },
-          });
-
-          return await container.untilEmbeddableLoaded(embeddableId);
-        })();
-        if (createdEmbeddable) {
-          scrolltoIncomingEmbeddable(container, createdEmbeddable.uuid);
-        }
-      });
-    }
-  }
 
   // --------------------------------------------------------------------------------------
   // Set restored runtime state for react embeddables.

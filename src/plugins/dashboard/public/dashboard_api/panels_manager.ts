@@ -18,7 +18,11 @@ import {
   SerializedPanelState,
   apiHasSerializableState,
 } from '@kbn/presentation-containers';
-import { DefaultEmbeddableApi, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import {
+  DefaultEmbeddableApi,
+  EmbeddablePackageState,
+  PanelNotFoundError,
+} from '@kbn/embeddable-plugin/public';
 import {
   StateComparators,
   apiHasInPlaceLibraryTransforms,
@@ -49,6 +53,7 @@ import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboar
 import { placeClonePanel } from '../dashboard_container/panel_placement';
 
 export function initializePanelsManager(
+  incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
@@ -65,6 +70,63 @@ export function initializePanelsManager(
 
   function setRuntimeStateForChild(childId: string, state: object) {
     restoredRuntimeState[childId] = state;
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Place the incoming embeddable if there is one
+  // --------------------------------------------------------------------------------------
+  if (incomingEmbeddable) {
+    let incomingEmbeddablePanelState: DashboardPanelState;
+    if (
+      incomingEmbeddable.embeddableId &&
+      Boolean(panels$.value[incomingEmbeddable.embeddableId])
+    ) {
+      // this embeddable already exists, just update the explicit input.
+      incomingEmbeddablePanelState = panels$.value[incomingEmbeddable.embeddableId];
+      const sameType = incomingEmbeddablePanelState.type === incomingEmbeddable.type;
+
+      incomingEmbeddablePanelState.type = incomingEmbeddable.type;
+      setRuntimeStateForChild(incomingEmbeddable.embeddableId, {
+        // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
+        ...(sameType ? incomingEmbeddablePanelState.explicitInput : {}),
+
+        ...incomingEmbeddable.input,
+        id: incomingEmbeddable.embeddableId,
+
+        // maintain hide panel titles setting.
+        hidePanelTitles: incomingEmbeddablePanelState.explicitInput.hidePanelTitles,
+      });
+      incomingEmbeddablePanelState.explicitInput = {
+        id: incomingEmbeddablePanelState.explicitInput.id,
+      };
+    } else {
+      // otherwise this incoming embeddable is brand new.
+      const embeddableId = incomingEmbeddable.embeddableId ?? v4();
+      setRuntimeStateForChild(embeddableId, incomingEmbeddable.input);
+      const { newPanelPlacement } = runPanelPlacementStrategy(
+        PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        {
+          width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
+          height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
+          currentPanels: panels$.value,
+        }
+      );
+      incomingEmbeddablePanelState = {
+        explicitInput: { id: embeddableId },
+        type: incomingEmbeddable.type,
+        gridData: {
+          ...newPanelPlacement,
+          i: embeddableId,
+        },
+      };
+    }
+
+    setPanels({
+      ...panels$.value,
+      [incomingEmbeddablePanelState.explicitInput.id]: incomingEmbeddablePanelState,
+    });
+    trackPanel.setScrollToPanelId(incomingEmbeddablePanelState.explicitInput.id);
+    trackPanel.setHighlightPanelId(incomingEmbeddablePanelState.explicitInput.id);
   }
 
   async function untilEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {

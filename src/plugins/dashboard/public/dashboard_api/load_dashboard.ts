@@ -25,11 +25,10 @@ export async function loadDashboard({
 }) {
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
+  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
   const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
     id: savedObjectId,
   });
-
-  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
 
   // --------------------------------------------------------------------------------------
   // Create method which allows work to be done on the dashboard api when it's ready.
@@ -55,6 +54,7 @@ export async function loadDashboard({
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
+    incomingEmbeddable,
     initialState,
     savedObjectResult,
     savedObjectId,
@@ -84,6 +84,6 @@ export async function loadDashboard({
       cleanup();
       performanceSubscription.unsubscribe();
     },
-    internalApi
+    internalApi,
   };
 }
