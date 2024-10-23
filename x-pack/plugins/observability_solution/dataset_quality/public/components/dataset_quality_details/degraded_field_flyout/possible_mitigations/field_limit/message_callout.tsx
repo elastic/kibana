@@ -21,14 +21,13 @@ import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../c
 import { useKibanaContextForPlugin } from '../../../../../utils';
 
 export function MessageCallout() {
-  const { isSavingNewFieldLimitInProgress, newFieldLimitResult } = useDegradedFields();
-  const { isComponentTemplateUpdated, isLatestBackingIndexUpdated, error } =
-    newFieldLimitResult ?? {};
-  const isSuccess = Boolean(isComponentTemplateUpdated) && Boolean(isLatestBackingIndexUpdated);
-  const isPartialSuccess =
-    Boolean(isComponentTemplateUpdated) && !Boolean(isLatestBackingIndexUpdated);
+  const { isSavingNewFieldLimitInProgress, newFieldLimitData } = useDegradedFields();
+  const { result, error: serverError } = newFieldLimitData ?? {};
+  const { isComponentTemplateUpdated, isLatestBackingIndexUpdated } = result ?? {};
+  const isSuccess = isComponentTemplateUpdated && isLatestBackingIndexUpdated;
+  const isPartialSuccess = isComponentTemplateUpdated && !Boolean(isLatestBackingIndexUpdated);
 
-  if (error) {
+  if (serverError) {
     return <ErrorCallout />;
   }
 

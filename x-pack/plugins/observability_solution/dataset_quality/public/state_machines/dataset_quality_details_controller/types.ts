@@ -39,6 +39,12 @@ export interface DegradedFieldsWithData {
   data: DegradedField[];
 }
 
+export interface FieldLimit {
+  newFieldLimit?: number;
+  result?: UpdateFieldLimitResponse;
+  error?: boolean;
+}
+
 export interface WithDefaultControllerState {
   dataStream: string;
   degradedFields: DegradedFieldsTableConfig;
@@ -50,8 +56,7 @@ export interface WithDefaultControllerState {
   integration?: Integration;
   expandedDegradedField?: string;
   isNonAggregatable?: boolean;
-  newFieldLimit?: number;
-  fieldLimitResponse?: UpdateFieldLimitResponse;
+  fieldLimit?: FieldLimit;
 }
 
 export interface WithDataStreamDetails {
@@ -92,11 +97,13 @@ export interface WithDegradeFieldAnalysis {
 }
 
 export interface WithNewFieldLimit {
-  newFieldLimit: number;
+  fieldLimit?: FieldLimit & {
+    newFieldLimit: number;
+  };
 }
 
 export interface WithNewFieldLimitResponse {
-  fieldLimitResponse: UpdateFieldLimitResponse | { error: boolean };
+  fieldLimit: FieldLimit;
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<

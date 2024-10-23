@@ -177,8 +177,8 @@ export function useDegradedFields() {
     return state.matches('initializing.mitigations.savingNewFieldLimit');
   });
 
-  const newFieldLimitResult = useSelector(service, (state) =>
-    state.matches('initializing.mitigations.done') ? state.context.fieldLimitResponse : undefined
+  const newFieldLimitData = useSelector(service, (state) =>
+    state.matches('initializing.mitigations.done') ? state.context.fieldLimit : undefined
   );
 
   const triggerRollover = useCallback(() => {
@@ -206,7 +206,7 @@ export function useDegradedFields() {
     expandedRenderedItem,
     updateNewFieldLimit,
     isSavingNewFieldLimitInProgress,
-    newFieldLimitResult,
+    newFieldLimitData,
     triggerRollover,
   };
 }

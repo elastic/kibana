@@ -389,7 +389,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     },
                     onError: {
                       target: 'done',
-                      actions: ['storeErrorResponse', 'notifySaveNewFieldLimitError'],
+                      actions: ['storeNewFieldLimitErrorResponse', 'notifySaveNewFieldLimitError'],
                     },
                   },
                 },
@@ -531,19 +531,22 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           };
         }),
         storeNewFieldLimit: assign((_, event) => {
-          return 'newFieldLimit' in event ? { newFieldLimit: event.newFieldLimit } : {};
+          return 'newFieldLimit' in event
+            ? { fieldLimit: { newFieldLimit: event.newFieldLimit } }
+            : {};
         }),
         storeNewFieldLimitResponse: assign(
-          (_, event: DoneInvokeEvent<UpdateFieldLimitResponse>) => {
-            return 'data' in event ? { fieldLimitResponse: event.data } : {};
+          (context, event: DoneInvokeEvent<UpdateFieldLimitResponse>) => {
+            return 'data' in event
+              ? { fieldLimit: { ...context.fieldLimit, result: event.data, error: false } }
+              : {};
           }
         ),
-        storeErrorResponse: assign(() => {
-          return { fieldLimitResponse: { error: true } };
+        storeNewFieldLimitErrorResponse: assign((context) => {
+          return { fieldLimit: { ...context.fieldLimit, error: true } };
         }),
         resetFieldLimitServerResponse: assign(() => ({
-          newFieldLimit: undefined,
-          fieldLimitResponse: undefined,
+          fieldLimit: undefined,
         })),
         raiseForceTimeRangeRefresh: raise('UPDATE_TIME_RANGE'),
       },
@@ -731,10 +734,10 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       saveNewFieldLimit: (context) => {
-        if ('newFieldLimit' in context && context.newFieldLimit) {
+        if ('fieldLimit' in context && context.fieldLimit && context.fieldLimit.newFieldLimit) {
           return dataStreamDetailsClient.setNewFieldLimit({
             dataStream: context.dataStream,
-            newFieldLimit: context.newFieldLimit,
+            newFieldLimit: context.fieldLimit.newFieldLimit,
           });
         }
 
