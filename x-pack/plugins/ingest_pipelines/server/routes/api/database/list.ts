@@ -22,13 +22,9 @@ export const registerListDatabaseRoute = ({
         databases: GeoipDatabaseFromES[];
       };
 
-      const geoipDatabases = data.databases;
+      const body = sortBy(data.databases.map(deserializeGeoipDatabase), 'name');
 
-      const body = sortBy(geoipDatabases.map(deserializeGeoipDatabase), 'name');
-      // eslint-disable-next-line no-console
-      console.log(body);
-
-      return res.ok({ body: sortBy(geoipDatabases.map(deserializeGeoipDatabase), 'name') });
+      return res.ok({ body });
     } catch (error) {
       const esErrorResponse = handleEsError({ error, response: res });
       if (esErrorResponse.status === 404) {
