@@ -57266,9 +57266,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -57420,9 +57418,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
