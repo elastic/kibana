@@ -455,6 +455,7 @@ soc_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
       privileges:
         - read
