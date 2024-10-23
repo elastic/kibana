@@ -69,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('uses the datastream configuration', async () => {
