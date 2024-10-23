@@ -23,7 +23,8 @@ import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 import type { AgentPolicy } from '../types';
 import { agentPolicyUpdateEventHandler } from '../services/agent_policy_update';
 
-export const DELETED_AGENTLESS_POLICIES_TASK_TYPE = 'cloud-security:deleted-agentless-policies-task';
+export const DELETED_AGENTLESS_POLICIES_TASK_TYPE =
+  'cloud-security:deleted-orphan-agentless-policies-task';
 export const DELETE_AGENTLESS_POLICIES_TASK_VERSION = '1.0.0';
 const TITLE = 'Cloud Security Delete Orphan Agentless Policies Task';
 const TIMEOUT = '1m';
