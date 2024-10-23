@@ -110,20 +110,20 @@ function getColor(status: Status) {
 function getTitle(status: Status): string {
   switch (status) {
     case 'BREACHED':
-      return i18n.translate('xpack.slo.burnRate.breachedStatustTitle', {
+      return i18n.translate('xpack.slo.burnRate.breachedStatusTitle', {
         defaultMessage: 'Breached',
       });
     case 'INCREASING':
-      return i18n.translate('xpack.slo.burnRate.increasingStatustTitle', {
+      return i18n.translate('xpack.slo.burnRate.increasingStatusTitle', {
         defaultMessage: 'Increasing',
       });
     case 'RECOVERING':
-      return i18n.translate('xpack.slo.burnRate.recoveringStatustTitle', {
+      return i18n.translate('xpack.slo.burnRate.recoveringStatusTitle', {
         defaultMessage: 'Recovering',
       });
     case 'ACCEPTABLE':
     default:
-      return i18n.translate('xpack.slo.burnRate.okStatusTitle', {
+      return i18n.translate('xpack.slo.burnRate.acceptableStatusTitle', {
         defaultMessage: 'Acceptable value',
       });
   }
