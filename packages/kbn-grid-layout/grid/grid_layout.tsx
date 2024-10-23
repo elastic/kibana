@@ -8,8 +8,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-
 import { distinctUntilChanged, map, skip } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
@@ -57,7 +58,7 @@ export const GridLayout = ({
           {Array.from({ length: rowCount }).map((_, rowIndex) => {
             return (
               <GridRow
-                key={rowIndex}
+                key={uuidv4()}
                 rowIndex={rowIndex}
                 renderPanelContents={renderPanelContents}
                 gridLayoutStateManager={gridLayoutStateManager}
@@ -65,14 +66,19 @@ export const GridLayout = ({
                   const currentLayout = gridLayoutStateManager.gridLayout$.value;
                   currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
+                  const currentRow = currentLayout[rowIndex];
+                  gridLayoutStateManager.rows$[rowIndex].next({
+                    title: currentRow.title,
+                    isCollapsed: currentRow.isCollapsed,
+                    panelIds: Object.keys(currentRow.panels),
+                  });
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
                   if (nextInteractionEvent?.type === 'drop') {
                     gridLayoutStateManager.activePanel$.next(undefined);
-                    gridLayoutStateManager.interactionEvent$.next(undefined);
-                  } else {
-                    gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
+                    gridLayoutStateManager.targetRow$.next(undefined);
                   }
+                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                 }}
                 ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
               />
