@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Entity,
-  UserEntity,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-
-export const isUserEntity = (record: Entity): record is UserEntity =>
-  !!(record as UserEntity)?.user;
+export enum EntitySourceTag {
+  'risk' = 'Risk',
+  'criticality' = 'Asset Criticality',
+  'events' = 'Events',
+}
