@@ -17,12 +17,6 @@ interface PrivilegeGroupValue {
   anyRequired: string[];
 }
 
-interface PrivilegeGroups {
-  all: PrivilegeGroupValue;
-  serverless: PrivilegeGroupValue;
-  traditional: PrivilegeGroupValue;
-}
-
 export const extractAuthzDescription = (
   route: InternalRouterRoute,
   currentOffering: BuildFlavor
@@ -33,31 +27,24 @@ export const extractAuthzDescription = (
     }
     if ('authz' in route.security) {
       const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
-      const offeringGroupedPrivileges = privileges.reduce<PrivilegeGroups>(
+
+      const groupedPrivileges = privileges.reduce<PrivilegeGroupValue>(
         (groups, privilege) => {
           if (typeof privilege === 'string') {
-            groups.all.allRequired.push(privilege);
+            groups.allRequired.push(privilege);
 
             return groups;
           }
-
-          const group = (privilege[currentOffering] ?? 'all') as keyof PrivilegeGroups;
-
-          groups[group].allRequired.push(...(privilege.allRequired ?? []));
-          groups[group].anyRequired.push(...(privilege.anyRequired ?? []));
+          groups.allRequired.push(...(privilege.allRequired ?? []));
+          groups.anyRequired.push(...(privilege.anyRequired ?? []));
 
           return groups;
         },
         {
-          all: { allRequired: [], anyRequired: [] },
-          serverless: { allRequired: [], anyRequired: [] },
-          traditional: { allRequired: [], anyRequired: [] },
+          anyRequired: [],
+          allRequired: [],
         }
       );
-
-      const hasAnyOfferingPrivileges = (offering: keyof PrivilegeGroups) =>
-        offeringGroupedPrivileges[offering].allRequired.length ||
-        offeringGroupedPrivileges[offering].anyRequired.length;
 
       const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
         const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
@@ -68,32 +55,14 @@ export const extractAuthzDescription = (
         }${anyDescription}`;
       };
 
-      if (!hasAnyOfferingPrivileges('serverless') && !hasAnyOfferingPrivileges('traditional')) {
-        const { allRequired, anyRequired } = offeringGroupedPrivileges.all;
+      const getDescriptionForRoute = () => {
+        const allRequired = [...groupedPrivileges.allRequired];
+        const anyRequired = [...groupedPrivileges.anyRequired];
 
-        return `[Authz] Route required privileges: ${getPrivilegesDescription(
-          allRequired,
-          anyRequired
-        )}`;
-      }
-
-      const getDescriptionForOffering = (offering: string) => {
-        const allRequired = [
-          ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].allRequired,
-          ...offeringGroupedPrivileges.all.allRequired,
-        ];
-        const anyRequired = [
-          ...offeringGroupedPrivileges[offering as keyof PrivilegeGroups].anyRequired,
-          ...offeringGroupedPrivileges.all.anyRequired,
-        ];
-
-        return `Route required privileges for: ${getPrivilegesDescription(
-          allRequired,
-          anyRequired
-        )}.`;
+        return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
       };
 
-      return `[Authz] ${getDescriptionForOffering(currentOffering)}`;
+      return `[Authz] ${getDescriptionForRoute()}`;
     }
   }
 };

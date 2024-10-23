@@ -7,47 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { extractAuthzDescription } from './extract_authz_description';
+import { InternalRouterRoute } from './type';
 
 describe('extractAuthzDescription', () => {
-  const testRouter = {
-    getRoutes: () => [
-      {
+  it('should return undefined if route does not require privileges', () => {
+    const route: InternalRouterRoute = {
+      path: '/foo',
+      options: { access: 'internal' },
+      handler: jest.fn(),
+      validationSchemas: { request: { body: schema.object({}) } },
+      method: 'get',
+      isVersioned: false,
+    };
+    const description = extractAuthzDescription(route, 'traditional');
+    expect(description).toBe(undefined);
+  });
+
+  it('should return route authz description for simple privileges', () => {
+    const route: InternalRouterRoute = {
+      path: '/foo',
+      options: { access: 'public' },
+      handler: jest.fn(),
+      validationSchemas: { request: { body: schema.object({}) } },
+      method: 'get',
+      isVersioned: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_spaces'],
+        },
+      },
+    };
+    const description = extractAuthzDescription(route, 'traditional');
+    expect(description).toBe('[Authz] Route required privileges: ALL of [manage_spaces].');
+  });
+
+  it('should return route authz description for privilege groups', () => {
+    {
+      const route: InternalRouterRoute = {
         path: '/foo',
-        options: { access: 'internal', deprecated: true, discontinued: 'discontinued router' },
+        options: { access: 'public' },
         handler: jest.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
-      },
-      {
-        path: '/bar',
-        options: {},
+        method: 'get',
+        isVersioned: false,
+        security: {
+          authz: {
+            requiredPrivileges: [{ allRequired: ['console'], anyRequired: ['manage_spaces'] }],
+          },
+        },
+      };
+      const description = extractAuthzDescription(route, 'traditional');
+      expect(description).toBe(
+        '[Authz] Route required privileges: ALL of [console] AND ANY of [manage_spaces].'
+      );
+    }
+    {
+      const route: InternalRouterRoute = {
+        path: '/foo',
+        options: { access: 'public' },
         handler: jest.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
-      },
-      {
-        path: '/baz',
-        options: {},
-        handler: jest.fn(),
-        validationSchemas: { request: { body: schema.object({}) } },
-      },
-      {
-        path: '/qux',
-        method: 'post',
-        options: {},
-        handler: jest.fn(),
-        validationSchemas: { request: { body: schema.object({}) } },
+        method: 'get',
+        isVersioned: false,
         security: {
           authz: {
             requiredPrivileges: [
-              'manage_spaces',
               {
-                allRequired: ['taskmanager'],
-                anyRequired: ['console'],
+                allRequired: ['console', 'filesManagement'],
+                anyRequired: ['manage_spaces', 'taskmanager'],
               },
             ],
           },
         },
-      },
-    ],
-  } as unknown as Router;
+      };
+      const description = extractAuthzDescription(route, 'traditional');
+      expect(description).toBe(
+        '[Authz] Route required privileges: ALL of [console, filesManagement] AND ANY of [manage_spaces OR taskmanager].'
+      );
+    }
+  });
 });
