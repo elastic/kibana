@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Entity,
-  UserEntity,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import { PRECONFIGURED_ENDPOINTS } from '../components/all_inference_endpoints/constants';
 
-export const isUserEntity = (record: Entity): record is UserEntity =>
-  !!(record as UserEntity)?.user;
+export const isEndpointPreconfigured = (endpoint: string) =>
+  Object.values(PRECONFIGURED_ENDPOINTS).includes(endpoint);
