@@ -24,6 +24,7 @@ describe('GroupSelector', () => {
   it('Should default to Type', async () => {
     expect(await screen.findByText('Group entities by: Type')).toBeInTheDocument();
   });
+  // TODO: This test should work, but doesn't currently, must fix.
   it.skip('Should change to None', async () => {
     const user = userEvent.setup();
 
