@@ -339,7 +339,10 @@ const ActionsConnectorsList = ({
               <RunOperation
                 canExecute={
                   !!(
-                    hasExecuteActionsCapability(capabilities, item.actionTypeId) &&
+                    hasExecuteActionsCapability(
+                      capabilities,
+                      actionTypesIndex && actionTypesIndex[item.actionTypeId].isEdrConnectorType
+                    ) &&
                     actionTypesIndex &&
                     actionTypesIndex[item.actionTypeId]
                   )

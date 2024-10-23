@@ -81,7 +81,7 @@ export const ACTIONS_FEATURE = {
           privileges: [
             {
               api: [CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG],
-              id: 'execute-edr-connectors',
+              id: 'executeEdrConnectors',
               name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDetails', {
                 defaultMessage: 'Execute advanced EDR connectors',
               }),
@@ -90,7 +90,7 @@ export const ACTIONS_FEATURE = {
                 all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
                 read: [ACTION_SAVED_OBJECT_TYPE],
               },
-              ui: ['execute-edr-connectors'],
+              ui: ['executeEdrConnectors'],
             },
           ],
         },

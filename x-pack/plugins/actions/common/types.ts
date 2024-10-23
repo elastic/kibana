@@ -24,6 +24,7 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
+  isEdrConnectorType: boolean;
 }
 
 export enum InvalidEmailReason {

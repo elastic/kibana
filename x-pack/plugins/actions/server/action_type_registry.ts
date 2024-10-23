@@ -238,6 +238,7 @@ export class ActionTypeRegistry {
           enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
           supportedFeatureIds: actionType.supportedFeatureIds,
           isSystemActionType: !!actionType.isSystemActionType,
+          isEdrConnectorType: !!actionType.isEdrConnectorType,
         }))
     );
   }
