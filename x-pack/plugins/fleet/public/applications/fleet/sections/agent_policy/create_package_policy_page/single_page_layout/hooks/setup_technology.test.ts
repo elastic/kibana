@@ -11,6 +11,7 @@ import { waitFor } from '@testing-library/react';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
+import type { PackageInfo } from '../../../../../../../../common/types';
 import { SetupTechnology } from '../../../../../../../../common/types';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { sendGetOneAgentPolicy, useStartServices, useConfig } from '../../../../../hooks';
@@ -303,7 +304,11 @@ describe('useSetupTechnology', () => {
       })
     );
 
+    await rerender();
+
     expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
+
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
@@ -521,5 +526,31 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
     expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+  });
+
+  it('should set the default selected setup technology when creating a package policy', async () => {
+    const packageInfoMock = {
+      policy_templates: [
+        {
+          deployment_modes: {
+            default: { enabled: false },
+            agentless: { enabled: true },
+          },
+        },
+      ],
+    } as PackageInfo;
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packageInfo: packageInfoMock,
+        packagePolicy: packagePolicyMock,
+      })
+    );
+
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
   });
 });
