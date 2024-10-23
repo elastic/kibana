@@ -44,6 +44,19 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      machineType: n2-standard-32
+      preemptible: true
+    key: linting_with_types
+    timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
@@ -80,18 +93,6 @@ steps:
       preemptible: true
     key: check_types
     timeout_in_minutes: 70
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/lint_with_types.sh
-    label: 'Linting (with types)'
-    agents:
-      machineType: n2-standard-16
-      preemptible: true
-    key: linting_with_types
-    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'

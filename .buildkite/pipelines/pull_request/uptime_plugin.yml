@@ -8,6 +8,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     artifact_paths:
       - 'x-pack/plugins/observability_solution/synthetics/e2e/.journeys/**/*'

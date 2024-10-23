@@ -61,6 +61,21 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-32
+      preemptible: true
+    key: linting_with_types
+    timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - wait
 
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
@@ -125,6 +140,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -144,6 +160,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -163,6 +180,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -182,6 +200,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -201,6 +220,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -220,6 +240,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -239,6 +260,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -258,6 +280,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -277,6 +300,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -296,6 +320,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -315,6 +340,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -334,6 +360,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -353,6 +380,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -372,6 +400,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -391,6 +420,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -410,6 +440,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -429,6 +460,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -448,6 +480,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -469,6 +502,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 20
     retry:
@@ -490,6 +524,7 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 14
     retry:
@@ -504,26 +539,12 @@ steps:
       - build
       - quick_checks
       - linting
+      - linting_with_types
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-
-  - command: .buildkite/scripts/steps/lint_with_types.sh
-    label: 'Linting (with types)'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-16
-      preemptible: true
-    key: linting_with_types
-    timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
