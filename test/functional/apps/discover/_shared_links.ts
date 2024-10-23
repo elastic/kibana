@@ -172,6 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
+        log.debug('currentURL' + currentUrl);
+        await toasts.dismissAllToasts();
         const timeBeforeReload = await PageObjects.timePicker.getTimeConfig();
         await browser.clearSessionStorage();
         await browser.get(currentUrl, false);
