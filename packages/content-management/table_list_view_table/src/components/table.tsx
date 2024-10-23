@@ -236,7 +236,7 @@ export function Table<T extends UserContentCommonSchema>({
       filters: searchFilters,
       hint: {
         content: (
-          <EuiText color="red" size="s">
+          <EuiText color="red" size="s" data-test-subj="forbiddenCharErrorMessage">
             <FormattedMessage
               id="contentManagement.tableList.listing.charsNotAllowedHint"
               defaultMessage="Characters not allowed: {chars}"

@@ -1078,25 +1078,29 @@ describe('TableListView', () => {
 
     const findItems = jest.fn();
 
-    const setupSearch = (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
-      const testBed = registerTestBed<string, TableListViewTableProps>(
-        WithServices<TableListViewTableProps>(TableListViewTable),
-        {
-          defaultProps: {
-            ...requiredProps,
-            findItems,
-            urlStateEnabled: false,
-            entityName: 'Foo',
-            entityNamePlural: 'Foos',
-          },
-          memoryRouter: { wrapComponent: true },
-        }
-      )(...args);
+    const setupSearch = async (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
+      let testBed: TestBed;
 
-      const { updateSearchText, getSearchBoxValue } = getActions(testBed);
+      await act(async () => {
+        testBed = registerTestBed<string, TableListViewTableProps>(
+          WithServices<TableListViewTableProps>(TableListViewTable),
+          {
+            defaultProps: {
+              ...requiredProps,
+              findItems,
+              urlStateEnabled: false,
+              entityName: 'Foo',
+              entityNamePlural: 'Foos',
+            },
+            memoryRouter: { wrapComponent: true },
+          }
+        )(...args);
+      });
+
+      const { updateSearchText, getSearchBoxValue } = getActions(testBed!);
 
       return {
-        testBed,
+        testBed: testBed!,
         updateSearchText,
         getSearchBoxValue,
         getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
@@ -1216,6 +1220,25 @@ describe('TableListView', () => {
           ],
         ]
       `);
+    });
+
+    test('should show error hint when inserting invalid chars', async () => {
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
+
+      const { component, exists } = testBed;
+      component.update();
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(false);
+
+      const expected = '[foo';
+      await updateSearchText!(expected);
+      expect(getSearchBoxValue!()).toBe(expected);
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(true); // hint is shown
+
+      const [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(searchTerm).toBe(''); // no search has been made
     });
   });
 
