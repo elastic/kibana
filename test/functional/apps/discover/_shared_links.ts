@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
-  // Failing: See https://github.com/elastic/kibana/issues/196627
-  describe.skip('shared links', function describeIndexTests() {
+  describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
     async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
@@ -173,6 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
+        log.debug('currentURL' + currentUrl);
+        await toasts.dismissAllToasts();
         const timeBeforeReload = await PageObjects.timePicker.getTimeConfig();
         await browser.clearSessionStorage();
         await browser.get(currentUrl, false);
