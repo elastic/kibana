@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine - Exception Operators Date & Numeric Types Integration Tests - Serverless Env - Essentials Tier',
+      'Detection Engine - Exception Operators Double Types Integration Tests - Serverless Env - Essentials Tier',
   },
 });

@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../../../../config/ess/config.base.trial')
   );
 
   return {
@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Detection Engine - Rule Execution Logic Integration Tests - ESS Env - Trial License',
+        'Detection Engine - New Terms Rule Execution Logic Integration Tests - ESS Env - Trial License',
     },
   };
 }
