@@ -24,7 +24,6 @@ import {
   AgentlessAgentCreateError,
   AgentlessAgentDeleteError,
 } from '../../errors';
-import { AgentlessAgentCreateError } from '../../errors';
 import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
@@ -210,6 +209,21 @@ class AgentlessAgentService {
     });
 
     return response;
+  }
+
+  private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {
+    if (!agentlessAgentPolicy.global_data_tags) {
+      return undefined;
+    }
+
+    const getGlobalTagValueByName = (name: string) =>
+      agentlessAgentPolicy.global_data_tags?.find((tag) => tag.name === name)?.value;
+
+    return {
+      organization: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION),
+      division: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_DIVISION),
+      team: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_TEAM),
+    };
   }
 
   private withRequestIdMessage(message: string, traceId?: string) {
