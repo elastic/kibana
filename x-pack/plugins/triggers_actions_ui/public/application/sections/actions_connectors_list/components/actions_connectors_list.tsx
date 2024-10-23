@@ -339,12 +339,12 @@ const ActionsConnectorsList = ({
               <RunOperation
                 canExecute={
                   !!(
+                    actionTypesIndex &&
+                    actionTypesIndex[item.actionTypeId] &&
                     hasExecuteActionsCapability(
                       capabilities,
-                      actionTypesIndex && actionTypesIndex[item.actionTypeId].isEdrActionType
-                    ) &&
-                    actionTypesIndex &&
-                    actionTypesIndex[item.actionTypeId]
+                      actionTypesIndex[item.actionTypeId].isEdrActionType
+                    )
                   )
                 }
                 item={item}
