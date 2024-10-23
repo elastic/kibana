@@ -156,7 +156,10 @@ export class EntityStoreDataClient {
       indexPattern,
       filter,
       pipelineDebugMode
-    );
+    ).catch((e) => {
+      this.log('error', entityType, `Error initializing entity store: ${e.message}`);
+      throw e;
+    });
 
     return descriptor;
   }
