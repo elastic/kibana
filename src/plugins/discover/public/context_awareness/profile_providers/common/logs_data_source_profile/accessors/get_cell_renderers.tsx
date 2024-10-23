@@ -31,8 +31,8 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
     ...SERVICE_NAME_FIELDS.reduce(
       (acc, field) => ({
         ...acc,
-        [field]: getServiceNameCell(field),
-        [`${field}.keyword`]: getServiceNameCell(`${field}.keyword`),
+        [field]: getServiceNameCell(field, params),
+        [`${field}.keyword`]: getServiceNameCell(`${field}.keyword`, params),
       }),
       {}
     ),

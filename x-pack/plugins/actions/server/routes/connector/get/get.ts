@@ -11,7 +11,7 @@ import {
   GetConnectorParamsV1,
 } from '../../../../common/routes/connector/apis/get';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
-import { transformGetConnectorResponseV1 } from './transforms';
+import { transformConnectorResponseV1 } from '../common_transforms';
 import { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { ActionsRequestHandlerContext } from '../../../types';
@@ -46,7 +46,7 @@ export const getConnectorRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorParamsV1 = req.params;
         return res.ok({
-          body: transformGetConnectorResponseV1(await actionsClient.get({ id })),
+          body: transformConnectorResponseV1(await actionsClient.get({ id })),
         });
       })
     )
