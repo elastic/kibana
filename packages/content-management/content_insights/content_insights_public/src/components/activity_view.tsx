@@ -9,7 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import {

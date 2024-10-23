@@ -14,15 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { ActivityView as ActivityViewComponent, ActivityViewProps } from './activity_view';
 
-jest.mock('moment', () => {
-  const original = jest.requireActual('moment');
-  return () => {
-    const m = original;
-    m.tz = jest.fn(() => 'Europe/Madrid');
-    return m;
-  };
-});
-
 const mockGetUserProfile = jest.fn(async (uid: string) => ({
   uid,
   enabled: true,
