@@ -50,7 +50,7 @@ export const LinkContent = ({
   allowShortUrl,
   delegatedShareUrlHandler,
 }: LinkProps) => {
-  const [url, setUrl] = useState<string>('');
+  const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
@@ -76,18 +76,19 @@ export const LinkContent = ({
   }, []);
 
   useEffect(() => {
-    setUrl(getUrlWithUpdatedParams(shareableUrl || window.location.href));
+    setSnapshotUrl(getUrlWithUpdatedParams(shareableUrl || window.location.href));
   }, [getUrlWithUpdatedParams, shareableUrl]);
 
   const createShortUrl = useCallback(async () => {
+    const shortUrlService = urlService.shortUrls.get(null);
+
     if (shareableUrlLocatorParams) {
-      const shortUrls = urlService.shortUrls.get(null);
-      const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+      const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
-      return (await urlService.shortUrls.get(null).createFromLongUrl(url)).url;
+      return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
     }
-  }, [shareableUrlLocatorParams, urlService.shortUrls, url]);
+  }, [shareableUrlLocatorParams, urlService.shortUrls, snapshotUrl]);
 
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);
@@ -97,7 +98,7 @@ export const LinkContent = ({
         ? delegatedShareUrlHandler()
         : allowShortUrl
         ? await createShortUrl()
-        : url;
+        : snapshotUrl;
     }
 
     copyToClipboard(urlToCopy.current);
@@ -113,7 +114,7 @@ export const LinkContent = ({
       return true;
     });
     setIsLoading(false);
-  }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
+  }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
   return (
     <>
