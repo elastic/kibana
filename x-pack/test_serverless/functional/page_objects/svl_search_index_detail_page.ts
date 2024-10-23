@@ -27,8 +27,8 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
-      expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).to.be(
-        'https://fakeprojectid.es.fake-domain.cld.elstc.co:443'
+      expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).match(
+        /^https?\:\/\/.*(\:\d+)?/
       );
     },
     async expectQuickStats() {

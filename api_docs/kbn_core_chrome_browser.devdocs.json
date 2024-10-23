@@ -3923,7 +3923,7 @@
         "label": "CloudLinkId",
         "description": [],
         "signature": [
-          "\"projects\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployment\" | \"deployments\""
+          "\"projects\" | \"deployment\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployments\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3939,6 +3939,14 @@
         "description": [],
         "signature": [
           "{ projects?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; deployment?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "public",
@@ -3963,14 +3971,6 @@
             "text": "CloudLink"
           },
           " | undefined; billingAndSub?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
-          " | undefined; deployment?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "public",
