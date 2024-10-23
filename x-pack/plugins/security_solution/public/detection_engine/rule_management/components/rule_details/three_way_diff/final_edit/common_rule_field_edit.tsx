@@ -63,6 +63,12 @@ import {
   timelineTemplateSchema,
   timelineTemplateSerializer,
 } from './fields/timeline_template';
+import {
+  TimestampOverrideEdit,
+  timestampOverrideDeserializer,
+  timestampOverrideSerializer,
+  timestampOverrideSchema,
+} from './fields/timestamp_override';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -158,6 +164,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={timelineTemplateSchema}
           serializer={timelineTemplateSerializer}
           deserializer={timelineTemplateDeserializer}
+        />
+      );
+    case 'timestamp_override':
+      return (
+        <FieldFormWrapper
+          component={TimestampOverrideEdit}
+          fieldFormSchema={timestampOverrideSchema}
+          serializer={timestampOverrideSerializer}
+          deserializer={timestampOverrideDeserializer}
         />
       );
     case 'threat':
