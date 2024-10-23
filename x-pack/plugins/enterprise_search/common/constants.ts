@@ -349,3 +349,10 @@ export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];
 export const GETTING_STARTED_TITLE = i18n.translate('xpack.enterpriseSearch.gettingStarted.title', {
   defaultMessage: 'Getting started',
 });
+
+export const SEARCH_APPS_BREADCRUMB = i18n.translate(
+  'xpack.enterpriseSearch.searchApplications.breadcrumb',
+  {
+    defaultMessage: 'Search Applications',
+  }
+);

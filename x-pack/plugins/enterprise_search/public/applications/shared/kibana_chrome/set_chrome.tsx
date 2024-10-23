@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { SEARCH_APPS_BREADCRUMB } from '../../applications/constants';
+import { SEARCH_APPS_BREADCRUMB } from '../../../../common/constants';
 import { KibanaLogic } from '../kibana';
 
 import {
