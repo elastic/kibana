@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -16,6 +16,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
+import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
   FieldStatisticTableEmbeddableProps,
@@ -41,7 +42,12 @@ function isFieldStatisticTableEmbeddableState(
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    return (
+    const unsupportedReason = getReasonIfQueryUnsupportedByFieldStats(props.esqlQuery);
+    return unsupportedReason ? (
+      <EuiCallOut size="m" iconType="warning" color="warning">
+        {unsupportedReason}
+      </EuiCallOut>
+    ) : (
       <EmbeddableESQLFieldStatsTableWrapper
         id={props.id}
         dataView={props.dataView}

@@ -166,8 +166,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     [changeDataView, isCanceledRef]
   );
 
-  const warningMsgForQuery = useMemo(() => getReasonIfQueryUnsupportedByFieldStats(query), [query]);
-
   async function fetchData() {
     if (isCanceledRef.current) {
       return;

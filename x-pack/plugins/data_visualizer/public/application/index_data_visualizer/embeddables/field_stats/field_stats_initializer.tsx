@@ -29,6 +29,7 @@ import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -94,6 +95,12 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
+
+  const unsupportedReason = useMemo(
+    () => getReasonIfQueryUnsupportedByFieldStats(esqlQuery),
+    [esqlQuery]
+  );
+
   const onESQLQuerySubmit = useCallback(
     async (query: AggregateQuery, abortController?: AbortController) => {
       const adhocDataView = await getESQLAdHocDataview(query.esql, dataViews);
@@ -202,6 +209,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               }
             />
           ) : null}
+
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
               <DataSourceTypeSelector value={viewType} onChange={setViewType} />
@@ -247,7 +255,13 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               query={esqlQuery}
               setQuery={setQuery}
               onQuerySubmit={onESQLQuerySubmit}
+              disableSubmitAction={!!unsupportedReason}
             />
+          ) : null}
+          {unsupportedReason ? (
+            <EuiCallOut size="m" iconType="alert" color="warning">
+              {unsupportedReason}
+            </EuiCallOut>
           ) : null}
         </EuiFlexGroup>
       </EuiFlyoutBody>
@@ -282,7 +296,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                   defaultMessage: 'Apply changes',
                 }
               )}
-              disabled={!isEsqlFormValid || !isDataViewFormValid}
+              disabled={!isEsqlFormValid || !isDataViewFormValid || !!unsupportedReason}
               iconType="check"
               data-test-subj="applyFlyoutButton"
             >
