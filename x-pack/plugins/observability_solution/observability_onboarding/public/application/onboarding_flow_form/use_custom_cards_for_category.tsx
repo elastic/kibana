@@ -175,7 +175,6 @@ export function useCustomCardsForCategory(
                 'Unified Kubernetes observability with Elastic Distro for OTel Collector',
             }
           ),
-          release: 'preview',
           extraLabelsBadges: [
             <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
@@ -192,7 +191,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
-          release: 'preview',
+          releddase: 'preview',
         },
       ];
 
