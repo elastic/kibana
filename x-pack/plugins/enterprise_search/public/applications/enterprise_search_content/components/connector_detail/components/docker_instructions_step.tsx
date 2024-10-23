@@ -138,7 +138,6 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
                     )}
                   </EuiLink>
                 ),
-                repository: <EuiCode>elastic/connectors</EuiCode>,
               }}
             />
           </p>
