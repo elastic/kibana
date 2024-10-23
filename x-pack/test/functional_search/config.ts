@@ -22,9 +22,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [require.resolve('.')],
     esTestCluster: {
-      ...functionalTestsConfig.get('esTestCluster'),
+      ...functionalConfig.get('esTestCluster'),
       serverArgs: [
-        ...functionalTestsConfig.get('esTestCluster.serverArgs'),
+        ...functionalConfig.get('esTestCluster.serverArgs'),
         'xpack.security.enabled=true',
       ],
     },

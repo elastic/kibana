@@ -47,8 +47,8 @@ export default function searchSolutionNavigation({
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
         { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
-        { id: 'Relevance', label: 'Relevance' },
-        { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
+        // { id: 'Relevance', label: 'Relevance' },
+        // { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Elasticsearch', label: 'Elasticsearch' },
         { id: 'VectorSearch', label: 'Vector Search' },
@@ -60,6 +60,70 @@ export default function searchSolutionNavigation({
       const expectNoPageReload = await searchClassicNavigation.createNoPageReloadCheck();
 
       await searchClassicNavigation.expectNavItemExists('Home');
+
+      // Check Content
+      // > Indices
+      await searchClassicNavigation.clickNavItem('Indices');
+      await searchClassicNavigation.expectNavItemActive('Indices');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Elasticsearch indices');
+      // > Connectors
+      await searchClassicNavigation.clickNavItem('Connectors');
+      await searchClassicNavigation.expectNavItemActive('Connectors');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Connectors');
+      // > Crawlers
+      await searchClassicNavigation.clickNavItem('Crawlers');
+      await searchClassicNavigation.expectNavItemActive('Crawlers');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Web crawlers');
+
+      // Check Build
+      // > Playground
+      await searchClassicNavigation.clickNavItem('Playground');
+      await searchClassicNavigation.expectNavItemActive('Playground');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Playground');
+      // > SearchApplications
+      await searchClassicNavigation.clickNavItem('SearchApplications');
+      await searchClassicNavigation.expectNavItemActive('SearchApplications');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Search Applications');
+      // > BehavioralAnalytics
+      await searchClassicNavigation.clickNavItem('BehavioralAnalytics');
+      await searchClassicNavigation.expectNavItemActive('BehavioralAnalytics');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Behavioral Analytics');
+
+      // Check Relevance
+      // > InferenceEndpoints
+      // await searchClassicNavigation.clickNavItem('InferenceEndpoints');
+      // await searchClassicNavigation.expectNavItemActive('InferenceEndpoints');
+      // await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Relevance');
+      // await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Inference Endpoints');
+
+      // Check Getting started
+      // > Elasticsearch
+      await searchClassicNavigation.clickNavItem('Elasticsearch');
+      await searchClassicNavigation.expectNavItemActive('Elasticsearch');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists(
+        'Getting started with Elasticsearch'
+      );
+      // > VectorSearch
+      await searchClassicNavigation.clickNavItem('VectorSearch');
+      await searchClassicNavigation.expectNavItemActive('VectorSearch');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Getting started');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Vector Search');
+      // > SemanticSearch
+      await searchClassicNavigation.clickNavItem('SemanticSearch');
+      await searchClassicNavigation.expectNavItemActive('SemanticSearch');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Getting started');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Semantic Search');
+      // > AISearch
+      await searchClassicNavigation.clickNavItem('AISearch');
+      await searchClassicNavigation.expectNavItemActive('AISearch');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Getting started');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('AI Search');
 
       await expectNoPageReload();
     });
