@@ -69,10 +69,22 @@ type CategorizeTextSubAggregations = {
   maxTimestamp: { max: AggregationsMaxAggregation };
 };
 
+interface CategorizeTextAggregationResult {
+  categorize_text: AggregationsCategorizeTextAggregation;
+  aggs: CategorizeTextSubAggregations &
+    (
+      | {}
+      | {
+          timeseries: { date_histogram: AggregationsDateHistogramAggregation };
+          changes: { change_point: { buckets_path: string } };
+        }
+    );
+}
+
 export async function runCategorizeTextAggregation<
   TChanges extends boolean | undefined = undefined
 >(
-  options: CategorizeTextOptions & { changes?: TChanges }
+  options: CategorizeTextOptions & { includeChanges?: TChanges }
 ): Promise<Array<FieldPatternResult<TChanges>>>;
 
 export async function runCategorizeTextAggregation({
@@ -83,100 +95,85 @@ export async function runCategorizeTextAggregation({
   query,
   samplingProbability,
   useMlStandardTokenizer,
-  changes,
+  includeChanges,
   size,
   start,
   end,
-}: CategorizeTextOptions & { changes?: boolean }): Promise<Array<FieldPatternResult<boolean>>> {
+}: CategorizeTextOptions & { includeChanges?: boolean }): Promise<
+  Array<FieldPatternResult<boolean>>
+> {
   const aggs = Object.fromEntries(
-    fields.map(
-      (
-        field
-      ): [
-        string,
-        {
-          categorize_text: AggregationsCategorizeTextAggregation;
-          aggs: CategorizeTextSubAggregations &
-            (
-              | {}
-              | {
-                  timeseries: { date_histogram: AggregationsDateHistogramAggregation };
-                  changes: { change_point: { buckets_path: string } };
-                }
-            );
-        }
-      ] => [
-        field,
-        {
-          categorize_text: {
-            field,
-            min_doc_count: 1,
-            size,
-            categorization_analyzer: useMlStandardTokenizer
-              ? {
-                  tokenizer: 'ml_standard',
-                  char_filter: [
-                    {
-                      type: 'pattern_replace',
-                      pattern: '\\\\n',
-                      replacement: '',
-                    } as unknown as string,
-                  ],
-                }
-              : categorizationAnalyzer,
+    fields.map((field): [string, CategorizeTextAggregationResult] => [
+      field,
+      {
+        categorize_text: {
+          field,
+          min_doc_count: 1,
+          size,
+          categorization_analyzer: useMlStandardTokenizer
+            ? {
+                tokenizer: 'ml_standard',
+                char_filter: [
+                  {
+                    type: 'pattern_replace',
+                    pattern: '\\\\n',
+                    replacement: '',
+                  } as unknown as string,
+                ],
+              }
+            : categorizationAnalyzer,
+        },
+        aggs: {
+          minTimestamp: {
+            min: {
+              field: '@timestamp',
+            },
           },
-          aggs: {
-            minTimestamp: {
-              min: {
-                field: '@timestamp',
-              },
+          maxTimestamp: {
+            max: {
+              field: '@timestamp',
             },
-            maxTimestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
-            ...(changes
-              ? {
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: start,
-                        max: end,
-                      },
-                      fixed_interval: `${Math.round((end - start) / 50)}ms`,
+          },
+          ...(includeChanges
+            ? {
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: start,
+                      max: end,
                     },
-                  },
-                  changes: {
-                    change_point: {
-                      buckets_path: 'timeseries>_count',
-                    },
-                  },
-                }
-              : {}),
-            sample: {
-              top_hits: {
-                size: 1,
-                _source: false,
-                fields: [field, ...metadata],
-                sort: {
-                  _score: {
-                    order: 'desc',
+                    fixed_interval: `${Math.round((end - start) / 50)}ms`,
                   },
                 },
-                highlight: {
-                  fields: {
-                    '*': {},
+                changes: {
+                  change_point: {
+                    buckets_path: 'timeseries>_count',
                   },
+                },
+              }
+            : {}),
+          sample: {
+            top_hits: {
+              size: 1,
+              _source: false,
+              fields: [field, ...metadata],
+              sort: {
+                _score: {
+                  order: 'desc',
+                },
+              },
+              highlight: {
+                fields: {
+                  '*': {},
                 },
               },
             },
           },
         },
-      ]
-    )
+      },
+    ])
   );
 
   const response = await esClient.search('get_log_patterns', {
@@ -253,7 +250,7 @@ interface LogPatternOptions {
 }
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
-  options: LogPatternOptions & { changes?: TChanges }
+  options: LogPatternOptions & { includeChanges?: TChanges }
 ): Promise<Array<FieldPatternResult<TChanges>>>;
 
 export async function getLogPatterns({
@@ -262,10 +259,10 @@ export async function getLogPatterns({
   end,
   index,
   kuery,
-  changes,
+  includeChanges,
   metadata = [],
   fields,
-}: LogPatternOptions & { changes?: boolean }): Promise<Array<FieldPatternResult<boolean>>> {
+}: LogPatternOptions & { includeChanges?: boolean }): Promise<Array<FieldPatternResult<boolean>>> {
   const fieldCapsResponse = await esClient.fieldCaps('get_field_caps_for_log_pattern_analysis', {
     fields,
     index_filter: {
@@ -306,7 +303,9 @@ export async function getLogPatterns({
     samplingProbability = 1;
   }
 
-  const fieldGroups = changes ? fieldsInFieldCaps.map((field) => [field]) : [fieldsInFieldCaps];
+  const fieldGroups = includeChanges
+    ? fieldsInFieldCaps.map((field) => [field])
+    : [fieldsInFieldCaps];
 
   const allPatterns = await Promise.all(
     fieldGroups.map(async (fieldGroup) => {
@@ -324,7 +323,7 @@ export async function getLogPatterns({
         size: 50,
         start,
         end,
-        changes,
+        includeChanges,
         metadata,
       });
 
@@ -364,7 +363,7 @@ export async function getLogPatterns({
           },
         },
         size: 1000,
-        changes,
+        includeChanges,
         samplingProbability: 1,
         useMlStandardTokenizer: true,
         metadata,

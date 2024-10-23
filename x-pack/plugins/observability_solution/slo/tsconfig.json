@@ -96,7 +96,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
     "@kbn/ebt-tools",
-    "@kbn/observability-alerting-rule-utils",
-    "@kbn/observability-utils-server"
+    "@kbn/observability-alerting-rule-utils"
   ]
 }

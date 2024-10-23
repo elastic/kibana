@@ -33,7 +33,10 @@ export async function getAlertsForEntity({
 }) {
   const alertsKuery = Object.entries(entity)
     .map(([field, value]) => {
-      return `(${ALERT_GROUP_FIELD}:"${field}" AND ${ALERT_GROUP_VALUE}:"${value}")`;
+      return [
+        `(${ALERT_GROUP_FIELD}:"${field}" AND ${ALERT_GROUP_VALUE}:"${value}")`,
+        `(${field}:"${value}")`,
+      ].join();
     })
     .join(' AND ');
 

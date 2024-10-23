@@ -51,7 +51,7 @@ export function RootCauseAnalysisContainer({
         label={i18n.translate('xpack.observabilityAiAssistant.rca.toolResponseError', {
           defaultMessage: 'Failed to execute task: {errorMessage}',
           values: {
-            error: response.error.message,
+            errorMessage: response.error.message,
           },
         })}
         iconType="alert"

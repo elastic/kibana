@@ -72,7 +72,6 @@
     "@kbn/ai-assistant-common",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
-    "@kbn/charts-plugin",
     "@kbn/slo-plugin",
     "@kbn/spaces-plugin",
     "@kbn/data-service",
