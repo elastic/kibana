@@ -68,7 +68,7 @@ export function MonitorConfiguration({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="singleSloSelector" grow>
+              <EuiFlexItem grow>
                 <FormProvider {...methods}>
                   <MonitorFiltersForm />
                 </FormProvider>
