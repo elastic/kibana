@@ -59,7 +59,7 @@ class AgentlessAgentService {
       throw new AgentlessAgentConfigError('missing Agentless API configuration in Kibana');
     }
 
-    if (!isAgentlessApiEnabled()) {
+    if (!isAgentlessEnabled) {
       logger.error(
         '[Agentless API] Agentless agents are only supported in cloud deployment and serverless projects'
       );
