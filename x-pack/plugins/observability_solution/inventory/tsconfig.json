@@ -53,6 +53,7 @@
     "@kbn/cloud-plugin",
     "@kbn/observability-utils-browser",
     "@kbn/observability-utils-server",
-    "@kbn/observability-utils-common"
+    "@kbn/observability-utils-common",
+    "@kbn/storybook"
   ]
 }

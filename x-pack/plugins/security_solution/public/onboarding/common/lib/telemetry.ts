@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 
-window.jest = jest;
-
-export const decorators = [EuiThemeProviderDecorator];
+export const trackOnboardingLinkClick = (linkId: string) => {
+  track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.ONBOARDING}_${linkId}`);
+};

@@ -82,7 +82,7 @@ export async function analyzeLogPatterns({
       start,
       end,
       kuery,
-      changes: true,
+      includeChanges: true,
       fields,
       metadata: [],
     }),
@@ -100,7 +100,7 @@ export async function analyzeLogPatterns({
         )
         .join(' AND ')}`,
       metadata: Object.keys(entity),
-      changes: true,
+      includeChanges: true,
       fields,
     }),
   ]);
