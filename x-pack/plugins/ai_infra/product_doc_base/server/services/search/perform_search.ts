@@ -26,7 +26,6 @@ export const performSearch = async ({
     size,
     query: {
       bool: {
-        filter: [],
         should: [
           {
             multi_match: {
