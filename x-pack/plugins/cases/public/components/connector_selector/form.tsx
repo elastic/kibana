@@ -14,6 +14,7 @@ import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
+import { i18n } from '@kbn/i18n';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
@@ -49,6 +50,14 @@ export const ConnectorSelector = ({
     connectors.find((connector) => connector.id === field.value)
   );
 
+  const ADD_CONNECTOR_HELPER_TEXT = i18n.translate(
+    'xpack.cases.connectorSelector.addConnectorHelperText',
+    {
+      defaultMessage:
+        'Go to Stack Management > Cases > Settings to add an external incident management system',
+    }
+  );
+
   return (
     <EuiFormRow
       css={css`
@@ -60,9 +69,7 @@ export const ConnectorSelector = ({
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
       fullWidth
-      helpText={
-        'Go to Stack Management > Cases > Settings to add an external incident management system'
-      }
+      helpText={ADD_CONNECTOR_HELPER_TEXT}
       isInvalid={isInvalid}
       label={field.label}
       labelAppend={field.labelAppend}
