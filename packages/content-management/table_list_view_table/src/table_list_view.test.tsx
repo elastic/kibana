@@ -1112,15 +1112,8 @@ describe('TableListView', () => {
     });
 
     test('should search the table items', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-      let getLastCallArgsFromFindItems: () => Parameters<typeof findItems>;
-      let getSearchBoxValue: () => string;
-
-      await act(async () => {
-        ({ testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
-          await setupSearch());
-      });
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
 
       const { component, table } = testBed!;
       component.update();
@@ -1177,12 +1170,7 @@ describe('TableListView', () => {
     });
 
     test('should search and render empty list if no result', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-
-      await act(async () => {
-        ({ testBed, updateSearchText } = await setupSearch());
-      });
+      const { testBed, updateSearchText } = await setupSearch();
 
       const { component, table, find } = testBed!;
       component.update();
