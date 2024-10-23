@@ -76,8 +76,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           body: await this.buildBulkOperations(params),
         },
         {
-          // Increasing timout to 10min as KB docs were failing to load after 30s
-          requestTimeout: 600000,
+          // Increasing timeout to 2min as KB docs were failing to load after 30s
+          requestTimeout: 120000,
         }
       );
 
