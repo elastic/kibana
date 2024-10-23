@@ -26,14 +26,15 @@ import {
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';
-import { StatusDetails } from './status_details';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
+import { StatusDetails } from './status_details';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
 import { AliasesDetails } from './aliases_details';
+import { SizeDocCountDetails } from './size_doc_count_details';
 
 interface Props {
   indexDetails: Index;
@@ -88,6 +89,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           status={status}
           health={health}
         />
+
+        <SizeDocCountDetails size={size} documents={documents} />
 
         <AliasesDetails aliases={aliases} />
 
