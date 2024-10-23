@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
+import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { useTourContext } from '../guided_onboarding_tour';
@@ -309,6 +310,10 @@ export interface CaseDetailsLinkComponentProps {
    * Link index
    */
   index?: number;
+  /**
+   * If true, will open the app in new tab, will share session information via window.open if base
+   */
+  openInNewTab?: NavigateToAppOptions['openInNewTab'];
 }
 
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
@@ -316,6 +321,7 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
   children,
   detailName,
   title,
+  openInNewTab = false,
 }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
@@ -334,9 +340,10 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
+        openInNewTab,
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, openInNewTab, search]
   );
 
   useEffect(() => {
