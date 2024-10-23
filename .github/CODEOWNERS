@@ -1425,7 +1425,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/security/cypress @elastic/kibana-security
-/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
@@ -1540,6 +1539,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution
+/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/security-solution
