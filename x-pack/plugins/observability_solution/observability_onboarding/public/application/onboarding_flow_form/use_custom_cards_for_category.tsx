@@ -165,14 +165,14 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with EDOT Collector',
+              defaultMessage: 'Unified Kubernetes monitoring with OpenTelemetry',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage:
-                'Unified Kubernetes observability with Elastic Distro for OTel Collector',
+                'Monitor Kubernetes Infrastructure and auto-instrument Applications with OpenTelemetry',
             }
           ),
           extraLabelsBadges: [
