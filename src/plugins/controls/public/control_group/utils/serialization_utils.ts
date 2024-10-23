@@ -40,12 +40,7 @@ export const deserializeControlGroup = (
   }, {});
 
   return {
-    ...omit(state.rawState, ['controlStyle', 'showApplySelections']),
+    ...state.rawState,
     initialChildControlState: flattenedControls,
-    autoApplySelections:
-      typeof state.rawState.showApplySelections === 'boolean'
-        ? !state.rawState.showApplySelections
-        : true, // Rename "showApplySelections" to "autoApplySelections"
-    labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
   };
 };

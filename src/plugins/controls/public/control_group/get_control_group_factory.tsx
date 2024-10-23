@@ -193,8 +193,8 @@ export const getControlGroupEmbeddableFactory = () => {
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              controlStyle: labelPosition$.getValue(),
-              showApplySelections: !autoApplySelections$.getValue(),
+              labelPosition: labelPosition$.getValue(),
+              autoApplySelections: autoApplySelections$.getValue(),
               ignoreParentSettings: ignoreParentSettings$.getValue(),
               controls,
             },

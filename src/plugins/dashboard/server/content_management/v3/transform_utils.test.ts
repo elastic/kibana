@@ -20,12 +20,12 @@ import {
   savedObjectToItem,
 } from './transform_utils';
 import {
+  DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_SHOW_APPLY_SELECTIONS,
   ControlLabelPosition,
   ControlGroupChainingSystem,
   ControlWidth,
@@ -68,9 +68,9 @@ describe('dashboardAttributesOut', () => {
     expect(dashboardAttributesOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: DEFAULT_CONTROL_CHAINING,
-        controlStyle: DEFAULT_CONTROL_LABEL_POSITION,
+        labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
         ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-        showApplySelections: DEFAULT_SHOW_APPLY_SELECTIONS,
+        autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [
           {
             controlConfig: { anyKey: 'some value' },
@@ -141,14 +141,14 @@ describe('dashboardAttributesOut', () => {
     expect(dashboardAttributesOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: 'NONE',
-        controlStyle: 'twoLine',
+        labelPosition: 'twoLine',
         ignoreParentSettings: {
           ignoreFilters: true,
           ignoreQuery: false,
           ignoreTimerange: false,
           ignoreValidations: false,
         },
-        showApplySelections: true,
+        autoApplySelections: false,
         controls: [
           {
             controlConfig: {
@@ -210,7 +210,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
     const input: DashboardAttributes = {
       controlGroupInput: {
         chainingSystem: 'NONE',
-        controlStyle: 'twoLine',
+        labelPosition: 'twoLine',
         controls: [
           {
             controlConfig: { anyKey: 'some value' },
@@ -227,7 +227,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
           ignoreTimerange: true,
           ignoreValidations: true,
         },
-        showApplySelections: true,
+        autoApplySelections: false,
       },
       description: 'description',
       kibanaSavedObjectMeta: { searchSource: { query: { query: 'test', language: 'KQL' } } },
@@ -455,7 +455,7 @@ describe('getResultV3ToV2', () => {
           ...commonAttributes,
           controlGroupInput: {
             chainingSystem: 'NONE' as ControlGroupChainingSystem,
-            controlStyle: 'twoLine' as ControlLabelPosition,
+            labelPosition: 'twoLine' as ControlLabelPosition,
             controls: [
               {
                 controlConfig: { bizz: 'buzz' },
@@ -472,7 +472,7 @@ describe('getResultV3ToV2', () => {
               ignoreTimerange: true,
               ignoreValidations: true,
             },
-            showApplySelections: true,
+            autoApplySelections: false,
           },
           kibanaSavedObjectMeta: { searchSource: { query: { query: 'test', language: 'KQL' } } },
           options: {

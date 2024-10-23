@@ -23,6 +23,7 @@ import {
   type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
   DEFAULT_CONTROL_CHAINING,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
 } from '../../../common';
 import {
   type ControlGroupStateBuilder,
@@ -141,7 +142,8 @@ export const ControlGroupRenderer = ({
       const state: ControlGroupSerializedState = {
         ...omit(initialState, ['initialChildControlState']),
         editorConfig,
-        controlStyle: initialState?.labelPosition ?? DEFAULT_CONTROL_LABEL_POSITION,
+        autoApplySelections: initialState?.autoApplySelections ?? DEFAULT_AUTO_APPLY_SELECTIONS,
+        labelPosition: initialState?.labelPosition ?? DEFAULT_CONTROL_LABEL_POSITION,
         chainingSystem: initialState?.chainingSystem ?? DEFAULT_CONTROL_CHAINING,
         controls: Object.entries(initialState?.initialChildControlState ?? {}).map(
           ([controlId, value]) => ({ ...value, id: controlId })

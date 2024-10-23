@@ -40,7 +40,7 @@ interface DashboardAttributesTo720 extends KibanaAttributes {
   timeRestore: boolean;
   useMargins?: boolean;
   title: string;
-  optionsJSON: string;
+  optionsJSON?: string;
 }
 
 export type DashboardDoc730ToLatest = Doc<DashboardSavedObjectAttributes>;

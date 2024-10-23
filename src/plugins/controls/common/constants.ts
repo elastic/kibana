@@ -25,7 +25,7 @@ export const DEFAULT_IGNORE_PARENT_SETTINGS = {
   ignoreTimerange: false,
   ignoreValidations: false,
 } as const;
-export const DEFAULT_SHOW_APPLY_SELECTIONS = false;
+export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
 
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';

@@ -23,7 +23,7 @@ import {
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_SHOW_APPLY_SELECTIONS,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
 } from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
@@ -80,7 +80,7 @@ export const controlGroupInputSchema = schema.object({
       meta: { description: 'An array of control panels and their state in the control group.' },
     }
   ),
-  controlStyle: schema.oneOf(
+  labelPosition: schema.oneOf(
     Object.values(CONTROL_LABEL_POSITION_OPTIONS).map((value) => schema.literal(value)) as [
       Type<ControlLabelPosition>
     ],
@@ -122,9 +122,9 @@ export const controlGroupInputSchema = schema.object({
       defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
     }),
   }),
-  showApplySelections: schema.boolean({
+  autoApplySelections: schema.boolean({
     meta: { description: 'Show apply selections button in controls.' },
-    defaultValue: DEFAULT_SHOW_APPLY_SELECTIONS,
+    defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
   }),
 });
 

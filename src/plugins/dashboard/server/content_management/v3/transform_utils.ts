@@ -14,12 +14,12 @@ import {
   type ControlLabelPosition,
   type ControlPanelsState,
   type SerializedControlState,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_SHOW_APPLY_SELECTIONS,
 } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
@@ -53,7 +53,7 @@ function controlGroupInputOut(
     ignoreParentSettingsJSON,
     controlStyle = DEFAULT_CONTROL_LABEL_POSITION,
     chainingSystem = DEFAULT_CONTROL_CHAINING,
-    showApplySelections = DEFAULT_SHOW_APPLY_SELECTIONS,
+    showApplySelections = !DEFAULT_AUTO_APPLY_SELECTIONS,
   } = controlGroupInput;
   const controls = panelsJSON
     ? Object.entries(JSON.parse(panelsJSON) as ControlPanelsState<SerializedControlState>).map(
@@ -86,11 +86,11 @@ function controlGroupInputOut(
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
+    autoApplySelections: !showApplySelections,
     chainingSystem: chainingSystem as ControlGroupChainingSystem,
     controls,
-    controlStyle: controlStyle as ControlLabelPosition,
+    labelPosition: controlStyle as ControlLabelPosition,
     ignoreParentSettings: { ignoreFilters, ignoreQuery, ignoreTimerange, ignoreValidations },
-    showApplySelections,
   };
 }
 
@@ -179,7 +179,7 @@ function controlGroupInputIn(
   if (!controlGroupInput) {
     return;
   }
-  const { controls, ignoreParentSettings, controlStyle, chainingSystem, showApplySelections } =
+  const { controls, ignoreParentSettings, labelPosition, chainingSystem, autoApplySelections } =
     controlGroupInput;
   const updatedControls = Object.fromEntries(
     controls.map(({ controlConfig, id = uuidv4(), ...restOfControl }) => {
@@ -188,10 +188,10 @@ function controlGroupInputIn(
   );
   return {
     chainingSystem,
-    controlStyle,
+    controlStyle: labelPosition,
     ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings),
     panelsJSON: JSON.stringify(updatedControls),
-    showApplySelections,
+    showApplySelections: !autoApplySelections,
   };
 }
 

@@ -14,14 +14,14 @@ import {
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_SHOW_APPLY_SELECTIONS,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
 } from '../../common';
 
 export const getDefaultControlGroupState = (): SerializableControlGroupState => ({
   panels: {},
   labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
   chainingSystem: DEFAULT_CONTROL_CHAINING,
-  autoApplySelections: DEFAULT_SHOW_APPLY_SELECTIONS,
+  autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
   ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
 });
 

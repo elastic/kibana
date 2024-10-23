@@ -884,9 +884,9 @@ export class DashboardContainer
       rawState: this.controlGroupInput
         ? this.controlGroupInput
         : {
-            controlStyle: 'oneLine',
+            labelPosition: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
-            showApplySelections: false,
+            autoApplySelections: true,
             controls: [],
             ignoreParentSettings: {
               ignoreFilters: false,
