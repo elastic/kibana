@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
 * <<release-notes-8.15.1>>
 * <<release-notes-8.15.0>>
@@ -75,6 +76,44 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.15.3]]
+== {kib} 8.15.3
+
+The 8.15.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.15.3]]
+=== Bug fixes
+Alerting::
+* Fixes a storage configuration error that could prevent the Stack Management > Alerts page from loading correctly ({kibana-pull}194785[#194785]).
+* Fixes a bug preventing certain alerts with Role visibility set to "Stack Rules" from being shown on the Stack Management page ({kibana-pull}194615[#194615]).
+* Fixes an issue where rules created from Discover before version 8.11.0 could no longer be accessed after upgrading ({kibana-pull}192321[#192321]).
+Dashboards::
+* Fixes an issue where the `embed=true` parameter was missing when sharing a dashboard with the Embed code option ({kibana-pull}194366[#194366]).
+Discover::
+* Fixes an issue with the document viewer panel not opening in focus mode ({kibana-pull}191039[#191039]).
+Elastic Observability solution::
+* Fixes the OpenTelemetry guided onboarding for MacOS with x86_64 architectures ({kibana-pull}194915[#194915]).
+* Fixes a bug where the SLO creation form was allowing multiple values for timestamp fields ({kibana-pull}194311[#194311]).
+Elastic Search solution::
+* Fixes a bug with the https://www.elastic.co/guide/en/enterprise-search/8.15/connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected ({kibana-pull}195567[#195567]).
+Elastic Security solution::
+For the Elastic Security 8.15.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Automatic Import no longer asks the LLM to map fields to reserved ECS fields ({kibana-pull}195168[#195168]).
+* Automatic Import no longer returns an "Invalid ECS field" message when the ECS mapping slightly differs from the expected format. For example `date_format` instead of `date_formats` ({kibana-pull}195167[#195167]).
+* Fixes an issue that was causing the Grok processor to return non-ECS compatible fields when processing structured or unstructured syslog samples in Automatic Import ({kibana-pull}194727[#194727]).
+* Fixes the integrationName when uploading a new version of an existing integration using a ZIP upload ({kibana-pull}194298[#194298]).
+* Fixes a bug that caused the Deploy step of Automatic Import to fail after a pipeline was edited and saved ({kibana-pull}194203[#194203]).
+* Fixes an issue in the Kibana Management > Roles page where users could not sort the table by clicking the column headers ({kibana-pull}194196[#194196]).
+Lens & Visualizations::
+* Fixes an issue where the legend label truncation setting wasn't working properly for heat maps in Lens ({kibana-pull}195928[#195928]).
+Machine Learning::
+* Fixes an issue preventing Anomaly swim lane panels from updating on query changes ({kibana-pull}195090[#195090]).
+* Fixes an issue that could cause the "rows per page" option to disappear from the Anomaly timeline view in the Anomaly Explorer ({kibana-pull}194531[#194531]).
+* Fixes an issue causing screen flickering on the Results Explorer and Analytics Map pages when no jobs are available ({kibana-pull}193890[#193890]).
+
 
 [[release-notes-8.15.2]]
 == {kib} 8.15.2
@@ -235,6 +274,14 @@ you make the necessary updates after you upgrade to 8.15.0.
 ====
 *Details* +
 The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, and will be completely removed in early 2026. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
+====
+
+[discrete]
+.<<search-sessions,Search sessions>> are deprecated in 8.15.0 and will be removed in a future version.
+[%collapsible]
+====
+*Details* +
+Search sessions are now deprecated and will be removed in a future version. By default, queries that take longer than 10 minutes (the default for the advanced setting `search:timeout`) will be canceled. To allow queries to run longer, consider increasing `search:timeout` or setting it to `0` which will allow queries to continue running as long as a user is waiting on-screen for results.
 ====
 
 [float]

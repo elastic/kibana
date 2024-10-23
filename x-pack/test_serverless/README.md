@@ -202,6 +202,65 @@ describe("my internal APIs test suite", async function() {
 });
 ```
 
+#### Testing with custom roles
+
+With custom native roles now enabled for the Security and Search projects on MKI, the FTR supports
+defining and authenticating with custom roles in both UI functional tests and API integration tests.
+
+To test role management within the Observability project, you can execute the tests using the existing [config.feature_flags.ts](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts), where this functionality is explicitly enabled. Though the config is not run on MKI, it provides the ability to test custom roles in Kibana CI before the functionality is enabled in MKI. When roles management is enabled on MKI, these tests can be migrated to the regular FTR config and will be run on MKI.
+
+For compatibility with MKI, the role name `customRole` is reserved for use in tests. The test user is automatically assigned to this role, but before logging in via the browser, generating a cookie header, or creating an API key in each test suite, the role’s privileges must be updated.
+
+Note: We are still working on a solution to run these tests against MKI. In the meantime, please tag the suite with `skipMKI`.
+
+FTR UI test example:
+```
+// First, set privileges for the custom role
+await samlAuth.setCustomRole({
+  elasticsearch: {
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+// Then, log in via the browser as a user with the newly defined privileges
+await pageObjects.svlCommonPage.loginWithCustomRole();
+
+// Make sure to delete the custom role in the 'after' hook
+await samlAuth.deleteCustomRole();
+```
+
+FTR api_integration test example:
+```
+// First, set privileges for the custom role
+await samlAuth.setCustomRole({
+  elasticsearch: {
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+
+// Then, generate an API key with the newly defined privileges
+const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+
+// Remember to invalidate the API key after use and delete the custom role
+await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+await samlAuth.deleteCustomRole();
+```
+
 ### Testing with feature flags
 
 **tl;dr:** Tests specific to functionality behind a feature flag need special

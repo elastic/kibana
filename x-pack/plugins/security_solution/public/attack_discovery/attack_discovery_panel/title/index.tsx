@@ -7,19 +7,40 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
+import {
+  replaceAnonymizedValuesWithOriginalValues,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const AVATAR_SIZE = 24; // px
 
 interface Props {
   isLoading: boolean;
+  replacements?: Replacements;
+  showAnonymized?: boolean;
   title: string;
 }
 
-const TitleComponent: React.FC<Props> = ({ isLoading, title }) => {
+const TitleComponent: React.FC<Props> = ({
+  isLoading,
+  replacements,
+  showAnonymized = false,
+  title,
+}) => {
   const { euiTheme } = useEuiTheme();
+
+  const titleWithReplacements = useMemo(
+    () =>
+      replaceAnonymizedValuesWithOriginalValues({
+        messageContent: title,
+        replacements: { ...replacements },
+      }),
+
+    [replacements, title]
+  );
 
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="title" gutterSize="s">
@@ -53,7 +74,7 @@ const TitleComponent: React.FC<Props> = ({ isLoading, title }) => {
           />
         ) : (
           <EuiTitle data-test-subj="titleText" size="xs">
-            <h2>{title}</h2>
+            <h2>{showAnonymized ? title : titleWithReplacements}</h2>
           </EuiTitle>
         )}
       </EuiFlexItem>
