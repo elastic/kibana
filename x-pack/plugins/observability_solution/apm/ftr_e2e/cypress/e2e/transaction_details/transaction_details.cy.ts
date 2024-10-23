@@ -34,7 +34,7 @@ describe('Transaction details', () => {
     cy.loginAsViewerUser();
   });
 
-  // skipping this as it´s been failing a lot lately
+  // skipping this as it´s been failing a lot lately, more information here https://github.com/elastic/kibana/issues/197386
   it.skip('shows transaction name and transaction charts', () => {
     cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
       'transactionLatencyRequest'
