@@ -31,18 +31,22 @@ export function LensEmbeddableComponent({
     renderCount,
     // has the render completed?
     hasRendered,
+    // these are blockign errors that can be shown in a badge
+    // without replacing the entire panel
+    blockingErrors,
     // has view mode changed?
     latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
     internalApi.hasRenderCompleted$,
+    internalApi.blockingMessages$,
     api.viewMode
   );
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const { error = [], warning = [], info = [] } = useMessages(internalApi);
+  const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
   // On unmount call all the cleanups
   useEffect(() => {
@@ -79,13 +83,13 @@ export function LensEmbeddableComponent({
       data-shared-item
       ref={rootRef}
     >
-      {expressionParams == null || error.length ? null : (
+      {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper {...expressionParams} />
       )}
       <UserMessages
-        blockingErrors={error}
-        warningOrErrors={warning}
-        infoMessages={info}
+        blockingErrors={blockingErrors}
+        warningOrErrors={warningOrErrors}
+        infoMessages={infoMessages}
         canEdit={canEdit}
       />
     </div>

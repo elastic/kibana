@@ -9,14 +9,7 @@ import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plug
 import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
-import {
-  BehaviorSubject,
-  type Subscription,
-  distinctUntilChanged,
-  skip,
-  debounceTime,
-  pipe,
-} from 'rxjs';
+import { BehaviorSubject, type Subscription, distinctUntilChanged, skip, pipe } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { getEditPath } from '../../common/constants';
 import type {
@@ -80,14 +73,16 @@ export function loadEmbeddableData(
   );
 
   const onRenderComplete = () => {
-    updateMessages(
-      getUserMessages('embeddableBadge').concat(
-        getUserMessages(blockingMessageDisplayLocations, {
-          severity: 'error',
-        })
-      )
-    );
-    internalApi.dispatchRenderComplete();
+    updateMessages(getUserMessages('embeddableBadge'));
+    const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
+      severity: 'error',
+    });
+    updateBlockingErrors(blockingErrors);
+    if (blockingErrors.length > 0) {
+      internalApi.dispatchError();
+    } else {
+      internalApi.dispatchRenderComplete();
+    }
   };
 
   const unifiedSearch$ = new BehaviorSubject<
@@ -112,8 +107,10 @@ export function loadEmbeddableData(
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
     resetMessages();
+
     // reset the render on reload
     internalApi.dispatchRenderStart();
+
     // notify about data loading
     internalApi.updateDataLoading(true);
 
@@ -156,7 +153,11 @@ export function loadEmbeddableData(
       onLoad?.(false, adapters, api.dataLoading);
 
       updateWarnings();
-      updateBlockingErrors();
+      // updateBlockingErrors(
+      //   getUserMessages(blockingMessageDisplayLocations, {
+      //     severity: 'error',
+      //   })
+      // );
     };
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
@@ -214,15 +215,14 @@ export function loadEmbeddableData(
 
     if (params?.expression != null) {
       internalApi.updateExpressionParams(params);
-    } else {
-      internalApi.dispatchError();
     }
+
     internalApi.updateAbortController(abortController);
   }
 
   // Build a custom operator to be resused for various observables
   function waitUntilChanged() {
-    return pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0));
+    return pipe(distinctUntilChanged(fastIsEqual), skip(1));
   }
 
   const subscriptions: Subscription[] = [

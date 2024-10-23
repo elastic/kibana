@@ -389,6 +389,8 @@ export type LensInternalApi = Simplify<
       updateDataViews: (dataViews: DataView[] | undefined) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
+      blockingMessages$: PublishingSubject<UserMessage[]>;
+      updateBlockingMessages: (newMessages: UserMessage[]) => void;
       resetAllMessages: () => void;
     }
 >;

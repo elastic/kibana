@@ -111,7 +111,7 @@ export function buildUserMessagesHelpers(
   updateWarnings: () => void;
   updateMessages: (messages: UserMessage[]) => void;
   resetMessages: () => void;
-  updateBlockingErrors: (blockingMessages?: UserMessage[] | Error) => boolean;
+  updateBlockingErrors: (blockingMessages: UserMessage[] | Error) => void;
 } {
   let runtimeUserMessages: Record<string, UserMessage> = {};
   const addUserMessages = (messages: UserMessage[]) => {
@@ -244,7 +244,7 @@ export function buildUserMessagesHelpers(
      * This type of errors are those who need to be rendered in the embeddable native error panel
      * like runtime errors.
      */
-    updateBlockingErrors: (blockingMessages: UserMessage[] | Error = []) => {
+    updateBlockingErrors: (blockingMessages: UserMessage[] | Error) => {
       const error =
         blockingMessages instanceof Error
           ? blockingMessages
@@ -260,13 +260,13 @@ export function buildUserMessagesHelpers(
         addLog(`Blocking error: ${error?.message}`);
       }
 
-      let updateError = false;
+      if (Array.isArray(blockingMessages)) {
+        internalApi.updateBlockingMessages(blockingMessages);
+      }
       if (error?.message !== api.blockingError.getValue()?.message) {
         const finalError = error?.message === '' ? undefined : error;
         (api.blockingError as BehaviorSubject<Error | undefined>).next(finalError);
-        updateError = Boolean(finalError);
       }
-      return updateError;
     },
     updateWarnings: () => {
       addUserMessages(

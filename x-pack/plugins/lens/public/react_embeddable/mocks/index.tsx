@@ -267,6 +267,7 @@ const LensInternalApiMock: LensInternalApi = {
   expressionAbortController$: new BehaviorSubject<AbortController | undefined>(undefined),
   renderCount$: new BehaviorSubject<number>(0),
   messages$: new BehaviorSubject<UserMessage[]>([]),
+  blockingMessages$: new BehaviorSubject<UserMessage[]>([]),
   updateAttributes: jest.fn(),
   updateOverrides: jest.fn(),
   dispatchRenderStart: jest.fn(),
@@ -278,6 +279,7 @@ const LensInternalApiMock: LensInternalApi = {
   updateMessages: jest.fn(),
   resetAllMessages: jest.fn(),
   dispatchError: jest.fn(),
+  updateBlockingMessages: jest.fn(),
 };
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {

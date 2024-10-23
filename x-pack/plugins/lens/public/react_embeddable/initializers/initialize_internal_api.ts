@@ -35,7 +35,11 @@ export function initializeInternalApi(
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+  // This is an internal error state, not to be confused with the runtime error state thrown by the expression pipeline
+  // In both cases a blocking error can happen, but in this internal case we want to handle it with a custom renderer (badges).
+  // messages can be instead anything like non-blocking errors, warnings or info messages
   const messages$ = new BehaviorSubject<UserMessage[]>([]);
+  const blockingMessages$ = new BehaviorSubject<UserMessage[]>([]);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
@@ -68,6 +72,8 @@ export function initializeInternalApi(
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     messages$,
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
+    blockingMessages$,
+    updateBlockingMessages: (newMessages: UserMessage[]) => blockingMessages$.next(newMessages),
     resetAllMessages: () => {
       messages$.next([]);
     },
