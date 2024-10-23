@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { ENTITY_DEFINITION_ID, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-
-export const getEntityTypesWhereClause = (entityTypes: string[]) =>
-  `WHERE ${ENTITY_TYPE} IN (${entityTypes.map((entityType) => `"${entityType}"`).join()})`;
+import { ENTITY_DEFINITION_ID } from '@kbn/observability-shared-plugin/common';
 
 export const getBuiltinEntityDefinitionIdESQLWhereClause = () =>
   `WHERE ${ENTITY_DEFINITION_ID} LIKE "builtin_*"`;

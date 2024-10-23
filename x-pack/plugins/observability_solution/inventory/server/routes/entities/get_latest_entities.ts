@@ -8,17 +8,15 @@
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
+import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import type { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
   type Entity,
   type EntityColumnIds,
 } from '../../../common/entities';
-import {
-  getBuiltinEntityDefinitionIdESQLWhereClause,
-  getEntityTypesWhereClause,
-} from './query_helper';
+import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
 export async function getLatestEntities({
   inventoryEsClient,
@@ -38,9 +36,11 @@ export async function getLatestEntities({
 
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
   const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
+  const params: ScalarValue[] = [];
 
   if (entityTypes) {
-    where.push(getEntityTypesWhereClause(entityTypes));
+    where.push(`WHERE ${ENTITY_TYPE} IN (${entityTypes.map(() => '?').join()})`);
+    params.push(...entityTypes.map((entityType) => entityType));
   }
 
   const sort = `SORT ${entitiesSortField} ${sortDirection}`;
@@ -48,16 +48,15 @@ export async function getLatestEntities({
 
   const query = [from, ...where, sort, limit].join(' | ');
 
-  const request = {
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
     query,
     filter: {
       bool: {
         filter: [...kqlQuery(kuery)],
       },
     },
-  };
-
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', request);
+    params,
+  });
 
   return esqlResultToPlainObjects<Entity>(latestEntitiesEsqlResponse);
 }
