@@ -34,7 +34,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server",
-    "@kbn/alerting-state-types",
     "@kbn/alerting-types"
   ],
   "exclude": [
