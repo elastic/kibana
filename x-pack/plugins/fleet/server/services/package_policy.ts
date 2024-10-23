@@ -94,6 +94,7 @@ import type {
   DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
+  PutPackagePolicyPostUpdateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -2013,7 +2014,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 );
                 updatedNewData = PackagePolicySchema.validate(result) as NewPackagePolicy;
               } else if (externalCallbackType === 'packagePolicyPostUpdate') {
-                result = await (callback as PostPackagePolicyPostUpdateCallback)(
+                result = await (callback as PutPackagePolicyPostUpdateCallback)(
                   updatedNewData as PackagePolicy,
                   soClient,
                   esClient,

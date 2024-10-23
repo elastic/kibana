@@ -76,6 +76,8 @@ export type PostAgentPolicyUpdateCallback = (
   agentPolicy: Partial<AgentPolicy>
 ) => Promise<Partial<AgentPolicy>>;
 
+export type PostAgentPolicyPostUpdateCallback = (agentPolicy: AgentPolicy) => Promise<AgentPolicy>;
+
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
@@ -102,6 +104,10 @@ export type ExternalCallbackAgentPolicyUpdate = [
   'agentPolicyUpdate',
   PostAgentPolicyUpdateCallback
 ];
+export type ExternalCallbackAgentPolicyPostUpdate = [
+  'agentPolicyPostUpdate',
+  PostAgentPolicyPostUpdateCallback
+];
 
 /**
  * Callbacks supported by the Fleet plugin
@@ -114,6 +120,7 @@ export type ExternalCallback =
   | ExternalCallbackUpdate
   | ExternalCallbackPostUpdate
   | ExternalCallbackAgentPolicyCreate
-  | ExternalCallbackAgentPolicyUpdate;
+  | ExternalCallbackAgentPolicyUpdate
+  | ExternalCallbackAgentPolicyPostUpdate;
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

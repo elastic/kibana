@@ -62,6 +62,7 @@ import type {
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
   OutputsForAgentPolicy,
+  PostAgentPolicyPostUpdateCallback,
 } from '../types';
 import {
   AGENT_POLICY_INDEX,
@@ -330,6 +331,12 @@ class AgentPolicyService {
           if (externalCallbackType === 'agentPolicyUpdate') {
             result = await (callback as PostAgentPolicyUpdateCallback)(
               newAgentPolicy as Partial<AgentPolicy>
+            );
+            updatedNewAgentPolicy = result;
+          }
+          if (externalCallbackType === 'agentPolicyPostUpdate') {
+            result = await (callback as PostAgentPolicyPostUpdateCallback)(
+              newAgentPolicy as AgentPolicy
             );
             updatedNewAgentPolicy = result;
           }
@@ -741,6 +748,8 @@ class AgentPolicyService {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
+    }).then((updatedAgentPolicy) => {
+      return this.runExternalCallbacks('agentPolicyPostUpdate', updatedAgentPolicy);
     });
   }
 
