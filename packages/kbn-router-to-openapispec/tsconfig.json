@@ -18,6 +18,5 @@
     "@kbn/core-http-server",
     "@kbn/config-schema",
     "@kbn/zod",
-    "@kbn/config"
   ]
 }
