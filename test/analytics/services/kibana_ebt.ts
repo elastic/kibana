@@ -25,7 +25,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
     setOptIn,
     getEvents: async (
       takeNumberOfEvents,
-      { eventTypes = [], withTimeoutMs, fromTimestamp } = {}
+      { eventTypes = [], withTimeoutMs, fromTimestamp, filters } = {}
     ) => {
       await setOptIn(true);
       const resp = await supertest
@@ -35,17 +35,23 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
           eventTypes: JSON.stringify(eventTypes),
           withTimeoutMs,
           fromTimestamp,
+          filters: JSON.stringify(filters),
         })
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
       return resp.body;
     },
-    getEventCount: async ({ eventTypes = [], withTimeoutMs, fromTimestamp }) => {
+    getEventCount: async ({ eventTypes = [], withTimeoutMs, fromTimestamp, filters }) => {
       await setOptIn(true);
       const resp = await supertest
         .get(`/internal/analytics_ftr_helpers/count_events`)
-        .query({ eventTypes: JSON.stringify(eventTypes), withTimeoutMs, fromTimestamp })
+        .query({
+          eventTypes: JSON.stringify(eventTypes),
+          withTimeoutMs,
+          fromTimestamp,
+          filters: JSON.stringify(filters),
+        })
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
