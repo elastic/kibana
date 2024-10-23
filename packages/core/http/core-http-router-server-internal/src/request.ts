@@ -143,6 +143,8 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
   /** {@inheritDoc KibanaRequest.httpVersion} */
   public readonly httpVersion: string;
+  /** {@inheritDoc KibanaRequest.apiVersion} */
+  public readonly apiVersion: undefined;
   /** {@inheritDoc KibanaRequest.protocol} */
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
@@ -185,6 +187,7 @@ export class CoreKibanaRequest<
     });
 
     this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.apiVersion = undefined;
     this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
     this.route = deepFreeze(this.getRouteInfo(request));
@@ -216,6 +219,7 @@ export class CoreKibanaRequest<
       },
       route: this.route,
       authzResult: this.authzResult,
+      apiVersion: this.apiVersion,
     };
   }
 
@@ -252,7 +256,14 @@ export class CoreKibanaRequest<
     } = request.route?.settings?.payload || {};
 
     // the socket is undefined when using @hapi/shot, or when a "fake request" is used
-    const socketTimeout = isRealRawRequest(request) ? request.raw.req.socket?.timeout : undefined;
+    let socketTimeout: undefined | number;
+    let routePath: undefined | string;
+
+    if (isRealRawRequest(request)) {
+      socketTimeout = request.raw.req.socket?.timeout;
+      routePath = request.route.path;
+    }
+
     const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
@@ -266,6 +277,8 @@ export class CoreKibanaRequest<
       xsrfRequired:
         ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      deprecated: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+        ?.deprecated,
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
       security: this.getSecurity(request),
@@ -285,6 +298,7 @@ export class CoreKibanaRequest<
 
     return {
       path: request.path ?? '/',
+      routePath,
       method,
       options,
     };

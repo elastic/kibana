@@ -21,6 +21,7 @@ import googleAIStudioIcon from '../../../../assets/images/providers/google_ai_st
 import mistralIcon from '../../../../assets/images/providers/mistral.svg';
 import amazonBedrockIcon from '../../../../assets/images/providers/amazon_bedrock.svg';
 import alibabaCloudAISearchIcon from '../../../../assets/images/providers/alibaba_cloud_ai_search.svg';
+import watsonxAIIcon from '../../../../assets/images/providers/watsonx_ai.svg';
 import { ServiceProviderKeys } from '../../types';
 import * as i18n from './translations';
 
@@ -77,6 +78,10 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.openai]: {
     icon: openAIIcon,
     name: 'OpenAI',
+  },
+  [ServiceProviderKeys.watsonxai]: {
+    icon: watsonxAIIcon,
+    name: 'WatsonxAI',
   },
 };
 

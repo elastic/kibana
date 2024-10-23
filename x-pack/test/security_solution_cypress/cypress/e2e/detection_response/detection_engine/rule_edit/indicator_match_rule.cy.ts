@@ -58,7 +58,8 @@ describe(
     });
 
     // https://github.com/elastic/kibana/issues/187621
-    describe('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/196711
+    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });
