@@ -13,7 +13,7 @@ import type { RulesSnoozeSettingsMap } from '../../logic';
 import { fetchRulesSnoozeSettings } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-const FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY = ['GET', INTERNAL_ALERTING_API_FIND_RULES_PATH];
+const FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY = ['POST', INTERNAL_ALERTING_API_FIND_RULES_PATH];
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
