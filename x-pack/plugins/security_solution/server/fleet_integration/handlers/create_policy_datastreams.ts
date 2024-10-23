@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import pMap from 'p-map';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { catchAndWrapError } from '../../endpoint/utils';
@@ -50,7 +49,6 @@ interface PolicyDataStreamsCreator {
 
 export interface CreatePolicyDataStreamsOptions {
   endpointServices: EndpointAppContextService;
-  esClient: ElasticsearchClient;
   endpointPolicyIds: string[];
 }
 
@@ -60,10 +58,10 @@ export interface CreatePolicyDataStreamsOptions {
  */
 export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async ({
   endpointServices,
-  esClient,
   endpointPolicyIds,
 }: CreatePolicyDataStreamsOptions): Promise<void> => {
   const logger = endpointServices.createLogger('endpointPolicyDatastreamCreator');
+  const esClient = endpointServices.getInternalEsClient();
 
   logger.debug(
     () =>
@@ -144,6 +142,8 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
         ', '
       )}]:\n    ${indexesCreated.join('\n    ')}`
     );
+  } else if (createErrors.length === 0) {
+    logger.debug(() => `Nothing to do. Datastreams already exist`);
   }
 
   if (createErrors.length > 0) {

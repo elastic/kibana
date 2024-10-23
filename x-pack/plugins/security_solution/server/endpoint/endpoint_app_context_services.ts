@@ -31,6 +31,7 @@ import type { ResponseActionsClient } from './services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from './services';
 import {
   getAgentPolicyCreateCallback,
+  getAgentPolicyPostUpdateCallback,
   getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
@@ -161,8 +162,6 @@ export class EndpointAppContextService {
     const endpointMetadataService = this.getEndpointMetadataService();
     const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const fleetServicesFactory = this.fleetServicesFactory!;
 
     registerFleetCallback(
       'agentPolicyCreate',
@@ -172,6 +171,8 @@ export class EndpointAppContextService {
       'agentPolicyUpdate',
       getAgentPolicyUpdateCallback(logger, productFeaturesService)
     );
+
+    registerFleetCallback('agentPolicyPostUpdate', getAgentPolicyPostUpdateCallback(this));
 
     registerFleetCallback(
       'packagePolicyCreate',
@@ -232,6 +233,14 @@ export class EndpointAppContextService {
     // TODO:PT check what this returns when running locally with kibana in serverless emulation
 
     return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
+  }
+
+  public getInternalEsClient(): ElasticsearchClient {
+    if (!this.startDependencies.esClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.esClient;
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
