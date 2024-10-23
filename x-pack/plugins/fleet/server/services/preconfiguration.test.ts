@@ -307,6 +307,7 @@ jest.mock('./app_context', () => ({
     getExternalCallbacks: jest.fn(),
     getCloud: jest.fn(),
     getConfig: jest.fn(),
+    getExperimentalFeatures: jest.fn().mockReturnValue({}),
     getInternalUserSOClientForSpaceId: jest.fn(),
   },
 }));
