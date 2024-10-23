@@ -23,11 +23,6 @@ import { TestProviders } from '../../../../common/mock';
 import { APP_UI_ID } from '../../../../../common';
 
 jest.mock('../../shared/hooks/use_fetch_related_cases');
-// jest.mock('../../../../common/components/links', () => ({
-//   CaseDetailsLink: jest
-//     .fn()
-//     .mockImplementation(({ title }) => <>{`<CaseDetailsLink title="${title}" />`}</>),
-// }));
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
