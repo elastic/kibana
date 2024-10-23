@@ -54,8 +54,10 @@ function chainRouter({ state }: EcsBaseNodeParams): string {
   return END;
 }
 
+export type EcsGraph = ReturnType<typeof getEcsGraph>;
+
 // This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
-export async function getEcsSubGraph({ model }: EcsGraphParams) {
+export const getEcsSubGraph = ({ model }: EcsGraphParams) => {
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -80,10 +82,10 @@ export async function getEcsSubGraph({ model }: EcsGraphParams) {
 
   const compiledEcsSubGraph = workflow.compile().withConfig({ runName: 'ECS Mapping (Chunk)' });
   return compiledEcsSubGraph;
-}
+};
 
-export async function getEcsGraph({ model }: EcsGraphParams) {
-  const subGraph = await getEcsSubGraph({ model });
+export const getEcsGraph = ({ model }: EcsGraphParams) => {
+  const subGraph = getEcsSubGraph({ model });
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -121,4 +123,4 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
 
   const compiledEcsGraph = workflow.compile().withConfig({ runName: 'ECS Mapping' });
   return compiledEcsGraph;
-}
+};
