@@ -23,6 +23,9 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsRequest,
 } from '../../types';
 
 import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
@@ -200,4 +203,22 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
     body: JSON.stringify({}),
     version: API_VERSIONS.internal.v1,
   });
+};
+
+export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsRequest['body']) => {
+  return useRequest<GetListAgentPolicyOutputsResponse>({
+    path: agentPolicyRouteService.getListOutputsPath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) => {
+  return useConditionalRequest<GetAgentPolicyOutputsResponse>({
+    path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : undefined,
+    method: 'get',
+    shouldSendRequest: !!agentPolicyId,
+    version: API_VERSIONS.public.v1,
+  } as SendConditionalRequestConfig);
 };
