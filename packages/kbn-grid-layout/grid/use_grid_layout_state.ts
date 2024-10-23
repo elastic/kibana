@@ -56,7 +56,6 @@ export const useGridLayoutState = ({
       ...gridSettings,
       columnPixelWidth: 0,
     });
-    const targetRow$ = new BehaviorSubject<number | undefined>(undefined);
     const panelIds$ = new BehaviorSubject<string[][]>(
       initialLayout.map(({ panels }) => Object.keys(panels))
     );
@@ -66,7 +65,6 @@ export const useGridLayoutState = ({
       rows$,
       panelRefs,
       rowCount$,
-      targetRow$,
       panelIds$,
       gridLayout$,
       activePanel$,

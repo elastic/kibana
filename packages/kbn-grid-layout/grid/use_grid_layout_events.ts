@@ -93,9 +93,6 @@ export const useGridLayoutEvents = ({
         return highestOverlapRowIndex;
       })();
       const hasChangedGridRow = targetRowIndex !== lastRowIndex;
-      if (gridLayoutStateManager.targetRow$.getValue() !== targetRowIndex) {
-        gridLayoutStateManager.targetRow$.next(targetRowIndex);
-      }
 
       // re-render when the target row changes
       if (hasChangedGridRow) {
@@ -103,7 +100,6 @@ export const useGridLayoutEvents = ({
           ...interactionEvent,
           targetRowIndex,
         });
-        gridLayoutStateManager.targetRow$.next(targetRowIndex);
       }
 
       // calculate the requested grid position

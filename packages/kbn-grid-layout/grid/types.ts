@@ -61,7 +61,6 @@ export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
-  targetRow$: BehaviorSubject<number | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   rows$: Array<BehaviorSubject<Omit<GridRowData, 'panels'> & { panelIds: string[] }>>;

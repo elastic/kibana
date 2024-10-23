@@ -72,12 +72,12 @@ export const GridRow = forwardRef<
     useEffect(
       () => {
         const styleSubscription = combineLatest([
-          gridLayoutStateManager.targetRow$,
+          gridLayoutStateManager.interactionEvent$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([targetRow, gridLayout, runtimeSettings]) => {
+          .subscribe(([interactionEvent, gridLayout, runtimeSettings]) => {
             const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
             if (!rowRef) return;
 
@@ -87,6 +87,7 @@ export const GridRow = forwardRef<
               gridLayout[rowIndex]
             )}, ${rowHeight}px)`;
 
+            const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow) {
               // apply "targetted row" styles
               const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);

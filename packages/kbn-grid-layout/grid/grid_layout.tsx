@@ -29,7 +29,7 @@ export const GridLayout = ({
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
-  const rowCount: number = useStateFromPublishingSubject(gridLayoutStateManager.rowCount$);
+  const rowCount = useStateFromPublishingSubject(gridLayoutStateManager.rowCount$);
   return (
     <>
       <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
@@ -59,9 +59,10 @@ export const GridLayout = ({
                 setInteractionEvent={(nextInteractionEvent) => {
                   if (nextInteractionEvent?.type === 'drop') {
                     gridLayoutStateManager.activePanel$.next(undefined);
-                    gridLayoutStateManager.targetRow$.next(undefined);
+                    gridLayoutStateManager.interactionEvent$.next(undefined);
+                  } else {
+                    gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                   }
-                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                 }}
                 ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
               />
