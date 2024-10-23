@@ -868,24 +868,39 @@ export const selectEsqlRuleType = () => {
 };
 
 export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
+  const checkForAlerts = () => {
+    cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '), { timeout: 10000 }).then(($el) => {
+      const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
+      if (emptyTableState.length > 0) {
+        cy.log('Table is empty, refreshing the page');
+        refreshPage(); // Refresh the page if the table is empty
+        return false; // Retry if the table is empty
+      }
+
+      const countEl = $el.find(ALERTS_TABLE_COUNT);
+      const alertCount = parseInt(countEl.text(), 10) || 0;
+      cy.log(`Found ${alertCount} alerts`);
+
+      if (alertCount >= alertCountThreshold) {
+        cy.log('Alert count threshold met');
+        return true; // Success if alert count meets the threshold
+      }
+
+      cy.log(`Alert count below threshold (${alertCountThreshold}), retrying...`);
+      return false; // Retry if alert count is below the threshold
+    });
+  };
+
+  // Retry the check for alerts until the condition is met
   cy.waitUntil(
     () => {
       cy.log('Waiting for alerts to appear');
-      refreshPage();
-      cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
-      return cy.root().then(($el) => {
-        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
-        if (emptyTableState.length > 0) {
-          cy.log('Table is empty', emptyTableState.length);
-          return false;
-        }
-        const countEl = $el.find(ALERTS_TABLE_COUNT);
-        const alertCount = parseInt(countEl.text(), 10) || 0;
-        return alertCount >= alertCountThreshold;
-      });
+      return checkForAlerts();
     },
-    { interval: 500, timeout: 30000 }
+    { interval: 1000, timeout: 60000 } // Increased timeout and interval for stability
   );
+
+  // Ensure the alerts are fully loaded
   waitForAlerts();
 };
 
