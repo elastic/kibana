@@ -33,6 +33,11 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-usage-data-base-server-internal",
+    "@kbn/core-usage-data-server",
+    "@kbn/core-usage-data-server-internal",
+    "@kbn/core-usage-data-server-mocks",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
