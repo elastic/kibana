@@ -157,6 +157,7 @@ describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     jest
       .mocked(getPackagePolicySavedObjectType)
