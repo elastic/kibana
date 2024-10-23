@@ -44,7 +44,7 @@ describe('ESQL Theme', () => {
 
     // These names aren't from the lexer... they are added on our side
     // see packages/kbn-esql-ast/src/tokenizer/esql_token_helpers.ts
-    const syntheticNames = ['function', 'nulls_order', 'timespan_literal'];
+    const syntheticNames = ['function_name', 'nulls_order', 'timespan_literal'];
 
     const rulesWithNoName: string[] = [];
     for (const rule of theme.rules) {
