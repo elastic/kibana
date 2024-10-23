@@ -12,6 +12,8 @@ import fs from 'fs';
 import type { StorybookConfig } from '@storybook/react-webpack5';
 import webpack from 'webpack';
 import { resolve } from 'path';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
@@ -171,4 +173,31 @@ export const defaultConfig: StorybookConfig = {
 
     return WebpackConfig({ config });
   },
+  previewHead: (head) => `
+  ${head}
+  <meta name="eui-global" />
+  <meta name="emotion" />
+  <script>
+    window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
+  </script>
+  <script src="kbn-ui-shared-deps-npm.dll.js"></script>
+  <script src="kbn-ui-shared-deps-src.js"></script>
+  <link href="kbn-ui-shared-deps-src.css" rel="stylesheet" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+    rel="stylesheet">
+
+  <meta name="eui-utilities" />
+  `,
+  staticDirs: [
+    UiSharedDepsNpm.distDir,
+    UiSharedDepsSrc.distDir,
+    {
+      from: `${REPO_ROOT}/src/plugins/kibana_react/public/assets`,
+      to: 'plugins/kibanaReact/assets',
+    },
+  ],
 };
