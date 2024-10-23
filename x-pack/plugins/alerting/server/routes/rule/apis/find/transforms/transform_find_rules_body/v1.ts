@@ -6,7 +6,7 @@
  */
 
 import type {
-  FindRulesInternalRequestQueryV1,
+  FindRulesInternalRequestBodyV1,
   FindRulesRequestQueryV1,
 } from '../../../../../../../common/routes/rule/apis/find';
 import { FindRulesOptions } from '../../../../../../application/rule/methods/find';
@@ -41,7 +41,7 @@ export const transformFindRulesBody = (params: FindRulesRequestQueryV1): FindRul
 };
 
 export const transformFindRulesInternalBody = (
-  params: FindRulesInternalRequestQueryV1
+  params: FindRulesInternalRequestBodyV1
 ): FindRulesOptions => {
   const {
     per_page: perPage,

@@ -95,7 +95,7 @@ export const findRulesRequestQuerySchema = schema.object({
   ),
 });
 
-export const findRulesInternalRequestQuerySchema = schema.object({
+export const findRulesInternalRequestBodySchema = schema.object({
   per_page: schema.number({
     defaultValue: 10,
     min: 0,

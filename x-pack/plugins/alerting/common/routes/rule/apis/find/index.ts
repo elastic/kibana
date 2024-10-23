@@ -10,11 +10,11 @@ export type { FindRulesRequestQuery, FindRulesResponse } from './types/latest';
 
 export {
   findRulesRequestQuerySchema as findRulesRequestQuerySchemaV1,
-  findRulesInternalRequestQuerySchema as findRulesInternalRequestQuerySchemaV1,
+  findRulesInternalRequestBodySchema as findRulesInternalRequestBodySchemaV1,
 } from './schemas/v1';
 
 export type {
   FindRulesRequestQuery as FindRulesRequestQueryV1,
-  FindRulesInternalRequestQuery as FindRulesInternalRequestQueryV1,
+  FindRulesInternalRequestBody as FindRulesInternalRequestBodyV1,
   FindRulesResponse as FindRulesResponseV1,
 } from './types/latest';
