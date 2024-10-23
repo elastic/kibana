@@ -30,11 +30,17 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <EuiPortal>
-      <div
-        data-test-subj="knowledgeBase-tour-step-2"
-        css={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}
-      >
-        <EuiToast onClose={onClose} css={{ maxWidth: VIDEO_CONTENT_WIDTH }}>
+      <div data-test-subj="knowledgeBase-tour-step-2">
+        <EuiToast
+          onClose={onClose}
+          css={{
+            maxWidth: VIDEO_CONTENT_WIDTH,
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            zIndex: 9999,
+          }}
+        >
           <EuiImage
             onClick={openVideoInNewTab}
             css={{ marginTop: 20, '&:hover': { cursor: 'pointer' } }}
