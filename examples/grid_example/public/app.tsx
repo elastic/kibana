@@ -9,10 +9,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
 
 export const GridExample = () => {
   return (
