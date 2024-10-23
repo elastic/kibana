@@ -10,10 +10,9 @@
 import {
   type CoreVersionedRouter,
   versionHandlerResolvers,
-  VersionedRouterRoute,
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
-import type { RouteMethod } from '@kbn/core-http-server';
+import type { RouteMethod, VersionedRouterRoute } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
@@ -94,11 +93,13 @@ export const processVersionedRouter = (
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
       const hasVersionFilter = Boolean(filters?.version);
+      // If any handler is deprecated we show deprecated: true in the spec
+      const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
         ...(route.options.description ? { description: route.options.description } : {}),
-        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: hasBody
           ? {
