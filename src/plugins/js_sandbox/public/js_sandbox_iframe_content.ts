@@ -52,7 +52,7 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
 
           function updateWidthHeight() {
             width = Math.max(document.documentElement.clientWidth - 32 || 0, window.innerWidth - 32 || 0);
-            height = Math.max(document.documentElement.clientHeight - 54 || 0, window.innerHeight - 54 || 0);
+            height = Math.max(document.documentElement.clientHeight - 64 || 0, window.innerHeight - 64 || 0);
           }
 
           function updateData(dataString) {
