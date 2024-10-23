@@ -7,6 +7,7 @@
 
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { OnboardingHeaderCardId } from '../../../constants';
 import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
 import { LinkCard } from '../common/link_card';
 import teammatesImage from './images/teammates_card.png';
@@ -18,6 +19,7 @@ export const TeammatesCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }
   const usersUrl = useObservable(usersUrl$, undefined);
   return (
     <LinkCard
+      id={OnboardingHeaderCardId.teammates}
       icon={isDarkMode ? darkTeammatesImage : teammatesImage}
       title={i18n.ONBOARDING_HEADER_TEAMMATES_TITLE}
       description={i18n.ONBOARDING_HEADER_TEAMMATES_DESCRIPTION}
