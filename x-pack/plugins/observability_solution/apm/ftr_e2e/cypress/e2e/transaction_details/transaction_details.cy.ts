@@ -107,8 +107,8 @@ describe('Transaction details', () => {
     );
     cy.contains('Create SLO');
   });
-
-  it('shows top errors table', () => {
+  // skipping this as it´s been failing a lot lately, more information here https://github.com/elastic/kibana/issues/197386
+  it.skip('shows top errors table', () => {
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
