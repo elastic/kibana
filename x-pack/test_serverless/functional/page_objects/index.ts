@@ -14,7 +14,6 @@ import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
 import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboarding_stream_log_file';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
-import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { SvlTriggersActionsPageProvider } from './svl_triggers_actions_ui_page';
 import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
 import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
@@ -36,7 +35,6 @@ export const pageObjects = {
   svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlSearchConnectorsPage: SvlSearchConnectorsPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
-  svlSecLandingPage: SvlSecLandingPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
   svlManagementPage: SvlManagementPageProvider,
