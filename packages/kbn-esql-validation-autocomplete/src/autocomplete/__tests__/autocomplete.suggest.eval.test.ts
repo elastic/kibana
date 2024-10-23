@@ -48,14 +48,8 @@ describe('autocomplete.suggest', () => {
       const { assertSuggestions } = await setup();
       await assertSuggestions('from a | eval /', [
         'var0 = ',
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-      ]);
-
-      await assertSuggestions('from a | eval doubleField/', [
-        'doubleField, ',
-        'doubleField | ',
-        'var0 = ',
+        ...getFieldNamesByType('any', { advanceCursor: true }),
+        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true, advanceCursor: true }),
       ]);
 
       await assertSuggestions('from a | eval doubleField /', [
@@ -101,9 +95,9 @@ describe('autocomplete.suggest', () => {
       );
       await assertSuggestions('from a | eval a=doubleField, /', [
         'var0 = ',
-        ...getFieldNamesByType('any'),
-        'a',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFieldNamesByType('any', { advanceCursor: true }),
+        'a ',
+        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true, advanceCursor: true }),
       ]);
       await assertSuggestions(
         'from a | eval a=round(/)',
@@ -171,9 +165,9 @@ describe('autocomplete.suggest', () => {
       );
       await assertSuggestions('from a | eval a=round(doubleField),/', [
         'var0 = ',
-        ...getFieldNamesByType('any'),
-        'a',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFieldNamesByType('any', { advanceCursor: true }),
+        'a ',
+        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true, advanceCursor: true }),
       ]);
       await assertSuggestions('from a | eval a=round(doubleField) + /', [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
@@ -203,8 +197,11 @@ describe('autocomplete.suggest', () => {
         'from a | stats avg(doubleField) by keywordField | eval /',
         [
           'var0 = ',
-          '`avg(doubleField)`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          '`avg(doubleField)` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', {
+            scalar: true,
+            advanceCursor: true,
+          }),
         ],
         {
           triggerCharacter: ' ',
@@ -216,9 +213,12 @@ describe('autocomplete.suggest', () => {
         'from a | eval abs(doubleField) + 1 | eval /',
         [
           'var0 = ',
-          ...getFieldNamesByType('any'),
-          '`abs(doubleField) + 1`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          ...getFieldNamesByType('any', { advanceCursor: true }),
+          '`abs(doubleField) + 1` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', {
+            scalar: true,
+            advanceCursor: true,
+          }),
         ],
         { triggerCharacter: ' ' }
       );
@@ -226,8 +226,11 @@ describe('autocomplete.suggest', () => {
         'from a | stats avg(doubleField) by keywordField | eval /',
         [
           'var0 = ',
-          '`avg(doubleField)`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          '`avg(doubleField)` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', {
+            scalar: true,
+            advanceCursor: true,
+          }),
         ],
         {
           triggerCharacter: ' ',
@@ -243,9 +246,12 @@ describe('autocomplete.suggest', () => {
         'from a | stats avg(doubleField), avg(kubernetes.something.something) by keywordField | eval /',
         [
           'var0 = ',
-          '`avg(doubleField)`',
-          '`avg(kubernetes.something.something)`',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          '`avg(doubleField)` ',
+          '`avg(kubernetes.something.something)` ',
+          ...getFunctionSignaturesByReturnType('eval', 'any', {
+            scalar: true,
+            advanceCursor: true,
+          }),
         ],
         {
           triggerCharacter: ' ',
@@ -624,15 +630,31 @@ describe('autocomplete.suggest', () => {
       ];
       await assertSuggestions(
         'from a | eval case( integerField != /)',
-        expectedNumericSuggestions,
+        [
+          // Notice no extra space after field name
+          ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES).map((field) => `${field}`),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ESQL_COMMON_NUMERIC_TYPES,
+            { scalar: true, advanceCursor: false },
+            undefined,
+            []
+          ),
+        ],
         {
           triggerCharacter: ' ',
         }
       );
       await assertSuggestions('from a | eval case( integerField != /)', [
         // Notice no extra space after field name
-        ...getFieldNamesByType('any').map((field) => `${field}`),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, []),
+        ...getFieldNamesByType('any').map((field) => `${field} `),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          'any',
+          { scalar: true, advanceCursor: false },
+          undefined,
+          []
+        ),
       ]);
 
       // case( field > 0, >) suggests fields like normal
