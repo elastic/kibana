@@ -63,7 +63,7 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
               />
               <EuiSpacer size="s" />
               <EuiText
-                size="l"
+                size="relative"
                 textAlign="center"
                 color={isSelectedLanguage ? 'default' : 'subdued'}
               >
