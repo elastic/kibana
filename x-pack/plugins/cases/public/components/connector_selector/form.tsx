@@ -19,8 +19,7 @@ import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
 const ADD_CONNECTOR_HELPER_TEXT = i18n.translate(
   'xpack.cases.connectorSelector.addConnectorHelperText',
   {
-    defaultMessage:
-      'Go to Stack Management > Cases > Settings to add an external incident management system',
+    defaultMessage: 'Go to Cases > Settings to add an external incident management system',
   }
 );
 
