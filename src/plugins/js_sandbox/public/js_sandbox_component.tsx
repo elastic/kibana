@@ -10,12 +10,24 @@
 import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
 import { cloneDeep } from 'lodash';
 
+import { EuiBadge } from '@elastic/eui';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EventBus } from '@kbn/event-bus-plugin/public';
-import { appendWhereClauseToESQLQuery, getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults } from '@kbn/esql-utils';
 
 import type { DashboardCrossfilterSlice } from './dashboard_crossfilter_slice';
 import { getUnableToParseIframeMessage, getIframeContent } from './js_sandbox_iframe_content';
+
+function truncateString(str: string, n: number) {
+  // Check if the string length exceeds the limit
+  if (str.length > n) {
+    // Truncate and append "..."
+    return str.slice(0, n) + '...';
+  }
+  // Return the original string if it's within the limit
+  return str;
+}
 
 /**
  * JS Sandbox Component
@@ -72,7 +84,6 @@ export const JsSandboxComponent: FC<{
   const [data, setData] = useState<{ data: any[]; dataCrossfilter: any[] }>();
 
   const filters = crossfilter.useState((state) => state.filters);
-  console.log('filters', iframeID, filters);
 
   const panelFilters = useMemo(() => {
     const pfs = cloneDeep(filters);
@@ -204,6 +215,19 @@ export const JsSandboxComponent: FC<{
         <div>
           <h2>Error: {error.errorType}</h2>
           <pre>{error.error.message}</pre>
+        </div>
+      )}
+      {filters[iframeID] && (
+        <div css={{ position: 'absolute', bottom: 0 }}>
+          <EuiBadge
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={() => crossfilter.actions.setCrossfilter({ id: iframeID, filter: '' })}
+            iconOnClickAriaLabel="Example of onClick event for icon within the button"
+            data-test-sub="crossfilter-badge"
+          >
+            {truncateString(filters[iframeID], 80)}
+          </EuiBadge>
         </div>
       )}
       <iframe
