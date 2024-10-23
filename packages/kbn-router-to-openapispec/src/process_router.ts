@@ -64,9 +64,12 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      const authzDescription = extractAuthzDescription(route);
+      let description = '';
+      if (route.security) {
+        const authzDescription = extractAuthzDescription(route.security);
 
-      const description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
+        description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
+      }
 
       const hasDeprecations = !!route.options.deprecated;
 

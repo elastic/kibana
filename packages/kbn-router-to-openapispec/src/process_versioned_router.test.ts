@@ -144,6 +144,22 @@ describe('processVersionedRouter', () => {
       'application/test+json; Elastic-Api-Version=2023-10-31',
     ]);
   });
+
+  it('correctly updates the authz description for routes that require privileges', () => {
+    const results = processVersionedRouter(
+      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      new OasConverter(),
+      createOperationIdCounter(),
+      {}
+    );
+    expect(results.paths['/foo']).toBeDefined();
+
+    expect(results.paths['/foo']!.get).toBeDefined();
+
+    expect(results.paths['/foo']!.get!.description).toBe(
+      '[Authz] Route required privileges: ALL of [manage_spaces].'
+    );
+  });
 });
 
 const createTestRoute: () => VersionedRouterRoute = () => ({
@@ -155,6 +171,11 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
     deprecated: true,
     discontinued: 'discontinued versioned router',
     options: { body: { access: ['application/test+json'] } as any },
+    security: {
+      authz: {
+        requiredPrivileges: ['manage_spaces'],
+      },
+    },
   },
   handlers: [
     {

@@ -7,58 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AuthzEnabled, AuthzDisabled } from '@kbn/core-http-server';
-
-import type { InternalRouterRoute } from './type';
+import type { AuthzEnabled, AuthzDisabled, InternalRouteSecurity } from '@kbn/core-http-server';
 
 interface PrivilegeGroupValue {
   allRequired: string[];
   anyRequired: string[];
 }
 
-export const extractAuthzDescription = (route: InternalRouterRoute) => {
-  if (route.security) {
-    if (!('authz' in route.security) || (route.security.authz as AuthzDisabled).enabled === false) {
-      return '';
-    }
-    if ('authz' in route.security) {
-      const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
+export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | undefined) => {
+  if (!routeSecurity) {
+    return '';
+  }
+  if (!('authz' in routeSecurity) || (routeSecurity.authz as AuthzDisabled).enabled === false) {
+    return '';
+  }
+  if ('authz' in routeSecurity) {
+    const privileges = (routeSecurity.authz as AuthzEnabled).requiredPrivileges;
 
-      const groupedPrivileges = privileges.reduce<PrivilegeGroupValue>(
-        (groups, privilege) => {
-          if (typeof privilege === 'string') {
-            groups.allRequired.push(privilege);
-
-            return groups;
-          }
-          groups.allRequired.push(...(privilege.allRequired ?? []));
-          groups.anyRequired.push(...(privilege.anyRequired ?? []));
+    const groupedPrivileges = privileges.reduce<PrivilegeGroupValue>(
+      (groups, privilege) => {
+        if (typeof privilege === 'string') {
+          groups.allRequired.push(privilege);
 
           return groups;
-        },
-        {
-          anyRequired: [],
-          allRequired: [],
         }
-      );
+        groups.allRequired.push(...(privilege.allRequired ?? []));
+        groups.anyRequired.push(...(privilege.anyRequired ?? []));
 
-      const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
-        const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
-        const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+        return groups;
+      },
+      {
+        anyRequired: [],
+        allRequired: [],
+      }
+    );
 
-        return `${allDescription}${
-          allDescription && anyDescription ? ' AND ' : ''
-        }${anyDescription}`;
-      };
+    const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
+      const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
+      const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
 
-      const getDescriptionForRoute = () => {
-        const allRequired = [...groupedPrivileges.allRequired];
-        const anyRequired = [...groupedPrivileges.anyRequired];
+      return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
+    };
 
-        return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
-      };
+    const getDescriptionForRoute = () => {
+      const allRequired = [...groupedPrivileges.allRequired];
+      const anyRequired = [...groupedPrivileges.anyRequired];
 
-      return `[Authz] ${getDescriptionForRoute()}`;
-    }
+      return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
+    };
+
+    return `[Authz] ${getDescriptionForRoute()}`;
   }
 };

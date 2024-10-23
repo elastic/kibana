@@ -21,7 +21,7 @@ describe('extractAuthzDescription', () => {
       method: 'get',
       isVersioned: false,
     };
-    const description = extractAuthzDescription(route);
+    const description = extractAuthzDescription(route.security);
     expect(description).toBe(undefined);
   });
 
@@ -39,7 +39,7 @@ describe('extractAuthzDescription', () => {
         },
       },
     };
-    const description = extractAuthzDescription(route);
+    const description = extractAuthzDescription(route.security);
     expect(description).toBe('[Authz] Route required privileges: ALL of [manage_spaces].');
   });
 
@@ -58,7 +58,7 @@ describe('extractAuthzDescription', () => {
           },
         },
       };
-      const description = extractAuthzDescription(route);
+      const description = extractAuthzDescription(route.security);
       expect(description).toBe(
         '[Authz] Route required privileges: ALL of [console] AND ANY of [manage_spaces].'
       );
@@ -82,7 +82,7 @@ describe('extractAuthzDescription', () => {
           },
         },
       };
-      const description = extractAuthzDescription(route);
+      const description = extractAuthzDescription(route.security);
       expect(description).toBe(
         '[Authz] Route required privileges: ALL of [console, filesManagement] AND ANY of [manage_spaces OR taskmanager].'
       );
