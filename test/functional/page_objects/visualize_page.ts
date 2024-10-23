@@ -41,7 +41,6 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -106,7 +105,8 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickAggBasedVisualizations() {
-    await this.testSubjects.click('visGroupAggBasedExploreLink');
+    await this.clickLegacyTab();
+    await this.testSubjects.click('visType-aggbased');
   }
 
   public async goBackToGroups() {
@@ -125,7 +125,7 @@ export class VisualizePageObject extends FtrService {
       .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
   }
 
-  public async getPromotedVisTypes() {
+  public async getVisibleVisTypes() {
     const chartTypeField = await this.testSubjects.find('visNewDialogGroups');
     const $ = await chartTypeField.parseDomContent();
     const promotedVisTypes: string[] = [];
@@ -137,7 +137,7 @@ export class VisualizePageObject extends FtrService {
           promotedVisTypes.push(title);
         }
       });
-    return promotedVisTypes;
+    return promotedVisTypes.sort();
   }
 
   public async waitForVisualizationSelectPage() {
@@ -221,8 +221,8 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('line');
   }
 
-  public async clickMarkdownWidget() {
-    await this.clickVisType('markdown');
+  public async clickLegacyTab() {
+    await this.testSubjects.click('groupModalLegacyTab');
   }
 
   public async clickMetric() {
@@ -254,6 +254,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisualBuilder() {
+    await this.clickLegacyTab();
     await this.clickVisType('metrics');
   }
 
@@ -281,12 +282,10 @@ export class VisualizePageObject extends FtrService {
     return await this.hasVisType('maps');
   }
 
-  public async createSimpleMarkdownViz(vizName: string) {
+  public async createSimpleTSVBViz(vizName: string) {
     await this.gotoVisualizationLandingPage();
     await this.navigateToNewVisualization();
-    await this.clickMarkdownWidget();
-    await this.visEditor.setMarkdownTxt(vizName);
-    await this.visEditor.clickGo();
+    await this.clickVisualBuilder();
     await this.saveVisualization(vizName);
   }
 
