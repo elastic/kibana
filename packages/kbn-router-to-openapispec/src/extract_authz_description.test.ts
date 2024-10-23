@@ -12,7 +12,7 @@ import { extractAuthzDescription } from './extract_authz_description';
 import { InternalRouterRoute } from './type';
 
 describe('extractAuthzDescription', () => {
-  it('should return undefined if route does not require privileges', () => {
+  it('should return empty if route does not require privileges', () => {
     const route: InternalRouterRoute = {
       path: '/foo',
       options: { access: 'internal' },
@@ -22,7 +22,7 @@ describe('extractAuthzDescription', () => {
       isVersioned: false,
     };
     const description = extractAuthzDescription(route.security);
-    expect(description).toBe(undefined);
+    expect(description).toBe('');
   });
 
   it('should return route authz description for simple privileges', () => {
