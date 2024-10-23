@@ -331,11 +331,14 @@ export async function getLogPatterns({
         return [];
       }
 
-      // TODO: log patterns that are too complicated
-      const [_, uncomplicatedLogPatterns] = partition(topMessagePatterns, (pattern) => {
+      const [patternsToExclude, _] = partition(topMessagePatterns, (pattern) => {
         const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
         // elasticsearch will barf because the query is too complex
-        return complexity > 25;
+        return (
+          complexity <= 25 &&
+          // anything less than 100 messages should be re-processed with the ml_standard tokenizer
+          pattern.count > 100
+        );
       });
 
       const rareMessagePatterns = await runCategorizeTextAggregation({
@@ -348,7 +351,7 @@ export async function getLogPatterns({
           bool: {
             filter: kqlQuery(kuery),
             must_not: [
-              ...uncomplicatedLogPatterns.flatMap((pattern) => {
+              ...patternsToExclude.flatMap((pattern) => {
                 return [
                   {
                     regexp: {
@@ -369,7 +372,7 @@ export async function getLogPatterns({
         metadata,
       });
 
-      return [...uncomplicatedLogPatterns, ...rareMessagePatterns];
+      return [...patternsToExclude, ...rareMessagePatterns];
     })
   );
 
