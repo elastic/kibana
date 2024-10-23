@@ -166,7 +166,7 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs(breadcrumbs);
+  useSearchBreadcrumbs([{ text: APPLICATIONS_PLUGIN.NAV_TITLE }, ...breadcrumbs]);
 
 export const useAiSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: AI_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
