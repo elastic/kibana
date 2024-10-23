@@ -146,3 +146,16 @@ export interface CoreUsageStats {
   'savedObjectsRepository.resolvedOutcome.notFound'?: number;
   'savedObjectsRepository.resolvedOutcome.total'?: number;
 }
+
+/**
+ * @public
+ *
+ * CoreDeprecatedApiUsageStats are collected over time while Kibana is running.
+ */
+export interface CoreDeprecatedApiUsageStats {
+  apiId: string;
+  totalMarkedAsResolved: number;
+  markedAsResolvedLastCalledAt: string;
+  apiTotalCalls: number;
+  apiLastCalledAt: string;
+}
