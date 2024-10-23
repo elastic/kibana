@@ -88,7 +88,7 @@ export const getMonitorsEmbeddableFactory = (
                   filters: filters$.getValue(),
                 },
                 title: i18n.translate(
-                  'xpack.synthetics.editSloOverviewEmbeddableTitle.overview.title',
+                  'xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.overview.title',
                   {
                     defaultMessage: 'Create monitors overview',
                   }
