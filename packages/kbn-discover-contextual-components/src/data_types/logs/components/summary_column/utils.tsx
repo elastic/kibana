@@ -14,7 +14,18 @@ import { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
+import {
+  AGENT_NAME_FIELD,
+  CLOUD_INSTANCE_ID_FIELD,
+  CONTAINER_ID_FIELD,
+  CONTAINER_NAME_FIELD,
+  FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT,
+  HOST_NAME_FIELD,
+  ORCHESTRATOR_CLUSTER_NAME_FIELD,
+  ORCHESTRATOR_NAMESPACE_FIELD,
+  ORCHESTRATOR_RESOURCE_ID_FIELD,
+  SERVICE_NAME_FIELD,
+} from '@kbn/discover-utils';
 import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
@@ -23,26 +34,26 @@ import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions'
  * getUnformattedResourceFields definitions
  */
 export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields => {
-  const serviceName = getFieldValue(doc, constants.SERVICE_NAME_FIELD);
-  const hostName = getFieldValue(doc, constants.HOST_NAME_FIELD);
-  const agentName = getFieldValue(doc, constants.AGENT_NAME_FIELD);
-  const orchestratorClusterName = getFieldValue(doc, constants.ORCHESTRATOR_CLUSTER_NAME_FIELD);
-  const orchestratorResourceId = getFieldValue(doc, constants.ORCHESTRATOR_RESOURCE_ID_FIELD);
-  const orchestratorNamespace = getFieldValue(doc, constants.ORCHESTRATOR_NAMESPACE_FIELD);
-  const containerName = getFieldValue(doc, constants.CONTAINER_NAME_FIELD);
-  const containerId = getFieldValue(doc, constants.CONTAINER_ID_FIELD);
-  const cloudInstanceId = getFieldValue(doc, constants.CLOUD_INSTANCE_ID_FIELD);
+  const serviceName = getFieldValue(doc, SERVICE_NAME_FIELD);
+  const hostName = getFieldValue(doc, HOST_NAME_FIELD);
+  const agentName = getFieldValue(doc, AGENT_NAME_FIELD);
+  const orchestratorClusterName = getFieldValue(doc, ORCHESTRATOR_CLUSTER_NAME_FIELD);
+  const orchestratorResourceId = getFieldValue(doc, ORCHESTRATOR_RESOURCE_ID_FIELD);
+  const orchestratorNamespace = getFieldValue(doc, ORCHESTRATOR_NAMESPACE_FIELD);
+  const containerName = getFieldValue(doc, CONTAINER_NAME_FIELD);
+  const containerId = getFieldValue(doc, CONTAINER_ID_FIELD);
+  const cloudInstanceId = getFieldValue(doc, CLOUD_INSTANCE_ID_FIELD);
 
   return {
-    [constants.SERVICE_NAME_FIELD]: serviceName,
-    [constants.HOST_NAME_FIELD]: hostName,
-    [constants.AGENT_NAME_FIELD]: agentName,
-    [constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
-    [constants.ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,
-    [constants.ORCHESTRATOR_NAMESPACE_FIELD]: orchestratorNamespace,
-    [constants.CONTAINER_NAME_FIELD]: containerName,
-    [constants.CONTAINER_ID_FIELD]: containerId,
-    [constants.CLOUD_INSTANCE_ID_FIELD]: cloudInstanceId,
+    [SERVICE_NAME_FIELD]: serviceName,
+    [HOST_NAME_FIELD]: hostName,
+    [AGENT_NAME_FIELD]: agentName,
+    [ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
+    [ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,
+    [ORCHESTRATOR_NAMESPACE_FIELD]: orchestratorNamespace,
+    [CONTAINER_NAME_FIELD]: containerName,
+    [CONTAINER_ID_FIELD]: containerId,
+    [CLOUD_INSTANCE_ID_FIELD]: cloudInstanceId,
   };
 };
 
@@ -54,7 +65,7 @@ const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_i
 const resourceCustomComponentsMap: Partial<
   Record<keyof ResourceFields, React.ComponentType<FieldBadgeWithActionsProps>>
 > = {
-  [constants.SERVICE_NAME_FIELD]: ServiceNameBadgeWithActions,
+  [SERVICE_NAME_FIELD]: ServiceNameBadgeWithActions,
 };
 
 export interface ResourceFieldDescriptor {
@@ -82,10 +93,10 @@ export const createResourceFields = (
       name,
       value: resourceDoc[name] as string,
       ResourceBadge: resourceBadgeComponentWithDependencies,
-      ...(name === constants.SERVICE_NAME_FIELD && {
+      ...(name === SERVICE_NAME_FIELD && {
         Icon: () => (
           <AgentIcon
-            agentName={resourceDoc[constants.AGENT_NAME_FIELD] as AgentName}
+            agentName={resourceDoc[AGENT_NAME_FIELD] as AgentName}
             size="m"
             css={css`
               margin-right: ${euiThemeVars.euiSizeXS};
@@ -133,4 +144,4 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
 };
 
 const isFieldAllowed = (field: string) =>
-  !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => field.startsWith(prefix));
+  !FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => field.startsWith(prefix));

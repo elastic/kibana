@@ -19,7 +19,7 @@ import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table/src/constants';
+import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { Resource } from './resource';
 import { Content } from './content';
 import { createResourceFields, formatJsonDocumentForContent } from './utils';

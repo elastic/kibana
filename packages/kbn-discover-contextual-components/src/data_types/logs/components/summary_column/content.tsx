@@ -14,7 +14,7 @@ import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
+import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -32,7 +32,7 @@ const LogMessage = ({
   value: string;
   className: string;
 }) => {
-  const shouldRenderFieldName = field !== constants.MESSAGE_FIELD;
+  const shouldRenderFieldName = field !== MESSAGE_FIELD;
 
   if (shouldRenderFieldName) {
     return (
