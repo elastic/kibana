@@ -39,16 +39,12 @@ export const parseIndicesStats = (
 
 export const fetchMeteringStats = (
   client: IScopedClusterClient,
-  indexPattern: string,
-  secondaryAuthorization?: string | string[] | undefined
+  indexPattern: string
 ): Promise<MeteringIndicesStatsResponse> =>
-  client.asInternalUser.transport.request(
-    {
-      method: 'GET',
-      path: `/_metering/stats/${indexPattern}`,
-    },
-    { headers: { 'es-secondary-authorization': secondaryAuthorization } }
-  );
+  client.asSecondaryAuthUser.transport.request({
+    method: 'GET',
+    path: `/_metering/stats/${indexPattern}`,
+  });
 
 export const parseMeteringStats = (meteringStatsIndices: MeteringStatsIndex[]) =>
   meteringStatsIndices.reduce<Record<string, MeteringStatsIndex>>((acc, curr) => {
