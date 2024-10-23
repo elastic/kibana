@@ -59,7 +59,7 @@ export const FETCH_NOTES_ERROR = i18n.translate(
   }
 );
 export const NO_NOTES = i18n.translate('xpack.securitySolution.notes.noNotesLabel', {
-  defaultMessage: 'No notes have yet been created for this timeline',
+  defaultMessage: 'No notes have been created for this Timeline.',
 });
 
 interface NotesTabContentProps {
