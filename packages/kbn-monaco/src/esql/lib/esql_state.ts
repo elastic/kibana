@@ -11,19 +11,19 @@ import { monaco } from '../../monaco_imports';
 
 /** @internal **/
 export class ESQLState implements monaco.languages.IState {
-  private lastLine: number = 0;
+  private inComment: boolean = false;
 
-  setLineNumber(n: number) {
-    this.lastLine = n;
+  setInComment(inComment: boolean) {
+    this.inComment = inComment;
   }
 
-  getLineNumber() {
-    return this.lastLine;
+  isInComment() {
+    return this.inComment;
   }
 
   clone(): monaco.languages.IState {
     const newState = new ESQLState();
-    newState.setLineNumber(this.lastLine);
+    newState.setInComment(this.inComment);
     return newState;
   }
 

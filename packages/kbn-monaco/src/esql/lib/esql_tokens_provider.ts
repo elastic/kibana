@@ -20,9 +20,45 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
   }
 
   tokenize(line: string, prevState: ESQLState): monaco.languages.ILineTokens {
+    const tokens = tokenize(line);
+
+    // three comment cases
+    // 1. a comment starts on this line
+    // 2. a comment continues on this line
+    // 3. a comment ends on this line
+
+    // comment starts on this line
+    const lastToken = tokens[tokens.length - 1];
+    if (lastToken.name === 'multiline_comment_start') {
+      lastToken.name = 'multiline_comment';
+      return new ESQLLineTokens(
+        tokens.map((t) => new ESQLMonacoToken(t.name, t.start)),
+        true
+      );
+    }
+
+    // comment ends on this line
+    const commentEndPosition = tokens.findIndex((t) => t.name === 'multiline_comment_end');
+    if (commentEndPosition !== -1 && prevState.isInComment()) {
+      tokens.splice(0, commentEndPosition + 1);
+      tokens.unshift({ name: 'multiline_comment', start: 0 });
+      return new ESQLLineTokens(
+        tokens.map((t) => new ESQLMonacoToken(t.name, t.start)),
+        false
+      );
+    }
+
+    // comment continues on this line
+    if (prevState.isInComment()) {
+      return new ESQLLineTokens(
+        [{ name: 'multiline_comment', start: 0 }].map((t) => new ESQLMonacoToken(t.name, t.start)),
+        true
+      );
+    }
+
     return new ESQLLineTokens(
-      tokenize(line).map((t) => new ESQLMonacoToken(t.name, t.start)),
-      prevState.getLineNumber() + 1
+      tokens.map((t) => new ESQLMonacoToken(t.name, t.start)),
+      false
     );
   }
 }

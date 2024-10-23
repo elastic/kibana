@@ -77,6 +77,17 @@ export function tokenize(_text: string): Token[] {
 
   removeLexerModes(tokens);
 
+  // remove all tokens after any multiline comment start token
+  // this is because if there is a multiline comment start token
+  // (instead of a multiline comment token) it means that the comment
+  // is unclosed and therefore the rest of the text is part of the comment
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i].name === 'multiline_comment_start') {
+      tokens.splice(i + 1);
+      break;
+    }
+  }
+
   return mergeTokens(addFunctionTokens(tokens));
 }
 
