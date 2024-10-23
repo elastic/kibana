@@ -27,6 +27,7 @@ import type {
   FileAttachmentAggsResult,
   AttachmentFrameworkAggsResult,
   CustomFieldsTelemetry,
+  AlertBuckets,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -191,6 +192,12 @@ export const getCountsFromBuckets = (buckets: Buckets['buckets']) => ({
   monthly: buckets?.[0]?.doc_count ?? 0,
 });
 
+export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => ({
+  daily: buckets?.[2]?.topAlertsPerBucket?.value ?? 0,
+  weekly: buckets?.[1]?.topAlertsPerBucket?.value ?? 0,
+  monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
+});
+
 export const getCountsAndMaxAlertsData = async ({
   savedObjectsClient,
   savedObjectType,
@@ -203,7 +210,7 @@ export const getCountsAndMaxAlertsData = async ({
   const res = await savedObjectsClient.find<
     unknown,
     {
-      counts: Buckets;
+      counts: AlertBuckets;
       references: MaxBucketOnCaseAggregation['references'];
       uniqueAlertCommentsCount: { value: number };
     }
@@ -227,7 +234,7 @@ export const getCountsAndMaxAlertsData = async ({
   return {
     all: {
       total: totalAlerts,
-      ...getCountsFromBuckets(countsBuckets),
+      ...getAlertsCountsFromBuckets(countsBuckets),
       maxOnACase,
     },
   };

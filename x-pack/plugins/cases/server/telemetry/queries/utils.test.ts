@@ -16,6 +16,7 @@ import type {
 import {
   findValueInBuckets,
   getAggregationsBuckets,
+  getAlertsCountsFromBuckets,
   getAttachmentsFrameworkStats,
   getBucketFromAggregation,
   getConnectorsCardinalityAggregationQuery,
@@ -996,6 +997,51 @@ describe('utils', () => {
     });
   });
 
+  describe('getAlertsCountsFromBuckets', () => {
+    it('returns the correct counts', () => {
+      const buckets = [
+        { topAlertsPerBucket: { value: 12 } },
+        { topAlertsPerBucket: { value: 5 } },
+        { topAlertsPerBucket: { value: 3 } },
+      ];
+
+      expect(getAlertsCountsFromBuckets(buckets)).toEqual({
+        daily: 3,
+        weekly: 5,
+        monthly: 12,
+      });
+    });
+
+    it('returns zero counts when the bucket do not have the topAlertsPerBucket field', () => {
+      const buckets = [{}];
+      // @ts-expect-error
+      expect(getAlertsCountsFromBuckets(buckets)).toEqual({
+        daily: 0,
+        weekly: 0,
+        monthly: 0,
+      });
+    });
+
+    it('returns zero counts when the bucket is undefined', () => {
+      // @ts-expect-error
+      expect(getAlertsCountsFromBuckets(undefined)).toEqual({
+        daily: 0,
+        weekly: 0,
+        monthly: 0,
+      });
+    });
+
+    it('returns zero counts when the topAlertsPerBucket field is missing in some buckets', () => {
+      const buckets = [{ doc_count: 1, key: 1, topAlertsPerBucket: { value: 5 } }, {}, {}];
+      // @ts-expect-error
+      expect(getAlertsCountsFromBuckets(buckets)).toEqual({
+        daily: 0,
+        weekly: 0,
+        monthly: 5,
+      });
+    });
+  });
+
   describe('getUniqueAlertCommentsCountQuery', () => {
     it('returns the correct query', () => {
       const savedObjectType = 'cases-comments';
@@ -1150,9 +1196,9 @@ describe('utils', () => {
       aggregations: {
         counts: {
           buckets: [
-            { doc_count: 1, key: 1 },
-            { doc_count: 2, key: 2 },
-            { doc_count: 3, key: 3 },
+            { doc_count: 1, key: 1, topAlertsPerBucket: { value: 5 } },
+            { doc_count: 2, key: 2, topAlertsPerBucket: { value: 3 } },
+            { doc_count: 3, key: 3, topAlertsPerBucket: { value: 1 } },
           ],
         },
         references: { cases: { max: { value: 1 } } },
@@ -1174,9 +1220,9 @@ describe('utils', () => {
       expect(res).toEqual({
         all: {
           total: 5,
-          daily: 3,
-          weekly: 2,
-          monthly: 1,
+          daily: 1,
+          weekly: 3,
+          monthly: 5,
           maxOnACase: 1,
         },
       });
