@@ -198,7 +198,7 @@ describe('Versioned route', () => {
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining(expectedRouteConfig),
       expect.any(Function),
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   });
 
