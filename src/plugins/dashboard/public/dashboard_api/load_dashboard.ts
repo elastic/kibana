@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, first } from 'rxjs';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { DashboardPanelMap } from '../../common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { DashboardApi, DashboardCreationOptions } from './types';
-import { initializeDashboard } from '../dashboard_container/embeddable/create/create_dashboard';
+import { DashboardCreationOptions, DashboardState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';
+import {
+  PANELS_CONTROL_GROUP_KEY,
+  getDashboardBackupService,
+} from '../services/dashboard_backup_service';
+import { UnsavedPanelState } from '../dashboard_container/types';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
 export async function loadDashboard({
   getCreationOptions,
@@ -31,31 +36,85 @@ export async function loadDashboard({
   });
 
   // --------------------------------------------------------------------------------------
-  // Create method which allows work to be done on the dashboard api when it's ready.
+  // Run validation.
   // --------------------------------------------------------------------------------------
-  const dashboardApiReady$ = new Subject<DashboardApi>();
-  const untilDashboardReady = () =>
-    new Promise<DashboardApi>((resolve) => {
-      dashboardApiReady$.pipe(first()).subscribe((dashboardApi) => {
-        resolve(dashboardApi);
-      });
-    });
+  const validationResult =
+    savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
+  if (validationResult === 'invalid') {
+    // throw error to stop the rest of Dashboard loading and make the factory return an ErrorEmbeddable.
+    throw new Error('Dashboard failed saved object result validation');
+  } else if (validationResult === 'redirected') {
+    return;
+  }
 
   // --------------------------------------------------------------------------------------
-  // Initialize Dashboard integrations
+  // Combine saved object state and session storage state
   // --------------------------------------------------------------------------------------
-  const initializeResult = await initializeDashboard({
-    loadDashboardReturn: savedObjectResult,
-    untilDashboardReady,
-    creationOptions,
-  });
-  if (!initializeResult) return;
-  const { input: initialState } = initializeResult;
+  const dashboardBackupState = getDashboardBackupService().getState(savedObjectResult.dashboardId);
+  const initialPanelsRuntimeState: UnsavedPanelState = creationOptions?.useSessionStorageIntegration
+    ? dashboardBackupState?.panels ?? {}
+    : {};
+
+  const sessionStorageInput = ((): Partial<DashboardState> | undefined => {
+    if (!creationOptions?.useSessionStorageIntegration) return;
+    return dashboardBackupState?.dashboardState;
+  })();
+
+  const combinedSessionState: DashboardState = {
+    ...DEFAULT_DASHBOARD_INPUT,
+    ...(savedObjectResult?.dashboardInput ?? {}),
+    ...sessionStorageInput,
+  };
+
+  // --------------------------------------------------------------------------------------
+  // Combine state with overrides.
+  // --------------------------------------------------------------------------------------
+  const overrideState = creationOptions?.getInitialInput?.();
+  if (overrideState?.panels) {
+    const overridePanels: DashboardPanelMap = {};
+    for (const panel of Object.values(overrideState?.panels)) {
+      overridePanels[panel.explicitInput.id] = {
+        ...panel,
+
+        /**
+         * here we need to keep the state of the panel that was already in the Dashboard if one exists.
+         * This is because this state will become the "last saved state" for this panel.
+         */
+        ...(combinedSessionState.panels[panel.explicitInput.id] ?? []),
+      };
+      /**
+       * We also need to add the state of this react embeddable into the runtime state to be restored.
+       */
+      initialPanelsRuntimeState[panel.explicitInput.id] = panel.explicitInput;
+    }
+    overrideState.panels = overridePanels;
+  }
+  // Back up any view mode passed in explicitly.
+  if (overrideState?.viewMode) {
+    getDashboardBackupService().storeViewMode(overrideState?.viewMode);
+  }
+  if (overrideState?.controlGroupState) {
+    initialPanelsRuntimeState[PANELS_CONTROL_GROUP_KEY] = overrideState.controlGroupState;
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Combine input from saved object, session storage, & passed input to create initial input.
+  // --------------------------------------------------------------------------------------
+  const initialDashboardState: DashboardState = {
+    ...combinedSessionState,
+    ...overrideState,
+  };
+
+  initialDashboardState.executionContext = {
+    type: 'dashboard',
+    description: initialDashboardState.title,
+  };
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
-    initialState,
+    initialState: initialDashboardState,
+    initialPanelsRuntimeState,
     savedObjectResult,
     savedObjectId,
   });
@@ -77,7 +136,6 @@ export async function loadDashboard({
     contentInsightsClient.track(savedObjectId, 'viewed');
   }
 
-  dashboardApiReady$.next(api);
   return {
     api,
     cleanup: () => {

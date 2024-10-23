@@ -55,6 +55,7 @@ import { placeClonePanel } from '../dashboard_container/panel_placement';
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
+  initialPanelsRuntimeState: UnsavedPanelState,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
   pushReferences: (references: Reference[]) => void
@@ -66,7 +67,7 @@ export function initializePanelsManager(
   function setPanels(panels: DashboardPanelMap) {
     if (panels !== panels$.value) panels$.next(panels);
   }
-  let restoredRuntimeState: UnsavedPanelState = {};
+  let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
 
   function setRuntimeStateForChild(childId: string, state: object) {
     restoredRuntimeState[childId] = state;

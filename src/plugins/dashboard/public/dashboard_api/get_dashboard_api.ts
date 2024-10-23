@@ -12,7 +12,6 @@ import { omit } from 'lodash';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import {
   getReferencesForControls,
@@ -39,17 +38,21 @@ import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { openSaveModal } from './open_save_modal';
 import { initializeSearchSessionManager } from './search_session_manager';
+import { initializeViewModeApi } from './view_mode_api';
+import { UnsavedPanelState } from '../dashboard_container/types';
 
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddable,
   initialState,
+  initialPanelsRuntimeState,
   savedObjectResult,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
+  initialPanelsRuntimeState?: UnsavedPanelState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
@@ -59,18 +62,16 @@ export function getDashboardApi({
   const isManaged = savedObjectResult?.managed ?? false;
   let references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
-  // view mode must always be edit to recieve an embeddable.
-  const viewMode$ = new BehaviorSubject<ViewMode>(
-    incomingEmbeddable ? 'edit' : initialState.viewMode
-  );
 
   let untilEmbeddableLoadedBreakCircularDep: (id: string) => Promise<undefined> = async (
     id: string
   ) => undefined;
+  const viewModeApi = initializeViewModeApi(incomingEmbeddable, savedObjectResult);
   const trackPanel = initializeTrackPanel(untilEmbeddableLoadedBreakCircularDep);
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
+    initialPanelsRuntimeState ?? {},
     trackPanel,
     (id: string) => getReferencesForPanelId(id, references),
     (refs: Reference[]) => references.push(...refs)
@@ -110,7 +111,7 @@ export function getDashboardApi({
       ...settingsManager.api.getSettings(),
       ...unifiedSearchManager.internalApi.getState(),
       panels,
-      viewMode: viewMode$.value,
+      viewMode: viewModeApi.viewMode.value,
     };
 
     const controlGroupApi = controlGroupApi$.value;
@@ -135,6 +136,7 @@ export function getDashboardApi({
   setTimeout(() => animatePanelTransforms$.next(true), 500);
 
   const dashboardApi = {
+    ...viewModeApi,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
     ...panelsManager.api,
@@ -163,7 +165,7 @@ export function getDashboardApi({
       const saveResult = await openSaveModal({
         isManaged,
         lastSavedId: savedObjectId$.value,
-        viewMode: viewMode$.value,
+        viewMode: viewModeApi.viewMode.value,
         ...(await getState()),
       });
 
@@ -204,16 +206,8 @@ export function getDashboardApi({
     savedObjectId: savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
-    setViewMode: (viewMode: ViewMode) => {
-      // block the Dashboard from entering edit mode if this Dashboard is managed.
-      if (isManaged && viewMode?.toLowerCase() === 'edit') {
-        return;
-      }
-      viewMode$.next(viewMode);
-    },
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
-    viewMode: viewMode$,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const searchSessionManager = initializeSearchSessionManager(
