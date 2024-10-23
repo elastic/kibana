@@ -18,8 +18,6 @@ import {
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
-import { VECTOR_SEARCH_PLUGIN, SEMANTIC_SEARCH_PLUGIN } from '../../../../common/constants';
-
 import { ClassicNavItem, BuildClassicNavParameters } from '../types';
 
 export const buildBaseClassicNavItems = ({
@@ -31,6 +29,10 @@ export const buildBaseClassicNavItems = ({
   // Home
   navItems.push({
     'data-test-subj': 'searchSideNav-Home',
+    deepLink: {
+      link: ENTERPRISE_SEARCH_APP_ID,
+      shouldShowActiveForSubroutes: true,
+    },
     id: 'home',
     name: (
       <EuiText size="s">
@@ -39,10 +41,6 @@ export const buildBaseClassicNavItems = ({
         })}
       </EuiText>
     ),
-    navLink: {
-      link: ENTERPRISE_SEARCH_APP_ID,
-      shouldShowActiveForSubroutes: true,
-    },
   });
 
   // Content
@@ -53,35 +51,26 @@ export const buildBaseClassicNavItems = ({
       {
         'data-test-subj': 'searchSideNav-Indices',
         id: 'search_indices',
-        name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle', {
-          defaultMessage: 'Indices',
-        }),
-        navLink: {
+        deepLink: {
           link: 'enterpriseSearchContent:searchIndices',
           shouldShowActiveForSubroutes: true,
         },
       },
       {
         'data-test-subj': 'searchSideNav-Connectors',
-        id: 'connectors',
-        name: i18n.translate('xpack.enterpriseSearch.nav.connectorsTitle', {
-          defaultMessage: 'Connectors',
-        }),
-        navLink: {
+        deepLink: {
           link: 'enterpriseSearchContent:connectors',
           shouldShowActiveForSubroutes: true,
         },
+        id: 'connectors',
       },
       {
         'data-test-subj': 'searchSideNav-Crawlers',
-        id: 'crawlers',
-        name: i18n.translate('xpack.enterpriseSearch.nav.crawlersTitle', {
-          defaultMessage: 'Web crawlers',
-        }),
-        navLink: {
+        deepLink: {
           link: 'enterpriseSearchContent:webCrawlers',
           shouldShowActiveForSubroutes: true,
         },
+        id: 'crawlers',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
@@ -96,35 +85,25 @@ export const buildBaseClassicNavItems = ({
     items: [
       {
         'data-test-subj': 'searchSideNav-Playground',
-        id: 'playground',
-        name: i18n.translate('xpack.enterpriseSearch.nav.PlaygroundTitle', {
-          defaultMessage: 'Playground',
-        }),
-        navLink: {
+        deepLink: {
           link: 'enterpriseSearchApplications:playground',
           shouldShowActiveForSubroutes: true,
         },
+        id: 'playground',
       },
       {
         'data-test-subj': 'searchSideNav-SearchApplications',
-        id: 'searchApplications',
-        name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
-          defaultMessage: 'Search Applications',
-        }),
-        navLink: {
+        deepLink: {
           link: 'enterpriseSearchApplications:searchApplications',
         },
+        id: 'searchApplications',
       },
       {
         'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        id: 'analyticsCollections',
-        name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
-          defaultMessage: 'Behavioral Analytics',
-        }),
-        navLink: {
+        deepLink: {
           link: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-          shouldNotCreateHref: true,
         },
+        id: 'analyticsCollections',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
@@ -140,14 +119,11 @@ export const buildBaseClassicNavItems = ({
       items: [
         {
           'data-test-subj': 'searchSideNav-InferenceEndpoints',
-          id: 'inference_endpoints',
-          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
-            defaultMessage: 'Inference Endpoints',
-          }),
-          navLink: {
+          deepLink: {
             link: 'enterpriseSearchRelevance:inferenceEndpoints',
             shouldShowActiveForSubroutes: true,
           },
+          id: 'inference_endpoints',
         },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
@@ -163,43 +139,31 @@ export const buildBaseClassicNavItems = ({
     items: [
       {
         'data-test-subj': 'searchSideNav-Elasticsearch',
-        id: 'elasticsearch',
-        name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-          defaultMessage: 'Elasticsearch',
-        }),
-        navLink: {
+        deepLink: {
           link: SEARCH_ELASTICSEARCH,
-          shouldNotCreateHref: true,
         },
+        id: 'elasticsearch',
       },
       {
         'data-test-subj': 'searchSideNav-VectorSearch',
-        id: 'vectorSearch',
-        name: VECTOR_SEARCH_PLUGIN.NAME,
-        navLink: {
+        deepLink: {
           link: SEARCH_VECTOR_SEARCH,
-          shouldNotCreateHref: true,
         },
+        id: 'vectorSearch',
       },
       {
         'data-test-subj': 'searchSideNav-SemanticSearch',
-        id: 'semanticSearch',
-        name: SEMANTIC_SEARCH_PLUGIN.NAME,
-        navLink: {
+        deepLink: {
           link: SEARCH_SEMANTIC_SEARCH,
-          shouldNotCreateHref: true,
         },
+        id: 'semanticSearch',
       },
       {
         'data-test-subj': 'searchSideNav-AISearch',
-        id: 'aiSearch',
-        name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
-          defaultMessage: 'AI Search',
-        }),
-        navLink: {
+        deepLink: {
           link: SEARCH_AI_SEARCH,
-          shouldNotCreateHref: true,
         },
+        id: 'aiSearch',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
@@ -212,25 +176,19 @@ export const buildBaseClassicNavItems = ({
     if (productAccess.hasAppSearchAccess) {
       entSearchItems.push({
         'data-test-subj': 'searchSideNav-AppSearch',
-        id: 'app_search',
-        name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
-          defaultMessage: 'App Search',
-        }),
-        navLink: {
+        deepLink: {
           link: 'appSearch:engines',
         },
+        id: 'app_search',
       });
     }
     if (productAccess.hasWorkplaceSearchAccess) {
       entSearchItems.push({
         'data-test-subj': 'searchSideNav-WorkplaceSearch',
-        id: 'workplace_search',
-        name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
-          defaultMessage: 'Workplace Search',
-        }),
-        navLink: {
+        deepLink: {
           link: 'workplaceSearch',
         },
+        id: 'workplace_search',
       });
     }
     navItems.push({

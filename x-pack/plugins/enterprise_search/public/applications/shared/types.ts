@@ -79,22 +79,31 @@ export type GenerateNavLinkParameters = {
   to: string;
 } & ReactRouterProps;
 
-export type GenerateNavLinkFromDeepLinkParameters = {
-  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
+export interface GenerateNavLinkFromDeepLinkParameters {
   link: AppDeepLinkId;
   shouldShowActiveForSubroutes?: boolean;
-} & Omit<ReactRouterProps, 'to'>;
+}
 
 export interface BuildClassicNavParameters {
   hasEnterpriseLicense: boolean;
   productAccess: ProductAccess;
 }
 
-export interface ClassicNavItem {
+export type ClassicNavItem = BaseClassicNavItem | DeepLinkNavItem;
+
+export interface BaseClassicNavItem {
   'data-test-subj'?: string;
   iconToString?: string;
   id: string;
   items?: ClassicNavItem[];
   name: ReactNode;
-  navLink?: GenerateNavLinkParameters | GenerateNavLinkFromDeepLinkParameters;
+}
+
+export interface DeepLinkNavItem {
+  'data-test-subj'?: string;
+  deepLink: GenerateNavLinkFromDeepLinkParameters;
+  iconToString?: string;
+  id: string;
+  items?: ClassicNavItem[];
+  name?: ReactNode;
 }

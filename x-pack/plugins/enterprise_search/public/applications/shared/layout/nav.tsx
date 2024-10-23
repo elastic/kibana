@@ -21,6 +21,7 @@ import { KibanaLogic } from '../kibana';
 import { LicensingLogic } from '../licensing';
 import {
   ClassicNavItem,
+  DeepLinkNavItem,
   GenerateNavLinkParameters,
   GenerateNavLinkFromDeepLinkParameters,
 } from '../types';
@@ -228,7 +229,7 @@ export const generateSideNavItems = (
   for (const navItem of navItems) {
     let sideNavChildItems: Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined;
 
-    const { navLink, items, ...rest } = navItem;
+    const { items, ...rest } = navItem;
     const subItems = subItemsMap?.[navItem.id];
 
     if (items || subItems) {
@@ -241,10 +242,13 @@ export const generateSideNavItems = (
       }
     }
     let sideNavItem: EuiSideNavItemTypeEnhanced<unknown> | undefined;
-    if (navLink) {
-      const navLinkParams = getNavLinkParameters(navLink, deepLinks);
+    if (isDeepLinkNavItem(navItem)) {
+      const deepLink = navItem.deepLink;
+      const navLinkParams = getNavLinkParameters(deepLink, deepLinks);
       if (navLinkParams !== undefined) {
+        const name = getDeepLinkTitle(deepLink.link, deepLinks);
         sideNavItem = {
+          name,
           ...rest,
           ...generateNavLink({
             ...navLinkParams,
@@ -256,6 +260,7 @@ export const generateSideNavItems = (
       sideNavItem = {
         ...rest,
         items: sideNavChildItems,
+        name: navItem.name,
       };
     }
 
@@ -267,29 +272,31 @@ export const generateSideNavItems = (
   return sideNavItems;
 };
 
+function isDeepLinkNavItem(item: ClassicNavItem): item is DeepLinkNavItem {
+  return 'deepLink' in item;
+}
 const getNavLinkParameters = (
-  navLink: GenerateNavLinkParameters | GenerateNavLinkFromDeepLinkParameters,
+  navLink: GenerateNavLinkFromDeepLinkParameters,
   deepLinks: Record<string, ChromeNavLink | undefined>
 ): GenerateNavLinkParameters | undefined => {
-  if (isGenerateNavLinkParameters(navLink)) {
-    return navLink;
-  }
   const { link, ...navLinkProps } = navLink;
   const deepLink = deepLinks[link];
   if (!deepLink || !deepLink.url) return undefined;
   return {
     ...navLinkProps,
-    shouldNotPrepend: true,
     shouldNotCreateHref: true,
+    shouldNotPrepend: true,
     to: deepLink.url,
   };
 };
-
-function isGenerateNavLinkParameters(
-  navLink: GenerateNavLinkParameters | GenerateNavLinkFromDeepLinkParameters
-): navLink is GenerateNavLinkParameters {
-  return Object.hasOwn(navLink, 'to');
-}
+const getDeepLinkTitle = (
+  link: string,
+  deepLinks: Record<string, ChromeNavLink | undefined>
+): string | undefined => {
+  const deepLink = deepLinks[link];
+  if (!deepLink || !deepLink.url) return undefined;
+  return deepLink.title;
+};
 
 function isValidSideNavItem(
   item: EuiSideNavItemTypeEnhanced<unknown> | undefined
