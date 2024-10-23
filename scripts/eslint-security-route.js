@@ -253,7 +253,7 @@ function processChangesByOwners(ownerFilesMap) {
       }
 
       console.log('Created the following branches:');
-      console.log(runCommand("git branch | sed 's/^[ *]*//' | grep -E '^(temp|eslint)'"));
+      console.log(runCommand("git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/'"));
 
       if (!DRY_RUN) {
         const title =
@@ -270,6 +270,18 @@ function processChangesByOwners(ownerFilesMap) {
 
         console.log(`Deleting temporary branch: ${tempBranch}`);
         runCommand(`git branch -D ${tempBranch}`);
+
+        const labels = [
+          routeLabel,
+          'enhancement',
+          'release_note:skip',
+          'backport:prev-minor',
+          'Feature:Security/Authorization',
+        ];
+
+        if (teamLabel) {
+          labels.push(teamLabel);
+        }
 
         console.log(`Creating pull request for branch: ${targetBranch}`);
         // For some reason, running it in shell executes the markdown and fails
@@ -291,7 +303,7 @@ function processChangesByOwners(ownerFilesMap) {
               ? PR_DESCRIPTION_TEXT_AUTHORIZED
               : PR_DESCRIPTION_TEXT_UNAUTHORIZED,
             // '--label',
-            // `${routeLabel},${teamLabel}`,
+            // labels.join(','),
           ],
           { stdio: 'inherit' }
         );
@@ -300,7 +312,9 @@ function processChangesByOwners(ownerFilesMap) {
   } catch (error) {
     console.error('Error processing changes:', error);
     console.log('Deleting any created branches:');
-    runCommand("git branch | sed 's/^[ *]*//' | grep -E '^(temp|eslint)' | xargs -r git branch -D");
+    runCommand(
+      "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
+    );
   }
 }
 
