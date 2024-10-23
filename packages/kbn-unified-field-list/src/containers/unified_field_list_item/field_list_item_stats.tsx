@@ -76,6 +76,9 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       [services]
     );
 
+    const query = queryAndFiltersOverride
+      ? queryAndFiltersOverride.query
+      : querySubscriberResult.query;
     const filters = useMemo(
       () => [
         ...((queryAndFiltersOverride
@@ -85,26 +88,28 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       ],
       [querySubscriberResult.filters, additionalFilters, queryAndFiltersOverride]
     );
+    const fromDate = queryAndFiltersOverride
+      ? queryAndFiltersOverride.fromDate
+      : querySubscriberResult.fromDate;
+    const toDate = queryAndFiltersOverride
+      ? queryAndFiltersOverride.toDate
+      : querySubscriberResult.toDate;
 
-    if (!hasQuerySubscriberData(querySubscriberResult)) {
+    if (!queryAndFiltersOverride && !hasQuerySubscriberData(querySubscriberResult)) {
+      return null;
+    }
+
+    if (!query || !filters || !fromDate || !toDate) {
       return null;
     }
 
     return (
       <FieldStats
         services={statsServices}
-        query={
-          queryAndFiltersOverride ? queryAndFiltersOverride.query : querySubscriberResult.query
-        }
+        query={query}
         filters={filters}
-        fromDate={
-          queryAndFiltersOverride
-            ? queryAndFiltersOverride.fromDate
-            : querySubscriberResult.fromDate
-        }
-        toDate={
-          queryAndFiltersOverride ? queryAndFiltersOverride.toDate : querySubscriberResult.toDate
-        }
+        fromDate={fromDate}
+        toDate={toDate}
         dataViewOrDataViewId={dataView}
         field={fieldForStats}
         data-test-subj={options.dataTestSubj?.fieldListItemStatsDataTestSubj}

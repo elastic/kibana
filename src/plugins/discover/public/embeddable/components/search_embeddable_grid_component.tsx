@@ -88,8 +88,8 @@ export function SearchEmbeddableGridComponent({
     stateManager.grid
   );
 
-  const query = fetchContext?.query ?? apiQuery;
-  const filters = fetchContext?.filters ?? apiFilters;
+  const savedSearchQuery = apiQuery;
+  const savedSearchFilters = apiFilters;
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
     useBatchedOptionalPublishingSubjects(
@@ -138,7 +138,10 @@ export function SearchEmbeddableGridComponent({
     settings: grid,
   });
 
-  const dataSource = useMemo(() => createDataSource({ dataView, query }), [dataView, query]);
+  const dataSource = useMemo(
+    () => createDataSource({ dataView, query: savedSearchQuery }),
+    [dataView, savedSearchQuery]
+  );
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
     [fetchContext]
@@ -147,8 +150,8 @@ export function SearchEmbeddableGridComponent({
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
-    query,
-    filters,
+    query: savedSearchQuery,
+    filters: savedSearchFilters,
     timeRange,
   });
 
@@ -230,7 +233,7 @@ export function SearchEmbeddableGridComponent({
       <DiscoverDocTableEmbeddableMemoized
         {...sharedProps}
         {...onStateEditedProps}
-        filters={filters}
+        filters={savedSearchFilters}
         isEsqlMode={isEsql}
         isLoading={Boolean(loading)}
         sharedItemTitle={panelTitle || savedSearchTitle}
@@ -259,8 +262,8 @@ export function SearchEmbeddableGridComponent({
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
-      query={query}
-      filters={filters}
+      query={savedSearchQuery}
+      filters={savedSearchFilters}
       timeRange={timeRange}
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
