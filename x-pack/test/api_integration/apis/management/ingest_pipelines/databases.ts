@@ -18,9 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ipinfoDatabaseName = 'asn';
   const normalizedIpinfoDatabaseName = 'asn';
 
-  // Failing: See https://github.com/elastic/kibana/issues/196765
-  // Failing: See https://github.com/elastic/kibana/issues/196765
-  describe.skip('Manage databases', function () {
+  describe('Manage databases', function () {
     after(async () => {
       await ingestPipelines.api.deleteGeoipDatabases();
     });
@@ -64,8 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/196765
-    describe.skip('List', () => {
+    describe('List', () => {
       it('returns existing databases', async () => {
         const { body } = await supertest.get(url).set('kbn-xsrf', 'xxx').expect(200);
         expect(body).to.eql([
