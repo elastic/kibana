@@ -136,8 +136,8 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
     <EuiFlexItem>
       <EuiComboBox
         aria-label={i18n.translate(
-          'xpack.enterpriseSearch.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
-          { defaultMessage: 'Choose a data source' }
+          'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
+          { defaultMessage: 'Select a data source for your connector to use.' }
         )}
         prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
         singleSelection
