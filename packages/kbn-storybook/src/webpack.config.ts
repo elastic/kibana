@@ -18,10 +18,6 @@ import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
-function isProgressPlugin(plugin: any) {
-  return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
-}
-
 interface BabelLoaderRule extends webpack.RuleSetRule {
   use: Array<{
     loader: 'babel-loader';
@@ -140,21 +136,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     }
   }
 
-  // copy and modify the webpack plugins added by storybook
-  const filteredStorybookPlugins = [];
-  for (const plugin of storybookConfig.plugins ?? []) {
-    // Remove the progress plugin
-    if (isProgressPlugin(plugin)) {
-      continue;
-    }
-
-    filteredStorybookPlugins.push(plugin);
-  }
-
   return webpackMerge<object>(
     {
       ...storybookConfig,
-      plugins: filteredStorybookPlugins,
       module: {
         ...storybookConfig.module,
         rules: updatedModuleRules,
