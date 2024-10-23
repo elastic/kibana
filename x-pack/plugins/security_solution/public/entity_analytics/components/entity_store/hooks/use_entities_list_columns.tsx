@@ -17,9 +17,9 @@ import { RiskScoreLevel } from '../../severity/common';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../../explore/components/paginated_table';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import type { CriticalityLevels } from '../../../../../common/constants';
+import { type CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
-import { isUserEntity } from '../helpers';
+import { isUserEntity, sourceFieldToText } from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 
 export type EntitiesListColumns = [
@@ -110,7 +110,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       truncateText: { lines: 2 },
       render: (source: string | undefined) => {
         if (source != null) {
-          return <span>{source}</span>;
+          return sourceFieldToText(source);
         }
 
         return getEmptyTagValue();
