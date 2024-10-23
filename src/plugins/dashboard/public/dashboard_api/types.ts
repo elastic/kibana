@@ -50,6 +50,7 @@ import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/pub
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { DashboardOptions, DashboardPanelMap, DashboardPanelState } from '../../common';
 import {
   LoadDashboardReturn,

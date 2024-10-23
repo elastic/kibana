@@ -27,6 +27,7 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { createDashboardApi } from '../../dashboard_api/create_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { startQueryPerformanceTracking } from '../embeddable/create/performance/query_performance_tracking';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -46,6 +47,7 @@ export function DashboardRenderer({
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
+  const creationStartTimeRef = useRef<number>();
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
@@ -59,6 +61,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
+    creationStartTimeRef.current = performance.now();
     createDashboardApi({ getCreationOptions, savedObjectId })
       .then((results) => {
         if (!results) return;
@@ -83,6 +86,18 @@ export function DashboardRenderer({
     // Disabling exhaustive deps because embeddable should only be created on first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
+
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const subscription = startQueryPerformanceTracking(dashboardApi, {
+      firstLoad: true,
+      creationStartTime: creationStartTimeRef.current,
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dashboardApi]);
 
   const viewportClasses = classNames(
     'dashboardViewport',

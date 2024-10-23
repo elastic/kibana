@@ -295,15 +295,6 @@ export const initializeDashboard = async ({
     }
   });
 
-  // --------------------------------------------------------------------------------------
-  // Start performance tracker
-  // --------------------------------------------------------------------------------------
-  /* untilDashboardReady().then((dashboardContainer) =>
-    dashboardContainer.integrationSubscriptions.add(
-      startQueryPerformanceTracking(dashboardContainer)
-    )
-  );*/
-
   if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
