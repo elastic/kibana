@@ -294,7 +294,6 @@ export class HttpService
         } catch (e) {
           return h.response({ message: e.message }).code(400);
         }
-
         return await firstValueFrom(
           of(1).pipe(
             HttpService.generateOasSemaphore.acquire(),
@@ -310,7 +309,6 @@ export class HttpService
                     filters,
                   }
                 );
-
                 return h.response(result);
               } catch (e) {
                 this.log.error(e);
