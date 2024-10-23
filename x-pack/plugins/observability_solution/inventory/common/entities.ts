@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
+import { z } from '@kbn/zod';
+import { ENTITY_LATEST, entitiesAliasPattern, entityLatestSchema } from '@kbn/entities-schema';
 import {
-  HOST_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
   AGENT_NAME,
   CLOUD_PROVIDER,
   CONTAINER_ID,
@@ -18,6 +16,9 @@ import {
   ENTITY_IDENTITY_FIELDS,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
+  HOST_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
@@ -83,7 +84,7 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   (arr) => arr.join()
 );
 
-interface BaseEntity {
+export interface BaseEntity {
   [ENTITY_LAST_SEEN]: string;
   [ENTITY_ID]: string;
   [ENTITY_TYPE]: EntityType;
@@ -117,3 +118,7 @@ export interface ContainerEntity extends BaseEntity {
 }
 
 export type Entity = ServiceEntity | HostEntity | ContainerEntity;
+
+export type InventoryEntityLatest = z.infer<typeof entityLatestSchema> & {
+  alertsCount?: number;
+};
