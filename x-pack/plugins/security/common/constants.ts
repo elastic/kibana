@@ -127,3 +127,14 @@ export const API_VERSIONS = {
     },
   },
 };
+
+/**
+ * Privileges that define the superuser role or the role equivalent to the superuser role.
+ */
+export const SUPERUSER_PRIVILEGES = {
+  kibana: ['*'],
+  elasticsearch: {
+    cluster: ['all'],
+    index: { '*': ['all'] },
+  },
+};

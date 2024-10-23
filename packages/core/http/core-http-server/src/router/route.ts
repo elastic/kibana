@@ -188,6 +188,14 @@ export interface RouteSecurity {
 }
 
 /**
+ * A set of reserved privileges that can be used to check access to the route.
+ */
+export enum ReservedPrivilegesSet {
+  operator = 'operator',
+  superuser = 'superuser',
+}
+
+/**
  * Additional route options.
  * @public
  */
