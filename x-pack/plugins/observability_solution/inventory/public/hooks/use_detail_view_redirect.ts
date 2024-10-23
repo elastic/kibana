@@ -7,17 +7,16 @@
 import {
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorParams,
-  CONTAINER_ID,
+  ENTITY_IDENTITY_FIELDS,
   ENTITY_TYPE,
-  HOST_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
   SERVICE_OVERVIEW_LOCATOR_ID,
   ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { castArray } from 'lodash';
 import type { Entity } from '../../common/entities';
 import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
@@ -43,38 +42,45 @@ export const useDetailViewRedirect = () => {
   const dashboardLocator = locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const serviceOverviewLocator = locators.get<ServiceOverviewParams>(SERVICE_OVERVIEW_LOCATOR_ID);
 
-  const getIdentityValue = useCallback(
-    (entity: Entity) => entityManager.entityClient.getIdentityFieldsValue(unflattenEntity(entity)),
+  const getSingleIdentityFieldValue = useCallback(
+    (entity: Entity) => {
+      const identityField = castArray(entity[ENTITY_IDENTITY_FIELDS])[0];
+      return entityManager.entityClient.getIdentityFieldsValue(unflattenEntity(entity))[
+        identityField
+      ];
+    },
     [entityManager.entityClient]
   );
 
   const getDetailViewRedirectUrl = useCallback(
     (entity: Entity) => {
       const type = entity[ENTITY_TYPE];
-      const identityValue = getIdentityValue(entity);
+      const identityValue = getSingleIdentityFieldValue(entity);
 
       switch (type) {
         case 'host':
           return assetDetailsLocator?.getRedirectUrl({
-            assetId: identityValue[HOST_NAME],
+            assetId: identityValue,
             assetType: type,
           });
         case 'container':
           return assetDetailsLocator?.getRedirectUrl({
-            assetId: identityValue[CONTAINER_ID],
+            assetId: identityValue,
             assetType: type,
           });
         case 'service':
           return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: identityValue[SERVICE_NAME],
-            environment: identityValue[SERVICE_ENVIRONMENT],
+            serviceName: identityValue,
+            // service.environemnt is not part of entity.identityFields
+            // we need to manually get its value
+            environment: [entity[SERVICE_ENVIRONMENT] || undefined].flat()[0],
           });
 
         default:
           return undefined;
       }
     },
-    [assetDetailsLocator, getIdentityValue, serviceOverviewLocator]
+    [assetDetailsLocator, getSingleIdentityFieldValue, serviceOverviewLocator]
   );
 
   const getDashboardRedirectUrl = useCallback(
