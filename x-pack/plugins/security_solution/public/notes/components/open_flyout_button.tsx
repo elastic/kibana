@@ -21,7 +21,7 @@ import { TelemetryEventTypes } from '../../common/lib/telemetry/constants';
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.notes.openFlyoutButtonLabel',
   {
-    defaultMessage: 'Expand event details',
+    defaultMessage: 'Expand alert/event details',
   }
 );
 
