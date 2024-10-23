@@ -6,6 +6,12 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
+import * as Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+interface KbtServersConfig {
+  serversConfigDir: string;
+}
 
 /**
  * Read environment variables from file.
@@ -16,7 +22,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig({
+export default defineConfig<KbtServersConfig>({
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -33,6 +39,7 @@ export default defineConfig({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    serversConfigDir: Path.resolve(REPO_ROOT, '.test_servers'),
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 

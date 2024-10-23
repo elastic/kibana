@@ -29,7 +29,7 @@ test.describe('Discover app - value suggestions', () => {
 
   test.beforeEach(async ({ page, kbnUrl, browserAuth }) => {
     const discoverApp = new DiscoverApp(page, kbnUrl);
-    await browserAuth.loginAs('editor');
+    await browserAuth.loginAsPrivilegedUser();
     await discoverApp.goto();
   });
 

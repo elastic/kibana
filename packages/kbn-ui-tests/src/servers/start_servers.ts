@@ -9,7 +9,6 @@
 
 import * as Rx from 'rxjs';
 import dedent from 'dedent';
-import Path from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -17,16 +16,25 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { runElasticsearch } from './run_elasticsearch';
 import { runKibanaServer } from './run_kibana_server';
 import { StartServerOptions } from './flags';
-import { loadConfig } from '../config/config_load';
+import { loadConfig, getConfigFilePath } from '../config/config_load';
+import { saveTestServersConfigOnDisk } from '../config/helpers';
+import { SupportedConfigurations } from '../config/types';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
+  const configOption = options.config as SupportedConfigurations;
 
   await withProcRunner(log, async (procs) => {
-    const configPath = Path.resolve(__dirname, '..', 'config', 'local', options.configName);
-
+    // get path to one of the predefined config files
+    const configPath = getConfigFilePath(options.config);
+    // load config this is compatible with kbn-test input format
     const config = await loadConfig(configPath);
+    // construct config for Playwright Test
+    const testServersConfig = config.getTestServersConfig();
+    // save test config to the file
+    const savedPath = saveTestServersConfigOnDisk(testServersConfig);
+    log.info(`ui_tests: test configuration was saved to ${savedPath}`);
 
     const shutdownEs = await runElasticsearch({
       config,
@@ -68,7 +76,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright --config <path_to_Playwright.config.ts>' to run tests'
+          Use 'npx playwright test --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );
@@ -86,3 +94,12 @@ async function silence(log: ToolingLog, milliseconds: number) {
     )
   );
 }
+
+// const writeGeneratedFile = (fileName: string, contents: string) => {
+//   const genFileName = path.join(PLUGIN_DIR, fileName);
+//   try {
+//     fs.writeFileSync(genFileName, contents);
+//   } catch (err) {
+//     logError(`error writing file: ${genFileName}: ${err.message}`);
+//   }
+// };

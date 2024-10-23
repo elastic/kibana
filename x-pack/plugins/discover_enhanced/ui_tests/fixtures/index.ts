@@ -7,23 +7,53 @@
 
 import { test as base } from '@playwright/test';
 import * as Url from 'url';
+import Path from 'path';
+import Fs from 'fs';
 import { EsArchiver } from '@kbn/es-archiver';
 import { KbnClient, SamlSessionManager, createEsClientForTesting } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { STATEFUL_ROLES_ROOT_PATH, readRolesDescriptorsFromResource } from '@kbn/es';
+import {
+  SERVERLESS_ROLES_ROOT_PATH,
+  STATEFUL_ROLES_ROOT_PATH,
+  readRolesDescriptorsFromResource,
+} from '@kbn/es';
+import { Role } from '@kbn/test/src/auth/types';
 import { KibanaUrl } from './kibana_url';
-import { serversConfig } from './config';
 
 interface LoginFixture {
-  loginAs: (role: string) => Promise<void>;
+  loginAsViewer: () => Promise<void>;
+  loginAsAdmin: () => Promise<void>;
+  loginAsPrivilegedUser: () => Promise<void>;
+}
+
+const projectDefaultRoles = new Map<string, Role>([
+  ['es', 'developer'],
+  ['security', 'editor'],
+  ['oblt', 'editor'],
+]);
+
+export interface ServersConfig {
+  serverless: boolean;
+  projectType?: 'es' | 'oblt' | 'security';
+  isCloud: boolean;
+  cloudUsersFilePath: string;
+  hosts: {
+    kibana: string;
+    elasticsearch: string;
+  };
+  auth: {
+    username: string;
+    password: string;
+  };
 }
 
 // Extend the base test with custom fixtures
 interface KbtFixtures {
   log: ToolingLog;
+  serversConfig: ServersConfig;
   kbnUrl: KibanaUrl;
   esClient: Client;
   kbnClient: KbnClient;
@@ -33,84 +63,81 @@ interface KbtFixtures {
 }
 
 // singleton instances
+let logInstance: ToolingLog | null = null;
+let serversConfigInstance: ServersConfig | null = null;
+let kbnUrlInstance: KibanaUrl | null = null;
 let esClientInstance: Client | null = null;
 let kbnClientInstance: KbnClient | null = null;
 let esArchiverInstance: EsArchiver | null = null;
 let samlSessionManagerInstance: SamlSessionManager | null = null;
 
 export const test = base.extend<KbtFixtures>({
-  log: async ({}, use) => {
-    const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-    await use(log);
+  log: ({}, use) => {
+    if (!logInstance) {
+      logInstance = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
+    }
+
+    use(logInstance);
   },
 
-  // TODO: fix or implement alternative
-  // ftrConfig: async ({ log }, use) => {
-  //   const ftrConfigPath = resolve(
-  //     REPO_ROOT,
-  //     'x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts'
-  //   );
-  //   const esVersion = EsVersion.getDefault();
-  //   const config = await readConfigFile(log, esVersion, ftrConfigPath);
-  //   await use(config);
-  // },
+  serversConfig: ({ log }, use, testInfo) => {
+    if (!serversConfigInstance) {
+      const serversConfigDir = testInfo.project.use.serversConfigDir as string;
+      if (!serversConfigDir || !Fs.existsSync(serversConfigDir)) {
+        throw new Error(`Directory with servers configuration is missing`);
+      }
+      const configPath = Path.join(serversConfigDir, 'local.json');
+      log.info(`Reading test servers confiuration from file: ${configPath}`);
 
-  kbnUrl: async ({}, use) => {
-    const { protocol, hostname, port } = serversConfig.servers.kibana;
-    const kbnUrl = new KibanaUrl(
-      new URL(
-        Url.format({
-          protocol,
-          hostname,
-          port,
-        })
-      )
-    );
+      serversConfigInstance = JSON.parse(Fs.readFileSync(configPath, 'utf-8')) as ServersConfig;
+    }
 
-    await use(kbnUrl);
+    use(serversConfigInstance);
   },
 
-  esClient: ({}, use) => {
+  kbnUrl: ({ serversConfig, log }, use) => {
+    if (!kbnUrlInstance) {
+      kbnUrlInstance = new KibanaUrl(new URL(serversConfig.hosts.kibana));
+      log.info('service loaded: kbnUrl');
+    }
+
+    use(kbnUrlInstance);
+  },
+
+  esClient: ({ serversConfig, log }, use) => {
     if (!esClientInstance) {
-      const { protocol, hostname, port, username, password } = serversConfig.servers.elasticsearch;
+      const elasticsearchUrl = serversConfig.hosts.elasticsearch;
+      const { username, password } = serversConfig.auth;
       esClientInstance = createEsClientForTesting({
-        esUrl: Url.format(
-          new URL(
-            Url.format({
-              protocol,
-              hostname,
-              port,
-            })
-          )
-        ),
+        esUrl: Url.format(elasticsearchUrl),
         authOverride: {
           username,
           password,
         },
       });
+      log.info('service loaded: esClient');
     }
 
     use(esClientInstance);
   },
 
-  kbnClient: ({ log }, use) => {
+  kbnClient: ({ log, serversConfig }, use) => {
     if (!kbnClientInstance) {
-      const { protocol, hostname, port, username, password } = serversConfig.servers.kibana;
+      const kibanaUrl = new URL(serversConfig.hosts.kibana);
+      kibanaUrl.username = serversConfig.auth.username;
+      kibanaUrl.password = serversConfig.auth.password;
+
       kbnClientInstance = new KbnClient({
         log,
-        url: Url.format({
-          protocol,
-          hostname,
-          port,
-          auth: `${username}:${password}`,
-        }),
+        url: kibanaUrl.toString(),
       });
+      log.info('service loaded: kbnClient');
     }
 
     use(kbnClientInstance);
   },
 
-  esArchiver: async ({ kbnClient, esClient, log }, use) => {
+  esArchiver: ({ kbnClient, esClient, log }, use) => {
     if (!esArchiverInstance) {
       esArchiverInstance = new EsArchiver({
         log,
@@ -118,17 +145,22 @@ export const test = base.extend<KbtFixtures>({
         kbnClient,
         baseDir: REPO_ROOT,
       });
+      log.info('service loaded: esArchiver');
     }
 
-    await use(esArchiverInstance);
+    use(esArchiverInstance);
   },
 
-  samlAuth: async ({ log }, use) => {
+  samlAuth: ({ log, serversConfig }, use) => {
     if (!samlSessionManagerInstance) {
-      const { protocol, hostname, port, username, password } = serversConfig.servers.kibana;
+      const kibanaUrl = new URL(serversConfig.hosts.kibana);
+      kibanaUrl.username = serversConfig.auth.username;
+      kibanaUrl.password = serversConfig.auth.password;
 
-      const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
-      const rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
+      const rolesDefinitionPath = serversConfig.serverless
+        ? resolve(SERVERLESS_ROLES_ROOT_PATH, serversConfig.projectType!, 'roles.yml')
+        : resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
+
       const supportedRoleDescriptors = readRolesDescriptorsFromResource(
         rolesDefinitionPath
       ) as Record<string, unknown>;
@@ -137,26 +169,27 @@ export const test = base.extend<KbtFixtures>({
       log.info('Creating new SamlSessionManager instance');
       samlSessionManagerInstance = new SamlSessionManager({
         hostOptions: {
-          protocol,
-          hostname,
-          port,
-          username,
-          password,
+          protocol: kibanaUrl.protocol.replace(':', '') as 'http' | 'https',
+          hostname: kibanaUrl.hostname,
+          port: Number(kibanaUrl.port),
+          username: kibanaUrl.username,
+          password: kibanaUrl.password,
         },
         log,
-        isCloud: false,
+        isCloud: serversConfig.isCloud,
         supportedRoles: {
           roles: supportedRoles,
           sourcePath: rolesDefinitionPath,
         },
-        cloudUsersFilePath,
+        cloudUsersFilePath: serversConfig.cloudUsersFilePath,
       });
+      log.info('service loaded: samlAuth');
     }
 
-    await use(samlSessionManagerInstance);
+    use(samlSessionManagerInstance);
   },
 
-  browserAuth: async ({ samlAuth, context }, use) => {
+  browserAuth: async ({ samlAuth, context, serversConfig }, use) => {
     const loginAs = async (role: string) => {
       await context.clearCookies();
       const cookie = await samlAuth.getInteractiveUserSessionCookieWithRoleScope(role);
@@ -170,6 +203,21 @@ export const test = base.extend<KbtFixtures>({
       ]);
     };
 
-    await use({ loginAs });
+    const loginAsAdmin = async () => {
+      return loginAs('admin');
+    };
+
+    const loginAsViewer = async () => {
+      return loginAs('viewer');
+    };
+
+    const loginAsPrivilegedUser = async () => {
+      const roleName = serversConfig.serverless
+        ? projectDefaultRoles.get(serversConfig.projectType!)!
+        : 'editor';
+      return loginAs(roleName);
+    };
+
+    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
   },
 });

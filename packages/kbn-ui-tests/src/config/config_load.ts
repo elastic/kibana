@@ -9,8 +9,9 @@
 
 import path from 'path';
 import { Config } from './config';
+import { SupportedConfigurations } from './types';
 
-export async function loadConfig(configPath: string) {
+export const loadConfig = async (configPath: string) => {
   try {
     const absolutePath = path.resolve(configPath);
     const configModule = await import(absolutePath);
@@ -23,4 +24,12 @@ export async function loadConfig(configPath: string) {
   } catch (error) {
     process.exit(1);
   }
-}
+};
+
+export const getConfigFilePath = (config: SupportedConfigurations) => {
+  if (config === 'stateful') {
+    return path.join(__dirname, 'stateful', 'stateful.config.ts');
+  } else {
+    return path.join(__dirname, 'serverless', `${config.split('=')[1]}.serverless.config.ts`);
+  }
+};

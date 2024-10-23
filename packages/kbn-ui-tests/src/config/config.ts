@@ -8,9 +8,13 @@
  */
 
 import { Schema } from 'joi';
+import * as Url from 'url';
+import Path from 'path';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
-import { UrlParts } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
+import { formatCurrentDate, getProjectType } from './helpers';
+import { TestServersConfig } from './types';
 
 const $values = Symbol('values');
 
@@ -99,26 +103,38 @@ export class Config {
       }
     });
   }
-}
 
-export interface ConfigType {
-  serverless: boolean;
-  servers: {
-    kibana: UrlParts;
-    elasticsearch: UrlParts;
-    fleetserver?: UrlParts; // validate if needed
-  };
-  dockerServers: any;
-  esTestCluster: {
-    from: string;
-    files: string[];
-    serverArgs: string[];
-    ssl: boolean;
-  };
-  kbnTestServer: {
-    env: any;
-    buildArgs: string[];
-    sourceArgs: string[];
-    serverArgs: string[];
-  };
+  public getTestServersConfig() {
+    const config: TestServersConfig = {
+      serverless: this.get('serverless'),
+      projectType: this.get('serverless')
+        ? getProjectType(this.get('kbnTestServer.serverArgs'))
+        : undefined,
+      isCloud: false,
+      cloudUsersFilePath: Path.resolve(REPO_ROOT, '.ftr', 'role_users.json'),
+      hosts: {
+        kibana: Url.format({
+          protocol: this.get('servers.kibana.protocol'),
+          hostname: this.get('servers.kibana.hostname'),
+          port: this.get('servers.kibana.port'),
+        }),
+        elasticsearch: Url.format({
+          protocol: this.get('servers.elasticsearch.protocol'),
+          hostname: this.get('servers.elasticsearch.hostname'),
+          port: this.get('servers.elasticsearch.port'),
+        }),
+      },
+      auth: {
+        username: this.get('servers.elasticsearch.username'),
+        password: this.get('servers.elasticsearch.password'),
+      },
+
+      metadata: {
+        generatedOn: formatCurrentDate(),
+        config: this.getAll(),
+      },
+    };
+
+    return config;
+  }
 }

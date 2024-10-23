@@ -13,13 +13,9 @@ import { v4 as uuidV4 } from 'uuid';
 import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { SupportedConfigurations } from '../config/types';
 
 export type StartServerOptions = ReturnType<typeof parseFlags>;
-type SupportedConfigurations =
-  | 'stateful.config.ts'
-  | 'es.serverless.config.ts'
-  | 'oblt.serverless.config.ts'
-  | 'security.serverless.config.ts';
 
 export const FLAG_OPTIONS: FlagOptions = {
   string: ['serverless', 'esFrom', 'kibana-install-dir'],
@@ -41,12 +37,12 @@ export function parseFlags(flags: FlagsReader) {
     throw createFlagError(`expected exactly one --serverless=<type> or --stateful flag`);
   }
 
-  const configName: SupportedConfigurations = serverlessType
-    ? `${serverlessType}.serverless.config.ts`
-    : 'stateful.config.ts';
+  const config: SupportedConfigurations = serverlessType
+    ? `serverless=${serverlessType}`
+    : 'stateful';
 
   return {
-    configName,
+    config,
     esFrom: flags.enum('esFrom', ['source', 'snapshot', 'serverless']),
     installDir: flags.string('kibana-install-dir'),
     logsDir: flags.boolean('logToFile')

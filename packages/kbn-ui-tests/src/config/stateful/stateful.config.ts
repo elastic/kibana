@@ -7,19 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from './serverless.base.config';
+import { defaultConfig } from './base.config';
 
-export const serversConfig = {
-  ...defaultConfig,
-  esTestCluster: {
-    ...defaultConfig.esTestCluster,
-    serverArgs: [...defaultConfig.esTestCluster.serverArgs],
-  },
-  kbnTestServer: {
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=es',
-      '--coreApp.allowDynamicConfigOverrides=true',
-    ],
-  },
-};
+export const serversConfig = defaultConfig;
