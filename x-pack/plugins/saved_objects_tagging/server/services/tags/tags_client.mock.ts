@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ITagsClient } from '../../../common/types';
+import type { ITagsClient } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 const createClientMock = () => {
   const mock: jest.Mocked<ITagsClient> = {
