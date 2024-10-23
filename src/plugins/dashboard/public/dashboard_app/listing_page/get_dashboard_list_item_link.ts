@@ -30,6 +30,7 @@ export const getDashboardListItemLink = (
   let url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
     path: `#${createDashboardEditUrl(id)}`,
   });
+
   const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
 
   if (timeRestore) {
@@ -37,13 +38,13 @@ export const getDashboardListItemLink = (
     delete globalStateInUrl.refreshInterval;
   }
   url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
-
   // pull the filters off the session storage and put in the url if they exist
   const unsavedFiltersToUrl = JSON.parse(
     sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) ?? '[]'
   );
+
   const unsavedFilters = spaceId && unsavedFiltersToUrl ? unsavedFiltersToUrl[spaceId] : undefined;
-  if (unsavedFilters && unsavedFilters[id] && unsavedFilters[id].filters) {
+  if (unsavedFilters && unsavedFilters[id].filters) {
     const appStateInUrl = kbnUrlStateStorage.get<QueryState>(DASHBOARD_STATE_STORAGE_KEY) || {};
     appStateInUrl.filters = unsavedFilters[id].filters;
 
