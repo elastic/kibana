@@ -55,5 +55,6 @@
     "@kbn/apm-plugin",
     "@kbn/ml-plugin",
     "@kbn/data-service",
+    "@kbn/storybook",
   ]
 }
