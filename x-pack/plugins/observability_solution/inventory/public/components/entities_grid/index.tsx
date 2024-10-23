@@ -84,7 +84,7 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity[ENTITY_TYPE];
+      const entityType = entity.entity.type;
 
       switch (columnEntityTableId) {
         case 'alertsCount':
@@ -107,7 +107,7 @@ export function EntitiesGrid({
               values={{
                 date: (
                   <FormattedDate
-                    value={entity[columnEntityTableId]}
+                    value={entity.entity.lastSeenTimestamp}
                     month="short"
                     day="numeric"
                     year="numeric"
@@ -115,7 +115,7 @@ export function EntitiesGrid({
                 ),
                 time: (
                   <FormattedTime
-                    value={entity[columnEntityTableId]}
+                    value={entity.entity.lastSeenTimestamp}
                     hour12={false}
                     hour="2-digit"
                     minute="2-digit"
@@ -128,7 +128,7 @@ export function EntitiesGrid({
         case ENTITY_DISPLAY_NAME:
           return <EntityName entity={entity} />;
         default:
-          return entity[columnId as EntityColumnIds] || '';
+          return '';
       }
     },
     [entities, onFilterByType]

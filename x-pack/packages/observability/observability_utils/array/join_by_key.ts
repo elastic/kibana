@@ -18,6 +18,10 @@ export type JoinedReturnType<
   }
 >;
 
+function getValueByPath(obj: any, path: string): any {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+
 type ArrayOrSingle<T> = T | T[];
 
 export function joinByKey<
@@ -45,7 +49,7 @@ export function joinByKey(
   items.forEach((current) => {
     // The key of the map is a stable JSON string of the values from given keys.
     // We need stable JSON string to support plain object values.
-    const stableKey = stableStringify(keys.map((k) => current[k]));
+    const stableKey = stableStringify(keys.map((k) => getValueByPath(current, k)));
 
     if (map.has(stableKey)) {
       const item = map.get(stableKey);

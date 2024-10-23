@@ -8,11 +8,10 @@ import React from 'react';
 import rison from '@kbn/rison';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Entity } from '../../../common/entities';
-import { unflattenEntity } from '../../../common/utils/unflatten_entity';
+import type { InventoryEntityLatest } from '../../../common/entities';
 import { useKibana } from '../../hooks/use_kibana';
 
-export function AlertsBadge({ entity }: { entity: Entity }) {
+export function AlertsBadge({ entity }: { entity: InventoryEntityLatest }) {
   const {
     services: {
       http: { basePath },
@@ -22,7 +21,7 @@ export function AlertsBadge({ entity }: { entity: Entity }) {
 
   const activeAlertsHref = basePath.prepend(
     `/app/observability/alerts?_a=${rison.encode({
-      kuery: entityManager.entityClient.asKqlFilter(unflattenEntity(entity)),
+      kuery: entityManager.entityClient.asKqlFilter(entity),
       status: 'active',
     })}`
   );

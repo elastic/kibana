@@ -27,7 +27,7 @@ export async function getLatestEntitiesAlerts({
   alertsClient: AlertsClient;
   kuery?: string;
   identityFieldsPerEntityType: IdentityFieldsPerEntityType;
-}): Promise<Array<{ [key: string]: any; alertsCount?: number; [ENTITY_TYPE]: string }>> {
+}): Promise<Array<{ [key: string]: any; alertsCount?: number; type: string }>> {
   if (identityFieldsPerEntityType.size === 0) {
     return [];
   }

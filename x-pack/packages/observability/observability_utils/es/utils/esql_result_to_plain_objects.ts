@@ -6,25 +6,31 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { castArray } from 'lodash';
+import { unflattenObject } from '../../object/unflatten_object';
 
 export function esqlResultToPlainObjects<T extends Record<string, any>>(
-  result: ESQLSearchResponse
+  result: ESQLSearchResponse,
+  knownArrayFields?: string[]
 ): T[] {
+  const knownArrayFieldsSet = new Set(knownArrayFields);
   return result.values.map((row) => {
-    return row.reduce<Record<string, unknown>>((acc, value, index) => {
-      const column = result.columns[index];
+    return unflattenObject(
+      row.reduce<Record<string, unknown>>((acc, value, index) => {
+        const column = result.columns[index];
 
-      if (!column) {
+        if (!column) {
+          return acc;
+        }
+
+        // Removes the type suffix from the column name
+        const name = column.name.replace(/\.(text|keyword)$/, '');
+        if (!acc[name]) {
+          acc[column.name] = knownArrayFieldsSet.has(column.name) ? castArray(value) : value;
+        }
+
         return acc;
-      }
-
-      // Removes the type suffix from the column name
-      const name = column.name.replace(/\.(text|keyword)$/, '');
-      if (!acc[name]) {
-        acc[name] = value;
-      }
-
-      return acc;
-    }, {});
+      }, {})
+    );
   }) as T[];
 }

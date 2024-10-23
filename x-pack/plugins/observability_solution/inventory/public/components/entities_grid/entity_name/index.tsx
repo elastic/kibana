@@ -6,15 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import { ENTITY_DISPLAY_NAME } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../../../hooks/use_kibana';
-import type { Entity } from '../../../../common/entities';
+import React from 'react';
+import { InventoryEntityLatest } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
 
 interface EntityNameProps {
-  entity: Entity;
+  entity: InventoryEntityLatest;
 }
 
 export function EntityName({ entity }: EntityNameProps) {
@@ -40,7 +38,7 @@ export function EntityName({ entity }: EntityNameProps) {
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
-          {entity[ENTITY_DISPLAY_NAME]}
+          {entity.entity.displayName}
         </span>
       </EuiFlexItem>
     </EuiFlexGroup>
