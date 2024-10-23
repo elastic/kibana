@@ -45,6 +45,28 @@ const inferenceEndpoints = [
     },
     task_settings: {},
   },
+  {
+    inference_id: '.elser-2-elasticsearch',
+    task_type: 'sparse_embedding',
+    service: 'elasticsearch',
+    service_settings: {
+      num_allocations: 1,
+      num_threads: 1,
+      model_id: '.elser_model_2',
+    },
+    task_settings: {},
+  },
+  {
+    inference_id: '.multilingual-e5-small-elasticsearch',
+    task_type: 'text_embedding',
+    service: 'elasticsearch',
+    service_settings: {
+      num_allocations: 1,
+      num_threads: 1,
+      model_id: '.multilingual-e5-small',
+    },
+    task_settings: {},
+  },
 ] as InferenceAPIConfigResponse[];
 
 jest.mock('../../hooks/use_delete_endpoint', () => ({
@@ -58,9 +80,11 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('local-model');
-    expect(rows[2]).toHaveTextContent('my-elser-model-05');
-    expect(rows[3]).toHaveTextContent('third-party-model');
+    expect(rows[1]).toHaveTextContent('.elser-2-elasticsearch');
+    expect(rows[2]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
+    expect(rows[3]).toHaveTextContent('local-model');
+    expect(rows[4]).toHaveTextContent('my-elser-model-05');
+    expect(rows[5]).toHaveTextContent('third-party-model');
   });
 
   it('should display all service and model ids in the table', () => {
