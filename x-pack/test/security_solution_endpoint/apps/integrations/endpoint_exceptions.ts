@@ -155,7 +155,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await deleteEndpointExceptions();
 
-      clearPrefilledEntries = async () => {
+      clearPrefilledEntries = retryOnStale.wrap(async () => {
         const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
 
         let deleteButtons: WebElementWrapper[];
@@ -167,7 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await deleteButtons[0].click();
         } while (deleteButtons.length > 1);
-      };
+      });
     });
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
