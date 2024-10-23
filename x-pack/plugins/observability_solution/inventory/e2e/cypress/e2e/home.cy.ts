@@ -137,7 +137,7 @@ describe('Home page', () => {
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities*').as('getEntities');
         cy.intercept('GET', '/internal/inventory/group_by*').as('getGroups');
-         cy.visitKibana('/app/inventory');
+        cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.getByTestSubj('entityTypesFilterComboBox')
           .click()
