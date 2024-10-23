@@ -124,7 +124,7 @@ export const getAlertsAppMenuItem = ({
     testId: 'discoverAlertsButton',
     actions: [
       {
-        id: 'createSearchThreshold',
+        id: AppMenuActionId.createRule,
         type: AppMenuActionType.secondary,
         controlProps: {
           label: i18n.translate('discover.alerts.createSearchThreshold', {
@@ -155,7 +155,7 @@ export const getAlertsAppMenuItem = ({
         type: AppMenuActionType.submenuHorizontalRule,
       },
       {
-        id: 'manageRulesAndConnectors',
+        id: AppMenuActionId.manageRulesAndConnectors,
         type: AppMenuActionType.secondary,
         controlProps: {
           label: i18n.translate('discover.alerts.manageRulesAndConnectors', {

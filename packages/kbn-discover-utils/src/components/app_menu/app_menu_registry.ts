@@ -184,9 +184,13 @@ function extendSubmenuWithCustomActions<
   appMenuItem: T,
   customActions: Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>
 ): T {
+  const customActionsIds = new Set(customActions.map((action) => action.id));
   return {
     ...appMenuItem,
-    actions: [...appMenuItem.actions, ...customActions],
+    actions: [
+      ...appMenuItem.actions.filter((item) => !customActionsIds.has(item.id)), // allow to override secondary actions with custom ones
+      ...customActions,
+    ],
   };
 }
 

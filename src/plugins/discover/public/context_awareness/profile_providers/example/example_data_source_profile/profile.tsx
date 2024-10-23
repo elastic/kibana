@@ -130,6 +130,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
           // This example shows how to add a custom action under the Alerts submenu
           registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+            // It's also possible to override the submenu actions by using the same id
+            // as `AppMenuActionId.createRule` or `AppMenuActionId.manageRulesAndConnectors`
             id: 'example-custom-action4',
             type: AppMenuActionType.custom,
             order: 101,

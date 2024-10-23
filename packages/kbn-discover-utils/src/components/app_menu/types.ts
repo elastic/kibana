@@ -40,6 +40,8 @@ export enum AppMenuActionId {
   share = 'share',
   alerts = 'alerts',
   inspect = 'inspect',
+  createRule = 'createRule',
+  manageRulesAndConnectors = 'manageRulesAndConnectors',
 }
 
 export enum AppMenuActionType {
