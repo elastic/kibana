@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
-      const { job } = await reportingAPI.createReportJobInternal(
+      const { job, path } = await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
           browserTimezone: 'UTC',
@@ -58,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         cookieCredentials,
         internalReqHeader
       );
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
 
       generatedReports.add(job.id);
     });
