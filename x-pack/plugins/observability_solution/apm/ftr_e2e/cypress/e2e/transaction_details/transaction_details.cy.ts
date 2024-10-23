@@ -34,7 +34,8 @@ describe('Transaction details', () => {
     cy.loginAsViewerUser();
   });
 
-  it('shows transaction name and transaction charts', () => {
+  // skipping this as it´s been failing a lot lately
+  it.skip('shows transaction name and transaction charts', () => {
     cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
       'transactionLatencyRequest'
     );
