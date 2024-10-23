@@ -57,7 +57,7 @@ export function useCustomCardsForCategory(
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectDescription',
             {
-              defaultMessage: 'Scan your host for log and metric files, auto-install integrations',
+              defaultMessage: 'Scan your host for log files, metrics, auto-install integrations',
             }
           ),
           extraLabelsBadges: [
@@ -165,16 +165,17 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with EDOT Collector',
+              defaultMessage: 'Kubernetes monitoring with EDOT',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage:
-                'Unified Kubernetes observability with Elastic Distro for OTel Collector',
+                'Unified Kubernetes observability with the OpenTelemetry Operator and Elastic Distributions of OpenTelemetry (EDOT)',
             }
           ),
+          release: 'preview',
           extraLabelsBadges: [
             <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
