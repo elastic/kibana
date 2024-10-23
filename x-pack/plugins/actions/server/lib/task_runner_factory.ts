@@ -129,7 +129,6 @@ export class TaskRunnerFactory {
           executorResult = await actionExecutor.execute({
             params,
             actionId: actionId as string,
-            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             taskInfo,
             executionId,
@@ -243,38 +242,34 @@ async function getActionTaskParams(
 ): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
-  if (isPersistedActionTask(executorParams)) {
-    try {
-      const actionTask =
-        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          executorParams.actionTaskParamsId,
-          { namespace }
-        );
-      const {
-        attributes: { relatedSavedObjects },
-        references,
-      } = actionTask;
+  try {
+    const actionTask =
+      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        executorParams.actionTaskParamsId,
+        { namespace }
+      );
+    const {
+      attributes: { relatedSavedObjects },
+      references,
+    } = actionTask;
 
-      const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
-        injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
-      return {
-        ...actionTask,
-        attributes: {
-          ...actionTask.attributes,
-          ...(actionId ? { actionId } : {}),
-          ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-        },
-      };
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw createRetryableError(createTaskRunError(e, TaskErrorSource.USER), true);
-      }
-      throw createRetryableError(createTaskRunError(e, TaskErrorSource.FRAMEWORK), true);
+    return {
+      ...actionTask,
+      attributes: {
+        ...actionTask.attributes,
+        ...(actionId ? { actionId } : {}),
+        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+      },
+    };
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw createRetryableError(createTaskRunError(e, TaskErrorSource.USER), true);
     }
-  } else {
-    return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
+    throw createRetryableError(createTaskRunError(e, TaskErrorSource.FRAMEWORK), true);
   }
 }
 

@@ -13,7 +13,6 @@ import {
   SavedObjectAttributes,
   ElasticsearchClient,
   CustomRequestHandlerContext,
-  SavedObjectReference,
   Logger,
   ISavedObjectsRepository,
   IScopedClusterClient,
@@ -88,7 +87,6 @@ export interface ActionTypeExecutorOptions<
   secrets: Secrets;
   params: Params;
   logger: Logger;
-  isEphemeral?: boolean;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
@@ -243,15 +241,7 @@ interface PersistedActionTaskExecutorParams {
   actionTaskParamsId: string;
 }
 
-interface EphemeralActionTaskExecutorParams {
-  spaceId: string;
-  taskParams: ActionTaskParams;
-  references?: SavedObjectReference[];
-}
-
-export type ActionTaskExecutorParams =
-  | PersistedActionTaskExecutorParams
-  | EphemeralActionTaskExecutorParams;
+export type ActionTaskExecutorParams = PersistedActionTaskExecutorParams;
 
 export function isPersistedActionTask(
   actionTask: ActionTaskExecutorParams

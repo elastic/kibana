@@ -20,7 +20,6 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
@@ -55,14 +54,12 @@ import {
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import {
-  ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
   ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
-  getAuthorizationModeBySource,
   bulkGetAuthorizationModeBySource,
   AuthorizationMode,
 } from '../authorization/get_authorization_mode_by_source';
@@ -116,7 +113,6 @@ export interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
@@ -136,7 +132,6 @@ export interface ActionsClientContext {
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -155,7 +150,6 @@ export class ActionsClient {
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
-    ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
     authorization,
@@ -172,7 +166,6 @@ export class ActionsClient {
       kibanaIndices,
       inMemoryConnectors,
       actionExecutor,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization,
@@ -690,25 +683,6 @@ export class ActionsClient {
       );
     }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
-  }
-
-  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      await this.context.authorization.ensureAuthorized({
-        operation: 'execute',
-        actionTypeId: options.actionTypeId,
-      });
-    } else {
-      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
-    }
-    return this.context.ephemeralExecutionEnqueuer(
-      this.context.unsecuredSavedObjectsClient,
-      options
-    );
   }
 
   public async listTypes({
