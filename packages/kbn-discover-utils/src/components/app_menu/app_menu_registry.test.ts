@@ -112,29 +112,27 @@ describe('AppMenuRegistry', () => {
     let submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
     const existingSecondaryActionId = submenuItem.actions[0].id;
     expect(submenuItem.actions).toHaveLength(2);
-    expect(
-      submenuItem.actions.find((item) => item.id === existingSecondaryActionId)?.controlProps.label
-    ).toBe('Action 3.1');
 
     expect(appMenuRegistry.isActionRegistered(existingSecondaryActionId)).toBe(true);
 
-    appMenuRegistry.registerCustomActionUnderSubmenu('action-3', {
+    const customAction = {
       id: existingSecondaryActionId, // using the same id to override the action with a custom one
       type: AppMenuActionType.custom,
       controlProps: {
         label: 'Action Custom',
         onClick: jest.fn(),
       },
-    });
+    };
+    appMenuRegistry.registerCustomActionUnderSubmenu('action-3', customAction);
 
     expect(appMenuRegistry.isActionRegistered(existingSecondaryActionId)).toBe(true);
 
     items = appMenuRegistry.getSortedItems();
     submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
     expect(submenuItem.actions).toHaveLength(2);
-    expect(
-      submenuItem.actions.find((item) => item.id === existingSecondaryActionId)?.controlProps.label
-    ).toBe('Action Custom');
+    expect(submenuItem.actions.find((item) => item.id === existingSecondaryActionId)).toBe(
+      customAction
+    );
     expect(items).toMatchSnapshot();
   });
 });
