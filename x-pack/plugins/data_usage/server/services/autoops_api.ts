@@ -12,13 +12,17 @@ import apm from 'elastic-apm-node';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
-import { UsageMetricsResponseSchemaBody } from '../../common/rest_types';
-import { appContextService } from '../app_context';
+import {
+  UsageMetricsAutoOpsResponseSchemaBody,
+  UsageMetricsRequestBody,
+} from '../../common/rest_types';
+import { AppContextService } from './app_context';
 import { AutoOpsConfig } from '../types';
 
-class AutoOpsAPIService {
-  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsResponseSchemaBody) {
-    const logger = appContextService.getLogger().get();
+export class AutoOpsAPIService {
+  constructor(private appContextService: AppContextService) {}
+  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
+    const logger = this.appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
@@ -28,7 +32,7 @@ class AutoOpsAPIService {
       },
     };
 
-    const autoopsConfig = appContextService.getConfig()?.autoops;
+    const autoopsConfig = this.appContextService.getConfig()?.autoops;
     if (!autoopsConfig) {
       logger.error('[AutoOps API] Missing autoops configuration', errorMetadata);
       throw new Error('missing autoops configuration');
@@ -58,9 +62,9 @@ class AutoOpsAPIService {
       }),
     };
 
-    const cloudSetup = appContextService.getCloud();
+    const cloudSetup = this.appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestConfig.data.stack_version = this.appContextService.getKibanaVersion();
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -78,7 +82,7 @@ class AutoOpsAPIService {
       },
     };
 
-    const response = await axios<UsageMetricsResponseSchemaBody>(requestConfig).catch(
+    const response = await axios<UsageMetricsAutoOpsResponseSchemaBody>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           logger.error(
@@ -171,5 +175,3 @@ class AutoOpsAPIService {
     return error.cause;
   };
 }
-
-export const autoopsApiService = new AutoOpsAPIService();

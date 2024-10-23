@@ -53,6 +53,8 @@ import {
   isPromiseFulfilled,
   isPromiseRejected,
 } from './utils';
+import type { EntityRecord } from './types';
+import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -245,7 +247,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized`);
+      logger.info(`Entity store initialized for ${entityType}`);
 
       return updated;
     } catch (err) {
@@ -362,6 +364,7 @@ export class EntityStoreDataClient {
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
         esClient: this.esClient,
+        logger,
       });
 
       if (deleteData) {
@@ -406,7 +409,7 @@ export class EntityStoreDataClient {
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
     const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
-    const response = await this.esClient.search<Entity>({
+    const response = await this.esClient.search<EntityRecord>({
       index,
       query,
       size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
@@ -418,7 +421,19 @@ export class EntityStoreDataClient {
 
     const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
 
-    const records = hits.hits.map((hit) => hit._source as Entity);
+    const records = hits.hits.map((hit) => {
+      const { asset, ...source } = hit._source as EntityRecord;
+
+      const assetOverwrite: Pick<Entity, 'asset'> =
+        asset && asset.criticality !== CRITICALITY_VALUES.DELETED
+          ? { asset: { criticality: asset.criticality } }
+          : {};
+
+      return {
+        ...source,
+        ...assetOverwrite,
+      };
+    });
 
     const inspect: InspectQuery = {
       dsl: [JSON.stringify({ index, body: query }, null, 2)],
@@ -450,7 +465,7 @@ export class EntityStoreDataClient {
           originalStatus === ENGINE_STATUS.UPDATING
         ) {
           throw new Error(
-            `Error updating entity store: There is an changes already in progress for engine ${id}`
+            `Error updating entity store: There are changes already in progress for engine ${id}`
           );
         }
 

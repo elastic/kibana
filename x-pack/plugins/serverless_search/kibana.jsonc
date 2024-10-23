@@ -16,6 +16,7 @@
       "devTools",
       "discover",
       "management",
+      "searchIndices",
       "searchprofiler",
       "security",
       "serverless",
@@ -25,7 +26,6 @@
     "optionalPlugins": [
       "indexManagement",
       "searchConnectors",
-      "searchIndices",
       "searchInferenceEndpoints",
       "usageCollection"
     ],

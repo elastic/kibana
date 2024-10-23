@@ -27,12 +27,14 @@ import { PropertiesField } from './common_fields/properties_field';
 import type { GeoipDatabase } from '../../../../../../../common/types';
 import { getTypeLabel } from '../../../../../sections/manage_processors/constants';
 
+const extension = '.mmdb';
+
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
   database_file: {
     type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
-    serializer: (v: string[]) => (v.length ? v[0] : undefined),
+    deserializer: (v: unknown) => to.arrayOfStrings(v).map((str) => str?.split(extension)[0]),
+    serializer: (v: string[]) => (v.length ? `${v[0]}${extension}` : undefined),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.ipLocationForm.databaseFileLabel', {
       defaultMessage: 'Database file (optional)',
     }),
