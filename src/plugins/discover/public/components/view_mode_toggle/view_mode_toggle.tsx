@@ -8,12 +8,13 @@
  */
 
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
+import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -46,6 +47,11 @@ export const DocumentViewModeToggle = ({
     () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
     [uiSettings, isEsqlMode]
   );
+  const state = stateContainer.appState.getState();
+  const fieldStatsWarningMsgForQuery = useMemo(() => {
+    return getReasonIfQueryUnsupportedByFieldStats(state.query);
+  }, [state.query]);
+
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
     () => uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
@@ -150,14 +156,17 @@ export const DocumentViewModeToggle = ({
 
             {showFieldStatisticsTab ? (
               <EuiTab
+                disabled={fieldStatsWarningMsgForQuery !== undefined}
                 isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
                 onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
                 data-test-subj="dscViewModeFieldStatsButton"
               >
-                <FormattedMessage
-                  id="discover.viewModes.fieldStatistics.label"
-                  defaultMessage="Field statistics"
-                />
+                <EuiToolTip content={fieldStatsWarningMsgForQuery}>
+                  <FormattedMessage
+                    id="discover.viewModes.fieldStatistics.label"
+                    defaultMessage="Field statistics"
+                  />
+                </EuiToolTip>
               </EuiTab>
             ) : null}
           </EuiTabs>

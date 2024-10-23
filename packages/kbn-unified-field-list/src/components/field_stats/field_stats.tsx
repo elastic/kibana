@@ -53,6 +53,7 @@ import {
 import { FieldSummaryMessage } from './field_summary_message';
 import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
 import { ErrorBoundary } from '../error_boundary';
+import { getReasonIfQueryUnsupportedByFieldStats } from '../../utils/get_warning_message';
 
 export interface FieldStatsState {
   isLoading: boolean;
@@ -164,6 +165,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     },
     [changeDataView, isCanceledRef]
   );
+
+  const warningMsgForQuery = useMemo(() => getReasonIfQueryUnsupportedByFieldStats(query), [query]);
 
   async function fetchData() {
     if (isCanceledRef.current) {
@@ -336,6 +339,17 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
+  const unsupportedReason = getReasonIfQueryUnsupportedByFieldStats(query);
+  if (unsupportedReason) {
+    const messageUnsupportedReason = <FieldSummaryMessage message={unsupportedReason} />;
+
+    return overrideMissingContent
+      ? overrideMissingContent({
+          reason: 'unsupported',
+          element: messageUnsupportedReason,
+        })
+      : messageUnsupportedReason;
+  }
   if (canProvideNumberSummaryForField(field, isTextBased) && isNumberSummaryValid(numberSummary)) {
     title = (
       <EuiTitle size="xxxs">

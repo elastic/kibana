@@ -24,9 +24,13 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
+  EuiCallOut,
+  EuiIconTip,
+  EuiIcon,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -63,6 +67,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const [localQuery, setLocalQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [query, setQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
+
+  const unsupportedReasonForQuery = getReasonIfQueryUnsupportedByFieldStats(localQuery);
 
   const toggleShowEmptyFields = () => {
     setDataVisualizerListState({
@@ -202,8 +208,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const onTextLangQuerySubmit = useCallback(
     async (q: AggregateQuery | undefined) => {
       if (isESQLQuery(q)) {
-        resetData();
-        setQuery(q);
+        const isUnsupported = getReasonIfQueryUnsupportedByFieldStats(q) !== undefined;
+        if (!isUnsupported) {
+          resetData();
+          setQuery(q);
+        }
       }
     },
     [resetData]
@@ -224,8 +233,16 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             data-test-subj="dataViewTitleHeader"
             direction="row"
             alignItems="center"
-            css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
-          />
+            css={{ padding: 0, marginRight: 0 }}
+          >
+            {unsupportedReasonForQuery ? (
+              <EuiFlexItem grow={true}>
+                <EuiCallOut size="s" iconType="warning" color="warning">
+                  {unsupportedReasonForQuery}
+                </EuiCallOut>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
 
           {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexGroup
@@ -253,7 +270,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 width="full"
                 needsUpdate={queryNeedsUpdate}
                 onRefresh={handleRefresh}
-                isDisabled={!hasValidTimeField}
+                isDisabled={unsupportedReasonForQuery !== undefined}
+                tooltipMessage={unsupportedReasonForQuery}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -276,6 +294,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             hideRunQueryText={false}
             isLoading={queryHistoryStatus ?? false}
             displayDocumentationAsFlyout
+            disableSubmitAction={unsupportedReasonForQuery !== undefined}
           />
         </EuiFlexItem>
 
@@ -312,7 +331,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
               <EuiSpacer size="s" />
 
               <EuiProgress value={combinedProgress} max={100} size="xs" />
-              <DataVisualizerTable<FieldVisConfig>
+              <DataVisualizerTable
                 items={configs}
                 pageState={dataVisualizerListState}
                 updatePageState={setDataVisualizerListState}
