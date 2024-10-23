@@ -11,30 +11,32 @@ import { i18n } from '@kbn/i18n';
 import { UrlDrilldownConfig, UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
-const generalFormatError = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
-  {
-    defaultMessage: 'Invalid format. Example: {exampleUrl}',
-    values: {
-      exampleUrl: 'https://www.my-url.com/?{{event.key}}={{event.value}}',
-    },
-  }
-);
+const generalFormatError = () =>
+  i18n.translate(
+    'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
+    {
+      defaultMessage: 'Invalid URL format.',
+    }
+  );
 
-const formatError = (message: string) =>
-  i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage', {
-    defaultMessage: 'Invalid format: {message}',
+const compileError = (message: string) =>
+  i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlCompileErrorMessage', {
+    defaultMessage: 'The URL template is not valid in the given context. {message}.',
     values: {
-      message,
+      message: message.replaceAll('[object Object]', 'context'),
     },
   });
 
 const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
-export function validateUrl(url: string): { isValid: boolean; error?: string } {
+export function validateUrl(url: string): {
+  isValid: boolean;
+  error?: string;
+  invalidUrl?: string;
+} {
   if (!url)
     return {
       isValid: false,
-      error: generalFormatError,
+      error: generalFormatError(),
     };
 
   try {
@@ -44,7 +46,8 @@ export function validateUrl(url: string): { isValid: boolean; error?: string } {
   } catch (e) {
     return {
       isValid: false,
-      error: generalFormatError,
+      error: generalFormatError(),
+      invalidUrl: url,
     };
   }
 }
@@ -52,20 +55,32 @@ export function validateUrl(url: string): { isValid: boolean; error?: string } {
 export async function validateUrlTemplate(
   urlTemplate: UrlDrilldownConfig['url'],
   scope: UrlDrilldownScope
-): Promise<{ isValid: boolean; error?: string }> {
+): Promise<{ isValid: boolean; error?: string; invalidUrl?: string }> {
   if (!urlTemplate.template)
     return {
       isValid: false,
-      error: generalFormatError,
+      error: generalFormatError(),
     };
 
+  let compiledUrl: string;
+
   try {
-    const compiledUrl = await compile(urlTemplate.template, scope);
+    compiledUrl = await compile(urlTemplate.template, scope);
+  } catch (e) {
+    return {
+      isValid: false,
+      error: compileError(e.message),
+      invalidUrl: urlTemplate.template,
+    };
+  }
+
+  try {
     return validateUrl(compiledUrl);
   } catch (e) {
     return {
       isValid: false,
-      error: formatError(e.message),
+      error: generalFormatError() + ` ${e.message}.`,
+      invalidUrl: compiledUrl,
     };
   }
 }
