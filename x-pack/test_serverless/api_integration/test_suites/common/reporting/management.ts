@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
-import type { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
@@ -19,9 +19,8 @@ export default ({ getService }: FtrProviderContext) => {
   const reportingAPI = getService('svlReportingApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
-  const svlCommonApi = getService('svlCommonApi');
-  const internalReqHeader = svlCommonApi.getInternalRequestHeader();
   let cookieCredentials: CookieCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   const archives = {
     ecommerce: {
@@ -36,6 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);

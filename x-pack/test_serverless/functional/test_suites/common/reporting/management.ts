@@ -10,7 +10,7 @@ import {
   CSV_REPORT_TYPE_V2,
   type JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
-import type { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -21,10 +21,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
-  const svlCommonApi = getService('svlCommonApi');
   const samlAuth = getService('samlAuth');
-  const internalReqHeader = svlCommonApi.getInternalRequestHeader();
   let cookieCredentials: CookieCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -62,6 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // Kibana CI and MKI use different users
     before(async () => {
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
 
