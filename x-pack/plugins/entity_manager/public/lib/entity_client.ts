@@ -13,7 +13,7 @@ import {
   createRepositoryClient,
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
-import { KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
+import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import { entityLatestSchema } from '@kbn/entities-schema';
 import {
   DisableManagedEntityResponse,

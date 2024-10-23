@@ -9,9 +9,6 @@ import { EntityClient, EntityLatest } from './entity_client';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const commonEntityFields: EntityLatest = {
-  agent: {
-    name: 'node',
-  },
   entity: {
     lastSeenTimestamp: '2023-10-09T00:00:00Z',
     id: '1',
@@ -30,7 +27,6 @@ describe('EntityClient', () => {
   describe('asKqlFilter', () => {
     it('should return the value when identityFields is a single string', () => {
       const entityLatest: EntityLatest = {
-        ...commonEntityFields,
         entity: {
           ...commonEntityFields.entity,
           identityFields: ['service.name', 'service.environment'],
@@ -47,7 +43,6 @@ describe('EntityClient', () => {
 
     it('should return values when identityFields is an array of strings', () => {
       const entityLatest: EntityLatest = {
-        ...commonEntityFields,
         entity: {
           ...commonEntityFields.entity,
           identityFields: ['service.name', 'service.environment'],
@@ -73,7 +68,6 @@ describe('EntityClient', () => {
 
     it('should ignore fields that are not present in the entity', () => {
       const entityLatest: EntityLatest = {
-        ...commonEntityFields,
         entity: {
           ...commonEntityFields.entity,
           identityFields: ['host.name', 'foo.bar'],
@@ -91,7 +85,6 @@ describe('EntityClient', () => {
   describe('getIdentityFieldsValue', () => {
     it('should return identity fields values', () => {
       const serviceEntity: EntityLatest = {
-        ...commonEntityFields,
         entity: {
           ...commonEntityFields.entity,
           identityFields: ['service.name', 'service.environment'],
@@ -109,7 +102,6 @@ describe('EntityClient', () => {
 
     it('should return identity fields values when indentity field is an array of string', () => {
       const serviceEntity: EntityLatest = {
-        ...commonEntityFields,
         entity: {
           ...commonEntityFields.entity,
           identityFields: ['service.name', 'service.environment'],
@@ -129,7 +121,6 @@ describe('EntityClient', () => {
 
     it('should return identity fields when field is in the root', () => {
       const serviceEntity: EntityLatest = {
-        ...commonEntityFields,
         entity: {
           ...commonEntityFields.entity,
           identityFields: ['name'],

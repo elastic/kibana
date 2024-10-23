@@ -6,7 +6,7 @@
  */
 
 import { unflattenObject } from '@kbn/observability-utils/object/unflatten_object';
-import { Entity, InventoryEntityLatest } from '../entities';
+import type { Entity, InventoryEntityLatest } from '../entities';
 
 export function unflattenEntity(entity: Entity) {
   return unflattenObject(entity) as InventoryEntityLatest;

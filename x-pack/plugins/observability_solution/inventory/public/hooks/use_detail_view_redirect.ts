@@ -7,14 +7,18 @@
 import {
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorParams,
+  CONTAINER_ID,
+  ENTITY_TYPE,
+  HOST_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
   SERVICE_OVERVIEW_LOCATOR_ID,
   ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { castArray } from 'lodash';
-import { Entity } from '../../common/entities';
+import type { Entity } from '../../common/entities';
 import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
 
@@ -40,31 +44,30 @@ export const useDetailViewRedirect = () => {
   const serviceOverviewLocator = locators.get<ServiceOverviewParams>(SERVICE_OVERVIEW_LOCATOR_ID);
 
   const getIdentityValue = useCallback(
-    (entity: Entity) => {
-      const identityField = castArray(entity.entity.identityFields)[0];
-      return entityManager.entityClient.getIdentityFieldsValue(unflattenEntity(entity))[
-        identityField
-      ];
-    },
+    (entity: Entity) => entityManager.entityClient.getIdentityFieldsValue(unflattenEntity(entity)),
     [entityManager.entityClient]
   );
 
   const getDetailViewRedirectUrl = useCallback(
     (entity: Entity) => {
+      const type = entity[ENTITY_TYPE];
       const identityValue = getIdentityValue(entity);
 
-      switch (entity.entity.type) {
+      switch (type) {
         case 'host':
+          return assetDetailsLocator?.getRedirectUrl({
+            assetId: identityValue[HOST_NAME],
+            assetType: type,
+          });
         case 'container':
           return assetDetailsLocator?.getRedirectUrl({
-            assetId: identityValue,
-            assetType: entity.entity.type,
+            assetId: identityValue[CONTAINER_ID],
+            assetType: type,
           });
-
         case 'service':
           return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: identityValue,
-            environment: entity.service?.environment,
+            serviceName: identityValue[SERVICE_NAME],
+            environment: identityValue[SERVICE_ENVIRONMENT],
           });
 
         default:
