@@ -15,15 +15,17 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { LogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { LogCategoryDocument } from '../../services/category_details_service/types';
 import { type ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
 export interface LogCategoryDocumentExamplesTableDependencies {
+  core: CoreStart;
   uiSettings: SettingsStart;
   fieldFormats: FieldFormatsStart;
   share: SharePluginStart;
   columns: {
-    SummaryColumn: React.ComponentType<Omit<AllSummaryColumnProps, 'share' | 'core'>>;
+    SummaryColumn: React.ComponentType<AllSummaryColumnProps>;
     LogLevelCell: LogLevelBadgeCell;
   };
 }
@@ -116,6 +118,8 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
             density={DataGridDensity.COMPACT}
             rowHeight={ROWS_HEIGHT_OPTIONS.single}
             shouldShowFieldHandler={() => false}
+            core={dependencies.core}
+            share={dependencies.share}
           />
         );
       },

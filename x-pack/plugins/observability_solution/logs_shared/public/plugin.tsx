@@ -7,9 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import React from 'react';
-import { AllSummaryColumnProps } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column';
-import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
+import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components';
 import {
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
@@ -83,6 +81,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     });
 
     const LogsOverview = createLogsOverview({
+      core,
       charts,
       logsDataAccess,
       search: data.search.search,
@@ -91,9 +90,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       dataViews,
       fieldFormats,
       columns: {
-        SummaryColumn: (props: Omit<AllSummaryColumnProps, 'core' | 'share'>) => {
-          return <LazySummaryColumn {...props} share={share} core={core} />;
-        },
+        SummaryColumn: LazySummaryColumn,
         LogLevelCell: getLogLevelBadgeCell('log.level'),
       },
     });
