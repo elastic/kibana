@@ -167,6 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
@@ -212,6 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
