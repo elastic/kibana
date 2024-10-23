@@ -121,7 +121,7 @@ export class ActionTypeRegistry {
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
-    if (!actionType?.isSystemActionType || !actionType?.isEdrActionType) {
+    if (!actionType?.isSystemActionType && !actionType?.isEdrActionType) {
       return [];
     }
 
@@ -176,7 +176,8 @@ export class ActionTypeRegistry {
     }
 
     if (
-      (!actionType.isSystemActionType || !actionType.isEdrActionType) &&
+      !actionType.isSystemActionType &&
+      !actionType.isEdrActionType &&
       actionType.getKibanaPrivileges
     ) {
       throw new Error(
