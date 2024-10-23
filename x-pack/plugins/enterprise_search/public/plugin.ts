@@ -134,7 +134,7 @@ const contentLinks: AppDeepLink[] = [
 
 const relevanceLinks: AppDeepLink[] = [
   {
-    id: 'searchInferenceEndpoints',
+    id: 'inferenceEndpoints',
     path: `/${INFERENCE_ENDPOINTS_PATH}`,
     title: i18n.translate(
       'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
