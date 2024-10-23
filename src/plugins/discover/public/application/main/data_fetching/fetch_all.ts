@@ -92,13 +92,9 @@ export function fetchAll(
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, { query });
-
-    // histogram for data view mode will send `loading` for totalHits$
-    if (isEsqlQuery) {
-      sendLoadingMsg(dataSubjects.totalHits$, {
-        result: dataSubjects.totalHits$.getValue().result,
-      });
-    }
+    sendLoadingMsg(dataSubjects.totalHits$, {
+      result: dataSubjects.totalHits$.getValue().result,
+    });
 
     // Start fetching all required requests
     const response = isEsqlQuery
