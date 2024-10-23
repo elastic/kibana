@@ -37,7 +37,8 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: jest.fn().mockReturnValue({
       services: {
         telemetry: {
-          reportEvent: (params: { type: 'single' | 'bulk' }) => mockReportEvent(params),
+          reportEvent: (eventType: TelemetryEventTypes, params: { type: 'single' | 'bulk' }) =>
+            mockReportEvent(eventType, params),
         },
         application: {
           navigateToApp: jest.fn(),

@@ -104,10 +104,13 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
       return mockUseScheduleRuleRunMutation.mock.calls.length > 0;
     });
 
-    expect(mockedUseKibana.services.telemetry.reportEvent).toHaveBeenCalledWith({
-      rangeInMs: timeRange.endDate.diff(timeRange.startDate),
-      status: 'error',
-      rulesCount: 1,
-    });
+    expect(mockedUseKibana.services.telemetry.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.ManualRuleRunExecute,
+      {
+        rangeInMs: timeRange.endDate.diff(timeRange.startDate),
+        status: 'error',
+        rulesCount: 1,
+      }
+    );
   });
 });
