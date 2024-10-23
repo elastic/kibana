@@ -19,6 +19,10 @@ import type { SecurityAppStore } from '../../common/store';
 import { ReactQueryClientProvider } from '../../common/containers/query_client/query_client_provider';
 import type { StartPluginsDependencies, StartServices } from '../../types';
 import { MlCapabilitiesProvider } from '../../common/components/ml/permissions/ml_capabilities_provider';
+import { DiscoverInTimelineContextProvider } from '../../common/components/discover_in_timeline/provider';
+import { UpsellingProvider } from '../../common/components/upselling_provider';
+import { ConsoleManager } from '../../management/components/console';
+import { AssistantProvider } from '../../assistant/provider';
 
 interface GetSecuritySolutionDiscoverAppWrapperArgs {
   store: unknown;
@@ -75,24 +79,36 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
             <MlCapabilitiesProvider>
               <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
                 <NavigationProvider core={core}>
-                  <ReduxStoreProvider store={args.store as SecurityAppStore}>
-                    <ReactQueryClientProvider>
-                      <ExpandableFlyoutProvider>
-                        <SecuritySolutionFlyout />
-                        {/* below context should not be here and should be removed*/}
-                        <StatefulEventContext.Provider
-                          value={{
-                            timelineID: 'not-timeline',
-                            enableHostDetailsFlyout: true,
-                            tabType: 'query',
-                            enableIpDetailsFlyout: true,
-                          }}
-                        >
-                          {props.children}
-                        </StatefulEventContext.Provider>
-                      </ExpandableFlyoutProvider>
-                    </ReactQueryClientProvider>
-                  </ReduxStoreProvider>
+                  <UpsellingProvider upsellingService={services.upselling}>
+                    {/* ^_^ Needed for Alert Preview from Expanded Section of Entity Flyout */}
+                    <ReduxStoreProvider store={args.store as SecurityAppStore}>
+                      <ReactQueryClientProvider>
+                        <ConsoleManager>
+                          {/* ^_^ Needed for AlertPreview -> Alert Details Flyout Action */}
+                          <AssistantProvider>
+                            {/* ^_^ Needed for AlertPreview -> Alert Details Flyout Action */}
+                            <DiscoverInTimelineContextProvider>
+                              {/* ^_^ Needed for Add to Timeline action by `useRiskInputActions`*/}
+                              <ExpandableFlyoutProvider>
+                                <SecuritySolutionFlyout />
+                                {/* below context should not be here and should be removed*/}
+                                <StatefulEventContext.Provider
+                                  value={{
+                                    timelineID: 'not-timeline',
+                                    enableHostDetailsFlyout: true,
+                                    tabType: 'query',
+                                    enableIpDetailsFlyout: true,
+                                  }}
+                                >
+                                  {props.children}
+                                </StatefulEventContext.Provider>
+                              </ExpandableFlyoutProvider>
+                            </DiscoverInTimelineContextProvider>
+                          </AssistantProvider>
+                        </ConsoleManager>
+                      </ReactQueryClientProvider>
+                    </ReduxStoreProvider>
+                  </UpsellingProvider>
                 </NavigationProvider>
               </CasesContext>
             </MlCapabilitiesProvider>
