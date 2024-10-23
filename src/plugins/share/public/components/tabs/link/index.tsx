@@ -51,6 +51,7 @@ const linkTabReducer: ILinkTab['reducer'] = (
 const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
   const {
     objectType,
+    objectTypeMeta,
     objectId,
     isDirty,
     shareableUrl,
@@ -86,6 +87,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     <LinkContent
       {...{
         objectType,
+        objectConfig: objectTypeMeta?.config?.link,
         objectId,
         isDirty,
         shareableUrl,
