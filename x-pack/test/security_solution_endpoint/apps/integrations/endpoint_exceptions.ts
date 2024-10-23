@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const retry = getService('retry');
+  const retryOnStale = getService('retryOnStale');
   const esClient = getService('es');
   const supertest = getService('supertest');
   const find = getService('find');
@@ -49,8 +50,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const openNewEndpointExceptionFlyout = async () => {
-      await testSubjects.scrollIntoView('timeline-context-menu-button');
-      await testSubjects.click('timeline-context-menu-button');
+      retryOnStale(async () => {
+        await testSubjects.scrollIntoView('timeline-context-menu-button');
+        await testSubjects.click('timeline-context-menu-button');
+      });
       await testSubjects.click('add-endpoint-exception-menu-item');
       await testSubjects.existOrFail('addExceptionFlyout');
 
