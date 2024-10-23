@@ -1357,8 +1357,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /.eslintignore @elastic/kibana-operations
 
 # Appex QA
-/x-pack/test/functional/config.*.js @elastic/appex-qa
-/x-pack/test/functional/config.*.ts @elastic/appex-qa
+/x-pack/test/functional/config.*.* @elastic/appex-qa
 /x-pack/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa # Maybe this should be a glob?
 /x-pack/test/accessibility/services.ts @elastic/appex-qa
 /x-pack/test/accessibility/page_objects.ts @elastic/appex-qa
