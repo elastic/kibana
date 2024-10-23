@@ -77,21 +77,21 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       },
     };
   },
-  // getHoverProvider: (callbacks?: ESQLCallbacks): monaco.languages.HoverProvider => {
-  //   return {
-  //     async provideHover(
-  //       model: monaco.editor.ITextModel,
-  //       position: monaco.Position,
-  //       token: monaco.CancellationToken
-  //     ) {
-  //       const astAdapter = new ESQLAstAdapter(
-  //         (...uris) => workerProxyService.getWorker(uris),
-  //         callbacks
-  //       );
-  //       return astAdapter.getHover(model, position, token);
-  //     },
-  //   };
-  // },
+  getHoverProvider: (callbacks?: ESQLCallbacks): monaco.languages.HoverProvider => {
+    return {
+      async provideHover(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        token: monaco.CancellationToken
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        return astAdapter.getHover(model, position, token);
+      },
+    };
+  },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
       triggerCharacters: [',', '(', '=', ' ', '[', ''],
