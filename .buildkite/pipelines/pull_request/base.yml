@@ -44,7 +44,6 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
