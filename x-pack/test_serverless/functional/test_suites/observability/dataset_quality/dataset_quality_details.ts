@@ -385,6 +385,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataStream: degradedDataStreamName,
         });
 
+        await PageObjects.datasetQuality.waitUntilTableLoaded();
+
         const rows =
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
