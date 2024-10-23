@@ -9,7 +9,6 @@
     "@kbn/grid-layout",
     "@kbn/core-application-browser",
     "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/embeddable-plugin"
+    "@kbn/developer-examples-plugin"
   ]
 }

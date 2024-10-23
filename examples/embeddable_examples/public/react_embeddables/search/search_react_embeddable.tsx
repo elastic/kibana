@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLoadingSpinner, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiStat } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -34,7 +34,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
       );
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       if (!defaultDataView) {
@@ -84,7 +84,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
             try {
               dataLoading$.next(true);
-              await new Promise((resolve) => setTimeout(resolve, 500));
               const abortController = new AbortController();
               prevRequestAbortController = abortController;
               const count = await getCount(
@@ -124,11 +123,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       return {
         api,
         Component: () => {
-          const [count, error, loading] = useBatchedPublishingSubjects(
-            count$,
-            blockingError$,
-            dataLoading$
-          );
+          const [count, error] = useBatchedPublishingSubjects(count$, blockingError$);
 
           useEffect(() => {
             return () => {
@@ -139,9 +134,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           // in error case we can return null because the panel will handle rendering the blocking error.
           if (error || !defaultDataView) return null;
 
-          return loading ? (
-            <EuiLoadingSpinner />
-          ) : (
+          return (
             <div
               css={css`
                 width: 100%;
