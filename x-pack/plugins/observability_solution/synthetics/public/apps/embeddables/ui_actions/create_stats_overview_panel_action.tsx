@@ -39,7 +39,7 @@ export function createStatusOverviewPanelAction(
         const initialState = await openMonitorConfiguration({
           coreStart,
           pluginStart,
-          title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
+          title: i18n.translate('xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.title', {
             defaultMessage: 'Create monitor stats',
           }),
         });
