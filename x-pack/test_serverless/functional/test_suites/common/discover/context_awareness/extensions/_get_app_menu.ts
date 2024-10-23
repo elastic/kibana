@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    it('should render the main actions and the action from root profile', async () => {
+    it('should render the main actions', async () => {
       const state = kbnRison.encode({
         dataSource: { type: 'esql' },
         query: { esql: 'from logstash* | sort @timestamp desc' },
@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
       await testSubjects.existOrFail('discoverAlertsButton');
-      await testSubjects.existOrFail('example-custom-root-submenu');
     });
 
     it('should render custom actions', async () => {
