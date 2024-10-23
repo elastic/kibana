@@ -34,7 +34,6 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
-  ONBOARDING = 'onboarding_',
 
   ONBOARDING = 'onboarding',
 
