@@ -20,7 +20,7 @@ import { ActionsConfig } from '../config';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1d' };
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
