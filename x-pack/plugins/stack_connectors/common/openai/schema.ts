@@ -21,6 +21,12 @@ export const ConfigSchema = schema.oneOf([
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
+    apiUrl: schema.string(),
+    defaultModel: schema.string(),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  }),
 ]);
 
 export const SecretsSchema = schema.object({ apiKey: schema.string() });

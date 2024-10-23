@@ -28,6 +28,12 @@ export const COMMON_API_HEADERS = Object.freeze({
   'Elastic-Api-Version': API_VERSIONS.public.v1,
 });
 
+export const COMMON_INTERNAL_API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress',
+  'x-elastic-internal-origin': 'fleet',
+  'Elastic-Api-Version': API_VERSIONS.internal.v1,
+});
+
 // Replaces request - adds baseline authentication + global headers
 export const request = <T = unknown>({
   headers,
@@ -36,6 +42,17 @@ export const request = <T = unknown>({
   return cy.request<T>({
     auth: API_AUTH,
     headers: { ...COMMON_API_HEADERS, ...headers },
+    ...options,
+  });
+};
+
+export const internalRequest = <T = unknown>({
+  headers,
+  ...options
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> => {
+  return cy.request<T>({
+    auth: API_AUTH,
+    headers: { ...COMMON_INTERNAL_API_HEADERS, ...headers },
     ...options,
   });
 };

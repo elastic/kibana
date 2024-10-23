@@ -317,6 +317,7 @@ module.exports = {
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
+    '@kbn/eslint/no_deprecated_authz_config': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
@@ -326,7 +327,8 @@ module.exports = {
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
-
+    '@kbn/imports/no_group_crossing_manifests': 'error',
+    '@kbn/imports/no_group_crossing_imports': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',

@@ -5,36 +5,51 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
-
+import { type ElasticsearchClient, RequestHandler } from '@kbn/core/server';
+import { DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
+import { DataUsageService } from '../../services';
+
+export interface MeteringStats {
+  name: string;
+  num_docs: number;
+  size_in_bytes: number;
+}
+
+interface MeteringStatsResponse {
+  datastreams: MeteringStats[];
+}
+
+const getMeteringStats = (client: ElasticsearchClient) => {
+  return client.transport.request<MeteringStatsResponse>({
+    method: 'GET',
+    path: '/_metering/stats',
+  });
+};
 
 export const getDataStreamsHandler = (
-  dataUsageContext: DataUsageContext
+  dataUsageService: DataUsageService
 ): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
+  const logger = dataUsageService.getLogger('dataStreamsRoute');
 
   return async (context, _, response) => {
-    logger.debug(`Retrieving user data streams`);
+    logger.debug('Retrieving user data streams');
 
     try {
       const core = await context.core;
-      const esClient = core.elasticsearch.client.asCurrentUser;
+      const { datastreams: meteringStats } = await getMeteringStats(
+        core.elasticsearch.client.asSecondaryAuthUser
+      );
 
-      const { data_streams: dataStreamsResponse } = await esClient.indices.dataStreamsStats({
-        name: '*',
-        expand_wildcards: 'all',
-      });
-
-      const sorted = dataStreamsResponse
-        .sort((a, b) => b.store_size_bytes - a.store_size_bytes)
-        .map((dataStream) => ({
-          name: dataStream.data_stream,
-          storageSizeBytes: dataStream.store_size_bytes,
+      const body = meteringStats
+        .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
+        .map((stat) => ({
+          name: stat.name,
+          storageSizeBytes: stat.size_in_bytes ?? 0,
         }));
+
       return response.ok({
-        body: sorted,
+        body,
       });
     } catch (error) {
       return errorHandler(logger, response, error);

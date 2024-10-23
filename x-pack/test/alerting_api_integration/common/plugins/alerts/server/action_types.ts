@@ -76,6 +76,7 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+  actions.registerType(getHookedActionType());
 
   /**
    * System actions
@@ -131,9 +132,100 @@ function getIndexRecordActionType() {
           secrets,
           reference: params.reference,
           source: 'action:test.index-record',
+          '@timestamp': new Date(),
         },
       });
       return { status: 'ok', actionId };
+    },
+  };
+  return result;
+}
+
+function getHookedActionType() {
+  const paramsSchema = schema.object({});
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const configSchema = schema.object({
+    index: schema.string(),
+    source: schema.string(),
+  });
+  type ConfigType = TypeOf<typeof configSchema>;
+  const secretsSchema = schema.object({
+    encrypted: schema.string(),
+  });
+  type SecretsType = TypeOf<typeof secretsSchema>;
+  const result: ActionType<ConfigType, SecretsType, ParamsType> = {
+    id: 'test.connector-with-hooks',
+    name: 'Test: Connector with hooks',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: { schema: paramsSchema },
+      config: { schema: configSchema },
+      secrets: { schema: secretsSchema },
+    },
+    async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+    async preSaveHook({ connectorId, config, secrets, services, isUpdate, logger }) {
+      const body = {
+        state: {
+          connectorId,
+          config,
+          secrets,
+          isUpdate,
+        },
+        reference: 'pre-save',
+        source: config.source,
+      };
+      logger.info(`running hook pre-save for ${JSON.stringify(body)}`);
+      await services.scopedClusterClient.asInternalUser.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body,
+      });
+    },
+    async postSaveHook({
+      connectorId,
+      config,
+      secrets,
+      services,
+      logger,
+      isUpdate,
+      wasSuccessful,
+    }) {
+      const body = {
+        state: {
+          connectorId,
+          config,
+          secrets,
+          isUpdate,
+          wasSuccessful,
+        },
+        reference: 'post-save',
+        source: config.source,
+      };
+      logger.info(`running hook post-save for ${JSON.stringify(body)}`);
+      await services.scopedClusterClient.asInternalUser.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body,
+      });
+    },
+    async postDeleteHook({ connectorId, config, services, logger }) {
+      const body = {
+        state: {
+          connectorId,
+          config,
+        },
+        reference: 'post-delete',
+        source: config.source,
+      };
+      logger.info(`running hook post-delete for ${JSON.stringify(body)}`);
+      await services.scopedClusterClient.asInternalUser.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body,
+      });
     },
   };
   return result;

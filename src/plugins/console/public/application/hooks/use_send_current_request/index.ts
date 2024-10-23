@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useSendCurrentRequest } from './use_send_current_request';
 export { sendRequest } from './send_request';

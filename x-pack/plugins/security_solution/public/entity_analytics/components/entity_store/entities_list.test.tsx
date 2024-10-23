@@ -29,18 +29,11 @@ const responseData: ListEntitiesResponse = {
   total: 1,
   records: [
     {
+      '@timestamp': '2021-08-02T14:00:00.000Z',
       user: { name: entityName },
       entity: {
-        type: 'node',
-        id: 'entity-id',
-        lastSeenTimestamp: '2023-01-01T00:00:00Z',
-        schemaVersion: '1.0',
-        definitionVersion: '1.0',
-        displayName: entityName,
-        identityFields: ['field1', 'field2'],
-        firstSeenTimestamp: '2023-01-01T00:00:00Z',
-        definitionId: 'definition-id',
-        source: 'source',
+        name: entityName,
+        source: 'test-index',
       },
     },
   ],
@@ -113,7 +106,7 @@ describe('EntitiesList', () => {
     fireEvent.click(columnHeader);
     expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        sortField: 'entity.displayName.keyword',
+        sortField: 'entity.name.text',
         sortOrder: 'asc',
       })
     );
