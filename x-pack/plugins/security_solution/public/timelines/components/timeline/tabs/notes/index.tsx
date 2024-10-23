@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { TimelineModel } from '../../../../..';
 import { SaveTimelineCallout } from '../../../notes/save_timeline';
 import { AddNote } from '../../../../../notes/components/add_note';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -40,6 +41,7 @@ import {
   selectSortedNotesBySavedObjectId,
 } from '../../../../../notes';
 import type { Note } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { NotesList } from '../../../../../notes/components/notes_list';
 import { OldNotes } from '../../../notes/old_notes';
 import { Participants } from '../../../notes/participants';
@@ -57,7 +59,7 @@ export const FETCH_NOTES_ERROR = i18n.translate(
   }
 );
 export const NO_NOTES = i18n.translate('xpack.securitySolution.notes.noNotesLabel', {
-  defaultMessage: 'No notes have yet been created for this timeline',
+  defaultMessage: 'No notes have been created for this Timeline.',
 });
 
 interface NotesTabContentProps {
@@ -92,11 +94,16 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
   useScrollToTop('#scrollableNotes', !!scrollToTop);
 
-  const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
-  const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
+  const timeline: TimelineModel = useSelector((state: State) =>
+    selectTimelineById(state, timelineId)
+  );
+  const timelineSavedObjectId = useMemo(
+    () => timeline.savedObjectId ?? '',
+    [timeline.savedObjectId]
+  );
   const isTimelineSaved: boolean = useMemo(
-    () => timelineSavedObjectId.length > 0,
-    [timelineSavedObjectId]
+    () => timeline.status === TimelineStatusEnum.active,
+    [timeline.status]
   );
 
   const fetchNotes = useCallback(
@@ -160,7 +167,12 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   }, [timeline.description, timeline.updated, timeline.updatedBy]);
 
   return (
-    <EuiPanel>
+    <EuiPanel
+      css={css`
+        height: 100%;
+        overflow: auto;
+      `}
+    >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiTitle>

@@ -30,5 +30,7 @@
     "@kbn/core-doc-links-browser",
     "@kbn/core",
     "@kbn/zod",
+    "@kbn/data-views-plugin",
+    "@kbn/user-profile-components",
   ]
 }

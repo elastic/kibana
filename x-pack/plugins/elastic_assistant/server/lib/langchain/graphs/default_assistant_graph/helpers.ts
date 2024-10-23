@@ -79,10 +79,8 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  if (
-    (inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') &&
-    inputs?.bedrockChatEnabled
-  ) {
+  // Stream is from tool calling agent or structured chat agent
+  if (inputs.isOssModel || inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') {
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
@@ -92,14 +90,15 @@ export const streamGraph = async ({
         version: 'v2',
         streamMode: 'values',
       },
-      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+      inputs.isOssModel || inputs?.llmType === 'bedrock'
+        ? { includeNames: ['Summarizer'] }
+        : undefined
     );
 
     for await (const { event, data, tags } of stream) {
       if ((tags || []).includes(AGENT_NODE_TAG)) {
         if (event === 'on_chat_model_stream') {
           const msg = data.chunk as AIMessageChunk;
-
           if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
             push({ payload: msg.content as string, type: 'content' });
           }
@@ -116,6 +115,8 @@ export const streamGraph = async ({
     }
     return responseWithHeaders;
   }
+
+  // Stream is from openai functions agent
   let finalMessage = '';
   let conversationId: string | undefined;
   const stream = assistantGraph.streamEvents(inputs, {
@@ -126,12 +127,6 @@ export const streamGraph = async ({
     version: 'v1',
   });
 
-  let currentOutput = '';
-  let finalOutputIndex = -1;
-  const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
-  let streamingFinished = false;
-  const finalOutputStopRegex = /(?<!\\)"/;
-  let extraOutput = '';
   const processEvent = async () => {
     try {
       const { value, done } = await stream.next();
@@ -157,41 +152,6 @@ export const streamGraph = async ({
             if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
               handleStreamEnd(generations[0]?.text ?? finalMessage);
             }
-          }
-        }
-        if (event.name === 'ActionsClientSimpleChatModel') {
-          if (event.event === 'on_llm_stream') {
-            const chunk = event.data?.chunk;
-
-            const msg = chunk.content;
-            if (finalOutputIndex === -1) {
-              currentOutput += msg;
-              // Remove whitespace to simplify parsing
-              const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
-              if (noWhitespaceOutput.includes(finalOutputStartToken)) {
-                const nonStrippedToken = '"action_input": "';
-                finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
-                const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
-                extraOutput = currentOutput.substring(contentStartIndex);
-                push({ payload: extraOutput, type: 'content' });
-                finalMessage += extraOutput;
-              }
-            } else if (!streamingFinished && !didEnd) {
-              const finalOutputEndIndex = msg.search(finalOutputStopRegex);
-              if (finalOutputEndIndex !== -1) {
-                extraOutput = msg.substring(0, finalOutputEndIndex);
-                streamingFinished = true;
-                if (extraOutput.length > 0) {
-                  push({ payload: extraOutput, type: 'content' });
-                  finalMessage += extraOutput;
-                }
-              } else {
-                push({ payload: chunk.content, type: 'content' });
-                finalMessage += chunk.content;
-              }
-            }
-          } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
-            handleStreamEnd(finalMessage);
           }
         }
       }

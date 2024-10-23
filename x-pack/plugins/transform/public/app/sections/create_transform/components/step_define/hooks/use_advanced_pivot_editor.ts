@@ -6,7 +6,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import { XJsonMode } from '@kbn/ace';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
@@ -15,7 +14,6 @@ import type { PostTransformsPreviewRequestSchema } from '../../../../../../../se
 import type { StepDefineExposedState } from '../common';
 
 const { useXJsonMode } = XJson;
-const xJsonMode = new XJsonMode();
 
 export const useAdvancedPivotEditor = (
   defaults: StepDefineExposedState,
@@ -71,7 +69,6 @@ export const useAdvancedPivotEditor = (
       isAdvancedEditorSwitchModalVisible,
       isAdvancedPivotEditorApplyButtonEnabled,
       isAdvancedPivotEditorEnabled,
-      xJsonMode,
     },
   };
 };

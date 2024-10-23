@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
@@ -16,8 +17,8 @@ import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
+import { flappingSchema } from './flapping_schema';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
 export const intervalScheduleSchema = schema.object({
@@ -177,6 +178,7 @@ export const ruleDomainSchema = schema.object({
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
+  flapping: schema.maybe(schema.nullable(flappingSchema)),
 });
 
 /**
@@ -217,4 +219,5 @@ export const ruleSchema = schema.object({
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
+  flapping: schema.maybe(schema.nullable(flappingSchema)),
 });

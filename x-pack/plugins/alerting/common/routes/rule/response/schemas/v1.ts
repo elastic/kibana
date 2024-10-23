@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
@@ -16,10 +17,8 @@ import {
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
+import { flappingSchemaV1 } from '../../common';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
-  meta: { description: 'The parameters for the rule.' },
-});
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: {
     description:
@@ -496,7 +495,7 @@ export const ruleResponseSchema = schema.object({
   }),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
-  params: ruleParamsSchema,
+  params: ruleParamsSchemaV1,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduled_task_id: schema.maybe(
     schema.string({
@@ -626,6 +625,7 @@ export const ruleResponseSchema = schema.object({
     )
   ),
   alert_delay: schema.maybe(alertDelaySchema),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

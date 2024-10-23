@@ -6,3 +6,4 @@
  */
 
 export { rawRuleSchema as rawRuleSchemaV1 } from './v1';
+export { rawRuleSchema as rawRuleSchemaV2 } from './v2';

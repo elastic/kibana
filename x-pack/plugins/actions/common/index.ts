@@ -15,6 +15,7 @@ export * from './mustache_template';
 export * from './validate_email_addresses';
 export * from './connector_feature_config';
 export * from './execution_log_types';
+export * from './validate_empty_strings';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';

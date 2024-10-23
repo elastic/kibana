@@ -14,8 +14,8 @@ properties:
       get comments API.
     example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
   owner:
-    $ref: 'owners.yaml'
-  type: 
+    $ref: 'owner.yaml'
+  type:
     type: string
     description: The type of comment.
     enum:

@@ -153,4 +153,5 @@ export const ENTITY_LAST_SEEN = 'entity.lastSeenTimestamp';
 export const ENTITY_FIRST_SEEN = 'entity.firstSeenTimestamp';
 export const ENTITY_DISPLAY_NAME = 'entity.displayName';
 export const ENTITY_DEFINITION_ID = 'entity.definitionId';
+export const ENTITY_IDENTITY_FIELDS = 'entity.identityFields';
 export const SOURCE_DATA_STREAM_TYPE = 'source_data_stream.type';
