@@ -107,7 +107,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
       });
 
-      describe('With data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/197144
+      describe.skip('With data', () => {
         before(async () => {
           await es.index({
             index: indexName,
