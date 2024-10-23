@@ -21,7 +21,7 @@ import type {
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
@@ -47,7 +47,12 @@ import {
   sendGetEndpointSecurityPackage,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
-import type { EndpointState, PolicyIds, TransformStats, TransformStatsResponse } from '../types';
+import type {
+  EndpointState,
+  NonExistingPolicies,
+  TransformStats,
+  TransformStatsResponse,
+} from '../types';
 import type { EndpointPackageInfoStateChanged } from './action';
 import {
   endpointPackageInfo,
@@ -130,69 +135,50 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   };
 };
 
-const getAgentAndPoliciesForEndpointsList = async (
+const getNonExistingPoliciesForEndpointList = async (
   http: HttpStart,
   hosts: HostResultList['hosts'],
-  currentNonExistingPolicies: EndpointState['nonExistingPolicies']
-): Promise<PolicyIds | undefined> => {
+  currentNonExistingPolicies: Immutable<NonExistingPolicies>
+): Promise<NonExistingPolicies | undefined> => {
   if (hosts.length === 0) {
     return;
   }
 
   // Create an array of unique policy IDs that are not yet known to be non-existing.
   const policyIdsToCheck = [
-    ...new Set(
-      hosts.reduce((acc: string[], host) => {
-        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
-        if (!currentNonExistingPolicies[appliedPolicyId]) {
-          acc.push(appliedPolicyId);
-        }
-        return acc;
-      }, [])
-    ),
+    ...hosts.reduce<Set<string>>((acc, host) => {
+      const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+      if (!currentNonExistingPolicies.has(appliedPolicyId)) {
+        acc.add(appliedPolicyId);
+      }
+      return acc;
+    }, new Set()),
   ];
 
   if (policyIdsToCheck.length === 0) {
     return;
   }
 
-  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
-  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
-  // exists.
   const policiesFound = (
     await sendBulkGetPackagePolicies(http, policyIdsToCheck)
-  ).items.reduce<PolicyIds>(
-    (list, packagePolicy) => {
-      list.packagePolicy[packagePolicy.id as string] = true;
-      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_ids[0]; // TODO
+  ).items.reduce<NonExistingPolicies>((set, packagePolicy) => set.add(packagePolicy.id), new Set());
 
-      return list;
-    },
-    { packagePolicy: {}, agentPolicy: {} }
-  );
-
-  // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
-  const nonExistingPackagePoliciesAndExistingAgentPolicies = policyIdsToCheck.reduce<PolicyIds>(
-    (list, policyId: string) => {
-      if (policiesFound.packagePolicy[policyId as string]) {
-        list.agentPolicy[policyId as string] = policiesFound.agentPolicy[policyId];
-        return list;
+  const nonExistingPackagePolicies = policyIdsToCheck.reduce<NonExistingPolicies>(
+    (set, policyId) => {
+      if (!policiesFound.has(policyId)) {
+        set.add(policyId);
       }
-      list.packagePolicy[policyId as string] = true;
-      return list;
+
+      return set;
     },
-    { packagePolicy: {}, agentPolicy: {} }
+    new Set()
   );
 
-  if (
-    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.packagePolicy).length === 0 &&
-    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.agentPolicy).length === 0
-  ) {
+  if (!nonExistingPackagePolicies.size) {
     return;
   }
 
-  return nonExistingPackagePoliciesAndExistingAgentPolicies;
+  return nonExistingPackagePolicies;
 };
 
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
@@ -334,7 +320,7 @@ async function endpointListMiddleware({
       payload: endpointResponse,
     });
 
-    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
+    fetchNonExistingPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -435,8 +421,8 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORMS_STATUS_ROUTE,
-      { version: '2023-10-31' }
+      METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+      { version: '1' }
     );
 
     dispatch({
@@ -451,7 +437,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
   }
 }
 
-async function dispatchIngestPolicies({
+async function fetchNonExistingPolicies({
   store,
   hosts,
   http,
@@ -462,21 +448,15 @@ async function dispatchIngestPolicies({
 }) {
   const { getState, dispatch } = store;
   try {
-    const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+    const missingPolicies = await getNonExistingPoliciesForEndpointList(
       http,
       hosts,
       nonExistingPolicies(getState())
     );
-    if (ingestPolicies?.packagePolicy !== undefined) {
+    if (missingPolicies !== undefined) {
       dispatch({
         type: 'serverReturnedEndpointNonExistingPolicies',
-        payload: ingestPolicies.packagePolicy,
-      });
-    }
-    if (ingestPolicies?.agentPolicy !== undefined) {
-      dispatch({
-        type: 'serverReturnedEndpointAgentPolicies',
-        payload: ingestPolicies.agentPolicy,
+        payload: missingPolicies,
       });
     }
   } catch (error) {

@@ -206,7 +206,6 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */
   hideActions?: ActionTimelineToShow[];
-  tabName?: string;
 }
 
 export interface ResolveTimelineConfig {

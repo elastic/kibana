@@ -6,9 +6,11 @@
  */
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
-
+import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { setupMockServer } from '../agentless_api/mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'settings',
     'common',
@@ -24,9 +26,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
-    const previousPackageVersion = '1.9.0';
+    let mockApiServer: http.Server;
 
     before(async () => {
+      mockApiServer = mockAgentlessApiService.listen(8089);
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
@@ -41,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+      mockApiServer.close();
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {
@@ -60,20 +64,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(
           (await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()) !== undefined
         ).to.be(true);
-      });
-
-      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(testSubjectIds.AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.selectSetupTechnology('agentless');
-
-        await cisIntegration.selectAwsCredentials('temporary');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
     });
 
@@ -95,22 +85,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
       });
-
-      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.selectSetupTechnology('agentless');
-
-        await cisIntegration.selectAwsCredentials('temporary');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
-      });
     });
 
-    describe('Serverless - Agentless CIS_AWS edit flow', () => {
+    // TODO: Migrate test after Serverless default agentless policy is deleted.
+    describe.skip('Serverless - Agentless CIS_AWS edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newDirectAccessKeyId = `newDirectAccessKey`;
 
@@ -142,7 +120,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ).to.be('true');
       });
     });
-
     // FLAKY: https://github.com/elastic/kibana/issues/191017
     describe.skip('Serverless - Agentless CIS_AWS Create flow', () => {
       it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {

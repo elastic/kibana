@@ -6,9 +6,9 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
@@ -21,15 +21,18 @@ import { LanguageSelector } from '../shared/language_selector';
 
 import { CreateIndexFormState } from './types';
 import { useStartPageCodingExamples } from './hooks/use_coding_examples';
+import { APIKeyCallout } from './api_key_callout';
 
 export interface CreateIndexCodeViewProps {
   createIndexForm: CreateIndexFormState;
   changeCodingLanguage: (language: AvailableLanguages) => void;
+  canCreateApiKey?: boolean;
 }
 
 export const CreateIndexCodeView = ({
   createIndexForm,
   changeCodingLanguage,
+  canCreateApiKey,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
@@ -47,18 +50,26 @@ export const CreateIndexCodeView = ({
     [usageTracker, changeCodingLanguage]
   );
   const elasticsearchUrl = useElasticsearchUrl();
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
+      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl]);
+  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
+      {canCreateApiKey && (
+        <EuiFlexItem grow={true}>
+          <APIKeyCallout apiKey={apiKey} />
+        </EuiFlexItem>
+      )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
@@ -67,22 +78,26 @@ export const CreateIndexCodeView = ({
             onSelectLanguage={onSelectLanguage}
           />
         </EuiFlexItem>
-        {selectedLanguage === 'curl' && (
-          <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              request={selectedCodeExamples.sense.createIndex(codeParams)}
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <TryInConsoleButton
+            request={selectedCodeExamples.sense.createIndex(codeParams)}
+            application={application}
+            sharePlugin={share}
+            consolePlugin={consolePlugin}
+            telemetryId={`${selectedLanguage}_create_index`}
+            onClick={() => {
+              usageTracker.click([
+                AnalyticsEvents.startCreateIndexRunInConsole,
+                `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
+              ]);
+            }}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
-          title={i18n.translate('xpack.searchIndices.startPage.codeView.installCommand.title', {
-            defaultMessage: 'Install Elasticsearch serverless client',
-          })}
+          title={selectedCodeExamples.installTitle}
+          description={selectedCodeExamples.installDescription}
           language="shell"
           code={selectedCodeExample.installCommand}
           onCodeCopyClick={() => {
@@ -94,9 +109,9 @@ export const CreateIndexCodeView = ({
         />
       )}
       <CodeSample
-        title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
-          defaultMessage: 'Connect and create an index',
-        })}
+        id="createIndex"
+        title={selectedCodeExamples.createIndexTitle}
+        description={selectedCodeExamples.createIndexDescription}
         language={Languages[selectedLanguage].codeBlockLanguage}
         code={selectedCodeExample.createIndex(codeParams)}
         onCodeCopyClick={() => {

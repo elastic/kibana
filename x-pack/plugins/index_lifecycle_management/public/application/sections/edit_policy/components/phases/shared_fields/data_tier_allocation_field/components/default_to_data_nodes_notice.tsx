@@ -32,7 +32,10 @@ export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAlloc
         )}
       </p>
 
-      {nodeAllocationMigrationGuidance}
+      {
+        // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
+        nodeAllocationMigrationGuidance
+      }
     </EuiCallOut>
   );
 };

@@ -11,7 +11,7 @@
         "label": "ESQLDataGrid",
         "description": [],
         "signature": [
-          "(props: ESQLDataGridProps) => JSX.Element"
+          "(props: ESQLDataGridProps) => React.JSX.Element"
         ],
         "path": "src/plugins/esql_datagrid/public/create_datagrid.tsx",
         "deprecated": false,

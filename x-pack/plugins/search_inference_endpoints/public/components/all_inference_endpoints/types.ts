@@ -10,6 +10,7 @@ import { TaskTypes } from '../../types';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
 export enum ServiceProviderKeys {
+  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
   azureopenai = 'azureopenai',
   azureaistudio = 'azureaistudio',
@@ -20,6 +21,7 @@ export enum ServiceProviderKeys {
   hugging_face = 'hugging_face',
   mistral = 'mistral',
   openai = 'openai',
+  watsonxai = 'watsonxai',
 }
 
 export enum SortFieldInferenceEndpoint {
@@ -58,5 +60,10 @@ export interface EuiBasicTableSortTypes {
 export interface InferenceEndpointUI {
   endpoint: string;
   provider: InferenceAPIConfigResponse;
+  type: string;
+}
+
+export interface InferenceUsageInfo {
+  id: string;
   type: string;
 }

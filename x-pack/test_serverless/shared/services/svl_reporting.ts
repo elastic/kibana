@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
-import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 import { RoleCredentials } from '.';
@@ -111,17 +110,23 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         .set(roleAuthc.apiKeyHeader);
       return response.text as unknown;
     },
-    async deleteAllReports(roleAuthc: RoleCredentials, internalReqHeader: InternalRequestHeader) {
-      log.debug('ReportingAPI.deleteAllReports');
 
-      // ignores 409 errs and keeps retrying
-      await retry.tryForTime(5000, async () => {
-        await supertestWithoutAuth
-          .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .send({ query: { match_all: {} } });
-      });
+    /*
+     * Ensures reports are cleaned up through the delete report API
+     */
+    async deleteReport(
+      reportId: string,
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader
+    ) {
+      log.debug(`ReportingAPI.deleteReport ${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportId}`);
+      const response = await supertestWithoutAuth
+        .delete(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + `/${reportId}`)
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      return response.text as unknown;
     },
   };
 }

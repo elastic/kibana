@@ -38,5 +38,5 @@ export const registerCoreHandlers = (
     );
   }
   // add check on header if the route is internal
-  registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config)); // strictly speaking, we should have access to route.options.access from the request on postAuth
+  registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config, log)); // strictly speaking, we should have access to route.options.access from the request on postAuth
 };

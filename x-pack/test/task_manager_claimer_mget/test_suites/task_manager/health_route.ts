@@ -6,9 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import url from 'url';
 import { keyBy, mapValues } from 'lodash';
-import supertest from 'supertest';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -82,14 +80,13 @@ interface MonitoringStats {
 }
 
 export default function ({ getService }: FtrProviderContext) {
-  const config = getService('config');
   const retry = getService('retry');
-  const request = supertest(url.format(config.get('servers.kibana')));
+  const supertest = getService('supertest');
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   function getHealthRequest() {
-    return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
+    return supertest.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
 
   function getHealth(): Promise<MonitoringStats> {
@@ -114,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
-    return request
+    return supertest
       .post('/api/sample_tasks/schedule')
       .set('kbn-xsrf', 'xxx')
       .send({ task })
@@ -125,6 +122,11 @@ export default function ({ getService }: FtrProviderContext) {
   const monitoredAggregatedStatsRefreshRate = 5000;
 
   describe('health', () => {
+    afterEach(async () => {
+      // clean up after each test
+      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+    });
+
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
@@ -237,7 +239,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.overdue).to.eql('number');
 
       expect(typeof workload.non_recurring).to.eql('number');
-      expect(typeof workload.owner_ids).to.eql('number');
 
       expect(typeof workload.capacity_requirements.per_minute).to.eql('number');
       expect(typeof workload.capacity_requirements.per_hour).to.eql('number');

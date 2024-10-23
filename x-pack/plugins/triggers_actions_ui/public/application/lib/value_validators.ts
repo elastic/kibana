@@ -20,7 +20,7 @@ const filterQueryRequiredError = i18n.translate(
 export const validateActionFilterQuery = (actionItem: RuleUiAction): string | null => {
   if ('alertsFilter' in actionItem) {
     const query = actionItem?.alertsFilter?.query;
-    if (query && !query.kql) {
+    if (query && !(query.kql || query.filters.length)) {
       return filterQueryRequiredError;
     }
   }

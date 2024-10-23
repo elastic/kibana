@@ -50,32 +50,22 @@ export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   }
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      direction="column"
-      justifyContent="center"
-      className="unifiedDataTable__rowControl"
+    <EuiCheckbox
+      id={record.id}
+      aria-label={toggleDocumentSelectionLabel}
+      checked={isDocSelected(record.id)}
+      data-test-subj={`dscGridSelectDoc-${record.id}`}
+      onChange={(event) => {
+        if ((event.nativeEvent as MouseEvent)?.shiftKey) {
+          toggleMultipleDocsSelection(record.id);
+        } else {
+          toggleDocSelection(record.id);
+        }
+      }}
       css={css`
-        padding-block: ${euiTheme.size.xs}; // to have the same height as "openDetails" control
-        padding-left: ${euiTheme.size.xs}; // space between controls
+        margin-left: ${euiTheme.size.xs}; /* fine tune horizontal alignment */
       `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiCheckbox
-          id={record.id}
-          aria-label={toggleDocumentSelectionLabel}
-          checked={isDocSelected(record.id)}
-          data-test-subj={`dscGridSelectDoc-${record.id}`}
-          onChange={(event) => {
-            if ((event.nativeEvent as MouseEvent)?.shiftKey) {
-              toggleMultipleDocsSelection(record.id);
-            } else {
-              toggleDocSelection(record.id);
-            }
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    />
   );
 };
 

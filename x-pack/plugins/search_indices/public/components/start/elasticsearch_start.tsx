@@ -35,8 +35,10 @@ import { CreateIndexFormState } from './types';
 import { useKibana } from '../../hooks/use_kibana';
 
 function initCreateIndexState(): CreateIndexFormState {
+  const defaultIndexName = generateRandomIndexName();
   return {
-    indexName: generateRandomIndexName(),
+    indexName: defaultIndexName,
+    defaultIndexName,
     codingLanguage: getDefaultCodingLanguage(),
   };
 }
@@ -79,7 +81,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   }, [cloud, http]);
 
   const onChangeView = useCallback(
-    (id) => {
+    (id: string) => {
       switch (id) {
         case CreateIndexView.UI:
           usageTracker.click(AnalyticsEvents.startPageShowCreateIndexUIClick);
@@ -197,6 +199,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
             <CreateIndexCodeView
               createIndexForm={formState}
               changeCodingLanguage={onChangeCodingLanguage}
+              canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
             />
           )}
         </EuiFlexGroup>
@@ -220,7 +223,6 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               iconSide="right"
               iconType="popout"
               data-test-subj="analyzeLogsBtn"
-              data-telemetry-id="searchIndicesStartCollectLogsLink"
               href={docLinks.analyzeLogs}
               target="_blank"
             >
@@ -248,7 +250,6 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               iconSide="right"
               iconType="popout"
               data-test-subj="startO11yTrialBtn"
-              data-telemetry-id="searchIndicesStartO11yTrialLink"
               href={o11yTrialLink}
               target="_blank"
             >

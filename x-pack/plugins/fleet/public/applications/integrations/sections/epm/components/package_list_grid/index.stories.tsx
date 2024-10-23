@@ -75,6 +75,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_two'],
+        installStatus: 'installed',
       },
       {
         title: 'Package Two',
@@ -87,6 +88,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_one'],
+        installStatus: 'installed',
       },
       {
         title: 'Package Three',
@@ -99,6 +101,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['web'],
+        installStatus: 'installed',
       },
       {
         title: 'Package Four',
@@ -111,6 +114,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_one'],
+        installStatus: 'install_failed',
       },
       {
         title: 'Package Five',
@@ -123,6 +127,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_two'],
+        installStatus: 'install_failed',
       },
       {
         title: 'Package Six',
@@ -135,6 +140,7 @@ export const List = (props: Args) => (
         icons: [],
         integration: 'integration',
         categories: ['category_two'],
+        installStatus: 'install_failed',
       },
     ]}
     searchTerm=""

@@ -29,7 +29,12 @@ export const SearchIndicesRouter: React.FC = () => {
             />
           </Routes>
         </Route>
-        <Route render={() => application.navigateToApp('elasticsearchStart')} />
+        <Route
+          render={() => {
+            application.navigateToApp('elasticsearchStart');
+            return null;
+          }}
+        />
       </Routes>
     </Router>
   );

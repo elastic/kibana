@@ -101,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
