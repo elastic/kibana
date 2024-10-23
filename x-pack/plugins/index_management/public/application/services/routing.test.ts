@@ -6,7 +6,7 @@
  */
 
 import { getIndexDetailsLink, getIndexListUri, navigateToIndexDetailsPage } from './routing';
-import { applicationServiceMock, scopedHistoryMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { ExtensionsService } from '../../services/extensions_service';
 import { IndexDetailsSection } from '../../../common/constants';
 
@@ -15,7 +15,6 @@ describe('routing', () => {
     const application = applicationServiceMock.createStartContract();
     const http = httpServiceMock.createSetupContract();
 
-    const history = scopedHistoryMock.create();
     it('adds the index name to the url', () => {
       const indexName = 'testIndex';
       const url = getIndexDetailsLink(indexName, '');
@@ -37,7 +36,7 @@ describe('routing', () => {
       const extensionService = {
         indexDetailsPageRoute: null,
       } as ExtensionsService;
-      navigateToIndexDetailsPage('testIndex', '', extensionService, application, http, history);
+      navigateToIndexDetailsPage('testIndex', '', extensionService, application, http);
       expect(application.navigateToUrl).toHaveBeenCalled();
     });
 
@@ -55,7 +54,6 @@ describe('routing', () => {
         extensionService,
         application,
         http,
-        history,
         IndexDetailsSection.Settings
       );
       expect(application.navigateToUrl).toHaveBeenCalled();

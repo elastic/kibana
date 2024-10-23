@@ -78,8 +78,7 @@ const getColumnConfigs = ({
                   location.search || '',
                   extensionsService,
                   application,
-                  http,
-                  history
+                  http
                 );
               }}
             >

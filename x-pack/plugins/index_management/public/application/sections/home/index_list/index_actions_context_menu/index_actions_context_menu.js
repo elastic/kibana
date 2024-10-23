@@ -89,7 +89,6 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
-            history,
             IndexDetailsSection.Overview
           );
         },
@@ -106,7 +105,6 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
-            history,
             IndexDetailsSection.Settings
           );
         },
@@ -123,7 +121,6 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
-            history,
             IndexDetailsSection.Mappings
           );
         },

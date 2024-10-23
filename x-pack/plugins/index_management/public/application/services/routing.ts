@@ -7,7 +7,6 @@
 
 import { ApplicationStart } from '@kbn/core/public';
 import { HttpSetup } from '@kbn/core/public';
-import { ScopedHistory } from '@kbn/core/public';
 import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
 import { ExtensionsService } from '../../services/extensions_service';
@@ -88,17 +87,18 @@ export const navigateToIndexDetailsPage = (
   extensionsService: ExtensionsService,
   application: ApplicationStart,
   http: HttpSetup,
-  history: ScopedHistory,
   tabId?: IndexDetailsSection
 ) => {
   if (!extensionsService.indexDetailsPageRoute) {
-    application.navigateToUrl(http.basePath.prepend(
-      `/app/management/data/index_management${getIndexDetailsLink(
-        indexName,
-        indicesListURLParams,
-        tabId
-      )}`
-    ));
+    application.navigateToUrl(
+      http.basePath.prepend(
+        `/app/management/data/index_management${getIndexDetailsLink(
+          indexName,
+          indicesListURLParams,
+          tabId
+        )}`
+      )
+    );
   } else {
     const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
     application.navigateToUrl(http.basePath.prepend(route));
