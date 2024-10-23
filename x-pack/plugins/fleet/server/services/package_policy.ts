@@ -141,6 +141,7 @@ import { validateAgentPolicyOutputForIntegration } from './agent_policies/output
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
+import { updatePackagePolicySpaces } from './spaces/package_policy';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -224,6 +225,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
 
     let authorizationHeader = options.authorizationHeader;
@@ -283,6 +285,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
 
       await validateIsNotHostedPolicy(soClient, policyId, options?.force);
+
+      if (useSpaceAwareness && enrichedPackagePolicy.policy_ids.length > 1) {
+        if (agentPolicy?.space_ids?.length ?? 0 > 1) {
+          throw new FleetError(
+            'Reusable integration policy could  not be used through multiple spaces.'
+          );
+        }
+      }
     }
 
     // trailing whitespace causes issues creating API keys
@@ -409,6 +419,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       { ...options, id: packagePolicyId }
     );
+
+    for (const agentPolicy of agentPolicies) {
+      if (
+        useSpaceAwareness &&
+        agentPolicy &&
+        agentPolicy.space_ids &&
+        agentPolicy.space_ids.length > 1
+      ) {
+        await updatePackagePolicySpaces({
+          packagePolicyId: newSo.id,
+          currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+          newSpaceIds: agentPolicy.space_ids,
+        });
+      }
+    }
 
     if (options?.bumpRevision ?? true) {
       for (const policyId of enrichedPackagePolicy.policy_ids) {
@@ -995,6 +1020,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ...restOfPackagePolicy.package,
           requires_root: requiresRoot,
         };
+      }
+    }
+    // Validate agent policy restriction
+    // TODO
+    if (packagePolicyUpdate.policy_ids?.length ?? 0 > 1) {
+      for (const policyId of packagePolicyUpdate.policy_ids) {
+        const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+        if (agentPolicy?.space_ids?.length ?? 0 > 1) {
+          throw new FleetError(
+            'Reusable integration policy could  not be used through multiple spaces.'
+          );
+        }
       }
     }
 
