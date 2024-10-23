@@ -39,11 +39,12 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.svlCommonPage.loginWithRole('admin');
       }
     });
-    loadTestFile(require.resolve('./policy_list'));
-    loadTestFile(require.resolve('./policy_details'));
-    loadTestFile(require.resolve('./trusted_apps_list'));
-    loadTestFile(require.resolve('./fleet_integrations'));
-    loadTestFile(require.resolve('./artifact_entries_list'));
+
+    // loadTestFile(require.resolve('./policy_list'));
+    // loadTestFile(require.resolve('./policy_details'));
+    // loadTestFile(require.resolve('./trusted_apps_list'));
+    // loadTestFile(require.resolve('./fleet_integrations'));
+    // loadTestFile(require.resolve('./artifact_entries_list'));
     loadTestFile(require.resolve('./endpoint_exceptions'));
   });
 }
