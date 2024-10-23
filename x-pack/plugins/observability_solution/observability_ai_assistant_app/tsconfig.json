@@ -75,6 +75,7 @@
     "@kbn/charts-plugin",
     "@kbn/slo-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/data-service",
   ],
   "exclude": [
     "target/**/*"
