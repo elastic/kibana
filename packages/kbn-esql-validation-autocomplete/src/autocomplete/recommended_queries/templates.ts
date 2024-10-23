@@ -32,7 +32,7 @@ export const getRecommendedQueries = ({
           defaultMessage: 'Count aggregation',
         }
       ),
-      queryString: `${fromCommand}\n  | STATS count = COUNT(*) // you can group by a field using the BY operator`,
+      queryString: `${fromCommand}\n  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
     },
     ...(timeField
       ? [
@@ -49,7 +49,7 @@ export const getRecommendedQueries = ({
                 defaultMessage: 'Sort by time',
               }
             ),
-            queryString: `${fromCommand}\n  | SORT ${timeField} // Data is not sorted by default`,
+            queryString: `${fromCommand}\n  | SORT ${timeField} /* Data is not sorted by default */`,
           },
           {
             label: i18n.translate(
@@ -64,7 +64,7 @@ export const getRecommendedQueries = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}\n  | EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets // try out different intervals`,
+            queryString: `${fromCommand}\n  | EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
           },
         ]
       : []),
@@ -98,7 +98,22 @@ export const getRecommendedQueries = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}\n  | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n  | STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) // ?_tstart and ?_tend take the values of the time picker`,
+            queryString: `${fromCommand}\n  | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n  | STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) /* ?_tstart and ?_tend take the values of the time picker */`,
+          },
+          {
+            label: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.eventRate.label',
+              {
+                defaultMessage: 'Calculate the event rate',
+              }
+            ),
+            description: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.eventRate.description',
+              {
+                defaultMessage: 'Event rate over time',
+              }
+            ),
+            queryString: `${fromCommand}\n  | STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ \n  | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */\n | KEEP event_rate`,
           },
           {
             label: i18n.translate(
