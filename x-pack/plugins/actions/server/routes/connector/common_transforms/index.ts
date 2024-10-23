@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type {
-  Entity,
-  UserEntity,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+export { transformConnectorResponse } from './transform_connector_response/latest';
 
-export const isUserEntity = (record: Entity): record is UserEntity =>
-  !!(record as UserEntity)?.user;
+export { transformConnectorResponse as transformConnectorResponseV1 } from './transform_connector_response/v1';
