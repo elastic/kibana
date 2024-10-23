@@ -29,7 +29,8 @@
       "post": {
         "summary": "Rotate a key for encrypted saved objects",
         "operationId": "rotateEncryptionKey",
-        "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n",
+        "x-state": "Technical preview",
         "tags": [
           "saved objects"
         ],
@@ -380,7 +381,8 @@
       "post": {
         "summary": "Export saved objects",
         "operationId": "exportSavedObjectsDefault",
-        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n",
+        "x-state": "Technical preview",
         "tags": [
           "saved objects"
         ],
@@ -639,7 +641,8 @@
       "post": {
         "summary": "Import saved objects",
         "operationId": "importSavedObjectsDefault",
-        "description": "Create sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Create sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n",
+        "x-state": "Technical preview",
         "tags": [
           "saved objects"
         ],
@@ -759,7 +762,8 @@
       "post": {
         "summary": "Resolve import errors",
         "operationId": "resolveImportErrors",
-        "description": "To resolve errors from the Import objects API, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "To resolve errors from the Import objects API, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n",
+        "x-state": "Technical preview",
         "tags": [
           "saved objects"
         ],
