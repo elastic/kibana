@@ -61,7 +61,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
-      log.debug(`ReportingAPI.waitForJobToFinish ${downloadReportPath}`);
       await retry.waitForWithTimeout(
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),

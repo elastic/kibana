@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   };
 
-  describe('Management: listing', function () {
+  describe('Reporting Management app', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
     this.tags('failsOnMKI');
 
@@ -59,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     // Kibana CI and MKI use different users
-    before(async () => {
+    before('initialize saved object archive', async () => {
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = samlAuth.getInternalRequestHeader();
       // add test saved search object
@@ -77,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       reportJob = result.job;
     });
 
-    after(async () => {
+    after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
       await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
     });

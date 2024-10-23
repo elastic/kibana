@@ -20,8 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
-  let roleAuthc: RoleCredentials;
   const samlAuth = getService('samlAuth');
+  let roleAuthc: RoleCredentials;
   let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 

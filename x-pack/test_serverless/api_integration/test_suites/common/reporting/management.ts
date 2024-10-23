@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   };
 
-  describe('Management: Deletion', function () {
+  describe('Reporting Management', function () {
     let reportJob: ReportApiJSON;
     let path: string;
 
