@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { BuildFlavor } from '@kbn/config';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import { OasConverter } from './oas_converter';
@@ -32,7 +32,7 @@ export interface GenerateOpenApiDocumentOptions {
   docsUrl?: string;
   tags?: string[];
   filters?: GenerateOpenApiDocumentOptionsFilters;
-  buildFlavor: string;
+  buildFlavor: BuildFlavor;
 }
 
 export const generateOpenApiDocument = (

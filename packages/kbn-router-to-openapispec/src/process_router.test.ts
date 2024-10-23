@@ -11,7 +11,8 @@ import { schema } from '@kbn/config-schema';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
-import { extractResponses, processRouter, type InternalRouterRoute } from './process_router';
+import { extractResponses, processRouter } from './process_router';
+import { type InternalRouterRoute } from './type';
 
 describe('extractResponses', () => {
   let oasConverter: OasConverter;
@@ -136,9 +137,15 @@ describe('processRouter', () => {
 
     expect(Object.keys(result1.paths!)).toHaveLength(4);
 
-    const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), '', {
-      version: '2024-10-31',
-    });
+    const result2 = processRouter(
+      testRouter,
+      new OasConverter(),
+      createOperationIdCounter(),
+      'traditional',
+      {
+        version: '2024-10-31',
+      }
+    );
     expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 
