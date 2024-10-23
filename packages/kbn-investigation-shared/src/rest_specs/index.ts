@@ -29,6 +29,8 @@ export type * from './event';
 export type * from './get_events';
 export type * from './entity';
 export type * from './get_entities';
+export type * from './log_pattern';
+export type * from './get_log_patterns';
 
 export * from './create';
 export * from './create_item';
@@ -52,3 +54,5 @@ export * from './event';
 export * from './get_events';
 export * from './entity';
 export * from './get_entities';
+export * from './log_pattern';
+export * from './get_log_patterns';

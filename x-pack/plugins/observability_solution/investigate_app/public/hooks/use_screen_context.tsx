@@ -7,6 +7,7 @@
 
 import { ALERT_REASON, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { GetEventsResponse, GetInvestigationResponse } from '@kbn/investigation-shared';
 import dedent from 'dedent';
 import { useEffect } from 'react';
 import { useKibana } from './use_kibana';
@@ -24,23 +25,15 @@ export function useScreenContext() {
   const { data: alertDetails, isLoading: isAlertDetailsLoading } = useFetchAlert({ investigation });
 
   useEffect(() => {
-    if (!investigation || isAlertDetailsLoading) {
+    if (!investigation || (isAlertDetailsLoading && !alertDetails)) {
       return;
     }
 
-    observabilityAIAssistant.service.setScreenContext({
-      screenDescription: dedent(`
-        The user is looking at the details of an investigation in order to understand the root cause of an issue.
-        The investigation details include the title, status, tags, and its time range.
-
-        ${alertDetails ? getAlertDetailScreenContext(alertDetails) : ''}
-
-        Title: ${investigation.title}
-        Tags: ${investigation.tags.join(', ')}
-        Status: ${investigation.status}
-        Start time: ${new Date(investigation.params.timeRange.from).toISOString()}
-        End time: ${new Date(investigation.params.timeRange.to).toISOString()}
-      `),
+    return observabilityAIAssistant.service.setScreenContext({
+      screenDescription: getScreenContext({
+        alertDetails: alertDetails as EcsFieldsResponse,
+        investigation: investigation as GetInvestigationResponse,
+      }).screenDescription,
       data: [
         {
           name: 'investigation',
@@ -73,4 +66,45 @@ function getAlertDetailScreenContext(alertDetail: EcsFieldsResponse) {
       : ''
   }
   `);
+}
+
+export function getScreenContext({
+  alertDetails,
+  investigation,
+  deploymentEvents,
+}: {
+  alertDetails: EcsFieldsResponse;
+  investigation: GetInvestigationResponse;
+  deploymentEvents?: GetEventsResponse;
+}) {
+  const screenDescription = dedent(`
+    The user is looking at the details of an investigation in order to understand the root cause of an issue.
+    The investigation details include the title, status, tags, and its time range.
+
+    Title: ${investigation.title}
+    Tags: ${investigation.tags.join(', ')}
+    Status: ${investigation.status}
+    Start time: ${new Date(investigation.params.timeRange.from).toISOString()}
+    End time: ${new Date(investigation.params.timeRange.to).toISOString()}
+
+    ${alertDetails ? getAlertDetailScreenContext(alertDetails) : ''}
+
+    ${
+      deploymentEvents && deploymentEvents.length > 0
+        ? `There is a new version release for the following services: `
+        : ''
+    }
+    ${deploymentEvents?.map(
+      (deployment) =>
+        `
+      ${deployment.source?.['service.name']} ${
+          deployment.source?.['service.version']
+        } at ${new Date(deployment.timestamp).toISOString()}
+      `
+    )}
+  `);
+
+  return {
+    screenDescription,
+  };
 }
