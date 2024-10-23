@@ -1021,6 +1021,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
+/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Observability Entities Team (@elastic/obs-entities)
@@ -1205,6 +1206,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
 # Observability UX management team
+/x-pack/test/api_integration/apis/slos @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group1/uptime.ts @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/observability.ts @elastic/obs-ux-management-team
 /x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
@@ -1255,7 +1257,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
-# Logs
+# obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/index.feature_flags.ts @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
@@ -1266,6 +1268,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/ @elastic/obs-ux-logs-team
 /src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/appex-sharedux
@@ -1390,6 +1393,9 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
+/x-pack/test/api_integration/apis/telemetry @elastic/kibana-core
+/x-pack/test/api_integration/apis/status @elastic/kibana-core
+/x-pack/test/api_integration/apis/stats @elastic/kibana-core
 /x-pack/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
@@ -1530,6 +1536,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
+/x-pack/test/api_integration/apis/searchprofiler @elastic/kibana-management
 /x-pack/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
@@ -1803,6 +1810,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
 /x-pack/test/functional/es_archives/entity/risks @elastic/security-detection-engine
 /x-pack/test/functional/es_archives/entity/host_risk @elastic/security-detection-engine
+/x-pack/test/api_integration/apis/lists @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
@@ -1832,6 +1840,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
 ## Security Solution sub teams - security-defend-workflows
+/x-pack/test/api_integration/apis/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
@@ -1931,6 +1940,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
+/x-pack/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # EUI team
