@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import { useValues } from 'kea';
 
 import useObservable from 'react-use/lib/useObservable';
 
-import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
-
 import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchPlaygroundChrome } from '../../../shared/kibana_chrome/set_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
-import { useEnterpriseSearchApplicationNav } from '../../../shared/layout';
+import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { PlaygroundHeaderDocsAction } from './header_docs_action';
@@ -40,32 +38,10 @@ export const SearchPlaygroundPageTemplate: React.FC<SearchPlaygroundPageTemplate
   restrictWidth = true,
   ...pageTemplateProps
 }) => {
-  const alwaysReturnNavItems = true;
-  const navItems = useEnterpriseSearchApplicationNav(
-    searchApplicationName,
-    pageTemplateProps.isEmptyState,
-    hasSchemaConflicts,
-    alwaysReturnNavItems
-  );
+  const navItems = useEnterpriseSearchNav();
 
-  const { renderHeaderActions, updateSideNavDefinition, getChromeStyle$ } = useValues(KibanaLogic);
+  const { renderHeaderActions, getChromeStyle$ } = useValues(KibanaLogic);
   const chromeStyle = useObservable(getChromeStyle$(), 'classic');
-
-  const getSelectedAppItems = useCallback(
-    (
-      items?: Array<EuiSideNavItemTypeEnhanced<unknown>>
-    ): Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined => {
-      if (!items) return undefined;
-
-      const buildGroup = items.find((item) => item.id === 'build');
-      if (!buildGroup || !buildGroup.items) return undefined;
-
-      const searchAppsGroup = buildGroup.items.find((item) => item.id === 'searchApplications');
-
-      return searchAppsGroup?.items;
-    },
-    []
-  );
 
   useLayoutEffect(() => {
     renderHeaderActions(PlaygroundHeaderDocsAction);
@@ -74,17 +50,6 @@ export const SearchPlaygroundPageTemplate: React.FC<SearchPlaygroundPageTemplate
       renderHeaderActions();
     };
   }, []);
-
-  useEffect(() => {
-    // We update the new side nav definition with the selected app items
-    updateSideNavDefinition({ searchApps: getSelectedAppItems(navItems) });
-  }, [navItems, getSelectedAppItems, updateSideNavDefinition]);
-
-  useEffect(() => {
-    return () => {
-      updateSideNavDefinition({ searchApps: undefined });
-    };
-  }, [updateSideNavDefinition]);
 
   return (
     <EnterpriseSearchPageTemplateWrapper
