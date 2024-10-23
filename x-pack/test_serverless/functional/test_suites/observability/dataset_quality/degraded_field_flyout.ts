@@ -860,10 +860,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             const ctLinkURL = await ctLink.getAttribute('href');
 
+            const componentTemplateName = `${type}-${nginxAccessDatasetName}@custom`;
+
             // Should point to the component template page
             expect(
               ctLinkURL.endsWith(
-                `/app/management/data/index_management/component_templates/${type}-${nginxAccessDatasetName}@custom`
+                `/data/index_management/component_templates/${encodeURIComponent(
+                  componentTemplateName
+                )}`
               )
             ).to.be(true);
           });

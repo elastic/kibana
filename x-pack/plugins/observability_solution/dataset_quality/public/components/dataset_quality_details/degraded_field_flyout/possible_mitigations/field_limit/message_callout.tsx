@@ -53,7 +53,8 @@ export function SuccessCallout() {
   const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
 
-  const componentTemplateUrl = locators.get('MANAGEMENT_APP_LOCATOR')?.useUrl({
+  const componentTemplateUrl = locators.get('INDEX_MANAGEMENT_LOCATOR_ID')?.useUrl({
+    page: 'component_template',
     componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
       dataStreamSettings?.indexTemplate ?? name
     )}@custom`,
