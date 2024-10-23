@@ -40,5 +40,6 @@
     "@kbn/discover-plugin",
     "@kbn/unified-data-table",
     "@kbn/discover-contextual-components",
+    "@kbn/core-lifecycle-browser",
   ]
 }
