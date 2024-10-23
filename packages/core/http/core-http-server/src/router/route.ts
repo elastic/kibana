@@ -114,6 +114,43 @@ export type RouteAccess = 'public' | 'internal';
 export type Privilege = string;
 
 /**
+ * Route Deprecation info
+ * This information will assist Kibana HTTP API users when upgrading to new versions
+ * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
+ * created from HTTP API introspection (like OAS).
+ */
+export interface RouteDeprecationInfo {
+  documentationUrl: string;
+  severity: 'warning' | 'critical';
+  reason: VersionBumpDeprecationType | RemovalApiDeprecationType | MigrationApiDeprecationType;
+}
+
+/**
+ * bump deprecation reason denotes a new version of the API is available
+ */
+interface VersionBumpDeprecationType {
+  type: 'bump';
+  newApiVersion: string;
+}
+
+/**
+ * remove deprecation reason denotes the API was fully removed with no replacement
+ */
+interface RemovalApiDeprecationType {
+  type: 'remove';
+}
+
+/**
+ * migrate deprecation reason denotes the API has been migrated to a different API path
+ * Please make sure that if you are only incrementing the version of the API to use 'bump' instead
+ */
+interface MigrationApiDeprecationType {
+  type: 'migrate';
+  newApiPath: string;
+  newApiMethod: string;
+}
+
+/**
  * A set of privileges that can be used to define complex authorization requirements.
  *
  * - `anyRequired`: An array of privileges where at least one must be satisfied to meet the authorization requirement.
@@ -185,6 +222,14 @@ export type RouteAuthz = AuthzEnabled | AuthzDisabled;
 export interface RouteSecurity {
   authz: RouteAuthz;
   authc?: RouteAuthc;
+}
+
+/**
+ * A set of reserved privileges that can be used to check access to the route.
+ */
+export enum ReservedPrivilegesSet {
+  operator = 'operator',
+  superuser = 'superuser',
 }
 
 /**
@@ -277,12 +322,18 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   description?: string;
 
   /**
-   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
-   * refrain from usage of this route.
+   * Description of deprecations for this HTTP API.
    *
-   * @remarks This will be surfaced in OAS documentation.
+   * @remark This will assist Kibana HTTP API users when upgrading to new versions
+   * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
+   * created from HTTP API introspection (like OAS).
+   *
+   * Setting this object marks the route as deprecated.
+   *
+   * @remarks This may be surfaced in OAS documentation.
+   * @public
    */
-  deprecated?: boolean;
+  deprecated?: RouteDeprecationInfo;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router

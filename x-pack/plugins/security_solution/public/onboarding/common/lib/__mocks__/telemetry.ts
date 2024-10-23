@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+export const trackOnboardingLinkClick = jest.fn();

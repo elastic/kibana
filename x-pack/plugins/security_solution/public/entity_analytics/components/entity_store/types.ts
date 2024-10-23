@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setGlobalConfig } from '@storybook/testing-react';
-import * as globalStorybookConfig from './preview';
-
-setGlobalConfig(globalStorybookConfig);
+export enum EntitySourceTag {
+  'risk' = 'Risk',
+  'criticality' = 'Asset Criticality',
+  'events' = 'Events',
+}

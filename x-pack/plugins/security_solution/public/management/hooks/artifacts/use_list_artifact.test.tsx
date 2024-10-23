@@ -16,7 +16,8 @@ import {
   renderQuery,
 } from '../test_utils';
 
-describe('List artifact hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/196724
+describe.skip('List artifact hook', () => {
   let result: ReturnType<typeof useListArtifact>;
   let searchableFields: string[];
   let options:
