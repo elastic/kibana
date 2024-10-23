@@ -56,5 +56,12 @@ export default function searchSolutionNavigation({
         { id: 'AISearch', label: 'AI Search' },
       ]);
     });
+    it('has expected navigation', async () => {
+      const expectNoPageReload = await searchClassicNavigation.createNoPageReloadCheck();
+
+      await searchClassicNavigation.expectNavItemExists('Home');
+
+      await expectNoPageReload();
+    });
   });
 }
