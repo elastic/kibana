@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ConnectorResponseV1 } from '../../../../../../common/routes/connector/response';
-import { Connector } from '../../../../../application/connector/types';
+import { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
+import { Connector } from '../../../../application/connector/types';
 
-export const transformGetConnectorResponse = ({
+export const transformConnectorResponse = ({
   actionTypeId,
   isPreconfigured,
   isMissingSecrets,

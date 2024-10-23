@@ -7,6 +7,8 @@
 import { get } from 'lodash';
 import type {
   RuleSchedule,
+  DataSourceIndexPatterns,
+  DataSourceDataView,
   InlineKqlQuery,
   ThreeWayDiff,
   DiffableRuleTypes,
@@ -195,6 +197,10 @@ export const transformDiffableFieldValues = (
   } else if (fieldName === 'saved_id' && isInlineQuery(diffableFieldValue)) {
     // saved_id should be set only for rules with SavedKqlQuery, undefined otherwise
     return { type: 'TRANSFORMED_FIELD', value: undefined };
+  } else if (fieldName === 'data_view_id' && isDataSourceIndexPatterns(diffableFieldValue)) {
+    return { type: 'TRANSFORMED_FIELD', value: undefined };
+  } else if (fieldName === 'index' && isDataSourceDataView(diffableFieldValue)) {
+    return { type: 'TRANSFORMED_FIELD', value: undefined };
   }
 
   return { type: 'NON_TRANSFORMED_FIELD' };
@@ -207,5 +213,20 @@ function isRuleSchedule(value: unknown): value is RuleSchedule {
 function isInlineQuery(value: unknown): value is InlineKqlQuery {
   return (
     typeof value === 'object' && value !== null && 'type' in value && value.type === 'inline_query'
+  );
+}
+
+function isDataSourceIndexPatterns(value: unknown): value is DataSourceIndexPatterns {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'index_patterns'
+  );
+}
+
+function isDataSourceDataView(value: unknown): value is DataSourceDataView {
+  return (
+    typeof value === 'object' && value !== null && 'type' in value && value.type === 'data_view'
   );
 }
