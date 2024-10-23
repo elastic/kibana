@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EntityColumnIds, EntityType, entityPaginationRt } from '../../../common/entities';
@@ -92,21 +92,17 @@ export function UnifiedInventory() {
 
   return (
     <>
-      <InventorySummary totalEntities={value.entities.length} />
-      <EuiFlexGroup>
-        <EuiFlexItem grow>
-          <EntitiesGrid
-            entities={value.entities}
-            loading={loading}
-            sortDirection={sortDirection}
-            sortField={sortField}
-            onChangePage={handlePageChange}
-            onChangeSort={handleSortChange}
-            pageIndex={pageIndex}
-            onFilterByType={handleTypeFilter}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <InventorySummary />
+      <EntitiesGrid
+        entities={value.entities}
+        loading={loading}
+        sortDirection={sortDirection}
+        sortField={sortField}
+        onChangePage={handlePageChange}
+        onChangeSort={handleSortChange}
+        pageIndex={pageIndex}
+        onFilterByType={handleTypeFilter}
+      />
     </>
   );
 }

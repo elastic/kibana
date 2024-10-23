@@ -35,4 +35,9 @@ describe('InventorySummary', () => {
     expect(screen.getByText('15 Entities')).toBeInTheDocument();
     expect(screen.queryByText('3 Groups')).toBeInTheDocument();
   });
+  it("won't render either totals when not provided anything", () => {
+    render(<InventorySummary />, { wrapper: MockEnvWrapper });
+    expect(screen.queryByText('0 Entities')).not.toBeInTheDocument();
+    expect(screen.queryByText('0 Groups')).not.toBeInTheDocument();
+  });
 });
