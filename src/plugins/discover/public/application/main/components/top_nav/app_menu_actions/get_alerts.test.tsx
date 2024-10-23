@@ -26,7 +26,6 @@ const mount = (dataView = dataViewMock, isEsqlMode = false) => {
     dataView,
     adHocDataViews: [],
     isEsqlMode,
-    services: discoverServiceMock,
     onNewSearch: jest.fn(),
     onOpenSavedSearch: jest.fn(),
     onUpdateAdHocDataViews: jest.fn(),
@@ -34,6 +33,7 @@ const mount = (dataView = dataViewMock, isEsqlMode = false) => {
 
   const alertsAppMenuItem = getAlertsAppMenuItem({
     discoverParams: discoverParamsMock,
+    services: discoverServiceMock,
     stateContainer,
   });
 

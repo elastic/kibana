@@ -55,7 +55,6 @@ export const useTopNavLinks = ({
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
       isEsqlMode,
-      services,
       dataView,
       adHocDataViews,
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
@@ -63,7 +62,7 @@ export const useTopNavLinks = ({
         state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
       },
     }),
-    [isEsqlMode, services, dataView, adHocDataViews, state]
+    [isEsqlMode, dataView, adHocDataViews, state]
   );
 
   const defaultMenu = topNavCustomization?.defaultMenu;
@@ -83,6 +82,7 @@ export const useTopNavLinks = ({
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,
+          services,
           stateContainer: state,
         });
         items.push(alertsAppMenuItem);
@@ -105,7 +105,11 @@ export const useTopNavLinks = ({
       }
 
       if (!defaultMenu?.shareItem?.disabled) {
-        const shareAppMenuItem = getShareAppMenuItem({ discoverParams, stateContainer: state });
+        const shareAppMenuItem = getShareAppMenuItem({
+          discoverParams,
+          services,
+          stateContainer: state,
+        });
         items.push(shareAppMenuItem);
       }
 

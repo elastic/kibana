@@ -80,7 +80,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     },
     /**
      * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
-     * The extension also provides the essential params like current dataView, services etc when defining a custom action implementation.
+     * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
      * @param prev

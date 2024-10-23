@@ -15,13 +15,16 @@ import { DiscoverStateContainer } from '../../../state_management/discover_state
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import { AppMenuDiscoverParams } from './types';
+import { DiscoverServices } from '../../../../../build_services';
 
 export const getShareAppMenuItem = ({
-  stateContainer,
   discoverParams,
+  services,
+  stateContainer,
 }: {
-  stateContainer: DiscoverStateContainer;
   discoverParams: AppMenuDiscoverParams;
+  services: DiscoverServices;
+  stateContainer: DiscoverStateContainer;
 }): AppMenuActionPrimary => {
   return {
     id: AppMenuActionId.share,
@@ -36,7 +39,7 @@ export const getShareAppMenuItem = ({
       iconType: 'share',
       testId: 'shareTopNavButton',
       onClick: async ({ anchorElement }) => {
-        const { dataView, isEsqlMode, services } = discoverParams;
+        const { dataView, isEsqlMode } = discoverParams;
 
         if (!services.share) {
           return;

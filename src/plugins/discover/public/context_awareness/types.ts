@@ -23,7 +23,6 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import type { DiscoverServices } from '../build_services';
 import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 
 /**
@@ -43,7 +42,6 @@ export interface AppMenuExtension {
  */
 export interface AppMenuExtensionParams {
   isEsqlMode: boolean;
-  services: DiscoverServices;
   dataView: DataView | undefined;
   adHocDataViews: DataView[];
   onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
@@ -320,7 +318,7 @@ export interface Profile {
   /**
    * Supports extending the app menu with additional actions
    * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
-   * The extension also provides the essential params like current dataView, services etc when defining a custom action implementation.
+   * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
    * And it supports opening custom flyouts and any other modals on the click.
    * `getAppMenu` can be configured in both root and data source profiles.
    * Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.

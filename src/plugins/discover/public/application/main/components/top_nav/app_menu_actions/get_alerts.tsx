@@ -24,6 +24,7 @@ import {
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { AppMenuDiscoverParams } from './types';
+import { DiscoverServices } from '../../../../../build_services';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -39,12 +40,13 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
 
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
+  services: DiscoverServices;
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, onFinishAction }) => {
+}> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
   const query = stateContainer.appState.getState().query;
 
-  const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = discoverParams;
+  const { dataView, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = discoverParams;
   const { triggersActionsUi } = services;
   const timeField = getTimeField(dataView);
 
@@ -98,13 +100,15 @@ const CreateAlertFlyout: React.FC<{
 };
 
 export const getAlertsAppMenuItem = ({
-  stateContainer,
   discoverParams,
+  services,
+  stateContainer,
 }: {
   discoverParams: AppMenuDiscoverParams;
+  services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
 }): AppMenuActionSubmenuSecondary => {
-  const { dataView, services, isEsqlMode } = discoverParams;
+  const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
@@ -139,6 +143,7 @@ export const getAlertsAppMenuItem = ({
               <CreateAlertFlyout
                 {...params}
                 discoverParams={discoverParams}
+                services={services}
                 stateContainer={stateContainer}
               />
             );
