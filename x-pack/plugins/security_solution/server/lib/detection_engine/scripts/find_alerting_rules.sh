@@ -10,9 +10,10 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./get_alert_types.sh
-# https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/README.md#get-apialerttypes-list-alert-types
+# Example: ./find_alerting_rules.sh
+# https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-findrules
+# use ./find_rules.sh to work with Detection(Security) rules
 curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${KIBANA_URL}${SPACE_URL}/api/alerts/list_alert_types \
+  -X GET ${KIBANA_URL}${SPACE_URL}/api/alerting/rules/_find \
   | jq .
