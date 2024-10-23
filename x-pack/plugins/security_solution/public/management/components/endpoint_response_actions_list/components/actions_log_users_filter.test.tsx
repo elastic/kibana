@@ -15,9 +15,7 @@ import {
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/193554
-// FLAKY: https://github.com/elastic/kibana/issues/193092
-describe.skip('Users filter', () => {
+describe('Users filter', () => {
   let render: (
     props?: React.ComponentProps<typeof ActionsLogUsersFilter>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -29,7 +27,7 @@ describe.skip('Users filter', () => {
   const filterPrefix = 'users-filter';
   let onChangeUsersFilter: jest.Mock;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     onChangeUsersFilter = jest.fn();
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
@@ -58,8 +56,8 @@ describe.skip('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, 'usernameX');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, 'usernameX', { delay: 10 });
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -67,8 +65,8 @@ describe.skip('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ', { delay: 10 });
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ']);
   });
 
@@ -76,8 +74,8 @@ describe.skip('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, '   usernameX   ');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, '   usernameX   ', { delay: 10 });
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -85,8 +83,8 @@ describe.skip('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ');
-    await userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ', { delay: 10 });
+    await userEvent.keyboard('{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY']);
   });
 });
