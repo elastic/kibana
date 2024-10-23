@@ -21,8 +21,8 @@ import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';
 import { userFilterAssociatedNotes, userSearchedNotes } from '..';
 import { AssociatedFilter } from '../../../common/notes/constants';
 
-const FILTER_SELECT = i18n.translate('xpack.securitySolution.notes.management.filterSelect', {
-  defaultMessage: 'Select filter',
+const ATTACH_FILTER = i18n.translate('xpack.securitySolution.notes.management.attachFilter', {
+  defaultMessage: 'Attached to',
 });
 
 const searchBox = {
@@ -31,11 +31,14 @@ const searchBox = {
   'data-test-subj': SEARCH_BAR_TEST_ID,
 };
 const associatedNoteSelectOptions: EuiSelectOption[] = [
-  { value: AssociatedFilter.all, text: 'All' },
-  { value: AssociatedFilter.documentOnly, text: 'Attached to document only' },
-  { value: AssociatedFilter.savedObjectOnly, text: 'Attached to timeline only' },
-  { value: AssociatedFilter.documentAndSavedObject, text: 'Attached to document and timeline' },
-  { value: AssociatedFilter.orphan, text: 'Orphan' },
+  { value: AssociatedFilter.all, text: 'Anything or nothing' },
+  { value: AssociatedFilter.documentOnly, text: 'Alerts or events only' },
+  { value: AssociatedFilter.savedObjectOnly, text: 'Timelines only' },
+  {
+    value: AssociatedFilter.documentAndSavedObject,
+    text: 'Alerts or events and Timelines only',
+  },
+  { value: AssociatedFilter.orphan, text: 'Nothing' },
 ];
 
 export const SearchRow = React.memo(() => {
@@ -69,8 +72,8 @@ export const SearchRow = React.memo(() => {
           id={associatedSelectId}
           options={associatedNoteSelectOptions}
           onChange={onAssociatedNoteSelectChange}
-          prepend={FILTER_SELECT}
-          aria-label={FILTER_SELECT}
+          prepend={ATTACH_FILTER}
+          aria-label={ATTACH_FILTER}
           data-test-subj={ASSOCIATED_NOT_SELECT_TEST_ID}
         />
       </EuiFlexItem>

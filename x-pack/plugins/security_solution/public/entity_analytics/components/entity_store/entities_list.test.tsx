@@ -33,7 +33,7 @@ const responseData: ListEntitiesResponse = {
       user: { name: entityName },
       entity: {
         name: entityName,
-        source: ['source'],
+        source: 'test-index',
       },
     },
   ],
@@ -106,7 +106,7 @@ describe('EntitiesList', () => {
     fireEvent.click(columnHeader);
     expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        sortField: 'entity.displayName.keyword',
+        sortField: 'entity.name.text',
         sortOrder: 'asc',
       })
     );

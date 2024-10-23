@@ -37,6 +37,7 @@ import type {
   CoreConfigUsageData,
   CoreIncrementCounterParams,
   CoreUsageCounter,
+  DeprecatedApiUsageFetcher,
 } from '@kbn/core-usage-data-server';
 import {
   CORE_USAGE_STATS_TYPE,
@@ -48,6 +49,7 @@ import {
   type SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
 
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
@@ -88,6 +90,7 @@ export class CoreUsageDataService
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
   private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
+  private deprecatedApiUsageFetcher: DeprecatedApiUsageFetcher = async () => []; // Initially set to noop
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -513,12 +516,21 @@ export class CoreUsageDataService
       }
     };
 
+    const registerDeprecatedUsageFetch = (fetchFn: DeprecatedApiUsageFetcher) => {
+      this.deprecatedApiUsageFetcher = fetchFn;
+    };
+
+    const fetchDeprecatedUsageStats = (params: { soClient: ISavedObjectsRepository }) => {
+      return this.deprecatedApiUsageFetcher(params);
+    };
+
     this.coreUsageStatsClient = new CoreUsageStatsClient({
       debugLogger: (message: string) => this.logger.debug(message),
       basePath: http.basePath,
       repositoryPromise: internalRepositoryPromise,
       stop$: this.stop$,
       incrementUsageCounter,
+      fetchDeprecatedUsageStats,
     });
 
     const contract: InternalCoreUsageDataSetup = {
@@ -526,6 +538,7 @@ export class CoreUsageDataService
       getClient: () => this.coreUsageStatsClient!,
       registerUsageCounter,
       incrementUsageCounter,
+      registerDeprecatedUsageFetch,
     };
 
     return contract;
