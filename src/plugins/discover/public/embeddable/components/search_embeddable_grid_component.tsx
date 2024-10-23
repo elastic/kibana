@@ -26,8 +26,6 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { Filter } from '@kbn/es-query';
-import { isFunction } from 'lodash';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
@@ -69,6 +67,8 @@ export function SearchEmbeddableGridComponent({
     savedSearch,
     savedSearchId,
     interceptedWarnings,
+    apiQuery,
+    apiFilters,
     fetchContext,
     rows,
     totalHitCount,
@@ -79,6 +79,8 @@ export function SearchEmbeddableGridComponent({
     api.savedSearch$,
     api.savedObjectId,
     api.fetchWarnings$,
+    api.query$,
+    api.filters$,
     api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
@@ -89,17 +91,8 @@ export function SearchEmbeddableGridComponent({
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
   // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
 
-  const savedSearchQuery = savedSearch?.searchSource?.getField('query');
-  const savedSearchFilters: Filter[] | undefined = useMemo(() => {
-    let filters = savedSearch?.searchSource?.getField('filter');
-    if (filters && isFunction(filters)) {
-      filters = filters();
-    }
-    if (!filters) {
-      return undefined;
-    }
-    return Array.isArray(filters) ? filters : [filters];
-  }, [savedSearch]);
+  const savedSearchQuery = apiQuery;
+  const savedSearchFilters = apiFilters;
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
     useBatchedOptionalPublishingSubjects(
