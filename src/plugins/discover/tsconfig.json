@@ -99,7 +99,12 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/discover-contextual-components",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/router-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/discover-shared-plugin",
+    "@kbn/expandable-flyout"
   ],
   "exclude": [
     "target/**/*"
