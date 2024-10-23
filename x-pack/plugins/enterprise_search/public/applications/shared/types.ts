@@ -89,19 +89,9 @@ export interface BuildClassicNavParameters {
   productAccess: ProductAccess;
 }
 
-export type ClassicNavItem = BaseClassicNavItem | DeepLinkNavItem;
-
-export interface BaseClassicNavItem {
+export interface ClassicNavItem {
   'data-test-subj'?: string;
-  iconToString?: string;
-  id: string;
-  items?: ClassicNavItem[];
-  name: ReactNode;
-}
-
-export interface DeepLinkNavItem {
-  'data-test-subj'?: string;
-  deepLink: GenerateNavLinkFromDeepLinkParameters;
+  deepLink?: GenerateNavLinkFromDeepLinkParameters;
   iconToString?: string;
   id: string;
   items?: ClassicNavItem[];

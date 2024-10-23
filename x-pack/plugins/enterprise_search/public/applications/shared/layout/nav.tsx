@@ -21,7 +21,6 @@ import { KibanaLogic } from '../kibana';
 import { LicensingLogic } from '../licensing';
 import {
   ClassicNavItem,
-  DeepLinkNavItem,
   GenerateNavLinkParameters,
   GenerateNavLinkFromDeepLinkParameters,
 } from '../types';
@@ -42,17 +41,15 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
 
   const indicesNavItems = useIndicesNav();
 
-  const deepLinks = useMemo(() => {
-    return getNavLinks().reduce((links, link) => {
+  const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
+    const baseNavItems = buildBaseClassicNavItems({ hasEnterpriseLicense, productAccess });
+    const deepLinks = getNavLinks().reduce((links, link) => {
       links[link.id] = link;
       return links;
     }, {} as Record<string, ChromeNavLink | undefined>);
-  }, []);
-  const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
-    const baseNavItems = buildBaseClassicNavItems({ hasEnterpriseLicense, productAccess });
 
     return generateSideNavItems(baseNavItems, deepLinks, { search_indices: indicesNavItems });
-  }, [hasEnterpriseLicense, productAccess, indicesNavItems, deepLinks]);
+  }, [hasEnterpriseLicense, productAccess, indicesNavItems]);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
@@ -229,7 +226,7 @@ export const generateSideNavItems = (
   for (const navItem of navItems) {
     let sideNavChildItems: Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined;
 
-    const { items, ...rest } = navItem;
+    const { deepLink, items, ...rest } = navItem;
     const subItems = subItemsMap?.[navItem.id];
 
     if (items || subItems) {
@@ -241,15 +238,15 @@ export const generateSideNavItems = (
         sideNavChildItems.push(...subItems);
       }
     }
+
     let sideNavItem: EuiSideNavItemTypeEnhanced<unknown> | undefined;
-    if (isDeepLinkNavItem(navItem)) {
-      const deepLink = navItem.deepLink;
+    if (deepLink) {
       const navLinkParams = getNavLinkParameters(deepLink, deepLinks);
       if (navLinkParams !== undefined) {
-        const name = getDeepLinkTitle(deepLink.link, deepLinks);
+        const name = navItem.name ?? getDeepLinkTitle(deepLink.link, deepLinks);
         sideNavItem = {
-          name,
           ...rest,
+          name,
           ...generateNavLink({
             ...navLinkParams,
             items: sideNavChildItems,
@@ -272,9 +269,6 @@ export const generateSideNavItems = (
   return sideNavItems;
 };
 
-function isDeepLinkNavItem(item: ClassicNavItem): item is DeepLinkNavItem {
-  return 'deepLink' in item;
-}
 const getNavLinkParameters = (
   navLink: GenerateNavLinkFromDeepLinkParameters,
   deepLinks: Record<string, ChromeNavLink | undefined>

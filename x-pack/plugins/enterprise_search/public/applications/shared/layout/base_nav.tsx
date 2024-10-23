@@ -18,6 +18,8 @@ import {
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
+import { GETTING_STARTED_TITLE } from '../../../../common/constants';
+
 import { ClassicNavItem, BuildClassicNavParameters } from '../types';
 
 export const buildBaseClassicNavItems = ({
@@ -166,9 +168,7 @@ export const buildBaseClassicNavItems = ({
         id: 'aiSearch',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-      defaultMessage: 'Getting started',
-    }),
+    name: GETTING_STARTED_TITLE,
   });
 
   if (productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess) {
