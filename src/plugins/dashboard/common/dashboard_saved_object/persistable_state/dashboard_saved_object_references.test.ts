@@ -298,6 +298,7 @@ describe('injectReferences', () => {
           Object {
             "gridData": Object {
               "h": 1,
+              "i": "0",
               "w": 1,
               "x": 0,
               "y": 0,
@@ -312,6 +313,7 @@ describe('injectReferences', () => {
           Object {
             "gridData": Object {
               "h": 2,
+              "i": "1",
               "w": 2,
               "x": 1,
               "y": 1,
