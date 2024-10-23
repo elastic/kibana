@@ -72,7 +72,7 @@ export const suggestionsApi = ({
   // to return line / area instead of a bar chart
   const chartType = preferredChartType?.toLowerCase();
   const XYSuggestion = suggestions.find((sug) => sug.visualizationId === 'lnsXY');
-  // console.log(['area', 'line'].some((type) => chartType.includes(type)));
+  // a type can be area, line, area_stacked, area_percentage etc
   const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
   if (XYSuggestion && chartType && isAreaOrLine) {
     const visualizationState = visualizationMap[
