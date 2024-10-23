@@ -13,7 +13,9 @@ export function esqlResultToPlainObjects<T extends Record<string, any>>(
   return result.values.map((row) => {
     return row.reduce<Record<string, unknown>>((acc, value, index) => {
       const column = result.columns[index];
-      acc[column.name] = value;
+      if (!/(text$|keyword$)/.test(column.name)) {
+        acc[column.name] = value;
+      }
       return acc;
     }, {});
   }) as T[];
