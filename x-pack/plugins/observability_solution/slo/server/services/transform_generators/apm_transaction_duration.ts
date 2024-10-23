@@ -185,9 +185,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
               goodEvents: 'slo.numerator.value',
               totalEvents: 'slo.denominator.value',
             },
-            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
               slo.objective.timesliceTarget!
-            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),
