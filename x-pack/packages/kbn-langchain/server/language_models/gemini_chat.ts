@@ -87,9 +87,13 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
         };
 
         if (actionResult.status === 'error') {
-          throw new Error(
+          const error = new Error(
             `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
           );
+          if (actionResult?.serviceMessage) {
+            error.name = actionResult?.serviceMessage;
+          }
+          throw error;
         }
 
         if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {
@@ -162,9 +166,13 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       const actionResult = await this.#actionsClient.execute(requestBody);
 
       if (actionResult.status === 'error') {
-        throw new Error(
+        const error = new Error(
           `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
         );
+        if (actionResult?.serviceMessage) {
+          error.name = actionResult?.serviceMessage;
+        }
+        throw error;
       }
 
       const readable = get('data', actionResult) as Readable;

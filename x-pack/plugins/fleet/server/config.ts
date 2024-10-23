@@ -26,7 +26,7 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
-const REGISTRY_SPEC_MAX_VERSION = '3.2';
+const REGISTRY_SPEC_MAX_VERSION = '3.3';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -130,6 +130,7 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object(
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({

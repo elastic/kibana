@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
 
-  describe('dashboard listing page', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/192564
+  describe.skip('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {

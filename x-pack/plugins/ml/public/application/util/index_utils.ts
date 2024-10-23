@@ -6,6 +6,7 @@
  */
 
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 
@@ -51,7 +52,7 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
  * which means it is cross-cluster
  */
 export function isCcsIndexPattern(indexPattern: string) {
-  return indexPattern.includes(':');
+  return isCCSRemoteIndexName(indexPattern);
 }
 
 export function findMessageField(

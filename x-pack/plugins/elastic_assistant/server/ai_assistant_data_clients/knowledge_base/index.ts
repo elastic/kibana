@@ -54,6 +54,7 @@ import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_l
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
   modelIdOverride?: string;
   v2KnowledgeBaseEnabled?: boolean;
+  manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
@@ -63,6 +64,7 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   v2KnowledgeBaseEnabled: boolean;
+  manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -205,10 +207,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public setupKnowledgeBase = async ({
     soClient,
-    installSecurityLabsDocs = true,
+    v2KnowledgeBaseEnabled = true,
   }: {
     soClient: SavedObjectsClientContract;
-    installSecurityLabsDocs?: boolean;
+    v2KnowledgeBaseEnabled?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -218,6 +220,28 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug('Starting Knowledge Base setup...');
     this.options.setIsKBSetupInProgress(true);
     const elserId = await this.options.getElserId();
+
+    if (v2KnowledgeBaseEnabled) {
+      // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
+      try {
+        const esClient = await this.options.elasticsearchClientPromise;
+        const legacyESQL = await esClient.deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
+            },
+          },
+        });
+        if (legacyESQL?.total != null && legacyESQL?.total > 0) {
+          this.options.logger.info(
+            `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
+      } catch (e) {
+        this.options.logger.info('No legacy ESQL knowledge base docs to delete');
+      }
+    }
 
     try {
       const isInstalled = await this.isModelInstalled();
@@ -252,7 +276,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      if (installSecurityLabsDocs) {
+      if (v2KnowledgeBaseEnabled) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
@@ -285,12 +309,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
     const authenticatedUser = this.options.currentUser;
-    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
+
+    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+      throw new Error('User lacks privileges to create global knowledge base entries');
+    }
+
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
         // v1 schema has metadata nested in a `metadata` object
@@ -499,12 +527,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
-    // TODO: KB-RBAC check for when `global:true`
+
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
+
+    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+      throw new Error('User lacks privileges to create global knowledge base entries');
+    }
+
     this.options.logger.debug(
       () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );

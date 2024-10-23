@@ -23,7 +23,6 @@ import {
   cleanAssetCriticality,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
-  enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
   waitForAssetCriticalityToBePresent,
 } from '../../utils';
@@ -35,7 +34,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const previewRiskScores = async ({
@@ -70,10 +68,6 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
-    before(async () => {
-      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
-    });
-
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,

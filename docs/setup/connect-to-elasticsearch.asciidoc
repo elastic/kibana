@@ -73,12 +73,25 @@ image::images/add-sample-data.png[eCommerce, flights, and web logs sample data s
 [[upload-data-kibana]]
 === Upload a data file
 
-If you have a log file or delimited CSV, TSV, or JSON file, you can upload it,
-view its fields and metrics, and optionally import it into {es}.
+You can upload files, view their fields and metrics, and optionally import them to {es} with the Data Visualizer. 
 In the *Integrations* view, search for *Upload a file*, and then drop your file on the target.
 
-By default, you can upload a file up to 100 MB. This value is configurable up to 1 GB in
-<<fileupload-maxfilesize,Advanced Settings>>.
+You can upload different file formats for analysis with the Data Visualizer:
+
+File formats supported up to 500 MB:
+
+* CSV
+* TSV
+* NDJSON
+* Log files
+
+File formats supported up to 60 MB:
+
+* PDF
+* Microsoft Office files (Word, Excel, PowerPoint)
+* Plain Text (TXT)
+* Rich Text (RTF)
+* Open Document Format (ODF)
 
 NOTE: The upload feature is not intended for use as part of a repeated production
 process, but rather for the initial exploration of your data.

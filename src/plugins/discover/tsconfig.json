@@ -100,7 +100,8 @@
     "@kbn/management-settings-ids",
     "@kbn/react-hooks",
     "@kbn/logs-data-access-plugin",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/esql-ast"
   ],
   "exclude": [
     "target/**/*"

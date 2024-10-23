@@ -23,6 +23,7 @@ export const ConnectionDetails: React.FC = () => {
       value={elasticsearchUrl}
       copyValue={elasticsearchUrl}
       dataTestSubj="connectionDetailsEndpoint"
+      copyValueDataTestSubj="connectionDetailsEndpointCopy"
     />
   );
 };

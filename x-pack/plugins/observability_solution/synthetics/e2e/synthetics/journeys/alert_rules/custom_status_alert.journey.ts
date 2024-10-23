@@ -48,6 +48,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
 
   step('should create status rule', async () => {
     await page.getByTestId('syntheticsRefreshButtonButton').click();
+    await page.waitForTimeout(5000);
     await page.getByTestId('syntheticsAlertsRulesButton').click();
     await page.getByTestId('manageStatusRuleName').click();
     await page.getByTestId('createNewStatusRule').click();

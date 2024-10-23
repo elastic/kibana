@@ -27,14 +27,14 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
     // remove all allFilters that belong to a group
     return allFilters.filter((filter: string) => {
       const ast = fromExpression(filter);
-      const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+      const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []) as string[];
       return expGroups.length === 0;
     });
   }
 
   return allFilters.filter((filter: string) => {
     const ast = fromExpression(filter);
-    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []) as string[];
     return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
   });
 }

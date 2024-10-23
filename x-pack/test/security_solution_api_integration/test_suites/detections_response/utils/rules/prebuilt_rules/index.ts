@@ -19,4 +19,4 @@ export * from './install_prebuilt_rules_fleet_package';
 export * from './install_prebuilt_rules';
 export * from './review_install_prebuilt_rules';
 export * from './review_upgrade_prebuilt_rules';
-export * from './upgrade_prebuilt_rules';
+export * from './perform_upgrade_prebuilt_rules';

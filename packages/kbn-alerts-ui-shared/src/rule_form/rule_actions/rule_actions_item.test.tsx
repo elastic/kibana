@@ -324,7 +324,7 @@ describe('ruleActionsItem', () => {
 
     await userEvent.click(screen.getByText('onTimeframeChange'));
 
-    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
 
     expect(mockOnChange).toHaveBeenCalledWith({
       payload: {

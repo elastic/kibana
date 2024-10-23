@@ -90,7 +90,8 @@ export interface GetActionsToScheduleOpts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
+  activeCurrentAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredCurrentAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   throttledSummaryActions?: ThrottledActions;
 }
 
@@ -117,4 +118,31 @@ export interface RuleUrl {
   basePathname?: string;
   spaceIdSegment?: string;
   relativePath?: string;
+}
+
+export interface IsExecutableAlertOpts<
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+  action: RuleAction;
+  summarizedAlerts: CombinedSummarizedAlerts | null;
+}
+
+export interface IsExecutableActiveAlertOpts<ActionGroupIds extends string> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds>;
+  action: RuleAction;
+}
+
+export interface HelperOpts<ActionGroupIds extends string, RecoveryActionGroupId extends string> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+  action: RuleAction;
+}
+
+export interface AddSummarizedAlertsOpts<
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+  summarizedAlerts: CombinedSummarizedAlerts | null;
 }

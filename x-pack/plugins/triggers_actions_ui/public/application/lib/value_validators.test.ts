@@ -11,9 +11,10 @@ import {
   isValidUrl,
   getConnectorWithInvalidatedFields,
   getRuleWithInvalidatedFields,
+  validateActionFilterQuery,
 } from './value_validators';
 import { v4 as uuidv4 } from 'uuid';
-import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
+import { Rule, IErrorObject, UserConfiguredActionConnector, RuleUiAction } from '../../types';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -439,5 +440,72 @@ describe('getRuleWithInvalidatedFields', () => {
     getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
     expect((rule.actions[0].params as any).incident.field.name).toBeNull();
     expect((rule.actions[1].params as any).incident.field.name).toEqual('myIncident');
+  });
+});
+
+describe('validateActionFilterQuery', () => {
+  test('does not return an error when kql query exists', () => {
+    const actionItem: RuleUiAction = {
+      actionTypeId: 'test',
+      group: 'qwer',
+      id: '123',
+      params: {
+        incident: {
+          field: {
+            name: 'myIncident',
+          },
+        },
+      },
+      alertsFilter: { query: { kql: 'id: *', filters: [] } },
+    };
+
+    expect(validateActionFilterQuery(actionItem)).toBe(null);
+  });
+
+  test('does not return an error when filter query exists', () => {
+    const actionItem = {
+      actionTypeId: 'test',
+      group: 'qwer',
+      id: '123',
+      params: {
+        incident: {
+          field: {
+            name: 'myIncident',
+          },
+        },
+      },
+      alertsFilter: {
+        query: {
+          kql: undefined,
+          filters: [
+            {
+              $state: { store: 'state' },
+              meta: { key: 'test' },
+              query: { exists: { field: '_id' } },
+            },
+          ],
+        },
+      },
+    };
+
+    expect(validateActionFilterQuery(actionItem)).toBe(null);
+  });
+
+  test('returns an error no kql and no filters', () => {
+    const actionItem = {
+      actionTypeId: 'test',
+      group: 'qwer',
+      id: '123',
+      params: {
+        incident: {
+          field: {
+            name: 'myIncident',
+          },
+        },
+      },
+      alertsFilter: { query: { kql: '', filters: [] } },
+    };
+
+    expect(validateActionFilterQuery(actionItem)).toBe('A custom query is required.');
   });
 });

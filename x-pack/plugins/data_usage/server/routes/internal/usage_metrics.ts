@@ -7,31 +7,32 @@
 
 import { UsageMetricsRequestSchema, UsageMetricsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
-import { DataUsageContext, DataUsageRouter } from '../../types';
+import { DataUsageRouter } from '../../types';
+import { DataUsageService } from '../../services';
 
 import { getUsageMetricsHandler } from './usage_metrics_handler';
 
 export const registerUsageMetricsRoute = (
   router: DataUsageRouter,
-  dataUsageContext: DataUsageContext
+  dataUsageService: DataUsageService
 ) => {
-  if (dataUsageContext.serverConfig.enabled) {
-    router.versioned
-      .get({
-        access: 'internal',
-        path: DATA_USAGE_METRICS_API_ROUTE,
-      })
-      .addVersion(
-        {
-          version: '1',
-          validate: {
-            request: UsageMetricsRequestSchema,
-            response: {
-              200: UsageMetricsResponseSchema,
-            },
+  router.versioned
+    .post({
+      access: 'internal',
+      path: DATA_USAGE_METRICS_API_ROUTE,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: UsageMetricsRequestSchema,
+          },
+          response: {
+            200: UsageMetricsResponseSchema,
           },
         },
-        getUsageMetricsHandler(dataUsageContext)
-      );
-  }
+      },
+      getUsageMetricsHandler(dataUsageService)
+    );
 };

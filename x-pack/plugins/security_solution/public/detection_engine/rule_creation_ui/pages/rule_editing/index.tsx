@@ -348,7 +348,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   isUpdateView
                   actionMessageParams={actionMessageParams}
                   summaryActionMessageParams={actionMessageParams}
-                  ruleType={rule?.type}
                   form={actionsStepForm}
                   key="actionsStep"
                 />
@@ -362,7 +361,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [
       rule?.immutable,
       rule?.id,
-      rule?.type,
       activeStep,
       loading,
       isSavedQueryLoading,

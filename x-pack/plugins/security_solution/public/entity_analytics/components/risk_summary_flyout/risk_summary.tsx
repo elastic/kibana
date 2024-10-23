@@ -23,8 +23,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
@@ -82,17 +81,9 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+  const columns = useMemo(() => buildColumns(), []);
 
-  const columns = useMemo(
-    () => buildColumns(isAssetCriticalityEnabled),
-    [isAssetCriticalityEnabled]
-  );
-
-  const rows = useMemo(
-    () => getItems(entityData, isAssetCriticalityEnabled),
-    [entityData, isAssetCriticalityEnabled]
-  );
+  const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
     (isOpen: boolean) => {

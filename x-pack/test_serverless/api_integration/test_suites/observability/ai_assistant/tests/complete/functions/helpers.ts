@@ -11,7 +11,7 @@ import {
   MessageRole,
   StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { AssistantScope } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { Readable } from 'stream';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../../shared/services';
 import { ObservabilityAIAssistantApiClient } from '../../../common/observability_ai_assistant_api_client';

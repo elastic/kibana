@@ -400,6 +400,22 @@
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.AddVersionOpts.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ deprecated?: ",
+              "RouteDeprecationInfo",
+              " | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2310,6 +2326,32 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.HttpServiceSetup.getDeprecatedRoutes",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeprecatedRoutes",
+            "description": [
+              "\nProvides a list of all registered deprecated routes {{@link RouterDeprecatedRouteDetails | information}}.\nThe routers will be evaluated everytime this function gets called to\naccommodate for any late route registrations"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouterDeprecatedRouteDetails",
+                "text": "RouterDeprecatedRouteDetails"
+              },
+              "[]"
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3682,18 +3724,6 @@
                 "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/info.ts"
-              },
-              {
-                "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/feature_usage.ts"
-              },
-              {
-                "plugin": "features",
-                "path": "x-pack/plugins/features/server/routes/index.ts"
-              },
-              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/health.ts"
               },
@@ -3704,6 +3734,18 @@
               {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/plugins/licensing/server/routes/info.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/plugins/licensing/server/routes/feature_usage.ts"
+              },
+              {
+                "plugin": "features",
+                "path": "x-pack/plugins/features/server/routes/index.ts"
               },
               {
                 "plugin": "customIntegrations",
@@ -3927,7 +3969,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.ts"
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.ts"
               },
               {
                 "plugin": "alerting",
@@ -3935,7 +3977,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.ts"
               },
               {
                 "plugin": "alerting",
@@ -4618,6 +4660,10 @@
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/documents.ts"
               },
               {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/list.ts"
+              },
+              {
                 "plugin": "licenseManagement",
                 "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
@@ -5258,50 +5304,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/get_rule_state.test.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/health.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
-              },
-              {
                 "plugin": "features",
                 "path": "x-pack/plugins/features/server/routes/index.test.ts"
               },
@@ -5735,6 +5737,38 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/framework/apis/health/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
@@ -5827,6 +5861,18 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/list_types/rule_types.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
@@ -5892,6 +5938,18 @@
               {
                 "plugin": "@kbn/core-deprecations-server-internal",
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-resources-server-internal",
@@ -6344,6 +6402,10 @@
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/validate.ts"
               },
               {
+                "plugin": "@kbn/core-deprecations-server-internal",
+                "path": "packages/core/deprecations/core-deprecations-server-internal/src/routes/resolve_deprecated_api.ts"
+              },
+              {
                 "plugin": "@kbn/core-capabilities-server-internal",
                 "path": "packages/core/capabilities/core-capabilities-server-internal/src/routes/resolve_capabilities.ts"
               },
@@ -6493,7 +6555,7 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.ts"
               },
               {
                 "plugin": "actions",
@@ -6573,7 +6635,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.ts"
               },
               {
                 "plugin": "alerting",
@@ -6581,7 +6643,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.ts"
               },
               {
                 "plugin": "alerting",
@@ -7208,6 +7270,10 @@
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/parse_csv.ts"
               },
               {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/create.ts"
+              },
+              {
                 "plugin": "licenseManagement",
                 "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_basic_route.ts"
               },
@@ -7636,6 +7702,22 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
               },
@@ -7737,26 +7819,6 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
-              },
-              {
-                "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get_global_execution_kpi.test.ts"
               },
               {
@@ -7781,18 +7843,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
               },
               {
@@ -7802,18 +7852,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/update_flapping_settings.test.ts"
+              },
+              {
+                "plugin": "encryptedSavedObjects",
+                "path": "x-pack/plugins/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -8042,6 +8088,26 @@
               {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -8321,6 +8387,18 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
               },
               {
@@ -8338,6 +8416,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_all/unmute_all_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9898,6 +9984,10 @@
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/delete.ts"
               },
               {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/delete.ts"
+              },
+              {
                 "plugin": "logstash",
                 "path": "x-pack/plugins/logstash/server/routes/pipeline/delete.ts"
               },
@@ -11209,7 +11299,7 @@
                 "section": "def-server.KibanaRequestRouteOptions",
                 "text": "KibanaRequestRouteOptions"
               },
-              "<Method>>; }"
+              "<Method>>; readonly routePath?: string | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -11395,6 +11485,22 @@
             "signature": [
               "URL",
               " | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequest.apiVersion",
+            "type": "string",
+            "tags": [],
+            "label": "apiVersion",
+            "description": [
+              "\nThe versioned route API version of this request."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -11607,6 +11713,20 @@
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequestRoute.routePath",
+            "type": "string",
+            "tags": [],
+            "label": "routePath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -11739,6 +11859,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRouteOptions.deprecated",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "RouteDeprecationInfo",
+              " | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.KibanaRouteOptions.xsrfRequired",
@@ -13172,7 +13307,7 @@
             "tags": [],
             "label": "access",
             "description": [
-              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
+              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incoming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
             "signature": [
               {
@@ -13279,11 +13414,30 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteConfigOptions.deprecated",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "deprecated",
             "description": [
-              "\nSetting this to `true` declares this route to be deprecated. Consumers SHOULD\nrefrain from usage of this route.\n"
+              "\nDescription of deprecations for this HTTP API.\n"
+            ],
+            "signature": [
+              "RouteDeprecationInfo",
+              " | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.excludeFromOAS",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "excludeFromOAS",
+            "description": [
+              "\nWhether this route should be treated as \"invisible\" and excluded from router\nOAS introspection.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -13326,6 +13480,42 @@
                 "text": "RouteSecurity"
               },
               " | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.httpResource",
+            "type": "CompoundType",
+            "tags": [
+              "note",
+              "note",
+              "default"
+            ],
+            "label": "httpResource",
+            "description": [
+              "\nWhether this endpoint is being used to serve generated or static HTTP resources\nlike JS, CSS or HTML. _Do not set to `true` for HTTP APIs._\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.availability",
+            "type": "Object",
+            "tags": [],
+            "label": "availability",
+            "description": [
+              "\nBased on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)\nKibana APIs can also specify some metadata about API availability.\n\nThis setting is only applicable if your route `access` is `public`.\n"
+            ],
+            "signature": [
+              "{ stability?: \"experimental\" | \"beta\" | \"stable\" | undefined; since?: string | undefined; } | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -13432,6 +13622,87 @@
               "boolean | \"gunzip\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.RouterDeprecatedRouteDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouterDeprecatedRouteDetails",
+        "description": [],
+        "path": "packages/core/http/core-http-server/src/router/router.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouterDeprecatedRouteDetails.routeDeprecationOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "routeDeprecationOptions",
+            "description": [],
+            "signature": [
+              "RouteDeprecationInfo"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouterDeprecatedRouteDetails.routeMethod",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "routeMethod",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.SafeRouteMethod",
+                "text": "SafeRouteMethod"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.DestructiveRouteMethod",
+                "text": "DestructiveRouteMethod"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouterDeprecatedRouteDetails.routePath",
+            "type": "string",
+            "tags": [],
+            "label": "routePath",
+            "description": [],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouterDeprecatedRouteDetails.routeVersion",
+            "type": "string",
+            "tags": [],
+            "label": "routeVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13629,6 +13900,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouterRoute.isVersioned",
+            "type": "boolean",
+            "tags": [],
+            "label": "isVersioned",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -14892,10 +15177,6 @@
               },
               {
                 "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.ts"
-              },
-              {
-                "plugin": "dataUsage",
                 "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.ts"
               },
               {
@@ -15160,7 +15441,7 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get_attack_discovery.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -15536,6 +15817,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
               },
               {
@@ -15704,6 +15989,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -15797,7 +16086,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -15813,7 +16102,7 @@
                     "section": "def-server.RouteSecurity",
                     "text": "RouteSecurity"
                   },
-                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15967,10 +16256,6 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/cancel_attack_discovery.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/update_route.ts"
               },
               {
@@ -16112,7 +16397,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -16128,7 +16413,7 @@
                     "section": "def-server.RouteSecurity",
                     "text": "RouteSecurity"
                   },
-                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -16315,6 +16600,14 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/graph/route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -16630,7 +16923,11 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post_attack_discovery.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/cancel/cancel_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16727,6 +17024,10 @@
               {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/plugins/integration_assistant/server/routes/analyze_logs_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/routes/cel_routes.ts"
               },
               {
                 "plugin": "lists",
@@ -17010,6 +17311,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/apply_dataview_indices.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/init.ts"
               },
               {
@@ -17235,7 +17540,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -17251,7 +17556,7 @@
                     "section": "def-server.RouteSecurity",
                     "text": "RouteSecurity"
                   },
-                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -17382,7 +17687,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -17398,7 +17703,7 @@
                     "section": "def-server.RouteSecurity",
                     "text": "RouteSecurity"
                   },
-                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -17513,6 +17818,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/filters.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
@@ -17677,7 +17986,7 @@
                     "section": "def-server.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -17693,13 +18002,37 @@
                     "section": "def-server.RouteSecurity",
                     "text": "RouteSecurity"
                   },
-                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+                  " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.VersionedRouter.getRoutes",
+            "type": "Function",
+            "tags": [],
+            "label": "getRoutes",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.VersionedRouterRoute",
+                "text": "VersionedRouterRoute"
+              },
+              "<unknown, unknown, unknown>[]"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -17751,6 +18084,158 @@
             "description": [],
             "signature": [
               "{ body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.VersionedRouterRoute",
+        "type": "Interface",
+        "tags": [],
+        "label": "VersionedRouterRoute",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.VersionedRouterRoute",
+            "text": "VersionedRouterRoute"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.VersionedRouterRoute.method",
+            "type": "string",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.VersionedRouterRoute.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.VersionedRouterRoute.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ options?: Omit<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteConfigOptions",
+                "text": "RouteConfigOptions"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteMethod",
+                "text": "RouteMethod"
+              },
+              ">, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; description?: string | undefined; summary?: string | undefined; access: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteAccess",
+                "text": "RouteAccess"
+              },
+              "; discontinued?: string | undefined; enableQueryVersion?: boolean | undefined; }"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.VersionedRouterRoute.handlers",
+            "type": "Array",
+            "tags": [],
+            "label": "handlers",
+            "description": [],
+            "signature": [
+              "{ fn: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              "<P, Q, B, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RequestHandlerContextBase",
+                "text": "RequestHandlerContextBase"
+              },
+              ", any, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
+              ">; options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.AddVersionOpts",
+                "text": "AddVersionOpts"
+              },
+              "<P, Q, B>; }[]"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.VersionedRouterRoute.isVersioned",
+            "type": "boolean",
+            "tags": [],
+            "label": "isVersioned",
+            "description": [],
+            "signature": [
+              "true"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -20578,7 +21063,7 @@
             "section": "def-server.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+          "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -20594,7 +21079,7 @@
             "section": "def-server.RouteSecurity",
             "text": "RouteSecurity"
           },
-          " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+          " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -20662,7 +21147,7 @@
                 "section": "def-server.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"security\" | \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+              "<Method>, \"security\" | \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -20678,7 +21163,7 @@
                 "section": "def-server.RouteSecurity",
                 "text": "RouteSecurity"
               },
-              " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+              " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,

@@ -77,8 +77,11 @@ export interface IAlertsClient<
   processAlerts(opts: ProcessAlertsOpts): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
-    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
-  ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
+    type: 'new' | 'active' | 'activeCurrent'
+  ): Record<string, LegacyAlert<State, Context, ActionGroupIds>> | {};
+  getProcessedAlerts(
+    type: 'recovered' | 'recoveredCurrent'
+  ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;

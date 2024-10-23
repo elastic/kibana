@@ -11,6 +11,7 @@ import { AnomalyThresholdReadOnly } from './anomaly_threshold';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockMachineLearningRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: AnomalyThresholdReadOnly,
@@ -23,7 +24,11 @@ interface TemplateProps {
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return <FieldReadOnly fieldName="anomaly_threshold" finalDiffableRule={args.finalDiffableRule} />;
+  return (
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="anomaly_threshold" />
+    </ThreeWayDiffStorybookProviders>
+  );
 };
 
 export const Default = Template.bind({});
