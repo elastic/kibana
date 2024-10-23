@@ -23,6 +23,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
+  GETTING_STARTED_TITLE,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -169,10 +170,22 @@ export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcru
   useSearchBreadcrumbs([{ text: APPLICATIONS_PLUGIN.NAV_TITLE }, ...breadcrumbs]);
 
 export const useAiSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: AI_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: GETTING_STARTED_TITLE },
+    { text: AI_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
 
 export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: GETTING_STARTED_TITLE },
+    { text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' },
+    ...breadcrumbs,
+  ]);
 
 export const useSemanticSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: GETTING_STARTED_TITLE },
+    { text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);

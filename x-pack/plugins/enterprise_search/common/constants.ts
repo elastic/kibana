@@ -345,3 +345,7 @@ export const CRAWLER = {
 
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];
+
+export const GETTING_STARTED_TITLE = i18n.translate('xpack.enterpriseSearch.gettingStarted.title', {
+  defaultMessage: 'Getting started',
+});
