@@ -24,6 +24,12 @@ import {
   AgentlessAgentCreateError,
   AgentlessAgentDeleteError,
 } from '../../errors';
+import { AgentlessAgentCreateError } from '../../errors';
+import {
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+} from '../../constants';
 
 import { appContextService } from '../app_context';
 
@@ -88,16 +94,7 @@ class AgentlessAgentService {
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
 
-    const labels = agentlessAgentPolicy.global_data_tags
-      ? {
-          organization: agentlessAgentPolicy.global_data_tags.find(
-            (tag) => tag.name === 'organization'
-          )?.value,
-          division: agentlessAgentPolicy.global_data_tags.find((tag) => tag.name === 'division')
-            ?.value,
-          team: agentlessAgentPolicy.global_data_tags.find((tag) => tag.name === 'team')?.value,
-        }
-      : undefined;
+    const labels = this.getAgentlessTags(agentlessAgentPolicy);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),

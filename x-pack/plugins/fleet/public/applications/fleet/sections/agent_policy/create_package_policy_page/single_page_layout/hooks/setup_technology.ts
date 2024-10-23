@@ -19,7 +19,12 @@ import type {
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
-import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
+import {
+  AGENTLESS_POLICY_ID,
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+} from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
@@ -220,15 +225,15 @@ const getAdditionalAgentlessPolicyInfo = (
         global_data_tags: agentlessInfo
           ? [
               {
-                name: 'organization',
+                name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
                 value: agentlessInfo.organization,
               },
               {
-                name: 'division',
+                name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
                 value: agentlessInfo.division,
               },
               {
-                name: 'team',
+                name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
                 value: agentlessInfo.team,
               },
             ]
