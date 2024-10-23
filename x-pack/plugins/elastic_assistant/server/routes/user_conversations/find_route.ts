@@ -61,13 +61,23 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const userFilter = currentUser?.username
             ? `name: "${currentUser?.username}"`
             : `id: "${currentUser?.profile_uid}"`;
+
+          // TODO remove once we have pagination https://github.com/elastic/kibana/issues/192714
+          // Return no more than 99 conversations in order to avoid bulk update errors
+          const MAX_NON_DEFAULT_CONVERSATION_TOTAL = 90;
+          const MAX_DEFAULT_CONVERSATION_TOTAL = 9;
+          const nonDefaultSize = Math.min(MAX_NON_DEFAULT_CONVERSATION_TOTAL, query.per_page);
           const result = await dataClient?.findDocuments<EsConversationSchema>({
-            perPage: query.per_page,
+            perPage: nonDefaultSize,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ ${userFilter} }${additionalFilter}`,
+            filter: `users:{ ${userFilter} }${additionalFilter} and not is_default: true`,
             fields: query.fields,
+            mSearch: {
+              filter: `users:{ ${userFilter} }${additionalFilter} and is_default: true`,
+              perPage: MAX_DEFAULT_CONVERSATION_TOTAL,
+            },
           });
 
           if (result) {
