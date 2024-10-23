@@ -115,7 +115,7 @@ export interface PackageClient {
     prerelease?: false;
   }): Promise<PackageList>;
 
-  getAgentPolicyConfig(
+  getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
@@ -283,7 +283,7 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
-  public async getAgentPolicyConfig(
+  public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,

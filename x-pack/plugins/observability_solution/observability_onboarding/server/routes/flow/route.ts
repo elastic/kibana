@@ -414,7 +414,7 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const config = await packageClient.getAgentPolicyConfig(pkg.name, pkg.version);
+        const config = await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
         return {
