@@ -87,6 +87,7 @@ export const getDiscoverGridColumnInfoPopover =
           dataView={dataView}
           services={services}
           queryAndFiltersOverride={queryAndFiltersOverride}
+          popoverAnchorPosition="downCenter"
           onAddFilter={undefined} // TODO
           size="s" // TODO: make the following props optional
           itemIndex={0}

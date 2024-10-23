@@ -22,6 +22,7 @@ import {
   type FieldPopoverHeaderProps,
   FieldPopoverFooter,
   type FieldPopoverFooterProps,
+  FieldPopoverProps,
 } from '../../components/field_popover';
 import {
   UnifiedFieldListItemStats,
@@ -207,6 +208,10 @@ export interface UnifiedFieldListItemPopoverBaseProps {
    * Custom query and filters to override the default subscription to the query service
    */
   queryAndFiltersOverride?: UnifiedFieldListItemStatsProps['queryAndFiltersOverride'];
+  /**
+   * Popover position
+   */
+  popoverAnchorPosition?: FieldPopoverProps['anchorPosition'];
 }
 
 export interface UnifiedFieldListItemPopoverProps extends UnifiedFieldListItemPopoverBaseProps {
@@ -245,6 +250,7 @@ function UnifiedFieldListItemPopoverComponent({
     size,
     additionalFilters,
     queryAndFiltersOverride,
+    popoverAnchorPosition,
   } = otherProps;
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -369,6 +375,7 @@ function UnifiedFieldListItemPopoverComponent({
           onClosePopover={closePopover}
         />
       }
+      anchorPosition={popoverAnchorPosition}
       closePopover={closePopover}
       data-test-subj={options.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
