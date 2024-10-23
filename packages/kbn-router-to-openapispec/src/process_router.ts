@@ -156,7 +156,7 @@ export const processRouter = (
       const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
-        description,
+        ...(description ? { description } : {}),
         ...(route.options.description ? { description: route.options.description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
