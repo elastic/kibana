@@ -172,7 +172,7 @@ export function useCustomCardsForCategory(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage:
-                'Unified Kubernetes observability with the OpenTelemetry Operator and Elastic Distributions of OpenTelemetry (EDOT)',
+                'Unified Kubernetes observability with Elastic Distro for OTel Collector',
             }
           ),
           release: 'preview',
