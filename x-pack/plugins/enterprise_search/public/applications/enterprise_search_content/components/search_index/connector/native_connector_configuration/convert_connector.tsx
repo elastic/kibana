@@ -57,11 +57,7 @@ export const ConvertConnector: React.FC = () => {
           values={{
             link: (
               <EuiLink
-<<<<<<< HEAD
-                data-test-subj="enterpriseSearchConvertConnectorConnectorClientLink"
-=======
                 data-test-subj="enterpriseSearchConvertConnectorSelfManagedConnectorLink"
->>>>>>> upstream/main
                 href={docLinks.buildConnector}
                 target="_blank"
               >

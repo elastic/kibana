@@ -561,11 +561,7 @@ export class DashboardContainer
     duplicateDashboardPanel.bind(this)(id);
   }
 
-<<<<<<< HEAD
-  public canRemovePanels = () => !this.getExpandedPanelId() && !this.getFocusedPanelId();
-=======
   public canRemovePanels = () => this.expandedPanelId.value === undefined;
->>>>>>> upstream/main
 
   public getTypeDisplayName = () => dashboardTypeDisplayName;
   public getTypeDisplayNameLowerCase = () => dashboardTypeDisplayLowercase;
@@ -862,10 +858,6 @@ export class DashboardContainer
 
   public setPanels = (panels: DashboardPanelMap) => {
     this.dispatch.setPanels(panels);
-  };
-
-  public getFocusedPanelId = () => {
-    return this.getState().componentState.focusedPanelId;
   };
 
   // ------------------------------------------------------------------------------------------------------
