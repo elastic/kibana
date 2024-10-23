@@ -78,7 +78,6 @@ paths:
   /api/actions:
     get:
       deprecated: true
-      description: undefined
       operationId: '%2Fapi%2Factions#0'
       parameters:
         - description: The version of the API to use
@@ -96,7 +95,6 @@ paths:
   /api/actions/action:
     post:
       deprecated: true
-      description: undefined
       operationId: '%2Fapi%2Factions%2Faction#0'
       parameters:
         - description: The version of the API to use
@@ -221,7 +219,6 @@ paths:
         - connectors
     get:
       deprecated: true
-      description: undefined
       operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#1'
       parameters:
         - description: The version of the API to use
@@ -288,7 +285,6 @@ paths:
         - connectors
     put:
       deprecated: true
-      description: undefined
       operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#2'
       parameters:
         - description: The version of the API to use
@@ -382,7 +378,6 @@ paths:
   /api/actions/action/{id}/_execute:
     post:
       deprecated: true
-      description: undefined
       operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0'
       parameters:
         - description: The version of the API to use
@@ -524,7 +519,6 @@ paths:
       tags:
         - connectors
     get:
-      description: undefined
       operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1'
       parameters:
         - description: The version of the API to use
@@ -590,7 +584,6 @@ paths:
       tags:
         - connectors
     post:
-      description: undefined
       operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0'
       parameters:
         - description: The version of the API to use
@@ -687,7 +680,6 @@ paths:
       tags:
         - connectors
     put:
-      description: undefined
       operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2'
       parameters:
         - description: The version of the API to use
@@ -869,7 +861,6 @@ paths:
         - connectors
   /api/actions/connectors:
     get:
-      description: undefined
       operationId: '%2Fapi%2Factions%2Fconnectors#0'
       parameters:
         - description: The version of the API to use
@@ -887,7 +878,6 @@ paths:
   /api/actions/list_action_types:
     get:
       deprecated: true
-      description: undefined
       operationId: '%2Fapi%2Factions%2Flist_action_types#0'
       parameters:
         - description: The version of the API to use
@@ -1292,7 +1282,6 @@ paths:
         - alerting
   /api/alerting/rule/{id}:
     delete:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2'
       parameters:
         - description: The version of the API to use
@@ -1329,7 +1318,6 @@ paths:
       tags:
         - alerting
     get:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#0'
       parameters:
         - description: The version of the API to use
@@ -2178,7 +2166,6 @@ paths:
       tags:
         - alerting
     post:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%3F%7D#0'
       parameters:
         - description: The version of the API to use
@@ -3352,7 +3339,6 @@ paths:
       tags:
         - alerting
     put:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#1'
       parameters:
         - description: The version of the API to use
@@ -4500,7 +4486,6 @@ paths:
         - alerting
   /api/alerting/rule/{id}/_disable:
     post:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0'
       parameters:
         - description: The version of the API to use
@@ -4550,7 +4535,6 @@ paths:
         - alerting
   /api/alerting/rule/{id}/_enable:
     post:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0'
       parameters:
         - description: The version of the API to use
@@ -4588,7 +4572,6 @@ paths:
         - alerting
   /api/alerting/rule/{id}/_mute_all:
     post:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0'
       parameters:
         - description: The version of the API to use
@@ -4626,7 +4609,6 @@ paths:
         - alerting
   /api/alerting/rule/{id}/_unmute_all:
     post:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0'
       parameters:
         - description: The version of the API to use
@@ -4664,7 +4646,6 @@ paths:
         - alerting
   /api/alerting/rule/{id}/_update_api_key:
     post:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0'
       parameters:
         - description: The version of the API to use
@@ -4704,7 +4685,6 @@ paths:
         - alerting
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
-      description: undefined
       operationId: >-
         %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0
       parameters:
@@ -4749,7 +4729,6 @@ paths:
         - alerting
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
     post:
-      description: undefined
       operationId: >-
         %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0
       parameters:
@@ -4794,7 +4773,6 @@ paths:
         - alerting
   /api/alerting/rules/_find:
     get:
-      description: undefined
       operationId: '%2Fapi%2Falerting%2Frules%2F_find#0'
       parameters:
         - description: The version of the API to use
@@ -41438,7 +41416,6 @@ paths:
         - spaces
   /api/spaces/_disable_legacy_url_aliases:
     post:
-      description: undefined
       operationId: '%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0'
       parameters:
         - description: The version of the API to use
@@ -41993,7 +41970,6 @@ paths:
         - spaces
   /api/status:
     get:
-      description: undefined
       operationId: '%2Fapi%2Fstatus#0'
       parameters:
         - description: The version of the API to use
