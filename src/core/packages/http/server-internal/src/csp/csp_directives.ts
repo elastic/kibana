@@ -23,7 +23,8 @@ export type CspDirectiveName =
   | 'report-uri'
   | 'report-to'
   | 'form-action'
-  | 'object-src';
+  | 'object-src'
+  | 'sandbox';
 
 /**
  * The default report only directives rules
@@ -37,9 +38,10 @@ export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>>
  * The default directives rules that are always applied
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'script-src': [`'report-sample'`, `'self'`],
+  'script-src': [],
   'worker-src': [`'report-sample'`, `'self'`, `blob:`],
   'style-src': [`'report-sample'`, `'self'`, `'unsafe-inline'`],
+  sandbox: [],
 };
 
 /**
