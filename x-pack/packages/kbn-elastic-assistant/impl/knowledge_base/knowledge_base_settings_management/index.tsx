@@ -81,6 +81,12 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
 
   const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
+  const [duplicateKBItem, setDuplicateKBItem] = useState<KnowledgeBaseEntryCreateProps | null>(
+    null
+  );
+  const [originalEntry, setOriginalEntry] = useState<DocumentEntry | IndexEntry | undefined>(
+    undefined
+  );
 
   // Only needed for legacy settings management
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
@@ -144,25 +150,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   });
   const isModifyingEntry = isCreatingEntry || isUpdatingEntries || isDeletingEntries;
 
-  // Flyout Save/Cancel Actions
-  const onSaveConfirmed = useCallback(async () => {
-    if (isKnowledgeBaseEntryResponse(selectedEntry)) {
-      await updateEntries([selectedEntry]);
-      closeFlyout();
-    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
-      await createEntry(selectedEntry);
-      closeFlyout();
-    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
-      createEntry(selectedEntry);
-      closeFlyout();
-    }
-  }, [closeFlyout, selectedEntry, createEntry, updateEntries]);
-
-  const onSaveCancelled = useCallback(() => {
-    setSelectedEntry(undefined);
-    closeFlyout();
-  }, [closeFlyout]);
-
   const {
     data: entries,
     isFetching: isFetchingEntries,
@@ -172,6 +159,31 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     toasts,
     enabled: enableKnowledgeBaseByDefault,
   });
+
+  // Flyout Save/Cancel Actions
+  const onSaveConfirmed = useCallback(async () => {
+    if (isKnowledgeBaseEntryResponse(selectedEntry)) {
+      await updateEntries([selectedEntry]);
+      closeFlyout();
+    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
+      if (originalEntry) {
+        setDuplicateKBItem(selectedEntry);
+        return;
+      }
+      await createEntry(selectedEntry);
+      closeFlyout();
+    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
+      createEntry(selectedEntry);
+      closeFlyout();
+    }
+  }, [selectedEntry, originalEntry, updateEntries, closeFlyout, createEntry]);
+
+  const onSaveCancelled = useCallback(() => {
+    setOriginalEntry(undefined);
+    setSelectedEntry(undefined);
+    closeFlyout();
+  }, [closeFlyout]);
+
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(
     () =>
@@ -192,6 +204,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);
+          setOriginalEntry(entry);
           setSelectedEntry(entry);
           openFlyout();
         },
@@ -279,6 +292,18 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       setDeleteKBItem(null);
     }
   }, [deleteEntry, deleteKBItem, setDeleteKBItem]);
+
+  const handleCancelDuplicateEntry = useCallback(() => {
+    setDuplicateKBItem(null);
+  }, [setDuplicateKBItem]);
+
+  const handleDuplicateEntry = useCallback(async () => {
+    if (duplicateKBItem) {
+      await createEntry(duplicateKBItem);
+      closeFlyout();
+      setDuplicateKBItem(null);
+    }
+  }, [closeFlyout, createEntry, duplicateKBItem]);
 
   if (!enableKnowledgeBaseByDefault) {
     return (
@@ -379,6 +404,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           {selectedEntry?.type === DocumentEntryType.value ? (
             <DocumentEntryEditor
               entry={selectedEntry as DocumentEntry}
+              originalEntry={originalEntry as DocumentEntry}
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>
               }
@@ -387,6 +413,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           ) : (
             <IndexEntryEditor
               entry={selectedEntry as IndexEntry}
+              originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
@@ -410,6 +437,20 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           isLoading={isModifyingEntry}
         >
           <p>{i18n.DELETE_ENTRY_CONFIRMATION_CONTENT}</p>
+        </EuiConfirmModal>
+      )}
+      {duplicateKBItem && (
+        <EuiConfirmModal
+          title={i18n.DUPLICATE_ENTRY_CONFIRMATION_TITLE}
+          onCancel={handleCancelDuplicateEntry}
+          onConfirm={handleDuplicateEntry}
+          cancelButtonText={CANCEL_BUTTON_TEXT}
+          confirmButtonText={i18n.SAVE_BUTTON_TEXT}
+          buttonColor="warning"
+          defaultFocusedButton="confirm"
+          data-test-subj="create-duplicate-entry-modal"
+        >
+          <p>{i18n.DUPLICATE_ENTRY_CONFIRMATION_CONTENT}</p>
         </EuiConfirmModal>
       )}
     </>
