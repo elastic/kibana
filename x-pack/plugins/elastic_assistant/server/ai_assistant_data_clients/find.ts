@@ -87,10 +87,7 @@ export const findDocuments = async <TSearchSchema>({
         data: response,
         page,
         perPage,
-        total:
-          (typeof response.hits.total === 'number'
-            ? response.hits.total // This format is to be removed in 8.0
-            : response.hits.total?.value) ?? 0,
+        total: response.hits.total?.value ?? 0,
       };
     }
     const mSearchQueryBody = {
@@ -118,7 +115,6 @@ export const findDocuments = async <TSearchSchema>({
       index,
     };
     const response = await esClient.msearch<SearchResponse<TSearchSchema>>(mSearchQueryBody);
-    let total = 0;
     let responseStats: Omit<SearchResponse<TSearchSchema>, 'hits'> = {
       took: 0,
       _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
@@ -128,11 +124,6 @@ export const findDocuments = async <TSearchSchema>({
     const results = response.responses.flatMap((res) => {
       const mResponse = res as SearchResponse<TSearchSchema>;
       const { hits, ...responseBody } = mResponse;
-      const hitsTotal =
-        (typeof hits?.total === 'number'
-          ? hits?.total // This format is to be removed in 8.0
-          : hits?.total?.value) ?? 0;
-      total = hitsTotal + total;
       // assign whatever the last stats are, they are only used for type
       responseStats = { ...responseStats, ...responseBody };
       return hits?.hits ?? [];
@@ -142,7 +133,7 @@ export const findDocuments = async <TSearchSchema>({
       data: { ...responseStats, hits: { hits: results } },
       page,
       perPage,
-      total,
+      total: results.length,
     };
   } catch (err) {
     logger.error(`Error fetching documents: ${err}`);
