@@ -11,9 +11,6 @@ import { join } from 'path';
 import { build } from '@storybook/core-server';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import type { StorybookConfig } from '@storybook/react-webpack5';
-
-// @ts-expect-error internal dep of storybook
-import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
 import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
@@ -47,11 +44,6 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
       }
-
-      // force storybook to use our transpilation rather than ts-node or anything else
-      interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
-      interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
-      interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
 
       await build(config);
 
