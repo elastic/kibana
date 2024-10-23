@@ -48,15 +48,16 @@ const ExportContentUi = ({
   const [usePrintLayout, setPrintLayout] = useState(false);
 
   const radioOptions = useMemo(() => {
-    return aggregateReportTypes
-      .filter(({ reportType }) => reportType)
-      .map(({ reportType, label }) => {
-        return {
-          id: reportType!,
+    return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { reportType, label }) => {
+      if (reportType) {
+        acc.push({
+          id: reportType,
           label,
           'data-test-subj': `${reportType}-radioOption`,
-        } satisfies EuiRadioGroupOption;
-      });
+        });
+      }
+      return acc;
+    }, []);
   }, [aggregateReportTypes]);
 
   const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
