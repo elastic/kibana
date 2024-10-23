@@ -1,39 +1,11 @@
 ---
-id: kibDevDocsSecurityIntro
-slug: /kibana-dev-docs/key-concepts/security-intro
-title: Security
-description: Maintaining Kibana's security posture
-date: 2023-07-11
+id: kibDevDocsSecurityKibanaSystemUser
+slug: /kibana-dev-docs/key-concepts/security-kibana-system-user
+title: Security Kibana System User
+description: This guide provides an overview of `kibana_system` user
+date: 2024-10-04
 tags: ['kibana', 'dev', 'contributor', 'security']
 ---
-
-Security is everyone's responsibility. This is inclusive of design, product, and engineering. The purpose of this guide is to give a high-level overview of security constructs and expectations.
-
-This guide covers the following topics:
-
-* [API authorization](#api-authorization)
-* [The `kibana_system` user](#the-kibana_system-user)
-
-## API authorization
-Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
-This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
-
-### Adding API authorization
-Kibana leverages <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are already met.
-This is also true for derivatives of the Saved Objects Service, such as the Alerting and Cases services.
-
-If your endpoint is not a CRUD interface to Saved Objects, then your route should include `access` tags to ensure that only authorized users can invoke your endpoint. This is **especially** important if your route does any of the following:
-1. Performs non-insignificant processing, causing load on the Kibana server.
-2. Calls Elasticsearch using the internal `kibana_system` user.
-3. Calls a third-party service.
-4. Returns any non-public information to the caller, such as system configuration or state.
-
-More information on adding `access` tags to your routes can be found temporarily in the [legacy documentation](https://www.elastic.co/guide/en/kibana/current/development-security.html#development-plugin-feature-registration)
-
-### Why not add `access` tags to all routes by default?
-Each authorization check that we perform involves a round-trip to Elasticsearch, so they are not as cheap as we'd like. Therefore, we want to keep the number of authorization checks we perform within a single route to a minimum.
-Adding an `access` tag to routes that leverage the Saved Objects Service would be redundant in most cases, since the Saved Objects Service will be performing authorization anyway.
-
 
 ## The `kibana_system` user
 

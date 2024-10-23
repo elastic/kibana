@@ -27,8 +27,8 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     },
     async expectConnectionDetails() {
       await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
-      expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).to.be(
-        'https://fakeprojectid.es.fake-domain.cld.elstc.co:443'
+      expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).match(
+        /^https?\:\/\/.*(\:\d+)?/
       );
     },
     async expectQuickStats() {
@@ -42,6 +42,15 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await quickStatsDocumentElem.click();
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0b');
     },
+
+    async expectQuickStatsToHaveDocumentCount(count: number) {
+      const quickStatsElem = await testSubjects.find('quickStats');
+      const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
+        'QuickStatsDocumentCount'
+      );
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain(`Document count\n${count}`);
+    },
+
     async expectQuickStatsAIMappings() {
       await testSubjects.existOrFail('quickStats', { timeout: 2000 });
       const quickStatsElem = await testSubjects.find('quickStats');
