@@ -152,30 +152,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     try {
       const esClient = await this.options.elasticsearchClientPromise;
-      if (this.isV2KnowledgeBaseEnabled) {
-        await esClient.inference.put({
-          task_type: 'sparse_embedding',
-          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-          inference_config: {
-            service: 'elasticsearch',
-            service_settings: {
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 1,
-              },
-              num_threads: 1,
-              model_id: elserId,
-            },
-            task_settings: {},
-          },
-        });
-      } else {
-        await esClient.ml.startTrainedModelDeployment({
-          model_id: elserId,
-          wait_for: 'fully_allocated',
-        });
-      }
+      await esClient.ml.startTrainedModelDeployment({
+        model_id: elserId,
+        wait_for: 'fully_allocated',
+      });
     } catch (error) {
       this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
       throw new Error(`Error deploying ELSER model '${elserId}':\n${error}`);
