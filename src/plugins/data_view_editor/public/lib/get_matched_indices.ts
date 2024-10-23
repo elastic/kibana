@@ -74,14 +74,14 @@ export function getMatchedIndices(
   // 1) If there are exact matches, show those as the query is good to go
   // 2) If there are no exact matches, but there are partial matches,
   // show the partial matches
-  // 3) If there are no exact or partial matches, show empty indices
-  let visibleIndices: MatchedItem[];
+  // 3) If there are no exact or partial matches, just show all indices
+  let visibleIndices;
   if (exactMatchedIndices.length) {
     visibleIndices = exactMatchedIndices;
   } else if (partialMatchedIndices.length) {
     visibleIndices = partialMatchedIndices;
   } else {
-    visibleIndices = [];
+    visibleIndices = allIndices;
   }
 
   return {

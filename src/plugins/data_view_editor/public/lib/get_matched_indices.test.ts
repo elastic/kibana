@@ -99,9 +99,9 @@ describe('getMatchedIndices', () => {
     ]);
   });
 
-  it('should return empty array if there are no exact or partial', () => {
+  it('should return all indices as visible if there are no exact or partial', () => {
     const { visibleIndices } = getMatchedIndices(indices, [], [], true);
 
-    expect(visibleIndices).toEqual([]);
+    expect(visibleIndices).toEqual(indices);
   });
 });

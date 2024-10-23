@@ -64,11 +64,11 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
     currentViewMode = ViewMode.allIndices;
   }
 
-  const indicesListContent = matched.allIndices ? (
+  const indicesListContent = currentlyVisibleIndices.length ? (
     <IndicesList
       data-test-subj="createIndexPatternStep1IndicesList"
       query={title}
-      indices={currentlyVisibleIndices.length ? currentlyVisibleIndices : matched.allIndices}
+      indices={currentlyVisibleIndices}
       isExactMatch={(indexName) =>
         title.length > 0 && matched.exactMatchedIndices.some((index) => index.name === indexName)
       }
@@ -86,17 +86,18 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         query={title}
       />
       <EuiSpacer size="m" />
-      {Boolean(title) && currentlyVisibleIndices.length > 0 && (
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
-            defaultMessage: 'Visible sources',
-          })}
-          options={viewModeButtons}
-          idSelected={currentViewMode}
-          onChange={(id: string) => setViewMode(id as ViewMode)}
-        />
-      )}
+      {Boolean(title) &&
+        (matched.exactMatchedIndices.length > 0 || matched.partialMatchedIndices.length > 0) && (
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
+              defaultMessage: 'Visible sources',
+            })}
+            options={viewModeButtons}
+            idSelected={currentViewMode}
+            onChange={(id: string) => setViewMode(id as ViewMode)}
+          />
+        )}
       {indicesListContent}
     </>
   );
