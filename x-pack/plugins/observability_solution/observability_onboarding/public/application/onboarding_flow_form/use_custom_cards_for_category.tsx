@@ -165,7 +165,7 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with EDOT',
+              defaultMessage: 'Kubernetes monitoring with EDOT Collector',
             }
           ),
           description: i18n.translate(
