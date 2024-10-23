@@ -52,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(databaseExists).to.be(true);
     });
 
-    it('Create an IPInfo database', async () => {
+    it('Create an IPinfo database', async () => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
       await pageObjects.ingestPipelines.fillAddDatabaseForm('ipinfo', 'asn');
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
@@ -80,7 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         database.includes(ipInfoDatabaseName)
       );
       expect(ipInfoDatabaseRow).to.contain(ipInfoDatabaseName);
-      expect(ipInfoDatabaseRow).to.contain('IPInfo');
+      expect(ipInfoDatabaseRow).to.contain('IPinfo');
     });
 
     it('Modal to delete a database', async () => {

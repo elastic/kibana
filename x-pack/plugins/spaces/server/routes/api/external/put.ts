@@ -21,7 +21,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     .put({
       path: '/api/spaces/space/{id}',
       access: 'public',
-      description: `Update a space`,
+      summary: `Update a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -32,9 +32,19 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: {
+                  description:
+                    'The space identifier. You are unable to change the ID with the update operation.',
+                },
+              }),
             }),
             body: getSpaceSchema(isServerless),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },
