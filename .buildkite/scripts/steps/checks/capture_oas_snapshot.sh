@@ -23,3 +23,5 @@ run_check() {
 retry 5 15 run_check
 
 check_for_changed_files "$cmd" true
+
+.buildkite/scripts/steps/openapi_bundling/final_merge.sh
