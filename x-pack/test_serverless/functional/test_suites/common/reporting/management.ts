@@ -8,10 +8,10 @@
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import {
   CSV_REPORT_TYPE_V2,
-  JobParamsCsvFromSavedObject,
+  type JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
-import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -22,8 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const reportingAPI = getService('svlReportingApi');
   const svlCommonApi = getService('svlCommonApi');
   const samlAuth = getService('samlAuth');
+  const internalReqHeader = svlCommonApi.getInternalRequestHeader();
   let cookieCredentials: CookieCredentials;
-  let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -57,7 +57,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // Kibana CI and MKI use different users
     before('initialize saved object archive', async () => {
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });

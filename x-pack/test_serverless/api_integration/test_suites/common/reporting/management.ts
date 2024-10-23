@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
-import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -21,8 +19,9 @@ export default ({ getService }: FtrProviderContext) => {
   const reportingAPI = getService('svlReportingApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
+  const svlCommonApi = getService('svlCommonApi');
+  const internalReqHeader = svlCommonApi.getInternalRequestHeader();
   let cookieCredentials: CookieCredentials;
-  let internalReqHeader: InternalRequestHeader;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
@@ -37,7 +36,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
-      internalReqHeader = samlAuth.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
@@ -74,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertestWithoutAuth
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
         .set(...API_HEADER)
-        .set(...INTERNAL_HEADER)
+        .set(internalReqHeader)
         .set(cookieCredentials);
 
       expect(response.status).to.be(200);
