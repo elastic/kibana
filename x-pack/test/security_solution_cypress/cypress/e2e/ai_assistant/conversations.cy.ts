@@ -145,7 +145,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    it('Correctly creates new conversations, and allows title updates', () => {
+    it('Correctly creates and titles new conversations, and allows title updates', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
