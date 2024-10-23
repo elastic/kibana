@@ -39,7 +39,6 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
-            buildFlavor: 'traditional',
           }
         )
       ).toEqual(sharedOas);
@@ -86,7 +85,6 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
-            buildFlavor: 'traditional',
           }
         )
       ).toMatchSnapshot();
@@ -132,7 +130,6 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
-            buildFlavor: 'traditional',
           }
         )
       ).toMatchSnapshot();
@@ -179,7 +176,6 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
-            buildFlavor: 'traditional',
           }
         )
       ).toMatchSnapshot();
@@ -204,7 +200,6 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
-            buildFlavor: 'traditional',
           }
         )
       ).toMatchObject(sharedOas);
@@ -269,7 +264,6 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
-            buildFlavor: 'traditional',
           }
         )
       ).toMatchSnapshot();
@@ -317,7 +311,6 @@ describe('generateOpenApiDocument', () => {
           title: 'test',
           baseUrl: 'https://test.oas',
           version: '99.99.99',
-          buildFlavor: 'traditional',
         }
       );
       // router paths
@@ -395,7 +388,6 @@ describe('generateOpenApiDocument', () => {
           title: 'test',
           baseUrl: 'https://test.oas',
           version: '99.99.99',
-          buildFlavor: 'traditional',
         }
       );
 
