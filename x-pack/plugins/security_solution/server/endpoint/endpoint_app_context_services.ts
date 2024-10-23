@@ -236,7 +236,7 @@ export class EndpointAppContextService {
   }
 
   public getInternalEsClient(): ElasticsearchClient {
-    if (!this.startDependencies.esClient) {
+    if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
