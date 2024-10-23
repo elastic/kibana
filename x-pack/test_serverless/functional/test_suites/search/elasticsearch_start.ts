@@ -27,9 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('Elasticsearch Start [Onboarding Empty State]', function () {
-    // fails on MKI, see https://github.com/elastic/kibana/issues/196981
-    this.tags(['failsOnMKI']);
-
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');

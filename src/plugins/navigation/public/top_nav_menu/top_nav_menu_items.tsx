@@ -7,21 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiHeaderLinks } from '@elastic/eui';
+import { EuiBreakpointSize, EuiHeaderLinks } from '@elastic/eui';
 import React from 'react';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
+interface TopNavMenuItemsProps {
+  config: TopNavMenuData[] | undefined;
+  className?: string;
+  popoverBreakpoints?: EuiBreakpointSize[];
+}
+
 export const TopNavMenuItems = ({
   config,
   className,
-}: {
-  config: TopNavMenuData[] | undefined;
-  className?: string;
-}) => {
+  popoverBreakpoints,
+}: TopNavMenuItemsProps) => {
   if (!config || config.length === 0) return null;
   return (
-    <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
+    <EuiHeaderLinks
+      data-test-subj="top-nav"
+      gutterSize="xs"
+      className={className}
+      popoverBreakpoints={popoverBreakpoints}
+    >
       {config.map((menuItem: TopNavMenuData, i: number) => {
         return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
       })}

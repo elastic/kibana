@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import { i18n } from '@kbn/i18n';
 
-window.jest = jest;
-
-export const decorators = [EuiThemeProviderDecorator];
+export const PRECONFIGURED_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
+  {
+    defaultMessage: 'PRECONFIGURED',
+  }
+);
