@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { transformGetConnectorResponse } from './transform_connector_response/latest';
-
-export { transformGetConnectorResponse as transformGetConnectorResponseV1 } from './transform_connector_response/v1';
+export enum EntitySourceTag {
+  'risk' = 'Risk',
+  'criticality' = 'Asset Criticality',
+  'events' = 'Events',
+}
