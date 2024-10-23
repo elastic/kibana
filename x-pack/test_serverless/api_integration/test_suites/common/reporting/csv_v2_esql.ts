@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const reportingAPI = getService('svlReportingApi');
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           }));
           await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
-          response = await supertest.get(path);
+          response = await supertestWithoutAuth.get(path).set(cookieCredentials);
           csvFile = response.text;
         });
 
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
               title: 'Untitled discover search',
             }));
             await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
-            response = await supertest.get(path);
+            response = await supertestWithoutAuth.get(path).set(cookieCredentials);
             csvFile = response.text;
           });
 
