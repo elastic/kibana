@@ -14,7 +14,9 @@ export async function deleteIndices(
   definition: EntityDefinition,
   logger: Logger
 ) {
+  const index = generateLatestIndexName(definition);
   try {
+<<<<<<< HEAD
     const { indices: historyIndices } = await esClient.indices.resolveIndex({
       name: `${generateHistoryIndexName(definition)}.*`,
       expand_wildcards: 'all',
@@ -24,8 +26,13 @@ export async function deleteIndices(
       generateLatestIndexName(definition),
     ];
     await esClient.indices.delete({ index: indices, ignore_unavailable: true });
+=======
+    await esClient.indices.delete({ index, ignore_unavailable: true });
+>>>>>>> 0617ad44406 ([eem] rename fields to snake case (#195895))
   } catch (e) {
-    logger.error(`Unable to remove entity definition index [${definition.id}}]`);
+    logger.error(
+      `Unable to remove entity definition index ${index} for definition [${definition.id}]`
+    );
     throw e;
   }
 }
