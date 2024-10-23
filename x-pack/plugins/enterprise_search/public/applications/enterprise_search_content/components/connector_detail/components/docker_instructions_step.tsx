@@ -121,7 +121,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.connectorDeployment.p.exampleConfigFile"
-              defaultMessage="We provide an {exampleConfigLink} for reference in the {repository} repository."
+              defaultMessage="If you want to customize settings later, refer to this {exampleConfigLink}."
               values={{
                 exampleConfigLink: (
                   <EuiLink

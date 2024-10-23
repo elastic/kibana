@@ -71,6 +71,11 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
       >
         <EuiSpacer size="s" />
         <EuiText size="s">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.cloneRepositoryLabel', {
+              defaultMessage: 'Clone the repository',
+            })}
+          </h5>
           <p>
             {i18n.translate(
               'xpack.enterpriseSearch.connectorDeployment.p.addTheFollowingConfigurationLabel',
@@ -103,12 +108,36 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiButton>
+        <EuiText size="s">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.createConfigFileLabel', {
+              defaultMessage: 'Create configuration file',
+            })}
+          </h5>
+          <p>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.navigateToRootLabel', {
+              defaultMessage:
+                'Navigate to the root of your cloned repository and create a configuration file:',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <CodeBox
+          showTopBar={false}
+          languageType="bash"
+          codeSnippet="cd connectors && touch config.yml"
+        />
         <EuiSpacer size="s" />
         <EuiText size="s">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.populateConfigLabel', {
+              defaultMessage: 'Populate configuration file',
+            })}
+          </h5>
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.connectorDeployment.p.createConfigLabel"
-              defaultMessage="Next, create a {configYaml} file based on the {exampleFile} in the repository:"
+              defaultMessage="The previous command creates a {configYaml} file. Copy and paste the following configuration into that file:"
               values={{
                 configYaml: (
                   <EuiCode>
@@ -117,19 +146,6 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
                       { defaultMessage: 'config.yml' }
                     )}
                   </EuiCode>
-                ),
-                exampleFile: (
-                  <EuiLink
-                    data-test-subj="enterpriseSearchRunFromSourceStepExampleFileLink"
-                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectorDeployment.exampleConfigFileLabel',
-                      { defaultMessage: 'example file' }
-                    )}
-                  </EuiLink>
                 ),
               }}
             />
@@ -148,15 +164,47 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
             host: elasticsearchUrl,
           })}
         />
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.compileAndRunLabel', {
-              defaultMessage: 'Finally, compile and run the connector service source code:',
-            })}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.connectorDeployment.customizeSettingsLabel"
+              defaultMessage="If you want to customize settings later, refer to this {exampleFile}."
+              values={{
+                exampleFile: (
+                  <EuiLink
+                    data-test-subj="enterpriseSearchRunFromSourceStepExampleFileLink"
+                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectorDeployment.exampleConfigFileLinkLabel',
+                      { defaultMessage: 'example file' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiText>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <h5>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.compileAndRunTitle', {
+              defaultMessage: 'Run the connector service',
+            })}
+          </h5>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.connectorDeployment.p.compileAndRunInstructions',
+              {
+                defaultMessage: 'Finally, compile and run the connector service source code:',
+              }
+            )}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
         <CodeBox
           showTopBar={false}
           languageType="bash"
@@ -165,6 +213,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
                               make run
                               `}
         />
+        <EuiSpacer size="s" />
       </EuiAccordion>
     </>
   );
