@@ -15,6 +15,7 @@ import {
   TelemetryEventTypes,
   type EntityInventoryEntityTypeFilteredParams,
 } from './types';
+import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 
 describe('TelemetryService', () => {
   let service: TelemetryService;
@@ -27,6 +28,12 @@ describe('TelemetryService', () => {
     const mockCoreStart = coreMock.createSetup();
     return {
       analytics: mockCoreStart.analytics,
+    };
+  };
+
+  const getStartParams = () => {
+    return {
+      entityManager: {} as unknown as EntityManagerPublicPluginSetup,
     };
   };
 
@@ -52,7 +59,7 @@ describe('TelemetryService', () => {
     it('should return all the available tracking methods', () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
-      const telemetry = service.start();
+      const telemetry = service.start(getStartParams());
 
       const expectedProperties = [
         'reportInventoryAddData',
@@ -70,7 +77,7 @@ describe('TelemetryService', () => {
     it('should report inventory add data clicked with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
-      const telemetry = service.start();
+      const telemetry = service.start(getStartParams());
 
       telemetry.reportInventoryAddData({
         view: 'add_data_button',
@@ -92,7 +99,7 @@ describe('TelemetryService', () => {
     it('should report entity inventory viewed with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
-      const telemetry = service.start();
+      const telemetry = service.start(getStartParams());
       const params: EntityInventoryViewedParams = {
         view_state: 'empty',
       };
@@ -111,7 +118,7 @@ describe('TelemetryService', () => {
     it('should report search query submitted with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
-      const telemetry = service.start();
+      const telemetry = service.start(getStartParams());
       const params: EntityInventorySearchQuerySubmittedParams = {
         kuery_fields: ['_index'],
         action: 'submit',
@@ -132,7 +139,7 @@ describe('TelemetryService', () => {
     it('should report entity type filtered with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
-      const telemetry = service.start();
+      const telemetry = service.start(getStartParams());
       const params: EntityInventoryEntityTypeFilteredParams = {
         kuery_fields: ['_index'],
         entity_types: ['container'],
@@ -152,7 +159,7 @@ describe('TelemetryService', () => {
     it('should report entity view clicked with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
-      const telemetry = service.start();
+      const telemetry = service.start(getStartParams());
       const params: EntityViewClickedParams = {
         entity_type: 'container',
         view_type: 'detail',
