@@ -33,7 +33,7 @@ const responseData: ListEntitiesResponse = {
       user: { name: entityName },
       entity: {
         name: entityName,
-        source: ['source'],
+        source: 'test-index',
       },
     },
   ],
