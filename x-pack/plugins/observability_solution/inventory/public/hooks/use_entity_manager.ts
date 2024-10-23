@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useState } from 'react';
 import { useKibana } from './use_kibana';
 

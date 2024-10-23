@@ -14,6 +14,7 @@
       "security",
       "taskManager",
       "dataViews",
+      "inference"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": ["cloud", "serverless"],

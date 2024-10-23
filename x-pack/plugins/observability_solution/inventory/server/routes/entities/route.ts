@@ -6,10 +6,10 @@
  */
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
-import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
-import { joinByKey } from '@kbn/observability-utils/array/join_by_key';
+import { joinByKey } from '@kbn/observability-utils-common/array/join_by_key';
 import { entityTypeRt, entityColumnIdsRt, Entity } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityTypes } from './get_entity_types';

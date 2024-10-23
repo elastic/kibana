@@ -8,7 +8,7 @@ import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
 import { ErrorMessage } from '../../components/error_message';

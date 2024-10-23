@@ -16,7 +16,9 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new SloPlugin(initializerContext);
 }
 
-export type { PluginSetup, PluginStart } from './plugin';
+export type { SloClient } from './client';
+
+export type { PluginSetup, PluginStart, SloPluginSetup, SloPluginStart } from './plugin';
 
 export const config = {
   schema: configSchema,

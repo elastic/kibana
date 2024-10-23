@@ -21,7 +21,12 @@
       "security",
       "observability",
       "licensing",
-      "ruleRegistry"
+      "ruleRegistry",
+      "observabilityAIAssistantApp",
+      "inference",
+      "alerting",
+      "spaces",
+      "slo"
     ],
     "requiredBundles": [
       "esql",
