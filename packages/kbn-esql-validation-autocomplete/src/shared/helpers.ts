@@ -673,16 +673,17 @@ export function getBracketsToClose(text: string) {
 
   for (let i = 0; i < text.length; i++) {
     for (const openBracket in pairs) {
-      if (!Object.hasOwn(pairs, 'openBracket')) {
+      if (!Object.hasOwn(pairs, openBracket)) {
         continue;
       }
 
       const substr = text.slice(i, i + openBracket.length);
       if (substr === openBracket) {
         stack.push(substr);
-        i += openBracket.length - 1;
+        break;
       } else if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        break;
       }
     }
   }
