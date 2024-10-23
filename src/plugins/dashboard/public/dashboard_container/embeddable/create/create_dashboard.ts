@@ -10,7 +10,6 @@
 import { cloneDeep, omit } from 'lodash';
 import { v4 } from 'uuid';
 
-import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import {
@@ -32,7 +31,7 @@ import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management_service/types';
-import { coreServices, embeddableService } from '../../../services/kibana_services';
+import { embeddableService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { UnsavedPanelState } from '../../types';
@@ -55,7 +54,6 @@ export const initializeDashboard = async ({
 
   const {
     getInitialInput,
-    searchSessionSettings,
     validateLoadedSavedObject,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
@@ -294,18 +292,6 @@ export const initializeDashboard = async ({
       dashboardContainer.setRuntimeStateForChild(idWithRuntimeState, restoredRuntimeStateForChild);
     }
   });
-
-  if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
-    // We count a new view every time a user opens a dashboard, both in view or edit mode
-    // We don't count views when a user is editing a dashboard and is returning from an editor after saving
-    // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
-    // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
-    const contentInsightsClient = new ContentInsightsClient(
-      { http: coreServices.http },
-      { domainId: 'dashboard' }
-    );
-    contentInsightsClient.track(loadDashboardReturn.dashboardId, 'viewed');
-  }
 
   return { input: initialDashboardInput };
 };
