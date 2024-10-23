@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import path from 'path';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '../../config.base';
 import { services as apmServices } from './apm_api_integration/common/services';
 import { services as datasetQualityServices } from './dataset_quality_api_integration/common/services';
@@ -30,20 +30,8 @@ export default createTestConfig({
     // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.enabled=true',
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
-    `--xpack.dataUsage.autoops.api.tls.certificate=${path.resolve(
-      __dirname,
-      '../common/data_usage/test_certs',
-      'certificate.crt'
-    )}`,
-    `--xpack.dataUsage.autoops.api.tls.key=${path.resolve(
-      __dirname,
-      '../common/data_usage/test_certs',
-      'key.key'
-    )}`,
-    `--xpack.dataUsage.autoops.api.tls.ca=${path.resolve(
-      __dirname,
-      '../common/data_usage/test_certs',
-      'ca.crt'
-    )}`,
+    `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
+    `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
+    `--xpack.dataUsage.autoops.api.tls.ca=${CA_CERT_PATH}`,
   ],
 });
