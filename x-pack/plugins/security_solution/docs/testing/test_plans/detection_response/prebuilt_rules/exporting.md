@@ -1,7 +1,7 @@
 Feature: Exporting Prebuilt Rules
 
   Scenario: Exporting prebuilt rule individually
-    Given a space with prebuilt rules installed 
+    Given a space with prebuilt rules installed
     When the user selects "Export rule" from the "All actions" dropdown on the rule's page
     Then the rule should be exported as an NDJSON file
     And it should include an "immutable" field with a value of true
@@ -9,7 +9,7 @@ Feature: Exporting Prebuilt Rules
     And its "ruleSource" "isCustomized" value should depend on whether the rule was customized
 
   Scenario: Exporting prebuilt rules in bulk
-    Given a space with prebuilt rules installed 
+    Given a space with prebuilt rules installed
     When the user selects prebuilt rules in the alerts table
     And chooses "Export" from bulk actions
     Then the selected rules should be exported as an NDJSON file
