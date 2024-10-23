@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,6 +28,12 @@ import {
 import { useKibanaContextForPlugin } from '../../../../../utils';
 import { useDatasetQualityDetailsState } from '../../../../../hooks';
 
+const AccordionTitle = () => (
+  <EuiTitle size="xxs">
+    <h6>{otherMitigationsCustomIngestPipeline}</h6>
+  </EuiTitle>
+);
+
 export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boolean }) {
   const {
     services: {
@@ -41,26 +47,31 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
     prefix: otherMitigationsCustomIngestPipeline,
   });
 
-  const accordionTitle = (
-    <EuiTitle size="xxs">
-      <h6>{otherMitigationsCustomIngestPipeline}</h6>
-    </EuiTitle>
-  );
-
   const { datasetDetails } = useDatasetQualityDetailsState();
   const { type, name } = datasetDetails;
 
-  const pipelineName = isIntegration ? `${type}-${name}@custom` : `${type}@custom`;
+  const pipelineName = useMemo(
+    () => (isIntegration ? `${type}-${name}@custom` : `${type}@custom`),
+    [isIntegration, type, name]
+  );
 
-  const pipelineUrl = locators
-    .get('MANAGEMENT_APP_LOCATOR')
-    ?.useUrl({ pipeline: pipelineName }, {}, [pipelineName]);
+  const ingestPipelineLocator = locators.get('INGEST_PIPELINES_APP_LOCATOR');
+
+  const pipelineUrl = ingestPipelineLocator?.useUrl(
+    { pipelineId: pipelineName, page: 'pipelines_list' },
+    {},
+    [pipelineName]
+  );
+
+  const onClickHandler = useCallback(() => {
+    copyToClipboard(pipelineName);
+  }, [pipelineName]);
 
   return (
     <EuiPanel hasBorder grow={false}>
       <EuiAccordion
         id={accordionId}
-        buttonContent={accordionTitle}
+        buttonContent={<AccordionTitle />}
         paddingSize="none"
         initialIsOpen={true}
         data-test-subj="datasetQualityManualMitigationsPipelineAccordion"
@@ -85,7 +96,7 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
             <EuiButtonIcon
               iconType="copy"
               data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
-              onClick={() => copyToClipboard(pipelineName)}
+              onClick={onClickHandler}
             />
           }
           readOnly={true}

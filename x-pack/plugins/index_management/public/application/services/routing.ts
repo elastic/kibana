@@ -78,3 +78,7 @@ export const getComponentTemplatesLink = (usedByTemplateName?: string) => {
   }
   return url;
 };
+
+export const getComponentTemplateDetailLink = (name: string) => {
+  return `/component_templates/${encodeURIComponent(name)}`;
+};

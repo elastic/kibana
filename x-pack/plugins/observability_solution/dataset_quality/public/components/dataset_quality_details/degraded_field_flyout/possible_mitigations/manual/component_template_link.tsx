@@ -23,38 +23,51 @@ export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegrati
     },
   } = useKibanaContextForPlugin();
 
-  const [templatePath, setTemplatePath] = useState<string | null>(null);
+  const [indexTemplatePath, setIndexTemplatePath] = useState<string | null>(null);
+  const [componentTemplatePath, setComponentTemplatePath] = useState<string | null>(null);
 
   const { dataStreamSettings, datasetDetails } = useDatasetQualityDetailsState();
   const { name } = datasetDetails;
-  const managementAppLocator = locators.get('MANAGEMENT_APP_LOCATOR');
+
+  const indexManagementLocator = locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
 
   useEffect(() => {
-    managementAppLocator
-      ?.getLocation({ indexTemplate: dataStreamSettings?.indexTemplate })
-      .then(({ path }) => setTemplatePath(path));
-  }, [locators, setTemplatePath, dataStreamSettings?.indexTemplate, managementAppLocator]);
+    indexManagementLocator
+      ?.getLocation({
+        page: 'index_template',
+        indexTemplate: dataStreamSettings?.indexTemplate ?? '',
+      })
+      .then(({ path }) => setIndexTemplatePath(path));
+    indexManagementLocator
+      ?.getLocation({
+        page: 'component_template',
+        componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
+          dataStreamSettings?.indexTemplate ?? name
+        )}@custom`,
+      })
+      .then(({ path }) => setComponentTemplatePath(path));
+  }, [
+    locators,
+    setIndexTemplatePath,
+    dataStreamSettings?.indexTemplate,
+    indexManagementLocator,
+    name,
+  ]);
 
-  const customComponentTemplateUrl = managementAppLocator?.useUrl({
-    componentTemplate: `${getComponentTemplatePrefixFromIndexTemplate(
-      dataStreamSettings?.indexTemplate ?? name
-    )}@custom`,
-  });
-
-  const componentTemplateUrl = isIntegration ? customComponentTemplateUrl : templatePath;
+  const templateUrl = isIntegration ? componentTemplatePath : indexTemplatePath;
 
   const onClickHandler = useCallback(async () => {
     await application.navigateToApp(MANAGEMENT_APP_ID, {
-      path: componentTemplateUrl,
+      path: templateUrl,
       openInNewTab: true,
     });
-  }, [application, componentTemplateUrl]);
+  }, [application, templateUrl]);
 
   return (
     <EuiPanel hasBorder grow={false}>
       <EuiLink
         data-test-subj="datasetQualityManualMitigationsCustomComponentTemplateLink"
-        data-test-url={componentTemplateUrl}
+        data-test-url={templateUrl}
         onClick={onClickHandler}
         target="_blank"
         css={{ width: '100%' }}
