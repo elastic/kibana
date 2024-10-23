@@ -224,7 +224,9 @@ function processChangesByOwners(ownerFilesMap) {
 
       const fileList = files.join(' ');
       runCommand(`git add ${fileList}`);
-      runCommand(`git commit -m "[Authz] ESLint changes for ${owner}"`);
+      runCommand(
+        `git commit -m "[Authz] Migrated ${process.env.ROUTE_TYPE} routes owned by ${owner}"`
+      );
 
       console.log(`Temporary branch ${tempBranch} created and committed changes for ${owner}`);
     }
@@ -232,7 +234,7 @@ function processChangesByOwners(ownerFilesMap) {
     for (const [owner] of Object.entries(ownerFilesMap)) {
       const rawOwner = owner.replace('@elastic/', '');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
-      const targetBranch = `eslint/${process.env.ROUTE_TYPE}-changes-by-${rawOwner}`;
+      const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
 
       console.log(`Checking out 'main' branch`);
       runCommand(`git checkout main`);
@@ -256,9 +258,9 @@ function processChangesByOwners(ownerFilesMap) {
       if (!DRY_RUN) {
         const title =
           process.env.ROUTE_TYPE === 'authorized'
-            ? `Authorized Route Migration for routes owned by ${owner}`
-            : `Unauthorized Route Migration for routes owned by ${owner}`;
-        const labels =
+            ? `Authorized Route Migration for Routes Owned by ${owner}`
+            : `Unauthorized Route Migration for Routes Owned by ${owner}`;
+        const routeLabel =
           process.env.ROUTE_TYPE === 'authorized'
             ? '[Authz API migration] authorized'
             : '[Authz API migration] unauthorized';
@@ -288,6 +290,8 @@ function processChangesByOwners(ownerFilesMap) {
             process.env.ROUTE_TYPE === 'authorized'
               ? PR_DESCRIPTION_TEXT_AUTHORIZED
               : PR_DESCRIPTION_TEXT_UNAUTHORIZED,
+            // '--label',
+            // `${routeLabel},${teamLabel}`,
           ],
           { stdio: 'inherit' }
         );
