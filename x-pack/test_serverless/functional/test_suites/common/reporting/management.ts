@@ -11,6 +11,7 @@ import {
   type JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
 import type { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -35,9 +36,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   };
 
-  describe('Reporting Management app', function () {
+  describe('Management: listing', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
     this.tags('failsOnMKI');
+
+    let reportJob: ReportApiJSON;
+    let path: string;
+
     const savedObjectsArchive = 'test/functional/fixtures/kbn_archiver/discover';
 
     const job: JobParamsCsvFromSavedObject = {
@@ -55,28 +60,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     // Kibana CI and MKI use different users
-    before('initialize saved object archive', async () => {
+    before(async () => {
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
-    });
 
-    after('clean up archives', async () => {
-      await kibanaServer.importExport.unload(savedObjectsArchive);
-    });
-
-    it(`user sees a job they've created`, async () => {
-      const {
-        job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
+      // generate a report that can be tested to show in the listing
+      const result = await reportingAPI.createReportJobInternal(
         CSV_REPORT_TYPE_V2,
         job,
         cookieCredentials,
         internalReqHeader
       );
 
+      path = result.path;
+      reportJob = result.job;
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(savedObjectsArchive);
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
+    });
+
+    it(`user sees a job they've created`, async () => {
       await navigateToReportingManagement();
-      await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
+      await testSubjects.existOrFail(`viewReportingLink-${reportJob.id}`);
     });
   });
 };

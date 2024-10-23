@@ -23,14 +23,14 @@ export default ({ getService }: FtrProviderContext) => {
   const internalReqHeader = svlCommonApi.getInternalRequestHeader();
   let cookieCredentials: CookieCredentials;
 
-  const archives: Record<string, { data: string; savedObjects: string }> = {
+  const archives = {
     ecommerce: {
       data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
     },
   };
 
-  describe('Reporting Management: Deletion', function () {
+  describe('Management: Deletion', function () {
     let reportJob: ReportApiJSON;
     let path: string;
 
@@ -40,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
+      // generate a report that can be deleted in the test
       const result = await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
