@@ -34,7 +34,7 @@ export function GroupSelector() {
   const groupBy = query.view ?? 'grouped';
 
   const onGroupChange = (selected: EntityView) => {
-    inventoryRoute.replace('/', {
+    inventoryRoute.push('/', {
       path: {},
       query: {
         ...query,

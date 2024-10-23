@@ -12,7 +12,7 @@ import { UnifiedInventory } from '../../components/grouped_inventory/unified_inv
 import { GroupedInventory } from '../../components/grouped_inventory';
 
 export function InventoryPage() {
-  const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
+  const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const inventoryRoute = useInventoryRouter();
   const { query } = useInventoryParams('/');
 
@@ -33,7 +33,7 @@ export function InventoryPage() {
     // If query has updated, the inventoryRoute state is also updated
     // as well, so we only need to track changes on query.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, refreshSubject$, searchBarContentSubject$]);
+  }, [query, searchBarContentSubject$]);
 
   return query.view === 'unified' ? <UnifiedInventory /> : <GroupedInventory />;
 }

@@ -8,12 +8,12 @@
 import { isRight } from 'fp-ts/lib/Either';
 import { type EntityPagination, entityPaginationRt } from '../../common/entities';
 
-export function extractPaginationParameter(queryParam?: string): EntityPagination | undefined {
-  if (queryParam === undefined) {
+export function extractPaginationParameter(paginationParam?: string): EntityPagination | undefined {
+  if (paginationParam === undefined) {
     return undefined;
   }
 
-  const pagination = entityPaginationRt.decode(queryParam);
+  const pagination = entityPaginationRt.decode(paginationParam);
 
   if (isRight(pagination)) {
     return pagination.right;
