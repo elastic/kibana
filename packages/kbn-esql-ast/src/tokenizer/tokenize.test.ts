@@ -52,10 +52,17 @@ describe('tokenizer', () => {
   });
 
   it('should tokenize opening and closing multiline comment markers', () => {
-    expect(tokenize('/* this')[0]).toEqual<Token>({ name: 'multiline_comment_start', start: 0 });
+    expect(tokenize('/* this is a')[0]).toEqual<Token>({
+      name: 'multiline_comment_start',
+      start: 0,
+    });
+    expect(tokenize('FROM index /* this is a')).toContainEqual<Token>({
+      name: 'multiline_comment_start',
+      start: 11,
+    });
     const tokens2 = tokenize('is a comment */');
     expect(tokens2[tokens2.length - 1]).toEqual<Token>({
-      name: 'multiline_comment_end_expr',
+      name: 'multiline_comment_end',
       start: 13,
     });
   });

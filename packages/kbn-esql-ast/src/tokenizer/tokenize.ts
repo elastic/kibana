@@ -75,10 +75,27 @@ export function tokenize(_text: string): Token[] {
     tokens.splice(0, 2);
   }
 
+  removeLexerModes(tokens);
+
   return mergeTokens(addFunctionTokens(tokens));
 }
 
-export function addFunctionTokens(tokens: Token[]): Token[] {
+const modeNameToNormalizedName = {
+  from_multiline_comment_start: 'multiline_comment_start',
+  from_multiline_comment_end: 'multiline_comment_end',
+  expr_multiline_comment_start: 'multiline_comment_start',
+  expr_multiline_comment_end: 'multiline_comment_end',
+};
+
+function removeLexerModes(tokens: Token[]): void {
+  for (const token of tokens) {
+    if (modeNameToNormalizedName[token.name]) {
+      token.name = modeNameToNormalizedName[token.name];
+    }
+  }
+}
+
+function addFunctionTokens(tokens: Token[]): Token[] {
   // need to trim spaces as "abs (arg)" is still valid as function
   const tokensWithoutSpaces = tokens.filter(({ name }) => !name.includes('_ws'));
 
@@ -108,7 +125,7 @@ const mergeRules = [
   [['integer_literal', 'expr_ws', 'unquoted_identifier'], 'timespan_literal'],
 ] as const;
 
-export function mergeTokens(tokens: Token[]): Token[] {
+function mergeTokens(tokens: Token[]): Token[] {
   for (const [names, mergedName] of mergeRules) {
     let foundAnyMatches = false;
     do {
