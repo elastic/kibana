@@ -121,6 +121,10 @@ export class ActionTypeRegistry {
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
+    if (!actionType?.isSystemActionType || !actionType?.isEdrActionType) {
+      return [];
+    }
+
     return actionType?.getKibanaPrivileges?.({ params }) ?? [];
   }
 
@@ -167,6 +171,18 @@ export class ActionTypeRegistry {
             connectorTypeId: actionType.id,
             ids: actionType.supportedFeatureIds.join(','),
           },
+        })
+      );
+    }
+
+    if (
+      (!actionType.isSystemActionType || !actionType.isEdrActionType) &&
+      actionType.getKibanaPrivileges
+    ) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
+          defaultMessage:
+            'Kibana privilege authorization is only supported for system and EDR action types',
         })
       );
     }
@@ -238,7 +254,7 @@ export class ActionTypeRegistry {
           enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
           supportedFeatureIds: actionType.supportedFeatureIds,
           isSystemActionType: !!actionType.isSystemActionType,
-          isEdrConnectorType: !!actionType.isEdrConnectorType,
+          isEdrActionType: !!actionType.isEdrActionType,
         }))
     );
   }

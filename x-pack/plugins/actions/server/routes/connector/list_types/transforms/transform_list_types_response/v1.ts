@@ -21,7 +21,7 @@ export const transformListTypesResponse = (
       minimumLicenseRequired,
       supportedFeatureIds,
       isSystemActionType,
-      isEdrConnectorType,
+      isEdrActionType,
     }) => ({
       id,
       name,
@@ -31,7 +31,7 @@ export const transformListTypesResponse = (
       minimum_license_required: minimumLicenseRequired,
       supported_feature_ids: supportedFeatureIds,
       is_system_action_type: isSystemActionType,
-      is_edr_connector_type: isEdrConnectorType,
+      is_edr_action_type: isEdrActionType,
     })
   );
 };

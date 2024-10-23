@@ -130,7 +130,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   hideInUi?: boolean;
   modalWidth?: number;
   isSystemActionType?: boolean;
-  isEdrConnectorType?: boolean;
+  isEdrActionType?: boolean;
 }
 
 export type ActionTypeRegistryContract<Connector = unknown, Params = unknown> = PublicMethodsOf<

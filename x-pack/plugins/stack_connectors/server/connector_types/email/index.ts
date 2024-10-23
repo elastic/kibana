@@ -249,7 +249,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
     },
     renderParameterTemplates,
     executor: curry(executor)({ publicBaseUrl }),
-    isEdrConnectorType: true,
+    isEdrActionType: true,
     getKibanaPrivileges: () => [CONNECTORS_EDR_EXECUTE_PRIVILEGE],
   };
 }

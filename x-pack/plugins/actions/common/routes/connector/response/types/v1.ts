@@ -41,7 +41,7 @@ export interface ConnectorTypesResponse {
   minimum_license_required: ConnectorTypesResponseSchemaType['minimum_license_required'];
   supported_feature_ids: ConnectorTypesResponseSchemaType['supported_feature_ids'];
   is_system_action_type: ConnectorTypesResponseSchemaType['is_system_action_type'];
-  is_edr_connector_type: ConnectorTypesResponseSchemaType['is_edr_connector_type'];
+  is_edr_action_type: ConnectorTypesResponseSchemaType['is_edr_action_type'];
 }
 
 type ConnectorExecuteResponseSchemaType = TypeOf<typeof connectorExecuteResponseSchema>;

@@ -341,7 +341,7 @@ const ActionsConnectorsList = ({
                   !!(
                     hasExecuteActionsCapability(
                       capabilities,
-                      actionTypesIndex && actionTypesIndex[item.actionTypeId].isEdrConnectorType
+                      actionTypesIndex && actionTypesIndex[item.actionTypeId].isEdrActionType
                     ) &&
                     actionTypesIndex &&
                     actionTypesIndex[item.actionTypeId]
