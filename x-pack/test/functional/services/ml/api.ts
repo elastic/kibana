@@ -1696,5 +1696,33 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, module);
       return module;
     },
+
+    async setUpgradeMode(enabled: boolean) {
+      log.debug(`Setting upgrade mode to "${enabled}"`);
+      const { body, status } = await esSupertest.post(`/_ml/set_upgrade_mode?enabled=${enabled}`);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug(`Upgrade mode set to "${enabled}"`);
+    },
+
+    async assertUpgradeMode(expectedMode: boolean) {
+      log.debug(`Asserting upgrade mode is "${expectedMode}"`);
+      const { body, status } = await esSupertest.get('/_ml/info');
+      this.assertResponseStatusCode(200, status, body);
+
+      expect(body.upgrade_mode).to.eql(
+        expectedMode,
+        `Expected upgrade mode to be ${expectedMode}, got ${body.upgrade_mode}`
+      );
+    },
+
+    async getMlInfo() {
+      log.debug(`Getting ML info`);
+      const { body, status } = await kbnSupertest
+        .get(`/internal/ml/info`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, body);
+      return body;
+    },
   };
 }
