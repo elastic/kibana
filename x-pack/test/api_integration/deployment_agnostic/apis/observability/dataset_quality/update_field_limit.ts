@@ -13,6 +13,7 @@ import { SupertestWithRoleScopeType } from '../../../services';
 import { createBackingIndexNameWithoutVersion, rolloverDataStream } from './utils/es_utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('logsSynthtraceEsClient');
   const esClient = getService('es');
@@ -47,9 +48,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('Update field limit', function () {
+    let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
         {
@@ -58,7 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       );
       await packageApi.installPackage({
-        roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+        roleAuthc: adminRoleAuthc,
         pkg,
       });
       await synthtrace.index([
@@ -84,9 +87,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await synthtrace.clean();
       await packageApi.uninstallPackage({
-        roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+        roleAuthc: adminRoleAuthc,
         pkg,
       });
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     it('should handles failure gracefully when invalid datastream provided ', async () => {
