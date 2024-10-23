@@ -55,13 +55,13 @@ export function GroupSelector() {
       }),
       items: [
         {
-          'data-test-subj': 'panel-unified',
+          'data-test-subj': 'panelUnified',
           name: GROUP_LABELS.unified,
           icon: isGroupSelected('unified') ? 'check' : 'empty',
           onClick: () => onGroupChange('unified'),
         },
         {
-          'data-test-subj': 'panel-type',
+          'data-test-subj': 'panelType',
           name: GROUP_LABELS.grouped,
           icon: isGroupSelected('grouped') ? 'check' : 'empty',
           onClick: () => onGroupChange('grouped'),
@@ -101,7 +101,7 @@ export function GroupSelector() {
       panelPaddingSize="none"
     >
       <EuiContextMenu
-        data-test-subj="entitiesGroupByContextMnue"
+        data-test-subj="entitiesGroupByContextMenu"
         initialPanelId="firstPanel"
         panels={panels}
       />

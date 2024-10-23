@@ -20,7 +20,7 @@ import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '@kbn/apm-plugin/public/context/apm_plugin/apm_plugin_context';
-import { IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
@@ -187,18 +187,18 @@ export function InventoryComponentWrapperMock({ children }: React.PropsWithChild
     initialEntries: ['/'],
   });
   return (
-    <IntlProvider locale="en">
+    <I18nProvider>
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={context}>
             <APMServiceContext.Provider value={{} as APMServiceContextValue}>
-              <RouterProvider router={inventoryRouter as any} history={history}>
+              <RouterProvider router={inventoryRouter} history={history}>
                 {children}
               </RouterProvider>
             </APMServiceContext.Provider>
           </ApmPluginContext.Provider>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>
-    </IntlProvider>
+    </I18nProvider>
   );
 }
