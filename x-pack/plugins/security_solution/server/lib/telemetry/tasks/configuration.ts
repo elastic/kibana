@@ -51,7 +51,7 @@ export function createTelemetryConfigurationTaskConfig() {
         const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
         log.l('Got telemetry configuration artifact', {
-          artifact: configArtifact,
+          artifact: configArtifact ?? '<null>',
         });
 
         telemetryConfiguration.max_detection_alerts_batch =
