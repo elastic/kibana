@@ -68,5 +68,6 @@
     "@kbn/ml-random-sampler-utils",
     "@kbn/charts-plugin",
     "@kbn/observability-utils",
+    "@kbn/observability-alerting-rule-utils",
   ],
 }
