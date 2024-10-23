@@ -11,7 +11,7 @@ import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { CriticalityLevels } from '../../../../../common/constants';
 import { RiskSeverity } from '../../../../../common/search_strategy';
-import { EntitySource } from '../components/entity_source_filter';
+import { EntitySourceTag } from '../types';
 
 jest.mock('../../../../common/hooks/use_global_filter_query');
 
@@ -52,7 +52,6 @@ describe('useEntitiesListFilters', () => {
             { term: { 'host.risk.calculated_level': RiskSeverity.High } },
             { term: { 'user.risk.calculated_level': RiskSeverity.High } },
           ],
-          minimum_should_match: 1,
         },
       },
     ];
@@ -72,7 +71,6 @@ describe('useEntitiesListFilters', () => {
     const expectedFilters: QueryDslQueryContainer[] = [
       {
         bool: {
-          minimum_should_match: 1,
           should: [
             {
               term: {
@@ -97,13 +95,48 @@ describe('useEntitiesListFilters', () => {
       useEntitiesListFilters({
         selectedSeverities: [],
         selectedCriticalities: [],
-        selectedSources: [EntitySource.CSV_UPLOAD, EntitySource.EVENTS],
+        selectedSources: [EntitySourceTag.criticality, EntitySourceTag.risk],
       })
     );
 
     const expectedFilters: QueryDslQueryContainer[] = [
-      { term: { 'entity.source': EntitySource.CSV_UPLOAD } },
-      { term: { 'entity.source': EntitySource.EVENTS } },
+      {
+        bool: {
+          should: [
+            { wildcard: { 'entity.source': '.asset-criticality.asset-criticality-*' } },
+            { wildcard: { 'entity.source': 'risk-score.risk-score-*' } },
+          ],
+        },
+      },
+    ];
+
+    expect(result.current).toEqual(expectedFilters);
+  });
+
+  it('should return source events filters when events is selected', () => {
+    const { result } = renderHook(() =>
+      useEntitiesListFilters({
+        selectedSeverities: [],
+        selectedCriticalities: [],
+        selectedSources: [EntitySourceTag.events],
+      })
+    );
+
+    const expectedFilters: QueryDslQueryContainer[] = [
+      {
+        bool: {
+          should: [
+            {
+              bool: {
+                must_not: [
+                  { wildcard: { 'entity.source': '.asset-criticality.asset-criticality-*' } },
+                  { wildcard: { 'entity.source': 'risk-score.risk-score-*' } },
+                ],
+              },
+            },
+          ],
+        },
+      },
     ];
 
     expect(result.current).toEqual(expectedFilters);
@@ -132,7 +165,7 @@ describe('useEntitiesListFilters', () => {
       useEntitiesListFilters({
         selectedSeverities: [RiskSeverity.Low],
         selectedCriticalities: [CriticalityLevels.HIGH_IMPACT],
-        selectedSources: [EntitySource.CSV_UPLOAD],
+        selectedSources: [EntitySourceTag.risk],
       })
     );
 
@@ -143,16 +176,18 @@ describe('useEntitiesListFilters', () => {
             { term: { 'host.risk.calculated_level': RiskSeverity.Low } },
             { term: { 'user.risk.calculated_level': RiskSeverity.Low } },
           ],
-          minimum_should_match: 1,
         },
       },
       {
         bool: {
           should: [{ term: { 'asset.criticality': CriticalityLevels.HIGH_IMPACT } }],
-          minimum_should_match: 1,
         },
       },
-      { term: { 'entity.source': EntitySource.CSV_UPLOAD } },
+      {
+        bool: {
+          should: [{ wildcard: { 'entity.source': 'risk-score.risk-score-*' } }],
+        },
+      },
       globalQuery,
     ];
 
