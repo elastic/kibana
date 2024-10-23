@@ -36,6 +36,8 @@ export enum TELEMETRY_EVENT {
   CREATE_DASHBOARD = 'create_dashboard',
   ONBOARDING = 'onboarding_',
 
+  ONBOARDING = 'onboarding',
+
   // value list
   OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
   CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
