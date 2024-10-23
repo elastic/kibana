@@ -52,9 +52,6 @@
     "@kbn/rule-data-utils",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/apm-plugin",
-    "@kbn/ml-plugin",
-    "@kbn/data-service",
     "@kbn/storybook",
   ]
 }
