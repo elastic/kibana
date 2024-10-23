@@ -22,6 +22,7 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
+  APPLICATIONS_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -126,7 +127,11 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   ]);
 
 export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: APPLICATIONS_PLUGIN.NAV_TITLE },
+    { text: ANALYTICS_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
 
 export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([
