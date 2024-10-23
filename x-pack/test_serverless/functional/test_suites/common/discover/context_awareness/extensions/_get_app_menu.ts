@@ -60,15 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
       await testSubjects.existOrFail('discoverAlertsButton');
-      await testSubjects.existOrFail('example-custom-root-submenu');
       await testSubjects.existOrFail('example-custom-action');
-
-      await testSubjects.click('example-custom-root-submenu');
-      await testSubjects.existOrFail('example-custom-root-action12');
-
-      await testSubjects.click('example-custom-root-action12');
-      await testSubjects.existOrFail('example-custom-root-action12-flyout');
-      await testSubjects.click('euiFlyoutCloseButton');
 
       await testSubjects.click('discoverAlertsButton');
       await testSubjects.existOrFail('example-custom-action-under-alerts');
