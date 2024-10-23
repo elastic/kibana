@@ -43,10 +43,10 @@ import {
   FunctionParameterType,
   FunctionReturnType,
   ArrayType,
+  SupportedDataType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { compareTypesWithLiterals, isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import type { EditorContext } from '../autocomplete/types';
@@ -225,27 +225,29 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
+  if (item.literalType === argType) {
+    return true;
+  }
+
   if (item.literalType === 'null') {
+    // all parameters accept null, but this is not yet reflected
+    // in our function definitions so we let it through here
     return true;
   }
 
-  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
+  // some parameters accept string literals because of ES auto-casting
+  if (
+    item.literalType === 'keyword' &&
+    (argType === 'date' ||
+      argType === 'date_period' ||
+      argType === 'version' ||
+      argType === 'ip' ||
+      argType === 'boolean')
+  ) {
     return true;
   }
 
-  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
-    return true;
-  }
-
-  if (item.literalType !== 'string') {
-    if (argType === item.literalType) {
-      return true;
-    }
-    return false;
-  }
-
-  // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date', 'date_period'].includes(argType);
+  return false;
 }
 
 /**
@@ -417,7 +419,7 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
  */
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
-    arg.literalType === 'string' &&
+    arg.literalType === 'keyword' &&
     argDef.acceptedValues &&
     !argDef.acceptedValues
       .map((option) => option.toLowerCase())
@@ -447,7 +449,7 @@ export function checkFunctionArgMatchesDefinition(
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'any' || argType === signature.returnType
+        (signature) => signature.returnType === 'unknown' || argType === signature.returnType
       );
     }
   }
@@ -460,23 +462,15 @@ export function checkFunctionArgMatchesDefinition(
     if (!validHit) {
       return false;
     }
-    const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    // if final type is of type any make it pass for now
-    return wrappedTypes.some(
-      (ct) =>
-        ['any', 'null'].includes(ct) ||
-        argType === ct ||
-        (ct === 'string' && ['text', 'keyword'].includes(argType as string))
-    );
+    const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
+      ? validHit.type
+      : [validHit.type];
+    return wrappedTypes.some((ct) => ct === argType || ct === 'null');
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
-    const lowerArgCastType = arg.castType?.toLowerCase();
-    return (
-      compareTypesWithLiterals(lowerArgCastType, lowerArgType) ||
-      // for valid shorthand casts like 321.12::int or "false"::bool
-      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
-    );
+    const castedType = getExpressionType(arg);
+    return castedType === lowerArgType;
   }
 }
 
@@ -724,4 +718,144 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
   }
 
   return query;
+}
+
+/**
+ * Gets the signatures of a function that match the number of arguments
+ * provided in the AST.
+ */
+export function getSignaturesWithMatchingArity(
+  fnDef: FunctionDefinition,
+  astFunction: ESQLFunction
+) {
+  return fnDef.signatures.filter((def) => {
+    if (def.minParams) {
+      return astFunction.args.length >= def.minParams;
+    }
+    return (
+      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
+      astFunction.args.length <= def.params.length
+    );
+  });
+}
+
+/**
+ * Given a function signature, returns the parameter at the given position.
+ *
+ * Takes into account variadic functions (minParams), returning the last
+ * parameter if the position is greater than the number of parameters.
+ *
+ * @param signature
+ * @param position
+ * @returns
+ */
+export function getParamAtPosition(
+  { params, minParams }: FunctionDefinition['signatures'][number],
+  position: number
+) {
+  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
+}
+
+/**
+ * Determines the type of the expression
+ */
+export function getExpressionType(
+  root: ESQLAstItem,
+  fields?: Map<string, ESQLRealField>,
+  variables?: Map<string, ESQLVariable[]>
+): SupportedDataType | 'unknown' {
+  if (!isSingleItem(root)) {
+    if (root.length === 0) {
+      return 'unknown';
+    }
+    return getExpressionType(root[0], fields, variables);
+  }
+
+  if (isLiteralItem(root) && root.literalType !== 'param') {
+    return root.literalType;
+  }
+
+  if (isTimeIntervalItem(root)) {
+    return 'time_literal';
+  }
+
+  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
+  if (isInlineCastItem(root)) {
+    switch (root.castType) {
+      case 'int':
+        return 'integer';
+      case 'bool':
+        return 'boolean';
+      case 'string':
+        return 'keyword';
+      case 'text':
+        return 'keyword';
+      case 'datetime':
+        return 'date';
+      default:
+        return root.castType;
+    }
+  }
+
+  if (isColumnItem(root) && fields && variables) {
+    const column = getColumnForASTNode(root, { fields, variables });
+    if (!column) {
+      return 'unknown';
+    }
+    return column.type;
+  }
+
+  if (root.type === 'list') {
+    return getExpressionType(root.values[0], fields, variables);
+  }
+
+  if (isFunctionItem(root)) {
+    const fnDefinition = getFunctionDefinition(root.name);
+    if (!fnDefinition) {
+      return 'unknown';
+    }
+
+    if (fnDefinition.name === 'case' && root.args.length) {
+      // The CASE function doesn't fit our system of function definitions
+      // and needs special handling. This is imperfect, but it's a start because
+      // at least we know that the final argument to case will never be a conditional
+      // expression, always a result expression.
+      //
+      // One problem with this is that if a false case is not provided, the return type
+      // will be null, which we aren't detecting. But this is ok because we consider
+      // variables and fields to be nullable anyways and account for that during validation.
+      return getExpressionType(root.args[root.args.length - 1], fields, variables);
+    }
+
+    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
+
+    if (!signaturesWithCorrectArity.length) {
+      return 'unknown';
+    }
+
+    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, variables));
+
+    // When functions are passed null for any argument, they generally return null
+    // This is a special case that is not reflected in our function definitions
+    if (argTypes.some((argType) => argType === 'null')) return 'null';
+
+    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
+      return argTypes.every((argType, i) => {
+        const param = getParamAtPosition(signature, i);
+        return (
+          param &&
+          (param.type === argType ||
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+        );
+      });
+    });
+
+    if (!matchingSignature) {
+      return 'unknown';
+    }
+
+    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
+  }
+
+  return 'unknown';
 }
