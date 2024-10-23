@@ -87,7 +87,10 @@ export const findDocuments = async <TSearchSchema>({
         data: response,
         page,
         perPage,
-        total: response.hits.total?.value ?? 0,
+        total:
+          (typeof response.hits.total === 'number'
+            ? response.hits.total // This format is to be removed in 8.0
+            : response.hits.total?.value) ?? 0,
       };
     }
     const mSearchQueryBody = {
