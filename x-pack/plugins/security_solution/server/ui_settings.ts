@@ -343,6 +343,7 @@ export const initUiSettings = (
         max: 1000,
         defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
       }),
+      category: [APP_ID],
       requiresPageReload: false,
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
