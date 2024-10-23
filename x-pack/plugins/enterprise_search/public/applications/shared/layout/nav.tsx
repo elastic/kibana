@@ -240,22 +240,27 @@ export const generateSideNavItems = (
         sideNavChildItems.push(...subItems);
       }
     }
+    let sideNavItem: EuiSideNavItemTypeEnhanced<unknown> | undefined;
     if (navLink) {
       const navLinkParams = getNavLinkParameters(navLink, deepLinks);
       if (navLinkParams !== undefined) {
-        sideNavItems.push({
+        sideNavItem = {
           ...rest,
           ...generateNavLink({
             ...navLinkParams,
             items: sideNavChildItems,
           }),
-        });
+        };
       }
     } else {
-      sideNavItems.push({
+      sideNavItem = {
         ...rest,
         items: sideNavChildItems,
-      });
+      };
+    }
+
+    if (isValidSideNavItem(sideNavItem)) {
+      sideNavItems.push(sideNavItem);
     }
   }
 
@@ -284,4 +289,14 @@ function isGenerateNavLinkParameters(
   navLink: GenerateNavLinkParameters | GenerateNavLinkFromDeepLinkParameters
 ): navLink is GenerateNavLinkParameters {
   return Object.hasOwn(navLink, 'to');
+}
+
+function isValidSideNavItem(
+  item: EuiSideNavItemTypeEnhanced<unknown> | undefined
+): item is EuiSideNavItemTypeEnhanced<unknown> {
+  if (item === undefined) return false;
+  if (item.href || item.onClick) return true;
+  if (item?.items?.length ?? 0 > 0) return true;
+
+  return false;
 }
