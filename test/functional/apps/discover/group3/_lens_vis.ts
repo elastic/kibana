@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/184600
+  // Failing: See https://github.com/elastic/kibana/issues/197342
   describe.skip('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
