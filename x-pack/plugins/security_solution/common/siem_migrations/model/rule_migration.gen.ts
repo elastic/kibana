@@ -94,12 +94,12 @@ export const RuleMigration = z.object({
   /**
    * The moment of creation
    */
-  '@timestamp': z.string().optional(),
+  '@timestamp': z.string(),
   /**
    * The migration id.
    */
-  migration_id: z.string().optional(),
-  original_rule: OriginalRule.optional(),
+  migration_id: z.string(),
+  original_rule: OriginalRule,
   elastic_rule: ElasticRule.optional(),
   /**
    * The translation state.

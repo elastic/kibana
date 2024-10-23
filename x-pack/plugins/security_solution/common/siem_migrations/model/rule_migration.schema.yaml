@@ -80,8 +80,9 @@ components:
       type: object
       description: The rule migration document object.
       required:
-        - migrationId
-        - originalRule
+        - '@timestamp'
+        - migration_id
+        - original_rule
         - status
       properties:
         "@timestamp":
@@ -104,7 +105,7 @@ components:
         status:
           type: string
           description: The status of the rule migration.
-          enum:
+          enum: # should match SiemMigrationsStatus enum at ../constants.ts
             - pending
             - processing
             - finished
