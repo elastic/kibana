@@ -210,6 +210,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.internal.v1,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: {},
         },
         postEnableSpaceAwarenessHandler
@@ -226,6 +232,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: CheckPermissionsRequestSchema,
           response: {
@@ -252,6 +264,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {},
       },
       getAgentPoliciesSpacesHandler
@@ -271,6 +289,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GenerateServiceTokenRequestSchema,
           response: {
@@ -293,13 +317,21 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleet: { allAgents: true },
       },
       description: `Create a service token`,
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {},
+        options: {
+          // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+          deprecated: true,
+        },
       },
       generateServiceTokenHandler
     );
