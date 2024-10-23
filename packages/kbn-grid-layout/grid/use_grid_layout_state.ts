@@ -37,17 +37,6 @@ export const useGridLayoutState = ({
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
 
   const gridLayoutStateManager = useMemo(() => {
-    const rowCount$ = new BehaviorSubject<number>(initialLayout.length);
-    const rows$ = initialLayout.reduce((prev, currentRow) => {
-      return [
-        ...prev,
-        new BehaviorSubject<Omit<GridRowData, 'panels'> & { panelIds: string[] }>({
-          title: currentRow.title,
-          isCollapsed: currentRow.isCollapsed,
-          panelIds: Object.keys(currentRow.panels),
-        }),
-      ];
-    }, [] as Array<BehaviorSubject<Omit<GridRowData, 'panels'> & { panelIds: string[] }>>);
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
@@ -62,9 +51,7 @@ export const useGridLayoutState = ({
 
     return {
       rowRefs,
-      rows$,
       panelRefs,
-      rowCount$,
       panelIds$,
       gridLayout$,
       activePanel$,

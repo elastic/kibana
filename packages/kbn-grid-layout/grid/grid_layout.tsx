@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-
+import { distinctUntilChanged, map, skip } from 'rxjs';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
@@ -29,7 +28,24 @@ export const GridLayout = ({
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
-  const rowCount = useStateFromPublishingSubject(gridLayoutStateManager.rowCount$);
+  const [rowCount, setRowCount] = useState<number>(
+    gridLayoutStateManager.gridLayout$.getValue().length
+  );
+
+  useEffect(() => {
+    const rowCountSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(
+        skip(1),
+        map((newLayout) => newLayout.length),
+        distinctUntilChanged()
+      )
+      .subscribe((newRowCount) => {
+        setRowCount(newRowCount);
+      });
+    return () => rowCountSubscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
@@ -49,12 +65,6 @@ export const GridLayout = ({
                   const currentLayout = gridLayoutStateManager.gridLayout$.value;
                   currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
-                  const currentRow = currentLayout[rowIndex];
-                  gridLayoutStateManager.rows$[rowIndex].next({
-                    title: currentRow.title,
-                    isCollapsed: currentRow.isCollapsed,
-                    panelIds: Object.keys(currentRow.panels),
-                  });
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
                   if (nextInteractionEvent?.type === 'drop') {

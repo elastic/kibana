@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
-import { combineLatest, skip } from 'rxjs';
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { combineLatest, debounceTime, map, pairwise, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { DragPreview } from './drag_preview';
 import { GridPanel } from './grid_panel';
 import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
-import { DragPreview } from './drag_preview';
 
 export const GridRow = forwardRef<
   HTMLDivElement,
@@ -40,7 +39,10 @@ export const GridRow = forwardRef<
     },
     gridRef
   ) => {
-    const rowData = useStateFromPublishingSubject(gridLayoutStateManager.rows$[rowIndex]);
+    const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
+    const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
+    const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
     const getRowCount = useCallback(
       (row: GridRowData) => {
@@ -111,8 +113,30 @@ export const GridRow = forwardRef<
               rowRef.style.backgroundColor = `transparent`;
             }
           });
+
+        const rowDataSubscription = gridLayoutStateManager.gridLayout$
+          .pipe(
+            skip(1),
+            map((gridLayout) => {
+              return {
+                title: gridLayout[rowIndex].title,
+                isCollapsed: gridLayout[rowIndex].isCollapsed,
+                panelIds: Object.keys(gridLayout[rowIndex].panels),
+              };
+            }),
+            pairwise()
+          )
+          .subscribe(([oldRowData, newRowData]) => {
+            if (oldRowData.title !== newRowData.title) setRowTitle(newRowData.title);
+            if (oldRowData.isCollapsed !== newRowData.isCollapsed)
+              setIsCollapsed(newRowData.isCollapsed);
+            if (JSON.stringify(oldRowData.panelIds) !== JSON.stringify(newRowData.panelIds))
+              setPanelIds(newRowData.panelIds);
+          });
+
         return () => {
           styleSubscription.unsubscribe();
+          rowDataSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,17 +154,17 @@ export const GridRow = forwardRef<
                 aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
                   defaultMessage: 'Toggle collapse',
                 })}
-                iconType={rowData.isCollapsed ? 'arrowRight' : 'arrowDown'}
+                iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
                 onClick={toggleIsCollapsed}
               />
               <EuiTitle size="xs">
-                <h2>{rowData.title}</h2>
+                <h2>{rowTitle}</h2>
               </EuiTitle>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
           </>
         )}
-        {!rowData.isCollapsed && (
+        {!isCollapsed && (
           <div
             ref={gridRef}
             css={css`
@@ -150,7 +174,7 @@ export const GridRow = forwardRef<
               ${initialStyles};
             `}
           >
-            {rowData.panelIds.map((panelId) => (
+            {panelIds.map((panelId) => (
               <GridPanel
                 key={panelId}
                 panelId={panelId}

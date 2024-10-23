@@ -158,22 +158,6 @@ export const useGridLayoutEvents = ({
         }
         if (!deepEqual(currentLayout, nextLayout)) {
           gridLayout$.next(nextLayout);
-          gridLayoutStateManager.rowCount$.next(nextLayout.length);
-          nextLayout.forEach((row, rowIndex) => {
-            if (
-              !(
-                row.title === currentLayout[rowIndex].title &&
-                row.isCollapsed === currentLayout[rowIndex].isCollapsed &&
-                JSON.stringify(Object.keys(row.panels).sort()) ===
-                  JSON.stringify(Object.keys(currentLayout[rowIndex].panels).sort())
-              )
-            )
-              gridLayoutStateManager.rows$[rowIndex].next({
-                title: row.title,
-                isCollapsed: row.isCollapsed,
-                panelIds: Object.keys(row.panels),
-              });
-          });
         }
       }
     };
