@@ -35,19 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(10 * MINUTES);
 
-    const clearPrefilledEntries = async () => {
-      const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
-
-      let deleteButtons: WebElementWrapper[];
-      do {
-        deleteButtons = await testSubjects.findAllDescendant(
-          'builderItemEntryDeleteButton',
-          entriesContainer
-        );
-
-        await deleteButtons[0].click();
-      } while (deleteButtons.length > 1);
-    };
+    let clearPrefilledEntries: () => Promise<void>;
 
     const openNewEndpointExceptionFlyout = async () => {
       retryOnStale(async () => {
@@ -166,6 +154,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       await deleteEndpointExceptions();
+
+      clearPrefilledEntries = async () => {
+        const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
+
+        let deleteButtons: WebElementWrapper[];
+        do {
+          deleteButtons = await testSubjects.findAllDescendant(
+            'builderItemEntryDeleteButton',
+            entriesContainer
+          );
+
+          await deleteButtons[0].click();
+        } while (deleteButtons.length > 1);
+      };
     });
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
