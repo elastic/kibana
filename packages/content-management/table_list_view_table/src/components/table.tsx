@@ -21,6 +21,7 @@ import {
   type EuiTableSelectionType,
   useEuiTheme,
   EuiCode,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -58,6 +59,8 @@ type TagManagementProps = Pick<
   UseTagFilterPanelParams,
   'addOrRemoveIncludeTagFilter' | 'addOrRemoveExcludeTagFilter' | 'tagsToTableItemMap'
 >;
+
+export const FORBIDDEN_SEARCH_CHARS = '()[]{}<>+=\\"$#!¿?,;`\'/|&';
 
 interface Props<T extends UserContentCommonSchema> extends State<T>, TagManagementProps {
   dispatch: Dispatch<Action<T>>;
@@ -220,6 +223,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
 
   const search = useMemo((): Search => {
+    const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
     return {
       onChange: onTableSearchChange,
       toolsLeft: renderToolsLeft(),
@@ -232,17 +236,29 @@ export function Table<T extends UserContentCommonSchema>({
       filters: searchFilters,
       hint: {
         content: (
-          <FormattedMessage
-            id="contentManagement.tableList.listing.charsNotAllowedHint"
-            defaultMessage="Characters not allowed: {chars}"
-            values={{
-              chars: <EuiCode>()[]&#123;&#125;&lt;&gt;+=\&quot;$#!¿?,;`&apos;/|&</EuiCode>,
-            }}
-          />
+          <EuiText color="red" size="s">
+            <FormattedMessage
+              id="contentManagement.tableList.listing.charsNotAllowedHint"
+              defaultMessage="Characters not allowed: {chars}"
+              values={{
+                chars: <EuiCode>{FORBIDDEN_SEARCH_CHARS}</EuiCode>,
+              }}
+            />
+          </EuiText>
         ),
+        popoverProps: {
+          isOpen: showHint,
+        },
       },
     };
-  }, [onTableSearchChange, renderCreateButton, renderToolsLeft, searchFilters, searchQuery.query]);
+  }, [
+    onTableSearchChange,
+    renderCreateButton,
+    renderToolsLeft,
+    searchFilters,
+    searchQuery.query,
+    searchQuery.error,
+  ]);
 
   const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
 
