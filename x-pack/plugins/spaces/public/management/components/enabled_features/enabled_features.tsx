@@ -43,10 +43,10 @@ export const EnabledFeatures: FunctionComponent<Props> = (props) => {
                 defaultMessage="Choose the features to display in the navigation menu for users of this space. If you want to focus on a single solution, you can simplify the navigation even more by selecting a {solutionView}."
                 values={{
                   solutionView: (
-                      <FormattedMessage
-                        id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
-                        defaultMessage="Solution view"
-                      />
+                    <FormattedMessage
+                      id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
+                      defaultMessage="Solution view"
+                    />
                   ),
                 }}
               />

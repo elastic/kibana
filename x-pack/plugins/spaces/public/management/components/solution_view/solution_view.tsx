@@ -181,7 +181,7 @@ export const SolutionView: FunctionComponent<Props> = ({
                 />
               </EuiText>
 
-              <EuiSpacer size="m"/>
+              <EuiSpacer size="m" />
               <EuiCallOut
                 color="primary"
                 size="s"
