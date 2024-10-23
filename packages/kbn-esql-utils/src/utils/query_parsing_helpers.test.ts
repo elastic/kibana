@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -12,6 +13,10 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
+  prettifyQuery,
+  isQueryWrappedByPipes,
+  retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -77,17 +82,17 @@ describe('esql query helpers', () => {
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query does not contain LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query contains invalid LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT iAmNotANumber');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return limit when ES|QL query contains LIMIT command', () => {
@@ -95,7 +100,7 @@ describe('esql query helpers', () => {
       expect(limit).toBe(10000);
     });
 
-    it('should return last limit when ES|QL query contains multiple LIMIT command', () => {
+    it('should return minimum limit when ES|QL query contains multiple LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT 200 | LIMIT 0');
       expect(limit).toBe(0);
     });
@@ -150,10 +155,12 @@ describe('esql query helpers', () => {
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?start')).toBe('time');
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
+        'time'
+      );
     });
 
-    it('should return undefined if there is one named param but is not ?start or ?end', () => {
+    it('should return undefined if there is one named param but is not ?_tstart or ?_tend', () => {
       expect(
         getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
@@ -161,16 +168,109 @@ describe('esql query helpers', () => {
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?start)')
+        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
         getTimeFieldFromESQLQuery(
-          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?start, ?end)'
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
+    });
+  });
+
+  describe('prettifyQuery', function () {
+    it('should return the code wrapped', function () {
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
+    });
+
+    it('should return the code unwrapped', function () {
+      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should return the code unwrapped and trimmed', function () {
+      const code = prettifyQuery(
+        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
+        true
+      );
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+  });
+
+  describe('isQueryWrappedByPipes', function () {
+    it('should return false if the query is not wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(flag).toBeFalsy();
+    });
+
+    it('should return true if the query is wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n| KEEP field1, field2 /n| SORT field1');
+      expect(flag).toBeTruthy();
+    });
+
+    it('should return true if the query is wrapped and prettified', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
+      expect(flag).toBeTruthy();
+    });
+  });
+
+  describe('retrieveMetadataColumns', () => {
+    it('should return metadata columns if they exist', () => {
+      expect(retrieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
+        '_id',
+        '_ignored',
+      ]);
+    });
+
+    it('should return empty columns if metadata doesnt exist', () => {
+      expect(retrieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
+    });
+  });
+
+  describe('getQueryColumnsFromESQLQuery', () => {
+    it('should return the columns used in stats', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | stats var0 = avg(bytes) by dest')
+      ).toStrictEqual(['var0', 'bytes', 'dest']);
+    });
+
+    it('should return the columns used in eval', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | eval dest = geo.dest, var1 = bytes')
+      ).toStrictEqual(['dest', 'geo.dest', 'var1', 'bytes']);
+    });
+
+    it('should return the columns used in eval and stats', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | stats var0 = avg(bytes) by dest | eval meow = var0')
+      ).toStrictEqual(['var0', 'bytes', 'dest', 'meow', 'var0']);
+    });
+
+    it('should return the metadata columns', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a  metadata _id, _ignored | eval b = 1')
+      ).toStrictEqual(['_id', '_ignored', 'b']);
+    });
+
+    it('should return the keep columns', () => {
+      expect(getQueryColumnsFromESQLQuery('from a | keep b, c, d')).toStrictEqual(['b', 'c', 'd']);
+    });
+
+    it('should return the where columns', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | where field > 1000 and abs(fieldb) < 20')
+      ).toStrictEqual(['field', 'fieldb']);
+    });
+
+    it('should return the rename columns', () => {
+      expect(getQueryColumnsFromESQLQuery('from a | rename field as fieldb')).toStrictEqual([
+        'field',
+        'fieldb',
+      ]);
     });
   });
 });

@@ -6,13 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import * as t from 'io-ts';
-
-import type { IFieldSubType } from '@kbn/es-query';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -372,7 +367,8 @@ const allowedFilterKeysSchema = t.union([
   t.literal('range'),
   t.literal('rank_feature'),
   t.literal('regexp'),
-  t.literal('rule_query'),
+  t.literal('rule'),
+  t.literal('semantic'),
   t.literal('shape'),
   t.literal('simple_query_string'),
   t.literal('span_containing'),
@@ -417,21 +413,3 @@ export interface ClusterPutComponentTemplateBody {
     mappings: estypes.MappingTypeMapping;
   };
 }
-
-export interface BrowserField {
-  aggregatable: boolean;
-  category: string;
-  description?: string | null;
-  example?: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format?: SerializedFieldFormat;
-  indexes: string[];
-  name: string;
-  searchable: boolean;
-  type: string;
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
-  runtimeField?: RuntimeField;
-}
-
-export type BrowserFields = Record<string, Partial<BrowserField>>;

@@ -50,6 +50,15 @@ const buildGetRuleRoute = ({
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
         },
       },
     },
@@ -87,6 +96,7 @@ export const getRuleRoute = (
     options: {
       access: 'public',
       summary: `Get rule details`,
+      tags: ['oas-tag:alerting'],
     },
   });
 
@@ -99,4 +109,5 @@ export const getInternalRuleRoute = (
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    options: { access: 'internal' },
   });

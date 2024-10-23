@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -91,6 +92,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -109,6 +111,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('calls upon savedObjectClient.update', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: { title: 'Testing' },
         version: 'foo',
@@ -126,6 +129,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('returns with status 400 for types hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/hidden-from-http/hiddenId')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: { title: 'does not matter' },
       })
@@ -136,6 +140,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ attributes: { title: 'Logging test' }, version: 'log' })
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);

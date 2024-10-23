@@ -96,7 +96,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
     : [];
 
   return (
-    <Breadcrumb href="/traces" title={title}>
+    <Breadcrumb href="/traces" title={title} omitOnServerless>
       <ApmMainTemplate
         pageTitle={title}
         pageSectionProps={{

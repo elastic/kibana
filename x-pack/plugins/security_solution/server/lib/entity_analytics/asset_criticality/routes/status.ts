@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GetAssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics';
 import {
   ASSET_CRITICALITY_INTERNAL_STATUS_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { AssetCriticalityAuditActions } from '../audit';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 
@@ -34,10 +32,13 @@ export const assetCriticalityInternalStatusRoute = (
     })
     .addVersion(
       { version: API_VERSIONS.internal.v1, validate: {} },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetAssetCriticalityStatusResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;
@@ -55,11 +56,10 @@ export const assetCriticalityInternalStatusRoute = (
             },
           });
 
-          const body: GetAssetCriticalityStatusResponse = {
-            asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
-          };
           return response.ok({
-            body,
+            body: {
+              asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
+            },
           });
         } catch (e) {
           const error = transformError(e);

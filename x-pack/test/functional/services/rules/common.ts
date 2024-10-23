@@ -70,10 +70,10 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.click('ofExpressionPopover');
       const ofComboBox = await find.byCssSelector('#ofField');
       await ofComboBox.click();
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
     },
   };
 }

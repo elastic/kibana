@@ -16,8 +16,13 @@ import {
   SavedObjectTimelineType,
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
-import type { TimelineSavedObject } from '../../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
+import type { TimelineResponse } from '../../../../../common/api/timeline';
+import {
+  type TimelineType,
+  TimelineTypeEnum,
+  type TimelineStatus,
+  TimelineStatusEnum,
+} from '../../../../../common/api/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([
@@ -44,7 +49,7 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineResponse =>
   pipe(
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
@@ -100,10 +105,10 @@ function savedObjectTimelineTypeToAPITimelineType(
 ): TimelineType {
   switch (timelineType) {
     case SavedObjectTimelineType.template:
-      return TimelineType.template;
+      return TimelineTypeEnum.template;
     case 'draft':
     default:
-      return TimelineType.default;
+      return TimelineTypeEnum.default;
   }
 }
 
@@ -113,15 +118,15 @@ function savedObjectTimelineStatusToAPITimelineStatus(
 ): TimelineStatus {
   // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
   if (timelineType === 'draft') {
-    return TimelineStatus.draft;
+    return TimelineStatusEnum.draft;
   }
   switch (status) {
     case SavedObjectTimelineStatus.draft:
-      return TimelineStatus.draft;
+      return TimelineStatusEnum.draft;
     case SavedObjectTimelineStatus.immutable:
-      return TimelineStatus.immutable;
+      return TimelineStatusEnum.immutable;
     case SavedObjectTimelineStatus.active:
     default:
-      return TimelineStatus.active;
+      return TimelineStatusEnum.active;
   }
 }

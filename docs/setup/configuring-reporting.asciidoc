@@ -6,6 +6,20 @@
 <titleabbrev>Configure reporting</titleabbrev>
 ++++
 
+[NOTE]
+============
+Kibana PNG/PDF Reporting uses a custom binary of headless Chromium, and support comes with special caveats:
+
+* The functionality requires special OS dependencies which may not be available for all distributions and configurations of Linux.
+* It is subject to system resource configurations such as the limited number of file descriptors, allowed processes, and types of processes.
+* Linux versions that are in end-of-life phase are not supported.
+* Linux systems with SELinux or fapolicyd are not supported.
+
+Before upgrading Kibana in a production environment, we encourage you to test your screenshotting use cases in a pre-production environment
+to make sure your hosts support our latest build of Chromium. For the most reliable configuration of PDF/PNG {report-features}, consider
+installing {kib} using <<docker, Docker>>, or using <<set-up-on-cloud, Elastic Cloud>>.
+============
+
 For security, you grant users access to the {report-features} and secure the reporting endpoints
 with TLS/SSL encryption. Additionally, you can install graphical packages into the operating system
 to enable the {kib} server to have screenshotting capabilities.
@@ -214,13 +228,13 @@ If using PNG/PDF {report-features}, make sure the {kib} server operating system 
 
 If you are using RHEL operating systems, install the following packages:
 
-* `ipa-gothic-fonts`
 * `xorg-x11-fonts-100dpi`
 * `xorg-x11-fonts-75dpi`
 * `xorg-x11-utils`
 * `xorg-x11-fonts-cyrillic`
 * `xorg-x11-fonts-Type1`
 * `xorg-x11-fonts-misc`
+* `vlgothic-fonts`
 * `fontconfig`
 * `freetype`
 
@@ -243,6 +257,3 @@ PDF/PNG reporting to reach {kib} over a local interface, while also allowing the
 outward-facing network interfaces, as it makes the {kib} server accessible from any network interface on the
 machine. Make sure that no firewall rules or other routing rules prevent local services from accessing this
 address.
-
-For the most reliable configuration of PDF/PNG {report-features}, consider installing {kib} using <<docker, Docker>>, or
-using <<set-up-on-cloud, Elastic Cloud>>.

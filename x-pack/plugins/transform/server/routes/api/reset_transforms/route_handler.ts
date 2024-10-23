@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { ResetTransformsRequestSchema } from '../../../../common/api_schemas/reset_transforms';
+import type { ResetTransformsRequestSchema } from '../../api_schemas/reset_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 

@@ -455,9 +455,6 @@ export class LensPlugin {
       () => startServices().plugins.data.nowProvider.get()
     );
 
-    const getPresentationUtilContext = () =>
-      startServices().plugins.presentationUtil.ContextProvider;
-
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -490,7 +487,6 @@ export class LensPlugin {
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
-          getPresentationUtilContext,
           topNavMenuEntryGenerators: this.topNavMenuEntries,
           locator: this.locator,
         });
@@ -648,7 +644,13 @@ export class LensPlugin {
     );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
-    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
+    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
+      if (!this.editorFrameService) {
+        await this.initDependenciesForApi();
+      }
+
+      return this.editorFrameService!;
+    });
     startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -693,8 +695,8 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationTypes } = await import('./visualizations/xy/types');
-        return visualizationTypes;
+        const { visualizationSubtypes } = await import('./visualizations/xy/types');
+        return visualizationSubtypes;
       },
 
       stateHelperApi: async () => {

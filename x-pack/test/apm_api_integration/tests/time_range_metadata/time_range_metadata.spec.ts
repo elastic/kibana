@@ -620,10 +620,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
       });
-
-      after(() => {
-        return apmSynthtraceEsClient.clean();
-      });
     }
   );
 }

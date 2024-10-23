@@ -9,6 +9,10 @@ import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ImportModal } from './import_modal';
 
+jest.mock('../../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
+}));
+
 const testProps = {
   addImportedEvents: jest.fn(),
   closeImportModal: jest.fn(),

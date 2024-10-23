@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
@@ -12,14 +14,9 @@ import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-uti
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import {
-  SerializedVis,
-  Vis,
-  VisSavedObject,
-  VisualizeEmbeddableContract,
-  VisualizeInput,
-} from '../..';
+import { SerializedVis, Vis, VisSavedObject, VisualizeEmbeddableContract } from '../..';
 import type { VisInstance, VisualizeServices } from '../types';
+import { VisualizeInput } from '../../legacy/embeddable';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
   const originalError = error.original || error;

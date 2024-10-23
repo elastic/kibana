@@ -13,13 +13,12 @@ properties:
   index:
     $ref: 'alert_indices.yaml'
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   rule:
     $ref: 'rule.yaml'
-  type: 
+  type:
     description: The type of comment.
     type: string
-    examples:
-      - alert
+    example: alert
     enum:
       - alert

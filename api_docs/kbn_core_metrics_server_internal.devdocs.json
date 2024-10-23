@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-metrics-server-internal",
-        "id": "def-common.MetricsServiceSetupDeps",
+        "id": "def-server.MetricsServiceSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "MetricsServiceSetupDeps",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.MetricsServiceSetupDeps.http",
+            "id": "def-server.MetricsServiceSetupDeps.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -47,7 +39,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.MetricsServiceSetupDeps.elasticsearchService",
+            "id": "def-server.MetricsServiceSetupDeps.elasticsearchService",
             "type": "Object",
             "tags": [],
             "label": "elasticsearchService",
@@ -68,7 +60,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-metrics-server-internal",
-        "id": "def-common.opsConfig",
+        "id": "def-server.opsConfig",
         "type": "Object",
         "tags": [],
         "label": "opsConfig",
@@ -79,7 +71,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.opsConfig.path",
+            "id": "def-server.opsConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -93,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.opsConfig.schema",
+            "id": "def-server.opsConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -148,5 +140,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

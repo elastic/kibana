@@ -16,7 +16,7 @@ import { protectionUpdatesNoteSavedObjectType } from '../../lib/protection_updat
 import type {
   CreateUpdateProtectionUpdatesNoteSchema,
   GetProtectionUpdatesNoteSchema,
-} from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
+} from '../../../../common/api/endpoint/protection_updates_note';
 
 const getProtectionNote = async (SOClient: SavedObjectsClientContract, packagePolicyId: string) => {
   return SOClient.find<{ note: string }>({

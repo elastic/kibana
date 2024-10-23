@@ -150,6 +150,7 @@ export const LatestVulnerabilitiesContainer = () => {
       </>
     );
   }
+
   return (
     <>
       <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />

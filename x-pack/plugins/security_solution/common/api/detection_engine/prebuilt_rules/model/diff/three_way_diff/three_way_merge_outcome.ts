@@ -6,10 +6,10 @@
  */
 
 /**
- * Type of result of an automatic three-way merge of three values:
- *   - base version
+ * The type of result of an automatic three-way merge of three values:
  *   - current version
  *   - target version
+ *   - merged version
  */
 export enum ThreeWayMergeOutcome {
   /** Took current version and returned as the merged one. */
@@ -20,7 +20,4 @@ export enum ThreeWayMergeOutcome {
 
   /** Merged three versions successfully into a new one. */
   Merged = 'MERGED',
-
-  /** Couldn't merge three versions because of a conflict. */
-  Conflict = 'CONFLICT',
 }

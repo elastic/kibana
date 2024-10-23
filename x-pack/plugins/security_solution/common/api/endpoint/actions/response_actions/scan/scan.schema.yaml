@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: Scan Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/scan:
+    post:
+      summary: Scan a file or directory
+      operationId: EndpointScanAction
+      description: Scan a specific file or directory on an endpoint for malware.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    ScanRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              required:
+                - path
+              type: object
+              properties:
+                path:
+                  type: string
+

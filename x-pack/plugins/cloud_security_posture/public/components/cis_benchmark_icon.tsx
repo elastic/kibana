@@ -19,8 +19,8 @@ interface Props {
   size?: IconSize;
 }
 
-const getBenchmarkIdIconType = (props: Props): string => {
-  switch (props.type) {
+const getBenchmarkIdIconType = (type: BenchmarkId): string | undefined => {
+  switch (type) {
     case 'cis_eks':
       return cisEksIcon;
     case 'cis_azure':
@@ -30,13 +30,17 @@ const getBenchmarkIdIconType = (props: Props): string => {
     case 'cis_gcp':
       return googleCloudLogo;
     case 'cis_k8s':
-    default:
       return 'logoKubernetes';
   }
 };
 
-export const CISBenchmarkIcon = (props: Props) => (
-  <EuiToolTip content={props.name}>
-    <EuiIcon type={getBenchmarkIdIconType(props)} size={props.size || 'xl'} css={props.style} />
-  </EuiToolTip>
-);
+export const CISBenchmarkIcon = (props: Props) => {
+  const iconType = getBenchmarkIdIconType(props.type);
+  if (!iconType) return <></>;
+
+  return (
+    <EuiToolTip content={props.name}>
+      <EuiIcon type={iconType} size={props.size || 'xl'} css={props.style} />
+    </EuiToolTip>
+  );
+};

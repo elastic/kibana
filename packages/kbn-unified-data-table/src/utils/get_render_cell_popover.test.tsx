@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
@@ -26,10 +27,10 @@ const defaultProps: EuiDataGridCellPopoverElementProps = {
   cellContentsElement: (<div>{'cellContentsElement'}</div>) as unknown as HTMLDivElement,
 };
 
-const renderTestComponent = () => {
+const renderTestComponent = (overrideProps = {}) => {
   const Renderer = getCustomCellPopoverRenderer();
 
-  render(<Renderer {...defaultProps} />);
+  render(<Renderer {...defaultProps} {...overrideProps} />);
 };
 
 describe('getCustomCellPopoverRenderer', () => {
@@ -42,6 +43,19 @@ describe('getCustomCellPopoverRenderer', () => {
 
     expect(setCellPopoverPropsMocks).toHaveBeenCalledWith({
       panelClassName: 'unifiedDataTable__cellPopover',
+    });
+  });
+
+  it('should render a DefaultCellPopover with a wider panel for allowed columns', () => {
+    renderTestComponent({ columnId: '_source' });
+
+    expect(setCellPopoverPropsMocks).toHaveBeenCalledWith({
+      panelClassName: 'unifiedDataTable__cellPopover',
+      panelProps: {
+        css: {
+          maxInlineSize: 'min(75vw, 600px) !important',
+        },
+      },
     });
   });
 });

@@ -91,7 +91,7 @@ function selectorsIncludeConditionsForFIMOperations(
         !!(
           selector &&
           conditions.reduce((p, c) => {
-            return p && selector.hasOwnProperty(c);
+            return p && Object.hasOwn(selector, c);
           }, true)
         );
 

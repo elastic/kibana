@@ -188,6 +188,53 @@ describe('RuleExecutionStatus', () => {
       expect(status.error).toEqual({ message: 'an error', reason: 'unknown' });
       expect(status.warning).toBe(undefined);
     });
+
+    test('task state with framework warning and rule execution warning - only show framework warning', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunWarning('a rule execution warning');
+      const { status, metrics } = executionStatusFromState({
+        stateWithMetrics: {
+          alertInstances: { a: {} },
+          metrics: executionMetrics,
+        },
+        ruleResultService,
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: `a rule execution warning`,
+        reason: RuleExecutionStatusWarningReasons.EXECUTION,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, executionMetrics);
+    });
+
+    test('task state with rule execution warning', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunWarning('a rule execution warning');
+      const { status, metrics } = executionStatusFromState({
+        stateWithMetrics: {
+          alertInstances: { a: {} },
+          metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
+        },
+        ruleResultService,
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxExecutableActions,
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, {
+        ...executionMetrics,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+    });
   });
 
   describe('executionStatusFromError()', () => {

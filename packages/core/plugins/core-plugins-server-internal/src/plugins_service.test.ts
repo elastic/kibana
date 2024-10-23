@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
@@ -1046,7 +1047,7 @@ describe('PluginsService', () => {
       const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot')!;
       await expect(prebootUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-preboot' },
-        exposedConfigKeys: { sharedProp: 'string' },
+        exposedConfigKeys: { sharedProp: 'string?' },
       });
 
       const standardUIConfig$ = standard.uiPlugins.browserConfigs.get(
@@ -1054,7 +1055,7 @@ describe('PluginsService', () => {
       )!;
       await expect(standardUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-standard' },
-        exposedConfigKeys: { sharedProp: 'string' },
+        exposedConfigKeys: { sharedProp: 'string?' },
       });
     });
 

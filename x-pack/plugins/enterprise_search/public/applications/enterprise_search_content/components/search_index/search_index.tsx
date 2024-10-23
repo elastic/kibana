@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -40,6 +40,7 @@ import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_co
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
+import { IndexError } from './index_error';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
@@ -140,24 +141,39 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
-      content: <SearchIndexDocuments />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <SearchIndexDocuments />
+        </>
+      ),
       id: SearchIndexTabId.DOCUMENTS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.documentsTabLabel', {
         defaultMessage: 'Documents',
       }),
     },
     {
-      content: <SearchIndexIndexMappings />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <SearchIndexIndexMappings />
+        </>
+      ),
       id: SearchIndexTabId.INDEX_MAPPINGS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
-        defaultMessage: 'Index mappings',
+        defaultMessage: 'Mappings',
       }),
     },
   ];
 
   const CONNECTOR_TABS: EuiTabbedContentTab[] = [
     {
-      content: <ConnectorConfiguration />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <ConnectorConfiguration />
+        </>
+      ),
       id: SearchIndexTabId.CONFIGURATION,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
         defaultMessage: 'Configuration',
@@ -166,7 +182,12 @@ export const SearchIndex: React.FC = () => {
     ...(hasFilteringFeature
       ? [
           {
-            content: <ConnectorSyncRules />,
+            content: (
+              <>
+                <EuiSpacer size="l" />
+                <ConnectorSyncRules />
+              </>
+            ),
             id: SearchIndexTabId.SYNC_RULES,
             name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
               defaultMessage: 'Sync rules',
@@ -175,7 +196,12 @@ export const SearchIndex: React.FC = () => {
         ]
       : []),
     {
-      content: <ConnectorScheduling />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <ConnectorScheduling />
+        </>
+      ),
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
@@ -185,14 +211,24 @@ export const SearchIndex: React.FC = () => {
 
   const CRAWLER_TABS: EuiTabbedContentTab[] = [
     {
-      content: <SearchIndexDomainManagement />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <SearchIndexDomainManagement />
+        </>
+      ),
       id: SearchIndexTabId.DOMAIN_MANAGEMENT,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
         defaultMessage: 'Manage Domains',
       }),
     },
     {
-      content: <CrawlerConfiguration />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <CrawlerConfiguration />
+        </>
+      ),
       id: SearchIndexTabId.CRAWLER_CONFIGURATION,
       name: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
@@ -202,7 +238,12 @@ export const SearchIndex: React.FC = () => {
       ),
     },
     {
-      content: <AutomaticCrawlScheduler />,
+      content: (
+        <>
+          <EuiSpacer size="l" />
+          <AutomaticCrawlScheduler />
+        </>
+      ),
       'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
@@ -212,7 +253,12 @@ export const SearchIndex: React.FC = () => {
   ];
 
   const PIPELINES_TAB: EuiTabbedContentTab = {
-    content: <SearchIndexPipelines />,
+    content: (
+      <>
+        <EuiSpacer size="l" />
+        <SearchIndexPipelines />
+      </>
+    ),
     id: SearchIndexTabId.PIPELINES,
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
       defaultMessage: 'Pipelines',
@@ -239,6 +285,7 @@ export const SearchIndex: React.FC = () => {
         rightSideItems: getHeaderActions(index),
       }}
     >
+      <IndexError indexName={indexName} />
       <Content
         index={index}
         errorConnectingMessage={errorConnectingMessage}
@@ -287,7 +334,7 @@ const Content: React.FC<ContentProps> = ({
   }
   return (
     <>
-      <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      <EuiTabbedContent size="l" tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
       {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
     </>
   );

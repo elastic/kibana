@@ -1,5 +1,5 @@
 post:
-  summary: Import saved objects in the default space
+  summary: Import saved objects
   operationId: importSavedObjectsDefault
   description: |
     Create sets of Kibana saved objects from a file created by the export API.
@@ -84,3 +84,11 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+  x-codeSamples:
+  - lang: cURL
+    label: Import with createNewCopies
+    source: |
+      curl \
+        -X POST api/saved_objects/_import?createNewCopies=true
+        -H "kbn-xsrf: true"
+        --form file=@file.ndjson

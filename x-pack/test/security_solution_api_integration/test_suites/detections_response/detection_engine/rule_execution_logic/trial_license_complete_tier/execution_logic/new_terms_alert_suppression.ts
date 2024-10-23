@@ -18,7 +18,6 @@ import {
   TIMESTAMP,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -56,7 +55,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const historicalWindowStart = '2019-10-13T05:00:04.000Z';
 
-  describe('@ess @serverless @serverlessQA New terms type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless New terms type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -2249,15 +2249,11 @@ export default ({ getService }: FtrProviderContext) => {
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
-      const kibanaServer = getService('kibanaServer');
 
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
         await esArchiver.load(path);
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-        await kibanaServer.uiSettings.update({
-          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-        });
       });
 
       after(async () => {

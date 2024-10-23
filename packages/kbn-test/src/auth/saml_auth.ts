@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
@@ -133,7 +134,17 @@ export const createCloudSession = async (
                 data[key] = 'REDACTED';
               }
             });
+
+            // MFA must be disabled for test accounts
+            if (data.mfa_required === true) {
+              // Changing MFA configuration requires manual action, skip retry
+              attemptsLeft = 0;
+              throw new Error(
+                `Failed to create the new cloud session: MFA must be disabled for the test account`
+              );
+            }
           }
+
           throw new Error(
             `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
               data

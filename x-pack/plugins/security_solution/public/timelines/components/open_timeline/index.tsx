@@ -70,7 +70,7 @@ interface OwnProps<TCache = object> {
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
     OpenTimelineProps,
-    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle' | 'tabName'
+    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle'
   >;
 
 /** Returns a collection of selected timeline ids */
@@ -131,7 +131,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     importDataModalToggle,
     onOpenTimeline,
     setImportDataModalToggle,
-    tabName,
     title,
   }) => {
     const dispatch = useDispatch();
@@ -153,7 +152,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested sort direction of the query results */
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
-    const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+    const [sortField, setSortField] = useState<SortFieldTimeline>(DEFAULT_SORT_FIELD);
 
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineSavedObjectId = useShallowEqualSelector(
@@ -194,7 +193,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         search,
         sort: {
-          sortField: sortField as SortFieldTimeline,
+          sortField,
           sortOrder: sortDirection as Direction,
         },
         onlyUserFavorite: onlyFavorites,
@@ -318,7 +317,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       if (sort != null) {
         const { field, direction } = sort;
         setSortDirection(direction);
-        setSortField(field);
+        setSortField(field as SortFieldTimeline);
       }
     }, []);
 
@@ -423,7 +422,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabName={tabName}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
         timelineStatus={timelineStatus}

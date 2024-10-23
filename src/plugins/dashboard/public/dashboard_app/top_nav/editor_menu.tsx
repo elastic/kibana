@@ -1,127 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './editor_menu.scss';
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { type IconType } from '@elastic/eui';
+import React, { useEffect, useCallback, type ComponentProps } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { type Action, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from '../../services/plugin_services';
-import {
-  getAddPanelActionMenuItemsGroup,
-  type PanelSelectionMenuItem,
-  type GroupedAddPanelActions,
-} from './add_panel_action_menu_items';
-import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
-import type { DashboardServices } from '../../services/types';
-import { useDashboardAPI } from '../dashboard_app';
 
-export interface FactoryGroup {
-  id: string;
-  appName: string;
-  icon?: IconType;
-  factories: EmbeddableFactory[];
-  order: number;
-}
+import { useGetDashboardPanels, DashboardPanelSelectionListFlyout } from './add_new_panel';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { coreServices } from '../../services/kibana_services';
 
-interface UnwrappedEmbeddableFactory {
-  factory: EmbeddableFactory;
-  isEditable: boolean;
-}
-
-export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
-
-export const getEmbeddableFactoryMenuItemProvider =
-  (api: PresentationContainer, closePopover: () => void) =>
-  (factory: EmbeddableFactory): PanelSelectionMenuItem => {
-    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
-
-    return {
-      id: factory.type,
-      name: factory.getDisplayName(),
-      icon,
-      description: factory.getDescription?.(),
-      onClick: async () => {
-        closePopover();
-        api.addNewPanel({ panelType: factory.type }, true);
-      },
-      'data-test-subj': `createNew-${factory.type}`,
-      order: factory.order ?? 0,
-    };
-  };
-
-const sortGroupPanelsByOrder = <T extends { order: number }>(panelGroups: T[]): T[] => {
-  return panelGroups.sort(
-    // larger number sorted to the top
-    (panelGroupA, panelGroupB) => panelGroupB.order - panelGroupA.order
-  );
-};
-
-export const mergeGroupedItemsProvider =
-  (getEmbeddableFactoryMenuItem: GetEmbeddableFactoryMenuItem) =>
-  (
-    factoryGroupMap: Record<string, FactoryGroup>,
-    groupedAddPanelAction: Record<string, GroupedAddPanelActions>
-  ) => {
-    const panelGroups: GroupedAddPanelActions[] = [];
-
-    new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
-      (groupId) => {
-        const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
-
-        const factoryGroup = factoryGroupMap[groupId];
-        const addPanelGroup = groupedAddPanelAction[groupId];
-
-        if (factoryGroup && addPanelGroup) {
-          panelGroups.push({
-            id: factoryGroup.id,
-            title: factoryGroup.appName,
-            'data-test-subj': dataTestSubj,
-            order: factoryGroup.order,
-            items: [
-              ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
-              ...(addPanelGroup?.items ?? []),
-            ],
-          });
-        } else if (factoryGroup) {
-          panelGroups.push({
-            id: factoryGroup.id,
-            title: factoryGroup.appName,
-            'data-test-subj': dataTestSubj,
-            order: factoryGroup.order,
-            items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
-          });
-        } else if (addPanelGroup) {
-          panelGroups.push(addPanelGroup);
-        }
-      }
-    );
-
-    return panelGroups;
-  };
-
-interface EditorMenuProps {
-  api: PresentationContainer;
+interface EditorMenuProps
+  extends Pick<Parameters<typeof useGetDashboardPanels>[0], 'createNewVisType'> {
   isDisabled?: boolean;
-  /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
 }
 
-export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
-  const isMounted = useRef(false);
-  const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
-  const dashboard = useDashboardAPI();
+export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) => {
+  const dashboardApi = useDashboardApi();
 
+<<<<<<< HEAD
   useEffect(() => {
     isMounted.current = true;
 
@@ -242,50 +148,42 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
 
       factoryGroupMap[fallbackGroup.id].factories.push(factory);
     }
+=======
+  const fetchDashboardPanels = useGetDashboardPanels({
+    api: dashboardApi,
+    createNewVisType,
+>>>>>>> upstream/main
   });
 
-  const augmentedCreateNewVisType = (
-    visType: Parameters<EditorMenuProps['createNewVisType']>[0],
-    cb: () => void
-  ) => {
-    const visClickHandler = createNewVisType(visType);
+  useEffect(() => {
+    // ensure opened dashboard is closed if a navigation event happens;
     return () => {
-      visClickHandler();
-      cb();
+      dashboardApi.clearOverlays();
     };
-  };
+  }, [dashboardApi]);
 
-  const getVisTypeMenuItem = (
-    onClickCb: () => void,
-    visType: BaseVisType
-  ): PanelSelectionMenuItem => {
-    const {
-      name,
-      title,
-      titleInWizard,
-      description,
-      icon = 'empty',
-      isDeprecated,
-      order,
-    } = visType;
-    return {
-      id: name,
-      name: titleInWizard || title,
-      isDeprecated,
-      icon,
-      onClick: augmentedCreateNewVisType(visType, onClickCb),
-      'data-test-subj': `visType-${name}`,
-      description,
-      order,
-    };
-  };
+  const openDashboardPanelSelectionFlyout = useCallback(
+    function openDashboardPanelSelectionFlyout() {
+      const flyoutPanelPaddingSize: ComponentProps<
+        typeof DashboardPanelSelectionListFlyout
+      >['paddingSize'] = 'l';
 
-  const getVisTypeAliasMenuItem = (
-    onClickCb: () => void,
-    visTypeAlias: VisTypeAlias
-  ): PanelSelectionMenuItem => {
-    const { name, title, description, icon = 'empty', order } = visTypeAlias;
+      const mount = toMountPoint(
+        React.createElement(function () {
+          return (
+            <DashboardPanelSelectionListFlyout
+              close={dashboardApi.clearOverlays}
+              {...{
+                paddingSize: flyoutPanelPaddingSize,
+                fetchDashboardPanels: fetchDashboardPanels.bind(null, dashboardApi.clearOverlays),
+              }}
+            />
+          );
+        }),
+        { analytics: coreServices.analytics, theme: coreServices.theme, i18n: coreServices.i18n }
+      );
 
+<<<<<<< HEAD
     return {
       id: name,
       name: title,
@@ -345,6 +243,24 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       }
     });
   };
+=======
+      dashboardApi.openOverlay(
+        coreServices.overlays.openFlyout(mount, {
+          size: 'm',
+          maxWidth: 500,
+          paddingSize: flyoutPanelPaddingSize,
+          'aria-labelledby': 'addPanelsFlyout',
+          'data-test-subj': 'dashboardPanelSelectionFlyout',
+          onClose(overlayRef) {
+            dashboardApi.clearOverlays();
+            overlayRef.close();
+          },
+        })
+      );
+    },
+    [dashboardApi, fetchDashboardPanels]
+  );
+>>>>>>> upstream/main
 
   return (
     <ToolbarButton
@@ -354,11 +270,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
-      onClick={() => {
-        flyoutRef.current = openDashboardPanelSelectionFlyout({
-          getPanels: getEditorMenuPanels,
-        });
-      }}
+      onClick={openDashboardPanelSelectionFlyout}
       size="s"
     />
   );

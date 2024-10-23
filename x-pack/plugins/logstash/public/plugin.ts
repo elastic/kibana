@@ -16,6 +16,7 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 // @ts-ignore
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { LogstashLicenseService } from './services';
 
 interface SetupDeps {
@@ -26,8 +27,13 @@ interface SetupDeps {
 }
 
 export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
+  private readonly isServerless: boolean;
   private licenseSubscription?: Subscription;
   private capabilities$ = new Subject<Capabilities>();
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
@@ -54,7 +60,8 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
           coreStart,
           params,
           isMonitoringEnabled,
-          logstashLicense$
+          logstashLicense$,
+          this.isServerless
         );
 
         return () => {

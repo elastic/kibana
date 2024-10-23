@@ -14,14 +14,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { MlApi } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
   parentApi: unknown,
   focusedPanelId: string,
   services: { data: DataPublicPluginStart; share?: SharePluginStart },
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   input?: Partial<SingleMetricViewerEmbeddableInput>
 ): Promise<SingleMetricViewerEmbeddableUserInput> {
   const { http, overlays, ...startServices } = coreStart;
@@ -35,7 +35,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
         toMountPoint(
           <KibanaContextProvider
             services={{
-              mlServices: { mlApiServices },
+              mlServices: { mlApi },
               data,
               share,
               ...coreStart,
@@ -43,7 +43,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
           >
             <SingleMetricViewerInitializer
               data-test-subj="mlSingleMetricViewerEmbeddableInitializer"
-              mlApiServices={mlApiServices}
+              mlApi={mlApi}
               bounds={timefilter.getBounds()!}
               initialInput={input}
               onCreate={(explicitInput) => {

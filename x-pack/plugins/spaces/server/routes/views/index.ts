@@ -20,7 +20,7 @@ export interface ViewRouteDeps {
 
 export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
   deps.httpResources.register(
-    { path: '/spaces/space_selector', validate: false },
+    { path: '/spaces/space_selector', validate: false, options: { excludeFromOAS: true } },
     (context, request, response) => response.renderCoreApp()
   );
 
@@ -32,6 +32,7 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
           schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' })
         ),
       },
+      options: { excludeFromOAS: true },
     },
     async (context, request, response) => {
       try {
@@ -44,9 +45,10 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
         // need to get reed of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
+        // preserving of the hash is important for the navigation to work correctly with default route
         return response.redirected({
           headers: {
-            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}`,
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}${normalizedRoute.hash}`,
           },
         });
       } catch (e) {

@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository/src/format_request';
+import { formatRequest } from '@kbn/server-route-repository-utils/src/format_request';
 import type { InvestigateAppServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
@@ -28,12 +28,12 @@ export type InvestigateAppAPIClientOptions = Omit<
 export type InvestigateAppAPIClient = RouteRepositoryClient<
   InvestigateAppServerRouteRepository,
   InvestigateAppAPIClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedInvestigateAppAPIClient = RouteRepositoryClient<
   InvestigateAppServerRouteRepository,
   Omit<InvestigateAppAPIClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type InvestigateAppAPIEndpoint = keyof InvestigateAppServerRouteRepository;
 

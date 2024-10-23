@@ -246,11 +246,12 @@ export const dataLoaders = (
     },
 
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
-      const { esClient, log } = await stackServicesPromise;
+      const { esClient, log, kbnClient } = await stackServicesPromise;
       return (
         await indexEndpointRuleAlerts({
           ...options,
           esClient,
+          kbnClient,
           log,
         })
       ).alerts;
@@ -326,8 +327,6 @@ export const dataLoadersForRealEndpoints = (
   config: Cypress.PluginConfigOptions
 ): void => {
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
-  const isServerless = Boolean(config.env.IS_SERVERLESS);
-  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
 
   on('task', {
     createSentinelOneHost: async () => {
@@ -415,7 +414,6 @@ ${s1Info.status}
       options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
       const { kbnClient, log, esClient } = await stackServicesPromise;
-      const isMkiEnvironment = isServerless && isCloudServerless;
       let retryAttempt = 0;
       const attemptCreateEndpointHost =
         async (): Promise<CreateAndEnrollEndpointHostCIResponse> => {
@@ -424,7 +422,6 @@ ${s1Info.status}
             const newHost = process.env.CI
               ? await createAndEnrollEndpointHostCI({
                   useClosestVersionMatch: true,
-                  isMkiEnvironment,
                   ...options,
                   log,
                   kbnClient,

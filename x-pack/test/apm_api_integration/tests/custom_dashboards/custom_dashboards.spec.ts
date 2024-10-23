@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await deleteAllServiceDashboard(apmApiClient, 'synth-go', start, end);
     });
 
-    describe('when data is not loaded', () => {
+    describe('and when data is not loaded', () => {
       it('creates a new service dashboard', async () => {
         const serviceDashboard = {
           dashboardSavedObjectId: 'dashboard-saved-object-id',

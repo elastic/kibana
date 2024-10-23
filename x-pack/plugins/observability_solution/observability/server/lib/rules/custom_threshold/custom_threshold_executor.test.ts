@@ -178,10 +178,10 @@ const setup = () => {
 
   services = {
     ...alertsServices,
-    searchSourceClient: {
+    getSearchSourceClient: jest.fn().mockResolvedValue({
       ...searchSourceCommonMock,
       create: jest.fn(() => Promise.resolve(mockedSearchSource)),
-    },
+    }),
   };
 
   services.alertsClient.report.mockImplementation((params: any) => {
@@ -969,7 +969,7 @@ describe('The custom threshold alert type', () => {
           stateResult2
         );
         expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-        expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
+        expect(mockedEvaluateRule.mock.calls[2][10]).toEqual([
           { bucketKey: { groupBy0: 'b' }, key: 'b' },
         ]);
       });
@@ -1635,25 +1635,6 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(services.alertsClient.setAlertData).toBeCalledTimes(1);
-        expect(services.alertsClient.setAlertData).toBeCalledWith({
-          context: {
-            alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mockedUuid',
-            viewInAppUrl: 'mockedViewInApp',
-            group: [
-              {
-                field: 'host.name',
-                value: 'host-0',
-              },
-            ],
-            host: {
-              name: 'host-0',
-            },
-            timestamp: expect.stringMatching(ISO_DATE_REGEX),
-          },
-          id: 'host-0',
-          'host.name': 'host-0',
-        });
         expect(getViewInAppUrl).toBeCalledTimes(1);
         expect(getViewInAppUrl).toBeCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
@@ -2977,7 +2958,7 @@ describe('The custom threshold alert type', () => {
           stateResult2
         );
         expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-        expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
+        expect(mockedEvaluateRule.mock.calls[2][10]).toEqual([
           { bucketKey: { groupBy0: 'b' }, key: 'b' },
         ]);
       });

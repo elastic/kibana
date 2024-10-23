@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,6 +104,24 @@ describe('<ContentEditorFlyoutContent />', () => {
       expect(find('saveButton').text()).toBe('Update foo');
     });
 
+    test('should save form only if something changes', async () => {
+      const onSave = jest.fn();
+
+      await act(async () => {
+        testBed = await setup({ onSave, isReadonly: false });
+      });
+
+      const { find, component } = testBed!;
+
+      await act(async () => {
+        find('saveButton').simulate('click');
+      });
+
+      component.update();
+
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
     test('should send back the updated item to the onSave() handler', async () => {
       const onSave = jest.fn();
 
@@ -114,19 +134,6 @@ describe('<ContentEditorFlyoutContent />', () => {
         component,
         form: { setInputValue },
       } = testBed!;
-
-      await waitForValidationResults();
-
-      await act(async () => {
-        find('saveButton').simulate('click');
-      });
-
-      expect(onSave).toHaveBeenCalledWith({
-        id: '123',
-        title: 'Foo',
-        description: 'Some description',
-        tags: ['id-1', 'id-2'],
-      });
 
       await act(async () => {
         setInputValue('metadataForm.nameInput', 'newTitle');
@@ -194,7 +201,17 @@ describe('<ContentEditorFlyoutContent />', () => {
         testBed = await setup({ onSave, isReadonly: false, services: { notifyError } });
       });
 
-      const { find, component } = testBed!;
+      const {
+        find,
+        component,
+        form: { setInputValue },
+      } = testBed!;
+
+      await act(async () => {
+        setInputValue('metadataForm.nameInput', 'changingTitleToUnblockDisabledButtonState');
+      });
+
+      await waitForValidationResults();
 
       component.update();
 
@@ -261,23 +278,6 @@ describe('<ContentEditorFlyoutContent />', () => {
         description: 'Some description',
         tags: ['id-3', 'id-4'], // New selection
       });
-    });
-
-    test('should render activity view', async () => {
-      await act(async () => {
-        testBed = await setup({ showActivityView: true });
-      });
-      const { find, component } = testBed!;
-
-      expect(find('activityView').exists()).toBe(true);
-      expect(find('activityView.createdByCard').exists()).toBe(true);
-      expect(find('activityView.updatedByCard').exists()).toBe(false);
-
-      testBed.setProps({
-        item: { ...savedObjectItem, updatedAt: '2021-01-01T00:00:00Z' },
-      });
-      component.update();
-      expect(find('activityView.updatedByCard').exists()).toBe(true);
     });
   });
 });

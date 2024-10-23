@@ -110,7 +110,7 @@ export function getEsQueryFromSavedSearch({
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
+          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
 

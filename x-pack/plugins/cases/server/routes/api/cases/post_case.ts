@@ -17,6 +17,7 @@ export const postCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Create a case`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

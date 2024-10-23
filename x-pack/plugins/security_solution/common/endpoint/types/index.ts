@@ -375,6 +375,7 @@ export type AlertEvent = Partial<{
         sid: ECSField<string>;
         integrity_level: ECSField<number>;
         integrity_level_name: ECSField<string>;
+        elevation_level: ECSField<string>;
         // Using ECSField as the outer because the object is expected to be an array
         privileges: ECSField<
           Partial<{
@@ -406,6 +407,8 @@ export type AlertEvent = Partial<{
     Ext: Partial<{
       malware_classification: MalwareClassification;
       temp_file_path: ECSField<string>;
+      quarantine_result: ECSField<boolean>;
+      quarantine_message: ECSField<string>;
       // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
         Partial<{
@@ -535,6 +538,7 @@ export interface HostMetadataInterface {
     status: EndpointStatus;
     policy: {
       applied: {
+        /** The Endpoint integration policy UUID */
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
@@ -702,6 +706,8 @@ export type WinlogEvent = Partial<{
  * Safer version of ResolverEvent. Please use this going forward.
  */
 export type SafeEndpointEvent = Partial<{
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp': ECSField<number>;
   agent: Partial<{
     id: ECSField<string>;
@@ -812,6 +818,8 @@ export type SafeEndpointEvent = Partial<{
 }>;
 
 export interface SafeLegacyEndpointEvent {
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp'?: ECSField<number>;
   /**
    * 'legacy' events must have an `endgame` key.

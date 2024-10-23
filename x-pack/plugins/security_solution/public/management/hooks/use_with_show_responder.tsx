@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
 import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
@@ -23,7 +21,6 @@ import {
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
@@ -47,19 +44,10 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
 
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName, platform } = props;
-      const isExternalEdr =
-        (isSentinelOneV1Enabled && agentType === 'sentinel_one') ||
-        (responseActionsCrowdstrikeManualHostIsolationEnabled && agentType === 'crowdstrike');
 
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
@@ -109,19 +97,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (isExternalEdr) {
-                return (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBetaBadge
-                        label={TECHNICAL_PREVIEW}
-                        tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                );
-              }
               return <>{RESPONDER_PAGE_TITLE}</>;
             },
             ActionComponents: endpointPrivileges.canReadActionsLogManagement
@@ -141,12 +116,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [
-      isSentinelOneV1Enabled,
-      responseActionsCrowdstrikeManualHostIsolationEnabled,
-      endpointPrivileges,
-      isEnterpriseLicense,
-      consoleManager,
-    ]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager]
   );
 };

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  FieldHook,
+  ValidationError,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, map } from 'lodash';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -22,7 +25,7 @@ export const ResponseActionFormField = React.memo(({ field }: { field: FieldHook
   );
 
   const handleError = useCallback(
-    (newErrors) => {
+    (newErrors: ValidationError) => {
       if (isEmpty(newErrors)) {
         clearErrors();
       } else {

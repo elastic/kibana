@@ -2,32 +2,16 @@
   "id": "@kbn/content-management-user-profiles",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.ManagedAvatarTip",
+        "id": "def-public.ManagedAvatarTip",
         "type": "Function",
         "tags": [],
         "label": "ManagedAvatarTip",
         "description": [],
         "signature": [
-          "({\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}: { entityName?: string | undefined; }) => JSX.Element"
+          "({\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}: { entityName?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
         "deprecated": false,
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.ManagedAvatarTip.$1",
+            "id": "def-public.ManagedAvatarTip.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}",
@@ -46,7 +30,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.ManagedAvatarTip.$1.entityName",
+                "id": "def-public.ManagedAvatarTip.$1.entityName",
                 "type": "string",
                 "tags": [],
                 "label": "entityName",
@@ -66,7 +50,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.NoCreatorTip",
+        "id": "def-public.NoCreatorTip",
         "type": "Function",
         "tags": [],
         "label": "NoCreatorTip",
@@ -74,7 +58,7 @@
         "signature": [
           "(props: { iconType?: ",
           "IconType",
-          " | undefined; }) => JSX.Element"
+          " | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
@@ -82,7 +66,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.NoCreatorTip.$1",
+            "id": "def-public.NoCreatorTip.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -93,7 +77,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.NoCreatorTip.$1.iconType",
+                "id": "def-public.NoCreatorTip.$1.iconType",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "iconType",
@@ -114,13 +98,13 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.NoUpdaterTip",
+        "id": "def-public.NoUpdaterTip",
         "type": "Function",
         "tags": [],
         "label": "NoUpdaterTip",
         "description": [],
         "signature": [
-          "(props: { iconType?: string | undefined; }) => JSX.Element"
+          "(props: { iconType?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
@@ -128,7 +112,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.NoUpdaterTip.$1",
+            "id": "def-public.NoUpdaterTip.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -139,7 +123,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.NoUpdaterTip.$1.iconType",
+                "id": "def-public.NoUpdaterTip.$1.iconType",
                 "type": "string",
                 "tags": [],
                 "label": "iconType",
@@ -159,13 +143,13 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.UserAvatarTip",
+        "id": "def-public.UserAvatarTip",
         "type": "Function",
         "tags": [],
         "label": "UserAvatarTip",
         "description": [],
         "signature": [
-          "(props: { uid: string; }) => JSX.Element | null"
+          "(props: { uid: string; }) => React.JSX.Element | null"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
         "deprecated": false,
@@ -173,7 +157,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.UserAvatarTip.$1",
+            "id": "def-public.UserAvatarTip.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -184,7 +168,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.UserAvatarTip.$1.uid",
+                "id": "def-public.UserAvatarTip.$1.uid",
                 "type": "string",
                 "tags": [],
                 "label": "uid",
@@ -201,21 +185,21 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.UserProfilesKibanaProvider",
+        "id": "def-public.UserProfilesKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "UserProfilesKibanaProvider",
         "description": [],
         "signature": [
-          "({ children, core, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, core, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-user-profiles",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementUserProfilesPluginApi",
-            "section": "def-common.UserProfilesKibanaDependencies",
+            "section": "def-public.UserProfilesKibanaDependencies",
             "text": "UserProfilesKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
@@ -223,21 +207,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.UserProfilesKibanaProvider.$1",
+            "id": "def-public.UserProfilesKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  core,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-user-profiles",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementUserProfilesPluginApi",
-                "section": "def-common.UserProfilesKibanaDependencies",
+                "section": "def-public.UserProfilesKibanaDependencies",
                 "text": "UserProfilesKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
@@ -250,21 +234,21 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.UserProfilesProvider",
+        "id": "def-public.UserProfilesProvider",
         "type": "Function",
         "tags": [],
         "label": "UserProfilesProvider",
         "description": [],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-user-profiles",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementUserProfilesPluginApi",
-            "section": "def-common.UserProfilesServices",
+            "section": "def-public.UserProfilesServices",
             "text": "UserProfilesServices"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
@@ -272,21 +256,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.UserProfilesProvider.$1",
+            "id": "def-public.UserProfilesProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-user-profiles",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementUserProfilesPluginApi",
-                "section": "def-common.UserProfilesServices",
+                "section": "def-public.UserProfilesServices",
                 "text": "UserProfilesServices"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
@@ -299,7 +283,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.useUserProfile",
+        "id": "def-public.useUserProfile",
         "type": "Function",
         "tags": [],
         "label": "useUserProfile",
@@ -331,7 +315,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.useUserProfile.$1",
+            "id": "def-public.useUserProfile.$1",
             "type": "string",
             "tags": [],
             "label": "uid",
@@ -350,7 +334,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.useUserProfiles",
+        "id": "def-public.useUserProfiles",
         "type": "Function",
         "tags": [],
         "label": "useUserProfiles",
@@ -382,7 +366,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.useUserProfiles.$1",
+            "id": "def-public.useUserProfiles.$1",
             "type": "Array",
             "tags": [],
             "label": "uids",
@@ -397,7 +381,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.useUserProfiles.$2",
+            "id": "def-public.useUserProfiles.$2",
             "type": "Object",
             "tags": [],
             "label": "opts",
@@ -408,7 +392,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.useUserProfiles.$2.enabled",
+                "id": "def-public.useUserProfiles.$2.enabled",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "enabled",
@@ -428,7 +412,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.useUserProfilesServices",
+        "id": "def-public.useUserProfilesServices",
         "type": "Function",
         "tags": [],
         "label": "useUserProfilesServices",
@@ -437,9 +421,9 @@
           "() => ",
           {
             "pluginId": "@kbn/content-management-user-profiles",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementUserProfilesPluginApi",
-            "section": "def-common.UserProfilesServices",
+            "section": "def-public.UserProfilesServices",
             "text": "UserProfilesServices"
           }
         ],
@@ -454,7 +438,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.UserProfilesKibanaDependencies",
+        "id": "def-public.UserProfilesKibanaDependencies",
         "type": "Interface",
         "tags": [],
         "label": "UserProfilesKibanaDependencies",
@@ -465,7 +449,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.UserProfilesKibanaDependencies.core",
+            "id": "def-public.UserProfilesKibanaDependencies.core",
             "type": "Object",
             "tags": [],
             "label": "core",
@@ -482,9 +466,9 @@
               ">(params: ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileBulkGetParams",
+                "section": "def-public.UserProfileBulkGetParams",
                 "text": "UserProfileBulkGetParams"
               },
               ") => Promise<",
@@ -506,7 +490,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
-        "id": "def-common.UserProfilesServices",
+        "id": "def-public.UserProfilesServices",
         "type": "Interface",
         "tags": [],
         "label": "UserProfilesServices",
@@ -517,7 +501,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.UserProfilesServices.bulkGetUserProfiles",
+            "id": "def-public.UserProfilesServices.bulkGetUserProfiles",
             "type": "Function",
             "tags": [],
             "label": "bulkGetUserProfiles",
@@ -547,7 +531,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.UserProfilesServices.bulkGetUserProfiles.$1",
+                "id": "def-public.UserProfilesServices.bulkGetUserProfiles.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "uids",
@@ -565,7 +549,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-user-profiles",
-            "id": "def-common.UserProfilesServices.getUserProfile",
+            "id": "def-public.UserProfilesServices.getUserProfile",
             "type": "Function",
             "tags": [],
             "label": "getUserProfile",
@@ -595,7 +579,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-user-profiles",
-                "id": "def-common.UserProfilesServices.getUserProfile.$1",
+                "id": "def-public.UserProfilesServices.getUserProfile.$1",
                 "type": "string",
                 "tags": [],
                 "label": "uid",
@@ -615,6 +599,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

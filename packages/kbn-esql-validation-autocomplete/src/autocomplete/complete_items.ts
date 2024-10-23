@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRawDefinition } from './types';
+import type { ItemKind, SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
 import { getAllCommands } from '../shared/helpers';
 import {
@@ -16,6 +17,8 @@ import {
   TRIGGER_SUGGESTION_COMMAND,
   buildConstantsDefinitions,
 } from './factories';
+import { FunctionParameterType, FunctionReturnType } from '../definitions/types';
+import { getTestFunctions } from '../shared/test_functions';
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
@@ -54,14 +57,14 @@ export const getNextTokenForNot = (
 export const getBuiltinCompatibleFunctionDefinition = (
   command: string,
   option: string | undefined,
-  argType: string,
-  returnTypes?: string[],
-  { skipAssign }: { skipAssign?: boolean } = {}
+  argType: FunctionParameterType,
+  returnTypes?: FunctionReturnType[],
+  { skipAssign, commandsToInclude }: { skipAssign?: boolean; commandsToInclude?: string[] } = {}
 ): SuggestionRawDefinition[] => {
-  const compatibleFunctions = builtinFunctions.filter(
+  const compatibleFunctions = [...builtinFunctions, ...getTestFunctions()].filter(
     ({ name, supportedCommands, supportedOptions, signatures, ignoreAsSuggestion }) =>
+      (command === 'where' && commandsToInclude ? commandsToInclude.indexOf(name) > -1 : true) &&
       !ignoreAsSuggestion &&
-      !/not_/.test(name) &&
       (!skipAssign || name !== '=') &&
       (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
       signatures.some(
@@ -75,15 +78,18 @@ export const getBuiltinCompatibleFunctionDefinition = (
   return compatibleFunctions
     .filter((mathDefinition) =>
       mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+        (signature) =>
+          returnTypes[0] === 'unknown' ||
+          returnTypes[0] === 'any' ||
+          returnTypes.includes(signature.returnType)
       )
     )
     .map(getSuggestionBuiltinDefinition);
 };
 
-export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands().map(
-  getSuggestionCommandDefinition
-);
+export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands()
+  .filter(({ hidden }) => !hidden)
+  .map(getSuggestionCommandDefinition);
 
 function buildCharCompleteItem(
   label: string,
@@ -98,13 +104,16 @@ function buildCharCompleteItem(
     sortText,
   };
 }
-export const pipeCompleteItem = buildCharCompleteItem(
-  '|',
-  i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
+export const pipeCompleteItem: SuggestionRawDefinition = {
+  label: '|',
+  text: '| ',
+  kind: 'Keyword',
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
   }),
-  { sortText: 'C', quoted: false }
-);
+  sortText: 'C',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
 
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
@@ -139,4 +148,16 @@ export const listCompleteItem: SuggestionRawDefinition = {
   }),
   sortText: 'A',
   command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const allStarConstant: SuggestionRawDefinition = {
+  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  text: '*',
+  kind: 'Constant' as ItemKind,
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  sortText: '1',
 };

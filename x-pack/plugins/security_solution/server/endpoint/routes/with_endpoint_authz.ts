@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandler, Logger } from '@kbn/core/server';
+import type { RequestHandler, KibanaRequest, Logger } from '@kbn/core/server';
+import { errorHandler } from './error_handler';
 import { stringify } from '../utils/stringify';
 import type { EndpointAuthzKeyList } from '../../../common/endpoint/types/authz';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -29,11 +30,16 @@ export interface EndpointApiNeededAuthz {
  * @param neededAuthz
  * @param routeHandler
  * @param logger
+ * @param additionalChecks
  */
 export const withEndpointAuthz = <T>(
   neededAuthz: EndpointApiNeededAuthz,
   logger: Logger,
-  routeHandler: T
+  routeHandler: T,
+  additionalChecks?: (
+    context: SecuritySolutionRequestHandlerContext,
+    request: KibanaRequest
+  ) => void | Promise<void>
 ): T => {
   const needAll: EndpointAuthzKeyList = neededAuthz.all ?? [];
   const needAny: EndpointAuthzKeyList = neededAuthz.any ?? [];
@@ -101,6 +107,16 @@ export const withEndpointAuthz = <T>(
         return response.forbidden({
           body: new EndpointAuthorizationError({ need_any: [...needAny] }),
         });
+      }
+    }
+
+    if (additionalChecks) {
+      try {
+        await additionalChecks(context, request);
+      } catch (err) {
+        logger.debug(() => stringify(err));
+
+        return errorHandler(logger, response, err);
       }
     }
 

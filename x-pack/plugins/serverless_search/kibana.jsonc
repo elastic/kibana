@@ -7,11 +7,7 @@
     "id": "serverlessSearch",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "serverless",
-      "search"
-    ],
+    "configPath": ["xpack", "serverless", "search"],
     "requiredPlugins": [
       "cloud",
       "console",
@@ -20,6 +16,7 @@
       "devTools",
       "discover",
       "management",
+      "searchIndices",
       "searchprofiler",
       "security",
       "serverless",
@@ -29,12 +26,9 @@
     "optionalPlugins": [
       "indexManagement",
       "searchConnectors",
-      "searchHomepage",
       "searchInferenceEndpoints",
       "usageCollection"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaReact"]
   }
 }

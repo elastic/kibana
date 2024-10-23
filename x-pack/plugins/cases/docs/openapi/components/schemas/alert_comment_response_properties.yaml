@@ -7,13 +7,11 @@ properties:
     type: array
     items:
       type: string
-      examples:
-        - a6e12ac4-7bce-457b-84f6-d7ce8deb8446
+      example: a6e12ac4-7bce-457b-84f6-d7ce8deb8446
   created_at:
     type: string
     format: date-time
-    examples:
-      - 2023-11-06T19:29:38.424Z
+    example: 2023-11-06T19:29:38.424Z
   created_by:
     type: object
     required:
@@ -24,52 +22,44 @@ properties:
       $ref: 'user_properties.yaml'
   id:
     type: string
-    examples:
-      - 73362370-ab1a-11ec-985f-97e55adae8b9
+    example: 73362370-ab1a-11ec-985f-97e55adae8b9
   index:
     type: array
     items:
       type: string
-      examples:
-        - .internal.alerts-security.alerts-default-000001
+      example: .internal.alerts-security.alerts-default-000001
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   pushed_at:
-    type:
-      - "string"
-      - "null"
+    type: string
     format: date-time
-    examples:
-      - null
+    example: null
+    nullable: true
   pushed_by:
-    type:
-      - "object"
-      - "null"
+    type: object
     required:
       - email
       - full_name
       - username
     properties:
       $ref: 'user_properties.yaml'
+    nullable: true
   rule:
     type: object
     properties:
       $ref: 'rule_properties.yaml'
   type:
     type: string
-    examples:
-      - alert
+    example: alert
     enum:
       - alert
   updated_at:
-    type:
-      - "string"
-      - "null"
+    type: string
     format: date-time
+    nullable: true
   updated_by:
-    type:
-      - "object"
-      - "null"
+    type: object
+    nullable: true
     required:
       - email
       - full_name
@@ -78,5 +68,4 @@ properties:
       $ref: 'user_properties.yaml'
   version:
     type: string
-    examples:
-      - WzMwNDgsMV0=
+    example: WzMwNDgsMV0=

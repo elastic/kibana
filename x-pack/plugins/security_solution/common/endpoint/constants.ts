@@ -60,11 +60,16 @@ export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Location from where all Endpoint related APIs are mounted
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
+export const BASE_INTERNAL_ENDPOINT_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}`;
 
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
+
+/** @deprecated public route, use {@link METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE} internal route  */
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
+
+export const METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
@@ -72,7 +77,9 @@ export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_updates_note/{package_policy_id}`;
 
 /** Suggestions routes */
+/** @deprecated public route, use {@link SUGGESTIONS_INTERNAL_ROUTE} internal route  */
 export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
+export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
 
 /**
  * Action Response Routes
@@ -124,3 +131,7 @@ export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
 
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
+
+/** The list of OS types that support. Value usually found in ECS `host.os.type` */
+export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
+export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];

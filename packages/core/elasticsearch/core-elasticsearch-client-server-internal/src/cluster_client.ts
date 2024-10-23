@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Client } from '@elastic/elasticsearch';
@@ -163,9 +164,10 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
-    const headerSource = isRealRequest(request)
-      ? this.authHeaders?.get(request) ?? {}
-      : request.headers;
+    const headerSource =
+      isRealRequest(request) && !request.isFakeRequest
+        ? this.authHeaders?.get(request) ?? {}
+        : request.headers;
     const authorizationHeader = Object.entries(headerSource).find(([key, value]) => {
       return key.toLowerCase() === AUTHORIZATION_HEADER && value !== undefined;
     });

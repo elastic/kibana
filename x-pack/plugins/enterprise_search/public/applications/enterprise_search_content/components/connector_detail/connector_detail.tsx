@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
+
+import type { EuiTabProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -119,7 +121,7 @@ export const ConnectorDetail: React.FC = () => {
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
         {
-          defaultMessage: 'Index mappings',
+          defaultMessage: 'Mappings',
         }
       ),
       onClick: () =>
@@ -236,7 +238,7 @@ export const ConnectorDetail: React.FC = () => {
     ...CONFIG_TAB,
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -251,7 +253,7 @@ export const ConnectorDetail: React.FC = () => {
           wrap: false,
         },
         rightSideItems: getHeaderActions(index, connector),
-        tabs,
+        tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
       }}
     >
       {selectedTab?.content || null}

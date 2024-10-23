@@ -24,7 +24,7 @@ import {
   ServiceLocation,
   ServiceLocationErrors,
 } from '../../common/runtime_types';
-import { ServiceConfig } from '../../common/config';
+import { ServiceConfig } from '../config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -143,6 +143,10 @@ export class ServiceAPIClient {
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
       });
+    } else if (!this.server.isDev) {
+      this.logger.warn(
+        'TLS certificate and key are not provided. Falling back to default HTTPS agent.'
+      );
     }
 
     return baseHttpsAgent;

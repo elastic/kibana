@@ -71,6 +71,7 @@ export const CurationSuggestionLogic = kea<
     suggestion: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSuggestionLoaded: (_, { suggestion }) => suggestion,
       },
     ],
@@ -281,7 +282,7 @@ const updateSuggestion = async (
     }
   );
 
-  if (response.results[0].hasOwnProperty('error')) {
+  if (Object.hasOwn(response.results[0], 'error')) {
     throw new Error((response.results[0] as APIResponseError).error);
   }
 

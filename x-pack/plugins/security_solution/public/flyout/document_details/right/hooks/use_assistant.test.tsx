@@ -33,6 +33,7 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -51,6 +52,7 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -69,6 +71,7 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -81,7 +84,11 @@ describe('useAssistant', () => {
 
     expect(await getPromptContext()).toEqual({
       '@timestamp': ['2023-01-01T01:01:01.000Z'],
+      _id: ['_id'],
+      _index: ['index'],
+      'agent.id': ['agent.id'],
       'event.category': ['registry'],
+      'host.name': ['host-name'],
       'kibana.alert.ancestors.id': ['ancestors-id'],
       'kibana.alert.rule.description': ['rule-description'],
       'kibana.alert.rule.indices': ['rule-indices'],
@@ -89,8 +96,10 @@ describe('useAssistant', () => {
       'kibana.alert.rule.parameters.index': ['rule-parameters-index'],
       'kibana.alert.rule.type': ['query'],
       'kibana.alert.rule.uuid': ['rule-uuid'],
+      'kibana.alert.url': ['alert-url'],
       'kibana.alert.workflow_status': ['open'],
       'process.entity_id': ['process-entity_id'],
+      'user.name': ['user-name'],
     });
   });
 });

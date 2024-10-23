@@ -12,17 +12,17 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import {
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformPromptsBulkActionRequestBody,
+  PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 export const bulkUpdatePrompts = async (
   http: HttpSetup,
-  prompts: PerformBulkActionRequestBody,
+  prompts: PerformPromptsBulkActionRequestBody,
   toasts?: IToasts
 ) => {
   try {
-    const result = await http.fetch<PerformBulkActionResponse>(
+    const result = await http.fetch<PerformPromptsBulkActionResponse>(
       ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
       {
         method: 'POST',

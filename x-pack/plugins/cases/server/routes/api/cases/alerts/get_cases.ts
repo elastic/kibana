@@ -22,6 +22,7 @@ export const getCasesByAlertIdRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Get cases for an alert`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

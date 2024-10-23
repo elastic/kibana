@@ -22,7 +22,7 @@ type SectionProps = LayoutProps & {
   sectionLabel: string;
 };
 
-export const Section: FunctionComponent<SectionProps> = ({
+export const Section: FunctionComponent<React.PropsWithChildren<SectionProps>> = ({
   children,
   metrics,
   navLabel,

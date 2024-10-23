@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
         expect(await menuEntries[0].getVisibleText()).to.be('synth');
-        menuEntries[0].click();
+        await menuEntries[0].click();
       });
 
       // Assert selection is loaded correctly

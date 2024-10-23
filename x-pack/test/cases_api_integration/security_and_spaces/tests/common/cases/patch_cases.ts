@@ -799,7 +799,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 connector: {
                   id: 'jira',
                   name: 'Jira',
-                  // @ts-expect-error
                   type: ConnectorTypes.jira,
                   // @ts-expect-error
                   fields: { unsupported: 'value' },
@@ -849,7 +848,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('title', async () => {
+      describe('title', () => {
         it('400s if the title is too long', async () => {
           const longTitle = 'a'.repeat(161);
 
@@ -904,7 +903,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('description', async () => {
+      describe('description', () => {
         it('400s if the description is too long', async () => {
           const longDescription = 'a'.repeat(30001);
 
@@ -959,7 +958,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('categories', async () => {
+      describe('categories', () => {
         it('400s when a too long category value is passed', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
           await updateCase({
@@ -1012,7 +1011,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('tags', async () => {
+      describe('tags', () => {
         it('400s when tags array is too long', async () => {
           const tags = Array(201).fill('foo');
 
@@ -1086,7 +1085,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('customFields', async () => {
+      describe('customFields', () => {
         it('patches a case with missing required custom fields to their default values', async () => {
           await createConfiguration(
             supertest,
@@ -1450,7 +1449,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      describe('esArchiver', () => {
+      describe('Update', () => {
         const defaultSignalsIndex = '.siem-signals-default-000001';
 
         beforeEach(async () => {
@@ -1584,7 +1583,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('esArchiver', () => {
+      describe('No update', () => {
         const defaultSignalsIndex = '.siem-signals-default-000001';
 
         beforeEach(async () => {

@@ -6,23 +6,27 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import { applyRulePatch } from '../mergers/apply_rule_patch';
+import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { ClientError, validateMlAuth } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
 export const upgradePrebuiltRule = async ({
+  actionsClient,
   rulesClient,
   ruleAsset,
   mlAuthz,
   prebuiltRuleAssetClient,
 }: {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
@@ -46,6 +50,7 @@ export const upgradePrebuiltRule = async ({
     await rulesClient.delete({ id: existingRule.id });
 
     const createdRule = await createRule({
+      actionsClient,
       rulesClient,
       mlAuthz,
       rule: {
@@ -63,17 +68,17 @@ export const upgradePrebuiltRule = async ({
     return createdRule;
   }
 
-  // Else, simply patch it.
-  const patchedRule = await applyRulePatch({
+  // Else, recreate the rule from scratch with the passed payload.
+  const updatedRule = await applyRuleUpdate({
     prebuiltRuleAssetClient,
     existingRule,
-    rulePatch: ruleAsset,
+    ruleUpdate: ruleAsset,
   });
 
-  const patchedInternalRule = await rulesClient.update({
+  const updatedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(patchedRule),
+    data: convertRuleResponseToAlertingRule(updatedRule, actionsClient),
   });
 
-  return convertAlertingRuleToRuleResponse(patchedInternalRule);
+  return convertAlertingRuleToRuleResponse(updatedInternalRule);
 };

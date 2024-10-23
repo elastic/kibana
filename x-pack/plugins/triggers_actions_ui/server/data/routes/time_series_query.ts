@@ -31,6 +31,9 @@ export function createTimeSeriesQueryRoute(
       validate: {
         body: TimeSeriesQuerySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );

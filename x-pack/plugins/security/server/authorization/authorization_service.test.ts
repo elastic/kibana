@@ -19,6 +19,7 @@ import { Subject } from 'rxjs';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { privilegesFactory } from '@kbn/security-authorization-core';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { AuthorizationService } from './authorization_service';
@@ -26,7 +27,6 @@ import { checkPrivilegesFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
-import { privilegesFactory } from './privileges';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 

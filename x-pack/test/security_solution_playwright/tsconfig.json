@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "outDir": "target/types"
+  },
+  "include": ["index.d.ts"],
+  "kbn_references": [
+    {
+      "path": "../../plugins/security_solution/tsconfig.json",
+      "force": true
+    },
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

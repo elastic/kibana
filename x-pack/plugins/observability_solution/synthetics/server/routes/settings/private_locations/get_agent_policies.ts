@@ -15,11 +15,17 @@ export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.AGENT_POLICIES,
   validate: {},
   handler: async ({ server }): Promise<AgentPolicyInfo[]> => {
-    return getAgentPoliciesAsInternalUser(server);
+    return getAgentPoliciesAsInternalUser({ server, withAgentCount: true });
   },
 });
 
-export const getAgentPoliciesAsInternalUser = async (server: SyntheticsServerSetup) => {
+export const getAgentPoliciesAsInternalUser = async ({
+  server,
+  withAgentCount = false,
+}: {
+  server: SyntheticsServerSetup;
+  withAgentCount?: boolean;
+}) => {
   const soClient = server.coreStart.savedObjects.createInternalRepository();
   const esClient = server.coreStart.elasticsearch.client.asInternalUser;
 
@@ -30,7 +36,7 @@ export const getAgentPoliciesAsInternalUser = async (server: SyntheticsServerSet
     sortOrder: 'asc',
     kuery: 'ingest-agent-policies.is_managed : false',
     esClient,
-    withAgentCount: true,
+    withAgentCount,
   });
 
   return agentPolicies.items.map((agentPolicy) => ({
@@ -41,22 +47,4 @@ export const getAgentPoliciesAsInternalUser = async (server: SyntheticsServerSet
     description: agentPolicy.description,
     namespace: agentPolicy.namespace,
   }));
-};
-
-export const getAgentPolicyAsInternalUser = async (server: SyntheticsServerSetup, id: string) => {
-  const soClient = server.coreStart.savedObjects.createInternalRepository();
-
-  const agentPolicy = await server.fleet?.agentPolicyService.get(soClient, id);
-  if (!agentPolicy) {
-    return null;
-  }
-
-  return {
-    id: agentPolicy.id,
-    name: agentPolicy.name,
-    agents: agentPolicy.agents ?? 0,
-    status: agentPolicy.status,
-    description: agentPolicy.description,
-    namespace: agentPolicy.namespace,
-  };
 };

@@ -20,7 +20,7 @@ import type {
 } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../types';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { appContextService } from './app_context';
 
@@ -67,7 +67,7 @@ const mockDefaultDownloadService: DownloadSource = {
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
-    if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
+    if (type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
       const id = search!.replace(/"/g, '');
       const attributes = mockConfiguredPolicies.get(id);
       if (attributes) {
@@ -309,6 +309,7 @@ jest.mock('./app_context', () => ({
     getExperimentalFeatures: jest.fn().mockReturnValue({
       agentless: false,
     }),
+    getConfig: jest.fn(),
     getInternalUserSOClientForSpaceId: jest.fn(),
   },
 }));
@@ -898,116 +899,6 @@ describe('policy preconfiguration', () => {
         )
       ).rejects.toThrow(
         '[Test policy] could not be added. [test_package] is not installed, add [test_package] to [xpack.fleet.packages] or remove it from [Test package].'
-      );
-    });
-
-    it('should return a non fatal error if support_agentless is defined in stateful', async () => {
-      const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
-      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-        agentless: true,
-      } as any);
-
-      jest
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: false } as any);
-
-      const policies: PreconfiguredAgentPolicy[] = [
-        {
-          name: 'Test policy',
-          namespace: 'default',
-          id: 'test-id',
-          supports_agentless: true,
-          package_policies: [],
-        },
-      ];
-
-      const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-        soClient,
-        esClient,
-        policies,
-        [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
-        mockDefaultOutput,
-        mockDefaultDownloadService,
-        DEFAULT_SPACE_ID
-      );
-      // @ts-ignore-next-line
-      expect(nonFatalErrors[0].error.toString()).toEqual(
-        'FleetError: `supports_agentless` is only allowed in serverless environments that support the agentless feature'
-      );
-    });
-
-    it('should not return an error if support_agentless is defined in serverless and agentless is enabled', async () => {
-      const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
-      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-        agentless: true,
-      } as any);
-
-      jest
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
-
-      const policies: PreconfiguredAgentPolicy[] = [
-        {
-          name: 'Test policy',
-          namespace: 'default',
-          id: 'test-id',
-          supports_agentless: true,
-          package_policies: [],
-        },
-      ];
-
-      const { policies: resPolicies, nonFatalErrors } =
-        await ensurePreconfiguredPackagesAndPolicies(
-          soClient,
-          esClient,
-          policies,
-          [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
-          mockDefaultOutput,
-          mockDefaultDownloadService,
-          DEFAULT_SPACE_ID
-        );
-      expect(nonFatalErrors.length).toBe(0);
-      expect(resPolicies[0].id).toEqual('test-id');
-    });
-
-    it('should return an error if agentless feature flag is disabled on serverless', async () => {
-      const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
-      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-        agentless: false,
-      } as any);
-
-      jest
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
-
-      const policies: PreconfiguredAgentPolicy[] = [
-        {
-          name: 'Test policy',
-          namespace: 'default',
-          id: 'test-id',
-          supports_agentless: true,
-          package_policies: [],
-        },
-      ];
-
-      const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-        soClient,
-        esClient,
-        policies,
-        [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
-        mockDefaultOutput,
-        mockDefaultDownloadService,
-        DEFAULT_SPACE_ID
-      );
-      // @ts-ignore-next-line
-      expect(nonFatalErrors[0].error.toString()).toEqual(
-        'FleetError: `supports_agentless` is only allowed in serverless environments that support the agentless feature'
       );
     });
 

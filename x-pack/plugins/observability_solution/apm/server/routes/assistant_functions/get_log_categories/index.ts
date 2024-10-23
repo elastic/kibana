@@ -7,13 +7,16 @@
 
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreRequestHandlerContext } from '@kbn/core/server';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { maybe } from '../../../../common/utils/maybe';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { flattenObject, KeyValuePair } from '../../../../common/utils/flatten_object';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
+import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
 export interface LogCategory {
   errorCategory: string;
@@ -25,12 +28,12 @@ export interface LogCategory {
 export async function getLogCategories({
   apmEventClient,
   esClient,
-  coreContext,
+  logSourcesService,
   arguments: args,
 }: {
   apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
   arguments: {
     start: string;
     end: string;
@@ -52,7 +55,7 @@ export async function getLogCategories({
     Object.entries(args.entities).map(([key, value]) => ({ field: key, value }))
   );
 
-  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const index = await logSourcesService.getFlattenedLogSources();
   const search = getTypedSearch(esClient);
 
   const query = {
@@ -86,6 +89,7 @@ export async function getLogCategories({
   const rawSamplingProbability = Math.min(100_000 / totalDocCount, 1);
   const samplingProbability = rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
 
+  const fields = asMutableArray(['message', TRACE_ID] as const);
   const categorizedLogsRes = await search({
     index,
     size: 1,
@@ -101,14 +105,14 @@ export async function getLogCategories({
           categories: {
             categorize_text: {
               field: 'message',
-              size: 500,
+              size: 10,
             },
             aggs: {
               sample: {
                 top_hits: {
                   sort: { '@timestamp': 'desc' as const },
                   size: 1,
-                  _source: ['message', TRACE_ID],
+                  fields,
                 },
               },
             },
@@ -120,9 +124,11 @@ export async function getLogCategories({
 
   const promises = categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
     async ({ doc_count: docCount, key, sample }) => {
-      const hit = sample.hits.hits[0]._source as { message: string; trace?: { id: string } };
-      const sampleMessage = hit?.message;
-      const sampleTraceId = hit?.trace?.id;
+      const hit = sample.hits.hits[0];
+      const event = unflattenKnownApmEventFields(hit?.fields);
+
+      const sampleMessage = event.message as string;
+      const sampleTraceId = event.trace?.id;
       const errorCategory = key as string;
 
       if (!sampleTraceId) {
@@ -140,44 +146,12 @@ export async function getLogCategories({
     }
   );
 
-  const sampleDoc = categorizedLogsRes.hits.hits?.[0]?._source as Record<string, string>;
+  const event = unflattenKnownApmEventFields(maybe(categorizedLogsRes.hits.hits[0])?.fields);
+
+  const sampleDoc = event as Record<string, string>;
 
   return {
     logCategories: await Promise.all(promises ?? []),
     entities: flattenObject(sampleDoc),
   };
-}
-
-// field/value pairs should match, or the field should not exist
-export function getShouldMatchOrNotExistFilter(
-  keyValuePairs: Array<{
-    field: string;
-    value?: string;
-  }>
-) {
-  return keyValuePairs
-    .filter(({ value }) => value)
-    .map(({ field, value }) => {
-      return {
-        bool: {
-          should: [
-            {
-              bool: {
-                filter: [{ term: { [field]: value } }],
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    filter: [{ exists: { field } }],
-                  },
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      };
-    });
 }

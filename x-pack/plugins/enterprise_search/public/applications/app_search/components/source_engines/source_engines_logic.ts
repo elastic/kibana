@@ -88,6 +88,7 @@ export const SourceEnginesLogic = kea<
     indexedEngines: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setIndexedEngines: (_, { indexedEngines }) => indexedEngines,
       },
     ],
@@ -95,18 +96,23 @@ export const SourceEnginesLogic = kea<
       [],
       {
         closeModal: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onAddEnginesSelection: (_, { selectedEngineNamesToAdd }) => selectedEngineNamesToAdd,
       },
     ],
     sourceEngines: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSourceEnginesAdd: (sourceEngines, { sourceEnginesToAdd }) => [
           ...sourceEngines,
           ...sourceEnginesToAdd,
         ],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSourceEnginesFetch: (_, { sourceEngines }) => sourceEngines,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSourceEngineRemove: (sourceEngines, { sourceEngineNameToRemove }) =>
+          // @ts-expect-error upgrade typescript v5.1.6
           sourceEngines.filter((sourceEngine) => sourceEngine.name !== sourceEngineNameToRemove),
       },
     ],

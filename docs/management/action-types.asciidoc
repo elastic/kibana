@@ -28,6 +28,10 @@ a| <<gemini-action-type,{gemini}>>
 
 | Send a request to {gemini}.
 
+a| <<inference-action-type,{inference}>>
+
+| Send a request to {inference}.
+
 a| <<email-action-type,Email>>
 
 | Send email from your server.
@@ -91,6 +95,10 @@ a| <<slack-action-type,Slack>>
 a| <<swimlane-action-type,{swimlane}>>
 
 | Create an incident in {swimlane}.
+
+a| <<thehive-action-type,{hive}>>
+
+| Create cases and alerts in {hive}.
 
 a| <<tines-action-type,Tines>>
 

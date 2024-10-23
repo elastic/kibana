@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
+import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { WithMetricsExplorerOptionsUrlState } from '../../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
@@ -16,7 +18,6 @@ import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
-import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';
@@ -93,7 +94,8 @@ const MetricsExplorerContent = () => {
   };
 
   return (
-    <MetricsPageTemplate
+    <InfraPageTemplate
+      onboardingFlow={OnboardingFlow.Infra}
       pageHeader={{
         pageTitle: metricsExplorerTitle,
         rightSideItems: [
@@ -143,6 +145,6 @@ const MetricsExplorerContent = () => {
           onTimeChange={handleTimeChange}
         />
       )}
-    </MetricsPageTemplate>
+    </InfraPageTemplate>
   );
 };

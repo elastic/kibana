@@ -14,12 +14,14 @@ import { TlsTranslations } from '../../../../../common/rules/synthetics/translat
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
 import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
-import { AlertTypeInitializer } from '.';
+
+import type { AlertTypeInitializer } from './types';
 
 let validateFunc: (ruleParams: any) => ValidationResult;
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
+
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
   plugins,

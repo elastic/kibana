@@ -34,7 +34,9 @@
       "unifiedSearch",
       "usageCollection",
       "visTypeTimeseries",
-      "apmDataAccess"
+      "apmDataAccess",
+      "logsDataAccess",
+      "entityManager"
     ],
     "optionalPlugins": [
       "spaces",

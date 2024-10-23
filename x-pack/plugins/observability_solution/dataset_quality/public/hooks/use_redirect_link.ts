@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { map } from 'rxjs';
 import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { AppStatus } from '@kbn/core-application-browser';
 import {
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
   SINGLE_DATASET_LOCATOR_ID,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
@@ -16,50 +20,51 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
-import { useSelector } from '@xstate/react';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { TimeRangeConfig } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
-import { BasicDataStream } from '../../common/types';
-import { useRedirectLinkTelemetry } from './use_telemetry';
+import { BasicDataStream, TimeRangeConfig } from '../../common/types';
+import { SendTelemetryFn } from './use_redirect_link_telemetry';
 
 export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,
   query,
   timeRangeConfig,
   breakdownField,
-  telemetry,
+  sendTelemetry,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
-  timeRangeConfig?: TimeRangeConfig;
+  timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
-  telemetry?: Parameters<typeof useRedirectLinkTelemetry>[0]['telemetry'];
+  sendTelemetry: SendTelemetryFn;
 }) => {
   const {
-    services: { share },
+    services: { share, application },
   } = useKibanaContextForPlugin();
 
-  const { service } = useDatasetQualityContext();
-  const { timeRange } = useSelector(service, (state) => state.context.filters);
-  const { from, to } = timeRangeConfig || timeRange;
+  const { from, to } = timeRangeConfig;
 
   const logsExplorerLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
-  const { sendTelemetry } = useRedirectLinkTelemetry({
-    rawName: dataStreamStat.rawName,
-    isLogsExplorer: !!logsExplorerLocator,
-    telemetry,
-    query,
-  });
+  const isLogsExplorerAppAccessible = useObservable(
+    application.applications$.pipe(
+      map(
+        (apps) =>
+          (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+          AppStatus.accessible
+      )
+    ),
+    false
+  );
 
   return useMemo<{
     linkProps: RouterLinkProps;
     navigate: () => void;
     isLogsExplorerAvailable: boolean;
   }>(() => {
-    const config = logsExplorerLocator
+    const isLogsExplorerAvailable =
+      isLogsExplorerAppAccessible && !!logsExplorerLocator && dataStreamStat.type === 'logs';
+    const config = isLogsExplorerAvailable
       ? buildLogsExplorerConfig({
           locator: logsExplorerLocator,
           dataStreamStat,
@@ -95,7 +100,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
         onClick: onClickWithTelemetry,
       },
       navigate: navigateWithTelemetry,
-      isLogsExplorerAvailable: !!logsExplorerLocator,
+      isLogsExplorerAvailable,
     };
   }, [
     breakdownField,
@@ -106,6 +111,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
     query,
     sendTelemetry,
     share.url.locators,
+    isLogsExplorerAppAccessible,
   ]);
 };
 
@@ -193,11 +199,12 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
     dataViewId,
     dataViewSpec: {
       id: dataViewId,
-      title: dataViewTitle,
+      title: dataViewId,
+      timeFieldName: '@timestamp',
     },
     query,
     breakdownField,
-    columns: ['@timestamp', 'message'],
+    columns: [],
     filters: [
       buildPhraseFilter(
         {

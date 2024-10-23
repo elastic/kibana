@@ -193,7 +193,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
     });
 
-    describe('8.8.0', async () => {
+    describe('8.8.0', () => {
       it('adds UUIDs to all alerts', async () => {
         const response = await es.search<{ task: SerializedConcreteTaskInstance }>(
           {

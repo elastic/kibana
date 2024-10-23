@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -17,7 +18,7 @@ const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
   supertest: SuperTestAgent,
-  supertestWithoutAuth: any
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
   describe(describeType, () => {
     afterEach(async () => {
@@ -206,12 +207,14 @@ const findTestUtils = (
                 expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
 
                 const secondResponse = await supertestWithoutAuth
-                  .get(
-                    `${getUrlPrefix(space.id)}/${
-                      describeType === 'public' ? 'api' : 'internal'
-                    }/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
-                  )
-                  .auth(user.username, user.password);
+                  .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+                  .set('kbn-xsrf', 'kibana')
+                  .auth(user.username, user.password)
+                  .send({
+                    per_page: perPage,
+                    sort_field: 'createdAt',
+                    page: 2,
+                  });
 
                 expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
               }

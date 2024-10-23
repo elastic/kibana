@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-http-resources-server-internal",
-        "id": "def-common.HttpResourcesService",
+        "id": "def-server.HttpResourcesService",
         "type": "Class",
         "tags": [],
         "label": "HttpResourcesService",
@@ -28,9 +20,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-resources-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpResourcesServerInternalPluginApi",
-            "section": "def-common.HttpResourcesService",
+            "section": "def-server.HttpResourcesService",
             "text": "HttpResourcesService"
           },
           " implements ",
@@ -45,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.Unnamed",
+            "id": "def-server.HttpResourcesService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -59,7 +51,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server-internal",
-                "id": "def-common.HttpResourcesService.Unnamed.$1",
+                "id": "def-server.HttpResourcesService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -77,7 +69,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.preboot",
+            "id": "def-server.HttpResourcesService.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -88,25 +80,25 @@
               ") => { createRegistrar: (router: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IRouter",
+                "section": "def-server.IRouter",
                 "text": "IRouter"
               },
               "<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ">) => ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
+                "section": "def-server.HttpResources",
                 "text": "HttpResources"
               },
               "; }"
@@ -117,7 +109,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server-internal",
-                "id": "def-common.HttpResourcesService.preboot.$1",
+                "id": "def-server.HttpResourcesService.preboot.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -135,7 +127,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.setup",
+            "id": "def-server.HttpResourcesService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -146,25 +138,25 @@
               ") => { createRegistrar: (router: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IRouter",
+                "section": "def-server.IRouter",
                 "text": "IRouter"
               },
               "<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ">) => ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
+                "section": "def-server.HttpResources",
                 "text": "HttpResources"
               },
               "; }"
@@ -175,7 +167,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server-internal",
-                "id": "def-common.HttpResourcesService.setup.$1",
+                "id": "def-server.HttpResourcesService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -193,7 +185,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.start",
+            "id": "def-server.HttpResourcesService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -209,7 +201,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.stop",
+            "id": "def-server.HttpResourcesService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -227,6 +219,14 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

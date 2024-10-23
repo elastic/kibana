@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { JSONSchema } from 'json-schema-typed';
@@ -46,6 +47,20 @@ export const MANIFEST_V2: JSONSchema = {
 
         For additional codeowners, the value can be an array of user/team names.
       `,
+    },
+    group: {
+      enum: ['common', 'platform', 'observability', 'security', 'search'],
+      description: desc`
+        Specifies the group to which this module pertains.
+      `,
+      default: 'common',
+    },
+    visibility: {
+      enum: ['private', 'shared'],
+      description: desc`
+        Specifies the visibility of this module, i.e. whether it can be accessed by everybody or only modules in the same group
+      `,
+      default: 'shared',
     },
     devOnly: {
       type: 'boolean',

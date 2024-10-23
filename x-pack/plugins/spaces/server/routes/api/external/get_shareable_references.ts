@@ -12,13 +12,16 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
-  const { router, getStartServices } = deps;
+  const { router, getStartServices, isServerless } = deps;
 
   router.post(
     {
       path: '/api/spaces/_get_shareable_references',
       options: {
-        description: `Get shareable references`,
+        access: isServerless ? 'internal' : 'public',
+        summary: `Get shareable references`,
+        tags: ['oas-tag:spaces'],
+        description: 'Collect references and space contexts for saved objects.',
       },
       validate: {
         body: schema.object({

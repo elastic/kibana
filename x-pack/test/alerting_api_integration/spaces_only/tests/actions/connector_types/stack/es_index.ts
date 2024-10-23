@@ -21,9 +21,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('index connector', () => {
-    beforeEach(() => {
-      esDeleteAllIndices(ES_TEST_INDEX_NAME);
-      esDeleteAllIndices(ES_TEST_DATASTREAM_INDEX_NAME);
+    beforeEach(async () => {
+      await esDeleteAllIndices(ES_TEST_INDEX_NAME);
+      await esDeleteAllIndices(ES_TEST_DATASTREAM_INDEX_NAME);
     });
 
     after(async () => {

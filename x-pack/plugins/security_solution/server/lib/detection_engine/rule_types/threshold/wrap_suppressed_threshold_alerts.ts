@@ -25,7 +25,7 @@ import type {
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import type { ThresholdBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
@@ -53,6 +53,7 @@ export const wrapSuppressedThresholdALerts = ({
   from,
   to,
   threshold,
+  intendedTimestamp,
 }: {
   buckets: ThresholdBucket[];
   spaceId: string;
@@ -69,6 +70,7 @@ export const wrapSuppressedThresholdALerts = ({
   to: Date;
   suppressionWindow: string;
   threshold: ThresholdNormalized;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(
@@ -86,20 +88,22 @@ export const wrapSuppressedThresholdALerts = ({
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      hit,
+      doc: hit,
       mergeStrategy,
-      [],
-      true,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+      intendedTimestamp,
+    });
 
     return {
       _id: id,

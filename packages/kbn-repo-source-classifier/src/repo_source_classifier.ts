@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ImportResolver } from '@kbn/import-resolver';
-import { ModuleId } from './module_id';
-import { ModuleType } from './module_type';
+import type { ImportResolver } from '@kbn/import-resolver';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { KibanaPackageManifest } from '@kbn/repo-packages/modern/types';
+import type { ModuleId } from './module_id';
+import type { ModuleType } from './module_type';
 import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { RepoPath } from './repo_path';
+import { inferGroupAttrsFromPath } from './group';
 
 const STATIC_EXTS = new Set(
   'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml'
@@ -189,6 +193,7 @@ export class RepoSourceClassifier {
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'core':
         case 'plugin':
           // classification in plugins is more complicated, fall through to remaining logic
           break;
@@ -200,7 +205,7 @@ export class RepoSourceClassifier {
 
     const [root, ...dirs] = rel.split('/');
 
-    if (pkgId === '@kbn/core' && root === 'types') {
+    if (root === 'types') {
       return 'common package';
     }
 
@@ -229,7 +234,43 @@ export class RepoSourceClassifier {
     return 'common package';
   }
 
-  classify(absolute: string) {
+  private getManifest(path: RepoPath): KibanaPackageManifest | undefined {
+    const pkgInfo = path.getPkgInfo();
+    return pkgInfo?.pkgId ? this.resolver.getPkgManifest(pkgInfo!.pkgId) : undefined;
+  }
+  /**
+   * Determine the "group" of a file
+   */
+  private getGroup(path: RepoPath): ModuleGroup {
+    const attrs = inferGroupAttrsFromPath(path.getRepoRel());
+    const manifest = this.getManifest(path);
+
+    if (attrs.group !== 'common') {
+      // this package has been moved to a 'group-specific' folder, the group is determined by its location
+      return attrs.group;
+    } else {
+      // the package is still in its original location, allow Manifest to dictate its group
+      return manifest?.group ?? 'common';
+    }
+  }
+
+  /**
+   * Determine the "visibility" of a file
+   */
+  private getVisibility(path: RepoPath): ModuleVisibility {
+    const attrs = inferGroupAttrsFromPath(path.getRepoRel());
+    const manifest = this.getManifest(path);
+
+    if (attrs.group !== 'common') {
+      // this package has been moved to a 'group-specific' folder, the visibility is determined by its location
+      return attrs.visibility;
+    } else {
+      // the package is still in its original location, allow Manifest to dictate its visibility
+      return manifest?.visibility ?? 'shared';
+    }
+  }
+
+  classify(absolute: string): ModuleId {
     const path = this.getRepoPath(absolute);
     const cached = this.ids.get(path);
 
@@ -239,8 +280,12 @@ export class RepoSourceClassifier {
 
     const id: ModuleId = {
       type: this.getType(path),
+      group: this.getGroup(path),
+      visibility: this.getVisibility(path),
       repoRel: path.getRepoRel(),
       pkgInfo: path.getPkgInfo() ?? undefined,
+      manifest:
+        (path.getPkgInfo() && this.resolver.getPkgManifest(path.getPkgInfo()!.pkgId)) ?? undefined,
       dirs: path.getSegs(),
     };
     this.ids.set(path, id);

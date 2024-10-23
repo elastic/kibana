@@ -10,7 +10,7 @@ import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import { NotesButton } from './helpers';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { ThemeProvider } from 'styled-components';
 
 const toggleShowNotesMock = jest.fn();
@@ -21,11 +21,11 @@ const defaultProps: ComponentProps<typeof NotesButton> = {
   toggleShowNotes: toggleShowNotesMock,
   eventId: 'event-id',
   notesCount: 1,
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   toolTip: 'Sample Tooltip',
 };
 
-const TestWrapper: React.FC = ({ children }) => {
+const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return <ThemeProvider theme={{ eui: { euiColorDanger: 'red' } }}>{children}</ThemeProvider>;
 };
 

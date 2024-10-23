@@ -6,7 +6,7 @@
  */
 
 import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, type ConfigSchema } from '../common/config';
+import { configSchema, type ConfigSchema } from './config';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   const { TransformServerPlugin } = await import('./plugin');

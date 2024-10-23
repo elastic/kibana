@@ -12,8 +12,9 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
-import { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
@@ -73,7 +74,13 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const { globalFullScreen } = useGlobalFullScreen();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+  let ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+  if (!securitySolutionNotesEnabled) {
+    ACTION_BUTTON_COUNT--;
+  }
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
@@ -131,7 +138,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const defaultModel = useMemo(
     () => ({
       ...eventsDefaultModel,
-      excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : [],
+      excludedRowRendererIds: showExternalAlerts ? RowRendererValues : [],
     }),
     [showExternalAlerts]
   );

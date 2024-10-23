@@ -41,6 +41,7 @@ import { MachineLearningJobWizardRecognizerProvider } from './job_wizard_recogni
 import { MachineLearningJobWizardGeoProvider } from './job_wizard_geo';
 import { MachineLearningLensVisualizationsProvider } from './lens_visualizations';
 import { MachineLearningNavigationProvider } from './navigation';
+import { MachineLearningSuppliedConfigurationsProvider } from './supplied_configurations';
 import { MachineLearningOverviewPageProvider } from './overview_page';
 import { MachineLearningSecurityCommonProvider } from './security_common';
 import { MachineLearningSecurityUIProvider } from './security_ui';
@@ -133,6 +134,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
   const jobWizardRecognizer = MachineLearningJobWizardRecognizerProvider(context, commonUI);
@@ -142,18 +144,21 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     customUrls,
     commonFieldStatsFlyout
   );
-  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context);
+  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context, commonUI);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
 
   const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
+  const suppliedConfigurations = MachineLearningSuppliedConfigurationsProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
   const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
@@ -230,6 +235,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsFilterList,
     singleMetricViewer,
     stackManagementJobs,
+    suppliedConfigurations,
     swimLane,
     tableService,
     testExecution,

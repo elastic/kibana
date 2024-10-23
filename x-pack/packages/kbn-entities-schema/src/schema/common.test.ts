@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { SafeParseSuccess } from 'zod';
 import { durationSchema, metadataSchema, semVerSchema } from './common';
-import moment from 'moment';
 
 describe('schemas', () => {
   describe('metadataSchema', () => {
@@ -30,7 +28,7 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'host.name',
-        limit: 0,
+        aggregation: { type: 'terms', limit: 0 },
       });
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
@@ -54,44 +52,82 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'hostName',
-        size: 1,
       });
       expect(result.success).toBeTruthy();
       expect(result).toMatchSnapshot();
     });
+
+    it('should default to terms aggregation when none provided', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+      });
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'terms', limit: 10, lookbackPeriod: undefined },
+      });
+    });
+
+    it('should parse supported aggregations', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      });
+      expect(result.success).toBeTruthy();
+    });
+
+    it('should reject unsupported aggregation', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        aggregation: { type: 'unknown_agg', limit: 10 },
+      });
+      expect(result.success).toBeFalsy();
+    });
   });
+
   describe('durationSchema', () => {
     it('should work with 1m', () => {
       const result = durationSchema.safeParse('1m');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('1m');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(60);
+      expect(result.data).toBe('1m');
     });
     it('should work with 10s', () => {
       const result = durationSchema.safeParse('10s');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('10s');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(10);
+      expect(result.data).toBe('10s');
     });
     it('should work with 999h', () => {
       const result = durationSchema.safeParse('999h');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('999h');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(999 * 60 * 60);
+      expect(result.data).toBe('999h');
     });
     it('should work with 90d', () => {
       const result = durationSchema.safeParse('90d');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('90d');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(
-        90 * 24 * 60 * 60
-      );
+      expect(result.data).toBe('90d');
     });
     it('should not work with 1ms', () => {
       const result = durationSchema.safeParse('1ms');
       expect(result.success).toBeFalsy();
     });
+    it('should not work with invalid values', () => {
+      let result = durationSchema.safeParse('PT1H');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse('1H');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse('1f');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse('foo');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse(' 1h ');
+      expect(result.success).toBeFalsy();
+    });
   });
+
   describe('semVerSchema', () => {
     it('should validate with 999.999.999', () => {
       const result = semVerSchema.safeParse('999.999.999');

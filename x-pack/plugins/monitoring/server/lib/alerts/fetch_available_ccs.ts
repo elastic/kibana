@@ -11,7 +11,7 @@ export async function fetchAvailableCcs(esClient: ElasticsearchClient): Promise<
   const availableCcs = [];
   const response = await esClient.cluster.remoteInfo();
   for (const remoteName in response) {
-    if (!response.hasOwnProperty(remoteName)) {
+    if (!Object.hasOwn(response, remoteName)) {
       continue;
     }
     const remoteInfo = response[remoteName];
@@ -26,7 +26,7 @@ export async function fetchAvailableCcsLegacy(callCluster: any): Promise<string[
   const availableCcs = [];
   const response = await callCluster('cluster.remoteInfo');
   for (const remoteName in response) {
-    if (!response.hasOwnProperty(remoteName)) {
+    if (!Object.hasOwn(response, remoteName)) {
       continue;
     }
     const remoteInfo = response[remoteName];

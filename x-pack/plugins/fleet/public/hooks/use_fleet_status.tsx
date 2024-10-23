@@ -21,6 +21,7 @@ export interface FleetStatusProviderProps {
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
   missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
   isSecretsStorageEnabled?: GetFleetStatusResponse['is_secrets_storage_enabled'];
+  isSpaceAwarenessEnabled?: GetFleetStatusResponse['is_space_awareness_enabled'];
   spaceId?: string;
 }
 
@@ -64,6 +65,7 @@ export const FleetStatusProvider: React.FC<{
     missingRequirements: data?.missing_requirements,
     missingOptionalFeatures: data?.missing_optional_features,
     isSecretsStorageEnabled: data?.is_secrets_storage_enabled,
+    isSpaceAwarenessEnabled: data?.is_space_awareness_enabled,
     spaceId,
   };
 

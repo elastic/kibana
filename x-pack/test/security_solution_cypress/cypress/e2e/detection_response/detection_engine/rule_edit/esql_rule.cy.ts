@@ -14,7 +14,6 @@ import {
   DEFINITION_DETAILS,
   SUPPRESS_MISSING_FIELD,
   SUPPRESS_BY_DETAILS,
-  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import {
@@ -30,7 +29,6 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { getDetails } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  expandEsqlQueryBar,
   fillEsqlQueryBar,
   fillOverrideEsqlRuleName,
   goToAboutStepTab,
@@ -44,7 +42,11 @@ import { login } from '../../../../tasks/login';
 
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 
-import { saveEditedRule } from '../../../../tasks/edit_rule';
+import {
+  saveEditedRule,
+  saveEditedRuleWithNonBlockingErrors,
+  visitEditRulePage,
+} from '../../../../tasks/edit_rule';
 import { visit } from '../../../../tasks/navigation';
 
 const rule = getEsqlRule();
@@ -52,10 +54,13 @@ const rule = getEsqlRule();
 const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
-describe(
+// Skipping in MKI due to flake
+// Failing: See https://github.com/elastic/kibana/issues/184557
+// Failing: See https://github.com/elastic/kibana/issues/184556
+describe.skip(
   'Detection ES|QL rules, edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
@@ -68,7 +73,6 @@ describe(
     });
 
     it('edits ES|QL rule and checks details page', () => {
-      expandEsqlQueryBar();
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
@@ -94,7 +98,6 @@ describe(
     });
 
     it('adds ES|QL override rule name on edit', () => {
-      expandEsqlQueryBar();
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
@@ -189,9 +192,30 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
+        });
+      });
+    });
 
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+    describe('Editing rule with non-blocking query validation errors', () => {
+      it('should allow user to save a rule and show confirmation modal when data source does not exist', () => {
+        const esqlRule = {
+          ...rule,
+          query: 'from fake-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
+        };
+        createRule(esqlRule).then((createdRule) => {
+          visitEditRulePage(createdRule.body.id);
+          saveEditedRuleWithNonBlockingErrors();
+        });
+      });
+
+      it('should allow user to save a rule and show confirmation modal when data field does not exist', () => {
+        const esqlRule = {
+          ...rule,
+          query: 'from auditbeat-* metadata _id, _version, _index | keep hello.world',
+        };
+        createRule(esqlRule).then((createdRule) => {
+          visitEditRulePage(createdRule.body.id);
+          saveEditedRuleWithNonBlockingErrors();
         });
       });
     });

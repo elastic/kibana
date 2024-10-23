@@ -86,7 +86,7 @@ export class CasePlugin
       this.persistableStateAttachmentTypeRegistry
     );
 
-    registerCaseFileKinds(this.caseConfig.files, plugins.files);
+    registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -145,12 +145,16 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
+    const isServerlessSecurity =
+      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+
     registerConnectorTypes({
       actions: plugins.actions,
       alerting: plugins.alerting,
       core,
       getCasesClient,
       getSpaceId,
+      isServerlessSecurity,
     });
 
     return {

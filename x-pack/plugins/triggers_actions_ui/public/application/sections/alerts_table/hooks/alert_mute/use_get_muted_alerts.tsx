@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { getMutedAlerts } from '../apis/get_rules_muted_alerts';
 import { useKibana } from '../../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../../hooks/constants';
 import { MutedAlerts, ServerError } from '../../types';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.mutedAlerts.api.get', {
   defaultMessage: 'Error fetching muted alerts data',
@@ -32,7 +32,7 @@ export const useGetMutedAlerts = (ruleIds: string[], enabled = true) => {
         }, {} as MutedAlerts)
       ),
     {
-      context: AlertsTableQueryContext,
+      context: AlertsQueryContext,
       enabled: ruleIds.length > 0 && enabled,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

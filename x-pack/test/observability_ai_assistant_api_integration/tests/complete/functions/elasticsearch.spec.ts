@@ -10,14 +10,13 @@ import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
-import { LlmProxy } from '../../../common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { getMessageAddedEvents, invokeChatCompleteWithFunctionRequest } from './helpers';
 import {
-  createLLMProxyConnector,
-  deleteLLMProxyConnector,
-  getMessageAddedEvents,
-  invokeChatCompleteWithFunctionRequest,
-} from './helpers';
+  createProxyActionConnector,
+  deleteActionConnector,
+} from '../../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -31,7 +30,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let events: MessageAddEvent[];
 
     before(async () => {
-      ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
+      proxy = await createLlmProxy(log);
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
+
+      // intercept the LLM request and return a fixed response
+      void proxy
+        .intercept('conversation', () => true, 'Hello from LLM Proxy')
+        .completeAfterIntercept();
+
       await generateApmData(apmSynthtraceEsClient);
 
       const responseBody = await invokeChatCompleteWithFunctionRequest({
@@ -63,7 +69,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await deleteLLMProxyConnector({ supertest, connectorId, proxy });
+      proxy.close();
+      await deleteActionConnector({ supertest, connectorId, log });
       await apmSynthtraceEsClient.clean();
     });
 

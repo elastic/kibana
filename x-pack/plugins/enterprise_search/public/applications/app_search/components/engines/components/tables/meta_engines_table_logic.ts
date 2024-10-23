@@ -41,10 +41,12 @@ export const MetaEnginesTableLogic = kea<
     expandedRows: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         displayRow: (expandedRows, { itemId }) => ({
           ...expandedRows,
           [itemId]: true,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         hideRow: (expandedRows, { itemId }) => {
           const newRows = { ...expandedRows };
           delete newRows[itemId];
@@ -55,6 +57,7 @@ export const MetaEnginesTableLogic = kea<
     sourceEngines: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addSourceEngines: (currentSourceEngines, { sourceEngines: newSourceEngines }) => ({
           ...currentSourceEngines,
           ...newSourceEngines,

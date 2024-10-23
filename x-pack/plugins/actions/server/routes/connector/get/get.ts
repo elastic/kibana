@@ -10,6 +10,7 @@ import {
   getConnectorParamsSchemaV1,
   GetConnectorParamsV1,
 } from '../../../../common/routes/connector/apis/get';
+import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import { transformGetConnectorResponseV1 } from './transforms';
 import { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
@@ -26,9 +27,18 @@ export const getConnectorRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
-        params: getConnectorParamsSchemaV1,
+        request: {
+          params: getConnectorParamsSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => connectorResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

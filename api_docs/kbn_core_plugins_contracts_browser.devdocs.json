@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.FoundPluginContractResolverResponseItem",
+        "id": "def-public.FoundPluginContractResolverResponseItem",
         "type": "Interface",
         "tags": [
           "see"
@@ -34,9 +18,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.FoundPluginContractResolverResponseItem",
+            "section": "def-public.FoundPluginContractResolverResponseItem",
             "text": "FoundPluginContractResolverResponseItem"
           },
           "<ContractType>"
@@ -47,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.FoundPluginContractResolverResponseItem.found",
+            "id": "def-public.FoundPluginContractResolverResponseItem.found",
             "type": "boolean",
             "tags": [],
             "label": "found",
@@ -61,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.FoundPluginContractResolverResponseItem.contract",
+            "id": "def-public.FoundPluginContractResolverResponseItem.contract",
             "type": "Uncategorized",
             "tags": [],
             "label": "contract",
@@ -78,7 +62,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.NotFoundPluginContractResolverResponseItem",
+        "id": "def-public.NotFoundPluginContractResolverResponseItem",
         "type": "Interface",
         "tags": [
           "see"
@@ -93,7 +77,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.NotFoundPluginContractResolverResponseItem.found",
+            "id": "def-public.NotFoundPluginContractResolverResponseItem.found",
             "type": "boolean",
             "tags": [],
             "label": "found",
@@ -110,7 +94,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.PluginsServiceSetup",
+        "id": "def-public.PluginsServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "PluginsServiceSetup",
@@ -123,7 +107,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.PluginsServiceSetup.onSetup",
+            "id": "def-public.PluginsServiceSetup.onSetup",
             "type": "Function",
             "tags": [
               "experimental"
@@ -136,17 +120,17 @@
               "<T extends ",
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-                "section": "def-common.PluginContractMap",
+                "section": "def-public.PluginContractMap",
                 "text": "PluginContractMap"
               },
               ">(...pluginNames: (keyof T)[]) => Promise<",
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-                "section": "def-common.PluginContractResolverResponse",
+                "section": "def-public.PluginContractResolverResponse",
                 "text": "PluginContractResolverResponse"
               },
               "<T>>"
@@ -158,7 +142,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-contracts-browser",
-                "id": "def-common.PluginsServiceSetup.onSetup.$1",
+                "id": "def-public.PluginsServiceSetup.onSetup.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pluginNames",
@@ -174,7 +158,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.PluginsServiceSetup.onStart",
+            "id": "def-public.PluginsServiceSetup.onStart",
             "type": "Function",
             "tags": [
               "experimental"
@@ -187,17 +171,17 @@
               "<T extends ",
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-                "section": "def-common.PluginContractMap",
+                "section": "def-public.PluginContractMap",
                 "text": "PluginContractMap"
               },
               ">(...pluginNames: (keyof T)[]) => Promise<",
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-                "section": "def-common.PluginContractResolverResponse",
+                "section": "def-public.PluginContractResolverResponse",
                 "text": "PluginContractResolverResponse"
               },
               "<T>>"
@@ -209,7 +193,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-contracts-browser",
-                "id": "def-common.PluginsServiceSetup.onStart.$1",
+                "id": "def-public.PluginsServiceSetup.onStart.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pluginNames",
@@ -228,7 +212,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.PluginsServiceStart",
+        "id": "def-public.PluginsServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "PluginsServiceStart",
@@ -241,7 +225,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.PluginsServiceStart.onStart",
+            "id": "def-public.PluginsServiceStart.onStart",
             "type": "Function",
             "tags": [
               "experimental"
@@ -254,17 +238,17 @@
               "<T extends ",
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-                "section": "def-common.PluginContractMap",
+                "section": "def-public.PluginContractMap",
                 "text": "PluginContractMap"
               },
               ">(...pluginNames: (keyof T)[]) => Promise<",
               {
                 "pluginId": "@kbn/core-plugins-contracts-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-                "section": "def-common.PluginContractResolverResponse",
+                "section": "def-public.PluginContractResolverResponse",
                 "text": "PluginContractResolverResponse"
               },
               "<T>>"
@@ -276,7 +260,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-contracts-browser",
-                "id": "def-common.PluginsServiceStart.onStart.$1",
+                "id": "def-public.PluginsServiceStart.onStart.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pluginNames",
@@ -298,7 +282,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.PluginContractMap",
+        "id": "def-public.PluginContractMap",
         "type": "Type",
         "tags": [
           "see"
@@ -317,7 +301,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.PluginContractResolver",
+        "id": "def-public.PluginContractResolver",
         "type": "Type",
         "tags": [],
         "label": "PluginContractResolver",
@@ -328,17 +312,17 @@
           "<T extends ",
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.PluginContractMap",
+            "section": "def-public.PluginContractMap",
             "text": "PluginContractMap"
           },
           ">(...pluginNames: (keyof T)[]) => Promise<",
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.PluginContractResolverResponse",
+            "section": "def-public.PluginContractResolverResponse",
             "text": "PluginContractResolverResponse"
           },
           "<T>>"
@@ -350,7 +334,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-browser",
-            "id": "def-common.PluginContractResolver.$1",
+            "id": "def-public.PluginContractResolver.$1",
             "type": "Array",
             "tags": [],
             "label": "pluginNames",
@@ -367,7 +351,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.PluginContractResolverResponse",
+        "id": "def-public.PluginContractResolverResponse",
         "type": "Type",
         "tags": [
           "see"
@@ -380,9 +364,9 @@
           "{ [Key in keyof ContractMap]: ",
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.PluginContractResolverResponseItem",
+            "section": "def-public.PluginContractResolverResponseItem",
             "text": "PluginContractResolverResponseItem"
           },
           "<ContractMap[Key]>; }"
@@ -394,7 +378,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-browser",
-        "id": "def-common.PluginContractResolverResponseItem",
+        "id": "def-public.PluginContractResolverResponseItem",
         "type": "Type",
         "tags": [
           "see"
@@ -406,17 +390,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.NotFoundPluginContractResolverResponseItem",
+            "section": "def-public.NotFoundPluginContractResolverResponseItem",
             "text": "NotFoundPluginContractResolverResponseItem"
           },
           " | ",
           {
             "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-common.FoundPluginContractResolverResponseItem",
+            "section": "def-public.FoundPluginContractResolverResponseItem",
             "text": "FoundPluginContractResolverResponseItem"
           },
           "<ContractType>"
@@ -427,6 +411,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

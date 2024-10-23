@@ -69,7 +69,7 @@ export class CloudFullStoryPlugin implements Plugin {
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const { FullStoryShipper } = await import('@kbn/ebt/shippers/fullstory');
+    const { FullStoryShipper } = await import('@elastic/ebt/shippers/fullstory');
     analytics.registerShipper(FullStoryShipper, {
       eventTypesAllowlist,
       fullStoryOrgId,
@@ -85,6 +85,8 @@ export class CloudFullStoryPlugin implements Plugin {
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
       ),
       namespace: 'FSKibana',
+      // Tell FullStory to not capture from the start, and wait for the opt-in confirmation
+      captureOnStartup: false,
     });
   }
 }

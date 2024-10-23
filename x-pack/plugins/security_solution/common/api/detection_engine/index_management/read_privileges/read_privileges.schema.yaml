@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/privileges:
     get:
       x-labels: [serverless, ess]
-      operationId: GetPrivileges
+      operationId: ReadPrivileges
       x-codegen-enabled: true
       summary: Returns user privileges for the Kibana space
       description: |

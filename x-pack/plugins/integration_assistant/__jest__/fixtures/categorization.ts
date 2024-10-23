@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SamplesFormatName } from '../../common';
 import type { Pipeline } from '../../common';
 
 export const categorizationInitialPipeline: Pipeline = {
@@ -57,6 +58,7 @@ export const categorizationExpectedResults = {
           field: 'event.type',
           value: ['change'],
           if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          allow_duplicates: false,
         },
       },
       {
@@ -64,6 +66,7 @@ export const categorizationExpectedResults = {
           field: 'event.category',
           value: ['database'],
           if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          allow_duplicates: false,
         },
       },
       {
@@ -89,69 +92,53 @@ export const categorizationExpectedResults = {
 
 export const categorizationInitialMockedResponse = [
   {
-    append: {
-      field: 'event.type',
-      value: ['creation'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.type',
+    value: ['creation'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
-    },
+    field: 'event.category',
+    value: ['database'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
 export const categorizationErrorMockedResponse = [
   {
-    append: {
-      field: 'event.type',
-      value: ['creation'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.type',
+    value: ['creation'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.category',
+    value: ['database'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
 export const categorizationInvalidMockedResponse = [
   {
-    append: {
-      field: 'event.type',
-      value: ['change'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.type',
+    value: ['change'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.category',
+    value: ['database'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
 export const categorizationReviewMockedResponse = [
   {
-    append: {
-      field: 'event.type',
-      value: ['change'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.type',
+    value: ['change'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
+    field: 'event.category',
+    value: ['database'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
@@ -175,7 +162,6 @@ export const testPipelineInvalidEcs: { pipelineResults: object[]; errors: object
 export const categorizationTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
-  formattedSamples: '{"test1": "test1"}',
   ecsTypes: 'testtypes',
   ecsCategories: 'testcategories',
   exAnswer: 'testanswer',
@@ -183,45 +169,43 @@ export const categorizationTestState = {
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   errors: { test: 'testerror' },
+  previousError: 'testprevious',
+  previousInvalidCategorization: 'testinvalid',
   pipelineResults: [{ test: 'testresult' }],
-  finalized: false,
-  reviewed: false,
+  previousPipelineResults: [{ test: 'testresult' }],
+  lastReviewedSamples: [],
   currentPipeline: { test: 'testpipeline' },
   currentProcessors: [
     {
-      append: {
-        field: 'event.type',
-        value: ['creation'],
-        if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-      },
-    },
-    {
-      append: {
-        field: 'event.category',
-        value: ['database'],
-        if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
-      },
-    },
-  ],
-  invalidCategorization: { test: 'testinvalid' },
-  initialPipeline: categorizationInitialPipeline,
-  results: { test: 'testresults' },
-};
-
-export const categorizationMockProcessors = [
-  {
-    append: {
       field: 'event.type',
       value: ['creation'],
       if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
     },
-  },
-  {
-    append: {
+    {
       field: 'event.category',
       value: ['database'],
-      if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
     },
+  ],
+  invalidCategorization: [{ test: 'testinvalid' }],
+  initialPipeline: categorizationInitialPipeline,
+  results: { test: 'testresults' },
+  samplesFormat: { name: SamplesFormatName.Values.json },
+  stableSamples: [],
+  reviewCount: 0,
+  finalized: false,
+};
+
+export const categorizationMockProcessors = [
+  {
+    field: 'event.type',
+    value: ['creation'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+  },
+  {
+    field: 'event.category',
+    value: ['database'],
+    if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
   },
 ];
 
@@ -240,13 +224,15 @@ export const categorizationExpectedHandlerResponse = {
           field: 'event.type',
           value: ['creation'],
           if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          allow_duplicates: false,
         },
       },
       {
         append: {
           field: 'event.category',
           value: ['database'],
-          if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+          if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          allow_duplicates: false,
         },
       },
       {
@@ -270,18 +256,14 @@ export const categorizationExpectedHandlerResponse = {
   },
   currentProcessors: [
     {
-      append: {
-        field: 'event.type',
-        value: ['creation'],
-        if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-      },
+      field: 'event.type',
+      value: ['creation'],
+      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
     },
     {
-      append: {
-        field: 'event.category',
-        value: ['database'],
-        if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
-      },
+      field: 'event.category',
+      value: ['database'],
+      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
     },
   ],
   reviewed: false,

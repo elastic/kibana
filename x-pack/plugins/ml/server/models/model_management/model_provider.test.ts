@@ -58,6 +58,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
           hidden: true,
+          supported: false,
           model_id: '.elser_model_1',
           version: 1,
           modelName: 'elser',
@@ -66,6 +67,7 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           default: true,
+          supported: true,
           description: 'Elastic Learned Sparse EncodeR v2',
           model_id: '.elser_model_2',
           version: 2,
@@ -79,6 +81,7 @@ describe('modelsProvider', () => {
           model_id: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           recommended: true,
+          supported: true,
           version: 2,
           modelName: 'elser',
           type: ['elastic', 'pytorch', 'text_expansion'],
@@ -86,8 +89,11 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small',
           default: true,
+          supported: true,
           version: 1,
           modelName: 'e5',
           license: 'MIT',
@@ -99,9 +105,12 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
           recommended: true,
+          supported: true,
           version: 1,
           modelName: 'e5',
           license: 'MIT',
@@ -140,6 +149,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
           hidden: true,
+          supported: false,
           model_id: '.elser_model_1',
           version: 1,
           modelName: 'elser',
@@ -148,6 +158,7 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           recommended: true,
+          supported: true,
           description: 'Elastic Learned Sparse EncodeR v2',
           model_id: '.elser_model_2',
           version: 2,
@@ -163,12 +174,16 @@ describe('modelsProvider', () => {
           version: 2,
           modelName: 'elser',
           type: ['elastic', 'pytorch', 'text_expansion'],
+          supported: false,
         },
         {
           config: { input: { field_names: ['text_field'] } },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small',
           recommended: true,
+          supported: true,
           version: 1,
           modelName: 'e5',
           type: ['pytorch', 'text_embedding'],
@@ -180,8 +195,11 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
+          supported: false,
           version: 1,
           modelName: 'e5',
           type: ['pytorch', 'text_embedding'],

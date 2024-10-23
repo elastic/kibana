@@ -15,14 +15,17 @@ import { FormTestComponent } from '../../common/test_utils';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
 
-// FLAKY: https://github.com/elastic/kibana/issues/188450
-describe.skip('FormFields ', () => {
+describe('FormFields ', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders correctly', async () => {
@@ -57,8 +60,8 @@ describe.skip('FormFields ', () => {
       target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

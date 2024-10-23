@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { updateTestSuiteFactory } from '../../common/suites/update';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function updateSpaceTestSuite({ getService }: FtrProviderContext) {
@@ -21,7 +23,7 @@ export default function updateSpaceTestSuite({ getService }: FtrProviderContext)
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectRbacForbidden,
-  } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('update', () => {
     [

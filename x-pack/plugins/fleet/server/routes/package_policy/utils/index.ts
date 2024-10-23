@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { isAgentlessCloudEnabled } from '../../../services/utils/agentless';
+import { isAgentlessApiEnabled } from '../../../services/utils/agentless';
 
 import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_policy_helper';
 
@@ -19,11 +19,12 @@ import type {
   CreatePackagePolicyRequestSchema,
   PackagePolicy,
   PackagePolicyInput,
+  NewPackagePolicyInput,
 } from '../../../types';
-import { appContextService } from '../../../services';
-import { agentPolicyService, licenseService } from '../../../services';
+import { agentPolicyService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
+import type { NewPackagePolicyInputStream } from '../../../../common';
 
 export function isSimplifiedCreatePackagePolicyRequest(
   body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
@@ -54,20 +55,6 @@ export function removeFieldsFromInputSchema(
   });
 }
 
-const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
-
-export function canUseMultipleAgentPolicies() {
-  const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
-  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
-
-  return {
-    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
-    errorMessage: !hasEnterpriseLicence
-      ? 'Reusable integration policies are only available with an Enterprise license'
-      : 'Reusable integration policies are not supported',
-  };
-}
-
 /**
  * If an agentless agent policy is associated with the package policy,
  * it will rename the agentless agent policy of a package policy to keep it in sync with the package policy name.
@@ -78,7 +65,7 @@ export async function renameAgentlessAgentPolicy(
   packagePolicy: PackagePolicy,
   name: string
 ) {
-  if (!isAgentlessCloudEnabled()) {
+  if (!isAgentlessApiEnabled()) {
     return;
   }
   // If agentless is enabled for cloud, we need to rename the agent policy
@@ -117,4 +104,34 @@ export async function renameAgentlessAgentPolicy(
       `Failed to update agent policy name for agentless policy: ${error.message}`
     );
   }
+}
+
+function areAllInputStreamDisabled(streams: NewPackagePolicyInputStream[]) {
+  return streams.reduce((acc, stream, i) => {
+    return !stream.enabled && acc;
+  }, true);
+}
+
+/**
+ *
+ * Check if one input is enabled but all of its streams are disabled
+ * If true, switch input.enabled to false
+ */
+export function alignInputsAndStreams(
+  packagePolicyInputs: PackagePolicyInput[] | NewPackagePolicyInput[]
+) {
+  return packagePolicyInputs.map((input) => {
+    if (
+      input.enabled === true &&
+      input?.streams.length > 0 &&
+      areAllInputStreamDisabled(input.streams)
+    ) {
+      const newInput = {
+        ...input,
+        enabled: false,
+      };
+      return newInput;
+    }
+    return input;
+  });
 }

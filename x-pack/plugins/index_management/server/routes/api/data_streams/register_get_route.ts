@@ -13,23 +13,35 @@ import {
   IndicesDataStreamsStatsDataStreamsStatsItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
+import type { MeteringStats } from '../../../lib/types';
+import {
+  deserializeDataStream,
+  deserializeDataStreamList,
+} from '../../../lib/data_stream_serialization';
 import { EnhancedDataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
+interface MeteringStatsResponse {
+  datastreams: MeteringStats[];
+}
 const enhanceDataStreams = ({
   dataStreams,
   dataStreamsStats,
+  meteringStats,
   dataStreamsPrivileges,
+  globalMaxRetention,
 }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
+  meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
+  globalMaxRetention?: string;
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
     const enhancedDataStream: EnhancedDataStreamFromEs = {
       ...dataStream,
+      ...(globalMaxRetention ? { global_max_retention: globalMaxRetention } : {}),
       privileges: {
         delete_index: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].delete_index
@@ -51,6 +63,14 @@ const enhanceDataStreams = ({
       }
     }
 
+    if (meteringStats) {
+      const datastreamMeteringStats = meteringStats.find((s) => s.name === dataStream.name);
+      if (datastreamMeteringStats) {
+        enhancedDataStream.metering_size_in_bytes = datastreamMeteringStats.size_in_bytes;
+        enhancedDataStream.metering_doc_count = datastreamMeteringStats.num_docs;
+      }
+    }
+
     return enhancedDataStream;
   });
 };
@@ -62,11 +82,28 @@ const getDataStreams = (client: IScopedClusterClient, name = '*') => {
   });
 };
 
+const getDataStreamLifecycle = (client: IScopedClusterClient, name: string) => {
+  return client.asCurrentUser.indices.getDataLifecycle({
+    name,
+  });
+};
+
 const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
   return client.asCurrentUser.indices.dataStreamsStats({
     name,
     expand_wildcards: 'all',
     human: true,
+  });
+};
+
+const getMeteringStats = (client: IScopedClusterClient, name?: string) => {
+  let path = `/_metering/stats`;
+  if (name) {
+    path = `${path}/${name}`;
+  }
+  return client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
+    method: 'GET',
+    path,
   });
 };
 
@@ -99,9 +136,13 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
+        let meteringStats;
 
         if (includeStats && config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client));
+        }
+        if (includeStats && config.isSizeAndDocCountEnabled !== false) {
+          ({ datastreams: meteringStats } = await getMeteringStats(client));
         }
 
         if (config.isSecurityEnabled() && dataStreams.length > 0) {
@@ -114,6 +155,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
+          meteringStats,
           dataStreamsPrivileges,
         });
 
@@ -138,12 +180,21 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
       const { name } = request.params as TypeOf<typeof paramsSchema>;
       const { client } = (await context.core).elasticsearch;
       let dataStreamsStats;
+      let meteringStats;
 
       try {
         const { data_streams: dataStreams } = await getDataStreams(client, name);
 
+        const lifecycle = await getDataStreamLifecycle(client, name);
+        // @ts-ignore - TS doesn't know about the `global_retention` property yet
+        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+
         if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
+        }
+
+        if (config.isSizeAndDocCountEnabled !== false) {
+          ({ datastreams: meteringStats } = await getMeteringStats(client, name));
         }
 
         if (dataStreams[0]) {
@@ -156,7 +207,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
             dataStreamsStats,
+            meteringStats,
             dataStreamsPrivileges,
+            globalMaxRetention,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
           return response.ok({ body });

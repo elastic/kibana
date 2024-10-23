@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { CoreDeprecatedApiUsageStats } from './core_usage_stats';
 
 /**
  * Internal API for registering the Usage Tracker used for Core's usage data payload.
- *
- * @note This API should never be used to drive application logic and is only
- * intended for telemetry purposes.
  *
  * @public
  */
@@ -20,6 +21,7 @@ export interface CoreUsageDataSetup {
    * when tracking events.
    */
   registerUsageCounter: (usageCounter: CoreUsageCounter) => void;
+  registerDeprecatedUsageFetch: (fetchFn: DeprecatedApiUsageFetcher) => void;
 }
 
 /**
@@ -48,3 +50,11 @@ export interface CoreIncrementCounterParams {
  * Method to call whenever an event occurs, so the counter can be increased.
  */
 export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => void;
+
+/**
+ * @public
+ * Registers the deprecated API fetcher to be called to grab all the deprecated API usage details.
+ */
+export type DeprecatedApiUsageFetcher = (params: {
+  soClient: ISavedObjectsRepository;
+}) => Promise<CoreDeprecatedApiUsageStats[]>;

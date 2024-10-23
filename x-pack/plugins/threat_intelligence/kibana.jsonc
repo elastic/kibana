@@ -11,11 +11,12 @@
       "cases",
       "data",
       "dataViews",
+      "inspector",
+      "kibanaReact",
       "kibanaUtils",
       "navigation",
-      "kibanaReact",
-      "triggersActionsUi",
-      "inspector"
+      "security",
+      "triggersActionsUi"
     ],
     "requiredBundles": [
       "data",

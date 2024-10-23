@@ -21,7 +21,6 @@ import {
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
@@ -44,7 +43,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const {
     indexListOfDocuments: indexListOfSourceDocuments,
@@ -158,7 +156,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('@ess @serverless @serverlessQA Indicator match type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -2564,12 +2563,9 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('with asset criticality', async () => {
+        describe('with asset criticality', () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-            await kibanaServer.uiSettings.update({
-              [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-            });
           });
 
           after(async () => {

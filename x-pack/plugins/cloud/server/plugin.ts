@@ -18,6 +18,7 @@ import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
+import { defineRoutes } from './routes/elasticsearch_routes';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -35,6 +36,12 @@ export interface CloudSetup {
    * @note The `cloudId` is a concatenation of the deployment name and a hash. Users can update the deployment name, changing the `cloudId`. However, the changed `cloudId` will not be re-injected into `kibana.yml`. If you need the current `cloudId` the best approach is to split the injected `cloudId` on the semi-colon, and replace the first element with the `persistent.cluster.metadata.display_name` value as provided by a call to `GET _cluster/settings`.
    */
   cloudId?: string;
+  /**
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
+   */
+  csp?: string;
   /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */
@@ -195,14 +202,18 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     if (this.config.id) {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
+    const router = core.http.createRouter();
+    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
+    defineRoutes({ logger: this.logger, router, elasticsearchUrl });
 
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
+      csp: this.config.csp,
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,

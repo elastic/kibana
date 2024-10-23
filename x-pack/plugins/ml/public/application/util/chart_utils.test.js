@@ -7,27 +7,6 @@
 
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat.json';
 
-jest.mock('./dependency_cache', () => {
-  const dateMath = require('@kbn/datemath');
-  let _time = undefined;
-  const timefilter = {
-    setTime: (time) => {
-      _time = time;
-    },
-    getActiveBounds: () => {
-      return {
-        min: dateMath.parse(_time.from),
-        max: dateMath.parse(_time.to),
-      };
-    },
-  };
-  return {
-    getTimefilter: () => timefilter,
-  };
-});
-import { getTimefilter } from './dependency_cache';
-const timefilter = getTimefilter();
-
 import d3 from 'd3';
 import moment from 'moment';
 import React from 'react';
@@ -45,11 +24,6 @@ import {
 } from './chart_utils';
 
 import { CHART_TYPE } from '../explorer/explorer_constants';
-
-timefilter.setTime({
-  from: moment(seriesConfig.selectedEarliest).toISOString(),
-  to: moment(seriesConfig.selectedLatest).toISOString(),
-});
 
 describe('ML - chart utils', () => {
   describe('getChartType', () => {

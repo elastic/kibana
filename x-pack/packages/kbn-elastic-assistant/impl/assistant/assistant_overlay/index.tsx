@@ -12,13 +12,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { createGlobalStyle } from 'styled-components';
-import {
-  ShowAssistantOverlayProps,
-  useAssistantContext,
-  UserAvatar,
-} from '../../assistant_context';
+import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
-import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -26,9 +21,6 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export interface Props {
-  currentUserAvatar?: UserAvatar;
-}
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
@@ -36,11 +28,10 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   }
 `;
 
-export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
+export const AssistantOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationTitle, setConversationTitle] = useState<string | undefined>(
-    WELCOME_CONVERSATION_TITLE
-  );
+  // Why is this named Title and not Id?
+  const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
     useAssistantContext();
@@ -55,16 +46,12 @@ export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
         promptContextId: pid,
         conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        const newConversationTitle = getLastConversationId(cTitle);
-        if (so)
-          assistantTelemetry?.reportAssistantInvoked({
-            conversationId: newConversationTitle,
-            invokedBy: 'click',
-          });
+        const conversationId = getLastConversationId(cTitle);
+        if (so) assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: 'click' });
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationTitle(newConversationTitle);
+        setConversationTitle(conversationId);
       },
     [assistantTelemetry, getLastConversationId]
   );
@@ -150,7 +137,6 @@ export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
           onCloseFlyout={handleCloseModal}
           chatHistoryVisible={chatHistoryVisible}
           setChatHistoryVisible={toggleChatHistory}
-          currentUserAvatar={currentUserAvatar}
         />
       </EuiFlyoutResizable>
       <UnifiedTimelineGlobalStyles />

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import { LICENCE_FOR_MULTIPLE_AGENT_POLICIES } from '../../common/constants';
 import { ExperimentalFeaturesService } from '../services';
 
 import { useLicense } from './use_license';
-
-export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export function useMultipleAgentPolicies() {
   const licenseService = useLicense();

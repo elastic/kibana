@@ -24,7 +24,7 @@ import {
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
-import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
+import { EntitiesDetails } from '../components/entities_details';
 import {
   THREAT_INTELLIGENCE_TAB_ID,
   ThreatIntelligenceDetails,
@@ -33,6 +33,8 @@ import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_d
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
+
+const ENTITIES_TAB_ID = 'entity';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {

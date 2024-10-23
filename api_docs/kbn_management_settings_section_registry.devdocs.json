@@ -1,26 +1,10 @@
 {
   "id": "@kbn/management-settings-section-registry",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.SectionRegistry",
+        "id": "def-public.SectionRegistry",
         "type": "Class",
         "tags": [],
         "label": "SectionRegistry",
@@ -33,7 +17,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.SectionRegistry.setup",
+            "id": "def-public.SectionRegistry.setup",
             "type": "Object",
             "tags": [],
             "label": "setup",
@@ -44,7 +28,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.setup.addSpaceSection",
+                "id": "def-public.SectionRegistry.setup.addSpaceSection",
                 "type": "Function",
                 "tags": [],
                 "label": "addSpaceSection",
@@ -60,7 +44,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addSpaceSection.$1",
+                    "id": "def-public.SectionRegistry.setup.addSpaceSection.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "Component",
@@ -75,7 +59,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addSpaceSection.$2",
+                    "id": "def-public.SectionRegistry.setup.addSpaceSection.$2",
                     "type": "Function",
                     "tags": [],
                     "label": "queryMatch",
@@ -93,7 +77,7 @@
               },
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.setup.addGlobalSection",
+                "id": "def-public.SectionRegistry.setup.addGlobalSection",
                 "type": "Function",
                 "tags": [],
                 "label": "addGlobalSection",
@@ -109,7 +93,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addGlobalSection.$1",
+                    "id": "def-public.SectionRegistry.setup.addGlobalSection.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "Component",
@@ -124,7 +108,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addGlobalSection.$2",
+                    "id": "def-public.SectionRegistry.setup.addGlobalSection.$2",
                     "type": "Function",
                     "tags": [],
                     "label": "queryMatch",
@@ -144,7 +128,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.SectionRegistry.start",
+            "id": "def-public.SectionRegistry.start",
             "type": "Object",
             "tags": [],
             "label": "start",
@@ -155,7 +139,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.start.getGlobalSections",
+                "id": "def-public.SectionRegistry.start.getGlobalSections",
                 "type": "Function",
                 "tags": [],
                 "label": "getGlobalSections",
@@ -166,9 +150,9 @@
                   "() => ",
                   {
                     "pluginId": "@kbn/management-settings-section-registry",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                    "section": "def-common.RegistryEntry",
+                    "section": "def-public.RegistryEntry",
                     "text": "RegistryEntry"
                   },
                   "[]"
@@ -181,7 +165,7 @@
               },
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.start.getSpacesSections",
+                "id": "def-public.SectionRegistry.start.getSpacesSections",
                 "type": "Function",
                 "tags": [],
                 "label": "getSpacesSections",
@@ -192,9 +176,9 @@
                   "() => ",
                   {
                     "pluginId": "@kbn/management-settings-section-registry",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                    "section": "def-common.RegistryEntry",
+                    "section": "def-public.RegistryEntry",
                     "text": "RegistryEntry"
                   },
                   "[]"
@@ -215,7 +199,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.RegistryComponentProps",
+        "id": "def-public.RegistryComponentProps",
         "type": "Interface",
         "tags": [],
         "label": "RegistryComponentProps",
@@ -228,7 +212,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryComponentProps.toasts",
+            "id": "def-public.RegistryComponentProps.toasts",
             "type": "Object",
             "tags": [],
             "label": "toasts",
@@ -236,9 +220,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
+                "section": "def-public.IToasts",
                 "text": "IToasts"
               }
             ],
@@ -248,7 +232,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryComponentProps.enableSaving",
+            "id": "def-public.RegistryComponentProps.enableSaving",
             "type": "Object",
             "tags": [],
             "label": "enableSaving",
@@ -265,7 +249,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.RegistryEntry",
+        "id": "def-public.RegistryEntry",
         "type": "Interface",
         "tags": [],
         "label": "RegistryEntry",
@@ -278,7 +262,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryEntry.Component",
+            "id": "def-public.RegistryEntry.Component",
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
@@ -287,17 +271,17 @@
               "React.ComponentClass<",
               {
                 "pluginId": "@kbn/management-settings-section-registry",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                "section": "def-common.RegistryComponentProps",
+                "section": "def-public.RegistryComponentProps",
                 "text": "RegistryComponentProps"
               },
               ", any> | React.FunctionComponent<",
               {
                 "pluginId": "@kbn/management-settings-section-registry",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                "section": "def-common.RegistryComponentProps",
+                "section": "def-public.RegistryComponentProps",
                 "text": "RegistryComponentProps"
               },
               ">"
@@ -308,7 +292,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryEntry.queryMatch",
+            "id": "def-public.RegistryEntry.queryMatch",
             "type": "Function",
             "tags": [],
             "label": "queryMatch",
@@ -323,7 +307,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.RegistryEntry.queryMatch.$1",
+                "id": "def-public.RegistryEntry.queryMatch.$1",
                 "type": "string",
                 "tags": [],
                 "label": "term",
@@ -342,7 +326,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.SectionRegistrySetup",
+        "id": "def-public.SectionRegistrySetup",
         "type": "Type",
         "tags": [],
         "label": "SectionRegistrySetup",
@@ -359,7 +343,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.SectionRegistryStart",
+        "id": "def-public.SectionRegistryStart",
         "type": "Type",
         "tags": [],
         "label": "SectionRegistryStart",
@@ -370,17 +354,17 @@
           "{ getGlobalSections: () => ",
           {
             "pluginId": "@kbn/management-settings-section-registry",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-            "section": "def-common.RegistryEntry",
+            "section": "def-public.RegistryEntry",
             "text": "RegistryEntry"
           },
           "[]; getSpacesSections: () => ",
           {
             "pluginId": "@kbn/management-settings-section-registry",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-            "section": "def-common.RegistryEntry",
+            "section": "def-public.RegistryEntry",
             "text": "RegistryEntry"
           },
           "[]; }"
@@ -391,6 +375,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

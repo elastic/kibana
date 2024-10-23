@@ -31,6 +31,7 @@ const mockCounters = {
   errorCounter: jest.fn(),
 };
 const mockUser = { username: 'joeuser' };
+const options = { isInternal: false };
 
 beforeEach(async () => {
   mockSetupDeps = createMockPluginSetup({
@@ -70,37 +71,11 @@ it(`should return 404 if the docId isn't resolve`, async function () {
     'doc123',
     mockUser,
     mockCounters,
+    options,
     handler
   );
 
   expect(mockResponseFactory.notFound).toBeCalled();
-  expect(handlerCalled).toBe(false);
-});
-
-it(`should return forbidden if job type is unrecognized`, async function () {
-  mockJobsQueryFactory.mockReturnValue({
-    get: jest.fn(() => ({ jobtype: 'notARealJobType' })),
-  });
-
-  let handlerCalled = false;
-  const handler = async () => {
-    handlerCalled = true;
-    return {
-      status: 200,
-      options: {},
-    };
-  };
-
-  await jobManagementPreRouting(
-    mockCore,
-    mockResponseFactory,
-    'doc123',
-    mockUser,
-    mockCounters,
-    handler
-  );
-
-  expect(mockResponseFactory.forbidden).toBeCalled();
   expect(handlerCalled).toBe(false);
 });
 
@@ -124,6 +99,7 @@ it(`should call callback when document is available`, async function () {
     'doc123',
     mockUser,
     mockCounters,
+    options,
     handler
   );
 
@@ -154,6 +130,7 @@ describe('usage counters', () => {
       'doc123',
       mockUser,
       mockCounters,
+      options,
       handler
     );
 
@@ -177,6 +154,7 @@ describe('usage counters', () => {
       'doc123',
       mockUser,
       mockCounters,
+      options,
       handler
     );
 

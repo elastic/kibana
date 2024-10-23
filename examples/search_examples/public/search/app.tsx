@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -217,7 +218,7 @@ export const SearchExamplesApp = ({
             const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
-                Searched {res.rawResponse.hits.total} documents. <br />
+                Searched {res.rawResponse.hits.total as number} documents. <br />
                 The ${metricAggType} of {selectedNumericField!.name} is{' '}
                 {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
@@ -330,7 +331,9 @@ export const SearchExamplesApp = ({
         setWarningContents(warnings);
       }
 
-      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
+      const message = (
+        <EuiText>Searched {result.rawResponse.hits.total as number} documents.</EuiText>
+      );
       notifications.toasts.addSuccess(
         {
           title: 'Query result',

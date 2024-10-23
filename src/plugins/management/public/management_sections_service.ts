@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
@@ -71,12 +72,12 @@ export class ManagementSectionsService {
 
   start({ capabilities }: SectionsServiceStartDeps) {
     this.getAllSections().forEach((section) => {
-      if (capabilities.management.hasOwnProperty(section.id)) {
+      if (Object.hasOwn(capabilities.management, section.id)) {
         const sectionCapabilities = capabilities.management[section.id];
         section.apps.forEach((app) => {
           const capabilitiesId = app.capabilitiesId || app.id;
           if (
-            sectionCapabilities.hasOwnProperty(capabilitiesId) &&
+            Object.hasOwn(sectionCapabilities, capabilitiesId) &&
             sectionCapabilities[capabilitiesId] !== true
           ) {
             app.disable();

@@ -13,6 +13,7 @@ import {
   SavedObjectsUtils,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import {
   defaultLogViewAttributes,
   defaultLogViewId,
@@ -44,6 +45,7 @@ export class LogViewsClient implements ILogViewsClient {
   constructor(
     private readonly logger: Logger,
     private readonly dataViews: DataViewsService,
+    private readonly logSourcesService: Promise<LogSourcesService>,
     private readonly savedObjectsClient: SavedObjectsClientContract,
     private readonly logViewFallbackHandler: LogViewFallbackHandler,
     private readonly internalLogViews: Map<string, LogView>,
@@ -117,7 +119,13 @@ export class LogViewsClient implements ILogViewsClient {
     logViewId: string,
     logViewAttributes: LogViewAttributes
   ): Promise<ResolvedLogView> {
-    return await resolveLogView(logViewId, logViewAttributes, await this.dataViews, this.config);
+    return await resolveLogView(
+      logViewId,
+      logViewAttributes,
+      await this.dataViews,
+      await this.logSourcesService,
+      this.config
+    );
   }
 
   private async getSavedLogView(logViewId: string): Promise<LogView> {

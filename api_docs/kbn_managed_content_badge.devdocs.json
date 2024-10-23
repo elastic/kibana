@@ -11,9 +11,9 @@
         "label": "getManagedContentBadge",
         "description": [],
         "signature": [
-          "(tooltipText: string) => { 'data-test-subj': string; badgeText: string; title: string; color: string; iconType: string; toolTipProps: ",
+          "(tooltipText: string, enableTooltipProps?: boolean | undefined) => { 'data-test-subj': string; badgeText: string; title: string; color: string; iconType: string; toolTipProps: ",
           "EuiToolTipProps",
-          "; }"
+          " | undefined; }"
         ],
         "path": "packages/kbn-managed-content-badge/index.ts",
         "deprecated": false,
@@ -33,6 +33,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/managed-content-badge",
+            "id": "def-public.getManagedContentBadge.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableTooltipProps",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-managed-content-badge/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

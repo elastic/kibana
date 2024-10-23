@@ -7,12 +7,18 @@
 
 import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText, EuiAutoSizer } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiAutoSizer,
+  EuiSkeletonRectangle,
+} from '@elastic/eui';
 import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
 
-import { Loading } from '../../../../components';
 import type { IntegrationCardItem } from '../../screens/home';
 
 import { PackageCard } from '../package_card';
@@ -22,6 +28,8 @@ interface GridColumnProps {
   isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
+  scrollElementId?: string;
+  emptyStateStyles?: Record<string, string>;
 }
 
 const VirtualizedRow: React.FC<{
@@ -55,10 +63,11 @@ export const GridColumn = ({
   showMissingIntegrationMessage = false,
   showCardLabels = false,
   isLoading,
+  scrollElementId,
+  emptyStateStyles,
 }: GridColumnProps) => {
   const itemsSizeRefs = useRef(new Map<number, number>());
   const listRef = useRef<List>(null);
-
   const onHeightChange = useCallback((index: number, size: number) => {
     itemsSizeRefs.current.set(index, size);
     if (listRef.current) {
@@ -66,11 +75,21 @@ export const GridColumn = ({
     }
   }, []);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) {
+    return (
+      <EuiFlexGrid gutterSize="l" columns={3}>
+        {Array.from({ length: 12 }).map((_, index) => (
+          <EuiFlexItem key={index} grow={3}>
+            <EuiSkeletonRectangle height="160px" width="100%" />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    );
+  }
 
   if (!list.length) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="emptyState" style={emptyStateStyles}>
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -91,6 +110,7 @@ export const GridColumn = ({
       </EuiFlexGrid>
     );
   }
+
   return (
     <>
       <WindowScroller
@@ -99,12 +119,15 @@ export const GridColumn = ({
             listRef.current.scrollTo(scrollTop);
           }
         }}
+        scrollElement={
+          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
+        }
       >
         {() => (
           <EuiAutoSizer disableHeight>
             {({ width }: { width: number }) => (
               <List
-                style={{ height: '100%' }}
+                style={{ height: '100%', overflow: 'visible' }}
                 ref={listRef}
                 layout="vertical"
                 itemCount={Math.ceil(list.length / 3)}

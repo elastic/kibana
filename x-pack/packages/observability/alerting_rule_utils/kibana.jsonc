@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/observability-alerting-rule-utils",
+  "owner": "@elastic/obs-ux-management-team"
+}

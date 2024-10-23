@@ -71,8 +71,8 @@ describe('Tags', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), 'test{enter}');
-    userEvent.type(screen.getByRole('combobox'), 'case{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'test{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'case{enter}');
 
     expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });
   });
@@ -84,7 +84,7 @@ describe('Tags', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    await userEvent.type(screen.getByRole('combobox'), ' {enter}');
 
     await waitFor(() => {
       expect(screen.getByText('A tag must contain at least one non-space character.'));
@@ -100,8 +100,9 @@ describe('Tags', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
-    userEvent.keyboard('{enter}');
+    await userEvent.click(screen.getByRole('combobox'));
+    await userEvent.paste(`${longTag}`);
+    await userEvent.keyboard('{enter}');
 
     await waitFor(() => {
       expect(

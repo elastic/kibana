@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { DatatableColumn, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
@@ -15,7 +15,7 @@ import { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_ty
 const { VisDimension: strings } = ArgumentStrings;
 
 type VisDimensionArgInputProps = {
-  onValueChange: (value: ExpressionAstExpression) => void;
+  onValueChange: (value: ExpressionAstExpression | string) => void;
   argValue: ExpressionAstExpression;
   typeInstance: {
     options?: {
@@ -30,14 +30,14 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   onValueChange,
   resolved: { columns },
 }) => {
-  const [value, setValue] = useState(argValue);
+  const [value, setValue] = useState<ExpressionAstExpression | string>(argValue);
   const confirm = typeInstance?.options?.confirm;
 
   useEffect(() => {
     setValue(argValue);
   }, [argValue]);
 
-  const onChange = useCallback(
+  const onChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (ev) => {
       const onChangeFn = confirm ? setValue : onValueChange;
       const astObj: ExpressionAstExpression = {

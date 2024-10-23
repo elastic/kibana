@@ -22,7 +22,7 @@ const TableSearchComponent: React.FC<TableSearchComponentProps> = ({
   const [search, setSearch] = useState(filterOptionsSearch);
 
   const onSearch = useCallback(
-    (newSearch) => {
+    (newSearch: string) => {
       const trimSearch = newSearch.trim();
       setSearch(trimSearch);
       onFilterOptionsChange({ search: trimSearch });

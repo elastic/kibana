@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { ApmDataSource } from './data_source';
-
-export interface TimeRangeMetadata {
-  isUsingServiceDestinationMetrics: boolean;
-  sources: Array<ApmDataSource & { hasDocs: boolean; hasDurationSummaryField: boolean }>;
-}
+export type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';

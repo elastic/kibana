@@ -8,14 +8,22 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
-import { ILicenseState, validateEmptyStrings } from '../lib';
+import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
+import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
+import { validateEmptyStrings } from '../../common/validate_empty_strings';
 
 export const bodySchema = schema.object({
-  name: schema.string({ validate: validateEmptyStrings }),
-  connector_type_id: schema.string({ validate: validateEmptyStrings }),
+  name: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
+  connector_type_id: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The type of connector.' },
+  }),
   config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
     defaultValue: {},
   }),
@@ -56,14 +64,25 @@ export const createActionRoute = (
       options: {
         access: 'public',
         summary: 'Create a connector',
+        tags: ['oas-tag:connectors'],
       },
       validate: {
-        params: schema.maybe(
-          schema.object({
-            id: schema.maybe(schema.string()),
-          })
-        ),
-        body: bodySchema,
+        request: {
+          params: schema.maybe(
+            schema.object({
+              id: schema.maybe(
+                schema.string({ meta: { description: 'An identifier for the connector.' } })
+              ),
+            })
+          ),
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
+          },
+        },
       },
     },
     router.handleLegacyErrors(

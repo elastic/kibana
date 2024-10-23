@@ -12,7 +12,7 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
@@ -48,9 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'endpointResponseActionsEnabled',
-        ])}`,
       ],
     },
   };

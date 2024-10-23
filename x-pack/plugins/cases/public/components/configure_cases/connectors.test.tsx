@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 
@@ -41,7 +41,9 @@ describe('Connectors', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<Connectors {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   beforeEach(() => {
@@ -90,7 +92,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -117,7 +119,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 

@@ -1130,6 +1130,7 @@ describe('createLifecycleExecutor', () => {
     it('updates documents with maintenance window ids for newly firing alerts', async () => {
       const logger = loggerMock.create();
       const ruleDataClientMock = createRuleDataClientMock();
+
       const executor = createLifecycleExecutor(
         logger,
         ruleDataClientMock
@@ -1151,7 +1152,6 @@ describe('createLifecycleExecutor', () => {
           params: {},
           state: { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} },
           logger,
-          maintenanceWindowIds,
         })
       );
 
@@ -1288,7 +1288,6 @@ describe('createLifecycleExecutor', () => {
             trackedAlertsRecovered: {},
           },
           logger,
-          maintenanceWindowIds,
         })
       );
 
@@ -1420,7 +1419,6 @@ describe('createLifecycleExecutor', () => {
             trackedAlertsRecovered: {},
           },
           logger,
-          maintenanceWindowIds,
         })
       );
 

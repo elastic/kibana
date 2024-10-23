@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -21,7 +21,7 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import type { Cancelable } from 'lodash';
+import type { DebouncedFunc } from 'lodash';
 import { debounce } from 'lodash';
 import type {
   EqlOptionsData,
@@ -78,8 +78,8 @@ export const EqlQueryBarFooter: FC<Props> = ({
   onOptionsChange,
 }) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
-  const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 100);
-  const debounceSize = useRef<Cancelable & SizeVoidFunc>();
+  const [localSize, setLocalSize] = useState<string | number>(optionsSelected?.size ?? 100);
+  const debounceSize = useRef<DebouncedFunc<SizeVoidFunc>>();
 
   const openEqlSettingsHandler = useCallback(() => {
     setIsOpenEqlSettings(true);
@@ -124,10 +124,10 @@ export const EqlQueryBarFooter: FC<Props> = ({
     },
     [onOptionsChange]
   );
-  const handleSizeField = useCallback(
+  const handleSizeField = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (evt) => {
       if (onOptionsChange) {
-        setLocalSize(evt?.target?.value);
+        setLocalSize(evt?.target?.valueAsNumber);
         if (debounceSize.current?.cancel) {
           debounceSize.current?.cancel();
         }

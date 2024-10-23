@@ -8,7 +8,7 @@
 import {
   resetTransformsRequestSchema,
   type ResetTransformsRequestSchema,
-} from '../../../../common/api_schemas/reset_transforms';
+} from '../../api_schemas/reset_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

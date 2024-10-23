@@ -30,7 +30,8 @@ const rewriteBodyRes = ({ ruleTypeId, alerts, ...rest }: AlertSummary) => ({
 export const getAlertInstanceSummaryRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
@@ -38,6 +39,13 @@ export const getAlertInstanceSummaryRoute = (
       validate: {
         params: paramSchema,
         query: querySchema,
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Get an alert summary',
+        tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+        deprecated: true,
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {

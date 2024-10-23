@@ -10,6 +10,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
+import rison from '@kbn/rison';
 import {
   LOGS_LOCATOR_ID,
   NODE_LOGS_LOCATOR_ID,
@@ -32,6 +33,20 @@ import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import {
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+  ASSET_DETAILS_LOCATOR_ID,
+} from '@kbn/observability-shared-plugin/common';
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+    ),
+} as unknown as jest.Mocked<AssetDetailsLocator>;
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -62,6 +77,9 @@ const apmContextMock = {
                   'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
               ),
             };
+          }
+          if (id === ASSET_DETAILS_LOCATOR_ID) {
+            return mockAssetDetailsLocator;
           }
         },
       },
@@ -185,7 +203,7 @@ describe('TransactionActionMenu ', () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithKubernetesData);
 
       expect((getByText('Pod metrics').parentElement as HTMLAnchorElement).href).toEqual(
-        'http://localhost/basepath/app/metrics/link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952'
+        'http://localhost/node-mock/pod/pod123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
   });
@@ -215,7 +233,7 @@ describe('TransactionActionMenu ', () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithContainerData);
 
       expect((getByText('Container metrics').parentElement as HTMLAnchorElement).href).toEqual(
-        'http://localhost/basepath/app/metrics/link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952'
+        'http://localhost/node-mock/container/container123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
   });
@@ -245,7 +263,7 @@ describe('TransactionActionMenu ', () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithHostData);
 
       expect((getByText('Host metrics').parentElement as HTMLAnchorElement).href).toEqual(
-        'http://localhost/basepath/app/metrics/link-to/host-detail/227453131a17?from=1545091770952&to=1545092370952'
+        'http://localhost/node-mock/host/227453131a17?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
   });

@@ -9,6 +9,7 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
+import type { BuildFlavor } from '@kbn/config';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -30,6 +31,7 @@ import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_scor
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
+import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -47,6 +49,7 @@ interface ConstructorOptions {
   ruleMonitoringService: IRuleMonitoringService;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -69,6 +72,13 @@ export class RequestContextFactory implements IRequestContextFactory {
     const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
+
+    const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+      coreContext.savedObjects.client,
+      coreContext.elasticsearch.client.asInternalUser,
+      request
+    );
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -78,7 +88,9 @@ export class RequestContextFactory implements IRequestContextFactory {
       config,
       kibanaVersion: options.kibanaVersion,
       kibanaBranch: options.kibanaBranch,
+      buildFlavor: options.buildFlavor,
     });
+    const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
@@ -104,7 +116,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getFrameworkRequest: () => frameworkRequest,
 
-      getAppClient: () => appClientFactory.create(request),
+      getAppClient,
 
       getSpaceId,
 
@@ -123,6 +135,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
 
         return createDetectionRulesClient({
+          actionsClient,
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
@@ -185,6 +198,22 @@ export class RequestContextFactory implements IRequestContextFactory {
             auditLogger: getAuditLogger(),
           })
       ),
+      getEntityStoreDataClient: memoize(() => {
+        const clusterClient = coreContext.elasticsearch.client;
+        const logger = options.logger;
+        const soClient = coreContext.savedObjects.client;
+        return new EntityStoreDataClient({
+          namespace: getSpaceId(),
+          clusterClient,
+          dataViewsService,
+          appClient: getAppClient(),
+          logger,
+          soClient,
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
+        });
+      }),
     };
   }
 }

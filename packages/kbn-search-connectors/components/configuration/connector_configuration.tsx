@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
@@ -42,8 +43,10 @@ function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; 
 interface ConnectorConfigurationProps {
   connector: Connector;
   hasPlatinumLicense: boolean;
+  isDisabled?: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
+  saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
   children?: React.ReactNode;
@@ -87,8 +90,10 @@ export const ConnectorConfigurationComponent: FC<
   children,
   connector,
   hasPlatinumLicense,
+  isDisabled,
   isLoading,
   saveConfig,
+  saveAndSync,
   subscriptionLink,
   stackManagementLink,
 }) => {
@@ -165,6 +170,12 @@ export const ConnectorConfigurationComponent: FC<
                 saveConfig(config);
                 setIsEditing(false);
               }}
+              {...(saveAndSync && {
+                saveAndSync: (config) => {
+                  saveAndSync(config);
+                  setIsEditing(false);
+                },
+              })}
             />
           ) : (
             uncategorizedDisplayList.length > 0 && (
@@ -198,6 +209,7 @@ export const ConnectorConfigurationComponent: FC<
                         data-test-subj="entSearchContent-connector-configuration-editConfiguration"
                         data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
                         onClick={() => setIsEditing(!isEditing)}
+                        isDisabled={isDisabled}
                       >
                         {i18n.translate(
                           'searchConnectors.configurationConnector.config.editButton.title',

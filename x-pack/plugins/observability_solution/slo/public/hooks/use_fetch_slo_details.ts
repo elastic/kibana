@@ -36,14 +36,14 @@ export function useFetchSloDetails({
 }: {
   sloId?: string;
   instanceId?: string;
-  remoteName?: string | null;
+  remoteName?: string;
   shouldRefetch?: boolean;
 }): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: sloKeys.detail(sloId),
+      queryKey: sloKeys.detail(sloId!, instanceId, remoteName),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {

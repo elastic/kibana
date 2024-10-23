@@ -29,6 +29,27 @@ const createMockSecurityStartWithFullRiskEngineAccess = () => {
   return mockSecurityStart;
 };
 
+const createMockSecurityStartWithNoRiskEngineAccess = () => {
+  const mockSecurityStart = securityMock.createStart();
+
+  const mockCheckPrivileges = jest.fn().mockResolvedValue({
+    hasAllRequested: false,
+    privileges: {
+      elasticsearch: {
+        cluster: [],
+        index: [],
+      },
+    },
+  });
+
+  mockSecurityStart.authz.checkPrivilegesDynamicallyWithRequest = jest
+    .fn()
+    .mockReturnValue(mockCheckPrivileges);
+
+  return mockSecurityStart;
+};
+
 export const riskEnginePrivilegesMock = {
   createMockSecurityStartWithFullRiskEngineAccess,
+  createMockSecurityStartWithNoRiskEngineAccess,
 };

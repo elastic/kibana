@@ -35,6 +35,7 @@ export type PartitionFieldConfig =
         by: 'anomaly_score' | 'name';
         order: 'asc' | 'desc';
       };
+      value: string;
     }
   | undefined;
 

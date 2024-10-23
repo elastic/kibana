@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { ArrayNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
@@ -79,13 +81,13 @@ const getDistinctColor = (
   formattedCategoricalKey: string
 ) => {
   // TODO move away from Record to a Map to avoid issues with reserved JS keywords
-  if (overwriteColors.hasOwnProperty(categoricalKey)) {
+  if (Object.hasOwn(overwriteColors, categoricalKey)) {
     return overwriteColors[categoricalKey];
   }
   // this is for supporting old visualizations (created by vislib plugin)
   // it seems that there for some aggs, the uiState saved from vislib is
   // different from how es-charts handles it
-  if (overwriteColors.hasOwnProperty(formattedCategoricalKey)) {
+  if (Object.hasOwn(overwriteColors, formattedCategoricalKey)) {
     return overwriteColors[formattedCategoricalKey];
   }
 
@@ -181,7 +183,7 @@ const overrideColors = (
 ) => {
   let overwriteColor;
 
-  if (overwriteColors.hasOwnProperty(name)) {
+  if (Object.hasOwn(overwriteColors, name)) {
     overwriteColor = overwriteColors[name];
   }
 

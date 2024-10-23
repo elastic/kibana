@@ -21,6 +21,9 @@
     "@kbn/rule-data-utils",
     "@kbn/rrule",
     "@kbn/core",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/search-types"
   ]
 }

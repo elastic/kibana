@@ -6,7 +6,8 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
@@ -34,20 +35,19 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
-import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
+import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
-import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -60,11 +60,9 @@ export const mockSourcererState: SourcererState = {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
-    indexFields: mockIndexFields as FieldSpec[],
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
-    runtimeMappings: mockRuntimeMappings,
     title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
   },
 };
@@ -365,7 +363,7 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -387,7 +385,7 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
         version: null,
         selectedEventIds: {},
         isSelectAllChecked: false,
@@ -448,7 +446,7 @@ export const mockGlobalState: State = {
     [TableId.test]: EMPTY_RESOLVER,
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
-    flyout: EMPTY_RESOLVER,
+    [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
   },
   sourcerer: {
     ...mockSourcererState,
@@ -513,7 +511,6 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
-  dataViewPicker: dataViewPickerInitialState,
   notes: {
     entities: {
       '1': {
@@ -531,12 +528,14 @@ export const mockGlobalState: State = {
     ids: ['1'],
     status: {
       fetchNotesByDocumentIds: ReqStatus.Idle,
+      fetchNotesBySavedObjectIds: ReqStatus.Idle,
       createNote: ReqStatus.Idle,
       deleteNotes: ReqStatus.Idle,
       fetchNotes: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentIds: null,
+      fetchNotesBySavedObjectIds: null,
       createNote: null,
       deleteNotes: null,
       fetchNotes: null,
@@ -551,6 +550,8 @@ export const mockGlobalState: State = {
       direction: 'desc' as const,
     },
     filter: '',
+    userFilter: '',
+    associatedFilter: AssociatedFilter.all,
     search: '',
     selectedIds: [],
     pendingDeleteIds: [],

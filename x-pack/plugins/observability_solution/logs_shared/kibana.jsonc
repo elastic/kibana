@@ -9,12 +9,14 @@
     "browser": true,
     "configPath": ["xpack", "logs_shared"],
     "requiredPlugins": [
+      "charts",
       "data",
       "dataViews",
       "discoverShared",
-      "usageCollection",
+      "logsDataAccess",
       "observabilityShared",
-      "share"
+      "share",
+      "usageCollection",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",

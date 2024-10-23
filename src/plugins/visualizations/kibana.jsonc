@@ -26,7 +26,7 @@
       "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch",
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -34,14 +34,10 @@
       "spaces",
       "savedObjectsTaggingOss",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "embeddableEnhanced"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "charts",
-      "savedObjects",
-    ],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "charts", "savedObjects"],
     "extraPublicDirs": [
       "common/constants",
       "common/utils",

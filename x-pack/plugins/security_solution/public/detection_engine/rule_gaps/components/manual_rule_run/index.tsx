@@ -20,7 +20,7 @@ import {
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
+import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 
 import * as i18n from './translations';
 
@@ -73,7 +73,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>{i18n.MANUAL_RULE_RUN_MODAL_TITLE}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
+            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -127,10 +127,6 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
         iconType="warning"
         title={i18n.MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS}
       />
-
-      <EuiSpacer size="m" />
-
-      <EuiCallOut size="s" title={i18n.MANUAL_RULE_RUN_ALERT_LIMITATIONS} iconType="iInCircle" />
     </EuiConfirmModal>
   );
 };

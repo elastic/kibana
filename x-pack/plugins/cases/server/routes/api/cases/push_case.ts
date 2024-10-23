@@ -19,6 +19,7 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Push a case to an external service`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

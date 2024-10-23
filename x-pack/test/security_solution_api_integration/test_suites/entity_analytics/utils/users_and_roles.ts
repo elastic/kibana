@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityService } from '../../../../../../test/common/services/security/security';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 
 export const usersAndRolesFactory = (security: SecurityService) => ({
   createRole: async ({ name, privileges }: { name: string; privileges: any }) => {

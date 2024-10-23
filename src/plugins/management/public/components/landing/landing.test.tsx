@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { merge } from 'lodash';
+import { coreMock } from '@kbn/core/public/mocks';
 import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
 
 import { AppContextProvider } from '../management_app/management_context';
@@ -44,6 +46,7 @@ export const WithAppDependencies =
       kibanaVersion: '8.10.0',
       cardsNavigationConfig: { enabled: true },
       sections: sectionsMock,
+      chromeStyle: 'classic',
     };
 
     return (
@@ -85,6 +88,34 @@ describe('Landing Page', () => {
 
       expect(exists('cards-navigation-page')).toBe(false);
       expect(exists('managementHome')).toBe(true);
+    });
+  });
+
+  describe('Empty prompt', () => {
+    test('Renders the default empty prompt when chromeStyle is "classic"', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('managementHome')).toBe(true);
+    });
+
+    test('Renders the solution empty prompt when chromeStyle is "project"', async () => {
+      const coreStart = coreMock.createStart();
+
+      testBed = await setupLandingPage({
+        chromeStyle: 'project',
+        cardsNavigationConfig: { enabled: false },
+        coreStart,
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('managementHome')).toBe(false);
+      expect(exists('managementHomeSolution')).toBe(true);
     });
   });
 });

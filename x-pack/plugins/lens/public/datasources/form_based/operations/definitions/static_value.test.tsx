@@ -384,6 +384,8 @@ describe('static_value', () => {
     });
 
     it('should update state on change', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
         <ParamEditor
@@ -394,7 +396,7 @@ describe('static_value', () => {
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
       );
-      userEvent.type(screen.getByRole('spinbutton'), '{backspace}{backspace}27');
+      await user.type(screen.getByRole('spinbutton'), '{backspace}{backspace}27');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
       expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual({
@@ -413,6 +415,8 @@ describe('static_value', () => {
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
         <ParamEditor
@@ -424,7 +428,7 @@ describe('static_value', () => {
         />
       );
 
-      userEvent.type(screen.getByRole('spinbutton'), '{backspace}{backspace}');
+      await user.type(screen.getByRole('spinbutton'), '{backspace}{backspace}');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByRole('spinbutton')).toHaveValue(null);

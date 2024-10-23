@@ -12,6 +12,8 @@ declare namespace Cypress {
     loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsMonitorUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsApmManageOwnAndCreateAgentKeys(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsApmAllPrivilegesWithoutWriteSettingsUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsApmReadPrivilegesWithWriteSettingsUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAs(params: {
       username: string;
       password: string;
@@ -22,7 +24,6 @@ declare namespace Cypress {
     expectAPIsToHaveBeenCalledWith(params: { apisIntercepted: string[]; value: string }): void;
     updateAdvancedSettings(settings: Record<string, unknown>): void;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
-    dismissServiceGroupsTour(): void;
     withHidden(selector: string, callback: () => void): void;
   }
 }

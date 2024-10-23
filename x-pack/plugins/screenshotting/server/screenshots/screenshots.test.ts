@@ -11,12 +11,12 @@ import type { PackageInfo } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { PngScreenshotOptions } from '..';
 import { HeadlessChromiumDriverFactory } from '../browsers';
-import type { ConfigType } from '../config';
 import { Screenshots } from './screenshots';
 
 jest.mock('puppeteer');

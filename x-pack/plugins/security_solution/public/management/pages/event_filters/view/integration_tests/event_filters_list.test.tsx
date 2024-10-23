@@ -56,8 +56,8 @@ describe('When on the Event Filters list page', () => {
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
-    userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-    userEvent.click(renderResult.getByTestId('searchButton'));
+    await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+    await userEvent.click(renderResult.getByTestId('searchButton'));
     await waitFor(() => {
       expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenCalled();
     });
@@ -136,7 +136,7 @@ describe('When on the Event Filters list page', () => {
       expect(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)).toHaveLength(2);
       expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
 
-      userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
+      await userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
 
       expect(await renderResult.findByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
       expect(renderResult.getByTestId(`${prefix}-tooltipText`).textContent).toContain(
@@ -165,7 +165,7 @@ describe('When on the Event Filters list page', () => {
         const actionsButton = await waitFor(
           () => renderResult.getAllByTestId('EventFiltersListPage-card-header-actions-button')[0]
         );
-        userEvent.click(actionsButton);
+        await userEvent.click(actionsButton);
 
         expect(renderResult.getByTestId('EventFiltersListPage-card-cardEditAction')).toBeTruthy();
         expect(renderResult.getByTestId('EventFiltersListPage-card-cardDeleteAction')).toBeTruthy();

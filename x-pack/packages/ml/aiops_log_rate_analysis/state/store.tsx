@@ -16,6 +16,7 @@ import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
 
 import { logRateAnalysisSlice } from './log_rate_analysis_slice';
 import { logRateAnalysisTableRowSlice } from './log_rate_analysis_table_row_slice';
+import { logRateAnalysisFieldCandidatesSlice } from './log_rate_analysis_field_candidates_slice';
 import type { InitialAnalysisStart } from './log_rate_analysis_slice';
 
 const getReduxStore = () =>
@@ -23,6 +24,8 @@ const getReduxStore = () =>
     reducer: {
       // General page state
       logRateAnalysis: logRateAnalysisSlice.reducer,
+      // Field candidates
+      logRateAnalysisFieldCandidates: logRateAnalysisFieldCandidatesSlice.reducer,
       // Analysis results
       logRateAnalysisResults: logRateAnalysisResultsSlice.reducer,
       // Handles running the analysis

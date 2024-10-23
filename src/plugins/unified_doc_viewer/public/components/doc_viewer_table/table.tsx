@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
   EuiSpacer,
   EuiSelectableMessage,
   EuiDataGrid,
@@ -22,32 +23,23 @@ import {
   EuiText,
   EuiCallOut,
   useResizeObserver,
+  EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
-  formatFieldValue,
-  getIgnoredReason,
+  DOC_HIDE_TIME_COLUMN_SETTING,
   getShouldShowFieldHandler,
-  isNestedFieldParent,
   usePager,
+  getVisibleColumns,
+  canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
-import {
-  FieldDescription,
-  fieldNameWildcardMatcher,
-  getFieldSearchMatchingHighlight,
-  getTextBasedColumnIconType,
-} from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { TableFieldValue } from './table_cell_value';
 import {
-  type TableRow,
   getFieldCellActions,
   getFieldValueCellActions,
   getFilterExistsDisabledWarning,
@@ -57,12 +49,15 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-
-export type FieldRecord = TableRow;
+import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import { TableCell } from './table_cell';
+import { getPinColumnControl } from './get_pin_control';
+import { FieldRow } from './field_row';
 
 interface ItemsEntry {
-  pinnedItems: FieldRecord[];
-  restItems: FieldRecord[];
+  pinnedRows: FieldRow[];
+  restRows: FieldRow[];
+  allFields: TableFiltersProps['allFields'];
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -71,7 +66,8 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const SEARCH_TEXT = 'discover:searchText';
+const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
 const GRID_COLUMN_FIELD_VALUE = 'value';
@@ -122,32 +118,30 @@ const updatePageSize = (newPageSize: number, storage: Storage) => {
   storage.set(PAGE_SIZE, newPageSize);
 };
 
-const getSearchText = (storage: Storage) => {
-  return storage.get(SEARCH_TEXT) || '';
-};
-const updateSearchText = debounce(
-  (newSearchText: string, storage: Storage) => storage.set(SEARCH_TEXT, newSearchText),
-  500
-);
-
 export const DocViewerTable = ({
   columns,
   columnsMeta,
   hit,
   dataView,
+  textBasedHits,
   filter,
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
-  const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
+  );
+  const [areNullValuesHidden, setAreNullValuesHidden] = useLocalStorage(HIDE_NULL_VALUES, false);
+  const [showOnlySelectedFields, setShowOnlySelectedFields] = useLocalStorage(
+    SHOW_ONLY_SELECTED_FIELDS,
+    false
   );
 
   const flattened = hit.flattened;
@@ -155,10 +149,6 @@ export const DocViewerTable = ({
     () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
     [flattened, dataView, showMultiFields]
   );
-
-  const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
-    defaultMessage: 'Search field names',
-  });
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
 
@@ -187,110 +177,125 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const onSearch = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newSearchText = event.currentTarget.value;
-      updateSearchText(newSearchText, storage);
-      setSearchText(newSearchText);
-    },
-    [storage]
-  );
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
 
   const fieldToItem = useCallback(
-    (field: string, isPinned: boolean) => {
-      const fieldMapping = mapping(field);
-      const displayName = fieldMapping?.displayName ?? field;
-      const columnMeta = columnsMeta?.[field];
-      const columnIconType = getTextBasedColumnIconType(columnMeta);
-      const fieldType = columnIconType
-        ? columnIconType // for text-based results types come separately
-        : isNestedFieldParent(field, dataView)
-        ? 'nested'
-        : fieldMapping
-        ? getFieldIconType(fieldMapping)
-        : undefined;
-
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
-
-      return {
-        action: {
-          onToggleColumn,
-          onFilter: filter,
-          flattenedField: flattened[field],
-        },
-        field: {
-          field,
-          displayName,
-          fieldMapping,
-          fieldType,
-          scripted: Boolean(fieldMapping?.scripted),
-          pinned: isPinned,
-          onTogglePinned,
-        },
-        value: {
-          formattedValue: formatFieldValue(
-            hit.flattened[field],
-            hit.raw,
-            fieldFormats,
-            dataView,
-            fieldMapping
-          ),
-          ignored,
-        },
-      };
+    (field: string, isPinned: boolean): FieldRow => {
+      return new FieldRow({
+        name: field,
+        flattenedValue: flattened[field],
+        hit,
+        dataView,
+        fieldFormats,
+        isPinned,
+        columnsMeta,
+      });
     },
-    [
-      mapping,
-      dataView,
-      hit,
-      onToggleColumn,
-      filter,
-      columnsMeta,
-      flattened,
-      onTogglePinned,
-      fieldFormats,
-    ]
+    [dataView, hit, columnsMeta, flattened, fieldFormats]
   );
 
-  const { pinnedItems, restItems } = Object.keys(flattened)
-    .sort((fieldA, fieldB) => {
+  const fieldsFromColumns = useMemo(
+    () => columns?.filter((column) => column !== '_source') || [],
+    [columns]
+  );
+
+  const isShowOnlySelectedFieldsDisabled = !fieldsFromColumns?.length;
+
+  const shouldShowOnlySelectedFields = useMemo(
+    () => showOnlySelectedFields && !isShowOnlySelectedFieldsDisabled,
+    [showOnlySelectedFields, isShowOnlySelectedFieldsDisabled]
+  );
+
+  const displayedFieldNames = useMemo(() => {
+    if (shouldShowOnlySelectedFields) {
+      return getVisibleColumns(
+        fieldsFromColumns,
+        dataView,
+        canPrependTimeFieldColumn(
+          columns,
+          dataView.timeFieldName,
+          columnsMeta,
+          !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+          isEsqlMode
+        )
+      );
+    }
+    return Object.keys(flattened).sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
       const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
       const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
       return nameA.localeCompare(nameB);
-    })
-    .reduce<ItemsEntry>(
-      (acc, curFieldName) => {
-        if (!shouldShowFieldHandler(curFieldName)) {
-          return acc;
-        }
+    });
+  }, [
+    fieldsFromColumns,
+    flattened,
+    shouldShowOnlySelectedFields,
+    mapping,
+    dataView,
+    columns,
+    columnsMeta,
+    isEsqlMode,
+    uiSettings,
+  ]);
 
-        if (pinnedFields.includes(curFieldName)) {
-          acc.pinnedItems.push(fieldToItem(curFieldName, true));
-        } else {
-          const fieldMapping = mapping(curFieldName);
-          if (
-            !searchText?.trim() ||
-            fieldNameWildcardMatcher(
-              { name: curFieldName, displayName: fieldMapping?.displayName },
-              searchText
-            )
-          ) {
-            // filter only unpinned fields
-            acc.restItems.push(fieldToItem(curFieldName, false));
+  const { pinnedRows, restRows, allFields } = useMemo(
+    () =>
+      displayedFieldNames.reduce<ItemsEntry>(
+        (acc, curFieldName) => {
+          if (!shouldShowOnlySelectedFields && !shouldShowFieldHandler(curFieldName)) {
+            return acc;
           }
+          const shouldHideNullValue =
+            isEsqlMode && areNullValuesHidden && flattened[curFieldName] == null;
+          if (shouldHideNullValue) {
+            return acc;
+          }
+
+          const isPinned = pinnedFields.includes(curFieldName);
+          const row = fieldToItem(curFieldName, isPinned);
+
+          if (isPinned) {
+            acc.pinnedRows.push(row);
+          } else {
+            if (onFilterField(row)) {
+              // filter only unpinned fields
+              acc.restRows.push(row);
+            }
+          }
+
+          acc.allFields.push({
+            name: curFieldName,
+            displayName: row.dataViewField?.displayName,
+            type: row.fieldType,
+          });
+
+          return acc;
+        },
+        {
+          pinnedRows: [],
+          restRows: [],
+          allFields: [],
         }
+      ),
+    [
+      displayedFieldNames,
+      areNullValuesHidden,
+      shouldShowOnlySelectedFields,
+      fieldToItem,
+      flattened,
+      isEsqlMode,
+      onFilterField,
+      pinnedFields,
+      shouldShowFieldHandler,
+    ]
+  );
 
-        return acc;
-      },
-      {
-        pinnedItems: [],
-        restItems: [],
-      }
-    );
+  const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
-  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+  const leadingControlColumns = useMemo(() => {
+    return [getPinColumnControl({ rows, onTogglePinned })];
+  }, [rows, onTogglePinned]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
@@ -319,12 +324,12 @@ export const DocViewerTable = ({
   }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, filter, onToggleColumn }),
-    [rows, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
+    [rows, isEsqlMode, filter, onToggleColumn]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, filter }),
-    [rows, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, onFilter: filter }),
+    [rows, isEsqlMode, filter]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
@@ -358,62 +363,34 @@ export const DocViewerTable = ({
     [fieldCellActions, fieldValueCellActions, containerWidth]
   );
 
+  const onHideNullValuesChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      setAreNullValuesHidden(e.target.checked);
+    },
+    [setAreNullValuesHidden]
+  );
+
+  const onShowOnlySelectedFieldsChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      setShowOnlySelectedFields(e.target.checked);
+    },
+    [setShowOnlySelectedFields]
+  );
+
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId, isDetails }) => {
-      const row = rows[rowIndex];
-
-      if (!row) {
-        return null;
-      }
-
-      const {
-        action: { flattenedField },
-        field: { field, fieldMapping, fieldType, scripted, pinned },
-        value: { formattedValue, ignored },
-      } = row;
-
-      if (columnId === 'name') {
-        return (
-          <div>
-            <FieldName
-              fieldName={field}
-              fieldType={fieldType}
-              fieldMapping={fieldMapping}
-              scripted={scripted}
-              highlight={getFieldSearchMatchingHighlight(
-                fieldMapping?.displayName ?? field,
-                searchText
-              )}
-              isPinned={pinned}
-            />
-
-            {isDetails && !!fieldMapping ? (
-              <div>
-                <FieldDescription
-                  fieldsMetadataService={fieldsMetadata}
-                  field={fieldMapping}
-                  truncate={false}
-                />
-              </div>
-            ) : null}
-          </div>
-        );
-      }
-
-      if (columnId === 'value') {
-        return (
-          <TableFieldValue
-            field={field}
-            formattedValue={formattedValue}
-            rawValue={flattenedField}
-            ignoreReason={ignored}
-          />
-        );
-      }
-
-      return null;
+      return (
+        <TableCell
+          searchTerm={tableFiltersProps.searchTerm}
+          rows={rows}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          isDetails={isDetails}
+          onFindSearchTermMatch={onFindSearchTermMatch}
+        />
+      );
     },
-    [rows, searchText, fieldsMetadata]
+    [rows, tableFiltersProps.searchTerm, onFindSearchTermMatch]
   );
 
   const renderCellPopover = useCallback(
@@ -423,9 +400,9 @@ export const DocViewerTable = ({
 
       let warningMessage: string | undefined;
       if (columnId === GRID_COLUMN_FIELD_VALUE) {
-        warningMessage = getFilterInOutPairDisabledWarning(row);
+        warningMessage = getFilterInOutPairDisabledWarning(row, filter);
       } else if (columnId === GRID_COLUMN_FIELD_NAME) {
-        warningMessage = getFilterExistsDisabledWarning(row);
+        warningMessage = getFilterExistsDisabledWarning(row, filter);
       }
 
       return (
@@ -441,7 +418,7 @@ export const DocViewerTable = ({
         </>
       );
     },
-    [rows]
+    [rows, filter]
   );
 
   const containerHeight = containerRef
@@ -469,14 +446,54 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFieldSearch
-          aria-label={searchPlaceholder}
-          fullWidth
-          onChange={onSearch}
-          placeholder={searchPlaceholder}
-          value={searchText}
-          data-test-subj="unifiedDocViewerFieldsSearchInput"
-        />
+        <TableFilters {...tableFiltersProps} allFields={allFields} />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          responsive={false}
+          wrap={true}
+          direction="row"
+          justifyContent="flexEnd"
+          alignItems="center"
+          gutterSize="m"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
+                defaultMessage: 'Selected only',
+                description: 'Switch label to show only selected fields in the table',
+              })}
+              checked={showOnlySelectedFields ?? false}
+              disabled={isShowOnlySelectedFieldsDisabled}
+              onChange={onShowOnlySelectedFieldsChange}
+              compressed
+              data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
+            />
+          </EuiFlexItem>
+          {isEsqlMode && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                  defaultMessage: 'Hide null fields',
+                  description: 'Switch label to hide fields with null values in the table',
+                })}
+                checked={areNullValuesHidden ?? false}
+                onChange={onHideNullValuesChange}
+                compressed
+                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
       </EuiFlexItem>
 
       {rows.length === 0 ? (
@@ -489,32 +506,29 @@ export const DocViewerTable = ({
           </p>
         </EuiSelectableMessage>
       ) : (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={Boolean(containerHeight)}
-            css={css`
-              min-block-size: 0;
-              display: block;
-            `}
-          >
-            <EuiDataGrid
-              {...GRID_PROPS}
-              aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
-                defaultMessage: 'Field values',
-              })}
-              className="kbnDocViewer__fieldsGrid"
-              columns={gridColumns}
-              toolbarVisibility={false}
-              rowCount={rows.length}
-              renderCellValue={renderCellValue}
-              renderCellPopover={renderCellPopover}
-              pagination={pagination}
-            />
-          </EuiFlexItem>
-        </>
+        <EuiFlexItem
+          grow={Boolean(containerHeight)}
+          css={css`
+            min-block-size: 0;
+            display: block;
+          `}
+        >
+          <EuiDataGrid
+            key={`fields-table-${hit.id}`}
+            {...GRID_PROPS}
+            aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
+              defaultMessage: 'Field values',
+            })}
+            className="kbnDocViewer__fieldsGrid"
+            columns={gridColumns}
+            toolbarVisibility={false}
+            rowCount={rows.length}
+            renderCellValue={renderCellValue}
+            renderCellPopover={renderCellPopover}
+            pagination={pagination}
+            leadingControlColumns={leadingControlColumns}
+          />
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );

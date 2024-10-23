@@ -24,6 +24,12 @@ export const HOST_NAME_FIELD = 'host.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
 export const SYSTEM_PROCESS_CMDLINE_FIELD = 'system.process.cmdline';
+export const EVENT_MODULE = 'event.module';
+export const METRICSET_MODULE = 'metricset.module';
+export const METRICSET_NAME = 'metricset.name';
+
+// integrations
+export const SYSTEM_INTEGRATION = 'system';
 
 // logs
 export const MESSAGE_FIELD = 'message';
@@ -37,8 +43,6 @@ export const O11Y_AAD_FIELDS = [
   'tags',
 ];
 
-export const LINK_TO_INVENTORY = '/app/metrics/link-to/inventory';
-export const METRICS_EXPLORER_URL = '/app/metrics/explorer';
 export const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
 
 export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {

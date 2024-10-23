@@ -1699,21 +1699,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.SamlSessionManager.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "rolesFilename",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-test/src/auth/session_manager.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3330,6 +3315,20 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.esVersion",
+            "type": "string",
+            "tags": [],
+            "label": "esVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-common.CreateTestEsClusterOptions.esFrom",
             "type": "string",
             "tags": [],
@@ -3352,7 +3351,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"host\" | \"tag\" | \"image\" | \"dataPath\" | \"kibanaUrl\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"image\" | \"host\" | \"tag\" | \"dataPath\" | \"kibanaUrl\" | \"resources\" | \"projectType\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -5077,13 +5076,25 @@
           {
             "parentPluginId": "@kbn/test",
             "id": "def-common.SamlSessionManagerOptions.supportedRoles",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "supportedRoles",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "SupportedRoles",
+              " | undefined"
             ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.cloudUsersFilePath",
+            "type": "string",
+            "tags": [],
+            "label": "cloudUsersFilePath",
+            "description": [],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false

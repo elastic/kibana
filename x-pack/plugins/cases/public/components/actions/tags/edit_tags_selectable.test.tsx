@@ -92,7 +92,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
     for (const tag of props.tags) {
-      userEvent.click(result.getByText(tag));
+      await userEvent.click(result.getByText(tag));
     }
 
     expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
@@ -106,7 +106,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const tag of propsMultipleCases.tags) {
-      userEvent.click(result.getByText(tag));
+      await userEvent.click(result.getByText(tag));
     }
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
@@ -120,7 +120,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const tag of propsMultipleCases.tags) {
-      userEvent.click(result.getByText(tag));
+      await userEvent.click(result.getByText(tag));
     }
 
     for (const [tag, icon] of [
@@ -154,7 +154,7 @@ describe('EditTagsSelectable', () => {
 
     const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
-    userEvent.click(addNewTagButton);
+    await userEvent.click(addNewTagButton);
 
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
@@ -167,7 +167,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     expect(result.getByText('Select all')).toBeInTheDocument();
-    userEvent.click(result.getByText('Select all'));
+    await userEvent.click(result.getByText('Select all'));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -180,7 +180,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     expect(result.getByText('Select all')).toBeInTheDocument();
-    userEvent.click(result.getByText('Select none'));
+    await userEvent.click(result.getByText('Select none'));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -207,7 +207,7 @@ describe('EditTagsSelectable', () => {
     const iconDataTestSubj = 'cases-actions-tags-edit-selectable-tag-one-icon-check';
     expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId(iconDataTestSubj));
+    await userEvent.click(result.getByTestId(iconDataTestSubj));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -237,7 +237,7 @@ describe('EditTagsSelectable', () => {
 
     const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
-    userEvent.click(addNewTagButton);
+    await userEvent.click(addNewTagButton);
 
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {

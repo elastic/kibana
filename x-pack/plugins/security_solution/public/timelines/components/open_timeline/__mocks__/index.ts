@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 export const mockTimeline = {
   data: {
@@ -144,9 +144,9 @@ export const mockTimeline = {
       noteIds: [],
       pinnedEventIds: [],
       pinnedEventsSaveObject: [],
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       title: 'my timeline',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       savedQueryId: null,
@@ -398,7 +398,7 @@ export const mockTemplate = {
       noteIds: [],
       pinnedEventIds: [],
       pinnedEventsSaveObject: [],
-      status: TimelineStatus.immutable,
+      status: TimelineStatusEnum.immutable,
       title: 'Generic Process Timeline',
       timelineType: 'template',
       templateTimelineId: 'cd55e52b-7bce-4887-88e2-f1ece4c75447',

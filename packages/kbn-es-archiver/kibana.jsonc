@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "test-helper",
   "id": "@kbn/es-archiver",
   "devOnly": true,
   "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],

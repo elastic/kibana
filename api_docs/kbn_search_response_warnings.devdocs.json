@@ -2,26 +2,10 @@
   "id": "@kbn/search-response-warnings",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.getWarningsDescription",
+        "id": "def-public.getWarningsDescription",
         "type": "Function",
         "tags": [],
         "label": "getWarningsDescription",
@@ -37,7 +21,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.getWarningsDescription.$1",
+            "id": "def-public.getWarningsDescription.$1",
             "type": "Array",
             "tags": [],
             "label": "warnings",
@@ -57,7 +41,7 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.getWarningsTitle",
+        "id": "def-public.getWarningsTitle",
         "type": "Function",
         "tags": [],
         "label": "getWarningsTitle",
@@ -73,7 +57,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.getWarningsTitle.$1",
+            "id": "def-public.getWarningsTitle.$1",
             "type": "Array",
             "tags": [],
             "label": "warnings",
@@ -93,7 +77,7 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.hasUnsupportedDownsampledAggregationFailure",
+        "id": "def-public.hasUnsupportedDownsampledAggregationFailure",
         "type": "Function",
         "tags": [],
         "label": "hasUnsupportedDownsampledAggregationFailure",
@@ -109,7 +93,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.hasUnsupportedDownsampledAggregationFailure.$1",
+            "id": "def-public.hasUnsupportedDownsampledAggregationFailure.$1",
             "type": "Object",
             "tags": [],
             "label": "warning",
@@ -128,13 +112,13 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.SearchResponseWarningsBadge",
+        "id": "def-public.SearchResponseWarningsBadge",
         "type": "Function",
         "tags": [],
         "label": "SearchResponseWarningsBadge",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element | null"
+          "(props: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
         "deprecated": false,
@@ -142,7 +126,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.SearchResponseWarningsBadge.$1",
+            "id": "def-public.SearchResponseWarningsBadge.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -161,13 +145,13 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.SearchResponseWarningsBadgePopoverContent",
+        "id": "def-public.SearchResponseWarningsBadgePopoverContent",
         "type": "Function",
         "tags": [],
         "label": "SearchResponseWarningsBadgePopoverContent",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
         "deprecated": false,
@@ -175,7 +159,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.SearchResponseWarningsBadgePopoverContent.$1",
+            "id": "def-public.SearchResponseWarningsBadgePopoverContent.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -194,13 +178,13 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.SearchResponseWarningsCallout",
+        "id": "def-public.SearchResponseWarningsCallout",
         "type": "Function",
         "tags": [],
         "label": "SearchResponseWarningsCallout",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element | null"
+          "(props: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
         "deprecated": false,
@@ -208,7 +192,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.SearchResponseWarningsCallout.$1",
+            "id": "def-public.SearchResponseWarningsCallout.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -227,13 +211,13 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.SearchResponseWarningsEmptyPrompt",
+        "id": "def-public.SearchResponseWarningsEmptyPrompt",
         "type": "Function",
         "tags": [],
         "label": "SearchResponseWarningsEmptyPrompt",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
         "deprecated": false,
@@ -241,7 +225,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.SearchResponseWarningsEmptyPrompt.$1",
+            "id": "def-public.SearchResponseWarningsEmptyPrompt.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -260,13 +244,13 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.ViewDetailsPopover",
+        "id": "def-public.ViewDetailsPopover",
         "type": "Function",
         "tags": [],
         "label": "ViewDetailsPopover",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element | null"
+          "(props: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
         "deprecated": false,
@@ -274,7 +258,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.ViewDetailsPopover.$1",
+            "id": "def-public.ViewDetailsPopover.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -297,7 +281,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.SearchResponseWarning",
+        "id": "def-public.SearchResponseWarning",
         "type": "Type",
         "tags": [],
         "label": "SearchResponseWarning",
@@ -314,7 +298,7 @@
       },
       {
         "parentPluginId": "@kbn/search-response-warnings",
-        "id": "def-common.WarningHandlerCallback",
+        "id": "def-public.WarningHandlerCallback",
         "type": "Type",
         "tags": [],
         "label": "WarningHandlerCallback",
@@ -339,7 +323,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.WarningHandlerCallback.$1",
+            "id": "def-public.WarningHandlerCallback.$1",
             "type": "Object",
             "tags": [],
             "label": "warning",
@@ -353,7 +337,7 @@
           },
           {
             "parentPluginId": "@kbn/search-response-warnings",
-            "id": "def-common.WarningHandlerCallback.$2",
+            "id": "def-public.WarningHandlerCallback.$2",
             "type": "Object",
             "tags": [],
             "label": "meta",
@@ -375,6 +359,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

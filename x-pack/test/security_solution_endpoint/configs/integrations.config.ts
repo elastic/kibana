@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
 import { services } from '../services';
+import { pageObjects } from '../page_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
@@ -29,5 +30,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
       '--xpack.securitySolution.packagerTaskInterval=5s',
     ],
     services,
+    pageObjects,
   });
 }

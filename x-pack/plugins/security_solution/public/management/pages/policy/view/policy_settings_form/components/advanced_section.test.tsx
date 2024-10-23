@@ -18,7 +18,7 @@ import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
 import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
 import { within } from '@testing-library/react';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
@@ -28,11 +28,11 @@ describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
 
   let formProps: AdvancedSectionProps;
-  let render: (expanded?: boolean) => ReturnType<AppContextTestRender['render']>;
-  let renderResult: ReturnType<typeof render>;
+  let render: (expanded?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
 
-  const clickShowHideButton = () => {
-    userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
+  const clickShowHideButton = async () => {
+    await userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
   };
 
   beforeEach(() => {
@@ -46,11 +46,11 @@ describe('Policy Advanced Settings section', () => {
       'data-test-subj': testSubj.container,
     };
 
-    render = (expanded = true) => {
+    render = async (expanded = true) => {
       renderResult = mockedContext.render(<AdvancedSection {...formProps} />);
 
       if (expanded) {
-        clickShowHideButton();
+        await clickShowHideButton();
         expect(renderResult.getByTestId(testSubj.settingsContainer));
       }
 
@@ -58,35 +58,35 @@ describe('Policy Advanced Settings section', () => {
     };
   });
 
-  it('should render initially collapsed', () => {
-    render(false);
+  it('should render initially collapsed', async () => {
+    await render(false);
 
     expect(renderResult.queryByTestId(testSubj.settingsContainer)).toBeNull();
   });
 
-  it('should expand and collapse section when button is clicked', () => {
-    render(false);
+  it('should expand and collapse section when button is clicked', async () => {
+    await render(false);
 
     expect(renderResult.queryByTestId(testSubj.settingsContainer)).toBeNull();
 
-    clickShowHideButton();
+    await clickShowHideButton();
 
     expect(renderResult.getByTestId(testSubj.settingsContainer));
   });
 
-  it('should show warning callout', () => {
-    const { getByTestId } = render(true);
+  it('should show warning callout', async () => {
+    const { getByTestId } = await render(true);
 
     expect(getByTestId(testSubj.warningCallout));
   });
 
-  it('should render all advanced options', () => {
+  it('should render all advanced options', async () => {
     const fieldsWithDefaultValues = [
       'mac.advanced.capture_env_vars',
       'linux.advanced.capture_env_vars',
     ];
 
-    render(true);
+    await render(true);
 
     for (const advancedOption of AdvancedPolicySchema) {
       const optionTestSubj = testSubj.settingRowTestSubjects(advancedOption.key);
@@ -128,8 +128,8 @@ describe('Policy Advanced Settings section', () => {
       useLicenseMock.mockReturnValue(licenseServiceMocked);
     });
 
-    it('should not render options that require platinum license', () => {
-      render(true);
+    it('should not render options that require platinum license', async () => {
+      await render(true);
 
       for (const advancedOption of AdvancedPolicySchema) {
         if (advancedOption.license) {
@@ -154,20 +154,20 @@ describe('Policy Advanced Settings section', () => {
       formProps.mode = 'view';
     });
 
-    it('should render with no form fields', () => {
-      render();
+    it('should render with no form fields', async () => {
+      await render();
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.settingsContainer));
     });
 
-    it('should render options in expected content', () => {
+    it('should render options in expected content', async () => {
       const option1 = AdvancedPolicySchema[0];
       const option2 = AdvancedPolicySchema[4];
 
       set(formProps.policy, option1.key, 'foo');
       set(formProps.policy, option2.key, ''); // test empty value
 
-      const { getByTestId } = render();
+      const { getByTestId } = await render();
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.settingsContainer));
       expect(getByTestId(testSubj.settingRowTestSubjects(option1.key).container)).toHaveTextContent(

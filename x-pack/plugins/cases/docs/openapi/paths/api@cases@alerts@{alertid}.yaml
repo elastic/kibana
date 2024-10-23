@@ -1,16 +1,16 @@
 get:
-  summary:  Returns the cases associated with a specific alert in the default space.
+  summary:  Get cases for an alert
   operationId: getCasesByAlertDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the cases you're seeking.
-  x-technical-preview: true
+  x-state: Technical preview
   tags:
     - cases
   parameters:
     - $ref: ../components/parameters/alert_id.yaml
-    - $ref: '../components/parameters/owner.yaml'
+    - $ref: '../components/parameters/owner_filter.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -19,7 +19,7 @@ get:
           schema:
             type: array
             maxItems: 10000
-            items: 
+            items:
               type: object
               properties:
                 id:
@@ -28,7 +28,7 @@ get:
                 title:
                   type: string
                   description: The case title.
-            examples:
+            example:
               - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                 title: security_case
     '401':

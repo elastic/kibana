@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Color from 'color';
@@ -19,7 +20,7 @@ import type { Panel, Series } from '../../../../common/types';
 import type { BaseMeta } from '../request_processors/types';
 
 const getTimeSeries = <TRawResponse = unknown>(resp: TRawResponse, series: Series) =>
-  get(resp, `aggregations.timeseries`) || get(resp, `aggregations.${series.id}.timeseries`);
+  get(resp, `aggregations.timeseries`) || get(resp, [`aggregations`, series.id, `timeseries`]);
 
 interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   id: string;
@@ -48,7 +49,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   extractFields: Function
 ): Promise<Array<SplittedData<TMeta>>> {
   if (!meta) {
-    meta = get(resp, `aggregations.${series.id}.meta`);
+    meta = get(resp, `aggregations.${series.id}.meta`) as TMeta | undefined;
   }
 
   const color = new Color(series.color);
@@ -80,7 +81,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
 
     if (series.split_mode === 'filters' && isPlainObject(buckets)) {
       return (series.split_filters || []).map((filter) => {
-        const bucket = get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
+        const bucket = get(resp, [`aggregations`, series.id, `buckets`, filter.id!]); // using array path because the dotted string failed to resolve the types
         bucket.id = `${series.id}${SERIES_SEPARATOR}${filter.id}`;
         bucket.key = filter.id;
         bucket.splitByLabel = splitByLabel;

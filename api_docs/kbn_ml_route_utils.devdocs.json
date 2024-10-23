@@ -32,9 +32,9 @@
           "(coreStart: ",
           {
             "pluginId": "@kbn/core-lifecycle-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreLifecycleServerPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-server.CoreStart",
             "text": "CoreStart"
           },
           ", name: string, id: string | undefined, type: string) => ",
@@ -62,9 +62,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               }
             ],

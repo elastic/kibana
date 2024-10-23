@@ -318,9 +318,6 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
-                "icon": Array [
-                  "empty",
-                ],
                 "iconAlign": Array [
                   "left",
                 ],
@@ -393,9 +390,6 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
-                ],
-                "icon": Array [
-                  "empty",
                 ],
                 "iconAlign": Array [
                   "left",

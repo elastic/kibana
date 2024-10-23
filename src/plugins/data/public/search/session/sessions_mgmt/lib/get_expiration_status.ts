@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires: string | null) => {
   const tNow = moment.utc().valueOf();
@@ -43,7 +44,7 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
     });
   }
 
-  if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
+  if (durationToExpire.asMilliseconds() > 0 && expiresInDays <= sufficientDays) {
     return { toolTipContent, statusContent };
   }
 };

@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { INTRODUCTION_NOTEBOOK } from '../../common/constants';
+import { INTRODUCTION_NOTEBOOK, DEFAULT_NOTEBOOK_ID } from '../../common/constants';
 import { useNotebooksCatalog } from '../hooks/use_notebook_catalog';
 import { NotebooksList } from './notebooks_list';
 import { SelectionPanel } from './selection_panel';
 import { TitlePanel } from './title_panel';
 import { SearchNotebook } from './search_notebook';
 import { SearchLabsButtonPanel } from './search_labs_button_panel';
+import { readNotebookParameter } from '../utils/notebook_query_param';
 
 const LIST_PANEL_ID = 'notebooksList';
 const OUTPUT_PANEL_ID = 'notebooksOutput';
@@ -25,7 +27,9 @@ const defaultSizes: Record<string, number> = {
 
 export const SearchNotebooks = () => {
   const [sizes, setSizes] = useState(defaultSizes);
-  const [selectedNotebookId, setSelectedNotebookId] = useState<string>('introduction');
+  const [selectedNotebookId, setSelectedNotebookId] = useState<string>(
+    readNotebookParameter() ?? DEFAULT_NOTEBOOK_ID
+  );
   const { data } = useNotebooksCatalog();
   const onPanelWidthChange = useCallback((newSizes: Record<string, number>) => {
     setSizes((prevSizes: Record<string, number>) => ({
@@ -33,6 +37,16 @@ export const SearchNotebooks = () => {
       ...newSizes,
     }));
   }, []);
+  useEffect(() => {
+    if (!data) return;
+    const selectedNotebookFound =
+      data.notebooks.find((nb) => nb.id === selectedNotebookId) !== undefined;
+    if (!selectedNotebookFound) {
+      // If the currently selected notebook is not in the list of notebooks revert
+      // to the default notebook selection.
+      setSelectedNotebookId(DEFAULT_NOTEBOOK_ID);
+    }
+  }, [data, selectedNotebookId]);
   const notebooks = useMemo(() => {
     if (data) return data.notebooks;
     return null;
@@ -40,6 +54,7 @@ export const SearchNotebooks = () => {
   const onNotebookSelectionClick = useCallback((id: string) => {
     setSelectedNotebookId(id);
   }, []);
+
   return (
     <EuiResizableContainer
       style={{ height: '100%', width: '100%' }}

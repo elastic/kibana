@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -12,8 +13,12 @@ import { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { isRefNode } from '../process_document';
 import { mergeOperations } from './merge_operations';
 import { mergeArrays } from './merge_arrays';
+import { MergeOptions } from './merge_options';
 
-export function mergePaths(resolvedDocuments: ResolvedDocument[]): OpenAPIV3.PathsObject {
+export function mergePaths(
+  resolvedDocuments: ResolvedDocument[],
+  options: MergeOptions
+): OpenAPIV3.PathsObject {
   const mergedPaths: Record<string, OpenAPIV3.PathItemObject> = {};
 
   for (const { absolutePath, document } of resolvedDocuments) {
@@ -60,7 +65,7 @@ export function mergePaths(resolvedDocuments: ResolvedDocument[]): OpenAPIV3.Pat
       }
 
       try {
-        mergeOperations(sourcePathItem, mergedPathItem);
+        mergeOperations(sourcePathItem, mergedPathItem, options);
       } catch (e) {
         throw new Error(
           `❌  Unable to merge ${chalk.bold(absolutePath)} due to an error in ${chalk.bold(
@@ -69,7 +74,9 @@ export function mergePaths(resolvedDocuments: ResolvedDocument[]): OpenAPIV3.Pat
         );
       }
 
-      mergePathItemServers(sourcePathItem, mergedPathItem);
+      if (!options.skipServers) {
+        mergePathItemServers(sourcePathItem, mergedPathItem);
+      }
 
       try {
         mergeParameters(sourcePathItem, mergedPathItem);

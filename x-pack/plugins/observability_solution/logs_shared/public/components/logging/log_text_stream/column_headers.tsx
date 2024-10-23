@@ -108,14 +108,12 @@ export const LogColumnHeader: FC<
     'data-test-subj'?: string;
   }>
 > = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
-  <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
+  <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth} role="columnheader">
     <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
-  role: props.role ?? 'columnheader',
-}))`
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn)`
   align-items: center;
   display: flex;
   flex-direction: row;

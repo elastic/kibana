@@ -45,7 +45,7 @@ export function AddToCaseAction({
   } = kServices;
 
   const getToastText = useCallback(
-    (theCase) =>
+    (theCase: any) =>
       toMountPoint(
         <CaseToastText
           linkUrl={getUrlForApp(observabilityFeatureId, {

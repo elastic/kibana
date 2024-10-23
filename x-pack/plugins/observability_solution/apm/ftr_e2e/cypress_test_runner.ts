@@ -9,7 +9,7 @@ import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synt
 import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
-import { createApmUsers } from '../server/test_helpers/create_apm_users/create_apm_users';
+import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './field_list_sidebar.scss';
@@ -49,6 +50,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   | 'onAddFilter'
   | 'onAddFieldToWorkspace'
   | 'onRemoveFieldFromWorkspace'
+  | 'additionalFilters'
 > & {
   /**
    * All fields: fields from data view and unmapped fields or columns from text-based search
@@ -167,6 +169,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onDeleteField,
   onToggleSidebar,
   additionalFieldGroups,
+  additionalFilters,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
@@ -204,7 +207,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   );
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
-      (field) => {
+      (field: DataViewField) => {
         return shouldShowField(
           field,
           searchMode,
@@ -284,6 +287,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             groupName === FieldsGroupNames.SelectedFields ||
             Boolean(selectedFieldsState.selectedFieldsMap[field.name])
           }
+          additionalFilters={additionalFilters}
         />
       </li>
     ),
@@ -303,6 +307,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onDeleteField,
       workspaceSelectedFieldNames,
       selectedFieldsState.selectedFieldsMap,
+      additionalFilters,
     ]
   );
 

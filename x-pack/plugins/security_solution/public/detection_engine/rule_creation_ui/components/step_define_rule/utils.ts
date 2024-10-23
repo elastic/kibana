@@ -6,8 +6,7 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-
-import type { BrowserField } from '../../../../common/containers/source';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { CUSTOM_QUERY_REQUIRED, EQL_QUERY_REQUIRED, ESQL_QUERY_REQUIRED } from './translations';
 
@@ -19,7 +18,7 @@ import { isEqlRule, isEsqlRule } from '../../../../../common/detection_engine/ut
  * Keyword, Numeric, ip, boolean, or binary.
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html
  */
-export const getTermsAggregationFields = (fields: BrowserField[]): BrowserField[] => {
+export const getTermsAggregationFields = (fields: FieldSpec[]): FieldSpec[] => {
   // binary types is excluded, as binary field has property aggregatable === false
   const allowedTypesSet = new Set(['string', 'number', 'ip', 'boolean']);
 

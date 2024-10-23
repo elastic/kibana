@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { getObservabilityOnboardingServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
@@ -52,7 +53,6 @@ export class ObservabilityOnboardingPlugin
     >,
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
-    this.logger.debug('observability_onboarding: Setup');
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);
 
     core.savedObjects.registerType(observabilityOnboardingFlow);
@@ -83,12 +83,31 @@ export class ObservabilityOnboardingPlugin
       },
     });
 
+    plugins.customIntegrations.registerCustomIntegration({
+      id: 'otel',
+      title: i18n.translate('xpack.observability_onboarding.otelTile.title', {
+        defaultMessage: 'OpenTelemetry',
+      }),
+      categories: ['observability'],
+      uiInternalPath: '/app/observabilityOnboarding/otel-logs',
+      description: i18n.translate('xpack.observability_onboarding.otelTile.description', {
+        defaultMessage:
+          'Collect logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
+      }),
+      icons: [
+        {
+          type: 'svg',
+          src: core.http.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+        },
+      ],
+      shipper: 'tutorial',
+      isBeta: true,
+    });
+
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('observability_onboarding: Started');
-
     return {};
   }
 

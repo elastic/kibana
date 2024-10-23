@@ -7,8 +7,12 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { Onboarding } from '../../app/onboarding';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { INSTRUCTION_VARIANT } from '../../app/onboarding/instruction_variants';
+
+const Onboarding = dynamic(() =>
+  import('../../app/onboarding').then((mod) => ({ default: mod.Onboarding }))
+);
 
 export const onboarding = {
   '/onboarding': {

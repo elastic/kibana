@@ -12,6 +12,7 @@ import {
   TraceLogsLocatorDefinition,
 } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
+import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
 import {
   LogsSharedClientCoreSetup,
@@ -51,18 +52,36 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   }
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
-    const { http } = core;
-    const { data, dataViews, discoverShared, observabilityAIAssistant } = plugins;
+    const { http, settings } = core;
+    const {
+      charts,
+      data,
+      dataViews,
+      discoverShared,
+      logsDataAccess,
+      observabilityAIAssistant,
+      share,
+    } = plugins;
 
     const logViews = this.logViews.start({
       http,
       dataViews,
+      logSourcesService: logsDataAccess.services.logSourcesService,
       search: data.search,
+    });
+
+    const LogsOverview = createLogsOverview({
+      charts,
+      logsDataAccess,
+      search: data.search.search,
+      uiSettings: settings,
+      share,
     });
 
     if (!observabilityAIAssistant) {
       return {
         logViews,
+        LogsOverview,
       };
     }
 
@@ -76,6 +95,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     return {
       logViews,
       LogAIAssistant,
+      LogsOverview,
     };
   }
 

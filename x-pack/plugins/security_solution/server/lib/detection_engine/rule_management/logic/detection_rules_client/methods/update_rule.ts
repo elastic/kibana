@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizableUpdateFields } from '../../../utils/validate';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
@@ -20,6 +22,7 @@ import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 
 interface UpdateRuleArguments {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   ruleUpdate: RuleUpdateProps;
@@ -27,6 +30,7 @@ interface UpdateRuleArguments {
 }
 
 export const updateRule = async ({
+  actionsClient,
   rulesClient,
   prebuiltRuleAssetClient,
   ruleUpdate,
@@ -47,6 +51,8 @@ export const updateRule = async ({
     throw new ClientError(error.message, error.statusCode);
   }
 
+  validateNonCustomizableUpdateFields(ruleUpdate, existingRule);
+
   const ruleWithUpdates = await applyRuleUpdate({
     prebuiltRuleAssetClient,
     existingRule,
@@ -55,7 +61,7 @@ export const updateRule = async ({
 
   const updatedRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(ruleWithUpdates),
+    data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);

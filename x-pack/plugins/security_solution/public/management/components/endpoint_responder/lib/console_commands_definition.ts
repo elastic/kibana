@@ -164,7 +164,6 @@ export const getEndpointConsoleCommands = ({
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
-  const isScanEnabled = featureFlags.responseActionScanEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities is only validated for Endpoint agent types
@@ -486,43 +485,41 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
-  if (isScanEnabled) {
-    consoleCommands.push({
-      name: 'scan',
-      about: getCommandAboutInfo({
-        aboutInfo: CONSOLE_COMMANDS.scan.about,
-        isSupported: doesEndpointSupportCommand('scan'),
-      }),
-      RenderComponent: ScanActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
+  consoleCommands.push({
+    name: 'scan',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.scan.about,
+      isSupported: doesEndpointSupportCommand('scan'),
+    }),
+    RenderComponent: ScanActionResult,
+    meta: {
+      agentType,
+      endpointId: endpointAgentId,
+      capabilities: endpointCapabilities,
+      privileges: endpointPrivileges,
+    },
+    exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
+    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: true,
+    args: {
+      path: {
+        required: true,
+        allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
+        about: CONSOLE_COMMANDS.scan.args.path.about,
       },
-      exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
-      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator(agentType),
-      mustHaveArgs: true,
-      args: {
-        path: {
-          required: true,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: CONSOLE_COMMANDS.scan.args.path.about,
-        },
-        ...commandCommentArgument(),
-      },
-      helpGroupLabel: HELP_GROUPS.responseActions.label,
-      helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 8,
-      helpDisabled: !doesEndpointSupportCommand('scan'),
-      helpHidden: !getRbacControl({
-        commandName: 'scan',
-        privileges: endpointPrivileges,
-      }),
-    });
-  }
+      ...commandCommentArgument(),
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 8,
+    helpDisabled: !doesEndpointSupportCommand('scan'),
+    helpHidden: !getRbacControl({
+      commandName: 'scan',
+      privileges: endpointPrivileges,
+    }),
+  });
 
   switch (agentType) {
     case 'sentinel_one':

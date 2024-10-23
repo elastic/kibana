@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./log_rate_analysis_full_analysis'));
     loadTestFile(require.resolve('./log_rate_analysis_groups_only'));
     loadTestFile(require.resolve('./log_rate_analysis_no_index'));
+    loadTestFile(require.resolve('./log_rate_analysis_field_candidates'));
   });
 }

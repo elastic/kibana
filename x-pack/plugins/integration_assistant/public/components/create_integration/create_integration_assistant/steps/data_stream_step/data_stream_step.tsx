@@ -20,7 +20,7 @@ import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import type { OnComplete } from './generation_modal';
+import type { OnComplete } from './use_generation';
 import { GenerationModal } from './generation_modal';
 import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';
@@ -36,7 +36,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'filestream', label: 'File Stream' },
   { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
   { value: 'gcs', label: 'Google Cloud Storage' },
-  { value: 'http-endpoint', label: 'HTTP Endpoint' },
+  { value: 'http_endpoint', label: 'HTTP Endpoint' },
   { value: 'journald', label: 'Journald' },
   { value: 'kafka', label: 'Kafka' },
   { value: 'tcp', label: 'TCP' },
@@ -53,7 +53,8 @@ interface DataStreamStepProps {
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
   ({ integrationSettings, connector, isGenerating }) => {
-    const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
+    const { setIntegrationSettings, setIsGenerating, setHasCelInput, setStep, setResult } =
+      useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
     const [name, setName] = useState<string>(integrationSettings?.name ?? '');
@@ -99,9 +100,13 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           setIntegrationValues({ dataStreamDescription: e.target.value }),
         inputTypes: (options: EuiComboBoxOptionOption[]) => {
           setIntegrationValues({ inputTypes: options.map((option) => option.value as InputType) });
+          setHasCelInput(
+            // the cel value here comes from the input type options defined above
+            options.map((option) => option.value as InputType).includes('cel' as InputType)
+          );
         },
       };
-    }, [setIntegrationValues, setInvalidFields, packageNames]);
+    }, [setIntegrationValues, setInvalidFields, setHasCelInput, packageNames]);
 
     useEffect(() => {
       // Pre-populates the name from the title set in the previous step.

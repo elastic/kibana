@@ -16,7 +16,6 @@ import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
 import { ALERT_STATUS_ALL, infraAlertFeatureIds } from './constants';
-import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
@@ -24,7 +23,7 @@ interface AlertsOverviewProps {
   assetId: string;
   dateRange: TimeRange;
   onLoaded: (alertsCount?: AlertsCount) => void;
-  onRangeSelection?: HostsStateUpdater;
+  onRangeSelection?: (dateRange: TimeRange) => void;
   assetType?: InventoryItemType;
 }
 
@@ -86,7 +85,7 @@ export const AlertsOverview = ({
         const from = new Date(start).toISOString();
         const to = new Date(end).toISOString();
 
-        onRangeSelection({ dateRange: { from, to } });
+        onRangeSelection({ from, to });
       }
     },
     [onRangeSelection]
@@ -131,7 +130,7 @@ export const AlertsOverview = ({
           featureIds={alertFeatureIds}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
-          pageSize={5}
+          initialPageSize={5}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

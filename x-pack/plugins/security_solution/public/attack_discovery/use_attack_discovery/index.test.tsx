@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from '../../common/lib/kibana';
+import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { renderHook, act } from '@testing-library/react-hooks';
+import React from 'react';
+
+import { useKibana } from '../../common/lib/kibana';
 import { usePollApi } from '../hooks/use_poll_api';
 import { useAttackDiscovery } from '.';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+
+jest.mock('../../assistant/use_assistant_availability', () => ({
+  useAssistantAvailability: jest.fn(() => ({
+    hasAssistantPrivilege: true,
+    isAssistantEnabled: true,
+  })),
+}));
 
 jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
@@ -40,10 +49,10 @@ jest.mock('@kbn/elastic-assistant', () => ({
       latestAlerts: 20,
     },
   }),
-  useLoadConnectors: () => ({
+  useLoadConnectors: jest.fn(() => ({
     isFetched: true,
     data: mockConnectors,
-  }),
+  })),
 }));
 const mockAttackDiscoveryPost = {
   timestamp: '2024-06-13T17:50:59.409Z',
@@ -97,6 +106,8 @@ const mockAttackDiscoveries = [
 const setLoadingConnectorId = jest.fn();
 const setStatus = jest.fn();
 
+const SIZE = 20;
+
 describe('useAttackDiscovery', () => {
   const mockPollApi = {
     cancelAttackDiscovery: jest.fn(),
@@ -117,7 +128,11 @@ describe('useAttackDiscovery', () => {
 
   it('initializes with correct default values', () => {
     const { result } = renderHook(() =>
-      useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId })
+      useAttackDiscovery({
+        connectorId: 'test-id',
+        setLoadingConnectorId,
+        size: 20,
+      })
     );
 
     expect(result.current.alertsContextCount).toBeNull();
@@ -135,14 +150,15 @@ describe('useAttackDiscovery', () => {
   it('fetches attack discoveries and updates state correctly', async () => {
     (mockedUseKibana.services.http.fetch as jest.Mock).mockResolvedValue(mockAttackDiscoveryPost);
 
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
+
     await act(async () => {
       await result.current.fetchAttackDiscoveries();
     });
     expect(mockedUseKibana.services.http.fetch).toHaveBeenCalledWith(
       '/internal/elastic_assistant/attack_discovery',
       {
-        body: '{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"size":20,"replacements":{},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}',
+        body: `{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"replacements":{},"size":${SIZE},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}`,
         method: 'POST',
         version: '1',
       }
@@ -158,7 +174,7 @@ describe('useAttackDiscovery', () => {
     const error = new Error(errorMessage);
     (mockedUseKibana.services.http.fetch as jest.Mock).mockRejectedValue(error);
 
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
 
     await act(async () => {
       await result.current.fetchAttackDiscoveries();
@@ -175,7 +191,11 @@ describe('useAttackDiscovery', () => {
   it('sets loading state based on poll status', async () => {
     (usePollApi as jest.Mock).mockReturnValue({ ...mockPollApi, status: 'running' });
     const { result } = renderHook(() =>
-      useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId })
+      useAttackDiscovery({
+        connectorId: 'test-id',
+        setLoadingConnectorId,
+        size: SIZE,
+      })
     );
 
     expect(result.current.isLoading).toBe(true);
@@ -193,7 +213,7 @@ describe('useAttackDiscovery', () => {
       },
       status: 'succeeded',
     });
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
 
     expect(result.current.alertsContextCount).toEqual(20);
     // this is set from usePollApi
@@ -218,10 +238,38 @@ describe('useAttackDiscovery', () => {
       },
       status: 'failed',
     });
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
 
     expect(result.current.failureReason).toEqual('something bad');
     expect(result.current.isLoading).toBe(false);
     expect(result.current.lastUpdated).toEqual(null);
+  });
+
+  describe('when zero connectors are configured', () => {
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: [], // <-- zero connectors configured
+      });
+
+      renderHook(() =>
+        useAttackDiscovery({
+          connectorId: 'test-id',
+          setLoadingConnectorId,
+          size: SIZE,
+        })
+      );
+    });
+
+    afterEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: mockConnectors,
+      });
+    });
+
+    it('does NOT call pollApi when zero connectors are configured', () => {
+      expect(mockPollApi.pollApi).not.toHaveBeenCalled();
+    });
   });
 });

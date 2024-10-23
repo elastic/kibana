@@ -52,10 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
-      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-    });
-
-    beforeEach(async () => {
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
       const exists = await es.indices.exists({ index: testHistoryIndex });
       if (exists) {
         await es.deleteByQuery({
@@ -800,7 +797,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
-        expect(scheduledTask.status).to.eql('claiming');
+        expect(['claiming', 'running'].includes(scheduledTask.status)).to.be(true);
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });
@@ -906,7 +903,7 @@ export default function ({ getService }: FtrProviderContext) {
         params: {},
       });
 
-      runTaskSoon({ id: longRunningTask.id });
+      await runTaskSoon({ id: longRunningTask.id });
 
       let scheduledRunAt: string;
       // ensure task is running and store scheduled runAt

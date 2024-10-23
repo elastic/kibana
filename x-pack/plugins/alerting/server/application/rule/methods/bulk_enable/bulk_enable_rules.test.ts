@@ -210,12 +210,12 @@ describe('bulkEnableRules', () => {
     });
   });
 
-  test('should enable two rule and return right actions', async () => {
+  test('should enable two rules and return right actions', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
     });
 
-    const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -223,13 +223,13 @@ describe('bulkEnableRules', () => {
         expect.objectContaining({
           id: 'id1',
           attributes: expect.objectContaining({
-            enabled: false,
+            enabled: true,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
-            enabled: false,
+            enabled: true,
           }),
         }),
       ]),
@@ -239,6 +239,7 @@ describe('bulkEnableRules', () => {
     expect(result).toStrictEqual({
       errors: [],
       rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
+      taskIdsFailedToBeEnabled: [],
       total: 2,
     });
   });
@@ -432,15 +433,22 @@ describe('bulkEnableRules', () => {
     });
   });
 
-  test('should skip rule if it is already enabled', async () => {
+  test('should return both rules if one is already enabled and one is disabled when bulk enable is based on ids', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [disabledRule1, enabledRuleForBulkOps2],
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [enabledRuleForBulkOps1],
+      saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
     });
 
-    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+    const result = await rulesClient.bulkEnableRules({
+      ids: ['id1', 'id2'],
+    });
+
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+
+    expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -457,7 +465,45 @@ describe('bulkEnableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedRuleForBulkOps1],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
+      total: 2,
+      taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  test('should return both rules if one is already enabled and one is disabled when bulk enable is based on filters', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRule1, enabledRuleForBulkOps2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+    });
+
+    const result = await rulesClient.bulkEnableRules({
+      filter: 'fake_filter',
+    });
+
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+
+    expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: true,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
@@ -793,12 +839,12 @@ describe('bulkEnableRules', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeName' },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeName' },
       });
     });
 

@@ -15,7 +15,8 @@ export const getReportersRoute = createCasesRoute({
   path: CASE_REPORTERS_URL,
   routerOptions: {
     access: 'public',
-    summary: `Get all case creators`,
+    summary: `Get case creators`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

@@ -13,9 +13,6 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiSkeletonText,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   useGeneratedHtmlId,
   EuiIcon,
@@ -24,6 +21,8 @@ import {
   type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -33,14 +32,31 @@ import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { LocatorButtonEmpty } from '../shared/locator_button_empty';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
+import { FeedbackButtons } from '../shared/feedback_buttons';
+import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
+import { SupportedIntegrationsList } from './supported_integrations_list';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
+  const {
+    services: { share },
+  } = useKibana<ObservabilityOnboardingContextValue>();
+
+  useAutoDetectTelemetry(
+    status,
+    installedIntegrations.map(({ title, pkgName, pkgVersion, installSource }) => ({
+      title,
+      pkgName,
+      pkgVersion,
+      installSource,
+    }))
+  );
 
   if (error) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;
   }
 
   const registryIntegrations = installedIntegrations.filter(
@@ -49,6 +65,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const customIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'custom'
   );
+  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -57,7 +74,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           {
             title: i18n.translate(
               'xpack.observability_onboarding.autoDetectPanel.runTheCommandOnLabel',
-              { defaultMessage: 'Run the command on your host' }
+              { defaultMessage: 'Install standalone Elastic Agent on your host' }
             ),
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
@@ -73,13 +90,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s">
-                  {['Apache', 'Docker', 'Nginx', 'System', 'Custom .log files'].map((item) => (
-                    <EuiFlexItem key={item} grow={false}>
-                      <EuiBadge color="hollow">{item}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
+                <SupportedIntegrationsList />
                 <EuiSpacer />
                 {/* Bash syntax highlighting only highlights a few random numbers (badly) so it looks less messy to go with plain text */}
                 <EuiCodeBlock paddingSize="m" language="text">
@@ -113,6 +124,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       { defaultMessage: 'Your data is ready to explore!' }
                     )}
                     isLoading={false}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator"
                   />
                 ) : status === 'awaitingData' ? (
                   <ProgressIndicator
@@ -120,6 +132,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.installingElasticAgentFlexItemLabel',
                       { defaultMessage: 'Waiting for data to arrive...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelAwaitingDataProgressIndicator"
                   />
                 ) : status === 'inProgress' ? (
                   <ProgressIndicator
@@ -127,6 +140,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.lookingForLogFilesFlexItemLabel',
                       { defaultMessage: 'Waiting for installation to complete...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelInProgressProgressIndicator"
                   />
                 ) : null}
                 {(status === 'awaitingData' || status === 'dataReceived') &&
@@ -155,13 +169,27 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         initialIsOpen
                       >
                         <GetStartedPanel
+                          onboardingFlowType="auto-detect"
+                          dataset={integration.pkgName}
+                          onboardingId={data?.onboardingFlow?.id}
+                          telemetryEventContext={{
+                            autoDetect: {
+                              installSource: integration.installSource,
+                              pkgVersion: integration.pkgVersion,
+                              title: integration.title,
+                            },
+                          }}
                           integration={integration.pkgName}
                           newTab
                           isLoading={status !== 'dataReceived'}
-                          dashboardLinks={integration.kibanaAssets
+                          actionLinks={integration.kibanaAssets
                             .filter((asset) => asset.type === 'dashboard')
                             .map((asset) => {
                               const dashboard = DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
+                              const href =
+                                dashboardLocator?.getRedirectUrl({
+                                  dashboardId: asset.id,
+                                }) ?? '';
 
                               return {
                                 id: asset.id,
@@ -195,6 +223,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                           defaultMessage: 'Explore logs data',
                                         }
                                       ),
+                                href,
                               };
                             })}
                         />
@@ -242,6 +271,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           },
         ]}
       />
+      <FeedbackButtons flow="auto-detect" />
     </EuiPanel>
   );
 };

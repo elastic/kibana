@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
-import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('Endpoint plugin', async function async() {
+  describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
     const kbnClient = getService('kibanaServer');

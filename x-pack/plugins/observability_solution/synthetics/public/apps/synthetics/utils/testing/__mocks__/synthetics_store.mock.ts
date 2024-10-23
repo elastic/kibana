@@ -24,14 +24,12 @@ import { MonitorDetailsState } from '../../../state';
  */
 export const mockState: SyntheticsAppState = {
   ui: {
-    alertFlyoutVisible: null,
+    ruleFlyoutVisible: null,
     basePath: 'yyz',
     esKuery: '',
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',
-    refreshInterval: 60,
-    refreshPaused: true,
   },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,
@@ -100,14 +98,7 @@ export const mockState: SyntheticsAppState = {
       sortOrder: 'asc',
       sortField: 'name.keyword',
     },
-    data: {
-      total: 0,
-      allMonitorIds: [],
-      monitors: [],
-    },
-    error: null,
-    loaded: false,
-    loading: false,
+    trendStats: {},
     flyoutConfig: null,
     groupBy: {
       field: 'none',
@@ -118,7 +109,6 @@ export const mockState: SyntheticsAppState = {
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
-  pingStatus: getPingStatusesMockSlice(),
   agentPolicies: {
     loading: false,
     error: null,
@@ -163,6 +153,11 @@ export const mockState: SyntheticsAppState = {
       total: 0,
       certs: [],
     },
+  },
+  monitorStatusHeatmap: {
+    heatmap: [],
+    loading: false,
+    error: null,
   },
 };
 
@@ -443,7 +438,7 @@ function getMonitorDetailsMockSlice() {
       tags: [],
       timeout: null,
       name: 'One pixel monitor',
-      locations: [{ isServiceManaged: true, id: 'us_central' }],
+      locations: [{ isServiceManaged: true, id: 'us_central', label: 'US Central' }],
       namespace: 'default',
       origin: SourceType.UI,
       max_attempts: 2,
@@ -489,34 +484,4 @@ function getMonitorDetailsMockSlice() {
     error: null,
     selectedLocationId: 'us_central',
   } as MonitorDetailsState;
-}
-
-function getPingStatusesMockSlice() {
-  const monitorDetails = getMonitorDetailsMockSlice();
-
-  return {
-    pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
-      const geoName = cur.observer.geo?.name!;
-      if (!acc[cur.monitor.id]) {
-        acc[cur.monitor.id] = {};
-      }
-
-      if (!acc[cur.monitor.id][geoName]) {
-        acc[cur.monitor.id][geoName] = {};
-      }
-
-      acc[cur.monitor.id][geoName][cur.timestamp] = {
-        timestamp: cur.timestamp,
-        error: undefined,
-        locationId: geoName,
-        config_id: cur.config_id!,
-        docId: cur.docId,
-        summary: cur.summary!,
-      };
-
-      return acc;
-    }, {} as SyntheticsAppState['pingStatus']['pingStatuses']),
-    loading: false,
-    error: null,
-  } as SyntheticsAppState['pingStatus'];
 }

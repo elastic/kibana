@@ -30,7 +30,7 @@ describe('useGetFieldsByIssueType', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getFieldsByIssueType');
-    const { waitForNextUpdate } = renderHook(
+    const { result, waitFor } = renderHook(
       () =>
         useGetFieldsByIssueType({
           http,
@@ -40,7 +40,7 @@ describe('useGetFieldsByIssueType', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => result.current.isSuccess);
 
     expect(spy).toHaveBeenCalledWith({
       http,
@@ -88,7 +88,7 @@ describe('useGetFieldsByIssueType', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetFieldsByIssueType({
           http,
@@ -98,8 +98,9 @@ describe('useGetFieldsByIssueType', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getFieldsByIssueType api returns successfully but contains an error', async () => {
@@ -113,7 +114,7 @@ describe('useGetFieldsByIssueType', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetFieldsByIssueType({
           http,
@@ -123,7 +124,8 @@ describe('useGetFieldsByIssueType', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

@@ -78,30 +78,35 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     cachedSchema: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { schema }) => schema,
       },
     ],
     mostRecentIndexJob: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { mostRecentIndexJob }) => mostRecentIndexJob,
       },
     ],
     unconfirmedFields: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { unconfirmedFields }) => unconfirmedFields,
       },
     ],
     incompleteFields: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { incompleteFields }) => incompleteFields,
       },
     ],
     hasNewUnsearchedFields: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { unsearchedUnconfirmedFields }) => unsearchedUnconfirmedFields,
       },
     ],
@@ -135,7 +140,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
   },
   listeners: ({ actions, values }) => ({
     addSchemaField: ({ fieldName, fieldType }) => {
-      if (values.schema.hasOwnProperty(fieldName)) {
+      if (Object.hasOwn(values.schema, fieldName)) {
         setErrorMessage(ADD_SCHEMA_ERROR(fieldName));
         actions.closeModal();
       } else {

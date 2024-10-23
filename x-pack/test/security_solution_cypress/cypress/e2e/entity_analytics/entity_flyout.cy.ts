@@ -8,7 +8,7 @@
 import {
   ENTRA_ID_PACKAGE_NAME,
   OKTA_PACKAGE_NAME,
-} from '@kbn/security-solution-plugin/public/timelines/components/side_panel/new_user_detail/constants';
+} from '@kbn/security-solution-plugin/public/flyout/entity_details/shared/constants';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
@@ -42,7 +42,6 @@ import {
   ENTRA_DOCUMENT_TAB,
   OKTA_DOCUMENT_TAB,
 } from '../../screens/users/flyout_asset_panel';
-import { enableAssetCriticality } from '../../tasks/api_calls/kibana_advanced_settings';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -66,7 +65,6 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       cy.task('esArchiverLoad', { archiveName: 'user_managed_data' });
-      enableAssetCriticality();
       mockRiskEngineEnabled();
       login();
       visitWithTimeRange(ALERTS_URL);

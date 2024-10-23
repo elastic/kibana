@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-custom-branding-server-internal",
-        "id": "def-common.CustomBrandingService",
+        "id": "def-server.CustomBrandingService",
         "type": "Class",
         "tags": [],
         "label": "CustomBrandingService",
@@ -31,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-server-internal",
-            "id": "def-common.CustomBrandingService.Unnamed",
+            "id": "def-server.CustomBrandingService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,7 +37,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-custom-branding-server-internal",
-                "id": "def-common.CustomBrandingService.Unnamed.$1",
+                "id": "def-server.CustomBrandingService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -63,7 +55,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-internal",
-            "id": "def-common.CustomBrandingService.setup",
+            "id": "def-server.CustomBrandingService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -80,7 +72,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-internal",
-            "id": "def-common.CustomBrandingService.start",
+            "id": "def-server.CustomBrandingService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -89,9 +81,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-custom-branding-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreCustomBrandingServerPluginApi",
-                "section": "def-common.CustomBrandingStart",
+                "section": "def-server.CustomBrandingStart",
                 "text": "CustomBrandingStart"
               }
             ],
@@ -103,7 +95,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-internal",
-            "id": "def-common.CustomBrandingService.stop",
+            "id": "def-server.CustomBrandingService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -121,6 +113,14 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

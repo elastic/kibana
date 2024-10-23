@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestSuiteFactory } from '../../common/suites/get';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
@@ -15,7 +17,7 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const { getTest, createExpectResults, createExpectNotFoundResult, nonExistantSpaceId } =
-    getTestSuiteFactory(esArchiver, supertestWithoutAuth);
+    getTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('get', () => {
     // valid spaces

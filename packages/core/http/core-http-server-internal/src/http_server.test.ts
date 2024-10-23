@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTlsConfigMock } from './http_server.test.mocks';
@@ -905,6 +906,7 @@ test('exposes route details of incoming request to a route handler', async () =>
     .expect(200, {
       method: 'get',
       path: '/',
+      routePath: '/',
       options: {
         authRequired: true,
         xsrfRequired: false,
@@ -1087,6 +1089,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
     .expect(200, {
       method: 'post',
       path: '/',
+      routePath: '/',
       options: {
         authRequired: true,
         xsrfRequired: true,

@@ -1,0 +1,61 @@
+# FROM
+
+The `FROM` command retrieves a table of data from a specified data stream, index, or alias.
+
+## Syntax
+
+`FROM index_pattern [METADATA fields]`
+
+### Parameters
+
+#### index_pattern
+
+This parameter represents a list of indices, data streams, or aliases. It supports the use of wildcards and date math.
+
+#### fields
+
+This is a comma-separated list of metadata fields to be retrieved.
+
+## Description
+
+The `FROM` command retrieves a table of data from a specified data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field. The field can be accessed using its name.
+
+#### Basic Data Retrieval
+```esql
+FROM employees
+```
+
+#### Time Series Data
+Use date math to refer to indices, aliases, and data streams. This can be useful for time series data, for example, to access today’s index:
+```esql
+FROM <logs-{now/d}>
+```
+
+#### Multiple Indices
+Use comma-separated lists or wildcards to query multiple data streams, indices, or aliases:
+```esql
+FROM employees-00001,other-employees-*
+```
+
+#### Remote Clusters
+Use the format `<remote_cluster_name>:<target>` to query data streams and indices on remote clusters:
+```esql
+FROM cluster_one:employees-00001,cluster_two:other-employees-*
+```
+
+#### Metadata Retrieval
+Use the optional `METADATA` directive to enable metadata fields:
+```esql
+FROM employees METADATA _id
+```
+
+#### Escaping Special Characters
+Use enclosing double quotes (") or three enclosing double quotes (""") to escape index names that contain special characters:
+```esql
+FROM "this=that","""this[that"""
+```
+
+### Limitations
+
+- By default, an ES|QL query without an explicit `LIMIT` uses an implicit limit of 1000 rows. This applies to the `FROM` command as well.
+- Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value.

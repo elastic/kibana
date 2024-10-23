@@ -17,26 +17,22 @@ export default function ({ getService }: FtrProviderContext) {
 
   const compressionSuite = (url: string) => {
     it(`uses compression when there isn't a referer`, async () => {
-      await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .get(url)
         .set('accept-encoding', 'gzip')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
-          expect(response.header).to.have.property('content-encoding', 'gzip');
-        });
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.header).to.have.property('content-encoding', 'gzip');
     });
 
     it(`uses compression when there is a whitelisted referer`, async () => {
-      await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .get(url)
         .set('accept-encoding', 'gzip')
         .set(svlCommonApi.getInternalRequestHeader())
         .set('referer', 'https://some-host.com')
-        .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
-          expect(response.header).to.have.property('content-encoding', 'gzip');
-        });
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.header).to.have.property('content-encoding', 'gzip');
     });
   };
 

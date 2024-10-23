@@ -2,12 +2,8 @@
 
 exports[`HeatmapStyleEditor is rendered 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="rowCompressed"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   label="Color range"
-  labelType="label"
 >
   <EuiColorPalettePicker
     compressed={true}

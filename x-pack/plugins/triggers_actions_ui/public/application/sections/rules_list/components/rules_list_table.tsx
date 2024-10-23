@@ -623,7 +623,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 <EuiIconTip
                   data-test-subj="ruleDurationWarning"
                   anchorClassName="ruleDurationWarningIcon"
-                  type="rule"
+                  type="warning"
                   color="warning"
                   content={i18n.translate(
                     'xpack.triggersActionsUI.sections.rulesList.ruleTypeExcessDurationMessage',

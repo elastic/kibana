@@ -1,8 +1,7 @@
-type:
-  - "array"
-  - "null"
+type: array
 description: An array containing users that are assigned to the case.
 maxItems: 10
+nullable: true
 items:
   type: object
   required:
@@ -11,5 +10,4 @@ items:
     uid:
       type: string
       description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
-      examples:
-        - u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+      example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0

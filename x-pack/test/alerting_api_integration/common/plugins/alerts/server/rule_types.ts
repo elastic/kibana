@@ -917,7 +917,7 @@ function getAlwaysFiringAlertAsDataRuleType(
     validate: {
       params: paramsSchema,
     },
-    category: 'kibana',
+    category: 'management',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',

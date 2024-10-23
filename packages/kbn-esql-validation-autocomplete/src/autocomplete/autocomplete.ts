@@ -1,24 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import uniqBy from 'lodash/uniqBy';
+import { uniq, uniqBy } from 'lodash';
 import type {
   AstProviderFn,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
+  ESQLLiteral,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { partition } from 'lodash';
-import type { EditorContext, SuggestionRawDefinition } from './types';
+import { i18n } from '@kbn/i18n';
+import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
+import type { EditorContext, ItemKind, SuggestionRawDefinition, GetFieldsByTypeFn } from './types';
 import {
-  lookupColumn,
+  getColumnForASTNode,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -27,11 +30,9 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
-  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
-  isMathFunction,
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
@@ -43,10 +44,16 @@ import {
   nonNullable,
   getColumnExists,
   findPreviousWord,
+  noCaseCompare,
+  correctQuerySyntax,
+  getColumnByName,
+  sourceExists,
+  findFinalWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
+  allStarConstant,
   colonCompleteItem,
   commaCompleteItem,
   commandAutocompleteDefinitions,
@@ -73,8 +80,10 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  TRIGGER_SUGGESTION_COMMAND,
+  getAddDateHistogramSnippet,
 } from './factories';
-import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
+import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -82,25 +91,30 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
-  getParamAtPosition,
+  getOverlapRange,
   getQueryForFields,
   getSourcesFromCommands,
+  getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
+  getValidSignaturesAndTypesToSuggestNext,
 } from './helper';
-import { FunctionParameter } from '../definitions/types';
+import { getSortPos } from './commands/sort/helper';
+import {
+  FunctionParameter,
+  FunctionReturnType,
+  SupportedDataType,
+  isParameterType,
+  isReturnType,
+} from '../definitions/types';
+import { metadataOption } from '../definitions/options';
+import { comparisonFunctions } from '../definitions/builtin';
+import { countBracketsUnclosed } from '../shared/helpers';
+import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
-type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataStreamsForIntegrationFn = (
-  sourceName: string
-) => Promise<Array<{ name: string; title?: string }> | undefined>;
-type GetFieldsByTypeFn = (
-  type: string | string[],
-  ignored?: string[]
-) => Promise<SuggestionRawDefinition[]>;
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
@@ -124,7 +138,7 @@ function appendEnrichFields(
   // @TODO: improve this
   const newMap: Map<string, ESQLRealField> = new Map(fieldsMap);
   for (const field of policyMetadata.enrichFields) {
-    newMap.set(field, { name: field, type: 'number' });
+    newMap.set(field, { name: field, type: 'double' });
   }
   return newMap;
 }
@@ -137,28 +151,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   return finalSuggestions;
 }
 
-/**
- * This function count the number of unclosed brackets in order to
- * locally fix the queryString to generate a valid AST
- * A known limitation of this is that is not aware of commas "," or pipes "|"
- * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
- * @param bracketType
- * @param text
- * @returns
- */
-function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
-  const stack = [];
-  const closingBrackets = { '(': ')', '[': ']' };
-  for (const char of text) {
-    if (char === bracketType) {
-      stack.push(bracketType);
-    } else if (char === closingBrackets[bracketType]) {
-      stack.pop();
-    }
-  }
-  return stack.length;
-}
-
 export async function suggest(
   fullText: string,
   offset: number,
@@ -168,49 +160,22 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   const innerText = fullText.substring(0, offset);
 
-  let finalText = innerText;
+  const correctedQuery = correctQuerySyntax(innerText, context);
 
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
-  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
-    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) ||
-        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
-  ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
-  }
-  // if there are unclosed brackets, close them
-  if (unclosedBrackets) {
-    for (const [char, count] of [
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        finalText += Array(count).fill(char).join('');
-      }
-    }
-  }
-
-  const { ast } = await astProvider(finalText);
+  const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
+  const queryForFields = getQueryForFields(
+    buildQueryUntilPreviousCommand(ast, correctedQuery),
+    ast
+  );
+
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
-    queryForFields,
+    queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
-  const getSources = getSourcesRetriever(resourceRetriever);
-  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
+  const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -218,8 +183,28 @@ export async function suggest(
     // filter source commands if already defined
     const suggestions = commandAutocompleteDefinitions;
     if (!ast.length) {
-      return suggestions.filter(isSourceCommand);
+      // Display the recommended queries if there are no commands (empty state)
+      const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
+      if (getSources) {
+        let fromCommand = '';
+        const sources = await getSources();
+        const visibleSources = sources.filter((source) => !source.hidden);
+        if (visibleSources.find((source) => source.name.startsWith('logs'))) {
+          fromCommand = 'FROM logs*';
+        } else fromCommand = `FROM ${visibleSources[0].name}`;
+
+        const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
+          fromCommand,
+          resourceRetriever
+        );
+        recommendedQueriesSuggestions.push(
+          ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
+        );
+      }
+      const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
+      return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
+
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
@@ -231,7 +216,6 @@ export async function suggest(
       ast,
       astContext,
       getSources,
-      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -258,7 +242,8 @@ export async function suggest(
         { option, ...rest },
         getFieldsByType,
         getFieldsMap,
-        getPolicyMetadata
+        getPolicyMetadata,
+        resourceRetriever?.getPreferences
       );
     }
   }
@@ -269,7 +254,9 @@ export async function suggest(
       astContext,
       getFieldsByType,
       getFieldsMap,
-      getPolicyMetadata
+      getPolicyMetadata,
+      fullText,
+      offset
     );
   }
   if (astContext.type === 'list') {
@@ -285,12 +272,19 @@ export async function suggest(
   return [];
 }
 
-function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
+export function getFieldsByTypeRetriever(
+  queryString: string,
+  resourceRetriever?: ESQLCallbacks
+): { getFieldsByType: GetFieldsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   return {
-    getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
+    getFieldsByType: async (
+      expectedType: string | string[] = 'any',
+      ignored: string[] = [],
+      options
+    ) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields);
+      return buildFieldsDefinitionsWithMetadata(fields, options);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -307,29 +301,15 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async () => {
-    const list = (await helper()) || [];
-    // hide indexes that start with .
-    return buildSourcesDefinitions(
-      list
-        .filter(({ hidden }) => !hidden)
-        .map(({ name, dataStreams, title }) => {
-          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title };
-        })
-    );
-  };
-}
-
-function getDatastreamsForIntegrationRetriever(
-  resourceRetriever?: ESQLCallbacks
-): GetDataStreamsForIntegrationFn {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async (sourceName: string) => {
-    const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName)?.dataStreams;
-  };
+function getSourceSuggestions(sources: ESQLSourceResult[]) {
+  // hide indexes that start with .
+  return buildSourcesDefinitions(
+    sources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, dataStreams, title, type }) => {
+        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      })
+  );
 }
 
 function findNewVariable(variables: Map<string, ESQLVariable[]>) {
@@ -344,10 +324,16 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
 function workoutBuiltinOptions(
   nodeArg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): { skipAssign: boolean } {
+): { skipAssign: boolean; commandsToInclude?: string[] } {
+  const commandsToInclude =
+    (isSingleItem(nodeArg) && nodeArg.text?.toLowerCase().trim().endsWith('null')) ?? false
+      ? ['and', 'or']
+      : undefined;
+
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
-    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg, references)),
+    skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references)),
+    commandsToInclude,
   };
 }
 
@@ -387,7 +373,7 @@ function areCurrentArgsValid(
         return false;
       } else {
         return (
-          extractFinalTypeFromArg(node, references) ===
+          extractTypeFromASTArg(node, references) ===
           getCommandDefinition(command.name).signature.params[0].type
         );
       }
@@ -403,19 +389,25 @@ function areCurrentArgsValid(
   return true;
 }
 
-function extractFinalTypeFromArg(
+export function extractTypeFromASTArg(
   arg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): string | undefined {
+):
+  | ESQLLiteral['literalType']
+  | SupportedDataType
+  | FunctionReturnType
+  | 'timeInterval'
+  | string // @TODO remove this
+  | undefined {
   if (Array.isArray(arg)) {
-    return extractFinalTypeFromArg(arg[0], references);
+    return extractTypeFromASTArg(arg[0], references);
   }
   if (isColumnItem(arg) || isLiteralItem(arg)) {
     if (isLiteralItem(arg)) {
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = lookupColumn(arg, references);
+      const hit = getColumnForASTNode(arg, references);
       if (hit) {
         return hit.type;
       }
@@ -461,7 +453,10 @@ function isFunctionArgComplete(
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return arg.args.every((a, index) => {
-      return def.params[index].type === extractFinalTypeFromArg(a, references);
+      return (
+        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        def.params[index].type === extractTypeFromASTArg(a, references)
+      );
     });
   });
   if (!hasCorrectTypes) {
@@ -501,8 +496,7 @@ async function getExpressionSuggestionsByType(
     option: ESQLCommandOption | undefined;
     node: ESQLSingleAstItem | undefined;
   },
-  getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
+  getSources: () => Promise<ESQLSourceResult[]>,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -510,6 +504,12 @@ async function getExpressionSuggestionsByType(
 ) {
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
+
+  // TODO - this is a workaround because it was too difficult to handle this case in a generic way :(
+  if (commandDef.name === 'from' && node && isSourceItem(node) && /\s/.test(node.name)) {
+    // FROM " <suggest>"
+    return [];
+  }
 
   // A new expression is considered either
   // * just after a command name => i.e. ... | STATS <here>
@@ -543,6 +543,7 @@ async function getExpressionSuggestionsByType(
     const optArg = optionsAlreadyDeclared.find(({ name: optionName }) => optionName === name);
     return (!optArg && !optionsAlreadyDeclared.length) || (optArg && index > optArg.index);
   });
+  const hasRecommendedQueries = Boolean(commandDef?.hasRecommendedQueries);
   // get the next definition for the given command
   let argDef = commandDef.signature.params[argIndex];
   // tune it for the variadic case
@@ -580,12 +581,31 @@ async function getExpressionSuggestionsByType(
   const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
+  const previousWord = findPreviousWord(innerText);
   // enrich with assignment has some special rules who are handled somewhere else
-  const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveAssignments =
+    ['eval', 'stats', 'row'].includes(command.name) &&
+    !comparisonFunctions.map((fn) => fn.name).includes(previousWord);
 
   const references = { fields: fieldsMap, variables: anyVariables };
+  if (command.name === 'sort') {
+    return await suggestForSortCmd(innerText, getFieldsByType, (col) =>
+      Boolean(getColumnByName(col, references))
+    );
+  }
 
   const suggestions: SuggestionRawDefinition[] = [];
+
+  // When user types and accepts autocomplete suggestion, and cursor is placed at the end of a valid field
+  // we should not show irrelevant functions that might have words matching
+  const columnWithActiveCursor = commands.find(
+    (c) =>
+      c.name === command.name &&
+      command.name === 'eval' &&
+      c.args.some((arg) => isColumnItem(arg) && arg.name.includes(EDITOR_MARKER))
+  );
+
+  const shouldShowFunctions = !columnWithActiveCursor;
 
   // in this flow there's a clear plan here from argument definitions so try to follow it
   if (argDef) {
@@ -610,39 +630,79 @@ async function getExpressionSuggestionsByType(
     }
     // Suggest fields or variables
     if (argDef.type === 'column' || argDef.type === 'any') {
-      // ... | <COMMAND> <suggest>
       if ((!nodeArg || isNewExpression) && !endsWithNot) {
-        suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            [argDef.innerType || 'any'],
-            command.name,
-            option?.name,
-            getFieldsByType,
-            {
-              // TODO instead of relying on canHaveAssignments and other command name checks
-              // we should have a more generic way to determine if a command can have functions.
-              // I think it comes down to the definition of 'column' since 'any' should always
-              // include functions.
-              functions: canHaveAssignments || command.name === 'sort',
-              fields: !argDef.constantOnly,
-              variables: anyVariables,
-              literals: argDef.constantOnly,
-            },
-            {
-              ignoreFields: isNewExpression
-                ? command.args.filter(isColumnItem).map(({ name }) => name)
-                : [],
-            }
-          ))
+        const fieldSuggestions = await getFieldsOrFunctionsSuggestions(
+          argDef.innerTypes || ['any'],
+          command.name,
+          option?.name,
+          getFieldsByType,
+          {
+            // TODO instead of relying on canHaveAssignments and other command name checks
+            // we should have a more generic way to determine if a command can have functions.
+            // I think it comes down to the definition of 'column' since 'any' should always
+            // include functions.
+            functions: canHaveAssignments || command.name === 'sort',
+            fields: !argDef.constantOnly,
+            variables: anyVariables,
+            literals: argDef.constantOnly,
+          },
+          {
+            ignoreColumns: isNewExpression
+              ? command.args.filter(isColumnItem).map(({ name }) => name)
+              : [],
+          }
         );
+
+        const fieldFragmentSuggestions = await handleFragment(
+          innerText,
+          (fragment) => Boolean(getColumnByName(fragment, references)),
+          (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+            // COMMAND fie<suggest>
+            return fieldSuggestions.map((suggestion) => ({
+              ...suggestion,
+              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            }));
+          },
+          (fragment: string, rangeToReplace: { start: number; end: number }) => {
+            // COMMAND field<suggest>
+            if (['grok', 'dissect'].includes(command.name)) {
+              return fieldSuggestions.map((suggestion) => ({
+                ...suggestion,
+                text: suggestion.text + ' ',
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              }));
+            }
+
+            const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
+            if (fieldSuggestions.length > 1)
+              // when we fix the editor marker, this should probably be checked against 0 instead of 1
+              // this is because the last field in the AST is currently getting removed (because it contains
+              // the editor marker) so it is not included in the ignored list which is used to filter out
+              // existing fields above.
+              finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+
+            return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
+              ...s,
+              filterText: fragment,
+              text: fragment + s.text,
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            }));
+          }
+        );
+
+        suggestions.push(...fieldFragmentSuggestions);
       }
     }
     if (argDef.type === 'function' || argDef.type === 'any') {
       if (isColumnItem(nodeArg)) {
         // ... | STATS a <suggest>
         // ... | EVAL a <suggest>
-        const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
-        if (nodeArgType) {
+        const nodeArgType = extractTypeFromASTArg(nodeArg, references);
+        if (isParameterType(nodeArgType)) {
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
@@ -673,7 +733,7 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: true,
+              functions: shouldShowFunctions,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
               literals: argDef.constantOnly,
@@ -695,25 +755,25 @@ async function getExpressionSuggestionsByType(
       if (!isNewExpression) {
         if (isAssignment(nodeArg) && isAssignmentComplete(nodeArg)) {
           const [rightArg] = nodeArg.args[1] as [ESQLSingleAstItem];
-          const nodeArgType = extractFinalTypeFromArg(rightArg, references);
+          const nodeArgType = extractTypeFromASTArg(rightArg, references);
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
               undefined,
-              nodeArgType || 'any',
+              isParameterType(nodeArgType) ? nodeArgType : 'any',
               undefined,
               workoutBuiltinOptions(rightArg, references)
             )
           );
-          if (nodeArgType === 'number' && isLiteralItem(rightArg)) {
+          if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
             suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
           }
           if (isFunctionItem(rightArg)) {
             if (rightArg.args.some(isTimeIntervalItem)) {
               const lastFnArg = rightArg.args[rightArg.args.length - 1];
-              const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
-              if (lastFnArgType === 'number' && isLiteralItem(lastFnArg))
+              const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
+              if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
                 suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
             }
@@ -735,22 +795,23 @@ async function getExpressionSuggestionsByType(
                 ))
               );
             } else {
-              const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+              const nodeArgType = extractTypeFromASTArg(nodeArg, references);
               suggestions.push(
                 ...(await getBuiltinFunctionNextArgument(
+                  innerText,
                   command,
                   option,
                   argDef,
                   nodeArg,
-                  nodeArgType || 'any',
+                  (nodeArgType as string) || 'any',
                   references,
                   getFieldsByType
                 ))
               );
               if (nodeArg.args.some(isTimeIntervalItem)) {
                 const lastFnArg = nodeArg.args[nodeArg.args.length - 1];
-                const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
-                if (lastFnArgType === 'number' && isLiteralItem(lastFnArg))
+                const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
+                if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
                   suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
               }
@@ -763,10 +824,17 @@ async function getExpressionSuggestionsByType(
     // if the definition includes a list of constants, suggest them
     if (argDef.values) {
       // ... | <COMMAND> ... <suggest enums>
-      suggestions.push(...buildConstantsDefinitions(argDef.values));
+      suggestions.push(
+        ...buildConstantsDefinitions(argDef.values, undefined, undefined, {
+          advanceCursorAndOpenSuggestions: true,
+        })
+      );
     }
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
-    if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
+    if (
+      ['string', 'text', 'keyword', 'boolean', ...ESQL_NUMBER_TYPES].includes(argDef.type) &&
+      !argDef.values
+    ) {
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
@@ -783,6 +851,7 @@ async function getExpressionSuggestionsByType(
             // ... | <COMMAND> <suggest>
             // In this case start suggesting something not strictly based on type
             suggestions.push(
+              ...(await getFieldsByType('any', [], { advanceCursor: true, openSuggestions: true })),
               ...(await getFieldsOrFunctionsSuggestions(
                 ['any'],
                 command.name,
@@ -790,7 +859,7 @@ async function getExpressionSuggestionsByType(
                 getFieldsByType,
                 {
                   functions: true,
-                  fields: true,
+                  fields: false,
                   variables: anyVariables,
                 }
               ))
@@ -798,14 +867,14 @@ async function getExpressionSuggestionsByType(
           }
         } else {
           // if something is already present, leverage its type to suggest something in context
-          const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+          const nodeArgType = extractTypeFromASTArg(nodeArg, references);
           // These cases can happen here, so need to identify each and provide the right suggestion
           // i.e. ... | <COMMAND> field <suggest>
           // i.e. ... | <COMMAND> field + <suggest>
           // i.e. ... | <COMMAND> field >= <suggest>
           // i.e. ... | <COMMAND> field > 0 <suggest>
           // i.e. ... | <COMMAND> field + otherN <suggest>
-
+          // "FROM a | WHERE doubleField IS NOT N"
           if (nodeArgType) {
             if (isFunctionItem(nodeArg)) {
               if (nodeArg.name === 'not') {
@@ -825,17 +894,18 @@ async function getExpressionSuggestionsByType(
               } else {
                 suggestions.push(
                   ...(await getBuiltinFunctionNextArgument(
+                    innerText,
                     command,
                     option,
                     argDef,
                     nodeArg,
-                    nodeArgType,
+                    nodeArgType as string,
                     references,
                     getFieldsByType
                   ))
                 );
               }
-            } else {
+            } else if (isParameterType(nodeArgType)) {
               // i.e. ... | <COMMAND> field <suggest>
               suggestions.push(
                 ...getBuiltinCompatibleFunctionDefinition(
@@ -852,12 +922,25 @@ async function getExpressionSuggestionsByType(
       }
     }
     if (argDef.type === 'source') {
-      if (argDef.innerType === 'policy') {
+      if (argDef.innerTypes?.includes('policy')) {
         // ... | ENRICH <suggest>
         const policies = await getPolicies();
+        const lastWord = findFinalWord(innerText);
+        if (lastWord !== '') {
+          policies.forEach((suggestion) => {
+            suggestions.push({
+              ...suggestion,
+              rangeToReplace: {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              },
+            });
+          });
+        }
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const index = getSourcesFromCommands(commands, 'index');
+        const indexes = getSourcesFromCommands(commands, 'index');
+        const lastIndex = indexes[indexes.length - 1];
         const canRemoveQuote = isNewExpression && innerText.includes('"');
         // Function to add suggestions based on canRemoveQuote
         const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
@@ -866,24 +949,70 @@ async function getExpressionSuggestionsByType(
           );
         };
 
-        if (index && index.text && index.text !== EDITOR_MARKER) {
-          const source = index.text.replace(EDITOR_MARKER, '');
-          const dataStreams = await getDatastreamsForIntegration(source);
+        if (lastIndex && lastIndex.text && lastIndex.text !== EDITOR_MARKER) {
+          const sources = await getSources();
 
-          if (dataStreams) {
-            // Integration name, suggest the datastreams
-            await addSuggestionsBasedOnQuote(
-              buildSourcesDefinitions(
-                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-              )
-            );
-          } else {
-            // Not an integration, just a partial source name
-            await addSuggestionsBasedOnQuote(await getSources());
-          }
+          const recommendedQueriesSuggestions = hasRecommendedQueries
+            ? await getRecommendedQueriesSuggestions(getFieldsByType)
+            : [];
+
+          const suggestionsToAdd = await handleFragment(
+            innerText,
+            (fragment) =>
+              sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+            (_fragment, rangeToReplace) => {
+              return getSourceSuggestions(sources).map((suggestion) => ({
+                ...suggestion,
+                rangeToReplace,
+              }));
+            },
+            (fragment, rangeToReplace) => {
+              const exactMatch = sources.find(({ name: _name }) => _name === fragment);
+              if (exactMatch?.dataStreams) {
+                // this is an integration name, suggest the datastreams
+                const definitions = buildSourcesDefinitions(
+                  exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+                );
+
+                return canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions;
+              } else {
+                const _suggestions: SuggestionRawDefinition[] = [
+                  {
+                    ...pipeCompleteItem,
+                    filterText: fragment,
+                    text: fragment + ' | ',
+                    command: TRIGGER_SUGGESTION_COMMAND,
+                    rangeToReplace,
+                  },
+                  {
+                    ...commaCompleteItem,
+                    filterText: fragment,
+                    text: fragment + ', ',
+                    command: TRIGGER_SUGGESTION_COMMAND,
+                    rangeToReplace,
+                  },
+                  {
+                    ...buildOptionDefinition(metadataOption),
+                    filterText: fragment,
+                    text: fragment + ' METADATA ',
+                    asSnippet: false, // turn this off because $ could be contained within the source name
+                    rangeToReplace,
+                  },
+                  ...recommendedQueriesSuggestions.map((suggestion) => ({
+                    ...suggestion,
+                    rangeToReplace,
+                    filterText: fragment,
+                    text: fragment + suggestion.text,
+                  })),
+                ];
+                return _suggestions;
+              }
+            }
+          );
+          addSuggestionsBasedOnQuote(suggestionsToAdd);
         } else {
           // FROM <suggest> or no index/text
-          await addSuggestionsBasedOnQuote(await getSources());
+          await addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
         }
       }
     }
@@ -927,6 +1056,11 @@ async function getExpressionSuggestionsByType(
       }));
       suggestions.push(...finalSuggestions);
     }
+
+    // handle recommended queries for from
+    if (hasRecommendedQueries) {
+      suggestions.push(...(await getRecommendedQueriesSuggestions(getFieldsByType)));
+    }
   }
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on text string (it can differ from name)
@@ -934,6 +1068,7 @@ async function getExpressionSuggestionsByType(
 }
 
 async function getBuiltinFunctionNextArgument(
+  queryText: string,
   command: ESQLCommand,
   option: ESQLCommandOption | undefined,
   argDef: { type: string },
@@ -944,6 +1079,7 @@ async function getBuiltinFunctionNextArgument(
 ) {
   const suggestions = [];
   const isFnComplete = isFunctionArgComplete(nodeArg, references);
+
   if (isFnComplete.complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
@@ -951,7 +1087,7 @@ async function getBuiltinFunctionNextArgument(
       ...getBuiltinCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        nodeArgType || 'any',
+        isParameterType(nodeArgType) ? nodeArgType : 'any',
         undefined,
         workoutBuiltinOptions(nodeArg, references)
       )
@@ -966,25 +1102,29 @@ async function getBuiltinFunctionNextArgument(
 
     // pick the last arg and check its type to verify whether is incomplete for the given function
     const cleanedArgs = removeMarkerArgFromArgsList(nodeArg)!.args;
-    const nestedType = extractFinalTypeFromArg(nodeArg.args[cleanedArgs.length - 1], references);
+    const nestedType = extractTypeFromASTArg(nodeArg.args[cleanedArgs.length - 1], references);
 
     if (isFnComplete.reason === 'fewArgs') {
       const fnDef = getFunctionDefinition(nodeArg.name);
-      if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
+      if (
+        fnDef?.signatures.every(({ params }) =>
+          params.some(({ type }) => isArrayType(type as string))
+        )
+      ) {
         suggestions.push(listCompleteItem);
       } else {
         const finalType = nestedType || nodeArgType || 'any';
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
             // <COMMAND> expression AND/OR <suggest>
             // technically another boolean value should be suggested, but it is a better experience
             // to actually suggest a wider set of fields/functions
-            [
-              finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
-                ? 'any'
-                : finalType,
-            ],
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
+              ? ['any']
+              : (supportedTypes as string[]),
             command.name,
             option?.name,
             getFieldsByType,
@@ -1000,7 +1140,11 @@ async function getBuiltinFunctionNextArgument(
     if (isFnComplete.reason === 'wrongTypes') {
       if (nestedType) {
         // suggest something to complete the builtin function
-        if (nestedType !== argDef.type) {
+        if (
+          nestedType !== argDef.type &&
+          isParameterType(nestedType) &&
+          isReturnType(argDef.type)
+        ) {
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
@@ -1014,7 +1158,17 @@ async function getBuiltinFunctionNextArgument(
       }
     }
   }
-  return suggestions;
+  return suggestions.map<SuggestionRawDefinition>((s) => {
+    const overlap = getOverlapRange(queryText, s.text);
+    const offset = overlap.start === overlap.end ? 1 : 0;
+    return {
+      ...s,
+      rangeToReplace: {
+        start: overlap.start + offset,
+        end: overlap.end + offset,
+      },
+    };
+  });
 }
 
 function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote: boolean) {
@@ -1048,21 +1202,29 @@ async function getFieldsOrFunctionsSuggestions(
   },
   {
     ignoreFn = [],
-    ignoreFields = [],
+    ignoreColumns = [],
   }: {
     ignoreFn?: string[];
-    ignoreFields?: string[];
+    ignoreColumns?: string[];
   } = {}
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
-    (await (fields ? getFieldsByType(types, ignoreFields) : [])) as SuggestionRawDefinition[],
+    (await (fields
+      ? getFieldsByType(types, ignoreColumns, {
+          advanceCursor: commandName === 'sort',
+          openSuggestions: commandName === 'sort',
+        })
+      : [])) as SuggestionRawDefinition[],
     functions
   );
 
   const filteredVariablesByType: string[] = [];
   if (variables) {
     for (const variable of variables.values()) {
-      if (types.includes('any') || types.includes(variable[0].type)) {
+      if (
+        (types.includes('any') || types.includes(variable[0].type)) &&
+        !ignoreColumns.includes(variable[0].name)
+      ) {
         filteredVariablesByType.push(variable[0].name);
       }
     }
@@ -1074,11 +1236,7 @@ async function getFieldsOrFunctionsSuggestions(
       filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
       for (const variable of filteredVariablesByType) {
-        // remove backticks if present
-        const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
-          ? variable.slice(1, variable.length - 1)
-          : variable;
-        const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
@@ -1088,7 +1246,6 @@ async function getFieldsOrFunctionsSuggestions(
       }
     }
   }
-
   // could also be in stats (bucket) but our autocomplete is not great yet
   const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
 
@@ -1120,7 +1277,9 @@ async function getFunctionArgsSuggestions(
   },
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  fullText: string,
+  offset: number
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1128,60 +1287,57 @@ async function getFunctionArgsSuggestions(
     return [];
   }
   const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
+
+  const references = {
+    fields: fieldsMap,
+    variables: anyVariables,
+  };
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
     commands,
     command,
     fieldsMap,
     innerText
   );
-  // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
-  let argIndex = Math.max(node.args.length, 0);
-  if (!shouldGetNextArgument && argIndex) {
-    argIndex -= 1;
-  }
 
-  const arg = node.args[argIndex];
+  const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
+    getValidSignaturesAndTypesToSuggestNext(node, references, fnDefinition, fullText, offset);
+  const arg: ESQLAstItem = enrichedArgs[argIndex];
 
-  // the first signature is used as reference
-  // TODO - take into consideration all signatures that match the current args
-  const refSignature = fnDefinition.signatures[0];
+  // Whether to prepend comma to suggestion string
+  // E.g. if true, "fieldName" -> "fieldName, "
+  const isCursorFollowedByComma = fullText
+    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
+    : false;
+  const canBeBooleanCondition =
+    // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
+    fnDefinition.name === 'case' ||
+    // If the type is explicitly a boolean condition
+    typesToSuggestNext.some((t) => t && t.type === 'boolean' && t.name === 'condition');
 
-  const hasMoreMandatoryArgs =
-    (refSignature.params.length >= argIndex &&
-      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-        0) ||
-    ('minParams' in refSignature && refSignature.minParams
-      ? refSignature.minParams - 1 > argIndex
-      : false);
+  const shouldAddComma =
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== 'builtin' &&
+    !isCursorFollowedByComma &&
+    !canBeBooleanCondition;
+  const shouldAdvanceCursor =
+    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
 
-  const suggestedConstants = Array.from(
-    new Set(
-      fnDefinition.signatures.reduce<string[]>((acc, signature) => {
-        const p = signature.params[argIndex];
-        if (!p) {
-          return acc;
-        }
-
-        const _suggestions: string[] = p.literalSuggestions
-          ? p.literalSuggestions
-          : p.literalOptions
-          ? p.literalOptions
-          : [];
-
-        return acc.concat(_suggestions);
-      }, [] as string[])
-    )
-  );
+  const suggestedConstants = uniq(
+    typesToSuggestNext
+      .map((d) => d.literalSuggestions || d.acceptedValues)
+      .filter((d) => d)
+      .flat()
+  ) as string[];
 
   if (suggestedConstants.length) {
-    return buildValueDefinitions(suggestedConstants).map((suggestion) => ({
-      ...suggestion,
-      text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', suggestion.text),
-    }));
+    return buildValueDefinitions(suggestedConstants, {
+      addComma: shouldAddComma,
+      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+    });
   }
 
-  const suggestions = [];
+  const suggestions: SuggestionRawDefinition[] = [];
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
@@ -1221,33 +1377,6 @@ async function getFunctionArgsSuggestions(
           : [])
       );
     }
-
-    const existingTypes = node.args
-      .map((nodeArg) =>
-        extractFinalTypeFromArg(nodeArg, {
-          fields: fieldsMap,
-          variables: variablesExcludingCurrentCommandOnes,
-        })
-      )
-      .filter(nonNullable);
-
-    const validSignatures = fnDefinition.signatures
-      // if existing arguments are preset already, use them to filter out incompatible signatures
-      .filter((signature) => {
-        if (existingTypes.length) {
-          return existingTypes.every((type, index) => signature.params[index].type === type);
-        }
-        return true;
-      });
-
-    /**
-     * Get all parameter definitions across all function signatures
-     * for the current parameter position in the given function definition,
-     */
-    const allParamDefinitionsForThisPosition = validSignatures
-      .map((signature) => getParamAtPosition(signature, argIndex))
-      .filter(nonNullable);
-
     // Separate the param definitions into two groups:
     // fields should only be suggested if the param isn't constant-only,
     // and constant suggestions should only be given if it is.
@@ -1258,83 +1387,111 @@ async function getFunctionArgsSuggestions(
     // (e.g. if func1's first parameter is constant-only, any nested functions should
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
-    const [constantOnlyParamDefs, paramDefsWhichSupportFields] = partition(
-      allParamDefinitionsForThisPosition,
-      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
+    const constantOnlyParamDefs = typesToSuggestNext.filter(
+      (p) => p.constantOnly || /_literal/.test(p.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
 
+    // Literals
     suggestions.push(
-      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs))
+      ...getCompatibleLiterals(
+        command.name,
+        getTypesFromParamDefs(constantOnlyParamDefs) as string[],
+        undefined,
+        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
+      )
     );
 
+    // Fields
+
     suggestions.push(
-      ...(await getFieldsOrFunctionsSuggestions(
-        getTypesFromParamDefs(paramDefsWhichSupportFields),
+      ...pushItUpInTheList(
+        await getFieldsByType(
+          // For example, in case() where we are expecting a boolean condition
+          // we can accept any field types (field1 !== field2)
+          canBeBooleanCondition
+            ? ['any']
+            : // @TODO: have a way to better suggest constant only params
+              (getTypesFromParamDefs(
+                typesToSuggestNext.filter((d) => !d.constantOnly)
+              ) as string[]),
+          [],
+          {
+            addComma: shouldAddComma,
+            advanceCursor: shouldAdvanceCursor,
+            openSuggestions: shouldAdvanceCursor,
+          }
+        ),
+        true
+      )
+    );
+
+    // Functions
+    suggestions.push(
+      ...getCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        getFieldsByType,
-        {
-          functions: true,
-          fields: true,
-          variables: variablesExcludingCurrentCommandOnes,
-        },
-        // do not repropose the same function as arg
-        // i.e. avoid cases like abs(abs(abs(...))) with suggestions
-        {
-          ignoreFn: fnToIgnore,
-        }
-      ))
+        canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+        fnToIgnore
+      ).map((suggestion) => ({
+        ...suggestion,
+        text: addCommaIf(shouldAddComma, suggestion.text),
+      }))
     );
+    // could also be in stats (bucket) but our autocomplete is not great yet
+    if (
+      (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
+        ['where', 'eval'].includes(command.name)) ||
+      (command.name === 'stats' &&
+        typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
+    )
+      suggestions.push(
+        ...getDateLiterals({
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+        })
+      );
   }
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
-      if (isLiteralItem(arg) && arg.literalType === 'number') {
+      if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            ['time_literal_unit'],
-            command.name,
-            option?.name,
-            getFieldsByType,
-            {
-              functions: false,
-              fields: false,
-              variables: variablesExcludingCurrentCommandOnes,
-              literals: true,
-            }
-          ))
+          ...getCompatibleLiterals(command.name, ['time_literal_unit'], undefined, {
+            addComma: shouldAddComma,
+            advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          })
         );
       }
     }
-
+    // Suggest comparison functions for boolean conditions
+    if (canBeBooleanCondition) {
+      suggestions.push(
+        ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
+          label: name,
+          text: name,
+          kind: 'Function' as ItemKind,
+          detail: description,
+        }))
+      );
+    }
     if (hasMoreMandatoryArgs) {
-      // suggest a comma if there's another argument for the function
+      // Suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
     }
-    // if there are other arguments in the function, inject automatically a comma after each suggestion
-    return suggestions.map((suggestion) =>
-      suggestion !== commaCompleteItem
-        ? {
-            ...suggestion,
-            text:
-              hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
-                ? `${suggestion.text},`
-                : suggestion.text,
-          }
-        : suggestion
-    );
   }
 
-  return suggestions.map(({ text, ...rest }) => ({
-    ...rest,
-    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && text !== '', text),
-  }));
+  // For special case of COUNT, suggest * if cursor is in empty spot
+  // e.g. count( / ) -> suggest `*`
+  if (fnDefinition.name === 'count' && !arg) {
+    suggestions.push(allStarConstant);
+  }
+  return suggestions;
 }
 
 async function getListArgsSuggestions(
@@ -1365,7 +1522,7 @@ async function getListArgsSuggestions(
     });
     const [firstArg] = node.args;
     if (isColumnItem(firstArg)) {
-      const argType = extractFinalTypeFromArg(firstArg, {
+      const argType = extractTypeFromASTArg(firstArg, {
         fields: fieldsMap,
         variables: anyVariables,
       });
@@ -1374,7 +1531,7 @@ async function getListArgsSuggestions(
         const otherArgs = node.args.filter(Array.isArray).flat().filter(isColumnItem);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
-            [argType],
+            [argType as string],
             command.name,
             undefined,
             getFieldsByType,
@@ -1383,7 +1540,7 @@ async function getListArgsSuggestions(
               fields: true,
               variables: anyVariables,
             },
-            { ignoreFields: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
+            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
           ))
         );
       }
@@ -1435,8 +1592,14 @@ async function getOptionArgsSuggestions(
   },
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ) {
+  let preferences: { histogramBarTarget: number } | undefined;
+  if (getPreferences) {
+    preferences = await getPreferences();
+  }
+
   const optionDef = getCommandOption(option.name);
   const { nodeArg, argIndex, lastArg } = extractArgMeta(option, node);
   const suggestions = [];
@@ -1454,7 +1617,7 @@ async function getOptionArgsSuggestions(
       // if it's a new expression, suggest fields to match on
       if (
         isNewExpression ||
-        findPreviousWord(innerText) === 'ON' ||
+        noCaseCompare(findPreviousWord(innerText), 'ON') ||
         (option && isAssignment(option.args[0]) && !option.args[1])
       ) {
         const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
@@ -1474,7 +1637,7 @@ async function getOptionArgsSuggestions(
         suggestions.push(
           buildOptionDefinition(getCommandOption('with')!),
           ...getFinalSuggestions({
-            comma: true,
+            comma: false,
           })
         );
       }
@@ -1489,7 +1652,7 @@ async function getOptionArgsSuggestions(
           innerText
         );
 
-        if (isNewExpression || findPreviousWord(innerText) === 'WITH') {
+        if (isNewExpression || noCaseCompare(findPreviousWord(innerText), 'WITH')) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
         }
 
@@ -1501,9 +1664,26 @@ async function getOptionArgsSuggestions(
         if (policyMetadata) {
           if (isNewExpression || (assignFn && !isAssignmentComplete(assignFn))) {
             // ... | ENRICH ... WITH a =
-            suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
+            // ... | ENRICH ... WITH b
+            const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
+            // in this case, we don't want to open the suggestions menu when the field is accepted
+            // because we're keeping the suggestions simple here for now. Could always revisit.
+            fieldSuggestions.forEach((s) => (s.command = undefined));
+
+            // attach the replacement range if needed
+            const lastWord = findFinalWord(innerText);
+            if (lastWord) {
+              // ENRICH ... WITH a <suggest>
+              const rangeToReplace = {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              };
+              fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
+            }
+            suggestions.push(...fieldSuggestions);
           }
         }
+
         if (
           assignFn &&
           hasSameArgBothSides(assignFn) &&
@@ -1553,32 +1733,53 @@ async function getOptionArgsSuggestions(
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
     if (isNewExpression) {
-      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
-    } else if (existingFields.size > 0) {
-      if (filteredMetaFields.length > 0) {
-        suggestions.push(commaCompleteItem);
+      suggestions.push(
+        ...(await handleFragment(
+          innerText,
+          (fragment) => METADATA_FIELDS.includes(fragment),
+          (_fragment, rangeToReplace) =>
+            buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
+              ...suggestion,
+              rangeToReplace,
+            })),
+          (fragment, rangeToReplace) => {
+            const _suggestions = [
+              {
+                ...pipeCompleteItem,
+                text: fragment + ' | ',
+                filterText: fragment,
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              },
+            ];
+            if (filteredMetaFields.length > 1) {
+              _suggestions.push({
+                ...commaCompleteItem,
+                text: fragment + ', ',
+                filterText: fragment,
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              });
+            }
+            return _suggestions;
+          }
+        ))
+      );
+    } else {
+      if (existingFields.size > 0) {
+        // METADATA field <suggest>
+        if (filteredMetaFields.length > 0) {
+          suggestions.push(commaCompleteItem);
+        }
+        suggestions.push(pipeCompleteItem);
       }
-      suggestions.push(pipeCompleteItem);
     }
   }
 
   if (command.name === 'stats') {
-    suggestions.push(
-      ...(await getFieldsOrFunctionsSuggestions(
-        ['column'],
-        command.name,
-        option.name,
-        getFieldsByType,
-        {
-          functions: false,
-          fields: true,
-        }
-      ))
-    );
-
     const argDef = optionDef?.signature.params[argIndex];
 
-    const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+    const nodeArgType = extractTypeFromASTArg(nodeArg, references);
     // These cases can happen here, so need to identify each and provide the right suggestion
     // i.e. ... | STATS ... BY field + <suggest>
     // i.e. ... | STATS ... BY field >= <suggest>
@@ -1587,16 +1788,38 @@ async function getOptionArgsSuggestions(
       if (isFunctionItem(nodeArg) && !isFunctionArgComplete(nodeArg, references).complete) {
         suggestions.push(
           ...(await getBuiltinFunctionNextArgument(
+            innerText,
             command,
             option,
-            { type: argDef?.type || 'any' },
+            { type: argDef?.type || 'unknown' },
             nodeArg,
-            nodeArgType,
-            references,
+            nodeArgType as string,
+            {
+              fields: references.fields,
+              // you can't use a variable defined
+              // in the stats command in the by clause
+              variables: new Map(),
+            },
             getFieldsByType
           ))
         );
       }
+    }
+
+    // If it's a complete expression then propose some final suggestions
+    if (
+      (!nodeArgType &&
+        option.name === 'by' &&
+        option.args.length &&
+        !isNewExpression &&
+        !isAssignment(lastArg)) ||
+      (isAssignment(lastArg) && isAssignmentComplete(lastArg))
+    ) {
+      suggestions.push(
+        ...getFinalSuggestions({
+          comma: optionDef?.signature.multipleParams ?? option.name === 'by',
+        })
+      );
     }
   }
 
@@ -1619,21 +1842,56 @@ async function getOptionArgsSuggestions(
           })
         );
       } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
-        // Otherwise try to complete the expression suggesting some columns
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            types[0] === 'column' ? ['any'] : types,
-            command.name,
-            option.name,
-            getFieldsByType,
-            {
-              functions: option.name === 'by',
-              fields: true,
-            }
-          ))
+          ...(await getFieldsByType(types[0] === 'column' ? ['any'] : types, [], {
+            advanceCursor: true,
+            openSuggestions: true,
+          }))
         );
+        // Checks if cursor is still within function ()
+        // by checking if the marker editor/cursor is within an unclosed parenthesis
+        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
 
-        if (command.name === 'stats' && isNewExpression) {
+        if (option.name === 'by') {
+          // Add quick snippet for for stats ... by bucket(<>)
+          if (command.name === 'stats' && canHaveAssignment) {
+            suggestions.push({
+              label: i18n.translate(
+                'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram',
+                {
+                  defaultMessage: 'Add date histogram',
+                }
+              ),
+              text: getAddDateHistogramSnippet(preferences?.histogramBarTarget),
+              asSnippet: true,
+              kind: 'Issue',
+              detail: i18n.translate(
+                'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogramDetail',
+                {
+                  defaultMessage: 'Add date histogram using bucket()',
+                }
+              ),
+              sortText: '1A',
+              command: TRIGGER_SUGGESTION_COMMAND,
+            } as SuggestionRawDefinition);
+          }
+
+          suggestions.push(
+            ...(await getFieldsOrFunctionsSuggestions(
+              types[0] === 'column' ? ['any'] : types,
+              command.name,
+              option.name,
+              getFieldsByType,
+              {
+                functions: true,
+                fields: false,
+              },
+              { ignoreFn: canHaveAssignment ? [] : ['bucket', 'case'] }
+            ))
+          );
+        }
+
+        if (command.name === 'stats' && isNewExpression && canHaveAssignment) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
         }
       }
@@ -1641,3 +1899,236 @@ async function getOptionArgsSuggestions(
   }
   return suggestions;
 }
+
+/**
+ * This function handles the logic to suggest completions
+ * for a given fragment of text in a generic way. A good example is
+ * a field name.
+ *
+ * When typing a field name, there are 2 scenarios
+ *
+ * 1. field name is incomplete (includes the empty string)
+ * KEEP /
+ * KEEP fie/
+ *
+ * 2. field name is complete
+ * KEEP field/
+ *
+ * This function provides a framework for detecting and handling both scenarios in a clean way.
+ *
+ * @param innerText - the query text before the current cursor position
+ * @param isFragmentComplete — return true if the fragment is complete
+ * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
+ * @param getSuggestionsForComplete - gets suggestions for a complete fragment
+ * @returns
+ */
+function handleFragment(
+  innerText: string,
+  isFragmentComplete: (fragment: string) => boolean,
+  getSuggestionsForIncomplete: (
+    fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
+  getSuggestionsForComplete: (
+    fragment: string,
+    rangeToReplace: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
+): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
+  /**
+   * @TODO — this string manipulation is crude and can't support all cases
+   * Checking for a partial word and computing the replacement range should
+   * really be done using the AST node, but we'll have to refactor further upstream
+   * to make that available. This is a quick fix to support the most common case.
+   */
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return getSuggestionsForIncomplete('');
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length + 1,
+    };
+    if (isFragmentComplete(fragment)) {
+      return getSuggestionsForComplete(fragment, rangeToReplace);
+    } else {
+      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+    }
+  }
+}
+
+const sortModifierSuggestions = {
+  ASC: {
+    label: 'ASC',
+    text: 'ASC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-ASC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  DESC: {
+    label: 'DESC',
+    text: 'DESC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-DESC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_FIRST: {
+    label: 'NULLS FIRST',
+    text: 'NULLS FIRST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS FIRST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_LAST: {
+    label: 'NULLS LAST',
+    text: 'NULLS LAST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS LAST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+};
+
+export const suggestForSortCmd = async (
+  innerText: string,
+  getFieldsByType: GetFieldsByTypeFn,
+  columnExists: (column: string) => boolean
+): Promise<SuggestionRawDefinition[]> => {
+  const prependSpace = (s: SuggestionRawDefinition) => ({ ...s, text: ' ' + s.text });
+
+  const { pos, nulls } = getSortPos(innerText);
+
+  switch (pos) {
+    case 'space2': {
+      return [
+        sortModifierSuggestions.ASC,
+        sortModifierSuggestions.DESC,
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      ];
+    }
+    case 'order': {
+      return handleFragment(
+        innerText,
+        (fragment) => ['ASC', 'DESC'].some((completeWord) => noCaseCompare(completeWord, fragment)),
+        (_fragment, rangeToReplace) => {
+          return Object.values(sortModifierSuggestions).map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+          }));
+        },
+        (fragment, rangeToReplace) => {
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+            prependSpace(sortModifierSuggestions.NULLS_FIRST),
+            prependSpace(sortModifierSuggestions.NULLS_LAST),
+          ].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
+    }
+    case 'space3': {
+      return [
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      ];
+    }
+    case 'nulls': {
+      return handleFragment(
+        innerText,
+        (fragment) =>
+          ['FIRST', 'LAST'].some((completeWord) => noCaseCompare(completeWord, fragment)),
+        (_fragment) => {
+          const end = innerText.length + 1;
+          const start = end - nulls.length;
+          return Object.values(sortModifierSuggestions).map((suggestion) => ({
+            ...suggestion,
+            // we can't use the range generated by handleFragment here
+            // because it doesn't really support multi-word completions
+            rangeToReplace: { start, end },
+          }));
+        },
+        (fragment, rangeToReplace) => {
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+          ].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
+    }
+    case 'space4': {
+      return [
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      ];
+    }
+  }
+
+  const fieldSuggestions = await getFieldsByType('any', [], {
+    openSuggestions: true,
+  });
+  const functionSuggestions = await getFieldsOrFunctionsSuggestions(
+    ['any'],
+    'sort',
+    undefined,
+    getFieldsByType,
+    {
+      functions: true,
+      fields: false,
+    }
+  );
+
+  return await handleFragment(
+    innerText,
+    columnExists,
+    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      // SORT fie<suggest>
+      return [
+        ...pushItUpInTheList(
+          fieldSuggestions.map((suggestion) => ({
+            ...suggestion,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          })),
+          true
+        ),
+        ...functionSuggestions,
+      ];
+    },
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      // SORT field<suggest>
+      return [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+        prependSpace(sortModifierSuggestions.ASC),
+        prependSpace(sortModifierSuggestions.DESC),
+        prependSpace(sortModifierSuggestions.NULLS_FIRST),
+        prependSpace(sortModifierSuggestions.NULLS_LAST),
+      ].map<SuggestionRawDefinition>((s) => ({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    }
+  );
+};

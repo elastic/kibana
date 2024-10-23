@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { SetStateAction, useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,7 +43,7 @@ function DefaultEditorControls({
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
   const toggleAutoApply = useCallback(
-    (nextAutoApplyEnabled) => setAutoApplyEnabled(nextAutoApplyEnabled),
+    (nextAutoApplyEnabled: SetStateAction<boolean>) => setAutoApplyEnabled(nextAutoApplyEnabled),
     []
   );
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);

@@ -34,6 +34,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
 
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       it('Loads the page', async () => {
         await pageObjects.common.navigateToUrl(
           'management',
@@ -46,35 +50,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(headingText).to.be('Alerts');
       });
 
-      it('Shows only allowed feature filters', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+      describe('feature filters', function () {
+        this.tags('skipFIPS');
+        it('Shows only allowed feature filters', async () => {
+          await pageObjects.common.navigateToUrl(
+            'management',
+            'insightsAndAlerting/triggersActionsAlerts',
+            {
+              shouldUseHashForSubUrl: false,
+            }
+          );
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async () => {
-          if (!(await testSubjects.exists('queryBarMenuPanel'))) {
-            await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-          }
-          const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-          const solutionFilters = getSolutionNamesFromFilters(quickFilters);
-          expect(solutionFilters).to.have.length(2);
-          expect(solutionFilters[0]).to.equal('Stack');
-          // Observability is included because of multi-consumer rules
-          expect(solutionFilters[1]).to.equal('Observability');
+          await retry.try(async () => {
+            if (!(await testSubjects.exists('queryBarMenuPanel'))) {
+              await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
+            }
+            const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+            const solutionFilters = getSolutionNamesFromFilters(quickFilters);
+            expect(solutionFilters).to.have.length(2);
+            expect(solutionFilters[0]).to.equal('Stack');
+            // Observability is included because of multi-consumer rules
+            expect(solutionFilters[1]).to.equal('Observability');
+          });
         });
       });
     });
 
-    describe('Loads the page with actions but not alerting privilege', () => {
+    describe('Loads the page with actions but not alerting privilege', function () {
+      this.tags('skipFIPS');
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await security.testUser.setRoles(['only_actions_role']);
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('Loads the page but shows missing permission prompt', async () => {
@@ -100,6 +112,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             shouldUseHashForSubUrl: false,
           }
         );
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('Loads the page', async () => {
@@ -128,10 +144,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           firstSolutionFilter = quickFilters
             .filter((_: number, f: any) => f.attribs['data-test-subj'].endsWith('rule types'))
             .first();
-          expect(firstSolutionFilter).to.not.be(null);
+
+          expect(typeof firstSolutionFilter?.attr('data-test-subj')).to.be('string');
         });
 
-        await testSubjects.click(firstSolutionFilter!.attr('data-test-subj'));
+        await testSubjects.click(firstSolutionFilter.attr('data-test-subj'));
 
         await retry.try(async () => {
           const appliedFilters = await pageObjects.triggersActionsUI.getAlertsPageAppliedFilters();
@@ -152,9 +169,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               f.attribs['data-test-subj'].includes('Security rule types')
             )
             .first();
-          expect(filter).to.not.be(null);
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
-        await testSubjects.click(filter!.attr('data-test-subj'));
+
+        await testSubjects.click(filter.attr('data-test-subj'));
 
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
@@ -183,10 +202,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               return testSubj.includes('rule types') && !testSubj.includes('Security');
             })
             .first();
-          expect(filter).to.not.be(null);
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
 
-        await testSubjects.click(filter!.attr('data-test-subj'));
+        await testSubjects.click(filter.attr('data-test-subj'));
 
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();

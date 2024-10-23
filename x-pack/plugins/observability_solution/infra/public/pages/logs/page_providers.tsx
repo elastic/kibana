@@ -12,6 +12,7 @@ import {
   updateContextInUrl as createUpdateContextInUrl,
   listenForUrlChanges as createListenForUrlChanges,
 } from '@kbn/logs-shared-plugin/public';
+import { LogSourcesProvider } from '@kbn/logs-data-access-plugin/public';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../containers/kbn_url_state_context';
@@ -21,6 +22,7 @@ export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) 
     services: {
       notifications: { toasts: toastsService },
       logsShared,
+      logsDataAccess,
     },
   } = useKibanaContextForPlugin();
 
@@ -43,7 +45,9 @@ export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) 
       updateContextInUrl={updateContextInUrl}
       listenForUrlChanges={listenForUrlChanges}
     >
-      <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
+      <LogSourcesProvider logSourcesService={logsDataAccess.services.logSourcesService}>
+        <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
+      </LogSourcesProvider>
     </LogViewProvider>
   );
 };

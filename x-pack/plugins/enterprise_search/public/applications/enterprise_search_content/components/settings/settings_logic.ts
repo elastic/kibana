@@ -89,6 +89,7 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
     pipelineState: [
       DEFAULT_PIPELINE_VALUES,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setPipeline: (_, { pipeline }) => pipeline,
       },
     ],

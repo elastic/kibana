@@ -261,6 +261,80 @@ New lines and \\n escaped values.`,
     });
   });
 
+  describe('escape_multiline_string helper', () => {
+    it('should escape new lines', () => {
+      const streamTemplate = `
+      input: log
+      multiline_text: "{{escape_multiline_string multiline_text}}"
+            `;
+
+      const vars = {
+        multiline_text: {
+          type: 'textarea',
+          value: `This is a text with
+New lines and \n escaped values.`,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        multiline_text: `This is a text with
+New lines and 
+escaped values.`,
+      });
+    });
+
+    it('should escape single quotes', () => {
+      const streamTemplate = `
+      input: log
+      multiline_text: "{{escape_multiline_string multiline_text}}"
+            `;
+
+      const vars = {
+        multiline_text: {
+          type: 'textarea',
+          value: `This is a multiline text with
+'escaped values.'`,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        multiline_text: `This is a multiline text with
+''escaped values.''`,
+      });
+    });
+
+    it('should allow concatenation of multiline strings', () => {
+      const streamTemplate = `
+input: log
+multiline_text: "{{escape_multiline_string multiline_text}}{{escape_multiline_string "
+This is a concatenated text
+with new lines"}}"
+      `;
+
+      const vars = {
+        multiline_text: {
+          type: 'textarea',
+          value: `This is a text with
+New lines and\nescaped values.`,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        multiline_text: `This is a text with
+New lines and
+escaped values.
+This is a concatenated text
+with new lines`,
+      });
+    });
+  });
+
   describe('to_json helper', () => {
     const streamTemplate = `
 input: log
@@ -324,6 +398,25 @@ input: logs
     const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
       input: 'logs',
+    });
+  });
+
+  it('should support $$$$ yaml values at root level', () => {
+    const streamTemplate = `
+input: logs
+{{custom}}
+    `;
+    const vars = {
+      custom: {
+        type: 'yaml',
+        value: 'test: $$$$',
+      },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'logs',
+      test: '$$$$',
     });
   });
 

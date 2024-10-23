@@ -9,12 +9,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type {
+  AssetDetailsLocatorParams,
+  InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import {
   InventoryMetricConditions,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
-import { formatReason } from './rule_data_formatters';
+import { getRuleFormat } from './rule_data_formatters';
 
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
@@ -50,7 +55,15 @@ const inventoryDefaultRecoveryMessage = i18n.translate(
   }
 );
 
-export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
+export function createInventoryMetricRuleType({
+  assetDetailsLocator,
+  inventoryLocator,
+}: {
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
+}): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
+  const format = getRuleFormat({ assetDetailsLocator, inventoryLocator });
+
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
@@ -65,7 +78,7 @@ export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<Inve
     defaultActionMessage: inventoryDefaultActionMessage,
     defaultRecoveryMessage: inventoryDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: formatReason,
+    format,
     priority: 20,
   };
 }

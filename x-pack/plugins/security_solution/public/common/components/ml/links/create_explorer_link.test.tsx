@@ -42,7 +42,7 @@ describe('create_explorer_link', () => {
       const url = (await findByText('Open in Anomaly Explorer')).getAttribute('href');
 
       expect(url).toEqual(
-        "/app/ml/explorer?_g=(ml:(jobIds:!(job-1)),refreshInterval:(display:Off,pause:!t,value:0),time:(from:'1970-01-01T00:00:00.000Z',mode:absolute,to:'3000-01-01T00:00:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))"
+        "/app/ml/explorer?_g=(ml:(jobIds:!(job-1)),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:00:00.000Z',mode:absolute,to:'3000-01-01T00:00:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))"
       );
     });
   });

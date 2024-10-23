@@ -73,13 +73,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: any) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -89,7 +89,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const handleCustomMetricChange = useCallback(
-    (exp) => {
+    (exp: any) => {
       setRuleParams(expressionId, exp);
     },
     [expressionId, setRuleParams]
@@ -112,6 +112,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const normalizedFields = fields.map((f) => ({
     normalizedType: f.type,
+    esTypes: f.esTypes,
     name: f.name,
   }));
 
@@ -165,7 +166,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
                   <EuiFieldText
-                    data-test-subj="thresholdRuleCustomEquationEditorFieldText"
+                    data-test-subj="thresholdRuleCustomEquationEditorFieldTextLabel"
                     compressed
                     fullWidth
                     value={label}

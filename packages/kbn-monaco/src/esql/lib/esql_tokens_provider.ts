@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CharStreams, type Token } from 'antlr4';
@@ -15,7 +16,7 @@ import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
 
 import { ESQL_TOKEN_POSTFIX } from './constants';
-import { addFunctionTokens, addNullsOrder } from './esql_token_helpers';
+import { addFunctionTokens, mergeTokens } from './esql_token_helpers';
 
 const EOF = -1;
 
@@ -37,7 +38,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     const lexer = getLexer(inputStream, errorListener);
 
     let done = false;
-    const myTokens: monaco.languages.IToken[] = [];
+    const myTokens: ESQLToken[] = [];
 
     do {
       let token: Token | null;
@@ -78,7 +79,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     // the previous custom Kibana grammar baked functions directly as tokens, so highlight was easier
     // The ES grammar doesn't have the token concept of "function"
     const tokensWithFunctions = addFunctionTokens(myTokens);
-    addNullsOrder(tokensWithFunctions);
+    mergeTokens(tokensWithFunctions);
 
     return new ESQLLineTokens(tokensWithFunctions, prevState.getLineNumber() + 1);
   }

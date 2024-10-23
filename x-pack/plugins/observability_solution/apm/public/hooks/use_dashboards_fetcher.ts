@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public/services/dashboard_content_management/lib/find_dashboards';
+import { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
 import { ApmPluginStartDeps } from '../plugin';
 import { FETCH_STATUS } from './use_fetcher';
 

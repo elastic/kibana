@@ -11,8 +11,8 @@ import {
   updateApiKeyParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update_api_key';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 
 export const updateRuleApiKeyRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -24,9 +24,29 @@ export const updateRuleApiKeyRoute = (
       options: {
         access: 'public',
         summary: 'Update the API key for a rule',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: updateApiKeyParamsSchemaV1,
+        request: {
+          params: updateApiKeyParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
+          409: {
+            description: 'Indicates that the rule has already been updated by another user.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

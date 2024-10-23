@@ -10,7 +10,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
-  Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
   BulkActionsPanelConfig,
@@ -37,7 +36,7 @@ import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query'
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  alerts: Alerts;
+  alertsCount: number;
   casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
@@ -273,7 +272,7 @@ export const useBulkUntrackActions = ({
 };
 
 export function useBulkActions({
-  alerts,
+  alertsCount,
   casesConfig,
   query,
   refresh,
@@ -326,9 +325,10 @@ export function useBulkActions({
   useEffect(() => {
     updateBulkActionsState({
       action: BulkActionsVerbs.rowCountUpdate,
-      rowCount: alerts.length,
+      rowCount: alertsCount,
     });
-  }, [alerts, updateBulkActionsState]);
+  }, [alertsCount, updateBulkActionsState]);
+
   return useMemo(() => {
     return {
       isBulkActionsColumnActive,

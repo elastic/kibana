@@ -17,7 +17,7 @@ export const useHasRequiredIndicesPermissions = (
   const {
     services: {
       mlServices: {
-        mlApiServices: { hasPrivileges },
+        mlApi: { hasPrivileges },
       },
     },
   } = useMlKibana();

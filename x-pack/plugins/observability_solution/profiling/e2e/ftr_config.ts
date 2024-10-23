@@ -7,20 +7,27 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import path from 'path';
 
 const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 
 async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack/functional/config.base')
   );
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    services: {
+      ...commonFunctionalServices,
+      ...commonFunctionalUIServices,
+    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),

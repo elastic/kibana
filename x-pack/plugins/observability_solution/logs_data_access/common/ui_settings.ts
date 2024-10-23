@@ -23,7 +23,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: DEFAULT_LOG_SOURCES,
     description: i18n.translate('xpack.logsDataAccess.logSourcesDescription', {
       defaultMessage:
-        'Sources to be used for logs data. If the data contained in these indices is not logs data, you may experience degraded functionality.',
+        'Sources to be used for logs data. If the data contained in these indices is not logs data, you may experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules.',
     }),
     type: 'array',
     schema: schema.arrayOf(schema.string()),

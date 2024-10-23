@@ -8,6 +8,7 @@
 import {
   PerformRuleInstallationResponseBody,
   PERFORM_RULE_INSTALLATION_URL,
+  BOOTSTRAP_PREBUILT_RULES_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
@@ -144,15 +145,24 @@ export const bulkCreateRuleAssets = ({
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk?refresh`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
-    const indexOperation = {
+    const document = JSON.stringify(rule);
+    const documentId = `security-rule:${rule['security-rule'].rule_id}`;
+    const historicalDocumentId = `${documentId}_${rule['security-rule'].version}`;
+
+    const indexRuleAsset = `${JSON.stringify({
       index: {
         _index: index,
-        _id: `security-rule:${rule['security-rule'].rule_id}`,
+        _id: documentId,
       },
-    };
+    })}\n${document}\n`;
+    const indexHistoricalRuleAsset = `${JSON.stringify({
+      index: {
+        _index: index,
+        _id: historicalDocumentId,
+      },
+    })}\n${document}\n`;
 
-    const documentData = JSON.stringify(rule);
-    return body.concat(JSON.stringify(indexOperation), '\n', documentData, '\n');
+    return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
   }, '');
 
   rootRequest({
@@ -203,8 +213,7 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.log('Prevent prebuilt rules package installation');
-  cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {});
-  cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*', {});
+  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, {});
 };
 
 /**

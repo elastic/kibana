@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
@@ -24,13 +25,38 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('route access', () => {
-      describe('disabled', () => {
+      describe('internal', () => {
         it('rotate key', async () => {
-          const { body, status } = await supertestWithoutAuth
+          let body: unknown;
+          let status: number;
+
+          ({ body, status } = await supertestWithoutAuth
+            .post('/api/encrypted_saved_objects/_rotate_key')
+            .set(roleAuthc.apiKeyHeader));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining('Request must contain a kbn-xsrf header.'),
+          });
+          expect(status).toBe(400);
+
+          ({ body, status } = await supertestWithoutAuth
             .post('/api/encrypted_saved_objects/_rotate_key')
             .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
-          svlCommonApi.assertApiNotFound(body, status);
+            .set(roleAuthc.apiKeyHeader));
+          // expect a different, legitimate error when we use the internal header
+          // the config does not contain decryptionOnlyKeys, so when the API is
+          // called successfully, it will error for this reason, and not for an
+          // access or or missing header reason
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.'
+            ),
+          });
+          expect(status).toBe(400);
         });
       });
     });

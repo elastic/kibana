@@ -9,6 +9,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
+import { type AssistantScope, filterScopes } from '@kbn/ai-assistant-common';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
@@ -16,7 +17,8 @@ import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
-  RegisteredInstruction,
+  InstructionOrCallback,
+  InstructionOrCallbackWithScopes,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -34,7 +36,7 @@ const ajv = new Ajv({
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
-  private readonly instructions: RegisteredInstruction[] = [];
+  private readonly instructions: InstructionOrCallbackWithScopes[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -73,7 +75,8 @@ export class ChatFunctionClient {
           return {
             content: allData.filter((data) => dataNames.includes(data.name)),
           };
-        }
+        },
+        ['all']
       );
     }
 
@@ -84,11 +87,11 @@ export class ChatFunctionClient {
     });
   }
 
-  registerFunction: RegisterFunction = (definition, respond) => {
+  registerFunction: RegisterFunction = (definition, respond, scopes) => {
     if (definition.parameters) {
       this.validators.set(definition.name, ajv.compile(definition.parameters));
     }
-    this.functionRegistry.set(definition.name, { definition, respond });
+    this.functionRegistry.set(definition.name, { handler: { definition, respond }, scopes });
   };
 
   registerInstruction: RegisterInstruction = (instruction) => {
@@ -107,8 +110,8 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(): RegisteredInstruction[] {
-    return this.instructions;
+  getInstructions(scope: AssistantScope): InstructionOrCallback[] {
+    return this.instructions.filter(filterScopes(scope)).map((i) => i.instruction);
   }
 
   hasAction(name: string) {
@@ -117,10 +120,14 @@ export class ChatFunctionClient {
 
   getFunctions({
     filter,
+    scope,
   }: {
     filter?: string;
+    scope?: AssistantScope;
   } = {}): FunctionHandler[] {
-    const allFunctions = Array.from(this.functionRegistry.values());
+    const allFunctions = Array.from(this.functionRegistry.values())
+      .filter(filterScopes(scope))
+      .map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 
@@ -132,7 +139,7 @@ export class ChatFunctionClient {
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
   }
 
-  getActions() {
+  getActions(): Required<ObservabilityAIAssistantScreenContextRequest>['actions'] {
     return this.actions;
   }
 
@@ -146,12 +153,16 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
+    connectorId,
+    useSimulatedFunctionCalling,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -163,12 +174,14 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.respond(
+    return await fn.handler.respond(
       {
         arguments: parsedArguments,
         messages,
         screenContexts: this.screenContexts,
         chat,
+        connectorId,
+        useSimulatedFunctionCalling,
       },
       signal
     );

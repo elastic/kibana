@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info:
+  title: Find lists API endpoint
+  version: '2023-10-31'
+paths:
+  /api/lists/_find:
+    get:
+      x-labels: [serverless, ess]
+      operationId: FindLists
+      x-codegen-enabled: true
+      summary: Get lists
+      description: Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: The page number to return
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          required: false
+          description: The number of lists to return per page
+          schema:
+            type: integer
+        - name: sort_field
+          in: query
+          required: false
+          description: Determines which field is used to sort the results
+          schema:
+            $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_order
+          in: query
+          required: false
+          description: Determines the sort order, which can be `desc` or `asc`
+          schema:
+            type: string
+            enum: [desc, asc]
+        - name: cursor
+          in: query
+          required: false
+          description: |
+            Returns the list that come after the last list returned in the previous call
+            (use the cursor value returned in the previous call). This parameter uses
+            the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
+          schema:
+            $ref: '#/components/schemas/FindListsCursor'
+        - name: filter
+          in: query
+          required: false
+          description: |
+            Filters the returned results according to the value of the specified field,
+            using the <field name>:<field value> syntax.
+          schema:
+            $ref: '#/components/schemas/FindListsFilter'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+                  page:
+                    type: integer
+                    minimum: 0
+                  per_page:
+                    type: integer
+                    minimum: 0
+                  total:
+                    type: integer
+                    minimum: 0
+                  cursor:
+                    $ref: '#/components/schemas/FindListsCursor'
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+                  - cursor
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    FindListsCursor:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    FindListsFilter:
+      type: string

@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: Update endpoint list item API endpoint
+  version: '2023-10-31'
+paths:
+  /api/endpoint_list/items:
+    put:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: UpdateEndpointListItem
+      summary: Update an endpoint exception list item
+      description: Update an endpoint exception list item using the `id` or `item_id` field.
+      requestBody:
+        description: Exception list item's properties
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemId'
+                  description: Either `id` or `item_id` must be specified
+                item_id:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+                  description: Either `id` or `item_id` must be specified
+                type:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+                name:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+                description:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+                os_types:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+                meta:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+                comments:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemCommentArray'
+                  default: []
+                _version:
+                  type: string
+              required:
+                - type
+                - name
+                - description
+                - entries
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: Endpoint list item not found
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

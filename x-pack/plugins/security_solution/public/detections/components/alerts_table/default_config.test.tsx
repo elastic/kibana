@@ -16,6 +16,7 @@ import {
   buildThreatMatchFilter,
   getAlertsDefaultModel,
   getAlertsPreviewDefaultModel,
+  buildAlertsFilterByRuleIds,
 } from './default_config';
 
 jest.mock('./actions');
@@ -278,6 +279,75 @@ describe('alerts default_config', () => {
           },
         },
       };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertsFilterByRuleIds', () => {
+    it('given an empty list of rule ids will return an empty filter', () => {
+      const filters = buildAlertsFilterByRuleIds([]);
+      expect(filters).toHaveLength(0);
+    });
+
+    it('builds filter containing 1 rule id passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+
+    it('builds filter containing 3 rule ids passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1', 'rule-id-2', 'rule-id-3']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-2',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-3',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
       expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual(expected);
     });

@@ -13,6 +13,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlApi } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
@@ -57,6 +58,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       savedSearch: savedSearchService,
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
 
   const { context } = useRouteResolver(
     'full',
@@ -67,6 +69,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
         loadNewJobCapabilities(
           index,
           savedSearchId,
+          mlApi,
           dataViewsService,
           savedSearchService,
           DATA_FRAME_ANALYTICS

@@ -12,13 +12,15 @@ import { testHasEmbeddedConsole } from './embedded_console';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
-    'svlCommonNavigation',
+    'embeddedConsole',
     'common',
     'header',
     'indexManagement',
   ]);
   const security = getService('security');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
+  const testIndexName = `test-index-ftr-${Math.random()}`;
   describe('index management', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
@@ -29,9 +31,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.indexManagement.changeTabs('indicesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
+    after(async () => {
+      await esDeleteAllIndices(testIndexName);
+    });
 
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
+    });
+
+    it('can create an index', async () => {
+      await pageObjects.indexManagement.clickCreateIndexButton();
+      await pageObjects.indexManagement.setCreateIndexName(testIndexName);
+      await pageObjects.indexManagement.clickCreateIndexSaveButton();
+      await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+    });
+
+    it('can view index details - index with no documents', async () => {
+      await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+      await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
     });
   });
 }

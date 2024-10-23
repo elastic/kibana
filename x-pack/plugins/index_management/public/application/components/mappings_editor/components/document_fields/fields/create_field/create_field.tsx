@@ -22,7 +22,7 @@ import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch } from '../../../../mappings_state_context';
-import { Form, FormDataProvider, useForm, useFormData } from '../../../../shared_imports';
+import { Form, useForm, useFormData } from '../../../../shared_imports';
 import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
@@ -32,14 +32,16 @@ import { getRequiredParametersFormForType } from './required_parameters_forms';
 import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+export interface ModelIdMapEntry {
+  trainedModelId: string;
+  isDeployed: boolean;
+  isDeployable: boolean;
+  isDownloading: boolean;
+  modelStats?: TrainedModelStat; // third-party models don't have model stats
+}
 export interface InferenceToModelIdMap {
-  [key: string]: {
-    trainedModelId: string;
-    isDeployed: boolean;
-    isDeployable: boolean;
-    isDownloading: boolean;
-    modelStats?: TrainedModelStat; // third-party models don't have model stats
-  };
+  [key: string]: ModelIdMapEntry;
 }
 
 export interface SemanticTextInfo {
@@ -82,7 +84,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     id: 'create-field',
   });
 
-  useFormData({ form });
+  const [{ type, subType }] = useFormData({ form, watch: ['type', 'subType'] });
 
   const { subscribe } = form;
 
@@ -159,23 +161,14 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </EuiFlexItem>
 
       {/* Field subType (if any) */}
-      <FormDataProvider pathsToWatch="type">
-        {({ type }) => {
-          if (type === undefined) {
-            return null;
-          }
-
-          const [fieldType] = type;
-          return (
-            <SubTypeParameter
-              key={fieldType?.value}
-              type={fieldType?.value}
-              isMultiField={isMultiField ?? false}
-              isRootLevelField={isRootLevelField}
-            />
-          );
-        }}
-      </FormDataProvider>
+      {type !== undefined && (
+        <SubTypeParameter
+          key={type?.[0]?.value}
+          type={type?.[0]?.value}
+          isMultiField={isMultiField ?? false}
+          isRootLevelField={isRootLevelField}
+        />
+      )}
 
       {/* Field reference_field for semantic_text field type */}
       {isSemanticText && (
@@ -190,6 +183,34 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+
+  const renderRequiredParametersForm = () => {
+    if (!type) return null;
+
+    const RequiredParametersForm = getRequiredParametersFormForType(
+      type?.[0]?.value,
+      subType?.[0]?.value
+    );
+
+    if (!RequiredParametersForm) {
+      return null;
+    }
+
+    const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
+
+    return (
+      <div className="mappingsEditor__createFieldRequiredProps">
+        {typeDefinition?.isBeta ? (
+          <>
+            <FieldBetaBadge />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
+        <RequiredParametersForm key={subType ?? type} allFields={allFields} />
+      </div>
+    );
+  };
 
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -249,33 +270,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
             <div className="mappingsEditor__createFieldContent">
               {renderFormFields()}
 
-              <FormDataProvider pathsToWatch={['type', 'subType']}>
-                {({ type, subType }) => {
-                  const RequiredParametersForm = getRequiredParametersFormForType(
-                    type?.[0]?.value,
-                    subType?.[0]?.value
-                  );
-
-                  if (!RequiredParametersForm) {
-                    return null;
-                  }
-
-                  const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
-
-                  return (
-                    <div className="mappingsEditor__createFieldRequiredProps">
-                      {typeDefinition.isBeta ? (
-                        <>
-                          <FieldBetaBadge />
-                          <EuiSpacer size="m" />
-                        </>
-                      ) : null}
-
-                      <RequiredParametersForm key={subType ?? type} allFields={allFields} />
-                    </div>
-                  );
-                }}
-              </FormDataProvider>
+              {renderRequiredParametersForm()}
 
               {isSemanticText && (
                 <SelectInferenceId createInferenceEndpoint={createInferenceEndpoint} />

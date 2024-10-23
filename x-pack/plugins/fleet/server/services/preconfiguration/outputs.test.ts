@@ -6,11 +6,10 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { appContextService } from '..';
 
+import { appContextService } from '../app_context';
 import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
-
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
@@ -25,11 +24,16 @@ jest.mock('../agent_policy_update');
 jest.mock('../output');
 jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
+jest.mock('../settings');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 jest.mock('../app_context', () => ({
   appContextService: {
+    getExperimentalFeatures: jest.fn().mockReturnValue({
+      useSpaceAwareness: false,
+    }),
+    getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     getLogger: () =>
       new Proxy(
@@ -49,7 +53,10 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 );
 
 describe('output preconfiguration', () => {
+  let logstashSecretHash: string;
+
   beforeEach(async () => {
+    logstashSecretHash = await hashSecret('secretKey');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
@@ -59,6 +66,9 @@ describe('output preconfiguration', () => {
       page: 0,
       per_page: 0,
       total: 0,
+    });
+    internalSoClientWithoutSpaceExtension.bulkGet.mockResolvedValue({
+      saved_objects: [],
     });
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();
@@ -113,13 +123,41 @@ describe('output preconfiguration', () => {
           id: 'existing-logstash-output-with-secrets-2',
           is_default: false,
           is_default_monitoring: false,
-          name: 'Logstash Output With Secrets 2',
+          name: 'Logstash Output With Secrets ',
           type: 'logstash',
           hosts: ['test:4343'],
           is_preconfigured: true,
           secrets: {
             ssl: {
               key: 'secretKey',
+            },
+          },
+        },
+        {
+          id: 'existing-logstash-output-with-secrets-3-outdatded-hash',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Logstash Output With Secrets 3',
+          type: 'logstash',
+          hosts: ['test:4343'],
+          is_preconfigured: true,
+          secrets: {
+            ssl: {
+              key: { id: 'test456', hash: 'test456:outdatedhash' },
+            },
+          },
+        },
+        {
+          id: 'existing-logstash-output-with-secrets-4-hash',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Logstash Output With Secrets 4',
+          type: 'logstash',
+          hosts: ['test:4343'],
+          is_preconfigured: true,
+          secrets: {
+            ssl: {
+              key: { id: 'test123', hash: logstashSecretHash },
             },
           },
         },
@@ -680,6 +718,56 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should update output if a preconfigured logstash output with secrets exists and hash algorithm changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-logstash-output-with-secrets-3-outdatded-hash',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Logstash Output With Secrets 3',
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey', // no change
+          },
+        },
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should not update output if a preconfigured logstash output with secrets exists and hash algorithm did not changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-logstash-output-with-secrets-4-hash',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Logstash Output With Secrets 4',
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey', // no change
+          },
+        },
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
   it('should update output if a preconfigured kafka output with plain value secrets exists and did not change', async () => {

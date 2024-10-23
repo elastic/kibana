@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CALLOUT_PARAGRAPH1 = i18n.translate(
-  'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.calloutParagraph1',
-  {
-    defaultMessage: 'The fields below are allowed by default',
-  }
-);
-
-export const CALLOUT_PARAGRAPH2 = i18n.translate(
-  'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.calloutParagraph2',
-  {
-    defaultMessage: 'Optionally enable anonymization for these fields',
-  }
-);
-
-export const CALLOUT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.calloutTitle',
-  {
-    defaultMessage: 'Anonymization defaults',
-  }
-);
-
 export const SETTINGS_TITLE = i18n.translate(
   'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.settingsTitle',
   {

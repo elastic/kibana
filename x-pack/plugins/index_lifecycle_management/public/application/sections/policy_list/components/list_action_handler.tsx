@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { usePolicyListContext } from '../policy_list_context';
-import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
-import { ConfirmDelete } from './confirm_delete';
-import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
+import { IndexTemplatesFlyout } from '../../../components';
+import { ViewPolicyFlyout } from '../policy_flyout';
+import { ConfirmDelete, AddPolicyToTemplateConfirmModal } from '.';
 
 interface Props {
-  updatePolicies: () => void;
+  deletePolicyCallback: () => void;
 }
-export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolicies }) => {
+export const ListActionHandler: React.FunctionComponent<Props> = ({ deletePolicyCallback }) => {
   const { listAction, setListAction } = usePolicyListContext();
   if (listAction?.actionType === 'viewIndexTemplates') {
     return (
@@ -32,7 +32,7 @@ export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolici
       <ConfirmDelete
         policyToDelete={listAction.selectedPolicy}
         callback={() => {
-          updatePolicies();
+          deletePolicyCallback();
           setListAction(null);
         }}
         onCancel={() => {
@@ -58,5 +58,10 @@ export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolici
       />
     );
   }
+
+  if (listAction?.actionType === 'viewPolicy') {
+    return <ViewPolicyFlyout policy={listAction.selectedPolicy} />;
+  }
+
   return null;
 };

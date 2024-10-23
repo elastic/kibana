@@ -42,7 +42,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -325,7 +325,7 @@ export function App({
         prevVisState
       );
       if (telemetryEvents && telemetryEvents.length) {
-        trackUiCounterEvents(telemetryEvents);
+        trackSaveUiCounterEvents(telemetryEvents);
       }
       return runSaveLensVisualization(
         {
@@ -471,14 +471,6 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel: _onCancel }) => {
-    setIsSaveModalVisible(true);
-    setShouldCloseAndSaveTextBasedQuery(true);
-    saveAndExit.current = () => {
-      onSave();
-    };
-  }, []);
-
   // remember latest URL based on the configuration
   // url_panel_content has a similar logic
   const shareURLCache = useRef({ params: '', url: '' });
@@ -571,7 +563,6 @@ export function App({
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
-          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
           startServices={coreStart}

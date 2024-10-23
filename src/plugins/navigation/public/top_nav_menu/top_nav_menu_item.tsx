@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge, EuiButtonColor } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -48,6 +49,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
     className: props.className,
+    color: (props.color ?? 'primary') as EuiButtonColor,
   };
 
   // If the item specified a href, then override the suppress the onClick
@@ -57,12 +59,13 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
+  // fill is not compatible with EuiHeaderLink
   const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps} fill>
+    <EuiButton size="s" {...commonButtonProps} fill={props.fill ?? true}>
       {getButtonContainer()}
     </EuiButton>
   ) : (
-    <EuiHeaderLink size="s" color="primary" {...commonButtonProps} {...overrideProps}>
+    <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
       {getButtonContainer()}
     </EuiHeaderLink>
   );

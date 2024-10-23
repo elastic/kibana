@@ -9,8 +9,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
-  GetListItemRequestQuery,
-  GetListItemResponse,
+  ReadListItemRequestQuery,
+  ReadListItemResponse,
 } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
@@ -30,7 +30,7 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetListItemRequestQuery),
+            query: buildRouteValidationWithZod(ReadListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -51,7 +51,7 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
               });
             }
 
-            return response.ok({ body: GetListItemResponse.parse(listItem) });
+            return response.ok({ body: ReadListItemResponse.parse(listItem) });
           } else if (listId != null && value != null) {
             const list = await lists.getList({ id: listId });
 
@@ -75,7 +75,7 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
               });
             }
 
-            return response.ok({ body: GetListItemResponse.parse(listItem) });
+            return response.ok({ body: ReadListItemResponse.parse(listItem) });
           } else {
             return siemResponse.error({
               body: 'Either "list_id" or "id" needs to be defined in the request',

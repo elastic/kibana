@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/synthetics-e2e",
+  "owner": "@elastic/obs-ux-management-team",
+  "devOnly": true
+}

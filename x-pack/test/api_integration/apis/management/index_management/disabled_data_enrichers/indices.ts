@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const testIndex = 'test_index';
-  describe('GET indices without data enrichers', async () => {
+  describe('GET indices without data enrichers', () => {
     before(async () => {
       await createIndex(testIndex);
     });

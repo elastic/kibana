@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-        "id": "def-common.settingsServiceMock",
+        "id": "def-public.settingsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "settingsServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.settingsServiceMock.create",
+            "id": "def-public.settingsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +36,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.settingsServiceMock.createSetupContract",
+            "id": "def-public.settingsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,17 +45,17 @@
               "() => { client: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; globalClient: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; }"
@@ -84,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.settingsServiceMock.createStartContract",
+            "id": "def-public.settingsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -93,17 +77,17 @@
               "() => { client: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; globalClient: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; }"
@@ -119,7 +103,7 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-        "id": "def-common.uiSettingsServiceMock",
+        "id": "def-public.uiSettingsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "uiSettingsServiceMock",
@@ -130,7 +114,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.uiSettingsServiceMock.create",
+            "id": "def-public.uiSettingsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -146,7 +130,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.uiSettingsServiceMock.createSetupContract",
+            "id": "def-public.uiSettingsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -155,9 +139,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">"
@@ -170,7 +154,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-mocks",
-            "id": "def-common.uiSettingsServiceMock.createStartContract",
+            "id": "def-public.uiSettingsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -179,9 +163,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">"
@@ -196,5 +180,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

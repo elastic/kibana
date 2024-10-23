@@ -14,7 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esClient = getService('es');
 
-  describe('fleet_service_tokens', async () => {
+  describe('fleet_service_tokens', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });

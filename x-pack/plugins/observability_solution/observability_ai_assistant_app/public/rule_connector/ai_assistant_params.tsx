@@ -38,6 +38,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           fullWidth
           data-test-subj="observabilityAiAssistantAlertConnectorSelect"
           isLoading={loading}
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.connector?.length > 0}
           options={connectors?.map((connector) => {
             return { value: connector.id, text: connector.name };
@@ -69,6 +70,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             onChange={(event) => {
               editAction('message', event.target.value, index);
             }}
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.message?.length > 0}
           />
         </EuiFlexItem>

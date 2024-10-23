@@ -1,0 +1,18 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": []
+}

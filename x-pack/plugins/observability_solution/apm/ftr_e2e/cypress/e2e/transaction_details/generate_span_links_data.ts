@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { SpanLink } from '../../../../typings/es_schemas/raw/fields/span_links';
+import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { synthtrace } from '../../../synthtrace';
 
 function getProducerInternalOnly() {

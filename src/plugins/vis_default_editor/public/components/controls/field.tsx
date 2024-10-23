@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
@@ -13,7 +14,7 @@ import useMount from 'react-use/lib/useMount';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParam, IAggConfig, IFieldParamType, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { IAggConfig, IFieldParamType, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -46,7 +47,7 @@ function FieldParamEditor({
     : [];
 
   const onChange = (options: EuiComboBoxOptionOption[]) => {
-    const selectedOption: DataViewField = get(options, '0.target');
+    const selectedOption: DataViewField | undefined = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }
@@ -120,7 +121,7 @@ function FieldParamEditor({
     }
   });
 
-  const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
+  const onSearchChange = useCallback((searchValue: string) => setIsDirty(Boolean(searchValue)), []);
 
   return (
     <EuiFormRow
@@ -157,9 +158,8 @@ function getFieldTypesString(agg: IAggConfig) {
 }
 
 function getFieldTypes(agg: IAggConfig) {
-  const param =
-    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
-    ({} as IFieldParamType);
+  const param = (get(agg, 'type.params', []).find((p) => p.name === 'field') ||
+    {}) as IFieldParamType;
   return parseCommaSeparatedList(param.filterFieldTypes || []);
 }
 

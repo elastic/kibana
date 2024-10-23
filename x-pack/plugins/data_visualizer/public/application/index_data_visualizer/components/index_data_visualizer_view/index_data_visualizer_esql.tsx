@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
 import {
@@ -54,7 +54,6 @@ export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 const DEFAULT_ESQL_QUERY = { esql: '' };
-const expandCodeEditor = () => true;
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
@@ -260,17 +259,25 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
-        <TextBasedLangEditor
-          query={localQuery}
-          onTextLangQueryChange={onTextLangQueryChange}
-          onTextLangQuerySubmit={onTextLangQuerySubmit}
-          expandCodeEditor={expandCodeEditor}
-          isCodeEditorExpanded={true}
-          detectedTimestamp={currentDataView?.timeFieldName}
-          hideMinimizeButton={true}
-          hideRunQueryText={false}
-          isLoading={queryHistoryStatus ?? false}
-        />
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="DataVisualizerESQLEditor"
+          css={css({
+            borderTop: euiTheme.euiBorderThin,
+            borderLeft: euiTheme.euiBorderThin,
+            borderRight: euiTheme.euiBorderThin,
+          })}
+        >
+          <ESQLLangEditor
+            query={localQuery}
+            onTextLangQueryChange={onTextLangQueryChange}
+            onTextLangQuerySubmit={onTextLangQuerySubmit}
+            detectedTimestamp={currentDataView?.timeFieldName}
+            hideRunQueryText={false}
+            isLoading={queryHistoryStatus ?? false}
+            displayDocumentationAsFlyout
+          />
+        </EuiFlexItem>
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>

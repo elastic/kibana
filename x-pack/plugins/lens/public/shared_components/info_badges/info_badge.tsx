@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { type ReactChildren, type ReactChild } from 'react';
+import React from 'react';
 
 export function InfoBadge({
   title,
@@ -28,7 +28,7 @@ export function InfoBadge({
   dataView: string;
   index: number;
   palette?: string[];
-  children?: ReactChild | ReactChildren;
+  children?: React.ReactNode;
   'data-test-subj-prefix': string;
 }) {
   const { euiTheme } = useEuiTheme();

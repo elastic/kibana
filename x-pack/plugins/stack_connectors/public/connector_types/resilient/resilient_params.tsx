@@ -109,7 +109,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -208,10 +208,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors['subActionParams.incident.name']}
+        error={errors['subActionParams.incident.name'] as string[]}
         isInvalid={
           errors['subActionParams.incident.name'] !== undefined &&
-          errors['subActionParams.incident.name'].length > 0 &&
+          Number(errors['subActionParams.incident.name'].length) > 0 &&
           incident.name !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {

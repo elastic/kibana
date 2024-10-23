@@ -7,9 +7,9 @@
 
 import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
+import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type {
   GetHostPolicyResponse,
-  HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
@@ -73,11 +73,6 @@ export interface ServerReturnedEndpointNonExistingPolicies {
   payload: EndpointState['nonExistingPolicies'];
 }
 
-export interface ServerReturnedEndpointAgentPolicies {
-  type: 'serverReturnedEndpointAgentPolicies';
-  payload: EndpointState['agentPolicies'];
-}
-
 export interface ServerFinishedInitialization {
   type: 'serverFinishedInitialization';
   payload: boolean;
@@ -133,7 +128,7 @@ export interface ServerFailedToReturnEndpointsTotal {
 export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
   payload: {
     type: ISOLATION_ACTIONS;
-    data: HostIsolationRequestBody;
+    data: IsolationRouteRequestBody;
   };
 };
 
@@ -162,7 +157,6 @@ export type EndpointAction =
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
   | ServerReturnedAgenstWithEndpointsTotal
-  | ServerReturnedEndpointAgentPolicies
   | UserUpdatedEndpointListRefreshOptions
   | ServerReturnedEndpointsTotal
   | ServerFailedToReturnAgenstWithEndpointsTotal

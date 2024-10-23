@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Agent as SuperTestAgent } from 'supertest';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -20,7 +21,7 @@ const getTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
   supertest: SuperTestAgent,
-  supertestWithoutAuth: any
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());

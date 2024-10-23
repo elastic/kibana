@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import {
-  AwsCredentialsTypeFieldMap,
-  GcpCredentialsTypeFieldMap,
-  PostureTypes,
-  VulnSeverity,
-} from './types_old';
+import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 
-export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
-export const STATUS_API_CURRENT_VERSION = '1';
+import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
+
+export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
 
@@ -26,13 +22,12 @@ export const BENCHMARKS_API_CURRENT_VERSION = '1';
 export const FIND_CSP_BENCHMARK_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
 
+export const GRAPH_ROUTE_PATH = '/internal/cloud_security_posture/graph';
+export const GRAPH_API_CURRENT_VERSION = '1';
+
 export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
 export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
-
-export const CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH =
-  '/internal/cloud_security_posture/rules/_get_states';
-export const CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION = '1';
 
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
@@ -40,23 +35,22 @@ export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
-// TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
-export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
-
-export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
+
+export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
+export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
+  'security_solution_cdr_latest_vulnerabilities';
 
 export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
 export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
@@ -65,13 +59,6 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
-export const LATEST_VULNERABILITIES_INDEX_PATTERN =
-  'logs-cloud_security_posture.vulnerabilities_latest*';
-export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
-  'logs-cloud_security_posture.vulnerabilities_latest-default';
-export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
-
-export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
@@ -116,8 +103,6 @@ export const CIS_GCP = 'cis_gcp';
 export const CIS_K8S = 'cis_k8s';
 export const CIS_EKS = 'cis_eks';
 export const CIS_AZURE = 'cis_azure';
-export const KSPM_POLICY_TEMPLATE = 'kspm';
-export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const VULN_MGMT_POLICY_TEMPLATE = 'vuln_mgmt';
 export const CNVM_POLICY_TEMPLATE = 'cnvm';
 export const SUPPORTED_POLICY_TEMPLATES = [
@@ -142,19 +127,6 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
   [VULN_MGMT_POLICY_TEMPLATE]: VULN_MGMT_POLICY_TEMPLATE,
   [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
 };
-
-export const VULNERABILITIES = 'vulnerabilities';
-export const CONFIGURATIONS = 'configurations';
-
-export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-  CRITICAL: 'CRITICAL',
-  UNKNOWN: 'UNKNOWN',
-};
-
-export const VULNERABILITIES_ENUMERATION = 'CVE';
 
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
   assume_role: ['role_arn'],
@@ -195,7 +167,6 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   manual: [],
 };
 
-export const CLOUD_FORMATION_STACK_NAME = 'Elastic-Cloud-Security-Posture-Management';
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 
 export const ORGANIZATION_ACCOUNT = 'organization-account';
@@ -203,4 +174,4 @@ export const SINGLE_ACCOUNT = 'single-account';
 
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 // Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
-export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.10.0-preview01';
+export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview10';

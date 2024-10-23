@@ -33,9 +33,9 @@ import {
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import type {
   AlertsTableProps,
@@ -50,7 +50,6 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
-import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const DefaultGridStyle: EuiDataGridStyle = {
@@ -233,7 +232,8 @@ type CustomGridBodyProps = Pick<
 > & {
   alertsData: FetchAlertData['oldAlertsData'];
   isLoading: boolean;
-  pagination: RuleRegistrySearchRequestPagination;
+  pageIndex: number;
+  pageSize: number;
   actualGridStyle: EuiDataGridStyle;
   stripes?: boolean;
 };
@@ -242,7 +242,8 @@ const CustomGridBody = memo(
   ({
     alertsData,
     isLoading,
-    pagination,
+    pageIndex,
+    pageSize,
     actualGridStyle,
     visibleColumns,
     Cell,
@@ -251,11 +252,11 @@ const CustomGridBody = memo(
     return (
       <>
         {alertsData
-          .concat(isLoading ? Array.from({ length: pagination.pageSize - alertsData.length }) : [])
+          .concat(isLoading ? Array.from({ length: pageSize - alertsData.length }) : [])
           .map((_row, rowIndex) => (
             <Row
               role="row"
-              key={`${rowIndex},${pagination.pageIndex}`}
+              key={`${rowIndex},${pageIndex}`}
               // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
               // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
               // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
@@ -292,7 +293,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     leadingControlColumns: passedControlColumns,
     trailingControlColumns,
     alertsTableConfiguration,
-    pagination,
+    pageIndex,
+    pageSize,
     columns,
     alerts,
     alertsCount,
@@ -302,11 +304,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     onSortChange,
     onPageChange,
     sort: sortingFields,
-    refetch: alertsRefresh,
-    getInspectQuery,
+    refetchAlerts,
     rowHeightsOptions,
     dynamicRowHeight,
     query,
+    querySnapshot,
     featureIds,
     cases: { data: cases, isLoading: isLoadingCases },
     maintenanceWindows: { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows },
@@ -314,6 +316,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     toolbarVisibility: toolbarVisibilityProp,
     shouldHighlightRow,
     fieldFormats,
+    height,
   } = props;
 
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -321,7 +324,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     NonNullable<EuiDataGridStyle['rowClasses']>
   >({});
 
-  const queryClient = useQueryClient({ context: AlertsTableQueryContext });
+  const queryClient = useQueryClient({ context: AlertsQueryContext });
 
   const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
 
@@ -337,15 +340,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
 
   const bulkActionArgs = useMemo(() => {
     return {
-      alerts,
+      alertsCount: alerts.length,
       casesConfig: alertsTableConfiguration.cases,
       query,
       useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
-      refresh: alertsRefresh,
+      refresh: refetchAlerts,
       featureIds,
       hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
     };
-  }, [alerts, alertsTableConfiguration, query, alertsRefresh, featureIds]);
+  }, [
+    alerts.length,
+    alertsTableConfiguration.cases,
+    alertsTableConfiguration.useBulkActions,
+    alertsTableConfiguration.hideBulkActions,
+    query,
+    refetchAlerts,
+    featureIds,
+  ]);
 
   const {
     isBulkActionsColumnActive,
@@ -357,11 +368,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
   } = useBulkActions(bulkActionArgs);
 
   const refreshData = useCallback(() => {
-    alertsRefresh();
+    refetchAlerts();
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
-  }, [alertsRefresh, queryClient]);
+  }, [refetchAlerts, queryClient]);
 
   const refresh = useCallback(() => {
     refreshData();
@@ -377,8 +388,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     setFlyoutAlertIndex,
   } = usePagination({
     onPageChange,
-    pageIndex: pagination.pageIndex,
-    pageSize: pagination.pageSize,
+    pageIndex,
+    pageSize,
   });
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
@@ -411,7 +422,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       clearSelection,
       refresh,
       fieldBrowserOptions,
-      getInspectQuery,
+      querySnapshot,
       showInspectButton,
       toolbarVisibilityProp,
     };
@@ -428,7 +439,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     clearSelection,
     refresh,
     fieldBrowserOptions,
-    getInspectQuery,
+    querySnapshot,
     showInspectButton,
     toolbarVisibilityProp,
     alerts,
@@ -467,7 +478,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     }
   }, [bulkActionsColumn, customActionsRow, passedControlColumns]);
 
-  const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
+  const rowIndex = flyoutAlertIndex + pageIndex * pageSize;
   useEffect(() => {
     // Row classes do not deal with visible row indices, so we need to handle page offset
     setActiveRowClasses({
@@ -547,7 +558,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       renderCellPopover
         ? (_props: EuiDataGridCellPopoverElementProps) => {
             try {
-              const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+              const idx = _props.rowIndex - pageSize * pageIndex;
               const alert = alerts[idx];
               if (alert) {
                 return renderCellPopover({
@@ -561,7 +572,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
             }
           }
         : undefined,
-    [alerts, pagination.pageIndex, pagination.pageSize, renderCellPopover]
+    [alerts, pageIndex, pageSize, renderCellPopover]
   );
 
   const dataGridPagination = useMemo(
@@ -588,8 +599,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
           data: oldAlertsData,
           ecsData: ecsAlertsData,
           dataGridRef,
-          pageSize: pagination.pageSize,
-          pageIndex: pagination.pageIndex,
+          pageSize,
+          pageIndex,
         })
       : getCellActionsStub;
 
@@ -615,8 +626,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       return alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, alert, index) => {
           if (shouldHighlightRow(alert)) {
-            rowClasses[index + pagination.pageIndex * pagination.pageSize] =
-              'alertsTableHighlightedRow';
+            rowClasses[index + pageIndex * pageSize] = 'alertsTableHighlightedRow';
           }
 
           return rowClasses;
@@ -626,7 +636,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     } else {
       return stableMappedRowClasses;
     }
-  }, [shouldHighlightRow, alerts, pagination.pageIndex, pagination.pageSize]);
+  }, [shouldHighlightRow, alerts, pageIndex, pageSize]);
 
   const mergedGridStyle = useMemo(() => {
     const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
@@ -673,18 +683,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
   }, [props.gridStyle, mergedGridStyle]);
 
   const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
-    ({ visibleColumns: _visibleColumns, Cell }) => (
-      <CustomGridBody
-        visibleColumns={_visibleColumns}
-        Cell={Cell}
-        actualGridStyle={actualGridStyle}
-        alertsData={oldAlertsData}
-        pagination={pagination}
-        isLoading={isLoading}
-        stripes={props.gridStyle?.stripes}
-      />
+    ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
+      <>
+        {headerRow}
+        <CustomGridBody
+          visibleColumns={_visibleColumns}
+          Cell={Cell}
+          actualGridStyle={actualGridStyle}
+          alertsData={oldAlertsData}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          isLoading={isLoading}
+          stripes={props.gridStyle?.stripes}
+        />
+        {footerRow}
+      </>
     ),
-    [actualGridStyle, oldAlertsData, pagination, isLoading, props.gridStyle?.stripes]
+    [actualGridStyle, oldAlertsData, pageIndex, pageSize, isLoading, props.gridStyle?.stripes]
   );
 
   const sortProps = useMemo(() => {
@@ -704,7 +719,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
               alertsCount={alertsCount}
               onClose={handleFlyoutClose}
               alertsTableConfiguration={alertsTableConfiguration}
-              flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+              flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
               onPaginate={onPaginateFlyout}
               isLoading={isLoading}
               id={props.id}
@@ -713,6 +728,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
         </Suspense>
         {alertsCount > 0 && (
           <EuiDataGrid
+            // As per EUI docs, it is not recommended to switch between undefined and defined height.
+            // If user changes height, it is better to unmount and mount the component.
+            // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+            key={height ? 'fixedHeight' : 'autoHeight'}
             aria-label="Alerts table"
             data-test-subj="alertsTable"
             columns={columnsWithCellActions}
@@ -731,6 +750,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
             ref={dataGridRef}
             renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
             renderCellPopover={handleRenderCellPopover}
+            height={height}
           />
         )}
       </section>

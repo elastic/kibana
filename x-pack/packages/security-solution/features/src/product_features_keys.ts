@@ -35,6 +35,11 @@ export enum ProductFeatureSecurityKey {
    */
   endpointArtifactManagement = 'endpoint_artifact_management',
   /**
+   * Enables managing host isolation exceptions for serverless PLIs
+   * Allows user to create, read, update HIEs Endpoint Complete PLI
+   */
+  endpointHostIsolationExceptions = 'endpoint_host_isolation_exceptions',
+  /**
    * Enables all of endpoint's supported response actions - like host isolation, file operations,
    * process operations, command execution, etc.
    */
@@ -49,9 +54,15 @@ export enum ProductFeatureSecurityKey {
   osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
 
   /**
-   * Enables Agent Tamper Protection
+   * Enables Protection Updates
    */
   endpointProtectionUpdates = 'endpoint_protection_updates',
+
+  /**
+   * Enables Endpoint Custom Notification
+   */
+
+  endpointCustomNotification = 'endpoint_custom_notification',
 
   /**
    * Enables Agent Tamper Protection
@@ -93,17 +104,26 @@ export enum ProductFeatureAssistantKey {
   assistant = 'assistant',
 }
 
+export enum ProductFeatureAttackDiscoveryKey {
+  /**
+   * Enables Attack discovery
+   */
+  attackDiscovery = 'attack_discovery',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
+  ...ProductFeatureAttackDiscoveryKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
   | ProductFeatureSecurityKey
   | ProductFeatureCasesKey
-  | ProductFeatureAssistantKey;
+  | ProductFeatureAssistantKey
+  | ProductFeatureAttackDiscoveryKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -112,7 +132,7 @@ export enum SecuritySubFeatureId {
   endpointList = 'endpointListSubFeature',
   endpointExceptions = 'endpointExceptionsSubFeature',
   trustedApplications = 'trustedApplicationsSubFeature',
-  hostIsolationExceptions = 'hostIsolationExceptionsSubFeature',
+  hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
   policyManagement = 'policyManagementSubFeature',
@@ -133,4 +153,5 @@ export enum CasesSubFeatureId {
 /** Sub-features IDs for Security Assistant */
 export enum AssistantSubFeatureId {
   updateAnonymization = 'updateAnonymizationSubFeature',
+  manageGlobalKnowledgeBase = 'manageGlobalKnowledgeBaseSubFeature',
 }

@@ -19,14 +19,24 @@ const readline = require('readline');
 // ==============================
 
 // Directories to iterate over
+
+// Serverless FTRs
 const FTR_SERVERLESS =
   'x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture';
 const FTR_SERVERLESS_API_INTEGRATION =
   'x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture';
+
+// FTRs
 const FTR_API_INTEGRATION = 'x-pack/test/api_integration/apis/cloud_security_posture';
 const FTR_CSP_API = 'x-pack/test/cloud_security_posture_api';
 const FTR_CSP_FUNCTIONAL = 'x-pack/test/cloud_security_posture_functional';
+
+// Unit tests
 const UNIT_TEST_CSP = 'x-pack/plugins/cloud_security_posture';
+
+// KBN Package
+const KBN_CSP_PACKAGE = 'x-pack/packages/kbn-cloud-security-posture';
+const KBN_CSP_PACKAGE_COMMON = 'x-pack/packages/kbn-cloud-security-posture-common';
 
 const directoryPaths = [
   FTR_SERVERLESS,
@@ -35,6 +45,8 @@ const directoryPaths = [
   FTR_CSP_API,
   FTR_CSP_FUNCTIONAL,
   UNIT_TEST_CSP,
+  KBN_CSP_PACKAGE,
+  KBN_CSP_PACKAGE_COMMON,
 ];
 
 // Output directories and file paths
@@ -100,6 +112,10 @@ const getTags = (filePath, testSuits) => {
 
   if (filePath.startsWith(UNIT_TEST_CSP)) {
     tags.push('UT');
+  }
+
+  if (filePath.startsWith(KBN_CSP_PACKAGE) || filePath.startsWith(KBN_CSP_PACKAGE_COMMON)) {
+    tags.push('KBN PACKAGE');
   }
 
   if (testSuits.some((suit) => suit.isSkipped)) {
@@ -294,6 +310,7 @@ const tagShieldsColors = {
   'HAS SKIP': 'yellow',
   'HAS TODO': 'green',
   'API INTEGRATION': 'purple',
+  'KBN PACKAGE': 'blueviolet',
 };
 
 // Generates the Requirement Test Coverage Markdown file using the data in testsLogOutput
@@ -304,7 +321,7 @@ const generateMDFile = (testLogs) => {
   mdContent +=
     'This document provides a summary of the requirements test coverage for Cloud Security Posture.\n\n';
   mdContent +=
-    'You can also check out the dedicated app view, which enables easier search and filter functionalities. This app needs to be updated manually, so it might not always be up to date.\n';
+    'You can also check out the dedicated app view, which enables easier search and filter functionalities.\n';
   mdContent += '[Requirement test coverage app](https://vxgs2c.csb.app/)\n\n';
 
   Object.entries(groupedTests).forEach(([directory, logs]) => {

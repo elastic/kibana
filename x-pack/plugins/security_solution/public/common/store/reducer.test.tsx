@@ -13,7 +13,6 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { renderHook } from '@testing-library/react-hooks';
 import { initialGroupingState } from './grouping/reducer';
 import { initialAnalyzerState } from '../../resolver/store/helpers';
-import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 import { initialNotesState } from '../../notes/store/notes.slice';
 
 jest.mock('../hooks/use_selector');
@@ -72,13 +71,12 @@ describe('createInitialState', () => {
       {
         analyzer: initialAnalyzerState,
       },
-      dataViewPickerInitialState,
       initialNotesState
     );
 
     test('indicesExist should be TRUE if patternList is NOT empty', async () => {
       const { result } = renderHook(() => useSourcererDataView(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={createMockStore(initState)}>{children}</TestProviders>
         ),
       });
@@ -112,11 +110,10 @@ describe('createInitialState', () => {
         {
           analyzer: initialAnalyzerState,
         },
-        dataViewPickerInitialState,
         initialNotesState
       );
       const { result } = renderHook(() => useSourcererDataView(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={createMockStore(state)}>{children}</TestProviders>
         ),
       });

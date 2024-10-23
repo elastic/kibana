@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
+  useRef,
   useMemo,
+  useState,
+  useLayoutEffect,
   useCallback,
   Fragment,
   type ComponentProps,
@@ -26,6 +30,7 @@ import {
   type EuiTabProps,
   type CommonProps,
   useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import {
   ModalContextProvider,
@@ -60,6 +65,7 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
+  'data-test-subj'?: string;
 }
 
 const TabbedModalInner: FC<ITabbedModalInner> = ({
@@ -67,11 +73,42 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
+  ...props
 }) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
-  const selectedTabId = state.meta.selectedTabId;
-  const shareModalHeadingId = useGeneratedHtmlId();
+  const { selectedTabId, defaultSelectedTabId } = state.meta;
+  const tabbedModalHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
+  const tabbedModalHeadingHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
+  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'top'>>());
+  const [translateYValue, setTranslateYValue] = useState(0);
+
+  const onTabContentRender = useCallback(() => {
+    const tabbedModal = document.querySelector(`[id="${tabbedModalHTMLId}"]`) as HTMLDivElement;
+
+    if (!defaultTabCoordinates.current.get(defaultSelectedTabId)) {
+      // on initial render the modal animates into it's final position
+      // hence the need to wait till said animation has completed
+      tabbedModal.onanimationend = () => {
+        const { top } = tabbedModal.getBoundingClientRect();
+        defaultTabCoordinates.current.set(defaultSelectedTabId, { top });
+      };
+    } else {
+      let translateYOverride = 0;
+
+      if (defaultSelectedTabId !== selectedTabId) {
+        const defaultTabData = defaultTabCoordinates.current.get(defaultSelectedTabId);
+
+        const rect = tabbedModal.getBoundingClientRect();
+
+        translateYOverride = translateYValue + (defaultTabData?.top! - rect.top);
+      }
+
+      if (translateYOverride !== translateYValue) {
+        setTranslateYValue(translateYOverride);
+      }
+    }
+  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, translateYValue]);
 
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
@@ -107,26 +144,44 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
     });
   }, [onSelectedTabChanged, selectedTabId, tabs]);
 
+  const modalPositionOverrideStyles: React.CSSProperties = {
+    transform: `translateY(${translateYValue}px)`,
+    transformOrigin: 'top',
+    willChange: 'transform',
+  };
+
   return (
     <EuiModal
+      id={tabbedModalHTMLId}
       onClose={() => {
         onClose();
         setTimeout(() => anchorElement?.focus(), 1);
       }}
-      style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
-      data-test-subj="shareContextModal"
-      aria-labelledby={shareModalHeadingId}
+      data-test-subj={props['data-test-subj']}
+      css={{
+        ...(modalWidth ? { width: modalWidth } : {}),
+        ...modalPositionOverrideStyles,
+      }}
+      aria-labelledby={tabbedModalHeadingHTMLId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={shareModalHeadingId}>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
           <EuiTabs>{renderTabs()}</EuiTabs>
-          {React.createElement(SelectedTabContent, {
-            state: selectedTabState,
-            dispatch,
+          <EuiSpacer size="m" />
+          {React.createElement(function RenderSelectedTabContent() {
+            useLayoutEffect(onTabContentRender, []);
+            return (
+              <SelectedTabContent
+                {...{
+                  state: selectedTabState,
+                  dispatch,
+                }}
+              />
+            );
           })}
         </Fragment>
       </EuiModalBody>

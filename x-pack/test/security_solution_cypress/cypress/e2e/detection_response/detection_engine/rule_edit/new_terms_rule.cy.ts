@@ -40,10 +40,11 @@ const SUPPRESS_BY_FIELDS = ['agent.hostname', 'agent.type'];
 
 const rule = getNewTermsRule();
 
+// Skip in MKI due to flake
 describe(
   'Detection rules, New terms, Edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {

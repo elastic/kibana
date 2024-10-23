@@ -20,12 +20,12 @@ const geoFieldName = 'location';
 const flattenHitMock = (hit) => {
   const properties = {};
   for (const fieldName in hit._source) {
-    if (hit._source.hasOwnProperty(fieldName)) {
+    if (Object.hasOwn(hit._source, fieldName)) {
       properties[fieldName] = hit._source[fieldName];
     }
   }
   for (const fieldName in hit.fields) {
-    if (hit.fields.hasOwnProperty(fieldName)) {
+    if (Object.hasOwn(hit.fields, fieldName)) {
       properties[fieldName] = hit.fields[fieldName];
     }
   }
@@ -338,7 +338,7 @@ describe('hitsToGeoJson', () => {
         },
       ];
       const geojson = hitsToGeoJson(hits, cachedFlattenHit, geoFieldName, 'geo_point', []);
-      expect(cachedProperities.hasOwnProperty('location')).toBe(true);
+      expect(Object.hasOwn(cachedProperities, 'location')).toBe(true);
       expect(geojson.features[0].properties).toEqual({});
     });
   });

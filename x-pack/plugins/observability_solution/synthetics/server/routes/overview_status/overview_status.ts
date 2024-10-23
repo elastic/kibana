@@ -8,7 +8,7 @@ import { intersection } from 'lodash';
 import datemath, { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
-import { ConfigKey } from '../../../common/runtime_types';
+import { ConfigKey, OverviewStatusState } from '../../../common/runtime_types';
 import {
   getAllMonitors,
   processMonitors,
@@ -36,9 +36,9 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
  * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
  */
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
-  const { syntheticsEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
+  const { syntheticsEsClient, savedObjectsClient } = context;
 
-  const { query, scopeStatusByLocation = true } = params;
+  const { query, scopeStatusByLocation = true, showFromAllSpaces } = params;
 
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
@@ -54,6 +54,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
 
   const allMonitors = await getAllMonitors({
     soClient: savedObjectsClient,
+    showFromAllSpaces,
     search: query ? `${query}*` : undefined,
     filter: filtersStr,
     fields: [
@@ -63,6 +64,11 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
       ConfigKey.CONFIG_ID,
       ConfigKey.SCHEDULE,
       ConfigKey.MONITOR_SOURCE_TYPE,
+      ConfigKey.MONITOR_TYPE,
+      ConfigKey.NAME,
+      ConfigKey.TAGS,
+      ConfigKey.PROJECT_ID,
+      ConfigKey.ALERT_CONFIG,
     ],
   });
 
@@ -73,17 +79,11 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     disabledCount,
     maxPeriod,
     monitorLocationIds,
-    monitorLocationMap,
+    monitorLocationsMap,
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorQueryIdToConfigIdMap,
-  } = processMonitors(
-    allMonitors,
-    server,
-    savedObjectsClient,
-    syntheticsMonitorClient,
-    queryLocations
-  );
+  } = processMonitors(allMonitors, queryLocations);
 
   // Account for locations filter
   const listOfLocationAfterFilter =
@@ -96,14 +96,16 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     to: 'now',
   };
 
-  const { up, down, pending, upConfigs, downConfigs, pendingConfigs } = await queryMonitorStatus(
-    syntheticsEsClient,
-    listOfLocationAfterFilter,
-    range,
-    enabledMonitorQueryIds,
-    monitorLocationMap,
-    monitorQueryIdToConfigIdMap
-  );
+  const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
+    await queryMonitorStatus({
+      range,
+      monitors: allMonitors,
+      monitorLocationsMap,
+      monitorQueryIdToConfigIdMap,
+      esClient: syntheticsEsClient,
+      monitorLocationIds: listOfLocationAfterFilter,
+      monitorQueryIds: enabledMonitorQueryIds,
+    });
 
   return {
     allIds,
@@ -119,6 +121,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     upConfigs,
     downConfigs,
     pendingConfigs,
+    disabledConfigs,
   };
 }
 
@@ -128,7 +131,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => 
   validate: {
     query: OverviewStatusSchema,
   },
-  handler: async (routeContext): Promise<any> => {
+  handler: async (routeContext): Promise<OverviewStatusState> => {
     const { request } = routeContext;
 
     const params = request.query as OverviewStatusQuery;

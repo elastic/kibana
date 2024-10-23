@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { partition } from 'lodash/fp';
+import { partition, isEmpty } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
@@ -18,9 +16,8 @@ import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type {
   InvestigationFields,
-  RequiredField,
-  RequiredFieldInput,
   RuleResponse,
+  RuleAction as RuleActionSchema,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   FindRulesResponse,
@@ -222,18 +219,23 @@ export const swapActionIds = async (
  */
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  actionsClient: ActionsClient
 ): Promise<PromiseFromStreams[]> => {
   const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
 
   const toReturn = await pMap(
     rules,
     async (rule) => {
-      if (isImportRule(rule)) {
+      if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
+        // filter out system actions, since they were not part of any 7.x releases and do not need to be migrated
+        const [systemActions, extActions] = partition<RuleAction>((action) =>
+          actionsClient.isSystemAction(action.id)
+        )(rule.actions);
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<RuleAction | Error> = await pMap(
-          (rule.actions as RuleAction[]) ?? [],
+          (extActions as RuleAction[]) ?? [],
           (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
@@ -244,11 +246,11 @@ export const migrateLegacyActionsIds = async (
         )(newActions);
 
         if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
-          return { ...rule, actions: newlyMigratedActions };
+          return { ...rule, actions: [...newlyMigratedActions, ...systemActions] };
         }
 
         return [
-          { ...rule, actions: newlyMigratedActions },
+          { ...rule, actions: [...newlyMigratedActions, ...systemActions] },
           new Error(
             JSON.stringify(
               createBulkErrorObject({
@@ -369,18 +371,10 @@ export const migrateLegacyInvestigationFields = (
   return investigationFields;
 };
 
-/*
-  Computes the boolean "ecs" property value for each required field based on the ECS field map.
-  "ecs" property indicates whether the required field is an ECS field or not.
-*/
-export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
-  (requiredFields ?? []).map((requiredFieldWithoutEcs) => {
-    const isEcsField = Boolean(
-      ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
-    );
-
-    return {
-      ...requiredFieldWithoutEcs,
-      ecs: isEcsField,
-    };
-  });
+export const separateActionsAndSystemAction = (
+  actionsClient: ActionsClient,
+  actions: RuleActionSchema[] | undefined
+) =>
+  !isEmpty(actions)
+    ? partition((action: RuleActionSchema) => actionsClient.isSystemAction(action.id))(actions)
+    : [[], actions];

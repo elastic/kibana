@@ -9,6 +9,7 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
@@ -17,9 +18,7 @@ import {
   QueryParams,
   SortOrder,
   ServiceProviderKeys,
-  TaskTypes,
 } from '../components/all_inference_endpoints/types';
-import { DeploymentStatusEnum } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];
@@ -33,8 +32,7 @@ export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   queryParams: QueryParams,
   filterOptions: FilterOptions,
-  searchKey: string,
-  deploymentStatus: Record<string, DeploymentStatusEnum>
+  searchKey: string
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
@@ -52,29 +50,13 @@ export const useTableData = (
     }
 
     return filteredEndpoints
-      .filter((endpoint) => endpoint.model_id.includes(searchKey))
-      .map((endpoint) => {
-        const isElasticService =
-          endpoint.service === ServiceProviderKeys.elasticsearch ||
-          endpoint.service === ServiceProviderKeys.elser;
-
-        let deploymentStatusValue = DeploymentStatusEnum.notApplicable;
-        if (isElasticService) {
-          const modelId = endpoint.service_settings?.model_id;
-          deploymentStatusValue =
-            modelId && deploymentStatus[modelId] !== undefined
-              ? deploymentStatus[modelId]
-              : DeploymentStatusEnum.notDeployable;
-        }
-
-        return {
-          deployment: deploymentStatusValue,
-          endpoint,
-          provider: endpoint.service,
-          type: endpoint.task_type,
-        };
-      });
-  }, [inferenceEndpoints, searchKey, filterOptions, deploymentStatus]);
+      .filter((endpoint) => endpoint.inference_id.includes(searchKey))
+      .map((endpoint) => ({
+        endpoint: endpoint.inference_id,
+        provider: endpoint,
+        type: endpoint.task_type,
+      }));
+  }, [inferenceEndpoints, searchKey, filterOptions]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
@@ -82,9 +64,9 @@ export const useTableData = (
       const bValue = b[queryParams.sortField];
 
       if (queryParams.sortOrder === SortOrder.asc) {
-        return aValue.model_id.localeCompare(bValue.model_id);
+        return aValue.localeCompare(bValue);
       } else {
-        return bValue.model_id.localeCompare(aValue.model_id);
+        return bValue.localeCompare(aValue);
       }
     });
   }, [tableData, queryParams]);

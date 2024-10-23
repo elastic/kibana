@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SpecDefinitionsService } from '../../../services';
@@ -63,6 +64,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
               'nested',
               'geo_point',
               'geo_shape',
+              'dense_vector',
             ],
           },
 
@@ -84,7 +86,24 @@ export const mappings = (specService: SpecDefinitionsService) => {
           // index_prefixes: { min_chars, max_chars },
 
           index_options: {
-            __one_of: ['docs', 'freqs', 'positions'],
+            // leave the first item blank because the default depends on type
+            __one_of: [
+              '',
+              // text-based types
+              'docs',
+              'freqs',
+              'positions',
+              'offsets',
+              // dense_vector type
+              {
+                type: {
+                  __one_of: ['int8_hnsw', 'hnsw', 'int4_hnsw', 'flat', 'int8_flat', 'int4_flat'],
+                },
+                m: 16,
+                ef_construction: 100,
+                confidence_interval: 0,
+              },
+            ],
           },
           analyzer: 'standard',
           search_analyzer: 'standard',
@@ -92,6 +111,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
             __one_of: [false, true],
           },
           ignore_above: 10,
+          normalizer: '',
           position_increment_gap: 0,
 
           // numeric
@@ -213,7 +233,18 @@ export const mappings = (specService: SpecDefinitionsService) => {
             },
           },
           similarity: {
-            __one_of: ['default', 'BM25'],
+            // leave the first item blank because the default depends on type
+            __one_of: [
+              '',
+              // text-based types
+              'BM25',
+              'boolean',
+              // dense_vector type
+              'l2_norm',
+              'dot_product',
+              'cosine',
+              'max_inner_product',
+            ],
           },
 
           // objects
@@ -232,6 +263,12 @@ export const mappings = (specService: SpecDefinitionsService) => {
           // nested
           include_in_parent: BOOLEAN,
           include_in_root: BOOLEAN,
+
+          // dense_vector
+          element_type: {
+            __one_of: ['float', 'byte', 'bit'],
+          },
+          dims: 3,
         },
       },
     },

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 
@@ -73,8 +73,8 @@ describe('SaveTimelineModal', () => {
     it('should show correct header for save timeline template modal', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
-        status: TimelineStatus.draft,
-        timelineType: TimelineType.template,
+        status: TimelineStatusEnum.draft,
+        timelineType: TimelineTypeEnum.template,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -88,7 +88,7 @@ describe('SaveTimelineModal', () => {
     it('should render all the dom elements of the modal', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
       });
 
       const { getByTestId, queryByTestId } = renderSaveTimelineModal();
@@ -120,7 +120,7 @@ describe('SaveTimelineModal', () => {
     it('should show correct header for edit timeline template modal', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -131,8 +131,8 @@ describe('SaveTimelineModal', () => {
 
     it('should show correct header for save timeline template modal', () => {
       mockGetState.mockReturnValue({
-        status: TimelineStatus.active,
-        timelineType: TimelineType.template,
+        status: TimelineStatusEnum.active,
+        timelineType: TimelineTypeEnum.template,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -147,9 +147,9 @@ describe('SaveTimelineModal', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
         description: 'my description',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'my timeline',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -179,7 +179,7 @@ describe('SaveTimelineModal', () => {
     it('should show discard timeline in the close button', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
       });
 
       const { getByTestId } = renderSaveTimelineModal(true);
@@ -192,8 +192,8 @@ describe('SaveTimelineModal', () => {
     it('should show discard timeline template in the close button', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
-        timelineType: TimelineType.template,
-        status: TimelineStatus.draft,
+        timelineType: TimelineTypeEnum.template,
+        status: TimelineStatusEnum.draft,
       });
 
       const { getByTestId } = renderSaveTimelineModal(true);

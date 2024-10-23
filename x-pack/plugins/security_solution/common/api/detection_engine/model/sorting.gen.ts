@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type SortOrder = z.infer<typeof SortOrder>;
 export const SortOrder = z.enum(['asc', 'desc']);

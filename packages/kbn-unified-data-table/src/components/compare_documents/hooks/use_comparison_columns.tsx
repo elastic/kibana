@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -22,9 +23,9 @@ export interface UseComparisonColumnsProps {
   wrapper: HTMLElement | null;
   isPlainRecord: boolean;
   fieldColumnId: string;
-  selectedDocs: string[];
+  selectedDocIds: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
-  setSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (docIds: string[]) => void;
 }
 
 export const DEFAULT_COLUMN_WIDTH = 300;
@@ -37,9 +38,9 @@ export const useComparisonColumns = ({
   wrapper,
   isPlainRecord,
   fieldColumnId,
-  selectedDocs,
+  selectedDocIds,
   getDocById,
-  setSelectedDocs,
+  replaceSelectedDocs,
 }: UseComparisonColumnsProps) => {
   const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
     const fieldsColumn: EuiDataGridColumn = {
@@ -54,11 +55,11 @@ export const useComparisonColumns = ({
     const currentColumns = [fieldsColumn];
     const wrapperWidth = wrapper?.offsetWidth ?? 0;
     const columnWidth =
-      DEFAULT_COLUMN_WIDTH * selectedDocs.length + FIELD_COLUMN_WIDTH > wrapperWidth
+      DEFAULT_COLUMN_WIDTH * selectedDocIds.length + FIELD_COLUMN_WIDTH > wrapperWidth
         ? DEFAULT_COLUMN_WIDTH
         : undefined;
 
-    selectedDocs.forEach((docId, docIndex) => {
+    selectedDocIds.forEach((docId, docIndex) => {
       const doc = getDocById(docId);
 
       if (!doc) {
@@ -75,19 +76,19 @@ export const useComparisonColumns = ({
           }),
           size: 'xs',
           onClick: () => {
-            const newSelectedDocs = [...selectedDocs];
+            const newSelectedDocs = [...selectedDocIds];
             const index = newSelectedDocs.indexOf(docId);
             const [baseDocId] = newSelectedDocs;
 
             newSelectedDocs[0] = docId;
             newSelectedDocs[index] = baseDocId;
 
-            setSelectedDocs(newSelectedDocs);
+            replaceSelectedDocs(newSelectedDocs);
           },
         });
       }
 
-      if (selectedDocs.length > 2) {
+      if (selectedDocIds.length > 2) {
         additional.push({
           iconType: 'cross',
           label: i18n.translate('unifiedDataTable.removeFromComparison', {
@@ -95,7 +96,7 @@ export const useComparisonColumns = ({
           }),
           size: 'xs',
           onClick: () => {
-            setSelectedDocs(selectedDocs.filter((id) => id !== docId));
+            replaceSelectedDocs(selectedDocIds.filter((id) => id !== docId));
           },
         });
       }
@@ -151,7 +152,7 @@ export const useComparisonColumns = ({
         actions: {
           showHide: false,
           showMoveLeft: docIndex > 1,
-          showMoveRight: docIndex > 0 && docIndex < selectedDocs.length - 1,
+          showMoveRight: docIndex > 0 && docIndex < selectedDocIds.length - 1,
           showSortAsc: false,
           showSortDesc: false,
           additional,
@@ -164,8 +165,8 @@ export const useComparisonColumns = ({
     fieldColumnId,
     getDocById,
     isPlainRecord,
-    selectedDocs,
-    setSelectedDocs,
+    selectedDocIds,
+    replaceSelectedDocs,
     wrapper?.offsetWidth,
   ]);
 

@@ -61,7 +61,7 @@ export const kibanaContextMock = {
     charts: chartsServiceMock,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     mlServices: {
-      mlApiServices: mlApiServicesMock,
+      mlApi: mlApiServicesMock,
       mlCapabilities: {
         refreshCapabilities: jest.fn(),
       },

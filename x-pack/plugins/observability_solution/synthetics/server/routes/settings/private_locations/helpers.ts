@@ -26,7 +26,6 @@ export const toClientContract = (
       isInvalid: !Boolean(agPolicy),
       tags: location.tags,
       geo: location.geo,
-      namespace: agPolicy?.namespace,
     };
   });
 };

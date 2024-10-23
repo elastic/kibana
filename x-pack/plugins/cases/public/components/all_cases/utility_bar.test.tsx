@@ -6,7 +6,7 @@
  */
 
 import { act, waitFor, screen, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -21,6 +21,7 @@ import { basicCase } from '../../containers/mock';
 import { CasesTableUtilityBar } from './utility_bar';
 
 describe('Severity form field', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
   const deselectCases = jest.fn();
   const localStorageKey = 'securitySolution.cases.utilityBar.hideMaxLimitWarning';
@@ -40,7 +41,21 @@ describe('Severity form field', () => {
     showClearFiltersButton: false,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+    sessionStorage.removeItem(localStorageKey);
+  });
+
   beforeEach(() => {
+    jest.useFakeTimers();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
     appMockRender = createAppMockRenderer();
   });
 
@@ -119,7 +134,7 @@ describe('Severity form field', () => {
   it('opens the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
   });
@@ -127,11 +142,11 @@ describe('Severity form field', () => {
   it('closes the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
 
-    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     await waitForElementToBeRemoved(screen.queryByTestId('case-table-bulk-actions-context-menu'));
   });
@@ -140,7 +155,7 @@ describe('Severity form field', () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    userEvent.click(await screen.findByTestId('all-cases-refresh-link-icon'));
+    await user.click(await screen.findByTestId('all-cases-refresh-link-icon'));
 
     await waitFor(() => {
       expect(deselectCases).toHaveBeenCalled();
@@ -187,7 +202,7 @@ describe('Severity form field', () => {
   it('clears the filters correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} showClearFiltersButton={true} />);
 
-    userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await user.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
 
     await waitFor(() => {
       expect(props.onClearFilters).toHaveBeenCalled();
@@ -301,7 +316,7 @@ describe('Severity form field', () => {
       expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       expect(await screen.findByTestId('dismiss-warning')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('dismiss-warning'));
+      await user.click(await screen.findByTestId('dismiss-warning'));
 
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
@@ -353,7 +368,7 @@ describe('Severity form field', () => {
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
         expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('do-not-show-warning'));
+        await user.click(await screen.findByTestId('do-not-show-warning'));
 
         act(() => {
           jest.advanceTimersByTime(1000);

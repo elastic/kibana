@@ -24,6 +24,7 @@ export const deleteRuleRoute = (
       options: {
         access: 'public',
         summary: `Delete a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {
@@ -32,6 +33,15 @@ export const deleteRuleRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
           },
         },
       },

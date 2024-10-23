@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/stop_transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/stop_transforms';
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
+import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
-import { isSolutionNavEnabled } from './experiments';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
@@ -33,7 +32,6 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 /**
@@ -49,11 +47,11 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
+  private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
-  private readonly config: ConfigType;
+  private config: ConfigType;
   private readonly isServerless: boolean;
-  private solutionNavExperiment = Promise.resolve(false);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -62,6 +60,14 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
+    const onCloud = plugins.cloud !== undefined && plugins.cloud.isCloudEnabled;
+
+    // We only allow "solution" to be set on cloud environments, not on prem
+    // unless the forceSolutionVisibility flag is set
+    const allowSolutionVisibility =
+      (onCloud && !this.isServerless && this.config.allowSolutionVisibility) ||
+      Boolean(this.config.experimental?.forceSolutionVisibility);
+
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
       ui: getUiApi({
@@ -71,19 +77,30 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace$: () => this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
+      isSolutionViewEnabled: allowSolutionVisibility,
     };
 
-    this.solutionNavExperiment = core
-      .getStartServices()
-      .then(([, { cloud, cloudExperiments }]) => isSolutionNavEnabled(cloud, cloudExperiments))
-      .catch((err) => {
-        this.initializerContext.logger.get().error(`Failed to retrieve cloud experiment: ${err}`);
+    this.config = {
+      ...this.config,
+      allowSolutionVisibility,
+    };
 
-        return false;
-      });
+    registerSpacesEventTypes(core);
+    this.eventTracker = new EventTracker(core.analytics);
 
     // Only skip setup of space selector and management service if serverless and only one space is allowed
     if (!(this.isServerless && hasOnlyDefaultSpace)) {
+      const getIsRoleManagementEnabled = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+          'security'
+        );
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.authz.isRoleManagementEnabled;
+      };
+
       const getRolesAPIClient = async () => {
         const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
           'security'
@@ -94,6 +111,30 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         }
 
         return security.contract.authz.roles;
+      };
+
+      const getPrivilegesAPIClient = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+          'security'
+        );
+
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.authz.privileges;
+      };
+
+      const getSecurityLicense = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginSetup }>(
+          'security'
+        );
+
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.license;
       };
 
       if (plugins.home) {
@@ -107,8 +148,13 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           getStartServices: core.getStartServices,
           spacesManager: this.spacesManager,
           config: this.config,
+          logger: this.initializerContext.logger.get(),
+          getIsRoleManagementEnabled,
           getRolesAPIClient,
-          solutionNavExperiment: this.solutionNavExperiment,
+          eventTracker: this.eventTracker,
+          getPrivilegesAPIClient,
+          isServerless: this.isServerless,
+          getSecurityLicense,
         });
       }
 
@@ -119,13 +165,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
-    return { hasOnlyDefaultSpace };
+    registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
+
+    return { hasOnlyDefaultSpace, isSolutionViewEnabled: allowSolutionVisibility };
   }
 
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment);
+      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
 
     return this.spacesApi;

@@ -6,9 +6,11 @@
  */
 
 import {
-  LATEST_FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import {
   BENCHMARK_SCORE_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
   ALERTS_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
@@ -20,7 +22,7 @@ const alertsSecurityUserIndices = [
     privileges: ['read'],
   },
   {
-    names: [LATEST_FINDINGS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
     privileges: ['read'],
   },
   {
@@ -28,7 +30,7 @@ const alertsSecurityUserIndices = [
     privileges: ['read'],
   },
   {
-    names: [LATEST_VULNERABILITIES_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN],
     privileges: ['all'],
   },
   {
@@ -43,7 +45,7 @@ const securityUserIndinces = [
     privileges: ['read'],
   },
   {
-    names: [LATEST_FINDINGS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
     privileges: ['read'],
   },
   {
@@ -51,7 +53,7 @@ const securityUserIndinces = [
     privileges: ['read'],
   },
   {
-    names: [LATEST_VULNERABILITIES_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN],
     privileges: ['all'],
   },
 ];
@@ -129,6 +131,24 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         },
       ],
     },
+    {
+      name: 'role_security_all',
+      elasticsearch: {
+        indices: securityUserIndinces,
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            siem: ['all'],
+            fleet: ['all'],
+            fleetv2: ['all'],
+            savedObjectsManagement: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
   ];
 
   const users = [
@@ -140,7 +160,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     },
     {
       name: 'role_security_read_user_alerts',
-      full_name: 'user with 0 security privilege for',
+      full_name: 'user with 0 security privilege',
       password: 'csp123',
       roles: ['role_security_read_alerts'],
     },
@@ -152,9 +172,15 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
     },
     {
       name: 'role_security_no_read_user_alerts',
-      full_name: 'user with 0 security privilege for',
+      full_name: 'user with 0 security privilege',
       password: 'csp123',
       roles: ['role_security_no_read_alerts'],
+    },
+    {
+      name: 'role_security_all_user',
+      full_name: 'user with all security privilege',
+      password: 'csp123',
+      roles: ['role_security_all'],
     },
   ];
 

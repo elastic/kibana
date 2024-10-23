@@ -126,7 +126,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           selectedConversation={selectedConversationWithApiConfig}
           setConversationSettings={setConversationSettings}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-          onSelectedConversationChange={onSelectedConversationChange}
         />
 
         <EuiSpacer size="l" />

@@ -8,4 +8,8 @@
 export const DEFAULT_INTERVAL = '60s';
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
+export const ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID = `alerts-page-alerts-table`;
+export const RELATED_ALERTS_TABLE_CONFIG_ID = `related-alerts-table`;
 export const RULE_DETAILS_ALERTS_TABLE_CONFIG_ID = `rule-details-alerts-table`;
+
+export const SEARCH_BAR_URL_STORAGE_KEY = 'searchBarParams';

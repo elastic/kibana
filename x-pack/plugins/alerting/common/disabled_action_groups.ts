@@ -8,7 +8,7 @@
 import { RecoveredActionGroup } from './builtin_action_groups';
 
 const DisabledActionGroupsByActionType: Record<string, string[]> = {
-  [RecoveredActionGroup.id]: ['.jira', '.resilient'],
+  [RecoveredActionGroup.id]: ['.jira', '.resilient', '.thehive'],
 };
 
 export const DisabledActionTypeIdsForActionGroup: Map<string, string[]> = new Map(

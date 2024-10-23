@@ -4,7 +4,7 @@
   "kibana": {
     "version": "kibana"
   },
-  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"

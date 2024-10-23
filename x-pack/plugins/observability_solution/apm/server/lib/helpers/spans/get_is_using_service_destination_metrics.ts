@@ -6,11 +6,10 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getDocumentTypeFilterForServiceDestinationStatistics } from '@kbn/apm-data-access-plugin/server/utils';
 import {
-  METRICSET_NAME,
-  METRICSET_INTERVAL,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_DURATION,
@@ -22,25 +21,6 @@ export function getProcessorEventForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean
 ) {
   return searchServiceDestinationMetrics ? ProcessorEvent.metric : ProcessorEvent.span;
-}
-
-export function getDocumentTypeFilterForServiceDestinationStatistics(
-  searchServiceDestinationMetrics: boolean
-) {
-  return searchServiceDestinationMetrics
-    ? [
-        {
-          bool: {
-            filter: termQuery(METRICSET_NAME, 'service_destination'),
-            must_not: {
-              terms: {
-                [METRICSET_INTERVAL]: ['10m', '60m'],
-              },
-            },
-          },
-        },
-      ]
-    : [];
 }
 
 export function getLatencyFieldForServiceDestinationStatistics(
@@ -117,3 +97,5 @@ export async function getIsUsingServiceDestinationMetrics({
     anyServiceDestinationMetricsCount > 0 && serviceDestinationMetricsWithoutSpanNameCount === 0
   );
 }
+
+export { getDocumentTypeFilterForServiceDestinationStatistics };

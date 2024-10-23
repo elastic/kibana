@@ -719,17 +719,6 @@ describe('rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload = {
-      ...getCreateRulesSchemaMock(),
-      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const result = RuleCreateProps.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('actions.0.group: Required');
-  });
-
   test('You cannot send in an array of actions that are missing "id"', () => {
     const payload = {
       ...getCreateRulesSchemaMock(),

@@ -22,11 +22,9 @@ import {
   PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';
-import { useConversation } from '../../../use_conversation';
 import { TEST_IDS } from '../../../constants';
 import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
 import { SYSTEM_PROMPTS_TAB } from '../../../settings/const';
@@ -34,18 +32,14 @@ import { SYSTEM_PROMPTS_TAB } from '../../../settings/const';
 export interface Props {
   allPrompts: PromptResponse[];
   compressed?: boolean;
-  conversation?: Conversation;
-  selectedPrompt: PromptResponse | undefined;
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
+  selectedPrompt: PromptResponse | undefined;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
-  onSelectedConversationChange?: (result: Conversation) => void;
-  setConversationSettings?: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  setConversationsSettingsBulkActions?: React.Dispatch<Record<string, Conversation>>;
+  onSystemPromptSelectionChange: (promptId: string | undefined) => void;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
@@ -53,22 +47,16 @@ const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 const SelectSystemPromptComponent: React.FC<Props> = ({
   allPrompts,
   compressed = false,
-  conversation,
-  selectedPrompt,
   clearSelectedSystemPrompt,
   isClearable = false,
   isDisabled = false,
   isOpen = false,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
+  selectedPrompt,
   setIsSettingsModalVisible,
-  onSelectedConversationChange,
-  setConversationSettings,
-  setConversationsSettingsBulkActions,
 }) => {
   const { setSelectedSettingsTab } = useAssistantContext();
-  const { setApiConfig } = useConversation();
-
   const allSystemPrompts = useMemo(
     () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
     [allPrompts]
@@ -78,25 +66,8 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
   const valueOfSelected = useMemo(() => selectedPrompt?.id, [selectedPrompt?.id]);
 
-  // Write the selected system prompt to the conversation config
-  const setSelectedSystemPrompt = useCallback(
-    async (promptId?: string) => {
-      if (conversation && conversation.apiConfig) {
-        const result = await setApiConfig({
-          conversation,
-          apiConfig: {
-            ...conversation.apiConfig,
-            defaultSystemPromptId: promptId,
-          },
-        });
-        return result;
-      }
-    },
-    [conversation, setApiConfig]
-  );
-
-  const addNewSystemPrompt = useMemo(() => {
-    return {
+  const addNewSystemPrompt = useMemo(
+    () => ({
       value: ADD_NEW_SYSTEM_PROMPT,
       inputDisplay: i18n.ADD_NEW_SYSTEM_PROMPT,
       dropdownDisplay: (
@@ -112,57 +83,28 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-    };
-  }, []);
+    }),
+    []
+  );
 
   // SuperSelect State/Actions
-  const options = useMemo(() => getOptions({ prompts: allSystemPrompts }), [allSystemPrompts]);
+  const options = useMemo(() => getOptions(allSystemPrompts), [allSystemPrompts]);
 
   const onChange = useCallback(
-    async (selectedSystemPromptId) => {
+    async (selectedSystemPromptId: string) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
         setIsSettingsModalVisible(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
         return;
       }
-      // Note: if callback is provided, this component does not persist. Extract to separate component
-      if (onSystemPromptSelectionChange != null) {
-        onSystemPromptSelectionChange(selectedSystemPromptId);
-      }
-      const result = await setSelectedSystemPrompt(selectedSystemPromptId);
-      if (result) {
-        setConversationSettings?.((prev: Record<string, Conversation>) => {
-          const newConversationsSettings = Object.entries(prev).reduce<
-            Record<string, Conversation>
-          >((acc, [key, convo]) => {
-            if (result.title === convo.title) {
-              acc[result.id] = result;
-            } else {
-              acc[key] = convo;
-            }
-            return acc;
-          }, {});
-          return newConversationsSettings;
-        });
-        onSelectedConversationChange?.(result);
-        setConversationsSettingsBulkActions?.({});
-      }
+      onSystemPromptSelectionChange(selectedSystemPromptId);
     },
-    [
-      onSelectedConversationChange,
-      onSystemPromptSelectionChange,
-      setConversationSettings,
-      setConversationsSettingsBulkActions,
-      setIsSettingsModalVisible,
-      setSelectedSettingsTab,
-      setSelectedSystemPrompt,
-    ]
+    [onSystemPromptSelectionChange, setIsSettingsModalVisible, setSelectedSettingsTab]
   );
 
   const clearSystemPrompt = useCallback(() => {
-    setSelectedSystemPrompt(undefined);
     clearSelectedSystemPrompt?.();
-  }, [clearSelectedSystemPrompt, setSelectedSystemPrompt]);
+  }, [clearSelectedSystemPrompt]);
 
   return (
     <EuiFlexGroup

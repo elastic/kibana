@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TinesConnector } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { API_MAX_RESULTS, TINES_CONNECTOR_ID } from '../../../common/tines/constants';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('axios');
 (axios as jest.Mocked<typeof axios>).create.mockImplementation(
@@ -78,6 +79,7 @@ const storiesGetRequestExpected = {
     'Content-Type': 'application/json',
   },
   params: { per_page: API_MAX_RESULTS },
+  connectorUsageCollector: expect.any(ConnectorUsageCollector),
 };
 
 const agentsGetRequestExpected = {
@@ -91,20 +93,28 @@ const agentsGetRequestExpected = {
     'Content-Type': 'application/json',
   },
   params: { story_id: story.id, per_page: API_MAX_RESULTS },
+  connectorUsageCollector: expect.any(ConnectorUsageCollector),
 };
 
+let connectorUsageCollector: ConnectorUsageCollector;
+
 describe('TinesConnector', () => {
+  const logger = loggingSystemMock.createLogger();
   const connector = new TinesConnector({
     configurationUtilities: actionsConfigMock.create(),
     config: { url },
     connector: { id: '1', type: TINES_CONNECTOR_ID },
     secrets: { email, token },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('getStories', () => {
@@ -113,13 +123,13 @@ describe('TinesConnector', () => {
     });
 
     it('should request Tines stories', async () => {
-      await connector.getStories();
+      await connector.getStories(undefined, connectorUsageCollector);
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(storiesGetRequestExpected);
     });
 
     it('should return the Tines stories reduced array', async () => {
-      const { stories } = await connector.getStories();
+      const { stories } = await connector.getStories(undefined, connectorUsageCollector);
       expect(stories).toEqual([storyResult]);
     });
 
@@ -127,7 +137,7 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { stories: [story], meta: { pages: 1 } },
       });
-      const response = await connector.getStories();
+      const response = await connector.getStories(undefined, connectorUsageCollector);
       expect(response.incompleteResponse).toEqual(false);
     });
 
@@ -135,8 +145,30 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { stories: [story], meta: { pages: 2 } },
       });
-      const response = await connector.getStories();
+      const response = await connector.getStories(undefined, connectorUsageCollector);
       expect(response.incompleteResponse).toEqual(true);
+    });
+  });
+
+  describe('Error handling', () => {
+    let error: AxiosError;
+
+    beforeEach(() => {
+      error = new AxiosError();
+    });
+
+    it('should return status text api error', () => {
+      error.response = { status: 401, statusText: 'Unauthorized' } as AxiosResponse;
+      // @ts-expect-error protected method
+      const errorMessage = connector.getResponseErrorMessage(error);
+      expect(errorMessage).toEqual('API Error: Unauthorized');
+    });
+
+    it('should return original error', () => {
+      error.toString = () => 'Network Error';
+      // @ts-expect-error protected method
+      const errorMessage = connector.getResponseErrorMessage(error);
+      expect(errorMessage).toEqual('Network Error');
     });
   });
 
@@ -146,14 +178,17 @@ describe('TinesConnector', () => {
     });
 
     it('should request Tines webhook actions', async () => {
-      await connector.getWebhooks({ storyId: story.id });
+      await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
 
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(agentsGetRequestExpected);
     });
 
     it('should return the Tines webhooks reduced array', async () => {
-      const { webhooks } = await connector.getWebhooks({ storyId: story.id });
+      const { webhooks } = await connector.getWebhooks(
+        { storyId: story.id },
+        connectorUsageCollector
+      );
       expect(webhooks).toEqual([webhookResult]);
     });
 
@@ -161,7 +196,7 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { agents: [webhookAgent], meta: { pages: 1 } },
       });
-      const response = await connector.getWebhooks({ storyId: story.id });
+      const response = await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
       expect(response.incompleteResponse).toEqual(false);
     });
 
@@ -169,7 +204,7 @@ describe('TinesConnector', () => {
       mockRequest.mockReturnValueOnce({
         data: { agents: [webhookAgent], meta: { pages: 2 } },
       });
-      const response = await connector.getWebhooks({ storyId: story.id });
+      const response = await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
       expect(response.incompleteResponse).toEqual(true);
     });
   });
@@ -180,10 +215,13 @@ describe('TinesConnector', () => {
     });
 
     it('should send data to Tines webhook using selected webhook parameter', async () => {
-      await connector.runWebhook({
-        webhook: webhookResult,
-        body: '[]',
-      });
+      await connector.runWebhook(
+        {
+          webhook: webhookResult,
+          body: '[]',
+        },
+        connectorUsageCollector
+      );
 
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
@@ -194,14 +232,18 @@ describe('TinesConnector', () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        connectorUsageCollector,
       });
     });
 
     it('should send data to Tines webhook using webhook url parameter', async () => {
-      await connector.runWebhook({
-        webhookUrl,
-        body: '[]',
-      });
+      await connector.runWebhook(
+        {
+          webhookUrl,
+          body: '[]',
+        },
+        connectorUsageCollector
+      );
 
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
@@ -212,6 +254,7 @@ describe('TinesConnector', () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        connectorUsageCollector,
       });
     });
   });

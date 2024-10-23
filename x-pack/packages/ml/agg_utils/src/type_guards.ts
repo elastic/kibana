@@ -7,7 +7,7 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { SignificantItem } from './types';
+import type { SignificantItem, SignificantItemGroup } from './types';
 
 /**
  * Type guard for a significant item.
@@ -15,7 +15,7 @@ import type { SignificantItem } from './types';
  * for a p-value based variant, not a generic significant terms
  * aggregation type.
  * @param arg The unknown type to be evaluated
- * @returns whether arg is of type SignificantItem
+ * @returns Return whether arg is of type SignificantItem
  */
 export function isSignificantItem(arg: unknown): arg is SignificantItem {
   return isPopulatedObject(arg, [
@@ -31,4 +31,12 @@ export function isSignificantItem(arg: unknown): arg is SignificantItem {
     'pValue',
     'normalizedScore',
   ]);
+}
+/**
+ * Type guard to check if the given argument is a SignificantItemGroup.
+ * @param arg The unknown type to be evaluated
+ * @returns Return whether arg is of type SignificantItemGroup
+ */
+export function isSignificantItemGroup(arg: unknown): arg is SignificantItemGroup {
+  return isPopulatedObject(arg, ['id', 'group', 'docCount', 'pValue']);
 }

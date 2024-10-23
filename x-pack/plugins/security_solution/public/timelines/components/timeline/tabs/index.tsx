@@ -9,14 +9,17 @@ import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -38,7 +41,9 @@ import {
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
-import { selectTimelineESQLSavedSearchId } from '../../../store/selectors';
+import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
+import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -173,7 +178,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {timelineType === TimelineType.default && (
+        {timelineType === TimelineTypeEnum.default && (
           <HideShowContainer
             $isVisible={TimelineTabs.eql === activeTimelineTab}
             data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}
@@ -248,6 +253,14 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     selectTimelineESQLSavedSearchId(state, timelineId)
   );
 
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
   const shouldShowESQLTab = useMemo(() => {
@@ -273,6 +286,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
+  // old notes system (through timeline)
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
       (acc, v) => [...acc, ...v],
@@ -281,11 +295,41 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     return [...globalTimelineNoteIds, ...eventNoteIds];
   }, [globalTimelineNoteIds, eventIdToNoteIds]);
 
-  const numberOfNotes = useMemo(
+  const numberOfNotesOldSystem = useMemo(
     () =>
       appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length +
       (isEmpty(timelineDescription) ? 0 : 1),
     [appNotes, allTimelineNoteIds, timelineDescription]
+  );
+
+  const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
+  const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
+  const isTimelineSaved: boolean = useMemo(
+    () => timelineSavedObjectId.length > 0,
+    [timelineSavedObjectId]
+  );
+
+  // new note system
+  const fetchNotes = useCallback(
+    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
+    [dispatch, timelineSavedObjectId]
+  );
+  useEffect(() => {
+    if (isTimelineSaved) {
+      fetchNotes();
+    }
+  }, [fetchNotes, isTimelineSaved]);
+
+  const numberOfNotesNewSystem = useSelector((state: State) =>
+    selectSortedNotesBySavedObjectId(state, {
+      savedObjectId: timelineSavedObjectId,
+      sort: { field: 'created', direction: 'asc' },
+    })
+  );
+
+  const numberOfNotes = useMemo(
+    () => (securitySolutionNotesEnabled ? numberOfNotesNewSystem.length : numberOfNotesOldSystem),
+    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesEnabled]
   );
 
   const setActiveTab = useCallback(
@@ -359,7 +403,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
             </StyledEuiTab>
           )}
-          {timelineType === TimelineType.default && (
+          {timelineType === TimelineTypeEnum.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
               onClick={setEqlAsActiveTab}
@@ -371,16 +415,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               {showTimeline && <EqlEventsCountBadge />}
             </StyledEuiTab>
           )}
-          <EuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
-            onClick={setGraphAsActiveTab}
-            isSelected={activeTab === TimelineTabs.graph}
-            disabled={!graphEventId}
-            key={TimelineTabs.graph}
-          >
-            {i18n.ANALYZER_TAB}
-          </EuiTab>
-          {isEnterprisePlus && (
+          {!visualizationInFlyoutEnabled && (
+            <EuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
+              onClick={setGraphAsActiveTab}
+              isSelected={activeTab === TimelineTabs.graph}
+              disabled={!graphEventId}
+              key={TimelineTabs.graph}
+            >
+              {i18n.ANALYZER_TAB}
+            </EuiTab>
+          )}
+          {isEnterprisePlus && !visualizationInFlyoutEnabled && (
             <EuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.session}`}
               onClick={setSessionAsActiveTab}
@@ -395,11 +441,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineType.template}
+            disabled={timelineType === TimelineTypeEnum.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
+            {showTimeline && numberOfNotes > 0 && timelineType === TimelineTypeEnum.default && (
               <div>
                 <CountBadge>{numberOfNotes}</CountBadge>
               </div>
@@ -408,16 +454,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineType.template}
+            disabled={timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
             <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
-              <div>
-                <CountBadge>{numberOfPinnedEvents}</CountBadge>
-              </div>
-            )}
+            {showTimeline &&
+              numberOfPinnedEvents > 0 &&
+              timelineType === TimelineTypeEnum.default && (
+                <div>
+                  <CountBadge>{numberOfPinnedEvents}</CountBadge>
+                </div>
+              )}
           </StyledEuiTab>
         </StyledEuiTabs>
       )}

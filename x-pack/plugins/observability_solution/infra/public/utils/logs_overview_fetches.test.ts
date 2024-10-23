@@ -14,6 +14,7 @@ import { of } from 'rxjs';
 import { createInfraPluginStartMock } from '../mocks';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const DEFAULT_PARAMS = {
   absoluteTime: { start: 1593430680000, end: 1593430800000 },
@@ -27,7 +28,14 @@ function setup() {
   const data = dataPluginMock.createStartContract();
   const logsShared = createLogsSharedPluginStartMock();
   const pluginStart = createInfraPluginStartMock();
-  const pluginDeps = { data, logsShared } as unknown as InfraClientStartDeps;
+  const share = {
+    url: {
+      locators: {
+        get: jest.fn(() => sharePluginMock.createLocator()),
+      },
+    },
+  };
+  const pluginDeps = { data, logsShared, share } as unknown as InfraClientStartDeps;
 
   const dataSearch = data.search.search as jest.MockedFunction<typeof data.search.search>;
   const getResolvedLogView = logsShared.logViews.client.getResolvedLogView as jest.MockedFunction<

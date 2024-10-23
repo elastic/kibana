@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { get } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { RuleFlyoutKueryBar } from '../../../rule_kql_filter/kuery_bar';
 import { ClosablePopoverTitle } from '../closable_popover_title';
@@ -68,7 +69,13 @@ export function MetricRowWithAgg({
             fieldValue.normalizedType as ValidNormalizedTypes
           )
         ) {
-          acc.push({ label: fieldValue.name });
+          if (aggType === Aggregators.LAST_VALUE) {
+            if (!fieldValue.esTypes?.includes(ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)) {
+              acc.push({ label: fieldValue.name });
+            }
+          } else {
+            acc.push({ label: fieldValue.name });
+          }
         }
         return acc;
       }, [] as Array<{ label: string }>),
@@ -135,7 +142,7 @@ export function MetricRowWithAgg({
               }
             >
               <EuiExpression
-                data-test-subj="aggregationName"
+                data-test-subj={`aggregationName${name}`}
                 description={aggregationTypes[aggType].text}
                 value={aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field}
                 isActive={aggTypePopoverOpen}
@@ -221,6 +228,7 @@ export function MetricRowWithAgg({
                       options={fieldOptions}
                       selectedOptions={field ? [{ label: field }] : []}
                       onChange={handleFieldChange}
+                      data-test-subj="aggregationField"
                     />
                   </EuiFormRow>
                 )}

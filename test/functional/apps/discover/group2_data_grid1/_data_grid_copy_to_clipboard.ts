@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -17,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -30,11 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -44,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to copy a column values to clipboard', async () => {
       const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickCopyColumnValues('@timestamp');
 
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (canReadClipboard) {
         const copiedSourceData = await browser.getClipboardValue();
-        expect(copiedSourceData.startsWith('Document\n{"@message":["238.171.34.42')).to.be(true);
+        expect(copiedSourceData.startsWith('Summary\n{"@message":["238.171.34.42')).to.be(true);
         expect(copiedSourceData.endsWith('}')).to.be(true);
       }
 
@@ -74,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to copy a column name to clipboard', async () => {
       const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickCopyColumnName('@timestamp');
       if (canReadClipboard) {
@@ -89,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (canReadClipboard) {
         const copiedSourceName = await browser.getClipboardValue();
-        expect(copiedSourceName).to.be('Document');
+        expect(copiedSourceName).to.be('Summary');
       }
 
       expect(await toasts.getCount()).to.be(1);

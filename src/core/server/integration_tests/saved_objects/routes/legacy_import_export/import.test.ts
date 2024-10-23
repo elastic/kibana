@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const importObjects = [
@@ -61,6 +62,7 @@ describe('POST /api/dashboards/import', () => {
       maxImportPayloadBytes: 26214400,
       coreUsageData,
       logger: loggerMock.create(),
+      access: 'public',
     });
 
     handlerContext.savedObjects.client.bulkCreate.mockResolvedValueOnce({
@@ -78,6 +80,7 @@ describe('POST /api/dashboards/import', () => {
   it('calls importDashboards and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/kibana/dashboards/import')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ version: '7.14.0', objects: importObjects });
 
     expect(result.status).toBe(200);

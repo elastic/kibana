@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
@@ -25,6 +26,13 @@ export interface ToolingLogOptions {
    * writers on either log will update the other too.
    */
   parent?: ToolingLog;
+
+  /**
+   * A string, conveniently the name of the script,
+   * that will be prepended to log messages.
+   * Can be useful to identify which entity is emitting the log.
+   */
+  context?: string;
 }
 
 export class ToolingLog implements SomeDevLog {
@@ -32,6 +40,7 @@ export class ToolingLog implements SomeDevLog {
   private writers$: Rx.BehaviorSubject<Writer[]>;
   private readonly written$: Rx.Subject<Message>;
   private readonly type: string | undefined;
+  private readonly context: string | undefined;
 
   constructor(writerConfig?: ToolingLogTextWriterConfig, options?: ToolingLogOptions) {
     this.indentWidth$ = options?.parent ? options.parent.indentWidth$ : new Rx.BehaviorSubject(0);
@@ -45,6 +54,7 @@ export class ToolingLog implements SomeDevLog {
 
     this.written$ = options?.parent ? options.parent.written$ : new Rx.Subject();
     this.type = options?.type;
+    this.context = options?.context;
   }
 
   /**
@@ -93,31 +103,31 @@ export class ToolingLog implements SomeDevLog {
   }
 
   public verbose(...args: any[]) {
-    this.sendToWriters('verbose', args);
+    this.sendToWriters({ type: 'verbose', context: this.context }, args);
   }
 
   public debug(...args: any[]) {
-    this.sendToWriters('debug', args);
+    this.sendToWriters({ type: 'debug', context: this.context }, args);
   }
 
   public info(...args: any[]) {
-    this.sendToWriters('info', args);
+    this.sendToWriters({ type: 'info', context: this.context }, args);
   }
 
   public success(...args: any[]) {
-    this.sendToWriters('success', args);
+    this.sendToWriters({ type: 'success', context: this.context }, args);
   }
 
   public warning(...args: any[]) {
-    this.sendToWriters('warning', args);
+    this.sendToWriters({ type: 'warning', context: this.context }, args);
   }
 
   public error(error: Error | string) {
-    this.sendToWriters('error', [error]);
+    this.sendToWriters({ type: 'error', context: this.context }, [error]);
   }
 
   public write(...args: any[]) {
-    this.sendToWriters('write', args);
+    this.sendToWriters({ type: 'write' }, args);
   }
 
   public getWriters() {
@@ -143,7 +153,7 @@ export class ToolingLog implements SomeDevLog {
     });
   }
 
-  private sendToWriters(type: MessageTypes, args: any[]) {
+  private sendToWriters({ type, context }: { type: MessageTypes; context?: string }, args: any[]) {
     const indent = this.indentWidth$.getValue();
     const writers = this.writers$.getValue();
     const msg: Message = {
@@ -151,6 +161,7 @@ export class ToolingLog implements SomeDevLog {
       indent,
       source: this.type,
       args,
+      context,
     };
 
     let written = false;

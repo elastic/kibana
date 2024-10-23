@@ -12,9 +12,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { CellActions } from './cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';

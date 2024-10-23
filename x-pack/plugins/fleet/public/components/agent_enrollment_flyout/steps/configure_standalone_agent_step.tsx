@@ -34,6 +34,7 @@ export const ConfigureStandaloneAgentStep = ({
   downloadYaml,
   apiKey,
   onCreateApiKey,
+  isCreatingApiKey,
   isComplete,
   onCopy,
 }: {
@@ -43,6 +44,7 @@ export const ConfigureStandaloneAgentStep = ({
   downloadYaml: () => void;
   apiKey: string | undefined;
   onCreateApiKey: () => void;
+  isCreatingApiKey: boolean;
   isComplete?: boolean;
   onCopy?: () => void;
 }): EuiContainedStepProps => {
@@ -99,12 +101,12 @@ export const ConfigureStandaloneAgentStep = ({
     isK8s === 'IS_KUBERNETES' ? (
       <FormattedMessage
         id="xpack.fleet.agentEnrollment.downloadPolicyButtonk8s"
-        defaultMessage="Download Manifest"
+        defaultMessage="Download manifest"
       />
     ) : (
       <FormattedMessage
         id="xpack.fleet.agentEnrollment.downloadPolicyButton"
-        defaultMessage="Download Policy"
+        defaultMessage="Download policy"
       />
     );
 
@@ -121,7 +123,7 @@ export const ConfigureStandaloneAgentStep = ({
             {apiKey && (
               <EuiCallOut
                 title={i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created', {
-                  defaultMessage: 'API Key created.',
+                  defaultMessage: 'API key created.',
                 })}
                 color="success"
                 iconType="check"
@@ -129,8 +131,7 @@ export const ConfigureStandaloneAgentStep = ({
               >
                 <p>
                   {i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created.description', {
-                    defaultMessage:
-                      'Remember to store this information in a safe place. It won’t be displayed anymore after you continue.',
+                    defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue.`,
                   })}
                 </p>
                 <EuiFieldText
@@ -140,7 +141,7 @@ export const ConfigureStandaloneAgentStep = ({
                   aria-label={i18n.translate(
                     'xpack.fleet.agentEnrollment.apiKeyBanner.field.label',
                     {
-                      defaultMessage: 'Api Key',
+                      defaultMessage: 'API key',
                     }
                   )}
                   append={
@@ -165,10 +166,10 @@ export const ConfigureStandaloneAgentStep = ({
                 />
               </EuiCallOut>
             )}
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onCreateApiKey}>
+                <EuiButton onClick={onCreateApiKey} isLoading={isCreatingApiKey}>
                   <FormattedMessage
                     id="xpack.fleet.agentEnrollment.createApiKeyButton"
                     defaultMessage="Create API key"

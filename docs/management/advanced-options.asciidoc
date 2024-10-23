@@ -187,7 +187,7 @@ this setting stores part of the URL in your browser session to keep the URL
 short.
 
 [[theme-darkmode]]`theme:darkMode`::
-The UI theme that the {kib} UI should use. 
+The UI theme that the {kib} UI should use.
 Set to `enabled` or `disabled` to enable or disable the dark theme.
 Set to `system` to have the {kib} UI theme follow the system theme.
 You must refresh the page to apply the setting.
@@ -209,7 +209,7 @@ The default refresh interval for the time filter. Example:
 The default selection in the time filter.
 
 [[truncate-maxheight]]`truncate:maxHeight`::
-The maximum height that a cell occupies in a table. Set to 0 to disable
+deprecated:[8.16.0]The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
 [[enableESQL]]`enableESQL`::
@@ -225,7 +225,8 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. 
+//For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.
@@ -418,7 +419,7 @@ beta:[] Enables the usage of service transaction metrics, which are low cardinal
 
 [[observability-apm-labs]]`observability:apmLabsButton`::
 Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
-See <<apm-labs>> to learn more.
+// See <<apm-labs>> to learn more.
 
 [[observability-apm-critical-path]]`observability:apmEnableCriticalPath`::
 When enabled, displays the critical path of a trace.
@@ -453,7 +454,7 @@ preview:[] Display Amazon Lambda metrics in the service metrics tab.
 Shows the Uptime app even if there is no recent Heartbeat data.
 
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
-Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.
+Determines whether the comparison feature is enabled or disabled by default in the APM app.
 
 [[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
 Enables the Infrastructure view in the APM app.
@@ -555,8 +556,8 @@ Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
 
-[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for a search
-session. To disable the timeout and allow queries to run to completion, set to 0. The default is 600,000 ms, or 10 minutes.
+[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for search requests. To disable
+the timeout and allow queries to run to completion, set to 0. The default is `600000`, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]

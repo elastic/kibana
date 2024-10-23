@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -34,7 +35,7 @@ function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | und
         return ret;
       }
     } else {
-      if (node.location.min <= offset && node.location.max >= offset) {
+      if (node && node.location && node.location.min <= offset && node.location.max >= offset) {
         if ('args' in node) {
           const ret = findNode(node.args, offset);
           // if the found node is the marker, then return its parent
@@ -152,6 +153,10 @@ function isBuiltinFunction(node: ESQLFunction) {
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
+    if (node.type === 'literal' && node.literalType === 'keyword') {
+      // command ... "<here>"
+      return { type: 'value' as const, command, node, option, setting };
+    }
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )

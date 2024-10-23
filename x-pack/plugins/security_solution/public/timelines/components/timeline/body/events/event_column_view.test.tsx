@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { getDefaultControlColumn } from '../control_columns';
@@ -79,7 +79,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
+  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineTypeEnum.default);
   const ACTION_BUTTON_COUNT = 4;
   const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 
@@ -124,7 +124,7 @@ describe('EventColumnView', () => {
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {
     const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('[data-test-subj="add-note-button-mock"]').exists()).toBe(false);
@@ -132,7 +132,7 @@ describe('EventColumnView', () => {
 
   test('it does NOT render a notes button when showNotes is false', () => {
     const wrapper = mount(<EventColumnView {...props} showNotes={false} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('[data-test-subj="add-note-button-mock"]').exists()).toBe(false);
@@ -140,7 +140,7 @@ describe('EventColumnView', () => {
 
   test('it does NOT render a pin button when isEventViewer is true', () => {
     const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
@@ -154,7 +154,7 @@ describe('EventColumnView', () => {
         leadingControlColumns={[testLeadingControlColumn, ...leadingControlColumns]}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 

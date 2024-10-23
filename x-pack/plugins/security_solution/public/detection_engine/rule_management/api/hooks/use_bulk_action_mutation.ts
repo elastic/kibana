@@ -8,7 +8,11 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import type { BulkActionErrorResponse, BulkActionResponse, PerformBulkActionProps } from '../api';
+import type {
+  BulkActionErrorResponse,
+  BulkActionResponse,
+  PerformRulesBulkActionProps,
+} from '../api';
 import { performBulkAction } from '../api';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
@@ -25,7 +29,7 @@ export const useBulkActionMutation = (
   options?: UseMutationOptions<
     BulkActionResponse,
     IHttpFetchError<BulkActionErrorResponse>,
-    PerformBulkActionProps
+    PerformRulesBulkActionProps
   >
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
@@ -42,8 +46,8 @@ export const useBulkActionMutation = (
   return useMutation<
     BulkActionResponse,
     IHttpFetchError<BulkActionErrorResponse>,
-    PerformBulkActionProps
-  >((bulkActionProps: PerformBulkActionProps) => performBulkAction(bulkActionProps), {
+    PerformRulesBulkActionProps
+  >((bulkActionProps: PerformRulesBulkActionProps) => performBulkAction(bulkActionProps), {
     ...options,
     mutationKey: BULK_ACTION_MUTATION_KEY,
     onSettled: (...args) => {

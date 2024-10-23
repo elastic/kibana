@@ -180,8 +180,14 @@ export class ReportingPublicPlugin
     core.application.register({
       id: 'reportingRedirect',
       mount: async (params) => {
-        const { mountRedirectApp } = await import('./redirect');
-        return mountRedirectApp({
+        const [startServices, importParams] = await Promise.all([
+          core.getStartServices(),
+          import('./redirect'),
+        ]);
+        const [coreStart] = startServices;
+        const { mountRedirectApp } = importParams;
+
+        return mountRedirectApp(coreStart, {
           ...params,
           apiClient,
           screenshotMode: screenshotModeSetup,

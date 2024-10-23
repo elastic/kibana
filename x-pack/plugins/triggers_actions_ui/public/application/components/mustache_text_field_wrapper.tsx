@@ -40,7 +40,7 @@ export const MustacheTextFieldWrapper = ({ field, euiFieldProps, idAria, ...rest
         describedByIds: idAria ? [idAria] : undefined,
         error: errorMessage,
         fullWidth: true,
-        helpText: typeof field.helpText === 'function' ? field.helpText() : field.helpText,
+        helpText: field.helpText,
         isInvalid,
         label: field.label,
         ...rest,

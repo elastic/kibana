@@ -6,6 +6,7 @@
  */
 
 import type { ThreeWayDiffOutcome } from './three_way_diff_outcome';
+import type { ThreeWayDiffConflict } from './three_way_diff_conflict';
 import type { ThreeWayMergeOutcome } from './three_way_merge_outcome';
 
 /**
@@ -66,7 +67,27 @@ export interface ThreeVersionsOf<TValue> {
  * 6. base=A, current=B, target=C => merged=C, conflict=true
  *    Customized rule, the value has changed, conflict between B and C couldn't be resolved automatically.
  */
-export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
+export interface ThreeWayDiff<TValue> {
+  /**
+   * Corresponds to the stock version of the currently installed prebuilt rule.
+   * This field is optional because the base version is not always available in the package.
+   * This type is part of the API response, so the type of this field is replaced from possibly
+   * a MissingVersion (a JS Symbol), which can't be serialized in JSON, to possibly `undefined`.
+   */
+  base_version: TValue | undefined;
+
+  /**
+   * Corresponds exactly to the currently installed prebuilt rule:
+   *   - to the customized version (if it's customized)
+   *   - to the stock version (if it's not customized)
+   */
+  current_version: TValue;
+
+  /**
+   * Corresponds to the "new" stock version that the user is trying to upgrade to.
+   */
+  target_version: TValue;
+
   /**
    * The result of an automatic three-way merge of three values:
    *   - base version
@@ -92,30 +113,32 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
 
   /**
    * The type of result of an automatic three-way merge of three values:
-   *   - base version
    *   - current version
    *   - target version
+   *   - merged version
    */
   merge_outcome: ThreeWayMergeOutcome;
+
+  /**
+   * Boolean which determines if a base version was found and returned for the three-way-diff of the field
+   * - true: the base version of the field was found and is either defined or undefined
+   * - false: the base version of the field was not found
+   */
+  has_base_version: boolean;
 
   /**
    * Tells if the value has changed in the target version and the current version could be updated.
    * True if:
    *   - base=A, current=A, target=B
    *   - base=A, current=B, target=C
+   *   - base=<missing>, current=A, target=B
    */
   has_update: boolean;
 
   /**
-   * True if:
-   *   - current != target and we couldn't automatically resolve the conflict between them
-   *
-   * False if:
-   *   - current == target (value won't change)
-   *   - current != target && current == base (stock rule will get a new value)
-   *   - current != target and we automatically resolved the conflict between them
+   * Enum of possible conflict outcomes of a three-way diff.
    */
-  has_conflict: boolean;
+  conflict: ThreeWayDiffConflict;
 }
 
 /**

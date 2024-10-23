@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: Find endpoint list items API endpoint
+  version: '2023-10-31'
+paths:
+  /api/endpoint_list/items/_find:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: FindEndpointListItems
+      summary: Get endpoint exception list items
+      description: Get a list of all endpoint exception list items.
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: |
+            Filters the returned results according to the value of the specified field,
+            using the `<field name>:<field value>` syntax.
+          schema:
+            $ref: '#/components/schemas/FindEndpointListItemsFilter'
+        - name: page
+          in: query
+          required: false
+          description: The page number to return
+          schema:
+            type: integer
+            minimum: 0
+        - name: per_page
+          in: query
+          required: false
+          description: The number of exception list items to return per page
+          schema:
+            type: integer
+            minimum: 0
+        - name: sort_field
+          in: query
+          required: false
+          description: Determines which field is used to sort the results
+          schema:
+            $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_order
+          in: query
+          required: false
+          description: Determines the sort order, which can be `desc` or `asc`
+          schema:
+            type: string
+            enum: [desc, asc]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
+                  page:
+                    type: integer
+                    minimum: 0
+                  per_page:
+                    type: integer
+                    minimum: 0
+                  total:
+                    type: integer
+                    minimum: 0
+                  pit:
+                    type: string
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: Endpoint list not found
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    FindEndpointListItemsFilter:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'

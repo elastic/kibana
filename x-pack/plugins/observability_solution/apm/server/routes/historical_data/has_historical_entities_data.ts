@@ -7,7 +7,7 @@
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 export async function hasEntitiesData(entitiesESClient: EntitiesESClient, logger: Logger) {
   const params = {
@@ -19,7 +19,7 @@ export async function hasEntitiesData(entitiesESClient: EntitiesESClient, logger
   };
 
   try {
-    const resp = await entitiesESClient.search('has_historical_entities_data', params);
+    const resp = await entitiesESClient.searchLatest('has_historical_entities_data', params);
     return resp.hits.total.value > 0;
   } catch (error) {
     if (

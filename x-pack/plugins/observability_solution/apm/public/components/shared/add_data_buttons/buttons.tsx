@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { IBasePath } from '@kbn/core/public';
 
-export const addApmAgent = {
+// Disabling it for now until the EUI team fixes it
+/* eslint-disable @elastic/eui/href-or-on-click */
+
+import { EuiButton, EuiButtonSize } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+
+export const addApmData = {
   name: i18n.translate('xpack.apm.add.apm.agent.button.', {
-    defaultMessage: 'Add APM agent',
+    defaultMessage: 'Add APM',
   }),
   link: '/app/observabilityOnboarding/?category=apm',
 };
@@ -27,46 +31,60 @@ export const collectServiceLogs = {
   name: i18n.translate('xpack.apm.collect.service.logs.button', {
     defaultMessage: 'Collect new service logs',
   }),
-  link: '/app/observabilityOnboarding/?category=logs',
+  link: '/app/observabilityOnboarding/customLogs/?category=logs',
 };
 
-export function AddApmAgent({ basePath, onClick }: { basePath: IBasePath; onClick?: () => void }) {
-  function handleClick() {
-    window.open(basePath.prepend(addApmAgent.link), '_blank');
-    onClick?.();
-  }
+interface AddApmDataProps {
+  onClick?: () => void;
+  'data-test-subj': string;
+  fill?: boolean;
+  size?: EuiButtonSize;
+}
+
+export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataProps) {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+
   return (
-    <EuiButton data-test-subj="addApmAgentButton" size="s" onClick={handleClick}>
-      {addApmAgent.name}
+    <EuiButton
+      data-test-subj={props['data-test-subj']}
+      size={size}
+      onClick={props.onClick}
+      href={basePath.prepend(addApmData.link)}
+      fill={fill}
+    >
+      {addApmData.name}
     </EuiButton>
   );
 }
 
 export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
-  function handleClick() {
-    window.open(associateServiceLogs.link, '_blank');
-    onClick?.();
-  }
   return (
-    <EuiButton data-test-subj="associateServiceLogsButton" size="s" onClick={handleClick}>
+    <EuiButton
+      data-test-subj="associateServiceLogsButton"
+      size="s"
+      onClick={onClick}
+      href={associateServiceLogs.link}
+      target="_blank"
+      iconType="popout"
+      iconSide="right"
+    >
       {associateServiceLogs.name}
     </EuiButton>
   );
 }
 
-export function CollectServiceLogs({
-  basePath,
-  onClick,
-}: {
-  basePath: IBasePath;
-  onClick?: () => void;
-}) {
-  function handleClick() {
-    window.open(basePath.prepend(collectServiceLogs.link), '_blank');
-    onClick?.();
-  }
+export function CollectServiceLogs({ onClick }: { onClick?: () => void }) {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+
   return (
-    <EuiButton data-test-subj="collectServiceLogsButton" size="s" onClick={handleClick}>
+    <EuiButton
+      data-test-subj="collectServiceLogsButton"
+      size="s"
+      onClick={onClick}
+      href={basePath.prepend(collectServiceLogs.link)}
+    >
       {collectServiceLogs.name}
     </EuiButton>
   );

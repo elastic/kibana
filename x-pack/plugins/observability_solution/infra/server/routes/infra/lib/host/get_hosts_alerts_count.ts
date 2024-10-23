@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { INFRA_ALERT_FEATURE_ID } from '../../../../../common/constants';
-import { BUCKET_KEY, MAX_SIZE } from '../constants';
-import { InfraAlertsClient } from '../../../../lib/helpers/get_infra_alerts_client';
+import { HOST_NAME_FIELD, INFRA_ALERT_FEATURE_ID } from '../../../../../common/constants';
+import { GetHostParameters } from '../types';
 
 export async function getHostsAlertsCount({
   alertsClient,
-  hostNamesShortList,
-  kuery,
+  hostNames,
   from,
   to,
-  maxNumHosts = MAX_SIZE,
-}: {
-  alertsClient: InfraAlertsClient;
-  hostNamesShortList: string[];
-  kuery?: string;
-  from: string;
-  to: string;
-  maxNumHosts?: number;
+  limit,
+}: Pick<GetHostParameters, 'alertsClient' | 'from' | 'to' | 'limit'> & {
+  hostNames: string[];
 }) {
   const rangeQuery = [
     {
@@ -37,7 +31,6 @@ export async function getHostsAlertsCount({
         'kibana.alert.time_range': {
           gte: from,
           lte: to,
-          format: 'strict_date_optional_time',
         },
       },
     },
@@ -48,19 +41,18 @@ export async function getHostsAlertsCount({
     query: {
       bool: {
         filter: [
-          ...termQuery(ALERT_RULE_PRODUCER, INFRA_ALERT_FEATURE_ID),
+          ...termsQuery(ALERT_RULE_PRODUCER, INFRA_ALERT_FEATURE_ID, observabilityFeatureId),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
+          ...termsQuery(HOST_NAME_FIELD, ...hostNames),
           ...rangeQuery,
-          ...kqlQuery(kuery),
         ],
       },
     },
     aggs: {
       hosts: {
         terms: {
-          field: BUCKET_KEY,
-          size: maxNumHosts,
+          field: HOST_NAME_FIELD,
+          size: limit,
           order: {
             _key: 'asc',
           },

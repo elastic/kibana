@@ -24,6 +24,7 @@ import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
 export interface ForLastExpressionProps {
+  description?: string;
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
@@ -45,6 +46,12 @@ export interface ForLastExpressionProps {
   display?: 'fullWidth' | 'inline';
 }
 
+const FOR_LAST_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.descriptionLabel',
+  {
+    defaultMessage: 'for the last',
+  }
+);
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
@@ -53,6 +60,7 @@ export const ForLastExpression = ({
   onChangeWindowSize,
   onChangeWindowUnit,
   popupPosition,
+  description = FOR_LAST_LABEL,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
 
@@ -60,12 +68,7 @@ export const ForLastExpression = ({
     <EuiPopover
       button={
         <EuiExpression
-          description={i18n.translate(
-            'xpack.triggersActionsUI.common.expressionItems.forTheLast.descriptionLabel',
-            {
-              defaultMessage: 'for the last',
-            }
-          )}
+          description={description}
           data-test-subj="forLastExpression"
           value={`${timeWindowSize ?? '?'} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
@@ -97,10 +100,13 @@ export const ForLastExpression = ({
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow isInvalid={errors.timeWindowSize.length > 0} error={errors.timeWindowSize}>
+            <EuiFormRow
+              isInvalid={Number(errors.timeWindowSize?.length) > 0}
+              error={errors.timeWindowSize as string[]}
+            >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={errors.timeWindowSize.length > 0}
+                isInvalid={Number(errors.timeWindowSize?.length) > 0}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {

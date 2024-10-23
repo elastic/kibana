@@ -15,9 +15,6 @@ export type GetDataStreamsStatsResponse =
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type DataStreamStatServiceResponse = GetDataStreamsStatsResponse;
 
-export type GetIntegrationsParams =
-  APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations`>['params'];
-
 export type GetDataStreamsDegradedDocsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
 export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
@@ -36,6 +33,13 @@ export type GetDataStreamDegradedFieldsQueryParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/degraded_fields`>['params']['query'];
 export type GetDataStreamDegradedFieldsParams = GetDataStreamDegradedFieldsPathParams &
   GetDataStreamDegradedFieldsQueryParams;
+
+/*
+Types for Degraded Field Values inside a DataStream
+ */
+
+export type GetDataStreamDegradedFieldValuesPathParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values`>['params']['path'];
 
 /*
 Types for DataStream Settings
@@ -61,8 +65,6 @@ export type GetDataStreamDetailsResponse =
 
 export type GetNonAggregatableDataStreamsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/non_aggregatable`>['params']['query'];
-export type GetNonAggregatableDataStreamsResponse =
-  APIReturnType<`GET /internal/dataset_quality/data_streams/non_aggregatable`>;
 
 export type GetIntegrationDashboardsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>['params']['path'];

@@ -8,6 +8,9 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { fetchActiveSpace } from './spaces';
+import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../common/endpoint/utils/fetch_fleet_version';
 import { prefixedOutputLogger } from './utils';
 import type { HostVm } from './types';
 import type { BaseVmCreateOptions } from './vm_services';
@@ -23,6 +26,8 @@ export interface CreateAndEnrollEndpointHostOptions
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
+  /** skip all checks and use provided version */
+  forceVersion?: boolean;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
@@ -49,13 +54,24 @@ export const createAndEnrollEndpointHost = async ({
   memory,
   hostname,
   version = kibanaPackageJson.version,
+  forceVersion = false,
   useClosestVersionMatch = false,
   useCache = true,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const log = prefixedOutputLogger('createAndEnrollEndpointHost()', _log);
+  let agentVersion = version;
+
+  if (!forceVersion) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    if (isServerless) {
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    }
+  }
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
   const isRunningInCI = Boolean(process.env.CI);
-  const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
-  const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
+  const vmName =
+    hostname ?? `test-host-${activeSpaceId}-${Math.random().toString().substring(2, 6)}`;
+  const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
   const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
 
   // TODO: remove dependency on env. var and keep function pure
@@ -84,7 +100,7 @@ export const createAndEnrollEndpointHost = async ({
     log,
     hostVm,
     agentPolicyId,
-    version,
+    version: agentVersion,
     closestVersionMatch: useClosestVersionMatch,
     useAgentCache: useCache,
   });

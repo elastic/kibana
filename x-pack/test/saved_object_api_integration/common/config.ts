@@ -6,8 +6,6 @@
  */
 
 import path from 'path';
-
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
@@ -26,7 +24,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(
-          require.resolve('../../../../test/functional/config.base.js')
+          require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
       },
       xpack: {
@@ -41,7 +39,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
-
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,

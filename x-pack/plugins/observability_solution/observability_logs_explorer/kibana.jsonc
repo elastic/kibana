@@ -20,7 +20,8 @@
       "slo",
       "share",
       "kibanaUtils",
-      "dataQuality"
+      "dataQuality",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "serverless",

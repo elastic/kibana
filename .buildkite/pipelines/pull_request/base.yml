@@ -23,7 +23,7 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       preemptible: true
     key: quick_checks
     timeout_in_minutes: 60
@@ -100,6 +100,17 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     key: checks
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+    label: 'Check OAS Snapshot'
     agents:
       machineType: n2-standard-2
       preemptible: true

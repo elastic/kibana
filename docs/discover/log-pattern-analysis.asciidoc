@@ -1,8 +1,6 @@
 [[run-pattern-analysis-discover]]
 == Run a pattern analysis on your log data
 
-preview::["This functionality is in technical preview, requires a link:https://www.elastic.co/subscriptions[Platinum subscription], and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
-
 include::../user/ml/index.asciidoc[tag=log-pattern-analysis-intro]
 Log pattern analysis works on every text field.
 
@@ -16,23 +14,23 @@ can use your own data.
 . If you don't see any results, expand the time range, for example, to
 *Last 15 days*.
 
-. Click the `message` field in the **Available fields** list sidebar and click
-**Run pattern analysis**.
-+
---
-[role="screenshot"]
-image::images/log-pattern-analysis-available-fields.png["Available fields view in Discover showing the message field selected."]
-
-The pattern analysis starts. The results are displayed in a flyout when the
-analysis is complete.
+. Click the *Patterns* tab next to *Documents* and *Field statistics*. The
+pattern analysis starts. The results are displayed under the chart. You can
+change the analyzed field by using the field selector. In the
+*Pattern analysis menu*, you can change the *Minimum time range*. This option
+enables you to widen the time range for calculating patterns which improves
+accuracy. The patterns, however, are still displayed by the time range you
+selected in step 3.
 
 [role="screenshot"]
 image::images/log-pattern-analysis-results.png["Log pattern analysis results in Discover."]
---
+
 
 . (optional) Apply filters to one or more patterns. *Discover* only displays
 documents that match the selected patterns. Additionally, you can remove
 selected patterns from *Discover*, resulting in the display of only those
 documents that don't match the selected pattern. These options enable you to
 remove unimportant messages and focus on the more important, actionable data
-during troubleshooting.
+during troubleshooting. You can also create a categorization {anomaly-job}
+directly from the *Patterns* tab to find anomalous behavior in the selected
+pattern.

@@ -33,7 +33,11 @@ export const findingsTableFieldLabels: Record<string, string> = {
   ),
   'rule.section': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
-    { defaultMessage: 'CIS Section' }
+    { defaultMessage: 'Framework Section' }
+  ),
+  'observer.vendor': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.vendorColumnLabel',
+    { defaultMessage: 'Vendor' }
   ),
   '@timestamp': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',

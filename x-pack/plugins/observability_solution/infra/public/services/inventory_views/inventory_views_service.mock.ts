@@ -9,7 +9,7 @@ import { createInventoryViewsClientMock } from './inventory_views_client.mock';
 import { InventoryViewsServiceStart } from './types';
 
 export const createInventoryViewsServiceStartMock = () => ({
-  client: createInventoryViewsClientMock(),
+  getClient: () => Promise.resolve(createInventoryViewsClientMock()),
 });
 
 export const _ensureTypeCompatibility = (): InventoryViewsServiceStart =>

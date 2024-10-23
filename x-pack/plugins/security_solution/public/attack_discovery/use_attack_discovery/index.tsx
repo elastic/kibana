@@ -43,9 +43,11 @@ export interface UseAttackDiscovery {
 
 export const useAttackDiscovery = ({
   connectorId,
+  size,
   setLoadingConnectorId,
 }: {
   connectorId: string | undefined;
+  size: number;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
   // get Kibana services and connectors
@@ -75,7 +77,7 @@ export const useAttackDiscovery = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // get alerts index pattern and allow lists from the assistant context:
-  const { alertsIndexPattern, knowledgeBase, traceOptions } = useAssistantContext();
+  const { alertsIndexPattern, traceOptions } = useAssistantContext();
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
@@ -95,21 +97,19 @@ export const useAttackDiscovery = ({
       alertsIndexPattern,
       anonymizationFields,
       genAiConfig,
-      knowledgeBase,
+      size,
       selectedConnector,
       traceOptions,
     });
-  }, [
-    aiConnectors,
-    alertsIndexPattern,
-    anonymizationFields,
-    connectorId,
-    knowledgeBase,
-    traceOptions,
-  ]);
+  }, [aiConnectors, alertsIndexPattern, anonymizationFields, connectorId, size, traceOptions]);
 
   useEffect(() => {
-    if (connectorId != null && connectorId !== '') {
+    if (
+      connectorId != null &&
+      connectorId !== '' &&
+      aiConnectors != null &&
+      aiConnectors.length > 0
+    ) {
       pollApi();
       setLoadingConnectorId?.(connectorId);
       setAlertsContextCount(null);
@@ -120,7 +120,7 @@ export const useAttackDiscovery = ({
       setGenerationIntervals([]);
       setPollStatus(null);
     }
-  }, [pollApi, connectorId, setLoadingConnectorId, setPollStatus]);
+  }, [aiConnectors, connectorId, pollApi, setLoadingConnectorId, setPollStatus]);
 
   useEffect(() => {
     if (pollStatus === 'running') {
@@ -135,7 +135,7 @@ export const useAttackDiscovery = ({
   useEffect(() => {
     if (pollData !== null && pollData.connectorId === connectorId) {
       if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
-      if (pollData.attackDiscoveries.length) {
+      if (pollData.attackDiscoveries.length && pollData.attackDiscoveries[0].timestamp != null) {
         // get last updated from timestamp, not from updatedAt since this can indicate the last time the status was updated
         setLastUpdated(new Date(pollData.attackDiscoveries[0].timestamp));
       }

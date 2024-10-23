@@ -7,7 +7,6 @@
 
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetEnrollmentAPIKeysRequestSchema,
@@ -24,25 +23,24 @@ import type {
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
-import { appContextService } from '../../services';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
-  const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const soClient = (await context.core).savedObjects.client;
 
   try {
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       kuery: request.query.kuery,
-      spaceId: useSpaceAwareness
-        ? soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING
-        : undefined,
+      spaceId: useSpaceAwareness ? getCurrentNamespace(soClient) : undefined,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated
@@ -93,11 +91,10 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const currentNamespace =
-      coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+    const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
     await APIKeyService.deleteEnrollmentApiKey(
       esClient,
       request.params.keyId,
@@ -126,9 +123,8 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
   try {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const currentNamespace =
-      coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
 
     const apiKey = await APIKeyService.getEnrollmentAPIKey(
       esClient,

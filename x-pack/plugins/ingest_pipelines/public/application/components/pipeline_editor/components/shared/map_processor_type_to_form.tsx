@@ -10,6 +10,7 @@ import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
+import { stringifyValueDescription } from './stringify_value_description';
 import { LicenseType } from '../../../../../types';
 
 import {
@@ -31,6 +32,7 @@ import {
   Foreach,
   GeoGrid,
   GeoIP,
+  IpLocation,
   Grok,
   Gsub,
   HtmlStrip,
@@ -127,7 +129,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Appends "{value}" to the "{field}" field',
         values: {
           field,
-          value,
+          value: stringifyValueDescription(value),
         },
       }),
   },
@@ -466,10 +468,28 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.geoip', {
       defaultMessage:
-        'Adds geo data based on an IP address. Uses geo data from a Maxmind database file.',
+        'Adds geo data based on an IP address. Uses geo data from a MaxMind database file.',
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geoip', {
+        defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
+        values: {
+          field,
+        },
+      }),
+  },
+  ip_location: {
+    category: processorCategories.DATA_ENRICHMENT,
+    FieldsComponent: IpLocation,
+    docLinkPath: '/geoip-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.ipLocation', {
+      defaultMessage: 'IP Location',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.ipLocation', {
+      defaultMessage: 'Adds geo data based on an IP address.',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.ipLocation', {
         defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
         values: {
           field,
@@ -810,7 +830,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Sets value of "{field}" to "{value}"',
         values: {
           field,
-          value,
+          value: stringifyValueDescription(value),
         },
       });
     },

@@ -41,6 +41,7 @@ export const CrowdstrikeGetAgentOnlineStatusResponseSchema = schema.object(
         {
           state: schema.maybe(schema.string()),
           id: schema.maybe(schema.string()),
+          last_seen: schema.maybe(schema.string()),
         },
         { unknowns: 'allow' }
       )

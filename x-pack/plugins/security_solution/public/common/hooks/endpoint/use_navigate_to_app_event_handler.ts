@@ -41,7 +41,7 @@ export const useNavigateToAppEventHandler = <S = unknown>(
   const { path, state, onClick, deepLinkId, openInNewTab } = options || {};
 
   return useCallback(
-    (ev) => {
+    (ev: React.MouseEvent) => {
       try {
         if (onClick) {
           onClick(ev);

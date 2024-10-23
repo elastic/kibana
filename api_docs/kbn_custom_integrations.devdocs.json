@@ -2,32 +2,16 @@
   "id": "@kbn/custom-integrations",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.ConnectedCustomIntegrationsButton",
+        "id": "def-public.ConnectedCustomIntegrationsButton",
         "type": "Function",
         "tags": [],
         "label": "ConnectedCustomIntegrationsButton",
         "description": [],
         "signature": [
-          "({ isDisabled, onClick, testSubj, }: ConnectedCustomIntegrationsButtonProps) => JSX.Element | null"
+          "({ isDisabled, onClick, testSubj, }: ConnectedCustomIntegrationsButtonProps) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
         "deprecated": false,
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.ConnectedCustomIntegrationsButton.$1",
+            "id": "def-public.ConnectedCustomIntegrationsButton.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  isDisabled,\n  onClick,\n  testSubj = 'customIntegrationsPackageConnectedButton',\n}",
@@ -54,13 +38,13 @@
       },
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.ConnectedCustomIntegrationsForm",
+        "id": "def-public.ConnectedCustomIntegrationsForm",
         "type": "Function",
         "tags": [],
         "label": "ConnectedCustomIntegrationsForm",
         "description": [],
         "signature": [
-          "({ testSubjects }: Props) => JSX.Element | null"
+          "({ testSubjects }: Props) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
         "deprecated": false,
@@ -68,7 +52,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.ConnectedCustomIntegrationsForm.$1",
+            "id": "def-public.ConnectedCustomIntegrationsForm.$1",
             "type": "Object",
             "tags": [],
             "label": "{ testSubjects }",
@@ -87,7 +71,7 @@
       },
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.CustomIntegrationsProvider",
+        "id": "def-public.CustomIntegrationsProvider",
         "type": "Function",
         "tags": [],
         "label": "CustomIntegrationsProvider",
@@ -102,21 +86,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.CustomIntegrationsProvider.$1",
-            "type": "CompoundType",
+            "id": "def-public.CustomIntegrationsProvider.$1",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.CustomIntegrationsProvider.$2",
+            "id": "def-public.CustomIntegrationsProvider.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -124,7 +108,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -133,7 +117,7 @@
       },
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.useConsumerCustomIntegrations",
+        "id": "def-public.useConsumerCustomIntegrations",
         "type": "Function",
         "tags": [],
         "label": "useConsumerCustomIntegrations",
@@ -152,7 +136,7 @@
       },
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.useCustomIntegrations",
+        "id": "def-public.useCustomIntegrations",
         "type": "Function",
         "tags": [],
         "label": "useCustomIntegrations",
@@ -237,7 +221,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.Callbacks",
+        "id": "def-public.Callbacks",
         "type": "Interface",
         "tags": [],
         "label": "Callbacks",
@@ -248,7 +232,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.Callbacks.onIntegrationCreation",
+            "id": "def-public.Callbacks.onIntegrationCreation",
             "type": "Function",
             "tags": [],
             "label": "onIntegrationCreation",
@@ -262,7 +246,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/custom-integrations",
-                "id": "def-common.Callbacks.onIntegrationCreation.$1",
+                "id": "def-public.Callbacks.onIntegrationCreation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "integrationOptions",
@@ -280,7 +264,7 @@
           },
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.Callbacks.onIntegrationCleanup",
+            "id": "def-public.Callbacks.onIntegrationCleanup",
             "type": "Function",
             "tags": [],
             "label": "onIntegrationCleanup",
@@ -294,7 +278,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/custom-integrations",
-                "id": "def-common.Callbacks.onIntegrationCleanup.$1",
+                "id": "def-public.Callbacks.onIntegrationCleanup.$1",
                 "type": "string",
                 "tags": [],
                 "label": "integrationName",
@@ -312,7 +296,7 @@
           },
           {
             "parentPluginId": "@kbn/custom-integrations",
-            "id": "def-common.Callbacks.onIntegrationCleanupFailed",
+            "id": "def-public.Callbacks.onIntegrationCleanupFailed",
             "type": "Function",
             "tags": [],
             "label": "onIntegrationCleanupFailed",
@@ -328,7 +312,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/custom-integrations",
-                "id": "def-common.Callbacks.onIntegrationCleanupFailed.$1",
+                "id": "def-public.Callbacks.onIntegrationCleanupFailed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -352,7 +336,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.CustomIntegrationOptions",
+        "id": "def-public.CustomIntegrationOptions",
         "type": "Type",
         "tags": [],
         "label": "CustomIntegrationOptions",
@@ -367,7 +351,7 @@
       },
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.DispatchableEvents",
+        "id": "def-public.DispatchableEvents",
         "type": "Type",
         "tags": [],
         "label": "DispatchableEvents",
@@ -382,7 +366,7 @@
       },
       {
         "parentPluginId": "@kbn/custom-integrations",
-        "id": "def-common.InitialState",
+        "id": "def-public.InitialState",
         "type": "Type",
         "tags": [],
         "label": "InitialState",
@@ -399,6 +383,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

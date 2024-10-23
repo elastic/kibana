@@ -230,15 +230,15 @@
         "label": "NavigationProvider",
         "description": [],
         "signature": [
-          "({ core, children, }: React.PropsWithChildren<React.PropsWithChildren<{ core: ",
+          "({ core, children, }: React.PropsWithChildren<{ core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
-          "; }>>) => JSX.Element"
+          "; }>) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/navigation/src/context.tsx",
         "deprecated": false,
@@ -252,15 +252,15 @@
             "label": "{\n  core,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<{ core: ",
+              "React.PropsWithChildren<{ core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              "; }>>"
+              "; }>"
             ],
             "path": "x-pack/packages/security-solution/navigation/src/context.tsx",
             "deprecated": false,
@@ -1043,9 +1043,9 @@
           "(param: { url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.NavigateToAppOptions",
+            "section": "def-public.NavigateToAppOptions",
             "text": "NavigateToAppOptions"
           },
           ") => void"
@@ -1066,9 +1066,9 @@
               "{ url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToAppOptions",
+                "section": "def-public.NavigateToAppOptions",
                 "text": "NavigateToAppOptions"
               }
             ],

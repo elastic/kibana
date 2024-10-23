@@ -47,9 +47,9 @@ const filterOutPredefinedActionConnectorsIds = async (
   actionsClient: ActionsClient,
   actionsIdsToExport: string[]
 ): Promise<string[]> => {
-  const allActions = await actionsClient.getAll();
+  const allActions = await actionsClient.getAll({ includeSystemActions: true });
   const predefinedActionsIds = allActions
-    .filter(({ isPreconfigured }) => isPreconfigured)
+    .filter(({ isPreconfigured, isSystemAction }) => isPreconfigured || isSystemAction)
     .map(({ id }) => id);
   if (predefinedActionsIds.length)
     return actionsIdsToExport.filter((id) => !predefinedActionsIds.includes(id));
@@ -77,6 +77,7 @@ export const getRuleActionConnectorsForExport = async (
   };
 
   let actionsIds = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
+
   if (!actionsIds.length) return exportedActionConnectors;
 
   // handle preconfigured connectors

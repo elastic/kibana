@@ -23,7 +23,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 
 jest.mock('../hooks/use_fetch_threat_intelligence');
 
@@ -48,10 +48,7 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: [],
 } as unknown as DocumentDetailsContext;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const renderThreatIntelligenceOverview = (contextValue: DocumentDetailsContext) => (
   <TestProviders>

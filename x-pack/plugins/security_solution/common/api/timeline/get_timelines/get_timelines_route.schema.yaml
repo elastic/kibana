@@ -1,0 +1,102 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Get Timelines API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-get.html
+  description: Documentation
+paths:
+  /api/timelines:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetTimelines
+      summary: Get Timelines or Timeline templates
+      description: Get a list of all saved Timelines or Timeline templates.
+      tags:
+        - access:securitySolution
+      parameters:
+        - in: query
+          name: only_user_favorite
+          schema:
+            nullable: true
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+          description: If true, only timelines that are marked as favorites by the user are returned.
+        - in: query
+          name: timeline_type
+          schema:
+            $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+            nullable: true
+        - in: query
+          name: sort_field
+          schema:
+            $ref: '../model/components.schema.yaml#/components/schemas/SortFieldTimeline'
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: page_size
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: page_index
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: search
+          schema:
+            nullable: true
+            type: string
+        - in: query
+          name: status
+          schema:
+            $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
+            nullable: true
+      responses:
+        '200':
+          description: Indicates that the (template) Timelines were found and returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [
+                  timeline,
+                  totalCount,
+                ]
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                  totalCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  customTemplateTimelineCount:
+                    type: number
+        '400':
+          description: Bad request. The user supplied invalid data.
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number

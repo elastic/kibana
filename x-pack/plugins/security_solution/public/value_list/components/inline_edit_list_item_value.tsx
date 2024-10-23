@@ -33,7 +33,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
       });
     },
   });
-  const onChange = useCallback((e) => {
+  const onChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((e) => {
     setValue(e.target.value);
   }, []);
   const onCancel = useCallback(() => {
@@ -41,7 +41,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
   }, [listItem]);
 
   const onSave = useCallback(
-    async (newValue) => {
+    async (newValue: string) => {
       track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.EDIT_VALUE_LIST_ITEM);
       await patchListItemMutation.mutateAsync({
         id: listItem.id,

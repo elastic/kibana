@@ -353,6 +353,7 @@ export function VisualizeESQL({
                   query={{ esql: query }}
                   flyoutType="overlay"
                   isTableView
+                  initialRowHeight={0}
                 />
               ) : (
                 <lens.EmbeddableComponent
@@ -375,6 +376,7 @@ export function VisualizeESQL({
               dataView={dataViewAsync.value}
               query={{ esql: query }}
               flyoutType="overlay"
+              initialRowHeight={0}
             />
           </EuiFlexItem>
         )}
@@ -416,6 +418,11 @@ export function registerVisualizeQueryRenderFunction({
         'content' in typedResponse && 'errorMessages' in typedResponse.content
           ? typedResponse.content.errorMessages
           : [];
+
+      const correctedQuery =
+        'data' in typedResponse && 'correctedQuery' in typedResponse.data
+          ? typedResponse.data.correctedQuery
+          : query;
 
       if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
         userOverrides = typedResponse.data.userOverrides;
@@ -470,7 +477,7 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
-      const trimmedQuery = query.trim();
+      const trimmedQuery = correctedQuery.trim();
 
       return (
         <VisualizeESQL

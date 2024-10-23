@@ -96,9 +96,9 @@
               "<Context extends ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ", Params, Query, Body>(handler: ",
@@ -106,41 +106,41 @@
               "<Params, Query, Body, Context, any, ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
+                "section": "def-server.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               },
               ">) => (ctx: Context, request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<Params, Query, Body, any>, response: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
+                "section": "def-server.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
+                "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
               "<any> | Promise<",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
+                "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
               "<any>>"
@@ -161,9 +161,9 @@
                   "<Params, Query, Body, Context, any, ",
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaResponseFactory",
+                    "section": "def-server.KibanaResponseFactory",
                     "text": "KibanaResponseFactory"
                   },
                   ">"

@@ -17,25 +17,22 @@ properties:
     description: >
       The identifier for the comment. To retrieve comment IDs, use the
       get comments API.
-    examples:
-      - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+    example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
   index:
      $ref: 'alert_indices.yaml'
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   rule:
     $ref: 'rule.yaml'
-  type: 
+  type:
     description: The type of comment.
     type: string
     enum:
      - alert
-    examples:
-      - alert
+    example: alert
   version:
     description: >
       The current comment version. To retrieve version values, use the get
       comments API.
     type: string
-    examples:
-      - Wzk1LDFd
+    example: Wzk1LDFd

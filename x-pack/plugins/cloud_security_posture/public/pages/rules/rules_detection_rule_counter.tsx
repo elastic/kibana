@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
-import { CspBenchmarkRule } from '../../../common/types/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { DetectionRuleCounter } from '../../components/detection_rule_counter';
 import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';

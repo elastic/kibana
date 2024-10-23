@@ -59,7 +59,6 @@ import {
   EQL_TYPE,
   ESQL_TYPE,
   ESQL_QUERY_BAR,
-  ESQL_QUERY_BAR_EXPAND_BTN,
   ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
@@ -129,6 +128,11 @@ import {
   MAX_SIGNALS_INPUT,
   SETUP_GUIDE_TEXTAREA,
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
+  SAVE_WITH_ERRORS_MODAL,
+  SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
+  PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -150,8 +154,8 @@ import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/contr
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
-import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -161,6 +165,14 @@ export const createAndEnableRule = () => {
 export const createRuleWithoutEnabling = () => {
   cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
+};
+
+export const createRuleWithNonBlockingErrors = () => {
+  cy.get(CREATE_AND_ENABLE_BTN).click();
+  cy.get(SAVE_WITH_ERRORS_MODAL).should('exist');
+  cy.get(SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN).first().click();
+  cy.get(SAVE_WITH_ERRORS_MODAL).should('not.exist');
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {
@@ -545,7 +557,7 @@ export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
     .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
 };
 
-export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
   const thresholdField = 0;
   const threshold = 1;
 
@@ -566,7 +578,11 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
       cy.wrap(inputs[threshold]).clear();
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
     });
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+};
+
+export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+  fillDefineThresholdRule(rule);
+  continueFromDefineStep();
 };
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
@@ -630,14 +646,6 @@ export const fillEsqlQueryBar = (query: string) => {
 
   // only after this query can be safely typed
   typeEsqlQueryBar(query);
-};
-
-/**
- * expands query bar, so query is not obscured on narrow screens
- * and validation message is not covered by input menu tooltip
- */
-export const expandEsqlQueryBar = () => {
-  cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
@@ -864,6 +872,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
         if (emptyTableState.length > 0) {
@@ -875,7 +884,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
         return alertCount >= alertCountThreshold;
       });
     },
-    { interval: 500, timeout: 12000 }
+    { interval: 500, timeout: 30000 }
   );
   waitForAlerts();
 };
@@ -902,7 +911,8 @@ export const enablesAndPopulatesThresholdSuppression = (
 
   // enables suppression for threshold rule
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
-  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.checked');
 
   setAlertSuppressionDuration(interval, timeUnit);
 
@@ -933,11 +943,11 @@ export const selectAlertSuppressionPerInterval = () => {
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
 export const selectDoNotSuppressForMissingFields = () => {
-  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).click();
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
@@ -993,4 +1003,21 @@ export const uncheckLoadQueryDynamically = () => {
 
 export const openAddFilterPopover = () => {
   cy.get(QUERY_BAR_ADD_FILTER).click();
+};
+
+export const checkEnableLoggedRequests = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).click();
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('be.checked');
+};
+
+export const submitRulePreview = () => {
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+};
+
+export const toggleLoggedRequestsAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON).first().click();
+};
+
+export const toggleLoggedRequestsItemAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON).should('be.visible').first().click();
 };

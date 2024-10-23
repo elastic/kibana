@@ -39,6 +39,7 @@ export const ManageCrawlsPopoverLogic = kea<
       false,
       {
         closePopover: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         togglePopover: (currentIsOpen) => !currentIsOpen,
       },
     ],

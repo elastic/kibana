@@ -18,7 +18,7 @@ export function getCombinedRuntimeMappings(
   dataView: DataView | undefined,
   runtimeMappings?: RuntimeMappings
 ): RuntimeMappings | undefined {
-  let combinedRuntimeMappings = {};
+  let combinedRuntimeMappings = Object.create(null);
 
   // Add runtime field mappings defined by index pattern
   if (dataView) {

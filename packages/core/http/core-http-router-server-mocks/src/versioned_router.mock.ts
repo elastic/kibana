@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -13,6 +14,7 @@ import type {
   AddVersionOpts,
   RequestHandler,
   KibanaResponseFactory,
+  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 
 export type MockedVersionedRoute = jest.Mocked<VersionedRoute>;
@@ -23,14 +25,16 @@ const createMockVersionedRoute = (): MockedVersionedRoute => {
   return api;
 };
 
+type VersionedRouterMethods = keyof Omit<VersionedRouter, 'getRoutes'>;
+
 export type MockedVersionedRouter = jest.Mocked<VersionedRouter<any>> & {
-  getRoute: (method: keyof VersionedRouter, path: string) => RegisteredVersionedRoute;
+  getRoute: (method: VersionedRouterMethods, path: string) => RegisteredVersionedRoute;
 };
 
 const createMethodHandler = () => jest.fn((_) => createMockVersionedRoute());
-
+const createMockGetRoutes = () => jest.fn(() => [] as VersionedRouterRoute[]);
 export const createVersionedRouterMock = (): MockedVersionedRouter => {
-  const router: Omit<MockedVersionedRouter, 'getRoute'> = {
+  const router: Omit<MockedVersionedRouter, 'getRoute' | 'getRoutes'> = {
     delete: createMethodHandler(),
     get: createMethodHandler(),
     patch: createMethodHandler(),
@@ -41,6 +45,7 @@ export const createVersionedRouterMock = (): MockedVersionedRouter => {
   return {
     ...router,
     getRoute: getRoute.bind(null, router),
+    getRoutes: createMockGetRoutes(),
   };
 };
 
@@ -53,9 +58,10 @@ export interface RegisteredVersionedRoute {
     };
   };
 }
+
 const getRoute = (
-  router: Omit<MockedVersionedRouter, 'getRoute'>,
-  method: keyof VersionedRouter,
+  router: Omit<MockedVersionedRouter, 'getRoute' | 'getRoutes'>,
+  method: VersionedRouterMethods,
   path: string
 ): RegisteredVersionedRoute => {
   if (!router[method].mock.calls.length) {

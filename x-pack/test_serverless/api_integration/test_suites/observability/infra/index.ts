@@ -17,5 +17,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./snapshot'));
     loadTestFile(require.resolve('./processes'));
     loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./asset_count'));
   });
 }

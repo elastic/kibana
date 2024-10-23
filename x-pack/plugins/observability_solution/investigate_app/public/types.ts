@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -30,11 +35,14 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface ConfigSchema {}
+export interface ConfigSchema {
+  enabled: boolean;
+}
 
 export interface InvestigateAppSetupDependencies {
   investigate: InvestigatePublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
@@ -49,6 +57,7 @@ export interface InvestigateAppSetupDependencies {
 export interface InvestigateAppStartDependencies {
   investigate: InvestigatePublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
@@ -58,6 +67,7 @@ export interface InvestigateAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
+  charts: ChartsPluginStart;
 }
 
 export interface InvestigateAppPublicSetup {}

@@ -15,13 +15,9 @@ exports[`PointOptions component should init with the default set of props 1`] = 
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
     display="rowCompressed"
     fullWidth={true}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Dots size"
-    labelType="label"
   >
     <EuiRangeClass
       compressed={true}

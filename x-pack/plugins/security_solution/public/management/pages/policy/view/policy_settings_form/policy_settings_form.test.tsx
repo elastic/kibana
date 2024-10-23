@@ -23,8 +23,16 @@ import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/types';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../../../../common/hooks/use_license');
+
+const mockAllowShowingEventMergingBannerConstantGetter = jest.fn();
+jest.mock('./constants', () => ({
+  get ALLOW_SHOWING_EVENT_MERGING_BANNER() {
+    return mockAllowShowingEventMergingBannerConstantGetter();
+  },
+}));
 
 describe('Endpoint Policy Settings Form', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
@@ -33,11 +41,13 @@ describe('Endpoint Policy Settings Form', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let upsellingService: UpsellingService;
+  let storageMock: IStorageWrapper;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
     upsellingService = mockedContext.startServices.upselling;
+    storageMock = mockedContext.startServices.storage;
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -47,7 +57,59 @@ describe('Endpoint Policy Settings Form', () => {
       'data-test-subj': 'test',
     };
 
+    mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(false);
+
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
+  });
+
+  describe('event merging banner', () => {
+    beforeEach(() => {
+      mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(true);
+    });
+
+    it('should hide the banner if its not allowed to be displayed', () => {
+      mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(false);
+
+      render();
+
+      expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
+    });
+    it('should show the event merging banner for 8.16 if it has never been dismissed', () => {
+      render();
+
+      expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
+    });
+
+    it('should show the event merging banner for 8.16 if `securitySolution.showEventMergingBanner` is `true`', () => {
+      storageMock.set('securitySolution.showEventMergingBanner', true);
+      render();
+
+      expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
+    });
+
+    it('should hide the event merging banner when user dismisses it', () => {
+      render();
+      expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
+
+      renderResult.getByTestId('euiDismissCalloutButton').click();
+
+      expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
+    });
+
+    it('should persist that event merging banner have been dismissed', () => {
+      render();
+
+      renderResult.getByTestId('euiDismissCalloutButton').click();
+
+      expect(storageMock.get('securitySolution.showEventMergingBanner')).toBe(false);
+    });
+
+    it('should not show the banner if it was dismissed before', () => {
+      storageMock.set('securitySolution.showEventMergingBanner', false);
+      render();
+
+      expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
+    });
   });
 
   it.each([
@@ -91,7 +153,7 @@ describe('Endpoint Policy Settings Form', () => {
     ])('should include %s card', (_, testSubjSelector) => {
       render();
 
-      expect(renderResult.queryByTestId(testSubjSelector)).toBeNull();
+      expect(renderResult.queryByTestId(testSubjSelector)).not.toBeInTheDocument();
     });
 
     it('should display upselling component', () => {
@@ -101,7 +163,7 @@ describe('Endpoint Policy Settings Form', () => {
   });
 
   describe('when changing related settings', () => {
-    let clickOnRadio: (selector: string) => void;
+    let clickOnRadio: (selector: string) => Promise<void>;
     let expectOnChangeToBeCalledWith: (updatedPolicy: PolicyConfig) => void;
 
     describe('related to antivirus registration', () => {
@@ -117,12 +179,12 @@ describe('Endpoint Policy Settings Form', () => {
       });
 
       describe('changing malware when antivirus registration is synced with malware', () => {
-        it('should enable antivirus registration when malware is enabled', () => {
+        it('should enable antivirus registration when malware is enabled', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
           setMalwareMode({ policy: formProps.policy, turnOff: true });
           render();
 
-          userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setMalwareMode({ policy: expectedPolicy });
@@ -130,11 +192,11 @@ describe('Endpoint Policy Settings Form', () => {
           expectOnChangeToBeCalledWith(expectedPolicy);
         });
 
-        it('should disable antivirus registration when malware is disabled', () => {
+        it('should disable antivirus registration when malware is disabled', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
           render();
 
-          userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setMalwareMode({ policy: expectedPolicy, turnOff: true });
@@ -142,12 +204,12 @@ describe('Endpoint Policy Settings Form', () => {
           expectOnChangeToBeCalledWith(expectedPolicy);
         });
 
-        it('should disable antivirus registration when malware is set to detect only', () => {
+        it('should disable antivirus registration when malware is set to detect only', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
           setMalwareMode({ policy: formProps.policy });
           render();
 
-          clickOnRadio(testSubj.malware.protectionDetectRadio);
+          await clickOnRadio(testSubj.malware.protectionDetectRadio);
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setMalwareModeToDetect(expectedPolicy);
@@ -157,35 +219,35 @@ describe('Endpoint Policy Settings Form', () => {
       });
 
       describe('changing malware when antivirus registration is NOT synced with malware', () => {
-        it('should not change antivirus registration when malware is enabled', () => {
+        it('should not change antivirus registration when malware is enabled', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.disabled, false);
           setMalwareMode({ policy: formProps.policy, turnOff: true });
           render();
 
-          userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setMalwareMode({ policy: expectedPolicy });
           expectOnChangeToBeCalledWith(expectedPolicy);
         });
 
-        it('should not change antivirus registration when malware is disabled', () => {
+        it('should not change antivirus registration when malware is disabled', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
           render();
 
-          userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
+          await userEvent.click(renderResult.getByTestId(testSubj.malware.enableDisableSwitch));
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setMalwareMode({ policy: expectedPolicy, turnOff: true });
           expectOnChangeToBeCalledWith(expectedPolicy);
         });
 
-        it('should not change antivirus registration when malware is set to detect only', () => {
+        it('should not change antivirus registration when malware is set to detect only', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
           setMalwareMode({ policy: formProps.policy });
           render();
 
-          clickOnRadio(testSubj.malware.protectionDetectRadio);
+          await clickOnRadio(testSubj.malware.protectionDetectRadio);
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setMalwareModeToDetect(expectedPolicy);
@@ -194,22 +256,22 @@ describe('Endpoint Policy Settings Form', () => {
       });
 
       describe('changing antivirus registration mode when malware is enabled', () => {
-        it('should enable antivirus registration when set to sync', () => {
+        it('should enable antivirus registration when set to sync', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.disabled, false);
           render();
 
-          clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
+          await clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, true);
           expectOnChangeToBeCalledWith(expectedPolicy);
         });
 
-        it('should disable antivirus registration when set to disabled', () => {
+        it('should disable antivirus registration when set to disabled', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);
           render();
 
-          clickOnRadio(testSubj.antivirusRegistration.disabledRadioButton);
+          await clickOnRadio(testSubj.antivirusRegistration.disabledRadioButton);
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.disabled, false);
@@ -222,22 +284,22 @@ describe('Endpoint Policy Settings Form', () => {
           setMalwareMode({ policy: formProps.policy, turnOff: true });
         });
 
-        it('should disable antivirus registration when set to sync', () => {
+        it('should disable antivirus registration when set to sync', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.enabled, true);
           render();
 
-          clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
+          await clickOnRadio(testSubj.antivirusRegistration.syncRadioButton);
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.sync, false);
           expectOnChangeToBeCalledWith(expectedPolicy);
         });
 
-        it('should enable antivirus registration when set to enabled', () => {
+        it('should enable antivirus registration when set to enabled', async () => {
           setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, false);
           render();
 
-          clickOnRadio(testSubj.antivirusRegistration.enabledRadioButton);
+          await clickOnRadio(testSubj.antivirusRegistration.enabledRadioButton);
 
           const expectedPolicy = cloneDeep(formProps.policy);
           setAntivirusRegistration(expectedPolicy, AntivirusRegistrationModes.enabled, true);

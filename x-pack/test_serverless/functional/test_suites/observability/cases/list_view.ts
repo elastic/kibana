@@ -211,6 +211,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAll();
+      });
+
       describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
@@ -258,7 +262,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('deletes a case correctly', async () => {
-          await toasts.dismissAll();
           await cases.casesTable.deleteCase(0);
           await cases.casesTable.waitForTableToFinishLoading();
           await cases.casesTable.validateCasesTableHasNthRows(0);

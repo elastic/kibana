@@ -6,7 +6,7 @@
     "id": "navigation",
     "server": true,
     "browser": true,
-    "optionalPlugins": ["cloud", "cloudExperiments", "spaces"],
+    "optionalPlugins": ["cloud", "spaces"],
     "requiredPlugins": ["unifiedSearch"],
     "requiredBundles": []
   }

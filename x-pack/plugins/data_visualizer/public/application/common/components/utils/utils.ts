@@ -26,7 +26,7 @@ const overrideDefaults = {
   linesToSample: undefined,
 };
 
-export function readFile(file: File) {
+export function readFile(file: File): Promise<{ fileContents: string; data: ArrayBuffer }> {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
@@ -58,7 +58,7 @@ export function readFile(file: File) {
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
   const formattedOverrides: InputOverrides = {};
   for (const o in overrideDefaults) {
-    if (overrideDefaults.hasOwnProperty(o)) {
+    if (Object.hasOwn(overrideDefaults, o)) {
       let value = overrides[o];
       if (
         (Array.isArray(value) && isEqual(value, originalSettings[o])) ||

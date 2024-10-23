@@ -86,3 +86,8 @@ export const PERIODICALLY = i18n.translate(
   'xpack.securitySolution.detectionEngine.actionNotifyWhen.periodically',
   { defaultMessage: 'Periodically' }
 );
+
+export const SYSTEM_ACTION_FREQUENCY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.actionNotifyWhen.systemActionFrequency',
+  { defaultMessage: 'On check intervals' }
+);

@@ -197,6 +197,14 @@ export const agentPolicyRouteService = {
   getResetAllPreconfiguredAgentPolicyPath: () => {
     return PRECONFIGURATION_API_ROUTES.RESET_PATTERN;
   },
+
+  getInfoOutputsPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.INFO_OUTPUTS_PATTERN.replace('{agentPolicyId}', agentPolicyId);
+  },
+
+  getListOutputsPath: () => {
+    return AGENT_POLICY_API_ROUTES.LIST_OUTPUTS_PATTERN;
+  },
 };
 
 export const dataStreamRouteService = {
@@ -294,6 +302,7 @@ export const appRoutesService = {
   getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
   getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
   postHealthCheckPath: () => APP_API_ROUTES.HEALTH_CHECK_PATTERN,
+  getAgentPoliciesSpacesPath: () => APP_API_ROUTES.AGENT_POLICIES_SPACES,
 };
 
 export const enrollmentAPIKeyRouteService = {

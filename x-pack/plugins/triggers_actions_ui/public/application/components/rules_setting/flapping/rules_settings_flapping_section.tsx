@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { flappingOffMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
 import {
   RulesSettingsFlappingFormSection,
   RulesSettingsFlappingFormSectionProps,
@@ -121,12 +122,7 @@ export const RulesSettingsFlappingFormRight = memo((props: RulesSettingsFlapping
     return (
       <EuiFlexItem data-test-subj="rulesSettingsFlappingOffPrompt">
         <EuiPanel borderRadius="none" color="subdued" grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsOffDescription"
-              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval, which might result in higher alert volumes."
-            />
-          </EuiText>
+          <EuiText size="s">{flappingOffMessage}</EuiText>
         </EuiPanel>
       </EuiFlexItem>
     );

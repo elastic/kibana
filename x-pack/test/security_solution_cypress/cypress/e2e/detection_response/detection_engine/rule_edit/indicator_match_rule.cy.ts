@@ -9,7 +9,6 @@ import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   SUPPRESS_FOR_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
@@ -44,10 +43,11 @@ const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
 const rule = getNewThreatIndicatorRule();
 
+// Skipping in MKI due to flake
 describe(
   'Detection rules, Indicator Match, Edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
@@ -58,7 +58,8 @@ describe(
     });
 
     // https://github.com/elastic/kibana/issues/187621
-    describe('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/196711
+    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });
@@ -80,9 +81,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });

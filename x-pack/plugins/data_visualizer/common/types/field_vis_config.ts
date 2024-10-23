@@ -54,11 +54,11 @@ export interface FileBasedUnknownFieldVisConfig {
 export function isFileBasedFieldVisConfig(
   field: FieldVisConfig | FileBasedFieldVisConfig
 ): field is FileBasedFieldVisConfig {
-  return !field.hasOwnProperty('existsInDocs');
+  return !Object.hasOwn(field, 'existsInDocs');
 }
 
 export function isIndexBasedFieldVisConfig(
   field: FieldVisConfig | FileBasedFieldVisConfig
 ): field is FieldVisConfig {
-  return field.hasOwnProperty('existsInDocs');
+  return Object.hasOwn(field, 'existsInDocs');
 }

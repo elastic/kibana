@@ -15,12 +15,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'userProfiles']);
   const svlUserManager = getService('svlUserManager');
 
-  describe('User Profile Page', async () => {
+  describe('User Profile Page', () => {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole(VIEWER_ROLE);
     });
 
-    describe('User details', async () => {
+    describe('User details', () => {
       it('should display correct user details', async () => {
         await pageObjects.common.navigateToApp('security_account');
 

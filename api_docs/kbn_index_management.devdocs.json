@@ -1288,9 +1288,9 @@
               "(deps: { history: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown>; }) => React.FC<",
@@ -1328,9 +1328,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/core-application-browser",
-                        "scope": "common",
+                        "scope": "public",
                         "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-common.ScopedHistory",
+                        "section": "def-public.ScopedHistory",
                         "text": "ScopedHistory"
                       },
                       "<unknown>"

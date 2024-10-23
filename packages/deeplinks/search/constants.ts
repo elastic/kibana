@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const ENTERPRISE_SEARCH_APP_ID = 'enterpriseSearch';
@@ -18,3 +19,5 @@ export const SERVERLESS_ES_CONNECTORS_ID = 'serverlessConnectors';
 export const SERVERLESS_ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';
 export const SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID = 'searchInferenceEndpoints';
 export const SEARCH_HOMEPAGE = 'searchHomepage';
+export const SEARCH_INDICES_START = 'elasticsearchStart';
+export const SEARCH_INDICES = 'elasticsearchIndices';

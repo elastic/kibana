@@ -102,7 +102,7 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             type: 'json',
             content: {
-              code: 'ra_scan_error_scan-queue-quota',
+              code: 'ra_scan_error_queue-quota',
             },
           },
         },
@@ -233,7 +233,7 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             type: 'json',
             content: {
-              code: 'ra_scan_error_scan-queue-quota',
+              code: 'ra_scan_error_queue-quota',
             },
           },
           'agent-errs-a-lot': {

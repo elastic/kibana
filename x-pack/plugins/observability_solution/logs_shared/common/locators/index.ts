@@ -8,7 +8,6 @@
 export * from './logs_locator';
 export * from './trace_logs_locator';
 export * from './node_logs_locator';
-export * from './infra';
 export * from './get_logs_locators';
 
 export type {

@@ -7,7 +7,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ServerError, ToggleAlertParams } from '../../types';
 import { unmuteAlertInstance } from '../../../../lib/rule_api/unmute_alert';
 import { useKibana } from '../../../../..';
@@ -25,7 +25,7 @@ export const useUnmuteAlert = () => {
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
-      context: AlertsTableQueryContext,
+      context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.alertsTable.alertUnuted', {

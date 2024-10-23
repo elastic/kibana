@@ -19,10 +19,10 @@ const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPa
 
 describe('getMonitoringPermissions', () => {
   describe('Without elastic agent package installed', () => {
-    it('should return default logs and metrics permissions if both are enabled', async () => {
+    it('should return default logs, metrics, traces permissions if all are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: true, metrics: true },
+        { logs: true, metrics: true, traces: true },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();
@@ -30,7 +30,7 @@ describe('getMonitoringPermissions', () => {
     it('should return default logs permissions if only logs are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: true, metrics: false },
+        { logs: true, metrics: false, traces: false },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();
@@ -38,16 +38,24 @@ describe('getMonitoringPermissions', () => {
     it('should return default metrics permissions if only metrics are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: false, metrics: true },
+        { logs: false, metrics: true, traces: false },
+        'testnamespace123'
+      );
+      expect(permissions).toMatchSnapshot();
+    });
+    it('should return default traces permissions if only traces are enabled', async () => {
+      const permissions = await getMonitoringPermissions(
+        savedObjectsClientMock.create(),
+        { logs: false, metrics: false, traces: true },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();
     });
 
-    it('should an empty valid permission entry if neither metrics and logs are enabled', async () => {
+    it('should an empty valid permission entry if neither metrics, logs, nor traces are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: false, metrics: false },
+        { logs: false, metrics: false, traces: false },
         'testnamespace123'
       );
       expect(permissions).toEqual({ _elastic_agent_monitoring: { indices: [] } });
@@ -82,10 +90,10 @@ describe('getMonitoringPermissions', () => {
         ],
       } as PackageInfo);
     });
-    it('should return default logs and metrics permissions if both are enabled', async () => {
+    it('should return default logs, metrics, traces permissions if all are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: true, metrics: true },
+        { logs: true, metrics: true, traces: true },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();
@@ -93,7 +101,7 @@ describe('getMonitoringPermissions', () => {
     it('should return default logs permissions if only logs are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: true, metrics: false },
+        { logs: true, metrics: false, traces: false },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();
@@ -101,7 +109,15 @@ describe('getMonitoringPermissions', () => {
     it('should return default metrics permissions if only metrics are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: false, metrics: true },
+        { logs: false, metrics: true, traces: false },
+        'testnamespace123'
+      );
+      expect(permissions).toMatchSnapshot();
+    });
+    it('should return default traces permissions if only traces are enabled', async () => {
+      const permissions = await getMonitoringPermissions(
+        savedObjectsClientMock.create(),
+        { logs: false, metrics: false, traces: true },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();

@@ -15,7 +15,8 @@ import {
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170157
+describe.skip(
   'Alert Event Details - dynamic params',
   {
     tags: ['@ess', '@serverless'],
@@ -82,7 +83,7 @@ describe(
 
       it('should be able to run take action query against all enrolled agents', () => {
         cy.getBySel('expand-event').first().click();
-        cy.getBySel('take-action-dropdown-btn').click();
+        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
           cy.getBySel('comboBoxClearButton').click();

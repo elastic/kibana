@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DatasetQualityFlyoutOptions,
-  DatasetQualityPublicStateUpdate,
-} from '@kbn/dataset-quality-plugin/public/controller';
+import { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../common/utils/deep_compact_object';
 import { datasetQualityUrlSchemaV1 } from '../../../common/url_schema';
@@ -18,7 +15,6 @@ export const getStateFromUrlValue = (
 ): DatasetQualityPublicStateUpdate =>
   deepCompactObject<DatasetQualityPublicStateUpdate>({
     table: urlValue.table,
-    flyout: getFlyoutFromUrlValue(urlValue.flyout),
     filters: urlValue.filters,
   });
 
@@ -27,7 +23,6 @@ export const getUrlValueFromState = (
 ): datasetQualityUrlSchemaV1.UrlSchema =>
   deepCompactObject<datasetQualityUrlSchemaV1.UrlSchema>({
     table: state.table,
-    flyout: state.flyout,
     filters: state.filters,
     v: 1,
   });
@@ -45,25 +40,3 @@ const stateFromUrlSchemaRT = new rt.Type<
 
 export const stateFromUntrustedUrlRT =
   datasetQualityUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);
-
-const getFlyoutFromUrlValue = (
-  flyout?: datasetQualityUrlSchemaV1.UrlSchema['flyout']
-): DatasetQualityFlyoutOptions =>
-  deepCompactObject<DatasetQualityFlyoutOptions>({
-    ...(flyout
-      ? {
-          ...flyout,
-          dataset: flyout.dataset
-            ? {
-                ...flyout.dataset,
-                integration: flyout.dataset.integration
-                  ? {
-                      ...flyout.dataset.integration,
-                      datasets: {},
-                    }
-                  : undefined,
-              }
-            : undefined,
-        }
-      : {}),
-  });

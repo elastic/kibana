@@ -19,7 +19,7 @@ import { FilterAction } from './table/filter_action';
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
-  const { isRequestRunning: hostCountLoading } = useHostCountContext();
+  const { loading: hostCountLoading } = useHostCountContext();
   const { onPageReady } = usePerformanceContext();
 
   const {

@@ -13,6 +13,9 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
 import userEvent from '@testing-library/user-event';
 
+Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { value: 400 });
+Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { value: 200 });
+
 jest.mock('@kbn/unified-search-plugin/public', () => {
   const actual = jest.requireActual('@kbn/unified-search-plugin/public');
   return {
@@ -219,13 +222,11 @@ describe('Layer Data Panel', () => {
     };
   });
 
-  const renderLayerPanel = () => {
-    return render(<LayerPanel {...defaultProps} />);
-  };
+  const renderLayerPanel = () => render(<LayerPanel {...defaultProps} />);
 
-  it('should list all index patterns', () => {
+  it('should list all index patterns', async () => {
     renderLayerPanel();
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
     const dataviewOptions = screen
       .getAllByRole('option')
       .map((option) => within(option).getByTestId('fullText').textContent);
@@ -237,9 +238,9 @@ describe('Layer Data Panel', () => {
     ]);
   });
 
-  it('should switch data panel to target index pattern', () => {
+  it('should switch data panel to target index pattern', async () => {
     renderLayerPanel();
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
     const dataviewOptions = screen.getAllByRole('option');
     fireEvent.click(dataviewOptions[0]);
     expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('3');

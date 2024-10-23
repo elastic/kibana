@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
@@ -39,7 +39,7 @@ export const AttackDiscovery = z.object({
   /**
    * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
    */
-  entitySummaryMarkdown: z.string(),
+  entitySummaryMarkdown: z.string().optional(),
   /**
    * An array of MITRE ATT&CK tactic for the attack discovery
    */
@@ -55,7 +55,7 @@ export const AttackDiscovery = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString,
+  timestamp: NonEmptyString.optional(),
 });
 
 /**

@@ -532,7 +532,7 @@
             "label": "getStatusMessage",
             "description": [],
             "signature": [
-              "() => JSX.Element | null"
+              "() => React.JSX.Element | null"
             ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -642,7 +642,7 @@
             "label": "getCreatedAtLabel",
             "description": [],
             "signature": [
-              "() => string | JSX.Element"
+              "() => string | React.JSX.Element"
             ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -690,7 +690,7 @@
             "label": "getWarnings",
             "description": [],
             "signature": [
-              "() => JSX.Element | undefined"
+              "() => React.JSX.Element | undefined"
             ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -766,9 +766,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -787,9 +787,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-common.IUiSettingsClient",
+                    "section": "def-public.IUiSettingsClient",
                     "text": "IUiSettingsClient"
                   }
                 ],
@@ -1325,9 +1325,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpResponse",
+                "section": "def-public.HttpResponse",
                 "text": "HttpResponse"
               },
               "<unknown>>"
@@ -1370,7 +1370,9 @@
             "type": "Function",
             "tags": [],
             "label": "getDecoratedJobParams",
-            "description": [],
+            "description": [
+              "\nAdds the browserTimezone and kibana version to report job params"
+            ],
             "signature": [
               "<T extends AppParams>(baseParams: T) => ",
               "BaseParams"
@@ -1562,7 +1564,7 @@
         "label": "InternalApiClientProvider",
         "description": [],
         "signature": [
-          "({ apiClient, http, children }: React.PropsWithChildren<React.PropsWithChildren<{ apiClient: ",
+          "({ apiClient, http, children }: React.PropsWithChildren<{ apiClient: ",
           {
             "pluginId": "@kbn/reporting-public",
             "scope": "public",
@@ -1573,12 +1575,12 @@
           "; http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          "; }>>) => JSX.Element"
+          "; }>) => React.JSX.Element"
         ],
         "path": "packages/kbn-reporting/public/context.tsx",
         "deprecated": false,
@@ -1592,7 +1594,7 @@
             "label": "{ apiClient, http, children }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<{ apiClient: ",
+              "React.PropsWithChildren<{ apiClient: ",
               {
                 "pluginId": "@kbn/reporting-public",
                 "scope": "public",
@@ -1603,12 +1605,12 @@
               "; http: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               },
-              "; }>>"
+              "; }>"
             ],
             "path": "packages/kbn-reporting/public/context.tsx",
             "deprecated": false,
@@ -1699,9 +1701,9 @@
           "<Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           "> & ",
@@ -1828,9 +1830,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -1848,9 +1850,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               }
             ],
@@ -1868,9 +1870,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -1888,9 +1890,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
+                "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               }
             ],

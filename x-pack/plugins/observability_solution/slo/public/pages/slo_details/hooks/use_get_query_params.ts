@@ -52,7 +52,7 @@ export function useGetQueryParams() {
 
   return {
     instanceId: !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined,
-    remoteName,
+    remoteName: remoteName !== null ? remoteName : undefined,
     isDeletingSlo: deleteSlo === 'true',
     removeDeleteQueryParam,
     isResettingSlo: resetSlo === 'true',

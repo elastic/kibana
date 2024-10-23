@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps, FunctionComponent, PropsWithChildren } from 'react';
+import type { ComponentProps, FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
@@ -35,6 +35,10 @@ import { defaultColumnHeaderType } from '../../body/column_headers/default_heade
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
+import { userEvent } from '@testing-library/user-event';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -83,19 +87,11 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 jest.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@kbn/ebt/client`);
+jest.mock(`@elastic/ebt/client`);
 
 const mockOpenFlyout = jest.fn();
 const mockCloseFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({
-      openFlyout: mockOpenFlyout,
-      closeFlyout: mockCloseFlyout,
-    }),
-    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
-  };
-});
+jest.mock('@kbn/expandable-flyout');
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -106,8 +102,11 @@ const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) =
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,
@@ -139,7 +138,7 @@ const mockState = {
 
 mockState.timeline.timelineById[TimelineId.test].columns = customColumnOrder;
 
-const TestWrapper: FunctionComponent = ({ children }) => {
+const TestWrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => {
   return <TestProviders store={createMockStore(mockState)}>{children}</TestProviders>;
 };
 
@@ -162,6 +161,13 @@ let useTimelineEventsMock = jest.fn();
 describe('query tab with unified timeline', () => {
   beforeAll(() => {
     // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+
+    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+      closeFlyout: mockCloseFlyout,
+    }));
+
     Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
       get() {
         return true;
@@ -294,18 +300,25 @@ describe('query tab with unified timeline', () => {
 
   describe('pagination', () => {
     beforeEach(() => {
-      // should return all the records instead just 3
-      // as the case in the default mock
+      // pagination tests need more than 1 record so here
+      // we return 5 records instead of just 1.
       useTimelineEventsMock = jest.fn(() => [
         false,
         {
-          events: structuredClone(mockTimelineData),
+          events: structuredClone(mockTimelineData.slice(0, 5)),
           pageInfo: {
             activePage: 0,
-            totalPages: 10,
+            totalPages: 5,
           },
           refreshedAt: Date.now(),
-          totalCount: 70,
+          /*
+           * `totalCount` could be any number w.r.t this test
+           * and actually means total hits on elastic search
+           * and not the fecthed number of records.
+           *
+           * This helps in testing `sampleSize` and `loadMore`
+           */
+          totalCount: 50,
           loadPage: loadPageMock,
         },
       ]);
@@ -320,21 +333,48 @@ describe('query tab with unified timeline', () => {
     it(
       'should paginate correctly',
       async () => {
-        renderTestComponents();
+        const mockStateWithNoteInTimeline = {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                /* 1 record for each page */
+                itemsPerPage: 1,
+                itemsPerPageOptions: [1, 2, 3, 4, 5],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
+              },
+            },
+          },
+        };
 
-        await waitFor(() => {
-          expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-            'Rows per page: 5'
-          );
-        });
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
+
+        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+          'Rows per page: 1'
+        );
 
         expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-        expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+        expect(screen.getByTestId('pagination-button-4')).toBeVisible();
+        expect(screen.queryByTestId('pagination-button-5')).toBeNull();
 
-        fireEvent.click(screen.getByTestId('pagination-button-6'));
+        fireEvent.click(screen.getByTestId('pagination-button-4'));
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-6')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-4')).toHaveAttribute('aria-current', 'true');
         });
       },
       SPECIAL_TEST_TIMEOUT
@@ -343,13 +383,45 @@ describe('query tab with unified timeline', () => {
     it(
       'should load more records according to sample size correctly',
       async () => {
-        renderTestComponents();
+        const mockStateWithNoteInTimeline = {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                itemsPerPage: 1,
+                /*
+                 * `sampleSize` is the max number of records that are fetched from elasticsearch
+                 * in one request. If hits > sampleSize, you can fetch more records ( <= sampleSize)
+                 */
+                sampleSize: 5,
+                itemsPerPageOptions: [1, 2, 3, 4, 5],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
+              },
+            },
+          },
+        };
+
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-          expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+          expect(screen.getByTestId('pagination-button-4')).toBeVisible();
         });
         // Go to last page
-        fireEvent.click(screen.getByTestId('pagination-button-6'));
+        fireEvent.click(screen.getByTestId('pagination-button-4'));
         await waitFor(() => {
           expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         });
@@ -381,11 +453,7 @@ describe('query tab with unified timeline', () => {
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move left')).toBeEnabled();
@@ -414,11 +482,7 @@ describe('query tab with unified timeline', () => {
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Remove column')).toBeVisible();
@@ -447,16 +511,12 @@ describe('query tab with unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="@timestamp"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Sort Old-New')).toBeVisible();
         });
-        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
+        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
 
         useTimelineEventsMock.mockClear();
 
@@ -493,11 +553,7 @@ describe('query tab with unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="host.name"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-host.name'));
 
         await waitFor(() => {
           expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
@@ -552,11 +608,7 @@ describe('query tab with unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
@@ -612,9 +664,9 @@ describe('query tab with unified timeline', () => {
         // // timestamp sorting indicators
         expect(
           await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-        ).toBeVisible();
+        ).toBeInTheDocument();
 
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingClearButton'));
 
@@ -641,9 +693,9 @@ describe('query tab with unified timeline', () => {
         // // timestamp sorting indicators
         expect(
           await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-        ).toBeVisible();
+        ).toBeInTheDocument();
 
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
 
         // add more columns to sorting
         fireEvent.click(screen.getByText(/Pick fields to sort by/));
@@ -651,7 +703,7 @@ describe('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(
             screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
-          ).toBeVisible();
+          ).toBeInTheDocument();
         });
 
         fireEvent.click(
@@ -660,13 +712,15 @@ describe('query tab with unified timeline', () => {
 
         // check new columns for sorting validity
         await waitFor(() => {
-          expect(screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')).toBeVisible();
+          expect(
+            screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')
+          ).toBeInTheDocument();
         });
         expect(
           screen.getByTestId('euiDataGridColumnSorting-sortColumn-event.severity')
-        ).toBeVisible();
+        ).toBeInTheDocument();
 
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -847,7 +901,8 @@ describe('query tab with unified timeline', () => {
         );
       });
 
-      it(
+      // Flaky: https://github.com/elastic/kibana/issues/189794
+      it.skip(
         'should have the notification dot & correct tooltip',
         async () => {
           renderTestComponents();
@@ -858,12 +913,12 @@ describe('query tab with unified timeline', () => {
 
           expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
 
-          fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
+          userEvent.hover(screen.getByTestId('timeline-notes-button-small'));
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeInTheDocument();
             expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-              '1 Note available. Click to view it & add more.'
+              '1 note available. Click to view it and add more.'
             );
           });
         },
@@ -920,7 +975,7 @@ describe('query tab with unified timeline', () => {
           await waitFor(() => {
             expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
             expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-              '1 Note available. Click to view it & add more.'
+              '1 note available. Click to view it and add more.'
             );
           });
         },
@@ -1016,7 +1071,7 @@ describe('query tab with unified timeline', () => {
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
           await waitFor(() => {
-            expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
+            expect(screen.queryByTestId(OPEN_FLYOUT_BUTTON_TEST_ID)).not.toBeInTheDocument();
           });
         },
         SPECIAL_TEST_TIMEOUT
@@ -1037,9 +1092,31 @@ describe('query tab with unified timeline', () => {
         );
       });
       it(
-        'should have the pin button with correct tooltip',
+        'should disable pinning when event has notes attached in timeline',
         async () => {
-          renderTestComponents();
+          const mockStateWithNoteInTimeline = {
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                  savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                  pinnedEventIds: { '1': true },
+                },
+              },
+            },
+          };
+
+          render(
+            <TestProviders
+              store={createMockStore({
+                ...structuredClone(mockStateWithNoteInTimeline),
+              })}
+            >
+              <TestComponent />
+            </TestProviders>
+          );
 
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -1052,7 +1129,7 @@ describe('query tab with unified timeline', () => {
           await waitFor(() => {
             expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
             expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
-              'This event cannot be unpinned because it has notes'
+              'This event cannot be unpinned because it has notes in Timeline'
             );
             /*
              * Above event is alert and not an event but `getEventType` in
@@ -1061,6 +1138,26 @@ describe('query tab with unified timeline', () => {
              * Need to see if it is okay
              *
              * */
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should allow pinning when event has notes but notes are not attached in current timeline',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          expect(screen.getAllByTestId('pin')).toHaveLength(1);
+          expect(screen.getByTestId('pin')).not.toBeDisabled();
+
+          fireEvent.mouseOver(screen.getByTestId('pin'));
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
+              'Pin event'
+            );
           });
         },
         SPECIAL_TEST_TIMEOUT

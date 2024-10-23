@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
@@ -32,7 +33,7 @@ export const convertToCumulativeSumColumns = (
   // lens supports cumulative sum for count and sum as quick function
   // and everything else as formula
   if (subFunctionMetric.type !== 'count' && pipelineAgg.name !== 'sum') {
-    const metaValue = Number(meta?.replace(']', ''));
+    const metaValue = Number(meta?.replace(/\]/g, ''));
     formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
       metaValue,
       reducedTimeRange,

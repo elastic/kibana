@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Readable } from 'node:stream';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
-import { BulkUpsertAssetCriticalityRecordsRequestBody } from '../../../../../common/api/entity_analytics';
+import {
+  BulkUpsertAssetCriticalityRecordsRequestBody,
+  type BulkUpsertAssetCriticalityRecordsResponse,
+} from '../../../../../common/api/entity_analytics';
 import type { ConfigType } from '../../../../config';
 import {
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -46,7 +46,11 @@ export const assetCriticalityPublicBulkUploadRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<BulkUpsertAssetCriticalityRecordsResponse>> => {
         const { errorRetries, maxBulkRequestBodySizeBytes } =
           config.entityAnalytics.assetCriticality.csvUpload;
         const { records } = request.body;
@@ -66,7 +70,6 @@ export const assetCriticalityPublicBulkUploadRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
@@ -90,9 +93,7 @@ export const assetCriticalityPublicBulkUploadRoute = (
             () => `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
           );
 
-          const resBody: BulkUpsertAssetCriticalityRecordsResponse = { errors, stats };
-
-          return response.ok({ body: resBody });
+          return response.ok({ body: { errors, stats } });
         } catch (e) {
           logger.error(`Error during asset criticality bulk upload: ${e}`);
           const error = transformError(e);

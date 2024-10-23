@@ -6,6 +6,7 @@
  */
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { getCspStatus } from '../../../routes/status/status';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 
@@ -14,7 +15,6 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
 
@@ -82,7 +82,7 @@ export const getIndicesStats = async (
     getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS, logger),
     getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
     getIndexStats(esClient, VULNERABILITIES_INDEX_DEFAULT_NS, logger),
-    getIndexStats(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger),
+    getIndexStats(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger),
     getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
   ]);
 

@@ -6,11 +6,11 @@
  */
 
 import { memo, useMemo } from 'react';
+import type { KillProcessRequestBody } from '../../../../../common/api/endpoint';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type { KillProcessRequestBody } from '../../../../../common/endpoint/types';
 
 export const KillProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[]; processName?: string[] }>
@@ -18,8 +18,7 @@ export const KillProcessActionResult = memo<
   const actionCreator = useSendKillProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
-    const agentType = command.commandDefinition?.meta?.agentType;
+    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
     const parameters = parsedKillOrSuspendParameter(command.args.args);
 
     return endpointId
@@ -30,11 +29,7 @@ export const KillProcessActionResult = memo<
           parameters,
         }
       : undefined;
-  }, [
-    command.args.args,
-    command.commandDefinition?.meta?.agentType,
-    command.commandDefinition?.meta?.endpointId,
-  ]);
+  }, [command.args.args, command.commandDefinition?.meta]);
 
   return useConsoleActionSubmitter<KillProcessRequestBody>({
     ResultComponent,

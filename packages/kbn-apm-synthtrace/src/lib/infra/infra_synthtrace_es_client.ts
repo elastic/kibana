@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -22,7 +23,12 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
       ...options,
       pipeline: infraPipeline(),
     });
-    this.dataStreams = ['metrics-*', 'logs-*'];
+    this.dataStreams = [
+      'metrics-system*',
+      'metrics-kubernetes*',
+      'metrics-docker*',
+      'metrics-aws*',
+    ];
   }
 }
 
@@ -60,10 +66,15 @@ function getRoutingTransform() {
         document._index = 'metrics-system.filesystem-default';
       } else if (metricset === 'diskio') {
         document._index = 'metrics-system.diskio-default';
+      } else if (metricset === 'core') {
+        document._index = 'metrics-system.core-default';
       } else if ('container.id' in document) {
+        document._index = 'metrics-docker.container-default';
         document._index = 'metrics-kubernetes.container-default';
       } else if ('kubernetes.pod.uid' in document) {
         document._index = 'metrics-kubernetes.pod-default';
+      } else if ('aws.rds.db_instance.arn' in document) {
+        document._index = 'metrics-aws.rds-default';
       } else {
         throw new Error('Cannot determine index for event');
       }

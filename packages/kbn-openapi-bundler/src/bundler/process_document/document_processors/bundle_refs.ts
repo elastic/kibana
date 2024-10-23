@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import deepEqual from 'fast-deep-equal';
 import chalk from 'chalk';
+import { parseRef } from '../../../utils/parse_ref';
 import { hasProp } from '../../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
 import { insertRefByPointer } from '../../../utils/insert_by_json_pointer';
@@ -59,11 +61,6 @@ export class BundleRefProcessor implements DocumentNodeProcessor {
       inlineRef(node, resolvedRef);
     } else {
       const rootDocument = this.extractRootDocument(context);
-
-      if (!rootDocument.components) {
-        rootDocument.components = {};
-      }
-
       const ref = this.refs.get(resolvedRef.pointer);
 
       if (ref && !deepEqual(ref.refNode, resolvedRef.refNode)) {
@@ -77,16 +74,18 @@ export class BundleRefProcessor implements DocumentNodeProcessor {
             ref.pointer
           )} is defined in ${chalk.blue(ref.absolutePath)} and in ${chalk.magenta(
             resolvedRef.absolutePath
-          )} but has not matching definitions.`
+          )} but definitions DO NOT match.`
         );
       }
 
-      node.$ref = this.saveComponent(
-        resolvedRef,
-        rootDocument.components as Record<string, unknown>
-      );
+      // Ref pointer might be modified by previous processors
+      // resolvedRef.pointer always has the original value
+      // while node.$ref might have updated
+      const currentRefPointer = parseRef(node.$ref).pointer;
 
-      this.refs.set(resolvedRef.pointer, resolvedRef);
+      node.$ref = this.saveComponent(currentRefPointer, resolvedRef.refNode, rootDocument);
+
+      this.refs.set(currentRefPointer, resolvedRef);
     }
   }
 
@@ -94,10 +93,10 @@ export class BundleRefProcessor implements DocumentNodeProcessor {
     return this.refs.values();
   }
 
-  private saveComponent(ref: ResolvedRef, components: Record<string, unknown>): string {
-    insertRefByPointer(ref.pointer, ref.refNode, components);
+  private saveComponent(pointer: string, refNode: DocumentNode, document: Document): string {
+    insertRefByPointer(pointer, refNode, document);
 
-    return `#${ref.pointer}`;
+    return `#${pointer}`;
   }
 
   private extractParentContext(context: TraverseDocumentContext): TraverseRootDocumentContext {

@@ -1,0 +1,9 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/observability-onboarding-e2e",
+  "owner": [
+    "@elastic/obs-ux-logs-team",
+    "@elastic/obs-ux-onboarding-team"
+  ],
+  "devOnly": true
+}

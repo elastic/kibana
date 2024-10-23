@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    describe('create a rollup job wizard', async () => {
+    describe('create a rollup job wizard', () => {
       it('step 1 - logistics', async () => {
         await testSubjects.click('createRollupJobButton');
         await PageObjects.rollup.verifyStepIsActive(1);

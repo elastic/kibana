@@ -7,53 +7,49 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { asyncForEach } from '@kbn/std';
-import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import {
-  alertsLocatorID,
-  AlertsLocatorParams,
-  getAlertUrl,
-  observabilityPaths,
-} from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+  GetViewInAppRelativeUrlFnOpts,
+  AlertInstanceContext as AlertContext,
+  RuleExecutorOptions,
+  AlertsClientError,
+} from '@kbn/alerting-plugin/server';
+import { asyncForEach } from '@kbn/std';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { TlsTranslations } from '../../../common/rules/synthetics/translations';
-import {
-  CERT_COMMON_NAME,
-  CERT_HASH_SHA256,
-  CERT_ISSUER_NAME,
-  CERT_VALID_NOT_AFTER,
-  CERT_VALID_NOT_BEFORE,
-} from '../../../common/field_names';
-import { getCertSummary, setTLSRecoveredAlertsContext } from './message_utils';
+import { getCertSummary, getTLSAlertDocument, setTLSRecoveredAlertsContext } from './message_utils';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import {
   SYNTHETICS_ALERT_RULE_TYPES,
   TLS_CERTIFICATE,
 } from '../../../common/constants/synthetics_alerts';
-import { generateAlertMessage, SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
+import { SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 
-export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
+type TLSRuleTypeParams = TLSParams;
+type TLSActionGroups = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
+type TLSRuleTypeState = SyntheticsCommonState;
+type TLSAlertState = ReturnType<typeof getCertSummary>;
+type TLSAlertContext = AlertContext;
+type TLSAlert = ObservabilityUptimeAlert;
 
 export const registerSyntheticsTLSCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  ruleDataClient: IRuleDataClient
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
-    ruleDataClient,
-    logger: server.logger,
-  });
+  if (!plugins.alerting) {
+    throw new Error(
+      'Cannot register the synthetics TLS check rule type. The alerting plugin needs to be enabled.'
+    );
+  }
 
-  return createLifecycleRuleType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.TLS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
@@ -71,21 +67,22 @@ export const registerSyntheticsTLSCheckRule = (
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
-    async executor({ state, params, services, spaceId, previousStartedAt, startedAt }) {
-      const ruleState = state as SyntheticsCommonState;
-
-      const { basePath, share } = server;
-      const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
-        share.url.locators.get(alertsLocatorID);
-
-      const {
-        alertFactory,
-        getAlertUuid,
-        savedObjectsClient,
-        scopedClusterClient,
-        alertWithLifecycle,
-        getAlertStartedDate,
-      } = services;
+    executor: async (
+      options: RuleExecutorOptions<
+        TLSRuleTypeParams,
+        TLSRuleTypeState,
+        TLSAlertState,
+        TLSAlertContext,
+        TLSActionGroups,
+        TLSAlert
+      >
+    ) => {
+      const { state: ruleState, params, services, spaceId, previousStartedAt } = options;
+      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
+      const { basePath } = server;
 
       const tlsRule = new TLSRuleExecutor(
         previousStartedAt,
@@ -107,47 +104,30 @@ export const registerSyntheticsTLSCheckRule = (
         }
 
         const alertId = cert.sha256;
-        const alertUuid = getAlertUuid(alertId);
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-
-        const alertInstance = alertWithLifecycle({
+        const { uuid } = alertsClient.report({
           id: alertId,
-          fields: {
-            [CERT_COMMON_NAME]: cert.common_name,
-            [CERT_ISSUER_NAME]: cert.issuer,
-            [CERT_VALID_NOT_AFTER]: cert.not_after,
-            [CERT_VALID_NOT_BEFORE]: cert.not_before,
-            [CERT_HASH_SHA256]: cert.sha256,
-            [ALERT_UUID]: alertUuid,
-            [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
-          },
+          actionGroup: TLS_CERTIFICATE.id,
+          state: { ...updateState(ruleState, foundCerts), ...summary },
         });
 
-        alertInstance.replaceState({
-          ...updateState(ruleState, foundCerts),
-          ...summary,
-        });
+        const payload = getTLSAlertDocument(cert, summary, uuid);
 
-        alertInstance.scheduleActions(TLS_CERTIFICATE.id, {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+        const context = {
+          [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, uuid),
           ...summary,
+        };
+
+        alertsClient.setAlertData({
+          id: alertId,
+          payload,
+          context,
         });
       });
 
       await setTLSRecoveredAlertsContext({
-        alertFactory,
+        alertsClient,
         basePath,
-        defaultStartedAt: startedAt.toISOString(),
-        getAlertStartedDate,
-        getAlertUuid,
         spaceId,
-        alertsLocator,
         latestPings,
       });
 

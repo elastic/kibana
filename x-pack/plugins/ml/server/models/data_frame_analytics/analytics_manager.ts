@@ -228,7 +228,7 @@ export class AnalyticsManager {
   private async getInitialElementsModelRoot(modelId: string): Promise<InitialElementsReturnType> {
     const resultElements = [];
     const modelElements = [];
-    const details: any = {};
+    const details: any = Object.create(null);
     let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary | undefined;
     // fetch model data and create model elements
     data = this.findTrainedModel(modelId);
@@ -296,7 +296,7 @@ export class AnalyticsManager {
   ): Promise<InitialElementsReturnType> {
     const resultElements = [];
     const modelElements = [];
-    const details: any = {};
+    const details: any = Object.create(null);
     const data = this.findJob(jobId);
 
     const nextLinkId = data?.source?.index[0];
@@ -351,7 +351,7 @@ export class AnalyticsManager {
     try {
       await this.initData();
       // Create first node for incoming analyticsId or modelId
-      let initialData: InitialElementsReturnType = {} as InitialElementsReturnType;
+      let initialData: InitialElementsReturnType = Object.create(null) as InitialElementsReturnType;
       const job = analyticsId === undefined ? undefined : this.findJob(analyticsId);
       if (analyticsId !== undefined && job !== undefined) {
         const jobCreateTime = job.create_time!;

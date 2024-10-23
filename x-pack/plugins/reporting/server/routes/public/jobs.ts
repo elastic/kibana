@@ -16,7 +16,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
   const { router } = setupDeps;
 
   // use common route handlers that are shared for public and internal routes
-  const jobHandlers = commonJobsRouteHandlerFactory(reporting);
+  const jobHandlers = commonJobsRouteHandlerFactory(reporting, { isInternal: false });
 
   const registerPublicDownloadReport = () => {
     // trigger a download of the output from a job

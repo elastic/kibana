@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Props, Threshold as Component } from './custom_threshold';
+import { Props, Threshold as Component } from './threshold';
 
 export default {
   component: Component,
@@ -35,7 +35,7 @@ const defaultProps: Props = {
   threshold: [90],
   title: 'Threshold breached',
   value: 93,
-  valueFormatter: (d) => `${d}%`,
+  valueFormatter: (d: number) => `${d}%`,
 };
 
 export const Default = {

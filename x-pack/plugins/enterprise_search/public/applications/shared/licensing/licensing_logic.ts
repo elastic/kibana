@@ -34,12 +34,14 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
     license: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLicense: (_, license) => license,
       },
     ],
     licenseSubscription: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLicenseSubscription: (_, licenseSubscription) => licenseSubscription,
       },
     ],

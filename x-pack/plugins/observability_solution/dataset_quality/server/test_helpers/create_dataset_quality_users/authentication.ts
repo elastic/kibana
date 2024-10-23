@@ -10,20 +10,20 @@ export enum DatasetQualityUsername {
   viewerUser = 'viewer',
   readUser = 'readUser',
   editorUser = 'editor',
-  datasetQualityLogsUser = 'dataset_quality_logs_user',
+  datasetQualityMonitorUser = 'dataset_quality_monitor_user',
 }
 
 export enum DatasetQualityCustomRolename {
-  datasetQualityLogsUser = 'dataset_quality_logs_user',
+  datasetQualityMonitorUser = 'dataset_quality_monitor_user',
   datasetQualityReadUser = 'dataset_quality_read_user',
 }
 
 export const customRoles = {
-  [DatasetQualityCustomRolename.datasetQualityLogsUser]: {
+  [DatasetQualityCustomRolename.datasetQualityMonitorUser]: {
     elasticsearch: {
       indices: [
         {
-          names: ['logs-*-*'],
+          names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
           privileges: ['monitor', 'view_index_metadata'],
         },
       ],
@@ -55,9 +55,9 @@ export const users: Record<
   [DatasetQualityUsername.editorUser]: {
     builtInRoleNames: ['editor'],
   },
-  [DatasetQualityUsername.datasetQualityLogsUser]: {
+  [DatasetQualityUsername.datasetQualityMonitorUser]: {
     builtInRoleNames: ['editor'],
-    customRoleNames: [DatasetQualityCustomRolename.datasetQualityLogsUser],
+    customRoleNames: [DatasetQualityCustomRolename.datasetQualityMonitorUser],
   },
   [DatasetQualityUsername.readUser]: {
     customRoleNames: [DatasetQualityCustomRolename.datasetQualityReadUser],

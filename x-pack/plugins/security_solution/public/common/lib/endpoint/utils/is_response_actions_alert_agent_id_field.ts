@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
-
-const SUPPORTED_ALERT_FIELDS: Readonly<string[]> = Object.values(
-  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD
-);
+import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * Checks to see if a given alert field (ex. `agent.id`) is used by Agents that have support for response actions.
  */
 export const isResponseActionsAlertAgentIdField = (field: string): boolean => {
-  return SUPPORTED_ALERT_FIELDS.includes(field);
+  return SUPPORTED_AGENT_ID_ALERT_FIELDS.includes(field);
 };

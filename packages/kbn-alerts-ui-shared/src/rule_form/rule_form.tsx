@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -22,11 +23,12 @@ const queryClient = new QueryClient();
 
 export interface RuleFormProps {
   plugins: RuleFormPlugins;
-  returnUrl: string;
+  onCancel?: () => void;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins, returnUrl } = props;
+  const { plugins, onCancel, onSubmit } = props;
   const { id, ruleTypeId } = useParams<{
     id?: string;
     ruleTypeId?: string;
@@ -34,23 +36,31 @@ export const RuleForm = (props: RuleFormProps) => {
 
   const ruleFormComponent = useMemo(() => {
     if (id) {
-      return <EditRuleForm id={id} plugins={plugins} returnUrl={returnUrl} />;
+      return <EditRuleForm id={id} plugins={plugins} onCancel={onCancel} onSubmit={onSubmit} />;
     }
     if (ruleTypeId) {
-      return <CreateRuleForm ruleTypeId={ruleTypeId} plugins={plugins} returnUrl={returnUrl} />;
+      return (
+        <CreateRuleForm
+          ruleTypeId={ruleTypeId}
+          plugins={plugins}
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+        />
+      );
     }
     return (
       <EuiEmptyPrompt
         color="danger"
         iconType="error"
         title={<h2>{RULE_FORM_ROUTE_PARAMS_ERROR_TITLE}</h2>}
-      >
-        <EuiText>
-          <p>{RULE_FORM_ROUTE_PARAMS_ERROR_TEXT}</p>
-        </EuiText>
-      </EuiEmptyPrompt>
+        body={
+          <EuiText>
+            <p>{RULE_FORM_ROUTE_PARAMS_ERROR_TEXT}</p>
+          </EuiText>
+        }
+      />
     );
-  }, [id, ruleTypeId, plugins, returnUrl]);
+  }, [id, ruleTypeId, plugins, onCancel, onSubmit]);
 
   return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
 };

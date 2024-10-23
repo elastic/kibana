@@ -21,7 +21,6 @@ import { useMlKibana } from '../../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
-import { ml } from '../../../services/ml_api_service';
 import { useExplorerData } from '../../../explorer/actions';
 import { useJobSelection } from '../../../components/job_selector/use_job_selection';
 import { useTableInterval } from '../../../components/controls/select_interval';
@@ -40,8 +39,9 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   jobsWithTimeRange,
 }) => {
   const {
-    services: { cases, presentationUtil, uiSettings },
+    services: { cases, uiSettings, mlServices },
   } = useMlKibana();
+  const { mlApi } = mlServices;
 
   const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
@@ -77,7 +77,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
-      const fetchedStoppedPartitions = await ml.results.getCategoryStoppedPartitions(
+      const fetchedStoppedPartitions = await mlApi.results.getCategoryStoppedPartitions(
         selectedJobIds,
         ML_JOB_ID
       );
@@ -94,6 +94,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
       // eslint-disable-next-line no-console
       console.error(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -193,7 +194,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   }
 
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
-  const PresentationContextProvider = presentationUtil?.ContextProvider ?? React.Fragment;
 
   const casesPermissions = cases?.helpers.canUseCases();
 
@@ -217,27 +217,25 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
         </EuiFlexGroup>
       </MlPageHeader>
       <CasesContext owner={[]} permissions={casesPermissions!}>
-        <PresentationContextProvider>
-          {jobsWithTimeRange.length === 0 ? (
-            <AnomalyDetectionEmptyState />
-          ) : (
-            <Explorer
-              {...{
-                explorerState,
-                overallSwimlaneData,
-                showCharts,
-                severity: tableSeverity.val,
-                stoppedPartitions,
-                invalidTimeRangeError,
-                selectedJobsRunning,
-                timeBuckets,
-                timefilter,
-                selectedCells,
-                swimLaneSeverity,
-              }}
-            />
-          )}
-        </PresentationContextProvider>
+        {jobsWithTimeRange.length === 0 ? (
+          <AnomalyDetectionEmptyState />
+        ) : (
+          <Explorer
+            {...{
+              explorerState,
+              overallSwimlaneData,
+              showCharts,
+              severity: tableSeverity.val,
+              stoppedPartitions,
+              invalidTimeRangeError,
+              selectedJobsRunning,
+              timeBuckets,
+              timefilter,
+              selectedCells,
+              swimLaneSeverity,
+            }}
+          />
+        )}
       </CasesContext>
     </div>
   );

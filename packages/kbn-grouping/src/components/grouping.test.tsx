@@ -1,46 +1,58 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, within } from '@testing-library/react';
+import { fireEvent, render, within, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Grouping } from './grouping';
+import { Grouping, GroupingProps } from './grouping';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
 
 import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
+import { SetRequired } from 'type-fest';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
 const mockTracker = jest.fn();
 
-const testProps = {
+const testProps: SetRequired<GroupingProps<{}>, 'data'> = {
   ...mockGroupingProps,
   renderChildComponent,
   takeActionItems,
   tracker: mockTracker,
 };
 
-describe('grouping container', () => {
+describe('Grouping', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   it('Renders groups count when groupsCount > 0', () => {
-    const { getByTestId, getAllByTestId, queryByTestId } = render(
+    render(
       <I18nProvider>
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('unit-count').textContent).toBe('14 events');
-    expect(getByTestId('group-count').textContent).toBe('3 groups');
-    expect(getAllByTestId('grouping-accordion').length).toBe(3);
-    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('unit-count').textContent).toBe('14 events');
+    expect(screen.getByTestId('group-count').textContent).toBe('3 groups');
+    expect(screen.getAllByTestId('grouping-accordion').length).toBe(3);
+    expect(screen.queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+  });
+
+  it('Does not render empty state while loading', () => {
+    render(
+      <I18nProvider>
+        <Grouping {...testProps} isLoading />
+      </I18nProvider>
+    );
+    expect(screen.queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
   it('Does not render group counts when groupsCount = 0', () => {
@@ -57,25 +69,25 @@ describe('grouping container', () => {
         value: 0,
       },
     };
-    const { getByTestId, queryByTestId } = render(
+    render(
       <I18nProvider>
         <Grouping {...testProps} data={data} />
       </I18nProvider>
     );
-    expect(queryByTestId('unit-count')).not.toBeInTheDocument();
-    expect(queryByTestId('group-count')).not.toBeInTheDocument();
-    expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
-    expect(getByTestId('empty-results-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('unit-count')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('group-count')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('grouping-accordion')).not.toBeInTheDocument();
+    expect(screen.getByTestId('empty-results-panel')).toBeInTheDocument();
   });
 
   it('Opens one group at a time when each group is clicked', () => {
-    const { getAllByTestId } = render(
+    render(
       <I18nProvider>
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    const group1 = within(getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
-    const group2 = within(getAllByTestId('grouping-accordion')[1]).getAllByRole('button')[0];
+    const group1 = within(screen.getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
+    const group2 = within(screen.getAllByTestId('grouping-accordion')[1]).getAllByRole('button')[0];
     fireEvent.click(group1);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       1,
@@ -89,12 +101,12 @@ describe('grouping container', () => {
   });
 
   it('Send Telemetry when each group is clicked', () => {
-    const { getAllByTestId } = render(
+    render(
       <I18nProvider>
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    const group1 = within(getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
+    const group1 = within(screen.getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
     fireEvent.click(group1);
     expect(mockTracker).toHaveBeenNthCalledWith(
       1,
@@ -119,19 +131,19 @@ describe('grouping container', () => {
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
     takeActionItems.mockReturnValue([<span />]);
-    const { getAllByTestId, getByTestId } = render(
+    render(
       <I18nProvider>
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('null-group-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('null-group-icon')).toBeInTheDocument();
 
-    let lastGroup = getAllByTestId('grouping-accordion').at(-1);
+    let lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('take-action-button'));
 
     expect(takeActionItems).toHaveBeenCalledWith(getNullGroupFilter('host.name'), 2);
 
-    lastGroup = getAllByTestId('grouping-accordion').at(-1);
+    lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
 
     expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter('host.name'));
@@ -148,7 +160,7 @@ describe('grouping container', () => {
     expect(groupPanelRenderer).toHaveBeenNthCalledWith(
       1,
       'host.name',
-      testProps.data.groupByFields.buckets[0],
+      testProps.data.groupByFields!.buckets![0],
       undefined,
       false
     );
@@ -156,7 +168,7 @@ describe('grouping container', () => {
     expect(groupPanelRenderer).toHaveBeenNthCalledWith(
       2,
       'host.name',
-      testProps.data.groupByFields.buckets[1],
+      testProps.data.groupByFields!.buckets![1],
       undefined,
       false
     );
@@ -164,7 +176,7 @@ describe('grouping container', () => {
     expect(groupPanelRenderer).toHaveBeenNthCalledWith(
       3,
       'host.name',
-      testProps.data.groupByFields.buckets[2],
+      testProps.data.groupByFields!.buckets![2],
       'The selected group by field, host.name, is missing a value for this group of events.',
       false
     );
@@ -180,7 +192,7 @@ describe('grouping container', () => {
     expect(groupPanelRenderer).toHaveBeenNthCalledWith(
       1,
       'host.name',
-      testProps.data.groupByFields.buckets[0],
+      testProps.data.groupByFields!.buckets![0],
       undefined,
       true
     );
@@ -188,12 +200,12 @@ describe('grouping container', () => {
 
   describe('groupsUnit', () => {
     it('renders default groupsUnit text correctly', () => {
-      const { getByTestId } = render(
+      render(
         <I18nProvider>
           <Grouping {...testProps} />
         </I18nProvider>
       );
-      expect(getByTestId('group-count').textContent).toBe('3 groups');
+      expect(screen.getByTestId('group-count').textContent).toBe('3 groups');
     });
     it('calls custom groupsUnit callback correctly', () => {
       // Provide a custom groupsUnit function in testProps
@@ -202,14 +214,14 @@ describe('grouping container', () => {
       );
       const customProps = { ...testProps, groupsUnit: customGroupsUnit };
 
-      const { getByTestId } = render(
+      render(
         <I18nProvider>
           <Grouping {...customProps} />
         </I18nProvider>
       );
 
       expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, true);
-      expect(getByTestId('group-count').textContent).toBe('3 custom units');
+      expect(screen.getByTestId('group-count').textContent).toBe('3 custom units');
     });
   });
 });

@@ -6,13 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
+import { InstallPrepackedTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import {
-  GetPrebuiltRulesAndTimelinesStatusResponse,
+  ReadPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
@@ -69,12 +68,10 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
 
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const prebuiltTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-          const [validatedPrebuiltTimelineStatus] = validate(
-            prebuiltTimelineStatus,
-            checkTimelineStatusRt
-          );
+          const validatedPrebuiltTimelineStatus =
+            InstallPrepackedTimelinesRequestBody.parse(prebuiltTimelineStatus);
 
-          const responseBody: GetPrebuiltRulesAndTimelinesStatusResponse = {
+          const responseBody: ReadPrebuiltRulesAndTimelinesStatusResponse = {
             rules_custom_installed: customRules.total,
             rules_installed: installedPrebuiltRules.size,
             rules_not_installed: rulesToInstall.length,
@@ -86,7 +83,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
           };
 
           return response.ok({
-            body: GetPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
+            body: ReadPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
           });
         } catch (err) {
           const error = transformError(err);

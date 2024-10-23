@@ -38,7 +38,7 @@ describe('AssistantMessage component', () => {
     createdAt: new Date(),
     citations: [],
     retrievalDocs: [{ content: '', metadata: { _id: '1', _index: 'index', _score: 1 } }],
-    inputTokens: { context: 20, total: 10 },
+    inputTokens: { context: 20, total: 10, searchQuery: 'Test question' },
   };
 
   it('renders message content correctly', () => {

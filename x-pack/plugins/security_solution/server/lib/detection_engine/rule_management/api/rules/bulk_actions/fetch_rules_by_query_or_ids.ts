@@ -13,18 +13,19 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { findRules } from '../../../logic/search/find_rules';
-import { MAX_RULES_TO_PROCESS_TOTAL } from './route';
 
 export const fetchRulesByQueryOrIds = async ({
   query,
   ids,
   rulesClient,
   abortSignal,
+  maxRules,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
   abortSignal: AbortSignal;
+  maxRules: number;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
     return initPromisePool({
@@ -43,7 +44,7 @@ export const fetchRulesByQueryOrIds = async ({
 
   const { data, total } = await findRules({
     rulesClient,
-    perPage: MAX_RULES_TO_PROCESS_TOTAL,
+    perPage: maxRules,
     filter: query,
     page: undefined,
     sortField: undefined,
@@ -51,9 +52,9 @@ export const fetchRulesByQueryOrIds = async ({
     fields: undefined,
   });
 
-  if (total > MAX_RULES_TO_PROCESS_TOTAL) {
+  if (total > maxRules) {
     throw new BadRequestError(
-      `More than ${MAX_RULES_TO_PROCESS_TOTAL} rules matched the filter query. Try to narrow it down.`
+      `More than ${maxRules} rules matched the filter query. Try to narrow it down.`
     );
   }
 

@@ -9,12 +9,12 @@ import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { SettingsModal } from './settings_modal';
 import { StatusBell } from './status_bell';
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
 
 interface Props {
@@ -22,9 +22,11 @@ interface Props {
   connectorsAreConfigured: boolean;
   isLoading: boolean;
   isDisabledActions: boolean;
+  localStorageAttackDiscoveryMaxAlerts: string | undefined;
   onGenerate: () => void;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
+  setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
   stats: AttackDiscoveryStats | null;
 }
 
@@ -33,14 +35,15 @@ const HeaderComponent: React.FC<Props> = ({
   connectorsAreConfigured,
   isLoading,
   isDisabledActions,
+  localStorageAttackDiscoveryMaxAlerts,
   onGenerate,
   onConnectorIdSelected,
   onCancel,
+  setLocalStorageAttackDiscoveryMaxAlerts,
   stats,
 }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
-  const disabled = !hasAssistantPrivilege || connectorId == null;
+  const disabled = connectorId == null;
 
   const [didCancel, setDidCancel] = useState(false);
 
@@ -70,6 +73,7 @@ const HeaderComponent: React.FC<Props> = ({
           },
     [isLoading, handleCancel, onGenerate]
   );
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -80,6 +84,14 @@ const HeaderComponent: React.FC<Props> = ({
       data-test-subj="header"
       gutterSize="none"
     >
+      <EuiFlexItem grow={false}>
+        <SettingsModal
+          connectorId={connectorId}
+          isLoading={isLoading}
+          localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+          setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
+        />
+      </EuiFlexItem>
       <StatusBell stats={stats} />
       {connectorsAreConfigured && (
         <EuiFlexItem grow={false}>

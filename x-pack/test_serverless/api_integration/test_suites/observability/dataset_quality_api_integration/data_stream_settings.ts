@@ -14,6 +14,7 @@ import {
   DatasetQualityApiError,
 } from './common/dataset_quality_api_supertest';
 import { DatasetQualityFtrContextProvider } from './common/services';
+import { createBackingIndexNameWithoutVersion } from './utils';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
@@ -28,6 +29,10 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const namespace = 'default';
   const serviceName = 'my-service';
   const hostName = 'synth-host';
+
+  const defaultDataStreamPrivileges = {
+    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
+  };
 
   async function callApi(
     dataStream: string,
@@ -52,7 +57,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      return synthtrace.index([
+      await synthtrace.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -73,6 +78,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     });
 
     after(async () => {
+      await synthtrace.clean();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
@@ -85,23 +91,30 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
     });
 
-    it('returns {} if matching data stream is not available', async () => {
+    it('returns only privileges if matching data stream is not available', async () => {
       const nonExistentDataSet = 'Non-existent';
       const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
       const resp = await callApi(nonExistentDataStream, roleAuthc, internalReqHeader);
-      expect(resp.body).empty();
+      expect(resp.body).eql(defaultDataStreamPrivileges);
     });
 
-    it('returns "createdOn" correctly', async () => {
+    it('returns "createdOn" and "lastBackingIndexName" correctly', async () => {
       const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
         esClient,
         `${type}-${dataset}-${namespace}`
       );
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+      expect(resp.body.lastBackingIndexName).to.be(
+        `${createBackingIndexNameWithoutVersion({
+          type,
+          dataset,
+          namespace,
+        })}-000001`
+      );
     });
 
-    it('returns "createdOn" correctly for rolled over dataStream', async () => {
+    it('returns "createdOn" and "lastBackingIndexName" correctly for rolled over dataStream', async () => {
       await rolloverDataStream(esClient, `${type}-${dataset}-${namespace}`);
       const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
         esClient,
@@ -109,10 +122,9 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       );
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
-    });
-
-    after(async () => {
-      await synthtrace.clean();
+      expect(resp.body.lastBackingIndexName).to.be(
+        `${createBackingIndexNameWithoutVersion({ type, dataset, namespace })}-000002`
+      );
     });
   });
 }

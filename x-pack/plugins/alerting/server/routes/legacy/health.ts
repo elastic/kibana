@@ -18,12 +18,20 @@ export function healthRoute(
   router: AlertingRouter,
   licenseState: ILicenseState,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) {
   router.get(
     {
       path: '/api/alerts/_health',
       validate: false,
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Get the alerting framework health',
+        tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);

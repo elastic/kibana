@@ -12,11 +12,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconTip, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useCurrentThemeVars } from '../../../contexts/kibana';
 
 function getColumns(viewForecast) {
   return [
@@ -66,7 +67,7 @@ function getColumns(viewForecast) {
         return (
           <EuiButtonIcon
             onClick={() => viewForecast(forecast.forecast_id)}
-            iconType="visLine"
+            iconType="singleMetricViewer"
             aria-label={viewForecastAriaLabel}
           />
         );
@@ -75,37 +76,41 @@ function getColumns(viewForecast) {
   ];
 }
 
-// TODO - add in ml-info-icon to the h3 element,
-//        then remove tooltip and inline style.
-export function ForecastsList({ forecasts, viewForecast }) {
+export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
+  const { euiTheme } = useCurrentThemeVars();
+
   const getRowProps = (item) => {
     return {
       'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
+      ...(item.forecast_id === selectedForecastId
+        ? {
+            style: {
+              backgroundColor: `${euiTheme.euiPanelBackgroundColorModifiers.primary}`,
+            },
+          }
+        : {}),
     };
   };
 
   return (
     <EuiText>
-      <h3
-        aria-describedby="ml_aria_description_forecasting_modal_view_list"
-        style={{ display: 'inline', paddingRight: '5px' }}
-      >
+      <h3 aria-describedby="ml_aria_description_forecasting_modal_view_list">
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTitle"
           defaultMessage="Previous forecasts"
         />
+        &nbsp;
+        <EuiIconTip
+          size="s"
+          type="questionInCircle"
+          content={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
+              defaultMessage="Lists a maximum of five of the most recently run forecasts."
+            />
+          }
+        />
       </h3>
-      <EuiToolTip
-        position="right"
-        content={
-          <FormattedMessage
-            id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
-            defaultMessage="Lists a maximum of five of the most recently run forecasts."
-          />
-        }
-      >
-        <EuiIcon type="questionInCircle" size="s" />
-      </EuiToolTip>
       <EuiInMemoryTable
         items={forecasts}
         columns={getColumns(viewForecast)}
@@ -120,4 +125,5 @@ export function ForecastsList({ forecasts, viewForecast }) {
 ForecastsList.propType = {
   forecasts: PropTypes.array,
   viewForecast: PropTypes.func.isRequired,
+  selectedForecastId: PropTypes.string,
 };

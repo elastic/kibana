@@ -10,7 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import {
   type EndpointSuggestionsBody,
@@ -21,7 +21,11 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  eventsIndexPattern,
+  SUGGESTIONS_INTERNAL_ROUTE,
+  SUGGESTIONS_ROUTE,
+} from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 
@@ -39,10 +43,32 @@ export function registerEndpointSuggestionsRoutes(
       access: 'public',
       path: SUGGESTIONS_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+      deprecated: true,
     })
     .addVersion(
       {
         version: '2023-10-31',
+        validate: {
+          request: EndpointSuggestionsSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canWriteEventFilters'] },
+        endpointContext.logFactory.get('endpointSuggestions'),
+        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
+      )
+    );
+
+  router.versioned
+    .post({
+      access: 'internal',
+      path: SUGGESTIONS_INTERNAL_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '1',
         validate: {
           request: EndpointSuggestionsSchema,
         },

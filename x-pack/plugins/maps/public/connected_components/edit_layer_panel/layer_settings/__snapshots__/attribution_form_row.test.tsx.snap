@@ -7,12 +7,16 @@ exports[`Should render add form row when attribution not provided 1`] = `
   <div
     className="mapAttributionFormRow"
   >
-    <legend
-      className="mapAttributionFormRow__legend"
-      id="mapsLayerSettingsAttributionLegend"
+    <EuiTitle
+      size="xxxs"
     >
-      Attribution
-    </legend>
+      <legend
+        className="mapAttributionFormRow__legend"
+        id="mapsLayerSettingsAttributionLegend"
+      >
+        Attribution
+      </legend>
+    </EuiTitle>
     <div
       className="mapAttributionFormRow__field"
     >
@@ -37,12 +41,16 @@ exports[`Should render edit form row when attribution not provided 1`] = `
   <div
     className="mapAttributionFormRow"
   >
-    <legend
-      className="mapAttributionFormRow__legend"
-      id="mapsLayerSettingsAttributionLegend"
+    <EuiTitle
+      size="xxxs"
     >
-      Attribution
-    </legend>
+      <legend
+        className="mapAttributionFormRow__legend"
+        id="mapsLayerSettingsAttributionLegend"
+      >
+        Attribution
+      </legend>
+    </EuiTitle>
     <div
       className="mapAttributionFormRow__field"
     >

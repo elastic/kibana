@@ -17,38 +17,41 @@ const windowParameters = {
 
 describe('getLogRateAnalysisTypeForCounts', () => {
   it('returns SPIKE when normalized deviation count is higher than baseline count', () => {
-    const baselineCount = 100;
-    const deviationCount = 200;
-
-    const result = getLogRateAnalysisTypeForCounts(baselineCount, deviationCount, windowParameters);
+    const result = getLogRateAnalysisTypeForCounts({
+      baselineCount: 100,
+      deviationCount: 200,
+      windowParameters,
+    });
 
     expect(result).toEqual(LOG_RATE_ANALYSIS_TYPE.SPIKE);
   });
 
   it('returns DIP when normalized deviation count is lower than baseline count', () => {
-    const baselineCount = 20000;
-    const deviationCount = 10;
-
-    const result = getLogRateAnalysisTypeForCounts(baselineCount, deviationCount, windowParameters);
+    const result = getLogRateAnalysisTypeForCounts({
+      baselineCount: 20000,
+      deviationCount: 10,
+      windowParameters,
+    });
 
     expect(result).toEqual(LOG_RATE_ANALYSIS_TYPE.DIP);
   });
 
   it('handles zero baseline count without throwing error', () => {
-    const baselineCount = 0;
-    const deviationCount = 100;
-
-    const result = getLogRateAnalysisTypeForCounts(baselineCount, deviationCount, windowParameters);
+    const result = getLogRateAnalysisTypeForCounts({
+      baselineCount: 0,
+      deviationCount: 100,
+      windowParameters,
+    });
 
     expect(result).toBe(LOG_RATE_ANALYSIS_TYPE.SPIKE);
   });
 
   it('handles zero deviation count without throwing error', () => {
-    const baselineCount = 100;
-    const deviationCount = 0;
-
-    const result = getLogRateAnalysisTypeForCounts(baselineCount, deviationCount, windowParameters);
-
+    const result = getLogRateAnalysisTypeForCounts({
+      baselineCount: 100,
+      deviationCount: 0,
+      windowParameters,
+    });
     expect(result).toBe(LOG_RATE_ANALYSIS_TYPE.DIP);
   });
 });

@@ -3,10 +3,5 @@ name: category
 description: Filters the returned cases by category.
 schema:
   oneOf:
-    - type: string
-    - type: array
-      items:
-        type: string
-      maxItems: 100
-      examples:
-        - [ my-category ]
+    - $ref: '../schemas/case_category.yaml'
+    - $ref: '../schemas/case_categories.yaml'

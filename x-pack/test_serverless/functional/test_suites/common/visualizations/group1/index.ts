@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
+import type { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
@@ -75,6 +75,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     loadTestFile(require.resolve('./smokescreen.ts'));
     loadTestFile(require.resolve('./tsdb.ts'));
+    loadTestFile(require.resolve('./logsdb.ts'));
     loadTestFile(require.resolve('./vega_chart.ts'));
   });
 };

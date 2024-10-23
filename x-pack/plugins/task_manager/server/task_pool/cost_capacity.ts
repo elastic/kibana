@@ -6,13 +6,14 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { DEFAULT_CAPACITY } from '../config';
 import { TaskDefinition } from '../task';
 import { TaskRunner } from '../task_running';
 import { CapacityOpts, ICapacity } from './types';
 import { getCapacityInCost } from './utils';
 
 export class CostCapacity implements ICapacity {
-  private maxAllowedCost: number = 0;
+  private maxAllowedCost: number = DEFAULT_CAPACITY;
   private logger: Logger;
 
   constructor(opts: CapacityOpts) {
@@ -38,7 +39,9 @@ export class CostCapacity implements ICapacity {
   public usedCapacity(tasksInPool: Map<string, TaskRunner>) {
     let result = 0;
     tasksInPool.forEach((task) => {
-      result += task.definition.cost;
+      if (task.definition?.cost) {
+        result += task.definition.cost;
+      }
     });
     return result;
   }
@@ -56,7 +59,7 @@ export class CostCapacity implements ICapacity {
   public getUsedCapacityByType(tasksInPool: TaskRunner[], type: string) {
     return tasksInPool.reduce(
       (count, runningTask) =>
-        runningTask.definition.type === type ? count + runningTask.definition.cost : count,
+        runningTask.definition?.type === type ? count + runningTask.definition.cost : count,
       0
     );
   }
@@ -91,7 +94,7 @@ export class CostCapacity implements ICapacity {
 
     let capacityAccumulator = 0;
     for (const task of tasks) {
-      const taskCost = task.definition.cost;
+      const taskCost = task.definition?.cost ?? 0;
       if (capacityAccumulator + taskCost <= availableCapacity) {
         tasksToRun.push(task);
         capacityAccumulator += taskCost;

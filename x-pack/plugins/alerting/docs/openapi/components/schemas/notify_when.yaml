@@ -9,5 +9,4 @@ enum:
   - onActiveAlert
   - onThrottleInterval
 deprecated: true
-examples:
-  - onActiveAlert
+example: onActiveAlert

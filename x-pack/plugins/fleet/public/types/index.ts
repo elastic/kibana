@@ -120,6 +120,7 @@ export type {
   GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageRequest,
   DeletePackageResponse,
   InstallationStatus,
   Installable,
@@ -146,6 +147,9 @@ export type {
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
+  GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsRequest,
+  GetListAgentPolicyOutputsResponse,
 } from '../../common/types';
 export {
   entries,

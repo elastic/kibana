@@ -31,7 +31,7 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({
   const endpointDetailsHref = href ? href(endpoints[0].endpointId) : '';
 
   const onLinkClick = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent) => {
       ev.preventDefault();
       if (onClick) onClick(endpoints[0].endpointId, ev);
     },

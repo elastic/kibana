@@ -61,6 +61,7 @@ export interface NewAgentAction {
   ack_data?: any;
   sent_at?: string;
   agents: string[];
+  namespaces?: string[];
   created_at?: string;
   id?: string;
   expiration?: string;
@@ -100,9 +101,9 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting';
   last_checkin_message?: string;
-  user_provided_metadata: AgentMetadata;
+  user_provided_metadata?: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
@@ -271,7 +272,7 @@ export interface FleetServerAgent {
   /**
    * User provided metadata information for the Elastic Agent
    */
-  user_provided_metadata: AgentMetadata;
+  user_provided_metadata?: AgentMetadata;
   /**
    * Local metadata information for the Elastic Agent
    */
@@ -407,6 +408,8 @@ export interface FleetServerAgentAction {
    * The Agent IDs the action is intended for. No support for json.RawMessage with the current generator. Could be useful to lazy parse the agent ids
    */
   agents?: string[];
+
+  namespaces?: string[];
 
   /**
    * Date when the agent should execute that agent. This field could be altered by Fleet server for progressive rollout of the action.

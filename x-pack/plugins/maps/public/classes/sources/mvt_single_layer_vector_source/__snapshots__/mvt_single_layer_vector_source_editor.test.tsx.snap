@@ -3,13 +3,8 @@
 exports[`should render source creation editor (fields should _not_ be included) 1`] = `
 <EuiPanel>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText="URL of the .mvt vector tile service. e.g. http://company.com/{z}/{x}/{y}.pbf"
     label="Url"
-    labelType="label"
   >
     <EuiFieldText
       compressed={true}

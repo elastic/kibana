@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -24,6 +25,7 @@ import {
   EuiHorizontalRule,
   EuiProgress,
   PrettyDuration,
+  EuiSelectableProps,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
@@ -282,9 +284,17 @@ export const SavedQueryManagementList = ({
     }
   }, [onLoad, selectedSavedQuery, onClose]);
 
-  const handleSelect = useCallback((savedQueryToSelect) => {
-    setSelectedSavedQuery(savedQueryToSelect);
-  }, []);
+  const handleSelect = useCallback<NonNullable<EuiSelectableProps<SelectableProps>['onChange']>>(
+    (choices) => {
+      const choice = choices.find(({ checked }) => checked);
+      if (choice) {
+        setSelectedSavedQuery(
+          currentPageQueries.find((savedQuery) => savedQuery.id === choice.value)
+        );
+      }
+    },
+    [currentPageQueries]
+  );
 
   const handleDelete = useCallback((savedQueryToDelete: SavedQuery) => {
     setShowDeletionConfirmationModal(true);
@@ -439,14 +449,7 @@ export const SavedQueryManagementList = ({
                 {noSavedQueriesDescriptionText}
               </span>
             }
-            onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked);
-              if (choice) {
-                handleSelect(
-                  currentPageQueries.find((savedQuery) => savedQuery.id === choice.value)
-                );
-              }
-            }}
+            onChange={handleSelect}
             renderOption={renderOption}
             css={{
               '.euiSelectableList__list': {

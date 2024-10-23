@@ -52,6 +52,7 @@ export const settingsRoute = {
         title={i18n.translate('xpack.apm.views.listSettings.title', {
           defaultMessage: 'Settings',
         })}
+        omitOnServerless
       >
         <Outlet />
       </Breadcrumb>

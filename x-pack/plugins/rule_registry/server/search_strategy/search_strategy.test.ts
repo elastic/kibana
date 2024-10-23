@@ -15,7 +15,7 @@ import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { RuleRegistrySearchRequest } from '../../common/search_strategy';
+import type { RuleRegistrySearchRequest } from '../../common';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
 import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
 

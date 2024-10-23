@@ -31,12 +31,15 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
 } from '@kbn/rule-data-utils';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -82,6 +85,8 @@ const o11yRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
 ];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -99,6 +104,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
@@ -111,6 +117,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.observability,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: [observabilityFeatureId],
@@ -234,6 +241,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         }),
         order: 1000,
         category: DEFAULT_APP_CATEGORIES.observability,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
         alerting: o11yRuleTypes,

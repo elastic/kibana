@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subject } from 'rxjs';
@@ -20,9 +21,9 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
-import { pluginServices } from '../../../../services/plugin_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../../dashboard_constants';
 import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
+import { dataService } from '../../../../services/kibana_services';
 
 /**
  * Sets up syncing and subscriptions between the filter state from the Data plugin
@@ -32,11 +33,7 @@ export function syncUnifiedSearchState(
   this: DashboardContainer,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) {
-  const {
-    data: { query: queryService, search },
-  } = pluginServices.getServices();
-  const { queryString, timefilter } = queryService;
-  const { timefilter: timefilterService } = timefilter;
+  const timefilterService = dataService.query.timefilter.timefilter;
 
   // get Observable for when the dashboard's saved filters or query change.
   const OnFiltersChange$ = new Subject<{ filters: Filter[]; query: Query }>();
@@ -46,7 +43,7 @@ export function syncUnifiedSearchState(
     } = this.getState();
     OnFiltersChange$.next({
       filters: filters ?? [],
-      query: query ?? queryString.getDefaultQuery(),
+      query: query ?? dataService.query.queryString.getDefaultQuery(),
     });
   });
 
@@ -55,12 +52,12 @@ export function syncUnifiedSearchState(
     explicitInput: { filters, query },
   } = this.getState();
   const intermediateFilterState: { filters: Filter[]; query: Query } = {
-    query: query ?? queryString.getDefaultQuery(),
+    query: query ?? dataService.query.queryString.getDefaultQuery(),
     filters: filters ?? [],
   };
 
   const stopSyncingAppFilters = connectToQueryState(
-    queryService,
+    dataService.query,
     {
       get: () => intermediateFilterState,
       set: ({ filters: newFilters, query: newQuery }) => {
@@ -85,8 +82,7 @@ export function syncUnifiedSearchState(
 
       // if there is no url override time range, check if this dashboard uses time restore, and restore to that.
       const timeRestoreTimeRange =
-        this.getState().explicitInput.timeRestore &&
-        this.getState().componentState.lastSavedInput.timeRange;
+        this.getState().explicitInput.timeRestore && this.lastSavedInput$.value.timeRange;
       if (timeRestoreTimeRange) {
         timefilterService.setTime(timeRestoreTimeRange);
         return timeRestoreTimeRange;
@@ -118,8 +114,7 @@ export function syncUnifiedSearchState(
 
         // if there is no url override refresh interval, check if this dashboard uses time restore, and restore to that.
         const timeRestoreRefreshInterval =
-          this.getState().explicitInput.timeRestore &&
-          this.getState().componentState.lastSavedInput.refreshInterval;
+          this.getState().explicitInput.timeRestore && this.lastSavedInput$.value.refreshInterval;
         if (timeRestoreRefreshInterval) {
           timefilterService.setRefreshInterval(timeRestoreRefreshInterval);
           return timeRestoreRefreshInterval;
@@ -143,7 +138,7 @@ export function syncUnifiedSearchState(
       }),
       switchMap((done) =>
         // best way on a dashboard to estimate that panels are updated is to rely on search session service state
-        waitUntilNextSessionCompletes$(search.session).pipe(finalize(done))
+        waitUntilNextSessionCompletes$(dataService.search.session).pipe(finalize(done))
       )
     )
     .subscribe();

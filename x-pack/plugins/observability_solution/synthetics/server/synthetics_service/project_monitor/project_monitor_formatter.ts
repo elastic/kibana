@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pMap from 'p-map';
 import {
   SavedObjectsUpdateResponse,
   SavedObjectsClientContract,
@@ -12,15 +11,18 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
-import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import {
+  MonitorConfigUpdate,
+  syncEditedMonitorBulk,
+} from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
   SyntheticsMonitorWithSecretsAttributes,
@@ -30,6 +32,7 @@ import {
   Locations,
   SyntheticsMonitor,
   MonitorFields,
+  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
@@ -60,7 +63,7 @@ export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
   private publicLocations: Locations;
-  private privateLocations: PrivateLocationAttributes[];
+  private privateLocations: SyntheticsPrivateLocations;
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private monitors: ProjectMonitor[] = [];
@@ -103,6 +106,7 @@ export class ProjectMonitorFormatter {
       server: this.server,
       syntheticsMonitorClient: this.syntheticsMonitorClient,
       savedObjectsClient: this.savedObjectsClient,
+      excludeAgentPolicies: true,
     });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
 
@@ -182,7 +186,7 @@ export class ProjectMonitorFormatter {
   }: {
     monitor: ProjectMonitor;
     publicLocations: Locations;
-    privateLocations: PrivateLocationAttributes[];
+    privateLocations: SyntheticsPrivateLocations;
   }) => {
     try {
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
@@ -332,18 +336,30 @@ export class ProjectMonitorFormatter {
   private getDecryptedMonitors = async (
     monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
   ) => {
-    return await pMap(
-      monitors,
-      async (monitor) =>
-        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          syntheticsMonitorType,
-          monitor.id,
-          {
-            namespace: monitor.namespaces?.[0],
-          }
-        ),
-      { concurrency: 500 }
-    );
+    const configIds = monitors.map((monitor) => monitor.attributes[ConfigKey.CONFIG_ID]);
+    const monitorFilter = getSavedObjectKqlFilter({
+      field: ConfigKey.CONFIG_ID,
+      values: configIds,
+    });
+    const finder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+        {
+          search: monitorFilter,
+          type: syntheticsMonitorType,
+          perPage: 500,
+          namespaces: [this.spaceId],
+        }
+      );
+
+    const decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> =
+      [];
+    for await (const result of finder.find()) {
+      decryptedMonitors.push(...result.saved_objects);
+    }
+
+    finder.close().catch(() => {});
+
+    return decryptedMonitors;
   };
 
   private updateMonitorsBulk = async (
@@ -371,29 +387,30 @@ export class ProjectMonitorFormatter {
         monitors.map((m) => m.previousMonitor)
       );
 
-      const monitorsToUpdate = [];
+      const monitorsToUpdate: MonitorConfigUpdate[] = [];
 
-      for (let i = 0; i < decryptedPreviousMonitors.length; i++) {
-        const decryptedPreviousMonitor = decryptedPreviousMonitors[i];
-        const previousMonitor = monitors[i].previousMonitor;
-        const normalizedMonitor = monitors[i].monitor;
+      decryptedPreviousMonitors.forEach((decryptedPreviousMonitor) => {
+        const monitor = monitors.find((m) => m.previousMonitor.id === decryptedPreviousMonitor.id);
+        if (monitor) {
+          const normalizedMonitor = monitor?.monitor;
+          const previousMonitor = monitor?.previousMonitor;
+          const {
+            attributes: { [ConfigKey.REVISION]: _, ...normalizedPrevMonitorAttr },
+          } = normalizeSecrets(decryptedPreviousMonitor);
 
-        const {
-          attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-        } = normalizeSecrets(decryptedPreviousMonitor);
-
-        const monitorWithRevision = formatSecrets({
-          ...normalizedPreviousMonitorAttributes,
-          ...normalizedMonitor,
-          revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-        });
-        monitorsToUpdate.push({
-          normalizedMonitor,
-          previousMonitor,
-          monitorWithRevision,
-          decryptedPreviousMonitor,
-        });
-      }
+          const monitorWithRevision = formatSecrets({
+            ...normalizedPrevMonitorAttr,
+            ...normalizedMonitor,
+            revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+          });
+          monitorsToUpdate.push({
+            normalizedMonitor,
+            previousMonitor,
+            monitorWithRevision,
+            decryptedPreviousMonitor,
+          });
+        }
+      });
 
       const { editedMonitors, failedConfigs } = await syncEditedMonitorBulk({
         monitorsToUpdate,

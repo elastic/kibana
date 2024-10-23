@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
+import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
   getMonitorAction,
@@ -16,25 +16,26 @@ import {
   selectMonitorListState,
   selectorMonitorDetailsState,
   selectorError,
-  selectRefreshInterval,
 } from '../../../state';
+import { useGetUrlParams } from '../../../hooks';
 
 export const useSelectedMonitor = (monId?: string) => {
   let monitorId = monId;
   const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+  const { space } = useKibanaSpace();
+  const { spaceId } = useGetUrlParams();
   if (!monitorId) {
     monitorId = urlMonitorId;
   }
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
-  const refreshInterval = useSelector(selectRefreshInterval);
 
   const monitorFromList = useMemo(
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
   const error = useSelector(selectorError);
-  const { lastRefresh } = useSyntheticsRefreshContext();
+  const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
@@ -43,7 +44,8 @@ export const useSelectedMonitor = (monId?: string) => {
     monitorId && monitorFromList && monitorFromList[ConfigKey.CONFIG_ID] === monitorId;
   const isLoadedSyntheticsMonitorValid =
     monitorId && syntheticsMonitor && syntheticsMonitor[ConfigKey.CONFIG_ID] === monitorId;
-  const availableMonitor: EncryptedSyntheticsSavedMonitor | null = isLoadedSyntheticsMonitorValid
+
+  const availableMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
     ? monitorFromList
@@ -55,9 +57,22 @@ export const useSelectedMonitor = (monId?: string) => {
 
   useEffect(() => {
     if (monitorId && !availableMonitor && !syntheticsMonitorLoading && !isMonitorMissing) {
-      dispatch(getMonitorAction.get({ monitorId }));
+      dispatch(
+        getMonitorAction.get({
+          monitorId,
+          ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        })
+      );
     }
-  }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading, isMonitorMissing]);
+  }, [
+    dispatch,
+    monitorId,
+    availableMonitor,
+    syntheticsMonitorLoading,
+    isMonitorMissing,
+    spaceId,
+    space?.id,
+  ]);
 
   useEffect(() => {
     // Only perform periodic refresh if the last dispatch was earlier enough
@@ -68,7 +83,12 @@ export const useSelectedMonitor = (monId?: string) => {
       syntheticsMonitorDispatchedAt > 0 &&
       Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000
     ) {
-      dispatch(getMonitorAction.get({ monitorId }));
+      dispatch(
+        getMonitorAction.get({
+          monitorId,
+          ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        })
+      );
     }
   }, [
     dispatch,
@@ -78,6 +98,8 @@ export const useSelectedMonitor = (monId?: string) => {
     monitorListLoading,
     syntheticsMonitorLoading,
     syntheticsMonitorDispatchedAt,
+    spaceId,
+    space?.id,
   ]);
 
   return {

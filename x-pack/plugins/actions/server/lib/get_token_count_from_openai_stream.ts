@@ -90,7 +90,9 @@ export async function getTokenCountFromOpenAIStream({
           delta: { content?: string; function_call?: { name?: string; arguments: string } };
         }>;
       } => {
-        return 'object' in line && line.object === 'chat.completion.chunk';
+        return (
+          'object' in line && line.object === 'chat.completion.chunk' && line.choices.length > 0
+        );
       }
     )
     .reduce(

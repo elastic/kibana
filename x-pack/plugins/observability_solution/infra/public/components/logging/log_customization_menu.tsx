@@ -15,7 +15,10 @@ interface LogCustomizationMenuState {
   isShown: boolean;
 }
 
-export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMenuState> {
+export class LogCustomizationMenu extends React.Component<
+  React.PropsWithChildren<{}>,
+  LogCustomizationMenuState
+> {
   public readonly state = {
     isShown: false,
   };

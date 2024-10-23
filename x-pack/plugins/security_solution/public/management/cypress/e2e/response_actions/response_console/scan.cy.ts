@@ -25,11 +25,13 @@ describe(
   {
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'responseActionScanEnabled',
-          ])}`,
-        ],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
       },
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -56,8 +58,8 @@ describe(
             policy = indexedPolicy.integrationPolicies[0];
 
             return enableAllPolicyProtections(policy.id).then(() => {
-              // Create and enroll a new Endpoint host
-              return createEndpointHost(policy.policy_ids[0]).then((host) => {
+              // At this point 8.14.2 is GA and this functionality is not available until 8.15.0
+              return createEndpointHost(policy.policy_ids[0], '8.15.0').then((host) => {
                 createdHost = host as CreateAndEnrollEndpointHostResponse;
               });
             });

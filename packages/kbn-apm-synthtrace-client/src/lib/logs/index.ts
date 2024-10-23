@@ -1,13 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
+
+export const LONG_FIELD_NAME =
+  'thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces';
+
+const LOGSDB_DATASET_PREFIX = 'logsdb.';
+
+interface LogsOptions {
+  isLogsDb: boolean;
+}
+
+const defaultLogsOptions: LogsOptions = {
+  isLogsDb: false,
+};
 
 export type LogDocument = Fields &
   Partial<{
@@ -34,6 +47,7 @@ export type LogDocument = Fields &
     'orchestrator.resource.id'?: string;
     'kubernetes.pod.uid'?: string;
     'aws.s3.bucket.name'?: string;
+    'aws.kinesis.name'?: string;
     'orchestrator.namespace'?: string;
     'container.name'?: string;
     'cloud.provider'?: string;
@@ -45,9 +59,30 @@ export type LogDocument = Fields &
     'error.exception.stacktrace'?: string;
     'error.log.stacktrace'?: string;
     'log.custom': Record<string, unknown>;
+    'host.geo.location': number[];
+    'host.ip': string;
+    'network.bytes': number;
+    'tls.established': boolean;
+    'event.duration': number;
+    'event.start': Date;
+    'event.end': Date;
+    labels?: Record<string, string>;
+    test_field: string | string[];
+    date: Date;
+    severity: string;
+    msg: string;
+    svc: string;
+    hostname: string;
+    [LONG_FIELD_NAME]: string;
   }>;
 
 class Log extends Serializable<LogDocument> {
+  constructor(fields: LogDocument, private logsOptions: LogsOptions) {
+    super({
+      ...fields,
+    });
+  }
+
   service(name: string) {
     this.fields['service.name'] = name;
     return this;
@@ -69,8 +104,9 @@ class Log extends Serializable<LogDocument> {
   }
 
   dataset(value: string) {
-    this.fields['data_stream.dataset'] = value;
-    this.fields['event.dataset'] = value;
+    const dataset = `${this.logsOptions.isLogsDb ? LOGSDB_DATASET_PREFIX : ''}${value}`;
+    this.fields['data_stream.dataset'] = dataset;
+    this.fields['event.dataset'] = dataset;
     return this;
   }
 
@@ -83,19 +119,71 @@ class Log extends Serializable<LogDocument> {
     this.fields.message = message;
     return this;
   }
+
+  setGeoLocation(geoCoordinates: number[]) {
+    this.fields['host.geo.location'] = geoCoordinates;
+    return this;
+  }
+
+  setHostIp(hostIp: string) {
+    this.fields['host.ip'] = hostIp;
+    return this;
+  }
+
+  timestamp(time: number) {
+    super.timestamp(time);
+    return this;
+  }
+
+  deleteField(fieldName: keyof LogDocument) {
+    delete this.fields[fieldName];
+    return this;
+  }
 }
 
-function create(): Log {
-  return new Log({
-    'input.type': 'logs',
-    'data_stream.namespace': 'default',
-    'data_stream.type': 'logs',
-    'data_stream.dataset': 'synth',
-    'event.dataset': 'synth',
-    'host.name': 'synth-host',
-  });
+function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': 'default',
+      'data_stream.type': 'logs',
+      'host.name': 'synth-host',
+      'network.bytes': randomInt(500, 10000),
+      'tls.established': Math.random() < 0.5,
+    },
+    logsOptions
+  ).dataset('synth');
+}
+
+function createMinimal({
+  dataset = 'synth',
+  namespace = 'default',
+}: {
+  dataset?: string;
+  namespace?: string;
+} = {}): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': namespace,
+      'data_stream.type': 'logs',
+      'data_stream.dataset': dataset,
+      'event.dataset': dataset,
+    },
+    { isLogsDb: false }
+  );
 }
 
 export const log = {
   create,
+  createMinimal,
 };
+
+function randomInt(min: number, max: number) {
+  if (min > max) {
+    throw new Error('Min value must be less than or equal to max value.');
+  }
+
+  const random = Math.floor(Math.random() * (max - min + 1)) + min;
+  return random;
+}

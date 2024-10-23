@@ -42,7 +42,6 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   ResponseActionApiResponse,
-  ResponseActionRequestBody,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -63,20 +62,23 @@ import * as ActionDetailsService from '../../services/actions/action_details_by_
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
-import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import type {
+  ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { omit, set } from 'lodash';
+import { omit } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { responseActionsClientMock } from '../../services/actions/clients/mocks';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import type { EndpointAppContext } from '../../types';
-import type { ExperimentalFeatures } from '../../../../common';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -92,7 +94,7 @@ jest.mock('../../services', () => {
 const getResponseActionsClientMock = _getResponseActionsClient;
 
 interface CallRouteInterface {
-  body?: ResponseActionRequestBody;
+  body?: ResponseActionsRequestBody;
   indexErrorResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
@@ -133,13 +135,6 @@ describe('Response actions', () => {
 
     const docGen = new EndpointDocGenerator();
 
-    const setFeatureFlag = (ff: Partial<ExperimentalFeatures>) => {
-      endpointContext.experimentalFeatures = {
-        ...endpointContext.experimentalFeatures,
-        ...ff,
-      };
-    };
-
     beforeEach(() => {
       // instantiate... everything
       const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -148,7 +143,9 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
-      (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
+      (
+        startContract.fleetStartServices.messageSigningService?.sign as jest.Mock
+      ).mockImplementation(() => {
         return {
           data: 'thisisthedata',
           signature: 'thisisasignature',
@@ -169,10 +166,9 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
+        esClient: mockScopedClient.asInternalUser,
         licenseService,
       });
-
-      setFeatureFlag({ responseActionScanEnabled: true });
 
       // add the host isolation route handlers to routerMock
       registerResponseActionRoutes(routerMock, endpointContext);

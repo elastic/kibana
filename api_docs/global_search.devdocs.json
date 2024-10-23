@@ -95,9 +95,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               },
               " | undefined"
@@ -228,9 +228,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               },
               " | undefined"
@@ -689,9 +689,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               },
               " | undefined"
@@ -727,25 +727,25 @@
               "{ savedObjects: { client: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
               "; typeRegistry: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectTypeRegistry",
+                "section": "def-server.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               },
               "; }; uiSettings: { client: ",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-server.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               "; }; capabilities: ",
@@ -822,9 +822,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               },
               " | undefined"
@@ -1301,9 +1301,9 @@
         ", request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "common",
+          "scope": "server",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
+          "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => ",
@@ -1313,9 +1313,9 @@
         ">; getSearchableTypes: (request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "common",
+          "scope": "server",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
+          "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
