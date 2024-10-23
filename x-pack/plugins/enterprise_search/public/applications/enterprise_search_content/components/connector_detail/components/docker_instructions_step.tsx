@@ -23,7 +23,10 @@ import { CodeBox } from '@kbn/search-api-panels';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
-import { getRunFromDockerSnippet } from '../../search_index/connector/constants';
+import {
+  getConnectorTemplate,
+  getRunFromDockerSnippet,
+} from '../../search_index/connector/constants';
 
 export interface DockerInstructionsStepProps {
   apiKeyData?: ApiKey;
@@ -47,14 +50,11 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
     }
   }, [isWaitingForConnector]);
 
-  const configYamlContent = `connectors:
-  - 
-    connector_id: "${connectorId}"
-    service_type: "${serviceType}"
-    api_key: "${apiKeyData?.encoded ?? ''}"
-elasticsearch:
-  host: "${elasticsearchUrl}"
-  api_key: "${apiKeyData?.encoded ?? ''}"`;
+  const configYamlContent = getConnectorTemplate({
+    apiKeyData,
+    connectorData: { id: connectorId, service_type: serviceType },
+    host: elasticsearchUrl,
+  });
 
   const escapedConfigYamlContent = configYamlContent.replace(/"/g, '\\"').replace(/\$/g, '\\$');
 
