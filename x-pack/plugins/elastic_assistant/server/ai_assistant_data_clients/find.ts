@@ -89,7 +89,7 @@ export const findDocuments = async <TSearchSchema>({
         perPage,
         total:
           (typeof response.hits.total === 'number'
-            ? response.hits.total // This format is to be removed in 8.0
+            ? response.hits.total
             : response.hits.total?.value) ?? 0,
       };
     }
