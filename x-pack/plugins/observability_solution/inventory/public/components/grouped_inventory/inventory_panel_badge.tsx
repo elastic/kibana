@@ -35,7 +35,7 @@ export function InventoryPanelBadge({
             font-weight: ${euiTheme.font.weight.bold};
           `}
         >
-          {name}
+          {name}:
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>

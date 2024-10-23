@@ -14,7 +14,7 @@ export function InventorySummary({
   totalEntities,
   totalGroups,
 }: {
-  totalEntities: number;
+  totalEntities?: number;
   totalGroups?: number;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -31,15 +31,17 @@ export function InventorySummary({
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <span css={groupCountCss} style={{ borderRight: !isGrouped ? 'none' : undefined }}>
-              <FormattedMessage
-                id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
-                defaultMessage="{total} Entities"
-                values={{ total: totalEntities }}
-              />
-            </span>
-          </EuiFlexItem>
+          {totalEntities !== undefined && (
+            <EuiFlexItem grow={false}>
+              <span css={groupCountCss} style={{ borderRight: !isGrouped ? 'none' : undefined }}>
+                <FormattedMessage
+                  id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
+                  defaultMessage="{total} Entities"
+                  values={{ total: totalEntities }}
+                />
+              </span>
+            </EuiFlexItem>
+          )}
           {isGrouped ? (
             <EuiFlexItem grow={false}>
               <span css={groupCountCss} style={{ borderRight: 'none' }}>

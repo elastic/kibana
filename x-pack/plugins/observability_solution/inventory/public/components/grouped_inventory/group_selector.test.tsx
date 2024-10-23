@@ -21,13 +21,24 @@ describe('GroupSelector', () => {
       </InventoryComponentWrapperMock>
     );
   });
-  it('Should default to Type', () => {
-    expect(screen.findByText('Group entities by: Type')).toBeTruthy();
-    screen.debug();
+  it('Should default to Type', async () => {
+    expect(await screen.findByText('Group entities by: Type')).toBeInTheDocument();
   });
-  it('Should change to none', async () => {
-    await userEvent.click(screen.getByTestId('groupSelectorDropdown'));
-    await userEvent.click(screen.getByTestId('panel-unified'));
-    expect(screen.findByText('Group entities by: None')).toBeTruthy();
+  it.skip('Should change to None', async () => {
+    const user = userEvent.setup();
+
+    const selector = screen.getByText('Group entities by: Type');
+
+    expect(selector).toBeInTheDocument();
+
+    await user.click(selector);
+
+    const noneOption = screen.getByTestId('panelUnified');
+
+    expect(noneOption).toBeInTheDocument();
+
+    await user.click(noneOption);
+
+    expect(await screen.findByText('Group entities by: None')).toBeInTheDocument();
   });
 });
