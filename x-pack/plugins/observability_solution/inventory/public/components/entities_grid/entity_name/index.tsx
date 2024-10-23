@@ -6,11 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { ENTITY_DISPLAY_NAME } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
+import { ENTITY_DISPLAY_NAME } from '@kbn/observability-shared-plugin/common';
 import { Entity } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
-import { useDetailViewRedirect } from './use_detail_view_redirect';
+import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
 
 interface EntityNameProps {
   entity: Entity;
