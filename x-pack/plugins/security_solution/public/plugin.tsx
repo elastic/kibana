@@ -228,6 +228,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return createSecuritySolutionDiscoverAppWrapperGetter({
             core: coreStart,
             services,
+            plugins: startPlugins,
           });
         },
       };

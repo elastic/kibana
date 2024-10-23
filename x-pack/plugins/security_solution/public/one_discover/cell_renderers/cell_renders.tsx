@@ -17,7 +17,7 @@ export type SecuritySolutionRowCellRendererGetter = () => (
 ) => ReactElement;
 
 export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGetter = () => {
-  return function UnifiedFieldRender(props: DataGridCellValueElementProps) {
+  return function UnifiedFieldRenderBySecuritySolution(props: DataGridCellValueElementProps) {
     const data: TimelineNonEcsData[] = Object.keys(props.row.flattened).map((fieldName) => ({
       field: fieldName,
       value: Array.isArray(props.row.flattened[fieldName])
