@@ -36,6 +36,6 @@ export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTable
 export const PIPELINE_URL = 'ingest/ingest_pipelines';
 
 export const PRECONFIGURED_ENDPOINTS = {
-  ELSER: '.elser-2',
-  E5: '.multi-e5-small',
+  ELSER: '.elser-2-elasticsearch',
+  E5: '.multilingual-e5-small-elasticsearch',
 };
