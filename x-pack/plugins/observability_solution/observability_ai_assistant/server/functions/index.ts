@@ -82,7 +82,18 @@ export const registerFunctions: RegistrationCallback = async ({
       }
 
       if (availableFunctionNames.includes(GET_DATA_ON_SCREEN_FUNCTION_NAME)) {
+        // The function description is appended to the system message because
+        // the "get_data_on_screen" function description exceeds the token limit
+        const functionDefinition = functions
+          .getFunctions({ filter: GET_DATA_ON_SCREEN_FUNCTION_NAME })
+          .map((fn) => fn.definition)[0];
+
         instructions.push(`You have access to data on the screen by calling the "${GET_DATA_ON_SCREEN_FUNCTION_NAME}" function.
+        ${
+          functionDefinition.description
+            ? `This function will ${functionDefinition.description} `
+            : ''
+        }
         Use it to help the user understand what they are looking at. A short summary of what they are looking at is available in the return of the "${CONTEXT_FUNCTION_NAME}" function.
         Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`);
       }
