@@ -162,7 +162,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
               adaptive_allocations: {
                 enabled: true,
                 min_number_of_allocations: 0,
-                max_number_of_allocations: 8,
+                max_number_of_allocations: 1,
               },
               num_threads: 1,
               model_id: elserId,
