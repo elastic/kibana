@@ -191,7 +191,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
-          releddase: 'preview',
+          release: 'preview',
         },
       ];
 
