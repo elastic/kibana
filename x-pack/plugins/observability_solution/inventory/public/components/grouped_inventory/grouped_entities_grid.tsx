@@ -64,7 +64,7 @@ export function GroupedEntitiesGrid({ field }: Props) {
   );
 
   function handlePageChange(nextPage: number) {
-    inventoryRoute.replace('/', {
+    inventoryRoute.push('/', {
       path: {},
       query: {
         ...query,

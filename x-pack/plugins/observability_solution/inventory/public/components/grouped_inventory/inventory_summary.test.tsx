@@ -28,7 +28,7 @@ describe('InventorySummary', () => {
   it('renders the total entities without any group totals', () => {
     render(<InventorySummary totalEntities={10} />, { wrapper: MockEnvWrapper });
     expect(screen.getByText('10 Entities')).toBeInTheDocument();
-    expect(screen.queryByText('0 Groups')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inventorySummaryGroupsTotal')).not.toBeInTheDocument();
   });
   it('renders the total entities with group totals', () => {
     render(<InventorySummary totalEntities={15} totalGroups={3} />, { wrapper: MockEnvWrapper });
@@ -37,7 +37,7 @@ describe('InventorySummary', () => {
   });
   it("won't render either totals when not provided anything", () => {
     render(<InventorySummary />, { wrapper: MockEnvWrapper });
-    expect(screen.queryByText('0 Entities')).not.toBeInTheDocument();
-    expect(screen.queryByText('0 Groups')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inventorySummaryEntitiesTotal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inventorySummaryGroupsTotal')).not.toBeInTheDocument();
   });
 });

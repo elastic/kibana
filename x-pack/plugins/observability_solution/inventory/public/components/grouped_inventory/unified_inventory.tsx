@@ -7,7 +7,11 @@
 import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityColumnIds, EntityType, entityPaginationRt } from '../../../common/entities';
+import {
+  type EntityColumnIds,
+  type EntityType,
+  entityPaginationRt,
+} from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -56,7 +60,7 @@ export function UnifiedInventory() {
   });
 
   function handlePageChange(nextPage: number) {
-    inventoryRoute.replace('/', {
+    inventoryRoute.push('/', {
       path: {},
       query: {
         ...query,

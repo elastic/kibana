@@ -40,37 +40,30 @@ export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
 
 export const entityViewRt = t.union([t.literal('unified'), t.literal('grouped')]);
 
-const isPaginationRecord = (input: unknown): input is Record<string, number> => {
-  if (typeof input === 'object' && input !== null) {
-    for (const value of Object.values(input)) {
-      if (typeof value !== 'number') {
-        return false;
-      }
-    }
-    return true;
-  } else {
-    return false;
-  }
-};
-
+const paginationRt = t.record(t.string, t.number);
 export const entityPaginationRt = new t.Type<Record<string, number>, string, unknown>(
   'entityPaginationRt',
-  isPaginationRecord,
+  paginationRt.is,
   (input, context) => {
     if (typeof input === 'string') {
       try {
         const decoded = decode(input);
-        if (isPaginationRecord(decoded)) {
-          return t.success(decoded);
-        } else {
-          return t.failure(input, context);
+        const validation = paginationRt.decode(decoded);
+        if (isRight(validation)) {
+          return t.success(validation.right);
         }
+
+        return t.failure(input, context);
       } catch (e) {
         return t.failure(input, context);
       }
-    } else if (isPaginationRecord(input)) {
-      return t.success(input);
     }
+
+    const validation = paginationRt.decode(input);
+    if (isRight(validation)) {
+      return t.success(validation.right);
+    }
+
     return t.failure(input, context);
   },
   (o) => encode(o)
