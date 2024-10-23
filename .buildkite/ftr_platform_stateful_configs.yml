@@ -344,7 +344,7 @@ enabled:
   - x-pack/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/test/ui_capabilities/spaces_only/config.ts
-  - x-pack/test/upgrade_assistant_integration/config.js
+  - x-pack/test/upgrade_assistant_integration/config.ts
   - x-pack/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
