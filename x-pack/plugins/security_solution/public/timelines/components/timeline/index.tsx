@@ -20,7 +20,7 @@ import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
-import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
@@ -211,18 +211,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   );
   const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
   const resolveConflictComponent = useResolveConflict();
-
-  const handleSwitchToTab = useCallback(
-    (tab: TimelineTabs) => {
-      dispatch(
-        timelineActions.setActiveTabTimeline({
-          id: timelineId,
-          activeTab: tab,
-        })
-      );
-    },
-    [timelineId, dispatch]
-  );
 
   return (
     <TimelineContext.Provider value={timelineContext}>
