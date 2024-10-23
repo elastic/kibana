@@ -211,8 +211,14 @@ export function ContextAppContent({
       getDiscoverGridColumnInfoPopover({
         isEsqlMode: false,
         services,
+        queryAndFiltersOverride: {
+          query: { query: '', language: 'kuery' },
+          filters: filters || [],
+          fromDate: timeRange.from, // Hm, there is no time range filter on Surrounding Docs page. What should we use?
+          toDate: timeRange.to,
+        },
       }),
-    [services]
+    [services, filters, timeRange]
   );
 
   return (
