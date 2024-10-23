@@ -17,9 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
   describe(`GET ${API_PATH}`, function () {
-    // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is by default
+    // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is on by default
     this.tags(['skipMKI']);
     before(async () => {
+      await svlDatastreamsHelpers.createDataStream(testDataStreamName);
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
         {
@@ -28,10 +29,11 @@ export default function ({ getService }: FtrProviderContext) {
         }
       );
     });
+    after(async () => {
+      await svlDatastreamsHelpers.deleteDataStream(testDataStreamName);
+    });
 
     it('returns created data streams', async () => {
-      await svlDatastreamsHelpers.createDataStream(testDataStreamName);
-
       const res = await supertestAdminWithCookieCredentials
         .get(API_PATH)
         .set('elastic-api-version', '1');
@@ -40,7 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(foundStream?.name).to.be(testDataStreamName);
       expect(foundStream?.storageSizeBytes).to.be(0);
       expect(res.statusCode).to.be(200);
-      await svlDatastreamsHelpers.deleteDataStream(testDataStreamName);
     });
     it('returns system indices', async () => {
       const res = await supertestAdminWithCookieCredentials

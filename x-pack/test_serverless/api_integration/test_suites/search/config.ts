@@ -23,6 +23,7 @@ export default createTestConfig({
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     '--xpack.dataUsage.enabled=true',
+    // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${path.resolve(
       __dirname,

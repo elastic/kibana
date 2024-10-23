@@ -11,21 +11,21 @@ import http from 'http';
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { createProxyServer } from '../proxy_server';
+import { setupMockServer } from '../mock_api';
 
 const API_PATH = '/internal/api/data_usage/metrics';
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const log = getService('log');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
-  describe.skip('Metrics', function () {
-    // proxy does not work with MKI
+  const mockAutoopsApiService = setupMockServer();
+  describe('Metrics', function () {
+    let mockApiServer: http.Server;
+    // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is on by default
     this.tags(['skipMKI']);
-    let proxyServer: http.Server;
 
     before(async () => {
-      proxyServer = createProxyServer(9000, log);
+      mockApiServer = mockAutoopsApiService.listen(9000);
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
         {
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(() => {
-      proxyServer.close();
+      mockApiServer.close();
     });
     describe(`POST ${API_PATH}`, () => {
       const testDataStreamName = 'test-data-stream';
