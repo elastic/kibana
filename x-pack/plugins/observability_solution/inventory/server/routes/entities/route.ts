@@ -53,7 +53,13 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   options: {
     tags: ['access:inventory'],
   },
-  handler: async ({ params, context, logger, plugins, request }) => {
+  handler: async ({
+    params,
+    context,
+    logger,
+    plugins,
+    request,
+  }): Promise<{ entities: Entity[] }> => {
     const coreContext = await context.core;
     const inventoryEsClient = createObservabilityEsClient({
       client: coreContext.elasticsearch.client.asCurrentUser,
@@ -85,7 +91,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     const joined = joinByKey(
       [...latestEntities, ...alerts],
       [...identityFieldsPerEntityType.values()].flat()
-    ).filter((entity) => entity['entity.id']);
+    ).filter((entity) => entity['entity.id']) as Entity[];
 
     return {
       entities:
