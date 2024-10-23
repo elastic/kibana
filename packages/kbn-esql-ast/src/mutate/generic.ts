@@ -162,24 +162,38 @@ export const appendCommandOption = (
   return option;
 };
 
-export const appendCommandArgument = (
+export const insertCommandArgument = (
   command: ESQLCommand,
-  expression: ESQLSingleAstItem
+  expression: ESQLSingleAstItem,
+  index: number = -1
 ): number => {
   if (expression.type === 'option') {
     command.args.push(expression);
     return command.args.length - 1;
   }
 
-  const index = command.args.findIndex((arg) => isOptionNode(arg));
+  let mainArgumentCount = command.args.findIndex((arg) => isOptionNode(arg));
 
-  if (index > -1) {
-    command.args.splice(index, 0, expression);
-    return index;
+  if (mainArgumentCount < 0) {
+    mainArgumentCount = command.args.length;
+  }
+  if (index === -1) {
+    index = mainArgumentCount;
+  }
+  if (index > mainArgumentCount) {
+    index = mainArgumentCount;
   }
 
-  command.args.push(expression);
-  return command.args.length - 1;
+  command.args.splice(index, 0, expression);
+
+  return mainArgumentCount + 1;
+};
+
+export const appendCommandArgument = (
+  command: ESQLCommand,
+  expression: ESQLSingleAstItem
+): number => {
+  return insertCommandArgument(command, expression, -1);
 };
 
 export const removeCommand = (ast: ESQLAstQueryExpression, command: ESQLCommand): boolean => {
