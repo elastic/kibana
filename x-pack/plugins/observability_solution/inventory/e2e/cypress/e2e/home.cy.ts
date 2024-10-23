@@ -63,15 +63,15 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities*').as('getEntitities');
+        cy.intercept('GET', '/internal/inventory/entities*').as('getEntities');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('host').click();
-        cy.wait('@getEntitities');
+        cy.wait('@getEntities');
         cy.contains('service').click();
-        cy.wait('@getEntitities');
+        cy.wait('@getEntities');
         cy.contains('container').click();
-        cy.wait('@getEntitities');
+        cy.wait('@getEntities');
         cy.contains('server1');
         cy.contains('Host');
         cy.contains('synth-node-trace-logs');
@@ -84,11 +84,11 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities*').as('getEntitities');
+        cy.intercept('GET', '/internal/inventory/entities*').as('getEntities');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('Group entities by: Type').click();
-        cy.wait('@getEntitities');
+        cy.wait('@getEntities');
         cy.contains('None').click();
         cy.contains('server1');
         cy.contains('host');
@@ -135,8 +135,8 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities*').as('getEntities');
-        cy.intercept('GET', '/internal/inventory/group_by*').as('getGroups');
+        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities/group_by*').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.getByTestSubj('entityTypesFilterComboBox')
@@ -157,8 +157,8 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities*').as('getEntities');
-        cy.intercept('GET', '/internal/inventory/group_by*').as('getGroups');
+        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities/group_by*').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.getByTestSubj('entityTypesFilterComboBox')
@@ -179,8 +179,8 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities*').as('getEntities');
-        cy.intercept('GET', '/internal/inventory/group_by*').as('getGroups');
+        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities/group_by*').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.getByTestSubj('entityTypesFilterComboBox')
