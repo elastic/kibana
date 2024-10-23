@@ -25,9 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const indexName = 'test-my-index';
 
   describe('Search index detail page', function () {
-    // fails on MKI, see https://github.com/elastic/kibana/issues/196981
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlApiKeys.deleteAPIKeys();
@@ -110,7 +107,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
       });
 
-      describe('With data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/197144
+      describe.skip('With data', () => {
         before(async () => {
           await es.index({
             index: indexName,
@@ -120,15 +118,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
+        it('should have index documents', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        });
         it('menu action item should be replaced with playground', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
         });
         it('should have link to API reference doc link in options menu', async () => {
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
-        });
-        it('should have index documents', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
         });
         it('should have one document in quick stats', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
