@@ -616,18 +616,6 @@ describe('autocomplete.suggest', () => {
           triggerCharacter: ' ',
         }
       );
-
-      const expectedNumericSuggestions = [
-        // Notice no extra space after field name
-        ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES).map((field) => `${field}`),
-        ...getFunctionSignaturesByReturnType(
-          'eval',
-          ESQL_COMMON_NUMERIC_TYPES,
-          { scalar: true },
-          undefined,
-          []
-        ),
-      ];
       await assertSuggestions(
         'from a | eval case( integerField != /)',
         [
