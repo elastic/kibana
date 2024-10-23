@@ -11,13 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { UrlDrilldownConfig, UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
-const generalFormatError = () =>
-  i18n.translate(
-    'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
-    {
-      defaultMessage: 'Invalid URL format.',
-    }
-  );
+const generalFormatError = i18n.translate(
+  'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
+  {
+    defaultMessage: 'Invalid URL format.',
+  }
+);
 
 const compileError = (message: string) =>
   i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlCompileErrorMessage', {
@@ -36,7 +35,7 @@ export function validateUrl(url: string): {
   if (!url)
     return {
       isValid: false,
-      error: generalFormatError(),
+      error: generalFormatError,
     };
 
   try {
@@ -46,7 +45,7 @@ export function validateUrl(url: string): {
   } catch (e) {
     return {
       isValid: false,
-      error: generalFormatError(),
+      error: generalFormatError,
       invalidUrl: url,
     };
   }
@@ -59,7 +58,7 @@ export async function validateUrlTemplate(
   if (!urlTemplate.template)
     return {
       isValid: false,
-      error: generalFormatError(),
+      error: generalFormatError,
     };
 
   let compiledUrl: string;
@@ -79,7 +78,7 @@ export async function validateUrlTemplate(
   } catch (e) {
     return {
       isValid: false,
-      error: generalFormatError() + ` ${e.message}.`,
+      error: generalFormatError + ` ${e.message}.`,
       invalidUrl: compiledUrl,
     };
   }
