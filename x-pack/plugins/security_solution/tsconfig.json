@@ -95,7 +95,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/saved-objects-tagging-plugin",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",
     "@kbn/safer-lodash-set",
