@@ -16,7 +16,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager } from './types';
 
-export const GridPanelDragPreview = ({
+export const DragPreview = ({
   rowIndex,
   gridLayoutStateManager,
 }: {

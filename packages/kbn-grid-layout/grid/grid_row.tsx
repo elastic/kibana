@@ -18,7 +18,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridPanel } from './grid_panel';
 import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
-import { GridPanelDragPreview } from './grid_panel_drag_preview';
+import { DragPreview } from './drag_preview';
 
 export const GridRow = forwardRef<
   HTMLDivElement,
@@ -185,10 +185,7 @@ export const GridRow = forwardRef<
               />
             ))}
 
-            <GridPanelDragPreview
-              rowIndex={rowIndex}
-              gridLayoutStateManager={gridLayoutStateManager}
-            />
+            <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
           </div>
         )}
       </>
