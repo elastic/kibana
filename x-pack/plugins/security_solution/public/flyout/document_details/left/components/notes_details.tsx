@@ -44,7 +44,7 @@ export const FETCH_NOTES_ERROR = i18n.translate(
 );
 export const NO_NOTES = (isAlert: boolean) =>
   i18n.translate('xpack.securitySolution.flyout.left.notes.noNotesLabel', {
-    defaultMessage: 'No notes have been created for this {value}',
+    defaultMessage: 'No notes have been created for this {value}.',
     values: { value: isAlert ? 'alert' : 'event' },
   });
 
