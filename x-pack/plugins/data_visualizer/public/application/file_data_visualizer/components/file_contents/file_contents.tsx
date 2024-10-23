@@ -136,7 +136,7 @@ export const FileContents: FC<Props> = ({
       {format === FILE_FORMATS.TIKA ? (
         <FormattedMessage
           id="xpack.dataVisualizer.file.fileContents.characterCount"
-          defaultMessage="First {numberOfChars} characters"
+          defaultMessage="Limited to the first {numberOfChars} characters"
           values={{
             numberOfChars: TIKA_PREVIEW_CHARS,
           }}
