@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -272,15 +273,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
         await dashboard.waitForRenderComplete();
         await dashboard.gotoDashboardLandingPage();
-        try {
+
+        // it might take a bit for the view to be counted
+        await retry.try(async () => {
           const views2 = await getViewsCount();
           expect(views2).to.be(2);
-        } catch (e) {
-          // Retry just once in case of flakiness
-          // it might be that the views count is not updated yet
-          const views2 = await getViewsCount();
-          expect(views2).to.be(2);
-        }
+        });
       });
     });
   });
