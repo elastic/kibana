@@ -35,6 +35,11 @@ export enum FieldCopyAction {
 
 export type DatabaseType = 'maxmind' | 'ipinfo' | 'web' | 'local' | 'unknown';
 
+export interface DatabaseNameOption {
+  value: string;
+  text: string;
+}
+
 export interface GeoipDatabase {
   name: string;
   id: string;
