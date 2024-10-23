@@ -149,7 +149,7 @@ export const processRouter = (
 
       const authzDescription = extractAuthzDescription(route, buildFlavour);
 
-      const description = `${route.options.description ?? ''}${authzDescription}`;
+      const description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
 
       const hasDeprecations = !!route.options.deprecated;
 

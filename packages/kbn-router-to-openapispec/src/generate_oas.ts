@@ -32,19 +32,19 @@ export interface GenerateOpenApiDocumentOptions {
   docsUrl?: string;
   tags?: string[];
   filters?: GenerateOpenApiDocumentOptionsFilters;
-  buildFlavour: string;
+  buildFlavor: string;
 }
 
 export const generateOpenApiDocument = (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
-  const { filters, buildFlavour } = opts;
+  const { filters, buildFlavor } = opts;
   const converter = new OasConverter();
   const getOpId = createOperationIdCounter();
   const paths: OpenAPIV3.PathsObject = {};
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, getOpId, buildFlavour, filters);
+    const result = processRouter(router, converter, getOpId, buildFlavor, filters);
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
