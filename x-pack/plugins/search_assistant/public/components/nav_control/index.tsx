@@ -111,7 +111,7 @@ export function NavControl() {
       <EuiToolTip content={buttonLabel}>
         <EuiButton
           aria-label={buttonLabel}
-          data-test-subj="observabilityAiAssistantAppNavControlButton"
+          data-test-subj="AiAssistantAppNavControlButton"
           css={buttonCss}
           onClick={() => {
             service.conversations.openNewConversation({
