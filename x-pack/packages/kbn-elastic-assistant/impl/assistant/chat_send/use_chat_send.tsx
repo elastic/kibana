@@ -59,7 +59,10 @@ export const useChatSend = ({
   const { clearConversation, removeLastMessage } = useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http });
   const isSetupComplete =
-    kbStatus?.elser_exists && kbStatus?.index_exists && kbStatus?.pipeline_exists;
+    kbStatus?.elser_exists &&
+    kbStatus?.index_exists &&
+    kbStatus?.pipeline_exists &&
+    kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
