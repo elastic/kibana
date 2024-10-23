@@ -96,7 +96,7 @@ export function MonitorConfiguration({
             fill
           >
             <FormattedMessage
-              id="xpack.synthetics.overviewEmbeddableSlo.config.confirmButtonLabel"
+              id="xpack.synthetics.overviewEmbeddableSynthetics.config.confirmButtonLabel"
               defaultMessage="Save"
             />
           </EuiButton>
