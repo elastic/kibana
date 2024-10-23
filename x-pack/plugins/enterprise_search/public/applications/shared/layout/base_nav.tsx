@@ -23,7 +23,6 @@ import { GETTING_STARTED_TITLE } from '../../../../common/constants';
 import { ClassicNavItem, BuildClassicNavParameters } from '../types';
 
 export const buildBaseClassicNavItems = ({
-  hasEnterpriseLicense,
   productAccess,
 }: BuildClassicNavParameters): ClassicNavItem[] => {
   const navItems: ClassicNavItem[] = [];
@@ -113,26 +112,23 @@ export const buildBaseClassicNavItems = ({
     }),
   });
 
-  if (hasEnterpriseLicense) {
-    // Relevance
-    navItems.push({
-      'data-test-subj': 'searchSideNav-Relevance',
-      id: 'relevance',
-      items: [
-        {
-          'data-test-subj': 'searchSideNav-InferenceEndpoints',
-          deepLink: {
-            link: 'enterpriseSearchRelevance:inferenceEndpoints',
-            shouldShowActiveForSubroutes: true,
-          },
-          id: 'inference_endpoints',
+  navItems.push({
+    'data-test-subj': 'searchSideNav-Relevance',
+    id: 'relevance',
+    items: [
+      {
+        'data-test-subj': 'searchSideNav-InferenceEndpoints',
+        deepLink: {
+          link: 'searchInferenceEndpoints:inferenceEndpoints',
+          shouldShowActiveForSubroutes: true,
         },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
-        defaultMessage: 'Relevance',
-      }),
-    });
-  }
+        id: 'inference_endpoints',
+      },
+    ],
+    name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+      defaultMessage: 'Relevance',
+    }),
+  });
 
   // Getting Started
   navItems.push({

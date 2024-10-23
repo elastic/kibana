@@ -18,7 +18,6 @@ import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../appli
 import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 
 import { KibanaLogic } from '../kibana';
-import { LicensingLogic } from '../licensing';
 import {
   ClassicNavItem,
   GenerateNavLinkParameters,
@@ -37,19 +36,17 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSidebarEnabled, productAccess, getNavLinks } = useValues(KibanaLogic);
 
-  const { hasEnterpriseLicense } = useValues(LicensingLogic);
-
   const indicesNavItems = useIndicesNav();
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
-    const baseNavItems = buildBaseClassicNavItems({ hasEnterpriseLicense, productAccess });
+    const baseNavItems = buildBaseClassicNavItems({ productAccess });
     const deepLinks = getNavLinks().reduce((links, link) => {
       links[link.id] = link;
       return links;
     }, {} as Record<string, ChromeNavLink | undefined>);
 
     return generateSideNavItems(baseNavItems, deepLinks, { search_indices: indicesNavItems });
-  }, [hasEnterpriseLicense, productAccess, indicesNavItems]);
+  }, [productAccess, indicesNavItems]);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 

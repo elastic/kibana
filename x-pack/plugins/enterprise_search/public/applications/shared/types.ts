@@ -85,7 +85,6 @@ export interface GenerateNavLinkFromDeepLinkParameters {
 }
 
 export interface BuildClassicNavParameters {
-  hasEnterpriseLicense: boolean;
   productAccess: ProductAccess;
 }
 

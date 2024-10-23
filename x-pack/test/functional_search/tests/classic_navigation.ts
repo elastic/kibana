@@ -47,8 +47,8 @@ export default function searchSolutionNavigation({
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
         { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
-        // { id: 'Relevance', label: 'Relevance' },
-        // { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
+        { id: 'Relevance', label: 'Relevance' },
+        { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Elasticsearch', label: 'Elasticsearch' },
         { id: 'VectorSearch', label: 'Vector Search' },
@@ -97,10 +97,10 @@ export default function searchSolutionNavigation({
 
       // Check Relevance
       // > InferenceEndpoints
-      // await searchClassicNavigation.clickNavItem('InferenceEndpoints');
-      // await searchClassicNavigation.expectNavItemActive('InferenceEndpoints');
-      // await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Relevance');
-      // await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Inference Endpoints');
+      await searchClassicNavigation.clickNavItem('InferenceEndpoints');
+      await searchClassicNavigation.expectNavItemActive('InferenceEndpoints');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Relevance');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Inference Endpoints');
 
       // Check Getting started
       // > Elasticsearch
