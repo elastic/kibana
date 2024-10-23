@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+export const TELEMETRY_HEADER_CARD = `header_card`;
+
+export enum OnboardingHeaderCardId {
+  video = 'video',
+  teammates = 'teammates',
+  demo = 'demo',
+}
