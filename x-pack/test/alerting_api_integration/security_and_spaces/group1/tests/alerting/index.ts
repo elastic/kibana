@@ -22,6 +22,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
 
       loadTestFile(require.resolve('./backfill'));
       loadTestFile(require.resolve('./find'));
+      loadTestFile(require.resolve('./find_internal'));
       loadTestFile(require.resolve('./find_with_post'));
       loadTestFile(require.resolve('./create'));
       loadTestFile(require.resolve('./delete'));
