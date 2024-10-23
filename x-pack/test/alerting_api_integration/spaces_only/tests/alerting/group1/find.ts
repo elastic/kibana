@@ -30,7 +30,7 @@ async function createAlert(
 export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('find', () => {
+  describe('find public API', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
@@ -87,7 +87,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.per_page).to.be.greaterThan(0);
         expect(response.body.total).to.be.greaterThan(0);
         const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-
         expect(match).to.eql({
           id: createdAlert.id,
           name: 'abc',

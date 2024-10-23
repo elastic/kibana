@@ -30,10 +30,21 @@ beforeEach(() => {
 });
 
 describe('findRulesRoute', () => {
-  describe('Public', () => {
-    it('finds rules with proper parameters', async () => {
-      const licenseState = licenseStateMock.create();
-      const router = httpServiceMock.createRouter();
+  it('registers the route with public access', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findRulesRoute(router, licenseState);
+    expect(router.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ access: 'public' }),
+      }),
+      expect.any(Function)
+    );
+  });
+  it('finds rules with proper parameters', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
       findRulesRoute(router, licenseState);
 

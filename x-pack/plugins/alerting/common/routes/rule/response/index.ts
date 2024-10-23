@@ -6,7 +6,6 @@
  */
 
 export {
-  ruleParamsSchema,
   actionParamsSchema,
   mappedParamsSchema,
   ruleExecutionStatusSchema,
@@ -18,16 +17,9 @@ export {
   scheduleIdsSchema,
 } from './schemas/latest';
 
-export type {
-  RuleParams,
-  RuleResponse,
-  RuleSnoozeSchedule,
-  RuleLastRun,
-  Monitoring,
-} from './types/latest';
+export type { RuleResponse, RuleSnoozeSchedule, RuleLastRun, Monitoring } from './types/latest';
 
 export {
-  ruleParamsSchema as ruleParamsSchemaV1,
   actionParamsSchema as actionParamsSchemaV1,
   mappedParamsSchema as mappedParamsSchemaV1,
   ruleExecutionStatusSchema as ruleExecutionStatusSchemaV1,
@@ -41,9 +33,14 @@ export {
 } from './schemas/v1';
 
 export type {
-  RuleParams as RuleParamsV1,
   RuleResponse as RuleResponseV1,
   RuleSnoozeSchedule as RuleSnoozeScheduleV1,
   RuleLastRun as RuleLastRunV1,
   Monitoring as MonitoringV1,
 } from './types/v1';
+
+export { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
+export { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+
+export type { RuleParamsV1 } from '@kbn/response-ops-rule-params';
+export type { RuleParams } from '@kbn/response-ops-rule-params';

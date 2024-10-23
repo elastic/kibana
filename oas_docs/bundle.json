@@ -6397,7 +6397,6 @@
     },
     "/api/fleet/agent-status": {
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
         "parameters": [
           {
@@ -9764,6 +9763,191 @@
         ]
       }
     },
+    "/api/fleet/agent_policies/outputs": {
+      "post": {
+        "description": "Get list of outputs associated with agent policies",
+        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "ids": {
+                    "description": "list of package policy ids",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "agentPolicyId": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "integrations": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "integrationPolicyName": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "pkgName": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "output": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          },
+                          "monitoring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "output": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "monitoring",
+                          "data"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Elastic Agent policies"
+        ]
+      }
+    },
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
         "description": "Get an agent policy by ID",
@@ -12884,6 +13068,164 @@
                           "type": "object"
                         }
                       ]
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Elastic Agent policies"
+        ]
+      }
+    },
+    "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
+      "get": {
+        "description": "Get list of outputs associated with agent policy by policy id",
+        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Foutputs#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentPolicyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "agentPolicyId": {
+                          "type": "string"
+                        },
+                        "data": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "integrations": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "integrationPolicyName": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "pkgName": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "output": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "output"
+                          ],
+                          "type": "object"
+                        },
+                        "monitoring": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "output": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "output"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "monitoring",
+                        "data"
+                      ],
+                      "type": "object"
                     }
                   },
                   "required": [
@@ -17124,7 +17466,6 @@
         ]
       },
       "put": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
         "parameters": [
           {
@@ -17824,7 +18165,6 @@
     },
     "/api/fleet/enrollment-api-keys": {
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#0",
         "parameters": [
           {
@@ -17871,7 +18211,6 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#1",
         "parameters": [
           {
@@ -17928,7 +18267,6 @@
     },
     "/api/fleet/enrollment-api-keys/{keyId}": {
       "delete": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1",
         "parameters": [
           {
@@ -17967,7 +18305,6 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0",
         "parameters": [
           {
@@ -24698,7 +25035,6 @@
     },
     "/api/fleet/epm/packages/{pkgkey}": {
       "delete": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
         "parameters": [
           {
@@ -24756,7 +25092,6 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
         "parameters": [
           {
@@ -24818,7 +25153,6 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
         "parameters": [
           {
@@ -24902,7 +25236,6 @@
         "tags": []
       },
       "put": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
         "parameters": [
           {
@@ -40117,7 +40450,6 @@
     },
     "/api/fleet/service-tokens": {
       "post": {
-        "deprecated": true,
         "description": "Create a service token",
         "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
         "parameters": [

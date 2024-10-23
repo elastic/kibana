@@ -31,7 +31,7 @@ async function createAlert(
 export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('find', () => {
+  describe('find internal API', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
@@ -136,7 +136,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
           is_snoozed_until: null,
         });
-
         expect(Date.parse(match.created_at)).to.be.greaterThan(0);
         expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
       });
@@ -219,7 +218,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
           .send({
-            search_fields: 'monitoring.run.calculated_metrics.success_ratio&search=50',
+            search_fields: 'monitoring.run.calculated_metrics.success_ratio',
+            search: '50',
           });
 
         expect(response.status).to.eql(200);
@@ -230,7 +230,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
           .send({
-            filter: `alert.attributes.params.strValue:"my b"`,
+            filter: 'alert.attributes.params.strValue:"my b"',
           });
 
         expect(response.status).to.eql(200);
@@ -243,9 +243,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
           .send({
-            filter: `${JSON.stringify(
-              fromKueryExpression('alert.attributes.params.strValue:"my b"')
-            )}`,
+            filter: JSON.stringify(fromKueryExpression('alert.attributes.params.strValue:"my b"')),
           });
 
         expect(response.status).to.eql(200);
@@ -261,7 +259,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             sort_field: 'params.severity',
             sort_order: 'asc',
           });
-
         expect(response.body.data[0].params.severity).to.equal('low');
         expect(response.body.data[1].params.severity).to.equal('medium');
         expect(response.body.data[2].params.severity).to.equal('high');
