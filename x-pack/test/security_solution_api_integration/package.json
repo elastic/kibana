@@ -218,11 +218,6 @@
     "auth_alerts:qa:serverless": "npm run run-tests:de authentication/alerts serverless qaPeriodicEnv",
     "auth_alerts:qa:serverless:release": "npm run run-tests:de authentication/alerts serverless qaEnv",
 
-    "auth_actions:server:serverless": "npm run initialize-server:de authentication/actions serverless",
-    "auth_actions:runner:serverless": "npm run run-tests:de authentication/actions serverless serverlessEnv",
-    "auth_actions:qa:serverless": "npm run run-tests:de authentication/actions serverless qaPeriodicEnv",
-    "auth_actions:qa:serverless:release": "npm run run-tests:de authentication/actions serverless qaEnv",
-
     "auth_exceptions:server:serverless": "npm run initialize-server:de authentication/exceptions serverless",
     "auth_exceptions:runner:serverless": "npm run run-tests:de authentication/exceptions serverless serverlessEnv",
     "auth_exceptions:qa:serverless": "npm run run-tests:de authentication/exceptions serverless qaPeriodicEnv",
