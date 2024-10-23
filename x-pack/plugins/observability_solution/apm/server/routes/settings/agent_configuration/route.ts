@@ -39,7 +39,7 @@ function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm'], access: 'public' },
   handler: async (
     resources
   ): Promise<{
@@ -100,6 +100,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_settings_write'],
+    access: 'public',
   },
   params: t.type({
     body: t.type({
@@ -156,6 +157,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_settings_write'],
+    access: 'public',
   },
   params: t.intersection([
     t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
@@ -224,7 +226,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   params: t.type({
     body: searchParamsRt,
   }),
-  options: { tags: ['access:apm'], disableTelemetry: true },
+  options: { tags: ['access:apm'], disableTelemetry: true, access: 'public' },
   handler: async (
     resources
   ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
