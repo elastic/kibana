@@ -8,7 +8,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LinkCard } from './link_card';
-import { OnboardingHeaderCardId } from '../../../constants';
+import { OnboardingHeaderCardId, TELEMETRY_HEADER_CARD } from '../../../constants';
+import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+
+jest.mock('../../../../common/lib/telemetry');
 
 describe('DataIngestionHubHeaderCardComponent', () => {
   beforeEach(() => {
@@ -29,6 +32,23 @@ describe('DataIngestionHubHeaderCardComponent', () => {
     expect(getByText('Mock Title')).toBeInTheDocument();
     expect(getByText('Mock Description')).toBeInTheDocument();
     expect(getByTestId('data-ingestion-header-card-icon')).toHaveAttribute('src', 'mockIcon.png');
+  });
+
+  it('should track the link card click', () => {
+    const { getByTestId } = render(
+      <LinkCard
+        id={OnboardingHeaderCardId.demo}
+        icon={'mockIcon.png'}
+        title={'Mock Title'}
+        description={'Mock Description'}
+        linkText="test"
+      />
+    );
+
+    getByTestId('headerCardLink').click();
+    expect(trackOnboardingLinkClick).toHaveBeenCalledWith(
+      `${TELEMETRY_HEADER_CARD}_${OnboardingHeaderCardId.demo}`
+    );
   });
 
   it('should apply dark mode styles when color mode is DARK', () => {
