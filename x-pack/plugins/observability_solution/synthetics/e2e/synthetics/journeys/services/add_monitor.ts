@@ -51,6 +51,10 @@ export const getPrivateLocations = async (params: Record<string, any>) => {
   const server = getService('kibanaServer');
 
   try {
+    return await axios.get(kibanaUrl + SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, {
+      auth: { username: 'elastic', password: 'changeme' },
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
+    });
     return await server.savedObjects.get({
       id: legacyPrivateLocationsSavedObjectId,
       type: legacyPrivateLocationsSavedObjectName,
