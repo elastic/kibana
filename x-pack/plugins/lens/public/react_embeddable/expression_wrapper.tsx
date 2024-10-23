@@ -31,7 +31,7 @@ export interface ExpressionWrapperProps {
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
-  onRender$: () => void;
+  onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;

@@ -75,10 +75,13 @@ export function loadEmbeddableData(
   );
 
   const onRenderComplete = () => {
-    internalApi.dispatchRenderComplete();
-
     updateMessages(getUserMessages('embeddableBadge'));
-    updateBlockingErrors();
+    const hasErrored = updateBlockingErrors();
+    if (hasErrored) {
+      internalApi.dispatchError();
+    } else {
+      internalApi.dispatchRenderComplete();
+    }
   };
 
   const unifiedSearch$ = new BehaviorSubject<
@@ -104,7 +107,7 @@ export function loadEmbeddableData(
     addLog(`Embeddable reload reason: ${sourceId}`);
     resetMessages();
     // reset the render on reload
-    // internalApi.dispatchRenderStart();
+    internalApi.dispatchRenderStart();
     // notify about data loading
     internalApi.updateDataLoading(true);
 
@@ -152,6 +155,7 @@ export function loadEmbeddableData(
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
       api,
+      internalApi,
       parentApi,
       getState,
       services,
@@ -205,12 +209,9 @@ export function loadEmbeddableData(
     if (params?.expression != null) {
       internalApi.updateExpressionParams(params);
     } else {
-      // trigger a render complete on error
-      onRenderComplete();
+      internalApi.dispatchError();
     }
     internalApi.updateAbortController(abortController);
-
-    internalApi.updateRenderCount();
   }
 
   // Build a custom operator to be resused for various observables

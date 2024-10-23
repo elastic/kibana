@@ -8,13 +8,20 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiHasDisableTriggers } from '@kbn/presentation-publishing';
-import { GetStateType, LensApi, LensEmbeddableStartServices, LensPublicCallbacks } from '../types';
+import {
+  GetStateType,
+  LensApi,
+  LensEmbeddableStartServices,
+  LensInternalApi,
+  LensPublicCallbacks,
+} from '../types';
 import { prepareOnRender } from './on_render';
 import { prepareEventHandler } from './on_event';
 import { addLog } from '../logger';
 
 export function prepareCallbacks(
   api: LensApi,
+  internalApi: LensInternalApi,
   parentApi: unknown,
   getState: GetStateType,
   services: LensEmbeddableStartServices,
@@ -28,6 +35,7 @@ export function prepareCallbacks(
     disableTriggers,
     onRender: prepareOnRender(
       api,
+      internalApi,
       parentApi,
       getState,
       services,

@@ -11,7 +11,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { GetStateType, LensApi, LensEmbeddableStartServices } from '../types';
+import { GetStateType, LensApi, LensEmbeddableStartServices, LensInternalApi } from '../types';
 import { getSuccessfulRequestTimings } from '../../report_performance_metric_util';
 import { addLog } from '../logger';
 
@@ -53,14 +53,20 @@ function trackPerformanceMetrics(
 
 export function prepareOnRender(
   api: LensApi,
+  internalApi: LensInternalApi,
   parentApi: unknown,
   getState: GetStateType,
   { datasourceMap, visualizationMap, coreStart }: LensEmbeddableStartServices,
   executionContext: KibanaExecutionContext | undefined,
   dispatchRenderComplete: () => void
 ) {
-  return function onRender$() {
-    addLog(`onRender$`);
+  return function onRender$(count: number) {
+    addLog(`onRender$ ${count}`);
+    // for some reason onRender$ is emitting multiple times with the same render count
+    // so avoid to repeat the same logic on duplicate calls
+    if (count === internalApi.renderCount$.getValue()) {
+      return;
+    }
     let datasourceEvents: string[] = [];
     let visualizationEvents: string[] = [];
     const currentState = getState();

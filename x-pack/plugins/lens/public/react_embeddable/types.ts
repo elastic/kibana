@@ -377,12 +377,9 @@ export type LensInternalApi = Simplify<
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
-      /** Required hook to dispatch render events from the DOM */
-      registerNode: (node: HTMLElement) => void;
       dispatchRenderStart: () => void;
       dispatchRenderComplete: () => void;
       dispatchError: () => void;
-      updateRenderCount: () => void;
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
       expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
       updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
@@ -408,7 +405,7 @@ export interface ExpressionWrapperProps {
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
-  onRender$: () => void;
+  onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;

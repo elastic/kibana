@@ -55,7 +55,7 @@ interface GetExpressionRendererPropsParams {
   getExecutionContext: () => KibanaExecutionContext | undefined;
   searchSessionId?: string;
   abortController?: AbortController;
-  onRender: () => void;
+  onRender: (count: number) => void;
   handleEvent: (event: ExpressionRendererEvent) => void;
   onData: ExpressionWrapperProps['onData$'];
   logError: (type: 'runtime' | 'validation') => void;

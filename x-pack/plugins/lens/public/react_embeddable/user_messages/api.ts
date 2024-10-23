@@ -117,7 +117,7 @@ export function buildUserMessagesHelpers(
   updateWarnings: () => void;
   updateMessages: (messages: UserMessage[]) => void;
   resetMessages: () => void;
-  updateBlockingErrors: (blockingMessages?: UserMessage[] | Error) => void;
+  updateBlockingErrors: (blockingMessages?: UserMessage[] | Error) => boolean;
 } {
   let runtimeUserMessages: Record<string, UserMessage> = {};
   const addUserMessages = (messages: UserMessage[]) => {
@@ -258,14 +258,14 @@ export function buildUserMessagesHelpers(
       if (error) {
         addLog(`Blocking error: ${error?.message}`);
       }
+
+      let updateError = false;
       if (error?.message !== api.blockingError.getValue()?.message) {
-        if (error?.message) {
-          internalApi.dispatchError();
-        }
-        (api.blockingError as BehaviorSubject<Error | undefined>).next(
-          error?.message === '' ? undefined : error
-        );
+        const finalError = error?.message === '' ? undefined : error;
+        (api.blockingError as BehaviorSubject<Error | undefined>).next(finalError);
+        updateError = Boolean(finalError);
       }
+      return updateError;
     },
     updateWarnings: () => {
       addUserMessages(
