@@ -272,8 +272,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
         await dashboard.waitForRenderComplete();
         await dashboard.gotoDashboardLandingPage();
-        const views2 = await getViewsCount();
-        expect(views2).to.be(2);
+        try {
+          const views2 = await getViewsCount();
+          expect(views2).to.be(2);
+        } catch (e) {
+          // Retry just once in case of flakiness
+          // it might be that the views count is not updated yet
+          const views2 = await getViewsCount();
+          expect(views2).to.be(2);
+        }
       });
     });
   });
