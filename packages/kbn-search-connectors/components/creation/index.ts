@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './configuration';
-export * from './creation';
-export * from './sync_jobs';
+export * from './create_connector';
