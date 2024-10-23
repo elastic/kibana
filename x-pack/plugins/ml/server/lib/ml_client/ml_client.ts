@@ -32,7 +32,7 @@ export function getMlClient(
   mlSavedObjectService: MLSavedObjectService,
   auditLogger: MlAuditLogger
 ): MlClient {
-  const mlClient = client.asInternalUser.ml;
+  let mlClient = client.asInternalUser.ml;
 
   async function jobIdsCheck(jobType: JobType, p: MlClientParams, allowWildcards: boolean = false) {
     const jobIds =
@@ -160,6 +160,16 @@ export function getMlClient(
 
   // @ts-expect-error promise and TransportRequestPromise are incompatible. missing abort
   return {
+    asCurrentUser() {
+      mlClient = client.asCurrentUser.ml;
+      return this;
+    },
+
+    asInternalUser() {
+      mlClient = client.asInternalUser.ml;
+      return this;
+    },
+
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return auditLogger.wrapTask(() => mlClient.closeJob(...p), 'ml_close_ad_job', p);
