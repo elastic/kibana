@@ -84,7 +84,7 @@ export function MonitorConfiguration({
             onClick={onCancel}
           >
             <FormattedMessage
-              id="xpack.synthetics.sloEmbeddable.config.cancelButtonLabel"
+              id="xpack.synthetics.embeddable.config.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
