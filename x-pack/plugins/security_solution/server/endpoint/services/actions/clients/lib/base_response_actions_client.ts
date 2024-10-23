@@ -13,8 +13,6 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import pMap from 'p-map';
-import { catchAndWrapError } from '../../../../utils';
 import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
@@ -44,7 +42,6 @@ import type {
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
-  ENDPOINT_ACTION_RESPONSES_DS,
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
@@ -74,7 +71,6 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  PolicyData,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -471,8 +467,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         } else {
           throw validation.error;
         }
-      } else {
-        await this.ensureDatastreamIndicesExist(actionRequest.endpoint_ids);
       }
     }
 
@@ -777,119 +771,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
             command: response.EndpointActions.data.command,
           },
         });
-    }
-  }
-
-  /**
-   * Ensures that any DOT index that might be written to from an external source (ex. Elastic Defent Endpoint)
-   * exists and if not, it is created.
-   * @param agentIds
-   * @protected
-   */
-  protected async ensureDatastreamIndicesExist(agentIds: string[]): Promise<void> {
-    const datastreamIndexNames: string[] = [];
-    let agentPolicyIds: string[] = [];
-
-    if (this.agentType === 'endpoint') {
-      const fleetServices = this.options.endpointService.getInternalFleetServices();
-      const soClient = fleetServices.savedObjects.createInternalScopedSoClient();
-      const agents = await fleetServices.agent.getByIds(agentIds);
-
-      agentPolicyIds = Array.from(
-        agents.reduce<Set<string>>((acc, agentRecord) => {
-          acc.add(agentRecord.policy_id ?? '');
-          return acc;
-        }, new Set<string>())
-      );
-
-      const agentPolicies = await fleetServices.agentPolicy.getByIds(soClient, agentPolicyIds, {
-        withPackagePolicies: true,
-      });
-
-      this.log.debug(
-        () =>
-          `Agents policies for agents [${agentIds.join(', ')}]:\n${JSON.stringify(
-            agentPolicies,
-            null,
-            2
-          )}`
-      );
-
-      const namespaces = Array.from(
-        agentPolicies.reduce<Set<string>>((acc, agentPolicy) => {
-          const endpointIntegration: PolicyData | undefined = (
-            (agentPolicy.package_policies ?? []) as PolicyData[]
-          ).find((packagePolicy) => packagePolicy.package?.name === 'endpoint');
-
-          if (endpointIntegration) {
-            acc.add(endpointIntegration.namespace || agentPolicy.namespace);
-          }
-
-          return acc;
-        }, new Set<string>())
-      );
-
-      datastreamIndexNames.push(
-        ...namespaces.map((namespace) => {
-          return `${ENDPOINT_ACTION_RESPONSES_DS}-${namespace}`;
-        })
-      );
-    } else {
-      // For agent types that are not Endpoint (External EDRs), we check that the `default` namespace indexes exist
-      datastreamIndexNames.push(ENDPOINT_ACTION_RESPONSES_INDEX);
-    }
-
-    if (datastreamIndexNames.length > 0) {
-      const esClient = this.options.esClient;
-      const indexesCreated: string[] = [];
-      const indexesAlreadyExist: string[] = [];
-      const processesDatastreamIndex = async (datastreamIndexName: string) => {
-        if (
-          !(await esClient.indices.exists({ index: datastreamIndexName }).catch(catchAndWrapError))
-        ) {
-          await esClient.indices
-            .createDataStream({ name: datastreamIndexName })
-            .then(() => {
-              indexesCreated.push(datastreamIndexName);
-            })
-            .catch((err) => {
-              // Its possible that between the `.exists()` check and this `.createDataStream()` that
-              // the index could have been created. If that's the case, then just ignore the error.
-              if (err.body?.error?.type === 'resource_already_exists_exception') {
-                indexesAlreadyExist.push(datastreamIndexName);
-                return;
-              }
-
-              // We only log the error here and do not fail the entire action. Reason: at the time of this implementation
-              // the change to the `kibana_system` role (in elasticsearch) might not yet be deployed, thus we just only
-              // log the error and allow the response action to still continue its flow
-              this.log.error(
-                `Attempt to create datastream [${datastreamIndexName}] failed:\n${stringify(err)}`
-              );
-            });
-        } else {
-          indexesAlreadyExist.push(datastreamIndexName);
-        }
-      };
-
-      await pMap(datastreamIndexNames, processesDatastreamIndex, { concurrency: 10 });
-
-      if (indexesCreated.length > 0) {
-        this.log.info(
-          `Datastream(s) index created in support of Fleet Agent policies [${agentPolicyIds.join(
-            ', '
-          )}] which include Elastic Defend integration:\n    ${indexesCreated.join('    \n')}`
-        );
-      }
-
-      if (indexesAlreadyExist.length > 0) {
-        this.log.debug(
-          () =>
-            `The following datastream(s) index already exist for Fleet Agent policies [${agentPolicyIds.join(
-              ', '
-            )}]. Nothing to do:\n    ${indexesAlreadyExist.join('    \n')}`
-        );
-      }
     }
   }
 
