@@ -32,7 +32,6 @@ import { useTimelineFullScreen } from '../../../common/containers/use_full_scree
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
-import { TimelineTour } from './tour';
 import { defaultUdtHeaders } from './unified_components/default_headers';
 
 const TimelineTemplateBadge = styled.div`
@@ -213,8 +212,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
   const resolveConflictComponent = useResolveConflict();
 
-  const showTimelineTour = isOpen && !isLoading && canEditTimeline;
-
   const handleSwitchToTab = useCallback(
     (tab: TimelineTabs) => {
       dispatch(
@@ -262,13 +259,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           />
         </TimelineBody>
       </TimelineContainer>
-      {showTimelineTour ? (
-        <TimelineTour
-          activeTab={activeTab}
-          switchToTab={handleSwitchToTab}
-          timelineType={timelineType}
-        />
-      ) : null}
     </TimelineContext.Provider>
   );
 };
