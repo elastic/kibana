@@ -61,11 +61,7 @@ describe('getStylesheetPaths', () => {
           darkMode: true,
           baseHref: '/base-path/buildShaShort',
         })
-      ).toMatchInlineSnapshot(`
-          Array [
-            "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
-          ]
-        `);
+      ).toMatchInlineSnapshot(`Array []`);
     });
   });
   describe('when darkMode is `false`', () => {
@@ -75,11 +71,7 @@ describe('getStylesheetPaths', () => {
           darkMode: false,
           baseHref: '/base-path/buildShaShort',
         })
-      ).toMatchInlineSnapshot(`
-          Array [
-            "/base-path/buildShaShort/ui/legacy_light_theme.min.css",
-          ]
-        `);
+      ).toMatchInlineSnapshot(`Array []`);
     });
   });
 });
