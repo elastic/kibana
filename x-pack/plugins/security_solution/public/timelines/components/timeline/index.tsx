@@ -13,7 +13,6 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -95,9 +94,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     description,
     sessionViewConfig,
     initialized,
-    show: isOpen,
-    isLoading,
-    activeTab,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -116,10 +112,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
-
-  const {
-    kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
-  } = useUserPrivileges();
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
