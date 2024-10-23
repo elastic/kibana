@@ -119,11 +119,7 @@ export type EntityAnalyticsTelemetryEvent =
       schema: RootSchema<ReportAssetCriticalityCsvImportedParams>;
     }
   | {
-      eventType: TelemetryEventTypes.EntityStoreEnabled;
-      schema: RootSchema<ReportEntityStoreEnablementParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityStoreDisabled;
+      eventType: TelemetryEventTypes.EntityStoreEnablement;
       schema: RootSchema<ReportEntityStoreEnablementParams>;
     }
   | {
