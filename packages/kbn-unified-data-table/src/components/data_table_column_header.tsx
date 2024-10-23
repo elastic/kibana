@@ -9,13 +9,13 @@
 
 import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { DataTableColumnsMeta } from '../types';
+import type { RenderCustomGridColumnInfoPopover, DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
@@ -25,6 +25,7 @@ interface DataTableColumnHeaderProps {
   columnsMeta?: DataTableColumnsMeta;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
 }
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
@@ -34,18 +35,28 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnsMeta,
   dataView,
   headerRowHeight,
+  renderCustomGridColumnInfoPopover,
 }) => {
   return (
-    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {showColumnTokens && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
-      )}
-      <DataTableColumnTitle columnDisplayName={columnDisplayName} />
-    </ColumnHeaderTruncateContainer>
+    <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+          {showColumnTokens && (
+            <DataTableColumnToken
+              columnName={columnName}
+              columnsMeta={columnsMeta}
+              dataView={dataView}
+            />
+          )}
+          <DataTableColumnTitle columnDisplayName={columnDisplayName} />
+        </ColumnHeaderTruncateContainer>
+      </EuiFlexItem>
+      {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
+        <EuiFlexItem>
+          {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 };
 
@@ -107,12 +118,18 @@ export const DataTableTimeColumnHeader = ({
   dataViewField,
   headerRowHeight = 1,
   columnLabel,
+  columnName,
+  columnsMeta,
+  renderCustomGridColumnInfoPopover,
 }: {
   dataView: DataView;
   dataViewField?: DataViewField;
   headerRowHeight?: number;
   columnLabel?: string;
-}) => {
+} & Pick<
+  DataTableColumnHeaderProps,
+  'columnName' | 'columnsMeta' | 'renderCustomGridColumnInfoPopover'
+>) => {
   const timeFieldName = columnLabel || (dataViewField?.customLabel ?? dataView.timeFieldName);
   const primaryTimeAriaLabel = i18n.translate(
     'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
@@ -126,15 +143,24 @@ export const DataTableTimeColumnHeader = ({
   });
 
   return (
-    <div
-      aria-label={primaryTimeAriaLabel}
-      css={css`
-        text-align: left;
-      `}
-    >
-      <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-        {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
-      </ColumnHeaderTruncateContainer>
-    </div>
+    <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <div
+          aria-label={primaryTimeAriaLabel}
+          css={css`
+            text-align: left;
+          `}
+        >
+          <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+            {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
+          </ColumnHeaderTruncateContainer>
+        </div>
+      </EuiFlexItem>
+      {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
+        <EuiFlexItem>
+          {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 };

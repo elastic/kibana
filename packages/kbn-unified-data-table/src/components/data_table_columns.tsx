@@ -21,7 +21,11 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ExpandButton } from './data_table_expand_button';
 import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
+import type {
+  ValueToStringConverter,
+  DataTableColumnsMeta,
+  RenderCustomGridColumnInfoPopover,
+} from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';
@@ -115,6 +119,7 @@ function buildEuiGridColumn({
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
+  renderCustomGridColumnInfoPopover,
   columnDisplay,
   onResize,
 }: {
@@ -138,6 +143,7 @@ function buildEuiGridColumn({
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
@@ -221,6 +227,7 @@ function buildEuiGridColumn({
           columnsMeta={columnsMeta}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
+          renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
         />
       ) : undefined,
     displayAsText: columnDisplayName,
@@ -267,6 +274,9 @@ function buildEuiGridColumn({
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
         columnLabel={columnDisplay}
+        columnName={columnName}
+        columnsMeta={columnsMeta}
+        renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
       />
     );
     if (numberOfColumns > 1) {
@@ -314,6 +324,7 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
+  renderCustomGridColumnInfoPopover,
   onResize,
 }: {
   columns: string[];
@@ -338,6 +349,7 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -366,6 +378,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
+      renderCustomGridColumnInfoPopover,
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
     })

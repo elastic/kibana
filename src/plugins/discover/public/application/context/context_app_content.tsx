@@ -38,7 +38,7 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
-import { DiscoverGrid } from '../../components/discover_grid';
+import { DiscoverGrid, getDiscoverGridColumnInfoPopover } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -206,6 +206,48 @@ export function ContextAppContent({
     timeRange,
   });
 
+  const renderCustomGridColumnInfoPopover = useMemo(() => {
+    const firstRow = rows[0];
+    const lastRow = rows[rows.length - 1];
+    let topDate = firstRow ? firstRow.flattened[dataView.timeFieldName!] : undefined;
+    let bottomDate = lastRow ? lastRow.flattened[dataView.timeFieldName!] : undefined;
+
+    if (Array.isArray(topDate)) {
+      topDate = topDate[0];
+    }
+
+    if (Array.isArray(bottomDate)) {
+      bottomDate = bottomDate[0];
+    }
+
+    if (typeof topDate !== 'string' && typeof topDate !== 'number') {
+      return undefined;
+    }
+    if (typeof bottomDate !== 'string' && typeof bottomDate !== 'number') {
+      return undefined;
+    }
+
+    let fromDate: string = String(bottomDate);
+    let toDate: string = String(topDate);
+
+    if (bottomDate > topDate) {
+      fromDate = String(topDate);
+      toDate = String(bottomDate);
+    }
+
+    return getDiscoverGridColumnInfoPopover({
+      isEsqlMode: false,
+      services,
+      queryAndFiltersOverride: {
+        query: { query: '', language: 'kuery' },
+        filters: filters || [],
+        // Hm, there is no time range filter on Surrounding Docs page. What should we use?
+        fromDate,
+        toDate,
+      },
+    });
+  }, [services, filters, rows, dataView.timeFieldName]);
+
   return (
     <Fragment>
       <WrapperWithPadding>
@@ -273,6 +315,7 @@ export function ContextAppContent({
               settings={grid}
               onResize={onResize}
               externalCustomRenderers={cellRenderers}
+              renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
             />
           </CellActionsProvider>
         </div>
