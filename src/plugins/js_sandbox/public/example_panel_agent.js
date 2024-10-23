@@ -7,19 +7,17 @@ function(props) {
 
   const data = React.useMemo(() => {
     const data = [
+      ...props.data.map((d, i) => ({
+        ...d,
+        count: d.count - (props.crossfilter.find(d2 => d2.agent === d.agent)?.count ?? 0),
+        type: '02_context'
+      })),
       ...props.crossfilter.map(d => ({
         ...d,
-        type: 'crossfilter',
-        typeOrder: 0,
-      })),
-      ...props.data.map((d,i) => ({
-        ...d,
-        count: d.count - (props.crossfilter.find(d2 => d2.date === d.date)?.count ?? 0),
-        type: 'context',
-        typeOrder: 1,
+        type: '01_filter'
       }))
-      ];
-    console.log('data histogram',data);
+    ];
+    console.log('data agent', data);
     return data;
   }, [props.data, props.crossfilter]);
 
@@ -41,53 +39,50 @@ function(props) {
   }, [props.width, props.height, initalized])
 
   React.useEffect(() => {
-  // setup API options
-  const options = {
-    config: {
-      // Vega-Lite default configuration
-    },
-    init: (view) => {
-      console.log('init',view);
-      vegaRef.current = view;
-      // initialize tooltip handler
-      view.tooltip(new vegaTooltip.Handler().call);
+    // setup API options
+    const options = {
+      config: {
+        // Vega-Lite default configuration
+      },
+      init: (view) => {
+        vegaRef.current = view;
+        // initialize tooltip handler
+        view.tooltip(new vegaTooltip.Handler().call);
 
-      view.addSignalListener('brushX', function(event, item) {
-          if (item.monthdate_date) {
-            props.dispatch(`WHERE @timestamp >= "${new Date(item.monthdate_date[0]).toISOString().replace('2012-', '2024-')}" AND @timestamp < "${new Date(item.monthdate_date[1]).toISOString().replace('2012-', '2024-')}"`);
-          } else {
-            props.dispatch('');
-          }
-        })
+        view.addSignalListener('agent', function(event, item) {
+            console.log('item',item);
+            if (item.agent) {
+              props.dispatch(`WHERE agent == "${item.agent[0]}"`);
+            } else {
+              props.dispatch('');
+            }
+          })
 
-      setInitialized(true);
-    },
-    view: {
-      renderer: "canvas",
-    },
-  };
-
-      // register vega and vega-lite with the API
+        setInitialized(true);
+      },
+      view: {
+        renderer: "canvas",
+      },
+    };
+    // register vega and vega-lite with the API
     vl.register(vega, vegaLite, options);
 
-
-    const brush = vl.selectInterval().name('brushX').encodings('x');
+    const click = vl.selectMulti().encodings('y').name('agent');
 
     // now you can use the API!
     const spec = vl.markBar({ tooltip: true })
       .data({ name: 'table'})
       .encode(
         // https://vega.github.io/vega-lite/docs/timeunit.html
-        vl.x().timeMD('date').axis({title: 'Date'}),
-        vl.y().sum("count"),
-        vl.color().fieldN('type').scale({ range: ['#eee','#00a69b'] }).legend({disable: true}),
-        vl.order().field('typeOrder'),
-        vl.tooltip([vl.fieldT("date"), vl.fieldQ("count")])
+        vl.x().sum("count"),
+        vl.y().fieldN('agent'),
+        vl.color().fieldN('type').scale({ range: ['steelblue', 'lightgrey'] }).legend({disable: true}),
+        vl.tooltip([vl.fieldN("agent"), vl.fieldQ("count")])
       )
       .width(props.width)
       .height(props.height)
       .autosize({ type: 'fit-x'})
-      .params(brush)
+      .params(click)
 
       spec.render()
       .then((viewElement) => {
