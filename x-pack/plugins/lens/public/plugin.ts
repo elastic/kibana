@@ -138,6 +138,7 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
+import type { TypedLensByValueInput } from './embeddable/embeddable_component';
 
 export type { SaveProps } from './app_plugin';
 
@@ -281,7 +282,8 @@ export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
   excludedVisualizations?: string[],
-  preferredChartType?: ChartType
+  preferredChartType?: ChartType,
+  preferredVisAttributes?: TypedLensByValueInput['attributes']
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -713,7 +715,13 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
+          suggestions: (
+            context,
+            dataView,
+            excludedVisualizations,
+            preferredChartType,
+            preferredVisAttributes
+          ) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
@@ -721,6 +729,7 @@ export class LensPlugin {
               dataView,
               excludedVisualizations,
               preferredChartType,
+              preferredVisAttributes,
             });
           },
         };

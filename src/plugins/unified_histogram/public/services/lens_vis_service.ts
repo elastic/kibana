@@ -522,7 +522,13 @@ export class LensVisService {
         : undefined;
 
       const suggestions =
-        this.lensSuggestionsApi(context, dataView, ['lnsDatatable'], preferredChartType) ?? [];
+        this.lensSuggestionsApi(
+          context,
+          dataView,
+          ['lnsDatatable'],
+          preferredChartType,
+          preferredVisAttributes
+        ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
         const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -606,7 +612,13 @@ export class LensVisService {
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord
-      ? this.lensSuggestionsApi(context, dataView, ['lnsDatatable'], preferredChartType) ?? []
+      ? this.lensSuggestionsApi(
+          context,
+          dataView,
+          ['lnsDatatable'],
+          preferredChartType,
+          preferredVisAttributes
+        ) ?? []
       : [];
 
     return allSuggestions;
