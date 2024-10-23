@@ -11,7 +11,10 @@ import { v4 as uuidV4 } from 'uuid';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { CreateRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
 import { CreateRuleMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
+import {
+  SIEM_RULE_MIGRATIONS_PATH,
+  SiemMigrationsStatus,
+} from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 export const registerSiemRuleMigrationsCreateRoute = (
@@ -45,7 +48,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
             '@timestamp': timestamp,
             migration_id: migrationId,
             original_rule: originalRule,
-            status: 'pending',
+            status: SiemMigrationsStatus.PENDING,
           }));
           await siemMigrationClient.rules.create(ruleMigrations);
 

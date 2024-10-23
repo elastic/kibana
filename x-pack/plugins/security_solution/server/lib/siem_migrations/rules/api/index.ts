@@ -14,5 +14,4 @@ export const registerSiemRuleMigrationsRoutes = (
   logger: Logger
 ) => {
   registerSiemRuleMigrationsCreateRoute(router, logger);
-  // TODO: registerSiemRuleMigrationsGetRoute(router, logger);
 };

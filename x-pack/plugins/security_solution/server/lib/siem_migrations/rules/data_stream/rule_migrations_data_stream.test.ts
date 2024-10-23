@@ -78,7 +78,7 @@ describe('SiemRuleMigrationsDataStream', () => {
   });
 
   describe('installSpace', () => {
-    it('should install space', async () => {
+    it('should install space data stream', async () => {
       const dataStream = new RuleMigrationsDataStream({ kibanaVersion: '8.13.0' });
       const params: InstallParams = {
         esClient,
@@ -95,7 +95,7 @@ describe('SiemRuleMigrationsDataStream', () => {
       expect(dataStreamSpacesAdapter.installSpace).toHaveBeenCalledWith('space1');
     });
 
-    it('should not install space if install not executed', async () => {
+    it('should not install space data stream if install not executed', async () => {
       const dataStream = new RuleMigrationsDataStream({ kibanaVersion: '8.13.0' });
       await expect(dataStream.installSpace('space1')).rejects.toThrowError();
     });

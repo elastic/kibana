@@ -38,10 +38,7 @@ export class RuleMigrationsDataStream {
       this.installPromise = this.dataStream.install(params);
       await this.installPromise;
     } catch (err) {
-      params.logger.error(
-        `Error installing siem rule migrations data stream. Data quality dashboard persistence may be impacted.- ${err.message}`,
-        err
-      );
+      params.logger.error(`Error installing siem rule migrations data stream. ${err.message}`, err);
     }
   }
 
