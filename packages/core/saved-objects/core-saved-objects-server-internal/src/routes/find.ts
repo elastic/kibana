@@ -42,6 +42,7 @@ export const registerFindRoute = (
         summary: `Search for saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
       validate: {
