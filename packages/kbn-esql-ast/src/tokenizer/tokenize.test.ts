@@ -51,6 +51,15 @@ describe('tokenizer', () => {
     ]);
   });
 
+  it('should tokenize opening and closing multiline comment markers', () => {
+    expect(tokenize('/* this')[0]).toEqual<Token>({ name: 'multiline_comment_start', start: 0 });
+    const tokens2 = tokenize('is a comment */');
+    expect(tokens2[tokens2.length - 1]).toEqual<Token>({
+      name: 'multiline_comment_end_expr',
+      start: 13,
+    });
+  });
+
   it('should tokenize function names', () => {
     const tokens = tokenize(
       'FROM my_index | EVAL date_diff("day", NOW()) | STATS abs  (field1), avg( field1 )'

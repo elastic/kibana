@@ -99,8 +99,16 @@ LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
     ;
 
+MULTILINE_COMMENT_START
+    : '/*'
+    ;
+
+MULTILINE_COMMENT_END
+    : '*/'
+    ;
+
 MULTILINE_COMMENT
-    : '/*' (MULTILINE_COMMENT|.)*? '*/' -> channel(HIDDEN)
+    : MULTILINE_COMMENT_START (MULTILINE_COMMENT|.)*? MULTILINE_COMMENT_END -> channel(HIDDEN)
     ;
 
 WS
@@ -111,6 +119,10 @@ WS
 // Expression - used by most command
 //
 mode EXPRESSION_MODE;
+
+MULTILINE_COMMENT_END_EXPR
+    : '*/'
+    ;
 
 PIPE : '|' -> popMode;
 
