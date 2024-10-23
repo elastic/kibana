@@ -15,6 +15,7 @@ import {
 } from '@kbn/server-route-repository-client';
 import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import { entityLatestSchema } from '@kbn/entities-schema';
+import { castArray } from 'lodash';
 import {
   DisableManagedEntityResponse,
   EnableManagedEntityResponse,
@@ -110,7 +111,7 @@ export class EntityClient {
       throw new Error('Identity fields are missing');
     }
 
-    return identityFields.reduce((acc, field) => {
+    return castArray(identityFields).reduce((acc, field) => {
       const value = field.split('.').reduce((obj: any, part: string) => {
         return obj && typeof obj === 'object' ? (obj as Record<string, any>)[part] : undefined;
       }, entityLatest);
