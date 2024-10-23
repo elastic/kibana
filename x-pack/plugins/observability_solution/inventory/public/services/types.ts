@@ -6,9 +6,9 @@
  */
 
 import type { InventoryAPIClient } from '../api';
-import type { ITelemetryClient } from './telemetry/types';
+import { TelemetryClient } from './telemetry/telemetry_client';
 
 export interface InventoryServices {
   inventoryAPIClient: InventoryAPIClient;
-  telemetry: ITelemetryClient;
+  telemetry: TelemetryClient;
 }

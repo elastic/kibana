@@ -6,10 +6,15 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 import type { EntityType } from '../../../common/entities';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
+}
+
+export interface TelemetryServiceStartParams {
+  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface InventoryAddDataParams {

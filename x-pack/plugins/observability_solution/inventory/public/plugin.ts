@@ -28,7 +28,7 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
-import { registerEemEnabledContext } from './analytics/register_eem_enabled_context';
+import { TelemetryClient } from './services/telemetry/telemetry_client';
 
 export class InventoryPlugin
   implements
@@ -50,6 +50,38 @@ export class InventoryPlugin
     this.kibanaVersion = context.env.packageInfo.version;
     this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
+
+  private async initializeTelemetry(
+    coreStart: CoreStart,
+    pluginsStart: InventoryStartDependencies,
+    telemetry: TelemetryClient
+  ) {
+    const shouldHideInventory = await this.shouldHideInventory(pluginsStart, coreStart);
+
+    if (!shouldHideInventory) {
+      telemetry.initialize();
+    }
+  }
+
+  private async shouldHideInventory(
+    pluginsStart: InventoryStartDependencies,
+    coreStart: CoreStart
+  ) {
+    if (pluginsStart.spaces) {
+      const space = await pluginsStart.spaces.getActiveSpace();
+      return this.isInventoryDisabledByUserOrSpace(space, coreStart);
+    }
+
+    return !coreStart.application.capabilities.inventory.show;
+  }
+
+  private isInventoryDisabledByUserOrSpace(space: any, coreStart: CoreStart): boolean {
+    return (
+      space.disabledFeatures.includes(INVENTORY_APP_ID) ||
+      !coreStart.application.capabilities.inventory.show
+    );
+  }
+
   setup(
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
     pluginsSetup: InventorySetupDependencies
@@ -59,17 +91,26 @@ export class InventoryPlugin
       'observability:entityCentricExperience',
       true
     );
+
+    this.telemetry.setup({
+      analytics: coreSetup.analytics,
+    });
+
+    const telemetry = this.telemetry.start({
+      entityManager: pluginsSetup.entityManager,
+    });
+
     const getStartServices = coreSetup.getStartServices();
+
+    getStartServices.then(([coreStart, pluginsStart]) => {
+      this.initializeTelemetry(coreStart, pluginsStart, telemetry);
+    });
 
     const hideInventory$ = from(getStartServices).pipe(
       mergeMap(([coreStart, pluginsStart]) => {
         if (pluginsStart.spaces) {
           return from(pluginsStart.spaces.getActiveSpace()).pipe(
-            map(
-              (space) =>
-                space.disabledFeatures.includes(INVENTORY_APP_ID) ||
-                !coreStart.application.capabilities.inventory.show
-            )
+            map((space) => this.isInventoryDisabledByUserOrSpace(space, coreStart))
           );
         }
 
@@ -80,7 +121,6 @@ export class InventoryPlugin
     const sections$ = hideInventory$.pipe(
       map((hideInventory) => {
         if (isEntityCentricExperienceSettingEnabled && !hideInventory) {
-          registerEemEnabledContext(coreSetup.analytics, pluginsSetup.entityManager);
           return [
             {
               label: '',
@@ -106,9 +146,6 @@ export class InventoryPlugin
     );
 
     pluginsSetup.observabilityShared.navigation.registerSections(sections$);
-
-    this.telemetry.setup({ analytics: coreSetup.analytics });
-    const telemetry = this.telemetry.start();
 
     const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
     const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;

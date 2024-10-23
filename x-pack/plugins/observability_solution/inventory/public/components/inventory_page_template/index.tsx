@@ -18,7 +18,6 @@ import { useEntityManager } from '../../hooks/use_entity_manager';
 import { Welcome } from '../entity_enablement/welcome_modal';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { EmptyState } from '../empty_states/empty_state';
-import { eemEnabled$ } from '../../analytics/register_eem_enabled_context';
 import { useIsLoadingComplete } from '../../hooks/use_is_loading_complete';
 
 const pageTitle = (
@@ -51,7 +50,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useEntityManager();
 
   const handleSuccess = () => {
-    eemEnabled$.next({ eem_enabled: true });
+    telemetry.updateEemEnabled(true);
     refresh();
     toggleWelcomedModal();
   };
