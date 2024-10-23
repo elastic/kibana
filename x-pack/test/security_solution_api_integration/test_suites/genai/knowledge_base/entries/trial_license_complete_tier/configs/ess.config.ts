@@ -49,5 +49,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('esTestCluster'),
       ssl: false,
     },
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      timeout: 360000 * 2,
+    },
   };
 }
