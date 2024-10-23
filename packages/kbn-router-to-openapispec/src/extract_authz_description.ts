@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildFlavor } from '@kbn/config';
 import type { AuthzEnabled, AuthzDisabled } from '@kbn/core-http-server';
 
 import type { InternalRouterRoute } from './type';
@@ -17,10 +16,7 @@ interface PrivilegeGroupValue {
   anyRequired: string[];
 }
 
-export const extractAuthzDescription = (
-  route: InternalRouterRoute,
-  currentOffering: BuildFlavor
-) => {
+export const extractAuthzDescription = (route: InternalRouterRoute) => {
   if (route.security) {
     if (!('authz' in route.security) || (route.security.authz as AuthzDisabled).enabled === false) {
       return '';

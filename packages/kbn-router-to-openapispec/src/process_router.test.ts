@@ -125,40 +125,22 @@ describe('processRouter', () => {
   } as unknown as Router;
 
   it('only provides routes for version 2023-10-31', () => {
-    const result1 = processRouter(
-      testRouter,
-      new OasConverter(),
-      createOperationIdCounter(),
-      'traditional',
-      {
-        version: '2023-10-31',
-      }
-    );
+    const result1 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2023-10-31',
+    });
 
     expect(Object.keys(result1.paths!)).toHaveLength(4);
 
-    const result2 = processRouter(
-      testRouter,
-      new OasConverter(),
-      createOperationIdCounter(),
-      'traditional',
-      {
-        version: '2024-10-31',
-      }
-    );
+    const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2024-10-31',
+    });
     expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 
   it('updates description with privileges required', () => {
-    const result = processRouter(
-      testRouter,
-      new OasConverter(),
-      createOperationIdCounter(),
-      'traditional',
-      {
-        version: '2023-10-31',
-      }
-    );
+    const result = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2023-10-31',
+    });
 
     expect(result.paths['/qux']?.post).toBeDefined();
 

@@ -39,12 +39,12 @@ export const generateOpenApiDocument = (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
-  const { filters, buildFlavor } = opts;
+  const { filters } = opts;
   const converter = new OasConverter();
   const getOpId = createOperationIdCounter();
   const paths: OpenAPIV3.PathsObject = {};
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, getOpId, buildFlavor, filters);
+    const result = processRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {

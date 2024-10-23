@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildFlavor } from '@kbn/config';
 import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
 import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
@@ -35,7 +34,6 @@ export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
   getOpId: OperationIdCounter,
-  buildFlavour: BuildFlavor,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
@@ -66,7 +64,7 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      const authzDescription = extractAuthzDescription(route, buildFlavour);
+      const authzDescription = extractAuthzDescription(route);
 
       const description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
 
