@@ -8,7 +8,11 @@
  */
 
 import { AppMenuRegistry } from './app_menu_registry';
-import { AppMenuActionSubmenuSecondary, AppMenuActionType } from './types';
+import {
+  AppMenuActionSubmenuSecondary,
+  AppMenuActionType,
+  AppMenuSubmenuActionCustom,
+} from './types';
 
 describe('AppMenuRegistry', () => {
   it('should initialize correctly', () => {
@@ -115,7 +119,7 @@ describe('AppMenuRegistry', () => {
 
     expect(appMenuRegistry.isActionRegistered(existingSecondaryActionId)).toBe(true);
 
-    const customAction = {
+    const customAction: AppMenuSubmenuActionCustom = {
       id: existingSecondaryActionId, // using the same id to override the action with a custom one
       type: AppMenuActionType.custom,
       controlProps: {
