@@ -5,46 +5,36 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
 import {
   GetOverviewParams,
   GetOverviewResponse,
 } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
 import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
+import { SloRouteContext } from '../types';
 import { typedSearch } from '../utils/queries';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 
 export class GetSLOsOverview {
-  constructor(
-    private soClient: SavedObjectsClientContract,
-    private esClient: ElasticsearchClient,
-    private spaceId: string,
-    private logger: Logger,
-    private rulesClient: RulesClientApi,
-    private racClient: AlertsClient
-  ) {}
+  constructor(private context: SloRouteContext, private racClient: AlertsClient) {}
 
   public async execute(params: GetOverviewParams = {}): Promise<GetOverviewResponse> {
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const settings = await getSloSettings(this.context.soClient);
+    const { indices } = await getListOfSummaryIndices(this.context.esClient, settings);
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
-    const parsedFilters = parseStringFilters(filters, this.logger);
+    const parsedFilters = parseStringFilters(filters, this.context.logger);
 
-    const response = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.context.esClient, {
       index: indices,
       size: 0,
       query: {
         bool: {
           filter: [
-            { term: { spaceId: this.spaceId } },
+            { term: { spaceId: this.context.spaceId } },
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -108,7 +98,7 @@ export class GetSLOsOverview {
     });
 
     const [rules, alerts] = await Promise.all([
-      this.rulesClient.find({
+      this.context.rulesClient.find({
         options: {
           search: 'alert.attributes.alertTypeId:("slo.rules.burnRate")',
         },

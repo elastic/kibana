@@ -5,65 +5,51 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import {
-  createSLORepositoryMock,
+  createSloContextMock,
   createSummaryTransformManagerMock,
   createTransformManagerMock,
+  SLOContextMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('DeleteSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockRulesClient: jest.Mocked<RulesClientApi>;
   let deleteSLO: DeleteSLO;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    mockRepository = createSLORepositoryMock();
+    contextMock = createSloContextMock();
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockRulesClient = rulesClientMock.create();
-    deleteSLO = new DeleteSLO(
-      mockRepository,
-      mockTransformManager,
-      mockSummaryTransformManager,
-      mockEsClient,
-      mockScopedClusterClient,
-      mockRulesClient
-    );
+    deleteSLO = new DeleteSLO(contextMock, mockTransformManager, mockSummaryTransformManager);
   });
 
   describe('happy path', () => {
-    it('removes all resources associatde to the slo', async () => {
+    it('removes all resources associate to the slo', async () => {
       const slo = createSLO({
         id: 'irrelevant',
         indicator: createAPMTransactionErrorRateIndicator(),
       });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       await deleteSLO.execute(slo.id);
 
-      expect(mockRepository.findById).toMatchSnapshot();
+      expect(contextMock.repository.findById).toMatchSnapshot();
       expect(mockSummaryTransformManager.stop).toMatchSnapshot();
       expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
       expect(mockTransformManager.stop).toMatchSnapshot();
       expect(mockTransformManager.uninstall).toMatchSnapshot();
-      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toMatchSnapshot();
-      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
-      expect(mockRulesClient.bulkDeleteRules).toMatchSnapshot();
-      expect(mockRepository.deleteById).toMatchSnapshot();
+      expect(
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toMatchSnapshot();
+      expect(contextMock.esClient.ingest.deletePipeline).toMatchSnapshot();
+      expect(contextMock.esClient.deleteByQuery).toMatchSnapshot();
+      expect(contextMock.rulesClient.bulkDeleteRules).toMatchSnapshot();
+      expect(contextMock.repository.deleteById).toMatchSnapshot();
     });
   });
 });
