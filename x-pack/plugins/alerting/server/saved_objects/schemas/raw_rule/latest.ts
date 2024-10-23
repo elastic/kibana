@@ -13,7 +13,7 @@ import {
   rawRuleLastRunSchema,
   rawRuleMonitoringSchema,
   rawRuleSchema,
-} from './v2';
+} from './v3';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 

@@ -6,29 +6,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilterStateStore } from '@kbn/es-query';
-import {
-  RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusWarningReasons,
-} from '@kbn/alerting-types';
-import { ruleLastRunOutcomeValues } from '../../../application/rule/constants';
 
-const executionStatusWarningReason = schema.oneOf([
-  schema.literal(RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS),
-  schema.literal(RuleExecutionStatusWarningReasons.MAX_ALERTS),
-  schema.literal(RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS),
-  schema.literal(RuleExecutionStatusWarningReasons.EXECUTION),
+export const executionStatusWarningReason = schema.oneOf([
+  schema.literal('maxExecutableActions'),
+  schema.literal('maxAlerts'),
+  schema.literal('maxQueuedActions'),
+  schema.literal('ruleExecution'),
 ]);
 
-const executionStatusErrorReason = schema.oneOf([
-  schema.literal(RuleExecutionStatusErrorReasons.Read),
-  schema.literal(RuleExecutionStatusErrorReasons.Decrypt),
-  schema.literal(RuleExecutionStatusErrorReasons.Execute),
-  schema.literal(RuleExecutionStatusErrorReasons.Unknown),
-  schema.literal(RuleExecutionStatusErrorReasons.License),
-  schema.literal(RuleExecutionStatusErrorReasons.Timeout),
-  schema.literal(RuleExecutionStatusErrorReasons.Disabled),
-  schema.literal(RuleExecutionStatusErrorReasons.Validate),
+export const executionStatusErrorReason = schema.oneOf([
+  schema.literal('read'),
+  schema.literal('decrypt'),
+  schema.literal('execute'),
+  schema.literal('unknown'),
+  schema.literal('license'),
+  schema.literal('timeout'),
+  schema.literal('disabled'),
+  schema.literal('validate'),
 ]);
 
 export const rawRuleExecutionStatusSchema = schema.object({
@@ -56,7 +50,7 @@ export const rawRuleExecutionStatusSchema = schema.object({
   ),
 });
 
-const ISOWeekdaysSchema = schema.oneOf([
+export const ISOWeekdaysSchema = schema.oneOf([
   schema.literal(1),
   schema.literal(2),
   schema.literal(3),
@@ -66,7 +60,7 @@ const ISOWeekdaysSchema = schema.oneOf([
   schema.literal(7),
 ]);
 
-const rRuleSchema = schema.object({
+export const rRuleSchema = schema.object({
   dtstart: schema.string(),
   tzid: schema.string(),
   freq: schema.maybe(
@@ -94,23 +88,21 @@ const rRuleSchema = schema.object({
       schema.literal('SU'),
     ])
   ),
-  byweekday: schema.maybe(
-    schema.nullable(schema.arrayOf(schema.oneOf([schema.string(), schema.number()])))
-  ),
-  bymonth: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  bysetpos: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  bymonthday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byyearday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byweekno: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byhour: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byminute: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  bysecond: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+  bymonth: schema.maybe(schema.number()),
+  bysetpos: schema.maybe(schema.number()),
+  bymonthday: schema.maybe(schema.number()),
+  byyearday: schema.maybe(schema.number()),
+  byweekno: schema.maybe(schema.number()),
+  byhour: schema.maybe(schema.number()),
+  byminute: schema.maybe(schema.number()),
+  bysecond: schema.maybe(schema.number()),
 });
 
-const outcome = schema.oneOf([
-  schema.literal(ruleLastRunOutcomeValues.SUCCEEDED),
-  schema.literal(ruleLastRunOutcomeValues.WARNING),
-  schema.literal(ruleLastRunOutcomeValues.FAILED),
+export const outcome = schema.oneOf([
+  schema.literal('succeeded'),
+  schema.literal('warning'),
+  schema.literal('failed'),
 ]);
 
 export const rawRuleLastRunSchema = schema.object({
@@ -182,15 +174,12 @@ export const rawRuleAlertsFilterSchema = schema.object({
           }),
           $state: schema.maybe(
             schema.object({
-              store: schema.oneOf([
-                schema.literal(FilterStateStore.APP_STATE),
-                schema.literal(FilterStateStore.GLOBAL_STATE),
-              ]),
+              store: schema.oneOf([schema.literal('appState'), schema.literal('globalState')]),
             })
           ),
         })
       ),
-      dsl: schema.string(),
+      dsl: schema.maybe(schema.string()),
     })
   ),
   timeframe: schema.maybe(
@@ -206,7 +195,7 @@ export const rawRuleAlertsFilterSchema = schema.object({
 });
 
 export const rawRuleActionSchema = schema.object({
-  uuid: schema.string(),
+  uuid: schema.maybe(schema.string()),
   group: schema.maybe(schema.string()),
   actionRef: schema.string(),
   actionTypeId: schema.string(),
