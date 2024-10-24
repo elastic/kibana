@@ -8,5 +8,5 @@
  */
 
 export function sanitazeESQLInput(input: string): string | undefined {
-  return `\`${input.replace(/`/g, '\\`')}\``;
+  return `\`${input.replace(/`/g, '``')}\``;
 }
