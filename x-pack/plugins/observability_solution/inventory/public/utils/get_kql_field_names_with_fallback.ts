@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { InventoryAPIClient } from '../api';
-import { TelemetryClient } from './telemetry/telemetry_client';
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 
-export interface InventoryServices {
-  inventoryAPIClient: InventoryAPIClient;
-  telemetry: TelemetryClient;
+export function getKqlFieldsWithFallback(kuery: string): string[] {
+  try {
+    return getKqlFieldNamesFromExpression(kuery);
+  } catch (e) {
+    return [];
+  }
 }
