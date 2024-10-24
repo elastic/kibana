@@ -27,20 +27,12 @@ describe('extractAuthzDescription', () => {
   });
 
   it('should return route authz description for simple privileges', () => {
-    const route: InternalRouterRoute = {
-      path: '/foo',
-      options: { access: 'public' },
-      handler: jest.fn(),
-      validationSchemas: { request: { body: schema.object({}) } },
-      method: 'get',
-      isVersioned: false,
-      security: {
-        authz: {
-          requiredPrivileges: ['manage_spaces'],
-        },
+    const routeSecurity: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['manage_spaces'],
       },
     };
-    const description = extractAuthzDescription(route.security);
+    const description = extractAuthzDescription(routeSecurity);
     expect(description).toBe('[Authz] Route required privileges: ALL of [manage_spaces].');
   });
 
