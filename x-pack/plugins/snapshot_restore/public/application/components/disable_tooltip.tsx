@@ -6,25 +6,28 @@
  */
 
 import React, { ReactElement } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  isManagedRepository?: boolean;
+  isManaged?: boolean;
+  tooltipMessage: string;
   component: ReactElement;
 }
 
+/**
+ * Component that wraps a given component with a tooltip if isManaged is true.
+ *
+ * @param {boolean} isManaged - Determines if the tooltip should be displayed.
+ * @param {string} tooltipMessage - The message to display inside the tooltip.
+ * @param {React.ReactElement} component - The component to wrap with the tooltip.
+ */
 export const DisableToolTip: React.FunctionComponent<Props> = ({
-  isManagedRepository,
+  isManaged,
+  tooltipMessage,
   component,
 }) => {
-  return isManagedRepository ? (
-    <EuiToolTip
-      content={i18n.translate('xpack.snapshotRestore.repositoryForm.disableToolTipContent', {
-        defaultMessage: 'This field is disabled because you are editing a managed repository.',
-      })}
-      display="block"
-    >
+  return isManaged ? (
+    <EuiToolTip content={tooltipMessage} display="block">
       {component}
     </EuiToolTip>
   ) : (

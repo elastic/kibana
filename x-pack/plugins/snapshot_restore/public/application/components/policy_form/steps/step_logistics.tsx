@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, ReactElement } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiCode,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -34,6 +33,7 @@ import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { InlineLoading } from '../..';
 import { StepProps } from '.';
+import { DisableToolTip } from '../../disable_tooltip';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,
@@ -54,21 +54,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
 
   const { i18n, history } = useServices();
   const { docLinks } = useCore();
-
-  const disableToolTip = (component: ReactElement): ReactElement => {
-    return policy?.isManagedPolicy ? (
-      <EuiToolTip
-        content={i18n.translate('xpack.snapshotRestore.policyForm.disableToolTipContent', {
-          defaultMessage: 'This field is disabled because you are editing a managed policy.',
-        })}
-        display="block"
-      >
-        {component}
-      </EuiToolTip>
-    ) : (
-      component
-    );
-  };
 
   const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] =
     useState<boolean>(false);
@@ -93,6 +78,13 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     Boolean(policy.schedule && policy.schedule !== DEFAULT_POLICY_SCHEDULE)
   );
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState<any>({});
+
+  const managedPolicyTooltipMessage = i18n.translate(
+    'xpack.snapshotRestore.policyForm.disableToolTip',
+    {
+      defaultMessage: 'This field is disabled because you are editing a managed policy.',
+    }
+  );
 
   const renderNameField = () => (
     <EuiDescribedFormGroup
@@ -273,23 +265,29 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       setShowRepositoryNotFoundWarning(!doesRepositoryExist);
     }
 
-    return disableToolTip(
-      <EuiSelect
-        options={repositories.map(({ name }: Repository) => ({
-          value: name,
-          text: name,
-        }))}
-        hasNoInitialSelection={!doesRepositoryExist}
-        value={!doesRepositoryExist ? '' : policy.repository}
-        onBlur={() => setTouched({ ...touched, repository: true })}
-        onChange={(e) => {
-          updatePolicy({
-            repository: e.target.value,
-          });
-        }}
-        fullWidth
-        data-test-subj="repositorySelect"
-        disabled={policy?.isManagedPolicy && isEditing}
+    return (
+      <DisableToolTip
+        isManaged={policy?.isManagedPolicy}
+        tooltipMessage={managedPolicyTooltipMessage}
+        component={
+          <EuiSelect
+            options={repositories.map(({ name }: Repository) => ({
+              value: name,
+              text: name,
+            }))}
+            hasNoInitialSelection={!doesRepositoryExist}
+            value={!doesRepositoryExist ? '' : policy.repository}
+            onBlur={() => setTouched({ ...touched, repository: true })}
+            onChange={(e) => {
+              updatePolicy({
+                repository: e.target.value,
+              });
+            }}
+            fullWidth
+            data-test-subj="repositorySelect"
+            disabled={policy?.isManagedPolicy && isEditing}
+          />
+        }
       />
     );
   };
@@ -341,28 +339,32 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }
         fullWidth
       >
-        {disableToolTip(
-          <EuiFieldText
-            defaultValue={policy.snapshotName}
-            fullWidth
-            onChange={(e) => {
-              updatePolicy({
-                snapshotName: e.target.value,
-              });
-            }}
-            onBlur={() => setTouched({ ...touched, snapshotName: true })}
-            placeholder={i18n.translate(
-              'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
-              {
-                defaultMessage: `'<daily-snap-{now/d}>'`,
-                description:
-                  'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
-              }
-            )}
-            data-test-subj="snapshotNameInput"
-            disabled={policy?.isManagedPolicy && isEditing}
-          />
-        )}
+        <DisableToolTip
+          isManaged={policy?.isManagedPolicy}
+          tooltipMessage={managedPolicyTooltipMessage}
+          component={
+            <EuiFieldText
+              defaultValue={policy.snapshotName}
+              fullWidth
+              onChange={(e) => {
+                updatePolicy({
+                  snapshotName: e.target.value,
+                });
+              }}
+              onBlur={() => setTouched({ ...touched, snapshotName: true })}
+              placeholder={i18n.translate(
+                'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
+                {
+                  defaultMessage: `'<daily-snap-{now/d}>'`,
+                  description:
+                    'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
+                }
+              )}
+              data-test-subj="snapshotNameInput"
+              disabled={policy?.isManagedPolicy && isEditing}
+            />
+          }
+        />
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );

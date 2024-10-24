@@ -6,13 +6,14 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
-import { DisableToolTip } from '../../repository_disable_tooltip';
+import { DisableToolTip } from '../../disable_tooltip';
 
 interface Props {
   repository: GCSRepository;
@@ -50,6 +51,13 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
     });
   };
 
+  const managedRepositoryTooltipMessage = i18n.translate(
+    'xpack.snapshotRestore.repositoryForm.disableToolTip',
+    {
+      defaultMessage: 'This field is disabled because you are editing a managed repository.',
+    }
+  );
+
   return (
     <Fragment>
       {/* Client field */}
@@ -84,7 +92,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.client}
         >
           <DisableToolTip
-            isManagedRepository={isManagedRepository}
+            isManaged={isManagedRepository}
+            tooltipMessage={managedRepositoryTooltipMessage}
             component={
               <EuiFieldText
                 defaultValue={client || ''}
@@ -134,7 +143,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.bucket}
         >
           <DisableToolTip
-            isManagedRepository={isManagedRepository}
+            isManaged={isManagedRepository}
+            tooltipMessage={managedRepositoryTooltipMessage}
             component={
               <EuiFieldText
                 defaultValue={bucket || ''}
@@ -184,7 +194,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.basePath}
         >
           <DisableToolTip
-            isManagedRepository={isManagedRepository}
+            isManaged={isManagedRepository}
+            tooltipMessage={managedRepositoryTooltipMessage}
             component={
               <EuiFieldText
                 defaultValue={basePath || ''}
