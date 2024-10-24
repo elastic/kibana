@@ -31,7 +31,7 @@ const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
       buffer: nodeLibsBrowser.buffer,
       child_process: false,
       cluster: false,
-      console: nodeLibsBrowser.console,
+      console: false,
       constants: nodeLibsBrowser.constants,
       crypto: nodeLibsBrowser.crypto,
       dgram: false,
