@@ -19,6 +19,7 @@ import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integratio
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
 // Failing: See https://github.com/elastic/kibana/issues/181889
+// Failing: See https://github.com/elastic/kibana/issues/181889
 describe.skip(
   'Alert Event Details',
   {
