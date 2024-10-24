@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
+
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
@@ -49,17 +50,17 @@ export const GridLayout = ({
                 key={rowData.title}
                 rowIndex={rowIndex}
                 runtimeSettings={runtimeSettings}
-                activePanelId={interactionEvent?.id}
                 renderPanelContents={renderPanelContents}
                 targetRowIndex={interactionEvent?.targetRowIndex}
+                gridLayoutStateManager={gridLayoutStateManager}
                 toggleIsCollapsed={() => {
                   const currentLayout = gridLayoutStateManager.gridLayout$.value;
                   currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
-                  if (!nextInteractionEvent) {
-                    gridLayoutStateManager.hideDragPreview();
+                  if (nextInteractionEvent?.type === 'drop') {
+                    gridLayoutStateManager.activePanel$.next(undefined);
                   }
                   gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                 }}
@@ -69,10 +70,6 @@ export const GridLayout = ({
           })}
         </div>
       </GridHeightSmoother>
-      <GridOverlay
-        interactionEvent={interactionEvent}
-        gridLayoutStateManager={gridLayoutStateManager}
-      />
     </>
   );
 };

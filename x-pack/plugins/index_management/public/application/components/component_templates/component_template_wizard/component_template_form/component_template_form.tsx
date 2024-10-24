@@ -19,10 +19,7 @@ import {
   StepMappingsContainer,
   StepAliasesContainer,
 } from '../../shared_imports';
-import {
-  serializeAsESLifecycle,
-  deserializeESLifecycle,
-} from '../../../../../../common/lib/data_stream_serialization';
+import { serializeAsESLifecycle, deserializeESLifecycle } from '../../../../../../common/lib';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 

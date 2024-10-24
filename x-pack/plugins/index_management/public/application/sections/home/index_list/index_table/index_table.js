@@ -52,6 +52,7 @@ import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_paginatio
 
 const getColumnConfigs = ({
   showIndexStats,
+  showSizeAndDocCount,
   history,
   filterChanged,
   extensionsService,
@@ -111,6 +112,28 @@ const getColumnConfigs = ({
     },
   ];
 
+  // size and docs count enabled by either "enableIndexStats" or "enableSizeAndDocCount" configs
+  if (showIndexStats || showSizeAndDocCount) {
+    columns.push(
+      {
+        fieldName: 'documents',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
+          defaultMessage: 'Documents count',
+        }),
+        order: 60,
+        render: (index) => {
+          return Number(index.documents ?? 0).toLocaleString();
+        },
+      },
+      {
+        fieldName: 'size',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
+          defaultMessage: 'Storage size',
+        }),
+        order: 70,
+      }
+    );
+  }
   if (showIndexStats) {
     columns.push(
       {
@@ -141,25 +164,6 @@ const getColumnConfigs = ({
           defaultMessage: 'Replicas',
         }),
         order: 50,
-      },
-      {
-        fieldName: 'documents',
-        label: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
-          defaultMessage: 'Docs count',
-        }),
-        order: 60,
-        render: (index) => {
-          if (index.documents) {
-            return Number(index.documents).toLocaleString();
-          }
-        },
-      },
-      {
-        fieldName: 'size',
-        label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
-          defaultMessage: 'Storage size',
-        }),
-        order: 70,
       }
     );
   }
@@ -545,6 +549,7 @@ export class IndexTable extends Component {
           const { application, http } = core;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
+            showSizeAndDocCount: config.enableSizeAndDocCount,
             extensionsService,
             filterChanged,
             history,
