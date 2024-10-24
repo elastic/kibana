@@ -27,6 +27,7 @@ export const DragPreview = ({
 
   useEffect(
     () => {
+      /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
         gridLayoutStateManager.activePanel$,
         gridLayoutStateManager.gridLayout$,
