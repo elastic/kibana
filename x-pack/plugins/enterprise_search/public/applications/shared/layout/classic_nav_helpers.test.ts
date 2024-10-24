@@ -6,6 +6,9 @@
  */
 
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
+
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+
 import '../../__mocks__/react_router';
 
 jest.mock('../react_router_helpers/link_events', () => ({
@@ -38,7 +41,7 @@ describe('generateSideNavItems', () => {
       title: 'Web crawlers',
       url: '/app/enterprise_search/content/crawlers',
     },
-  };
+  } as unknown as Record<string, ChromeNavLink | undefined>;
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibanaValues.history.location.pathname = '/';
