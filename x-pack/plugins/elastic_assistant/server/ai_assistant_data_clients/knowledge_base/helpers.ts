@@ -37,7 +37,6 @@ export const isModelAlreadyExistsError = (error: Error) => {
 export const getKBVectorSearchQuery = ({
   filter,
   kbResource,
-  modelId,
   query,
   required,
   user,
@@ -45,7 +44,6 @@ export const getKBVectorSearchQuery = ({
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
-  modelId: string;
   query: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;
@@ -118,11 +116,9 @@ export const getKBVectorSearchQuery = ({
     bool: {
       must: [
         {
-          text_expansion: {
-            'vector.tokens': {
-              model_id: modelId,
-              model_text: query,
-            },
+          semantic: {
+            field: 'semantic_text',
+            query,
           },
         },
         ...requiredFilter,

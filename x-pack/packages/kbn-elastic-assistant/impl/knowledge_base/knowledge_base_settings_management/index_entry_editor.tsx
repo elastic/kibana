@@ -101,7 +101,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         dataViews.getFieldsForWildcard({
           pattern: entry?.index ?? '',
         }),
-      []
+      [entry?.index]
     );
 
     const fieldOptions = useMemo(
