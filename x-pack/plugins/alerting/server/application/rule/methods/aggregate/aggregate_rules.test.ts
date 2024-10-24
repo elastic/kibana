@@ -23,7 +23,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 
 import { RegistryRuleType } from '../../../../rule_type_registry';
-import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
+import { fromKueryExpression, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
 import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
@@ -78,24 +78,28 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('aggregate()', () => {
-  const listedTypes = new Set<RegistryRuleType>([
-    {
-      actionGroups: [],
-      actionVariables: undefined,
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      id: 'myType',
-      name: 'myType',
-      category: 'test',
-      producer: 'myApp',
-      enabledInLicense: true,
-      hasAlertsMappings: false,
-      hasFieldsForAAD: false,
-      validLegacyConsumers: [],
-    },
+  const listedTypes = new Map<string, RegistryRuleType>([
+    [
+      'myType',
+      {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: 'myType',
+        name: 'myType',
+        category: 'test',
+        producer: 'myApp',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
+      },
+    ],
   ]);
+
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
@@ -161,26 +165,16 @@ describe('aggregate()', () => {
     });
 
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
-      new Set([
-        {
-          id: 'myType',
-          name: 'Test',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          defaultActionGroupId: 'default',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          recoveryActionGroup: RecoveredActionGroup,
-          category: 'test',
-          producer: 'alerts',
-          authorizedConsumers: {
-            myApp: { read: true, all: true },
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [
+          'myType',
+          {
+            authorizedConsumers: {
+              myApp: { read: true, all: true },
+            },
           },
-          enabledInLicense: true,
-          hasAlertsMappings: false,
-          hasFieldsForAAD: false,
-          validLegacyConsumers: [],
-        },
+        ],
       ])
     );
   });
@@ -392,6 +386,34 @@ describe('aggregate()', () => {
         },
       },
     ]);
+  });
+
+  test('combines the filters with the auth filter correctly', async () => {
+    const authFilter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: authFilter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.aggregate({
+      options: {
+        ruleTypeIds: ['my-rule-type-id'],
+        consumers: ['bar'],
+        filter: `alert.attributes.tags: ['bar']`,
+      },
+      aggs: defaultRuleAggregationFactory(),
+    });
+
+    const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
+      `"((alert.attributes.tags: ['bar'] AND alert.attributes.alertTypeId: my-rule-type-id AND alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+    );
   });
 
   test('logs audit event when not authorized to aggregate rules', async () => {

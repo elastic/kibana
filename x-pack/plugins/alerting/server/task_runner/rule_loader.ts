@@ -50,9 +50,9 @@ interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> 
  * - create a fakeRequest object using the rule API key
  * - get an instance of the RulesClient using the fakeRequest
  */
-export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
+export async function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   params: ValidateRuleAndCreateFakeRequestParams<Params>
-): RunRuleParams<Params> {
+): Promise<RunRuleParams<Params>> {
   const {
     context,
     logger,

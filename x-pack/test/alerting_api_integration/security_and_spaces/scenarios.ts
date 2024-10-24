@@ -282,6 +282,10 @@ const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
   space: Space1,
 };
 
+interface Space1AllAtSpace1 extends Scenario {
+  id: 'space_1_all at space1';
+}
+
 interface Space1AllWithRestrictedFixtureAtSpace1 extends Scenario {
   id: 'space_1_all_with_restricted_fixture at space1';
 }
@@ -322,7 +326,8 @@ export const systemActionScenario: SystemActionSpace1 = {
 interface Space1AllAtSpace1 extends Scenario {
   id: 'space_1_all at space1';
 }
-const Space1AllAtSpace1: Space1AllAtSpace1 = {
+
+export const Space1AllAtSpace1: Space1AllAtSpace1 = {
   id: 'space_1_all at space1',
   user: Space1All,
   space: Space1,

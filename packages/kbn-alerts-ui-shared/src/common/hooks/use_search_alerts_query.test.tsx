@@ -98,7 +98,8 @@ describe('useSearchAlertsQuery', () => {
 
   const params: UseSearchAlertsQueryParams = {
     data: mockDataPlugin as unknown as DataPublicPluginStart,
-    featureIds: ['siem'],
+    ruleTypeIds: ['siem.esqlRule'],
+    consumers: ['siem'],
     fields: [
       { field: 'kibana.rule.type.id', include_unmapped: true },
       { field: '*', include_unmapped: true },
@@ -123,6 +124,33 @@ describe('useSearchAlertsQuery', () => {
 
   afterEach(() => {
     queryClient.removeQueries();
+  });
+
+  it('calls searchAlerts with correct arguments', async () => {
+    const { result, waitForValueToChange } = renderHook(() => useSearchAlertsQuery(params), {
+      wrapper,
+    });
+
+    await waitForValueToChange(() => result.current.data);
+
+    expect(mockDataPlugin.search.search).toHaveBeenCalledWith(
+      {
+        consumers: ['siem'],
+        fields: [
+          { field: 'kibana.rule.type.id', include_unmapped: true },
+          { field: '*', include_unmapped: true },
+        ],
+        pagination: { pageIndex: 0, pageSize: 10 },
+        query: { ids: { values: ['alert-id-1'] } },
+        ruleTypeIds: ['siem.esqlRule'],
+        runtimeMappings: undefined,
+        sort: [],
+      },
+      {
+        abortSignal: expect.any(AbortSignal),
+        strategy: 'privateRuleRegistryAlertsSearchStrategy',
+      }
+    );
   });
 
   it('returns the response correctly', async () => {
@@ -261,8 +289,8 @@ describe('useSearchAlertsQuery', () => {
     });
   });
 
-  it('does not fetch with no feature ids', () => {
-    const { result } = renderHook(() => useSearchAlertsQuery({ ...params, featureIds: [] }), {
+  it('does not fetch with no rule type ids', () => {
+    const { result } = renderHook(() => useSearchAlertsQuery({ ...params, ruleTypeIds: [] }), {
       wrapper,
     });
 

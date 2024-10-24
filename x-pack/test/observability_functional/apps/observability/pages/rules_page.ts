@@ -36,6 +36,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         search_fields: ['name'],
       })
       .expect(200);
+
     return rules.find((rule: any) => rule.name === name);
   }
 

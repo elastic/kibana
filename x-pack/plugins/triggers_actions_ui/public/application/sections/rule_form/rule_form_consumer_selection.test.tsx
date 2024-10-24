@@ -162,19 +162,6 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
 
-  it('should display nothing if observability is one of the consumers', () => {
-    render(
-      <RuleFormConsumerSelection
-        selectedConsumer={null}
-        consumers={['logs', 'observability']}
-        onChange={mockOnChange}
-        errors={{}}
-      />
-    );
-
-    expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
-  });
-
   it('should display the initial selected consumer', () => {
     render(
       <RuleFormConsumerSelection

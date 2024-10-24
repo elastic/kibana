@@ -133,10 +133,10 @@ export async function bulkEditRules<Params extends RuleParams>(
   const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
-    );
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: alertingAuthorizationFilterOpts,
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

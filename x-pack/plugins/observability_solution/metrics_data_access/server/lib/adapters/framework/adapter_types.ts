@@ -20,7 +20,7 @@ import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
@@ -28,7 +28,7 @@ import { VersionedRouteConfig } from '@kbn/core-http-server';
 import { MetricsDataPluginSetup } from '../../../types';
 
 export interface InfraServerPluginSetupDeps {
-  alerting: AlertingPluginContract;
+  alerting: AlertingServerSetup;
   data: DataPluginSetup;
   home: HomeServerPluginSetup;
   features: FeaturesPluginSetup;

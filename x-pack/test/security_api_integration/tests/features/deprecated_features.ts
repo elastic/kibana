@@ -408,6 +408,24 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting_rule_type_two'
       );
 
+      // Create rules as user with new privileges (B).
+      const newUserB = getUserCredentials('case_2_b_new');
+      const ruleOneNewB = await createRule(
+        newUserB,
+        'case_2_b_new_one',
+        'case_2_feature_b',
+        'alerting_rule_type_one'
+      );
+
+      // Create cases as user with new privileges (C).
+      const newUserC = getUserCredentials('case_2_c_new');
+      const ruleTwoNewC = await createRule(
+        newUserC,
+        'case_2_c_new_two',
+        'case_2_feature_c',
+        'alerting_rule_type_two'
+      );
+
       // Users with deprecated privileges should be able to access rules created by themselves and
       // users with new privileges.
       for (const ruleToCheck of [
@@ -415,39 +433,23 @@ export default function ({ getService }: FtrProviderContext) {
         ruleTwoDeprecated,
         ruleOneTransformed,
         ruleTwoTransformed,
+        ruleOneNewB,
+        ruleTwoNewC,
       ]) {
         expect(await getRule(deprecatedUser, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(transformedUser, ruleToCheck.id)).toBeDefined();
       }
 
-      // NOTE: Scenarios below require SO migrations for both alerting rules and alerts to switch to
-      // a new producer that is tied to feature ID. Presumably we won't have this requirement once
-      // https://github.com/elastic/kibana/pull/183756 is resolved.
-
-      // Create rules as user with new privileges (B).
-      // const newUserB = getUserCredentials('case_2_b_new');
-      // const caseOneNewB = await createRule(newUserB, {
-      //   title: 'case_2_b_new_one',
-      //   owner: 'cases_owner_one',
-      // });
-      //
-      // // Create cases as user with new privileges (C).
-      // const newUserC = getUserCredentials('case_2_c_new');
-      // const caseTwoNewC = await createRule(newUserC, {
-      //   title: 'case_2_c_new_two',
-      //   owner: 'cases_owner_two',
-      // });
-      //
-
-      // User B and User C should be able to access cases created by themselves and users with
-      // deprecated and transformed privileges, but only for the specific owner.
-      // for (const caseToCheck of [ruleOneDeprecated, ruleOneTransformed, caseOneNewB]) {
-      //   expect(await getRule(newUserB, caseToCheck.id)).toBeDefined();
-      //   expect(await getRule(newUserC, caseToCheck.id)).toBeUndefined();
-      // }
-      // for (const caseToCheck of [ruleTwoDeprecated, ruleTwoTransformed, caseTwoNewC]) {
-      //   expect(await getRule(newUserC, caseToCheck.id)).toBeDefined();
-      //   expect(await getRule(newUserB, caseToCheck.id)).toBeUndefined();
-      // }
+      // User B and User C should be able to access rule types created by themselves and users with
+      // deprecated and transformed privileges, but only for the specific consumer.
+      for (const ruleToCheck of [ruleOneDeprecated, ruleOneTransformed, ruleOneNewB]) {
+        expect(await getRule(newUserB, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(newUserC, ruleToCheck.id)).toBeUndefined();
+      }
+      for (const ruleToCheck of [ruleTwoDeprecated, ruleTwoTransformed, ruleTwoNewC]) {
+        expect(await getRule(newUserC, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(newUserB, ruleToCheck.id)).toBeUndefined();
+      }
     });
   });
 }

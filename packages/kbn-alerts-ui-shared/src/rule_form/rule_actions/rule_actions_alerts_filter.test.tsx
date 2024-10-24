@@ -107,7 +107,7 @@ describe('ruleActionsAlertsFilter', () => {
         action={getAction('1')}
         onChange={mockOnChange}
         appName="stackAlerts"
-        featureIds={['stackAlerts']}
+        ruleTypeId=".es-query"
       />
     );
 
@@ -120,7 +120,7 @@ describe('ruleActionsAlertsFilter', () => {
         action={getAction('1')}
         onChange={mockOnChange}
         appName="stackAlerts"
-        featureIds={['stackAlerts']}
+        ruleTypeId=".es-query"
       />
     );
 
@@ -142,7 +142,7 @@ describe('ruleActionsAlertsFilter', () => {
         })}
         onChange={mockOnChange}
         appName="stackAlerts"
-        featureIds={['stackAlerts']}
+        ruleTypeId=".es-query"
       />
     );
 
@@ -164,7 +164,7 @@ describe('ruleActionsAlertsFilter', () => {
         })}
         onChange={mockOnChange}
         appName="stackAlerts"
-        featureIds={['stackAlerts']}
+        ruleTypeId=".es-query"
       />
     );
 
@@ -241,7 +241,6 @@ describe('ruleActionsAlertsFilter', () => {
         })}
         onChange={mockOnChange}
         appName="stackAlerts"
-        featureIds={['stackAlerts']}
       />
     );
 

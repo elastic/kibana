@@ -30,13 +30,12 @@ import {
   getMockedControlGroupRenderer,
 } from './mocks/control_group_renderer';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FilterGroupProps } from './types';
 
-const featureIds = [AlertConsumers.STACK_ALERTS];
+const ruleTypeIds = ['.es-query'];
 const spaceId = 'test-space-id';
-const LOCAL_STORAGE_KEY = `${featureIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`;
+const LOCAL_STORAGE_KEY = `${ruleTypeIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`;
 
 const controlGroupMock = getControlGroupMock();
 
@@ -63,7 +62,7 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
     <FilterGroup
       spaceId={spaceId}
       dataViewId="alert-filters-test-dv"
-      featureIds={featureIds}
+      ruleTypeIds={ruleTypeIds}
       defaultControls={[
         ...DEFAULT_CONTROLS,
         {

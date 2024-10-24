@@ -309,7 +309,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     dynamicRowHeight,
     query,
     querySnapshot,
-    featureIds,
+    ruleTypeIds,
     cases: { data: cases, isLoading: isLoadingCases },
     maintenanceWindows: { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows },
     controls,
@@ -345,7 +345,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       query,
       useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
       refresh: refetchAlerts,
-      featureIds,
+      ruleTypeIds,
       hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
     };
   }, [
@@ -355,7 +355,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     alertsTableConfiguration.hideBulkActions,
     query,
     refetchAlerts,
-    featureIds,
+    ruleTypeIds,
   ]);
 
   const {

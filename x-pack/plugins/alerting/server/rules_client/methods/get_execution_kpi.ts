@@ -105,16 +105,16 @@ export async function getGlobalExecutionKpiWithAuth(
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Alert,
-      {
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      filterOpts: {
         type: AlertingAuthorizationFilterType.KQL,
         fieldNames: {
           ruleTypeId: 'kibana.alert.rule.rule_type_id',
           consumer: 'kibana.alert.rule.consumer',
         },
-      }
-    );
+      },
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

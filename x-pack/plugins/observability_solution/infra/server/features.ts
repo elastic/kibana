@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
+  AlertConsumers,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
@@ -31,6 +33,11 @@ const metricRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
+const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
+}));
+
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
@@ -44,7 +51,7 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: metricRuleTypes,
+  alerting: metricAlertingFeatures,
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
@@ -56,10 +63,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: metricRuleTypes,
+          all: metricAlertingFeatures,
         },
         alert: {
-          all: metricRuleTypes,
+          all: metricAlertingFeatures,
         },
       },
       management: {
@@ -77,10 +84,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: metricRuleTypes,
+          read: metricAlertingFeatures,
         },
         alert: {
-          read: metricRuleTypes,
+          read: metricAlertingFeatures,
         },
       },
       management: {
@@ -98,6 +105,11 @@ const logsRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
+const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [LOGS_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
+}));
+
 export const LOGS_FEATURE = {
   id: LOGS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
@@ -111,7 +123,7 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: logsRuleTypes,
+  alerting: logsAlertingFeatures,
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
@@ -123,10 +135,10 @@ export const LOGS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: logsRuleTypes,
+          all: logsAlertingFeatures,
         },
         alert: {
-          all: logsRuleTypes,
+          all: logsAlertingFeatures,
         },
       },
       management: {
@@ -140,10 +152,10 @@ export const LOGS_FEATURE = {
       api: ['infra', 'rac'],
       alerting: {
         rule: {
-          read: logsRuleTypes,
+          read: logsAlertingFeatures,
         },
         alert: {
-          read: logsRuleTypes,
+          read: logsAlertingFeatures,
         },
       },
       management: {

@@ -8,7 +8,7 @@
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts, AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
@@ -81,7 +81,7 @@ const groupActionVariableDescription = i18n.translate(
 );
 
 export function registerInventoryThresholdRuleType(
-  alertingPlugin: PluginSetupContract,
+  alertingPlugin: AlertingServerSetup,
   libs: InfraBackendLibs,
   { featureFlags }: InfraConfig,
   locators: InfraLocators

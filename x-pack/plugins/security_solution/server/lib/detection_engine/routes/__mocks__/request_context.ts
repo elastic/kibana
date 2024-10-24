@@ -102,7 +102,7 @@ const createRequestContextMock = (
       getActionsClient: jest.fn(() => clients.actionsClient),
     } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
     alerting: {
-      getRulesClient: jest.fn(() => clients.rulesClient),
+      getRulesClient: jest.fn().mockResolvedValue(clients.rulesClient),
     } as unknown as jest.Mocked<AlertingApiRequestHandlerContext>,
     licensing: clients.licensing,
     lists: {

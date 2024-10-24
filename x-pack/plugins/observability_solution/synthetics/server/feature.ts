@@ -11,9 +11,14 @@ import {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import {
+  UPTIME_RULE_TYPE_IDS,
+  SYNTHETICS_RULE_TYPE_IDS,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
-import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import {
@@ -22,14 +27,12 @@ import {
 } from './saved_objects/synthetics_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
-const UPTIME_RULE_TYPES = [
-  'xpack.uptime.alerts.tls',
-  'xpack.uptime.alerts.tlsCertificate',
-  'xpack.uptime.alerts.monitorStatus',
-  'xpack.uptime.alerts.durationAnomaly',
-];
+const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
-const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
+const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
+}));
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
@@ -60,7 +63,7 @@ export const syntheticsFeature = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: ruleTypes,
+  alerting: alertingFeatures,
   privileges: {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
@@ -80,10 +83,10 @@ export const syntheticsFeature = {
       },
       alerting: {
         rule: {
-          all: ruleTypes,
+          all: alertingFeatures,
         },
         alert: {
-          all: ruleTypes,
+          all: alertingFeatures,
         },
       },
       management: {
@@ -109,10 +112,10 @@ export const syntheticsFeature = {
       },
       alerting: {
         rule: {
-          read: ruleTypes,
+          read: alertingFeatures,
         },
         alert: {
-          read: ruleTypes,
+          read: alertingFeatures,
         },
       },
       management: {
