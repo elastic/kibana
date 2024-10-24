@@ -507,6 +507,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(esAggsIdMap)],
+            isTextBased: [!!esqlLayer],
           },
         },
         ...expressions,

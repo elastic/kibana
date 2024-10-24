@@ -62,10 +62,16 @@ export function getESQLForLayer(
         ? `bucket_${index + (col.isBucketed ? 0 : 1)}_${aggId}`
         : `bucket_${index}_${aggId}`;
 
+      const format =
+        col.sourceField && indexPattern.fieldFormatMap
+          ? indexPattern.fieldFormatMap[col.sourceField]
+          : undefined;
+
       esAggsIdMap[esAggsId] = [
         {
           ...col,
           id: colId,
+          params: format,
           label: col.customLabel
             ? col.label
             : operationDefinitionMap[col.operationType].getDefaultLabel(
@@ -141,10 +147,16 @@ export function getESQLForLayer(
 
       if (!def.toESQL) return undefined;
 
+      const format =
+        col.sourceField && indexPattern.fieldFormatMap
+          ? indexPattern.fieldFormatMap[col.sourceField]
+          : undefined;
+
       esAggsIdMap[esAggsId] = [
         {
           ...col,
           id: colId,
+          params: format,
           label: col.customLabel
             ? col.label
             : operationDefinitionMap[col.operationType].getDefaultLabel(
