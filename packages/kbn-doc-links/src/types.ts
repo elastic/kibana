@@ -215,6 +215,7 @@ export interface DocLinks {
     readonly gettingStarted: string;
     readonly gmail: string;
     readonly googleDrive: string;
+    readonly guide: string;
     readonly indexingSchedule: string;
     readonly jiraCloud: string;
     readonly jiraServer: string;

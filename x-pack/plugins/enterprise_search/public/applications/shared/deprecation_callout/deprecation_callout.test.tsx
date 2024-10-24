@@ -14,7 +14,9 @@ import { EnterpriseSearchDeprecationCallout } from './deprecation_callout';
 describe('EnterpriseSearchDeprecationCallout', () => {
   it('renders', () => {
     const dismissFxn = jest.fn();
-    const wrapper = shallow(<EnterpriseSearchDeprecationCallout onDismissAction={dismissFxn} />);
+    const wrapper = shallow(
+      <EnterpriseSearchDeprecationCallout onDismissAction={dismissFxn} learnMoreLinkUrl="#" />
+    );
 
     expect(wrapper.find('EuiCallOut')).toHaveLength(1);
     wrapper.find('EuiCallOut').simulate('dismiss');
@@ -23,7 +25,9 @@ describe('EnterpriseSearchDeprecationCallout', () => {
 
   it('dismisses via the link', () => {
     const dismissFxn = jest.fn();
-    const wrapper = shallow(<EnterpriseSearchDeprecationCallout onDismissAction={dismissFxn} />);
+    const wrapper = shallow(
+      <EnterpriseSearchDeprecationCallout onDismissAction={dismissFxn} learnMoreLinkUrl="#" />
+    );
 
     expect(wrapper.find('EuiLink')).toHaveLength(1);
     wrapper.find('EuiLink').simulate('click');

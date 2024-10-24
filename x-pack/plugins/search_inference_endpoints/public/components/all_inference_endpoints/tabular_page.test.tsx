@@ -92,12 +92,43 @@ describe('When the tabular page is loaded', () => {
 
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('Elasticsearch');
-    expect(rows[1]).toHaveTextContent('.own_model');
+    expect(rows[1]).toHaveTextContent('.elser_model_2');
 
     expect(rows[2]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('.elser_model_2');
+    expect(rows[2]).toHaveTextContent('.multilingual-e5-small');
 
-    expect(rows[3]).toHaveTextContent('OpenAI');
+    expect(rows[3]).toHaveTextContent('Elasticsearch');
     expect(rows[3]).toHaveTextContent('.own_model');
+
+    expect(rows[4]).toHaveTextContent('Elasticsearch');
+    expect(rows[4]).toHaveTextContent('.elser_model_2');
+
+    expect(rows[5]).toHaveTextContent('OpenAI');
+    expect(rows[5]).toHaveTextContent('.own_model');
+  });
+
+  it('should only disable delete action for preconfigured endpoints', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    const deleteActions = screen.getAllByTestId('inferenceUIDeleteAction');
+
+    expect(deleteActions[0]).toBeDisabled();
+    expect(deleteActions[1]).toBeDisabled();
+    expect(deleteActions[2]).toBeEnabled();
+    expect(deleteActions[3]).toBeEnabled();
+    expect(deleteActions[4]).toBeEnabled();
+  });
+
+  it('should show preconfigured badge only for preconfigured endpoints', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    const preconfigured = 'PRECONFIGURED';
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[1]).toHaveTextContent(preconfigured);
+    expect(rows[2]).toHaveTextContent(preconfigured);
+    expect(rows[3]).not.toHaveTextContent(preconfigured);
+    expect(rows[4]).not.toHaveTextContent(preconfigured);
+    expect(rows[5]).not.toHaveTextContent(preconfigured);
   });
 });
