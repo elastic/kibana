@@ -57,10 +57,6 @@ export function ServiceTabEmptyState({ id, onDismiss }: ServiceTabEmptyStateProp
     telemetry.reportLearnMoreClick(defaultClickTelemetryParams);
   }
 
-  function handleDismiss() {
-    onDismiss?.();
-  }
-
   return (
     <AddDataPanel
       data-test-subj="apmAddApmCallout"
@@ -69,7 +65,7 @@ export function ServiceTabEmptyState({ id, onDismiss }: ServiceTabEmptyStateProp
       onAddData={handleAddAPMClick}
       onTryIt={handleTryItClick}
       onLearnMore={handleLearnMoreClick}
-      onDismiss={onDismiss && handleDismiss}
+      onDismiss={onDismiss}
     />
   );
 }
