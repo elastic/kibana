@@ -420,8 +420,7 @@ interface BaseOperationDefinitionProps<
     indexPattern: IndexPattern,
     layer: FormBasedLayer,
     uiSettings: IUiSettingsClient,
-    dateRange: DateRange,
-    data: DataPublicPluginStart
+    dateRange: DateRange
   ) => string | undefined;
 }
 

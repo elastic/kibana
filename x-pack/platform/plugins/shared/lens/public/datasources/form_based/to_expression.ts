@@ -10,7 +10,6 @@ import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import type {
   AggFunctionsMapping,
-  DataPublicPluginStart,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
@@ -79,7 +78,6 @@ function getExpressionForLayer(
   featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
-  data: DataPublicPluginStart,
   searchSessionId?: string,
   forceDSL?: boolean
 ): ExpressionAstExpression | null {
@@ -182,7 +180,7 @@ function getExpressionForLayer(
     const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
     const esqlLayer =
       canUseESQL &&
-      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant, data);
+      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
 
     if (!esqlLayer) {
       esAggEntries.forEach(([colId, col], index) => {
@@ -564,7 +562,6 @@ export function toExpression(
   featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
-  data: DataPublicPluginStart,
   searchSessionId?: string,
   forceDSL?: boolean
 ) {
@@ -576,7 +573,6 @@ export function toExpression(
       featureFlags,
       dateRange,
       nowInstant,
-      data,
       searchSessionId,
       forceDSL
     );
