@@ -9,7 +9,6 @@
 
 import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { isFailError } from '@kbn/dev-cli-errors';
 import { I18nCheckTaskContext, MessageDescriptor } from '../types';
@@ -24,13 +23,7 @@ import {
 import { TaskReporter } from '../utils/task_reporter';
 import { flagFailError, isDefined, undefinedOrBoolean } from '../utils/verify_bin_flags';
 
-const toolingLog = new ToolingLog({
-  level: 'info',
-  writeTo: process.stdout,
-});
-
 const runStartTime = Date.now();
-const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 const skipOnNoTranslations = ({ config }: I18nCheckTaskContext) =>
   !config?.translations.length && 'No translations found.';
@@ -50,9 +43,13 @@ run(
       namespace: namespace,
       fix = false,
       path,
+      silent,
+      quiet,
     },
     log,
   }) => {
+    const reportTime = getTimeReporter(log, 'scripts/i18n_check');
+
     if (
       fix &&
       (isDefined(ignoreIncompatible) ||
@@ -90,7 +87,7 @@ run(
     const kibanaRootPaths = ['./src', './packages', './x-pack'];
     const rootPaths = Array().concat(path || kibanaRootPaths);
 
-    const list = new Listr<I18nCheckTaskContext>(
+    const list = new Listr<I18nCheckTaskContext, 'default' | 'silent' | 'verbose'>(
       [
         {
           title: 'Checking .i18nrc.json files',
@@ -131,13 +128,14 @@ run(
       {
         concurrent: false,
         exitOnError: true,
-        renderer: process.env.CI ? 'verbose' : ('default' as any),
+        forceTTY: false,
+        renderer: silent ? 'silent' : process.env.CI ? 'verbose' : 'default',
       }
     );
 
     try {
       const messages: Map<string, MessageDescriptor[]> = new Map();
-      const taskReporter = new TaskReporter({ toolingLog });
+      const taskReporter = new TaskReporter({ toolingLog: log });
       await list.run({ messages, taskReporter });
 
       reportTime(runStartTime, 'total', {
@@ -150,6 +148,7 @@ run(
         reportTime(runStartTime, 'error', {
           success: false,
         });
+        log.error(error);
       } else {
         log.error('Unhandled exception!');
         log.error(error);

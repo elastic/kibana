@@ -854,6 +854,13 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "product-doc-install-status": [
+    "index_name",
+    "installation_status",
+    "last_installation_date",
+    "product_name",
+    "product_version"
+  ],
   "query": [
     "description",
     "title",
