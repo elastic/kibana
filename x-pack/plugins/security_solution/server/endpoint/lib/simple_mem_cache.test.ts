@@ -51,6 +51,13 @@ describe('SimpleMemCache class', () => {
     expect(cache.get(key)).toEqual(undefined);
   });
 
+  it('should delete all entries from cache', () => {
+    cache.set(key, value);
+    cache.deleteAll();
+
+    expect(cache.get(key)).toEqual(undefined);
+  });
+
   it('should cleanup expired cache entries', () => {
     const key2 = 'myKey';
     cache.set(key, value); // Default ttl of 10s

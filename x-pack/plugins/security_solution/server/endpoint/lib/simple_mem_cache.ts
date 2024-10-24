@@ -19,6 +19,8 @@ export interface SimpleMemCacheInterface {
   get<TValue = any>(key: any): TValue | undefined;
   /** Delete a piece of data from cache */
   delete(key: any): void;
+  /** Delete all cached entries */
+  deleteAll(): void;
   /** Clean up the cache by removing all expired entries */
   cleanup(): void;
 }
@@ -77,6 +79,10 @@ export class SimpleMemCache implements SimpleMemCacheInterface {
 
   public delete(key: any): void {
     this.cache.delete(key);
+  }
+
+  public deleteAll(): void {
+    this.cache.clear();
   }
 
   public cleanup(): void {
