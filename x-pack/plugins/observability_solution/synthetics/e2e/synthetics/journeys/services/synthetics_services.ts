@@ -264,10 +264,10 @@ export class SyntheticsServices {
   }
 
   async getPrivateLocations(): Promise<SyntheticsPrivateLocations> {
-    const response = await this.requester.request<SyntheticsPrivateLocations>({
+    const response = await this.requester.request({
       path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
       method: 'GET',
     });
-    return response.data;
+    return response.data as SyntheticsPrivateLocations;
   }
 }
