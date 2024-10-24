@@ -66,7 +66,7 @@ export type {
   PrivilegeSet,
 } from './route';
 
-export { validBodyOutput } from './route';
+export { validBodyOutput, ReservedPrivilegesSet } from './route';
 export type {
   RouteValidationFunction,
   RouteValidationResultFactory,

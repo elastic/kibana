@@ -35,7 +35,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<
     RouteConfigOptions<Method>,
-    'access' | 'description' | 'deprecated' | 'discontinued' | 'security'
+    'access' | 'description' | 'summary' | 'deprecated' | 'discontinued' | 'security'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;

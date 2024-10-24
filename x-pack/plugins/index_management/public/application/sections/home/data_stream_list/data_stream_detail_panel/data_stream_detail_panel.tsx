@@ -52,13 +52,14 @@ import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
 
+interface Detail {
+  name: string;
+  toolTip: string;
+  content: any;
+  dataTestSubj: string;
+}
 interface DetailsListProps {
-  details: Array<{
-    name: string;
-    toolTip: string;
-    content: any;
-    dataTestSubj: string;
-  }>;
+  details: Detail[];
 }
 
 const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
@@ -162,6 +163,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       ilmPolicyName,
       storageSize,
       maxTimeStamp,
+      meteringStorageSize,
+      meteringDocsCount,
       lifecycle,
     } = dataStream;
 
@@ -222,7 +225,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       </EuiLink>
     );
 
-    const defaultDetails = [
+    const defaultDetails: Detail[] = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
           defaultMessage: 'Health',
@@ -233,34 +236,67 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         content: <DataHealth health={health} />,
         dataTestSubj: 'healthDetail',
       },
-      {
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
-          defaultMessage: 'Last updated',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
-          defaultMessage: 'The most recent document to be added to the data stream.',
-        }),
-        content: maxTimeStamp ? (
-          humanizeTimeStamp(maxTimeStamp)
-        ) : (
-          <em>
-            {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampNoneMessage', {
-              defaultMessage: `Never`,
-            })}
-          </em>
-        ),
-        dataTestSubj: 'lastUpdatedDetail',
-      },
-      {
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
-          defaultMessage: 'Storage size',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
-          defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
-        }),
-        content: storageSize,
-        dataTestSubj: 'storageSizeDetail',
-      },
+    ];
+
+    // add either documents count and size or last updated and size
+    if (config.enableSizeAndDocCount) {
+      defaultDetails.push(
+        {
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.meteringDocsCountTitle', {
+            defaultMessage: 'Documents count',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.meteringDocsCountToolTip', {
+            defaultMessage: 'The number of documents in this data stream.',
+          }),
+          content: meteringDocsCount,
+          dataTestSubj: 'docsCountDetail',
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
+            defaultMessage: 'Storage size',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
+            defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
+          }),
+          content: meteringStorageSize,
+          dataTestSubj: 'meteringStorageSizeDetail',
+        }
+      );
+    }
+    if (config.enableDataStreamStats) {
+      defaultDetails.push(
+        {
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
+            defaultMessage: 'Last updated',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
+            defaultMessage: 'The most recent document to be added to the data stream.',
+          }),
+          content: maxTimeStamp ? (
+            humanizeTimeStamp(maxTimeStamp)
+          ) : (
+            <em>
+              {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampNoneMessage', {
+                defaultMessage: `Never`,
+              })}
+            </em>
+          ),
+          dataTestSubj: 'lastUpdatedDetail',
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
+            defaultMessage: 'Storage size',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
+            defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
+          }),
+          content: storageSize,
+          dataTestSubj: 'storageSizeDetail',
+        }
+      );
+    }
+
+    defaultDetails.push(
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesTitle', {
           defaultMessage: 'Indices',
@@ -328,8 +364,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           </ConditionalWrap>
         ),
         dataTestSubj: 'dataRetentionDetail',
-      },
-    ];
+      }
+    );
 
     // If both rentention types are available, we wanna surface to the user both
     if (lifecycle?.effective_retention && lifecycle?.data_retention) {

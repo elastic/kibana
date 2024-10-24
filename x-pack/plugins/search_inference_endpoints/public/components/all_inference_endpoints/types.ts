@@ -21,6 +21,7 @@ export enum ServiceProviderKeys {
   hugging_face = 'hugging_face',
   mistral = 'mistral',
   openai = 'openai',
+  watsonxai = 'watsonxai',
 }
 
 export enum SortFieldInferenceEndpoint {
