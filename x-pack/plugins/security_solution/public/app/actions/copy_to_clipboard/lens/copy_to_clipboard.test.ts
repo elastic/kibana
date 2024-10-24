@@ -7,12 +7,14 @@
 
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import { createCopyToClipboardLensAction } from './copy_to_clipboard';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
@@ -23,14 +25,29 @@ KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 const mockCopy = jest.fn((text: string) => true);
 jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
-class MockEmbeddable {
-  public type;
-  constructor(type: string) {
-    this.type = type;
-  }
-  getFilters() {}
-  getQuery() {}
-}
+const getMockLensApi = (
+  { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
+): LensApi =>
+  getLensApiMock({
+    timeRange$: new BehaviorSubject<TimeRange | undefined>({ from, to }),
+    getViewUnderlyingDataArgs: jest.fn(() => ({
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: { from: 'now-7d', to: 'now' },
+      filters: [],
+      query: undefined,
+      columns: [],
+    })),
+    saveToLibrary: jest.fn(async () => 'saved-id'),
+  });
+
+const getMockEmbeddable = (type: string): IEmbeddable =>
+  ({
+    type,
+    getFilters: jest.fn(),
+    getQuery: jest.fn(),
+  } as unknown as IEmbeddable);
+
+const lensEmbeddable = getMockLensApi();
 
 const columnMeta = {
   field: 'user.name',
@@ -39,7 +56,6 @@ const columnMeta = {
   sourceParams: { indexPatternId: 'some-pattern-id' },
 };
 const data: CellValueContext['data'] = [{ columnMeta, value: 'the value' }];
-const lensEmbeddable = new MockEmbeddable(LENS_EMBEDDABLE_TYPE) as unknown as IEmbeddable;
 
 const context = {
   data,
@@ -76,7 +92,7 @@ describe('createCopyToClipboardLensAction', () => {
       expect(
         await copyToClipboardAction.isCompatible({
           ...context,
-          embeddable: new MockEmbeddable('not_lens') as unknown as IEmbeddable,
+          embeddable: getMockEmbeddable('not_lens') as unknown as IEmbeddable,
         })
       ).toEqual(false);
     });

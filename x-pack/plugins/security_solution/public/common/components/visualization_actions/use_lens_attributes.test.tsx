@@ -22,6 +22,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
+import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 
 jest.mock('../../../sourcerer/containers');
@@ -146,7 +147,7 @@ describe('useLensAttributes', () => {
       { wrapper }
     );
 
-    expect(result?.current?.state.query.query).toEqual('');
+    expect((result?.current?.state.query as Query).query).toEqual('');
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,

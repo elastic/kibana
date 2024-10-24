@@ -20,6 +20,8 @@ const autoApplyDisabled = () => {
 export const initMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: PayloadAction) => {
     if (loadInitialAction.match(action)) {
+      // @TODO: fix this before merging
+      // @ts-expect-error
       return loadInitial(store, storeDeps, action.payload, autoApplyDisabled());
     }
     next(action);

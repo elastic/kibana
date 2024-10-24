@@ -41,6 +41,7 @@
       "expressionLegacyMetricVis",
       "expressionPartitionVis",
       "usageCollection",
+      "embeddableEnhanced",
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
