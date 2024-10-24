@@ -22,6 +22,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { getESQLForLayer } from './to_esql';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
@@ -169,7 +170,7 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
 
     // esql mode variables
-    const canUseESQL = uiSettings.get(UI_SETTINGS.LENS_GENERATE_ESQL); // read from a setting
+    const canUseESQL = uiSettings.get(ENABLE_ESQL); // read from a setting
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
