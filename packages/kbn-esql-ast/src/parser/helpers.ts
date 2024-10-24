@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Token } from 'antlr4';
+import type { ParserRuleContext, Token } from 'antlr4';
 import { DEFAULT_CHANNEL } from './constants';
+import { AstNodeParserFields } from '../builder';
 
 export const isQuotedIdentifier = (text: string): boolean => {
   const firstChar = text[0];
@@ -176,3 +177,9 @@ export const findPunctuationToken = (
       channel === DEFAULT_CHANNEL && text.length === 1 && punctuationChars.has(text)
   );
 };
+
+export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
+  text: ctx.getText(),
+  location: getPosition(ctx.start, ctx.stop),
+  incomplete: Boolean(ctx.exception),
+});
