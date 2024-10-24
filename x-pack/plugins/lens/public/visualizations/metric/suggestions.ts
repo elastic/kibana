@@ -64,7 +64,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
     title: metricColumns[0]?.operation.label || metricLabel,
     previewIcon: IconChartMetric,
     score: 0.5,
-    hide: hasInterval,
+    hide: bucketedColumns.length,
   };
 
   const accessorMappings: Pick<MetricVisualizationState, 'metricAccessor' | 'breakdownByAccessor'> =
