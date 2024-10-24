@@ -159,11 +159,14 @@ export class ObservabilityAIAssistantPlugin
       core,
       taskManager: plugins.taskManager,
       getModelId,
+      enableKnowledgeBase: this.config.enableKnowledgeBase,
     }));
 
     service.register(registerFunctions);
 
-    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
+    if (this.config.enableKnowledgeBase) {
+      addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
+    }
 
     registerServerRoutes({
       core,

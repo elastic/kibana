@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { AiAssistantManagementObservabilityPlugin as AiAssistantManagementObservabilityPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
+import {
+  AiAssistantManagementObservabilityPlugin,
+  AiAssistantManagementObservabilityPluginSetup,
+  AiAssistantManagementObservabilityPluginStart,
+  ConfigSchema,
+  SetupDependencies,
+  StartDependencies,
+} from './plugin';
 
 export type {
   AiAssistantManagementObservabilityPluginSetup,
   AiAssistantManagementObservabilityPluginStart,
 } from './plugin';
 
-export function plugin() {
-  return new AiAssistantManagementObservabilityPlugin();
-}
+export const plugin: PluginInitializer<
+  AiAssistantManagementObservabilityPluginSetup,
+  AiAssistantManagementObservabilityPluginStart,
+  SetupDependencies,
+  StartDependencies
+> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) => {
+  return new AiAssistantManagementObservabilityPlugin(pluginInitializerContext);
+};
