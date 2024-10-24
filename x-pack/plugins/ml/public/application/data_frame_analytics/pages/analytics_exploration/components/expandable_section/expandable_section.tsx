@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './expandable_section.scss';
-
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
@@ -18,6 +16,7 @@ import {
   EuiSkeletonText,
   EuiPanel,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   getDefaultExplorationPageUrlState,
@@ -59,6 +58,10 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   docsLink,
   urlStateKey,
 }) => {
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
   const overrides = useMemo(
     () => (isExpandedDefault !== undefined ? { [urlStateKey]: isExpandedDefault } : undefined),
     [urlStateKey, isExpandedDefault]
@@ -77,68 +80,65 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
 
   return (
     <EuiPanel
-      paddingSize="none"
+      paddingSize="s"
       data-test-subj={`mlDFExpandableSection-${dataTestId}`}
       hasShadow={false}
       hasBorder
     >
-      <div className="mlExpandableSection">
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={toggleExpanded}
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                  iconSide="left"
-                  flush="left"
-                  data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
-                >
-                  <EuiText size="m" color="default" style={{ fontWeight: 'bold' }}>
-                    <p>{title}</p>
-                  </EuiText>
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              {headerItems === HEADER_ITEMS_LOADING && <EuiSkeletonText lines={1} />}
-              {isHeaderItems(headerItems)
-                ? headerItems.map(({ label, value, id }) => (
-                    <EuiFlexItem
-                      grow={false}
-                      key={id}
-                      data-test-subj={`mlDFExpandableSectionItem-${dataTestId}-${id}`}
-                    >
-                      {label !== undefined && value !== undefined ? (
-                        <EuiFlexGroup gutterSize="xs" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="xs" textAlign="center">
-                              <p>{label}</p>
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge>{value}</EuiBadge>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      ) : null}
-                      {label === undefined ? (
-                        <EuiFlexGroup alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="xs" color="subdued" textAlign="center">
-                              {value}
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      ) : null}
-                    </EuiFlexItem>
-                  ))
-                : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {docsLink !== undefined && <EuiFlexItem grow={false}>{docsLink}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </div>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={toggleExpanded}
+                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconSide="left"
+                data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
+              >
+                <EuiText size="m" color="default" style={{ fontWeight: 'bold' }}>
+                  <p>{title}</p>
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {headerItems === HEADER_ITEMS_LOADING && <EuiSkeletonText lines={1} />}
+            {isHeaderItems(headerItems)
+              ? headerItems.map(({ label, value, id }) => (
+                  <EuiFlexItem
+                    grow={false}
+                    key={id}
+                    data-test-subj={`mlDFExpandableSectionItem-${dataTestId}-${id}`}
+                  >
+                    {label !== undefined && value !== undefined ? (
+                      <EuiFlexGroup gutterSize="xs" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" textAlign="center">
+                            <p>{label}</p>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge>{value}</EuiBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : null}
+                    {label === undefined ? (
+                      <EuiFlexGroup alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued" textAlign="center">
+                            {value}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : null}
+                  </EuiFlexItem>
+                ))
+              : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {docsLink !== undefined && <EuiFlexItem grow={false}>{docsLink}</EuiFlexItem>}
+      </EuiFlexGroup>
       {isExpanded && (
         <div
-          className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}
+          css={contentPadding ? { padding: `${size.s}` } : undefined}
           data-test-subj={`mlDFExpandableSection-${dataTestId}-content`}
         >
           {content}
