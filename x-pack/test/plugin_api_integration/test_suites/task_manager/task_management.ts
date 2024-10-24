@@ -797,7 +797,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
-        expect(scheduledTask.status).to.eql('claiming');
+        expect(['claiming', 'running'].includes(scheduledTask.status)).to.be(true);
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });

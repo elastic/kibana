@@ -23,6 +23,7 @@ import { Note } from '../model/components.gen';
  */
 export type AssociatedFilterType = z.infer<typeof AssociatedFilterType>;
 export const AssociatedFilterType = z.enum([
+  'all',
   'document_only',
   'saved_object_only',
   'document_and_saved_object',

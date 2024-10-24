@@ -928,6 +928,7 @@ components:
     AssociatedFilterType:
       description: Filter notes based on their association with a document or saved object.
       enum:
+        - all
         - document_only
         - saved_object_only
         - document_and_saved_object
