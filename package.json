@@ -1516,6 +1516,7 @@
     "@storybook/core-common": "^8.3.5",
     "@storybook/core-events": "^8.3.5",
     "@storybook/core-server": "^8.3.5",
+    "@storybook/icons": "^1.2.12",
     "@storybook/manager-api": "^8.3.5",
     "@storybook/preview-api": "^8.3.5",
     "@storybook/react": "^8.3.5",
