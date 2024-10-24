@@ -241,7 +241,7 @@ export const CreateConnector: React.FC = () => {
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiBadge color="hollow">
-                  {selfManagePreference
+                  {selfManagePreference === 'selfManaged'
                     ? i18n.translate(
                         'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
                         {
