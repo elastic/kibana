@@ -1650,10 +1650,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@68.0.0":
-  version "68.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.0.tgz#a61cc39d6b139006946a134f372c6af5e09fbadb"
-  integrity sha512-qtlI5U9olt9Y5ZkVUwy9VT2uvU8WzmCTYLjCM+l3b1g4ek0WW1ehZxaJha2Esqe5+QPSBH9LrVzBTayQbbprUA==
+"@elastic/charts@68.0.1":
+  version "68.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.1.tgz#3dd698da2385fe0baf2d48056f3bdc97b1ed5ae9"
+  integrity sha512-6JOwPiZcSLF25+ydFUw+bgO/y0Wxd7P3Z/lbnYsYUVRA3LBu0xuapFmf59linP7PRZWMLOtOfmymhgPa3gAR0A==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -4793,6 +4793,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-contextual-components@link:packages/kbn-discover-contextual-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-customization-examples-plugin@link:examples/discover_customization_examples":
   version "0.0.0"
   uid ""
@@ -6169,6 +6173,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-rule-params@link:packages/response-ops/rule_params":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-stream-plugin@link:examples/response_stream":
   version "0.0.0"
   uid ""
@@ -7030,6 +7038,10 @@
   uid ""
 
 "@kbn/translations-plugin@link:x-pack/plugins/translations":
+  version "0.0.0"
+  uid ""
+
+"@kbn/transpose-utils@link:packages/kbn-transpose-utils":
   version "0.0.0"
   uid ""
 
@@ -8461,12 +8473,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.5":
-  version "1.25.5"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.5.tgz#258f6d23e8298814518ec4d24d023c1e21e3b081"
-  integrity sha512-sFh4A8wqwuig7mF/nYNVIyxSfKKZikWC+uVH6OB1IepYQXNsHFaLAU1VaNI9gS5mMvWmYx5SEuSCVB9LaNFBhw==
+"@redocly/cli@^1.25.7":
+  version "1.25.8"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.8.tgz#fecd62d9ee1d564e6f0e1522f2c5648f514ce02b"
+  integrity sha512-oVFN3rpGFqupx57ZS0mF2B8grnk3i0xjTQrrMm1oftF3GEf7yTg5JzwnWi8KKRWuxin4qI7j+Id5AKgNQNmTKA==
   dependencies:
-    "@redocly/openapi-core" "1.25.5"
+    "@redocly/openapi-core" "1.25.8"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8480,7 +8492,7 @@
     pluralize "^8.0.0"
     react "^17.0.0 || ^18.2.0"
     react-dom "^17.0.0 || ^18.2.0"
-    redoc "~2.1.5"
+    redoc "~2.2.0"
     semver "^7.5.2"
     simple-websocket "^9.0.0"
     styled-components "^6.0.7"
@@ -8491,10 +8503,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.12.1.tgz#7b905a17d710244550ef826542d0db164d5ace02"
   integrity sha512-RW3rSirfsPdr0uvATijRDU3f55SuZV3m7/ppdTDvGw4IB0cmeZRkFmqTrchxMqWP50Gfg1tpHnjdxUCNo0E2qg==
 
-"@redocly/openapi-core@1.25.5", "@redocly/openapi-core@^1.4.0":
-  version "1.25.5"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.5.tgz#443b1488c8ef1ddcb8f407c3e7dd8cb7b388b427"
-  integrity sha512-BNgXjqesJu4L5f8F73c2hkkH5IdvjYCKYFgIl+m9oNgqGRIPBJjtiEGOx7jkQ6nElN4311z7Z4aTECtklaaHwg==
+"@redocly/openapi-core@1.25.8", "@redocly/openapi-core@^1.4.0":
+  version "1.25.8"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.8.tgz#a3aff052b1d9d2db8ba86263ec994bbc85f6b8f1"
+  integrity sha512-eKKRqo2RYo7UIoDvIgcUB9ynhOjIWJnILXFz+VDevYeOBKd/CxvC0KbNRnuOrFqG3ip6363R/ONal2MyvuVrjg==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.12.1"
@@ -27328,10 +27340,10 @@ redent@^3.0.0:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
 
-redoc@~2.1.5:
-  version "2.1.5"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.1.5.tgz#421307b22036b244171095bfc7ea3cfd419563c8"
-  integrity sha512-POSbVg+7WLf+/5/c6GWLxL7+9t2D+1WlZdLN0a6qaCQc+ih3XYzteRBkXEN5kjrYrRNjdspfxTZkDLN5WV3Tzg==
+redoc@~2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.2.0.tgz#1043812696683f23e4b0fbe66fb50236fbe8b5bb"
+  integrity sha512-52rz/xJtpUBc3Y/GAkaX03czKhQXTxoU7WnkXNzRLuGwiGb/iEO4OgwcgQqtwHWrYNaZXTyqZ4MAVXpi/e1gAg==
   dependencies:
     "@cfaester/enzyme-adapter-react-18" "^0.8.0"
     "@redocly/openapi-core" "^1.4.0"
@@ -30651,10 +30663,10 @@ tr46@~0.0.3:
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
 
-trace@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/trace/-/trace-3.1.1.tgz#061eebf012805611cb02138440bc716979b0eb11"
-  integrity sha512-iVxFnDKps8bCRQ6kXj66rHYFJY3fNkoYPHeFTFZn89YdwmmQ9Hz97IFPf3NdfbCF3zuqUqFpRNTu6N9+eZR2qg==
+trace@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/trace/-/trace-3.2.0.tgz#7ae270f75107acf24e3137988d83c6a9da944015"
+  integrity sha512-o5sIvza+ygxvws5TAtDX/SwMzgyS5YaeGpNkPd0TFVtYTNQp2nRpC/o7YU4A/zP6Hp4hDrLOgaZUKNc3c4huMQ==
   dependencies:
     stack-chain "^2.0.0"
 
