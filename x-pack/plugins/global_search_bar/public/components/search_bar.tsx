@@ -173,11 +173,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           reportEvent.searchRequest();
         }
 
-        const rawParams = parseSearchParams(searchValue.toLowerCase());
+        const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
         let tagIds: string[] | undefined;
         if (taggingApi && rawParams.filters.tags) {
           tagIds = rawParams.filters.tags.map(
-            (tagName) => taggingApi.ui.getTagIdFromName(tagName.toLowerCase()) ?? UNKNOWN_TAG_ID
+            (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
           );
         } else {
           tagIds = undefined;

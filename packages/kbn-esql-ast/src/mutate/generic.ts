@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isOptionNode } from '../ast/util';
 import { Builder } from '../builder';
-import { ESQLAstQueryExpression, ESQLCommand, ESQLCommandOption } from '../types';
+import {
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLProperNode,
+  ESQLSingleAstItem,
+} from '../types';
 import { Visitor } from '../visitor';
 import { Predicate } from './types';
 
@@ -125,6 +132,16 @@ export const findCommandOptionByName = (
 };
 
 /**
+ * Adds a new command to the query AST node.
+ *
+ * @param ast The root AST node to append the command to.
+ * @param command The command AST node to append.
+ */
+export const appendCommand = (ast: ESQLAstQueryExpression, command: ESQLCommand): void => {
+  ast.commands.push(command);
+};
+
+/**
  * Inserts a command option into the command's arguments list. The option can
  * be specified as a string or an AST node.
  *
@@ -132,7 +149,7 @@ export const findCommandOptionByName = (
  * @param option The option to insert.
  * @returns The inserted option.
  */
-export const insertCommandOption = (
+export const appendCommandOption = (
   command: ESQLCommand,
   option: string | ESQLCommandOption
 ): ESQLCommandOption => {
@@ -143,6 +160,40 @@ export const insertCommandOption = (
   command.args.push(option);
 
   return option;
+};
+
+export const appendCommandArgument = (
+  command: ESQLCommand,
+  expression: ESQLSingleAstItem
+): number => {
+  if (expression.type === 'option') {
+    command.args.push(expression);
+    return command.args.length - 1;
+  }
+
+  const index = command.args.findIndex((arg) => isOptionNode(arg));
+
+  if (index > -1) {
+    command.args.splice(index, 0, expression);
+    return index;
+  }
+
+  command.args.push(expression);
+  return command.args.length - 1;
+};
+
+export const removeCommand = (ast: ESQLAstQueryExpression, command: ESQLCommand): boolean => {
+  const cmds = ast.commands;
+  const length = cmds.length;
+
+  for (let i = 0; i < length; i++) {
+    if (cmds[i] === command) {
+      cmds.splice(i, 1);
+      return true;
+    }
+  }
+
+  return false;
 };
 
 /**
@@ -184,6 +235,44 @@ export const removeCommandOption = (
       ctx.node.args.splice(index, 1);
 
       return true;
+    })
+    .on('visitQuery', (ctx): boolean => {
+      for (const success of ctx.visitCommands()) {
+        if (success) {
+          return true;
+        }
+      }
+
+      return false;
+    })
+    .visitQuery(ast);
+};
+
+/**
+ * Searches all command arguments in the query AST node and removes the node
+ * from the command's arguments list.
+ *
+ * @param ast The root AST node to search for command arguments.
+ * @param node The argument AST node to remove.
+ * @returns Returns true if the argument was removed, false otherwise.
+ */
+export const removeCommandArgument = (
+  ast: ESQLAstQueryExpression,
+  node: ESQLProperNode
+): boolean => {
+  return new Visitor()
+    .on('visitCommand', (ctx): boolean => {
+      const args = ctx.node.args;
+      const length = args.length;
+
+      for (let i = 0; i < length; i++) {
+        if (args[i] === node) {
+          args.splice(i, 1);
+          return true;
+        }
+      }
+
+      return false;
     })
     .on('visitQuery', (ctx): boolean => {
       for (const success of ctx.visitCommands()) {

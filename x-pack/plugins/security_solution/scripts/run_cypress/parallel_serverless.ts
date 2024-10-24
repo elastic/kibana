@@ -93,7 +93,11 @@ export function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
 }
 
 // Wait until elasticsearch status goes green
-export function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForEsStatusGreen(
+  esUrl: string,
+  auth: string,
+  projectId: string
+): Promise<void> {
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
@@ -105,13 +109,13 @@ export function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: stri
       })
       .catch(catchAxiosErrorFormatAndThrow);
 
-    log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
+    log.info(`${projectId}: Elasticsearch is ready with status ${response.data.status}.`);
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info(
-          `${runnerId}: The Elasticsearch URL is not yet reachable. A retry will be triggered soon...`
+          `${projectId}: The Elasticsearch URL is not yet reachable. A retry will be triggered soon...`
         );
       }
     },
@@ -127,7 +131,7 @@ export function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: stri
 export function waitForKibanaAvailable(
   kbUrl: string,
   auth: string,
-  runnerId: string
+  projectId: string
 ): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if kibana is available.`);
@@ -139,19 +143,19 @@ export function waitForKibanaAvailable(
       })
       .catch(catchAxiosErrorFormatAndThrow);
     if (response.data.status.overall.level !== 'available') {
-      throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
+      throw new Error(`${projectId}: Kibana is not available. A retry will be triggered soon...`);
     } else {
-      log.info(`${runnerId}: Kibana status overall is ${response.data.status.overall.level}.`);
+      log.info(`${projectId}: Kibana status overall is ${response.data.status.overall.level}.`);
     }
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info(
-          `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
+          `${projectId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
         );
       } else {
-        log.info(`${runnerId}: ${error.message}`);
+        log.info(`${projectId}: ${error.message}`);
       }
     },
     retries: 50,
@@ -162,7 +166,7 @@ export function waitForKibanaAvailable(
 }
 
 // Wait for Elasticsearch to be accessible
-export function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForEsAccess(esUrl: string, auth: string, projectId: string): Promise<void> {
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
@@ -178,7 +182,7 @@ export function waitForEsAccess(esUrl: string, auth: string, runnerId: string): 
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info(
-          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
+          `${projectId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
         );
       }
     },
@@ -447,7 +451,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
               log.info(`Running spec file: ${filePath}`);
-              log.info(`${id}: Creating project ${PROJECT_NAME}...`);
+              log.info(`Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
               const project = await cloudHandler.createSecurityProject(
                 PROJECT_NAME,
@@ -461,6 +465,21 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 return process.exit(1);
               }
 
+              log.info(`
+                -----------------------------------------------
+                 Project created with details:
+                -----------------------------------------------
+                 ID: ${project.id}
+                 Name: ${project.name}
+                 Region: ${project.region}
+                 Elasticsearch URL: ${project.es_url}
+                 Kibana URL: ${project.kb_url}
+                 Product: ${project.product}
+                 Organization ID: ${project.proxy_org_id}
+                 Organization Name: ${project.proxy_org_name}
+                -----------------------------------------------
+               `);
+
               context.addCleanupTask(() => {
                 let command: string;
                 if (cloudHandler instanceof CloudHandler) {
@@ -470,7 +489,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               });
 
               // Reset credentials for elastic user
-              const credentials = await cloudHandler.resetCredentials(project.id, id);
+              const credentials = await cloudHandler.resetCredentials(project.id);
 
               if (!credentials) {
                 log.error('Credentials could not be reset.');
@@ -485,13 +504,13 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const auth = btoa(`${credentials.username}:${credentials.password}`);
 
               // Wait for elasticsearch status to go green.
-              await waitForEsStatusGreen(project.es_url, auth, id);
+              await waitForEsStatusGreen(project.es_url, auth, project.id);
 
               // Wait until Kibana is available
-              await waitForKibanaAvailable(project.kb_url, auth, id);
+              await waitForKibanaAvailable(project.kb_url, auth, project.id);
 
               // Wait for Elasticsearch to be accessible
-              await waitForEsAccess(project.es_url, auth, id);
+              await waitForEsAccess(project.es_url, auth, project.id);
 
               // Wait until application is ready
               await waitForKibanaLogin(project.kb_url, credentials);
@@ -499,7 +518,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // Check if proxy service is used to define which org executes the tests.
               const proxyOrg =
                 cloudHandler instanceof ProxyHandler ? project.proxy_org_name : undefined;
-              log.info(`Proxy Organization used id : ${proxyOrg}`);
 
               // Normalized the set of available env vars in cypress
               const cyCustomEnv = {
@@ -576,13 +594,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                     failedSpecFilePaths.push(filePath);
                   }
                   // Delete serverless project
-                  log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+                  log.info(`Deleting project ${PROJECT_NAME} and ID ${project.id} ...`);
                   await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
                 } catch (error) {
                   // False positive
                   // eslint-disable-next-line require-atomic-updates
                   result = error;
                   failedSpecFilePaths.push(filePath);
+                  log.error(`Cypress runner failed: ${error}`);
                 }
               }
               return result;

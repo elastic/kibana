@@ -30,6 +30,7 @@ export interface Props {
     pattern: string;
     onCheckNowAction: (indexName: string) => void;
     onViewHistoryAction: (indexName: string) => void;
+    firstIndexName?: string;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
   items: IndexSummaryTableItem[];
   pageIndex: number;
@@ -66,6 +67,7 @@ const SummaryTableComponent: React.FC<Props> = ({
         pattern,
         onCheckNowAction,
         onViewHistoryAction,
+        firstIndexName: items[0]?.indexName,
       }),
     [
       getTableColumns,
@@ -75,6 +77,7 @@ const SummaryTableComponent: React.FC<Props> = ({
       pattern,
       onCheckNowAction,
       onViewHistoryAction,
+      items,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);

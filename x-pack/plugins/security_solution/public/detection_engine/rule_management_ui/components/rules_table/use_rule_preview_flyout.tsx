@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { invariant } from '../../../../../common/utils/invariant';
-import type { RuleObjectId } from '../../../../../common/api/detection_engine';
+import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../rule_management/components/rule_details/rule_details_flyout';
 
@@ -30,7 +30,7 @@ interface RulePreviewFlyoutProps {
 
 interface UseRulePreviewFlyoutResult {
   rulePreviewFlyout: ReactNode;
-  openRulePreview: (ruleId: RuleObjectId) => void;
+  openRulePreview: (ruleId: RuleSignatureId) => void;
   closeRulePreview: () => void;
 }
 
@@ -64,7 +64,7 @@ export function useRulePreviewFlyout({
       />
     ),
     openRulePreview: useCallback(
-      (ruleId: RuleObjectId) => {
+      (ruleId: RuleSignatureId) => {
         const ruleToShowInFlyout = rules.find((x) => x.id === ruleId);
 
         invariant(ruleToShowInFlyout, `Rule with id ${ruleId} not found`);

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { getHostUnitedDefinition } from './host';
-export { getUserUnitedDefinition } from './user';
+export * from './host';
+export * from './user';
 export { getCommonUnitedFieldDefinitions } from './common';

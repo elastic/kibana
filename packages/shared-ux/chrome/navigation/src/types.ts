@@ -34,7 +34,6 @@ export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
 export interface NavigationServices {
   basePath: BasePathService;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   isSideNavCollapsed: boolean;

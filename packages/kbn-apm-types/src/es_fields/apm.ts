@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TIMESTAMP = 'timestamp.us';
+export const TIMESTAMP_US = 'timestamp.us';
+export const AT_TIMESTAMP = '@timestamp';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
@@ -21,9 +22,11 @@ export const CLOUD_PROVIDER = 'cloud.provider';
 export const CLOUD_REGION = 'cloud.region';
 export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
 export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
+export const CLOUD_ACCOUNT_NAME = 'cloud.account.name';
 export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
+export const CLOUD_PROJECT_NAME = 'cloud.project.name';
 
 export const EVENT_SUCCESS_COUNT = 'event.success_count';
 
@@ -48,10 +51,14 @@ export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
 
+export const OBSERVER_VERSION = 'observer.version';
+export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_HOSTNAME = 'observer.hostname';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
+export const PROCESSOR_NAME = 'processor.name';
 
+export const TRANSACTION_AGENT_MARKS = 'transaction.agent.marks';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
@@ -95,6 +102,7 @@ export const SPAN_COMPOSITE_SUM = 'span.composite.sum.us';
 export const SPAN_COMPOSITE_COMPRESSION_STRATEGY = 'span.composite.compression_strategy';
 
 export const SPAN_SYNC = 'span.sync';
+export const SPAN_STACKTRACE = 'span.stacktrace';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
@@ -110,6 +118,7 @@ export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used i
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
+export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_TYPE = 'error.type';
 
 // METRICS
@@ -153,6 +162,12 @@ export const CONTAINER_IMAGE = 'container.image.name';
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
+export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
+export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
+export const KUBERNETES_CONTAINER_ID = 'kubernetes.container.id';
+export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
 
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
@@ -175,6 +190,10 @@ export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cp
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+// OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
+export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
+export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
+export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
 // Metadata
 export const TIER = '_tier';
@@ -198,3 +217,7 @@ export const CLIENT_GEO_REGION_NAME = 'client.geo.region_name';
 export const CHILD_ID = 'child.id';
 
 export const LOG_LEVEL = 'log.level';
+
+// Process
+export const PROCESS_ARGS = 'process.args';
+export const PROCESS_PID = 'process.pid';
