@@ -6,10 +6,14 @@
  */
 
 import type { IStaticAssets } from '@kbn/core-http-browser';
-import { ConnectorServerSideDefinition, CONNECTOR_DEFINITIONS } from '../connectors';
-import { getConnectorsDict } from '../constants';
-
-import { ConnectorDefinition } from '../types';
+import {
+  CONNECTOR_DEFINITIONS,
+  getConnectorsDict,
+} from '@kbn/search-connectors/constants/connectors';
+import {
+  ConnectorDefinition,
+  ConnectorServerSideDefinition,
+} from '@kbn/search-connectors/types/connector_definition';
 
 // used on server and in browser before plugin start when we don't have docLinks yet
 export function getConnectorTypes(staticAssets: IStaticAssets): ConnectorServerSideDefinition[] {
