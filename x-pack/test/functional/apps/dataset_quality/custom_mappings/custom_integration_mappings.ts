@@ -29,7 +29,7 @@ export const logsNginxMappings = (dataset: string): MappingTypeMapping => ({
       properties: {
         dataset: {
           type: 'constant_keyword',
-          value: 'nginx.access',
+          value: dataset,
         },
         namespace: {
           type: 'constant_keyword',

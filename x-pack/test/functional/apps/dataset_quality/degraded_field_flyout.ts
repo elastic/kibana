@@ -741,7 +741,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           );
 
           const currentFieldLimitValue = await currentFieldLimitInput.getAttribute('value');
-          const currentFieldLimit = parseInt(currentFieldLimitValue, 10);
+          const currentFieldLimit = parseInt(currentFieldLimitValue as string, 10);
           const currentFieldLimitDisabledStatus = await currentFieldLimitInput.getAttribute(
             'disabled'
           );
@@ -759,7 +759,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           );
 
           const newFieldLimitValue = await newFieldLimitInput.getAttribute('value');
-          const newFieldLimit = parseInt(newFieldLimitValue, 10);
+          const newFieldLimit = parseInt(newFieldLimitValue as string, 10);
 
           // Should be 30% more the current limit
           const newLimit = Math.round(currentFieldLimit * 1.3);
@@ -841,7 +841,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
             // Should point to the component template page
             expect(
-              ctLinkURL.endsWith(
+              ctLinkURL?.endsWith(
                 `/data/index_management/component_templates/${encodeURIComponent(
                   componentTemplateName
                 )}`

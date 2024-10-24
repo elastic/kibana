@@ -248,9 +248,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       dataset,
       namespace = 'default',
     }: {
-      type: string;
+      type?: string;
       dataset: string;
-      namespace: string;
+      namespace?: string;
     }) {
       return `.ds-${type}-${dataset}-${namespace}-${getCurrentDateFormatted()}`;
     },
