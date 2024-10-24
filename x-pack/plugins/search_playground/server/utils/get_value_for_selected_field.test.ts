@@ -117,9 +117,9 @@ describe('getValueForSelectedField', () => {
 
     expect(getValueForSelectedField(hit as any, 'test')).toMatchInlineSnapshot(`
       "Over the course of several years
-       ---
+       --- 
       two convicts form a friendship
-       ---
+       --- 
       seeking consolation and, eventually, redemption through basic compassion"
     `);
   });
