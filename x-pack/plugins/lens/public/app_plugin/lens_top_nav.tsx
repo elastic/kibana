@@ -1065,6 +1065,7 @@ export const LensTopNavMenu = ({
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
+      popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery

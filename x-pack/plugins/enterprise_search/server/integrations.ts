@@ -6,17 +6,13 @@
  */
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/server';
 
 import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  customIntegrations: CustomIntegrationsPluginSetup,
-  isCloud: boolean,
-  connectors: ConnectorServerSideDefinition[]
+  customIntegrations: CustomIntegrationsPluginSetup
 ) => {
-  const nativeSearchTag = config.hasNativeConnectors && isCloud ? ['native_search'] : [];
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({
       id: 'web_crawler',
@@ -58,29 +54,4 @@ export const registerEnterpriseSearchIntegrations = (
     shipper: 'search',
     isBeta: false,
   });
-
-  if (config.hasConnectors) {
-    connectors.forEach((connector) => {
-      const connectorType = connector.isNative && isCloud ? 'native' : 'connector_client';
-      const categories = connector.isNative
-        ? [...(connector.categories || []), ...nativeSearchTag]
-        : connector.categories;
-
-      customIntegrations.registerCustomIntegration({
-        categories: categories || [],
-        description: connector.description || '',
-        icons: [
-          {
-            src: connector.iconPath,
-            type: 'svg',
-          },
-        ],
-        id: `${connector.serviceType}-${connector.name}`,
-        isBeta: connector.isBeta,
-        shipper: 'search',
-        title: connector.name,
-        uiInternalPath: `/app/enterprise_search/content/connectors/new_connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
-      });
-    });
-  }
 };
