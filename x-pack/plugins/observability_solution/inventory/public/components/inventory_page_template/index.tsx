@@ -50,7 +50,6 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useEntityManager();
 
   const handleSuccess = () => {
-    telemetry.updateEemEnabled(true);
     refresh();
     toggleWelcomedModal();
   };

@@ -7,8 +7,6 @@
 
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
-import { BehaviorSubject } from 'rxjs';
-import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 import {
   type ITelemetryClient,
   TelemetryEventTypes,
@@ -20,35 +18,7 @@ import {
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
-  private eemEnabled$: BehaviorSubject<{ eem_enabled: boolean }>;
-
-  constructor(
-    private analytics: AnalyticsServiceSetup,
-    private entityManager: EntityManagerPublicPluginSetup
-  ) {
-    this.eemEnabled$ = new BehaviorSubject<{ eem_enabled: boolean }>({ eem_enabled: false });
-  }
-
-  public initialize = () => {
-    this.entityManager.entityClient.isManagedEntityDiscoveryEnabled().then(({ enabled }) => {
-      this.updateEemEnabled(enabled);
-
-      this.analytics.registerContextProvider({
-        name: 'eem_enabled',
-        context$: this.eemEnabled$,
-        schema: {
-          eem_enabled: {
-            type: 'boolean',
-            _meta: { description: 'Whether EEM is enabled or not.' },
-          },
-        },
-      });
-    });
-  };
-
-  public updateEemEnabled = (enabled: boolean) => {
-    this.eemEnabled$.next({ eem_enabled: enabled });
-  };
+  constructor(private analytics: AnalyticsServiceSetup) {}
 
   public reportInventoryAddData = (params: InventoryAddDataParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.INVENTORY_ADD_DATA_CLICKED, params);

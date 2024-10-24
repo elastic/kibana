@@ -28,7 +28,6 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
-import { TelemetryClient } from './services/telemetry/telemetry_client';
 
 export class InventoryPlugin
   implements
@@ -51,37 +50,6 @@ export class InventoryPlugin
     this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  private async initializeTelemetry(
-    coreStart: CoreStart,
-    pluginsStart: InventoryStartDependencies,
-    telemetry: TelemetryClient
-  ) {
-    const shouldHideInventory = await this.shouldHideInventory(pluginsStart, coreStart);
-
-    if (!shouldHideInventory) {
-      telemetry.initialize();
-    }
-  }
-
-  private async shouldHideInventory(
-    pluginsStart: InventoryStartDependencies,
-    coreStart: CoreStart
-  ) {
-    if (pluginsStart.spaces) {
-      const space = await pluginsStart.spaces.getActiveSpace();
-      return this.isInventoryDisabledByUserOrSpace(space, coreStart);
-    }
-
-    return !coreStart.application.capabilities.inventory.show;
-  }
-
-  private isInventoryDisabledByUserOrSpace(space: any, coreStart: CoreStart): boolean {
-    return (
-      space.disabledFeatures.includes(INVENTORY_APP_ID) ||
-      !coreStart.application.capabilities.inventory.show
-    );
-  }
-
   setup(
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
     pluginsSetup: InventorySetupDependencies
@@ -96,21 +64,19 @@ export class InventoryPlugin
       analytics: coreSetup.analytics,
     });
 
-    const telemetry = this.telemetry.start({
-      entityManager: pluginsSetup.entityManager,
-    });
+    const telemetry = this.telemetry.start();
 
     const getStartServices = coreSetup.getStartServices();
-
-    getStartServices.then(([coreStart, pluginsStart]) => {
-      this.initializeTelemetry(coreStart, pluginsStart, telemetry);
-    });
 
     const hideInventory$ = from(getStartServices).pipe(
       mergeMap(([coreStart, pluginsStart]) => {
         if (pluginsStart.spaces) {
           return from(pluginsStart.spaces.getActiveSpace()).pipe(
-            map((space) => this.isInventoryDisabledByUserOrSpace(space, coreStart))
+            map(
+              (space) =>
+                space.disabledFeatures.includes(INVENTORY_APP_ID) ||
+                !coreStart.application.capabilities.inventory.show
+            )
           );
         }
 
