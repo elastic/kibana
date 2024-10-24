@@ -39,16 +39,9 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
-import {
-  getAuthorizationModeBySource,
-  AuthorizationMode,
-  bulkGetAuthorizationModeBySource,
-} from '../authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
-import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { SavedObject } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -64,25 +57,6 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
     ...actual,
     SavedObjectsUtils: {
       generateId: () => 'mock-saved-object-id',
-    },
-  };
-});
-
-jest.mock('../lib/track_legacy_rbac_exemption', () => ({
-  trackLegacyRBACExemption: jest.fn(),
-}));
-
-jest.mock('../authorization/get_authorization_mode_by_source', () => {
-  return {
-    getAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    bulkGetAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    AuthorizationMode: {
-      Legacy: 0,
-      RBAC: 1,
     },
   };
 });
@@ -127,14 +101,6 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
 
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
-
-const actionTypeIdFromSavedObjectMock = (actionTypeId: string = 'my-action-type') => {
-  return {
-    attributes: {
-      actionTypeId,
-    },
-  } as SavedObject;
-};
 
 let logger: MockedLogger;
 
@@ -2743,270 +2709,6 @@ describe('update()', () => {
 });
 
 describe('execute()', () => {
-  describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-      await actionsClient.execute({
-        actionId: 'action-id',
-        params: {
-          name: 'my name',
-        },
-        source: asHttpRequestExecutionSource(request),
-      });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
-        operation: 'execute',
-        additionalPrivileges: [],
-      });
-    });
-
-    test('throws when user is not authorised to create the type of action', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to execute all actions`)
-      );
-
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-
-      await expect(
-        actionsClient.execute({
-          actionId: 'action-id',
-          params: {
-            name: 'my name',
-          },
-          source: asHttpRequestExecutionSource(request),
-        })
-      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
-        operation: 'execute',
-        additionalPrivileges: [],
-      });
-    });
-
-    test('tracks legacy RBAC', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.Legacy;
-      });
-
-      await actionsClient.execute({
-        actionId: 'action-id',
-        params: {
-          name: 'my name',
-        },
-        source: asHttpRequestExecutionSource(request),
-      });
-
-      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
-      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
-    });
-
-    test('ensures that system actions privileges are being authorized correctly', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-
-      actionsClient = new ActionsClient({
-        inMemoryConnectors: [
-          {
-            id: 'system-connector-.cases',
-            actionTypeId: '.cases',
-            name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
-            isSystemAction: true,
-          },
-        ],
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        auditLogger,
-        usageCounter: mockUsageCounter,
-        connectorTokenClient,
-        getEventLogClient,
-      });
-
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
-
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-
-      await actionsClient.execute({
-        actionId: 'system-connector-.cases',
-        params: {},
-      });
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: '.cases',
-        operation: 'execute',
-        additionalPrivileges: ['test/create'],
-      });
-    });
-
-    test('does not authorize kibana privileges for non system actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-
-      actionsClient = new ActionsClient({
-        inMemoryConnectors: [
-          {
-            id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
-            secrets: {
-              test: 'test1',
-            },
-            isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
-            name: 'test',
-            config: {
-              foo: 'bar',
-            },
-          },
-        ],
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        auditLogger,
-        usageCounter: mockUsageCounter,
-        connectorTokenClient,
-        getEventLogClient,
-      });
-
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
-
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-
-      await actionsClient.execute({
-        actionId: 'testPreconfigured',
-        params: {},
-      });
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
-        operation: 'execute',
-        additionalPrivileges: [],
-      });
-    });
-
-    test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-
-      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
-
-      actionsClient = new ActionsClient({
-        inMemoryConnectors: [
-          {
-            id: 'system-connector-.cases',
-            actionTypeId: '.cases',
-            name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
-            isSystemAction: true,
-          },
-        ],
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        auditLogger,
-        usageCounter: mockUsageCounter,
-        connectorTokenClient,
-        getEventLogClient,
-      });
-
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges,
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
-
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-
-      await actionsClient.execute({
-        actionId: 'system-connector-.cases',
-        params: { foo: 'bar' },
-      });
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: '.cases',
-        operation: 'execute',
-        additionalPrivileges: ['test/create'],
-      });
-
-      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
-    });
-  });
-
   test('calls the actionExecutor with the appropriate parameters', async () => {
     const actionId = uuidv4();
     const actionExecutionId = uuidv4();
@@ -3104,111 +2806,7 @@ describe('execute()', () => {
 });
 
 describe('bulkEnqueueExecution()', () => {
-  describe('authorization', () => {
-    test('ensures user is authorised to execute actions', async () => {
-      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
-      });
-      await actionsClient.bulkEnqueueExecution([
-        {
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
-        },
-        {
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '456def',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
-        },
-      ]);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
-        operation: 'execute',
-      });
-    });
-
-    test('throws when user is not authorised to create the type of action', async () => {
-      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
-      });
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to execute all actions`)
-      );
-
-      await expect(
-        actionsClient.bulkEnqueueExecution([
-          {
-            id: uuidv4(),
-            params: {},
-            spaceId: 'default',
-            executionId: '123abc',
-            apiKey: null,
-            source: asHttpRequestExecutionSource(request),
-            actionTypeId: 'my-action-type',
-          },
-          {
-            id: uuidv4(),
-            params: {},
-            spaceId: 'default',
-            executionId: '456def',
-            apiKey: null,
-            source: asHttpRequestExecutionSource(request),
-            actionTypeId: 'my-action-type',
-          },
-        ])
-      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: 'execute',
-      });
-    });
-
-    test('tracks legacy RBAC', async () => {
-      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 2 };
-      });
-
-      await actionsClient.bulkEnqueueExecution([
-        {
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
-        },
-        {
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '456def',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
-        },
-      ]);
-
-      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
-        'bulkEnqueueExecution',
-        mockUsageCounter,
-        2
-      );
-    });
-  });
-
   test('calls the bulkExecutionEnqueuer with the appropriate parameters', async () => {
-    (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-      return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 0 };
-    });
     const opts = [
       {
         id: uuidv4(),
@@ -3504,17 +3102,11 @@ describe('getGlobalExecutionLogWithAuth()', () => {
     test('ensures user is authorised to access logs', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access logs', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
 
       await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
@@ -3563,17 +3155,11 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
     test('ensures user is authorised to access kpi', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
 
       await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
