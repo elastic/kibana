@@ -1206,6 +1206,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
 # Observability UX management team
+/x-pack/test/api_integration/apis/slos @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group1/uptime.ts @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/observability.ts @elastic/obs-ux-management-team
 /x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
@@ -1395,6 +1396,9 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
+/x-pack/test/api_integration/apis/telemetry @elastic/kibana-core
+/x-pack/test/api_integration/apis/status @elastic/kibana-core
+/x-pack/test/api_integration/apis/stats @elastic/kibana-core
 /x-pack/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
@@ -1544,6 +1548,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/apps/watcher @elastic/kibana-management
 /x-pack/test/api_integration/apis/watcher @elastic/kibana-management
 /x-pack/test/api_integration/apis/upgrade_assistant @elastic/kibana-management
+/x-pack/test/api_integration/apis/searchprofiler @elastic/kibana-management
 /x-pack/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
@@ -1659,7 +1664,12 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
-## Security Solution sub teams - Threat Hunting Investigations
+## Security Solution sub teams - Threat Hunting
+
+/x-pack/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
+
+## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
 /x-pack/plugins/security_solution/common/api/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
@@ -1689,7 +1699,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 /x-pack/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
 
-## Security Solution sub teams - Threat Hunting Explore
+## Security Solution Threat Hunting areas - Threat Hunting Explore
 /x-pack/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
@@ -1850,6 +1860,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
 ## Security Solution sub teams - security-defend-workflows
+/x-pack/test/api_integration/apis/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
