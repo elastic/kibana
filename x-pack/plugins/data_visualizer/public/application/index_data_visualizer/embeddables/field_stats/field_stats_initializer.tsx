@@ -29,6 +29,7 @@ import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -94,6 +95,12 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
+
+  const unsupportedReason = useMemo(
+    () => getReasonIfFieldStatsUnavailableForQuery(esqlQuery),
+    [esqlQuery]
+  );
+
   const onESQLQuerySubmit = useCallback(
     async (query: AggregateQuery, abortController?: AbortController) => {
       const adhocDataView = await getESQLAdHocDataview(query.esql, dataViews);
@@ -101,11 +108,14 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         setDataViewId(adhocDataView.id);
       }
 
-      await onPreview({
-        viewType,
-        dataViewId: adhocDataView?.id,
-        query,
-      });
+      const supported = getReasonIfFieldStatsUnavailableForQuery(query) === undefined;
+      if (supported) {
+        await onPreview({
+          viewType,
+          dataViewId: adhocDataView?.id,
+          query,
+        });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isEsqlMode]
@@ -202,6 +212,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               }
             />
           ) : null}
+
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
               <DataSourceTypeSelector value={viewType} onChange={setViewType} />
@@ -247,7 +258,11 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               query={esqlQuery}
               setQuery={setQuery}
               onQuerySubmit={onESQLQuerySubmit}
+              disableSubmitAction={!!unsupportedReason}
             />
+          ) : null}
+          {unsupportedReason ? (
+            <EuiCallOut title={unsupportedReason} size="s" iconType="alert" color="warning" />
           ) : null}
         </EuiFlexGroup>
       </EuiFlyoutBody>
@@ -282,7 +297,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                   defaultMessage: 'Apply changes',
                 }
               )}
-              disabled={!isEsqlFormValid || !isDataViewFormValid}
+              disabled={!isEsqlFormValid || !isDataViewFormValid || !!unsupportedReason}
               iconType="check"
               data-test-subj="applyFlyoutButton"
             >
