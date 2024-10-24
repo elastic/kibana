@@ -156,7 +156,7 @@ function asPollingError<T>(err: Error, type: PollingErrorType, data: Option<T> =
       `Failed to poll for work: ${err.message || err}`,
       type,
       data,
-      typeof err === 'string' ? new Error(err) : err
+      err instanceof Error ? err : new Error(`${err}`)
     )
   );
 }
