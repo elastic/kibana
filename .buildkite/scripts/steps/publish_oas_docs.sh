@@ -20,8 +20,8 @@ deploy_to_bump() {
 }
 
 if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
-  BUMP_KIBANA_DOC_NAME="$(vault_get TODO TODO)"
-  BUMP_KIBANA_DOC_TOKEN="$(vault_get TODO TODO)"
+  BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
+  BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
   deploy_to_bump oas_docs/output/kibana.yaml $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN;
 
   # We should only do this after a successfull rollout to prod, i.e. once e2e tests passed
