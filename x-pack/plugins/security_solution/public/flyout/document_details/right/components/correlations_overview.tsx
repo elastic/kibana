@@ -134,7 +134,7 @@ export const CorrelationsOverview: React.FC = () => {
       data-test-subj={CORRELATIONS_TEST_ID}
     >
       {canShowAtLeastOneInsight ? (
-        <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup direction="column" gutterSize="s">
           {showSuppressedAlerts && (
             <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType={ruleType} />
           )}
