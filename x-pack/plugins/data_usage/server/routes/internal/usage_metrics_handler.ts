@@ -6,7 +6,6 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
