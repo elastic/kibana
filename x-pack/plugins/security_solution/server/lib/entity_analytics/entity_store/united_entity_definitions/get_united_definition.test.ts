@@ -117,8 +117,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "entity.source",
-              "maxLength": 10,
-              "operation": "collect_values",
+              "operation": "prefer_oldest_value",
             },
             Object {
               "field": "asset.criticality",
@@ -219,8 +218,10 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
+                "sort": Object {
+                  "@timestamp": "asc",
+                },
+                "type": "top_value",
               },
               "destination": "entity.source",
               "source": "_index",
@@ -373,8 +374,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "entity.source",
-              "maxLength": 10,
-              "operation": "collect_values",
+              "operation": "prefer_oldest_value",
             },
             Object {
               "field": "asset.criticality",
@@ -467,8 +467,10 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
+                "sort": Object {
+                  "@timestamp": "asc",
+                },
+                "type": "top_value",
               },
               "destination": "entity.source",
               "source": "_index",
