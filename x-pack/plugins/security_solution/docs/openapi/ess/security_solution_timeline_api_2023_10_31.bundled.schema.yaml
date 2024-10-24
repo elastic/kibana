@@ -98,7 +98,7 @@ paths:
             nullable: true
             type: string
         - in: query
-          name: userFilter
+          name: createdByFilter
           schema:
             nullable: true
             type: string

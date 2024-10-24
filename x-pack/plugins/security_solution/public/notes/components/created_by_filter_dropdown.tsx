@@ -13,15 +13,26 @@ import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { useLicense } from '../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
-import { USER_SELECT_TEST_ID } from './test_ids';
+import { CREATED_BY_SELECT_TEST_ID } from './test_ids';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
-import { userFilterUsers } from '..';
+import { userFilterCreatedBy } from '..';
 
-export const USERS_DROPDOWN = i18n.translate('xpack.securitySolution.notes.usersDropdownLabel', {
-  defaultMessage: 'Users',
+export const CREATED_BY = i18n.translate('xpack.securitySolution.notes.createdByDropdownLabel', {
+  defaultMessage: 'Created by',
 });
 
-export const UserFilterDropdown = React.memo(() => {
+interface User {
+  /**
+   * uuid of the UserProfile
+   */
+  id: string;
+  /**
+   * full_name || email || username of the UserProfile
+   */
+  label: string;
+}
+
+export const CreatedByFilterDropdown = React.memo(() => {
   const dispatch = useDispatch();
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const upsellingMessage = useUpsellingMessage('note_management_user_filter');
@@ -30,19 +41,21 @@ export const UserFilterDropdown = React.memo(() => {
     searchTerm: '',
     enabled: isPlatinumPlus,
   });
-  const users = useMemo(
+
+  const users: User[] = useMemo(
     () =>
       (data || []).map((userProfile: UserProfileWithAvatar) => ({
-        label: userProfile.user.full_name || userProfile.user.username,
+        id: userProfile.uid,
+        label: userProfile.user.full_name || userProfile.user.email || userProfile.user.username,
       })),
     [data]
   );
 
-  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<string>>>();
+  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<User>>>();
   const onChange = useCallback(
-    (user: Array<EuiComboBoxOptionOption<string>>) => {
+    (user: Array<EuiComboBoxOptionOption<User>>) => {
       setSelectedUser(user);
-      dispatch(userFilterUsers(user.length > 0 ? user[0].label : ''));
+      dispatch(userFilterCreatedBy(user.length > 0 ? (user[0].id as string) : ''));
     },
     [dispatch]
   );
@@ -50,14 +63,14 @@ export const UserFilterDropdown = React.memo(() => {
   const dropdown = useMemo(
     () => (
       <EuiComboBox
-        prepend={USERS_DROPDOWN}
+        prepend={CREATED_BY}
         singleSelection={{ asPlainText: true }}
         options={users}
         selectedOptions={selectedUser}
         onChange={onChange}
         isLoading={isPlatinumPlus && isLoading}
         isDisabled={!isPlatinumPlus}
-        data-test-subj={USER_SELECT_TEST_ID}
+        data-test-subj={CREATED_BY_SELECT_TEST_ID}
       />
     ),
     [isLoading, isPlatinumPlus, onChange, selectedUser, users]
@@ -76,4 +89,4 @@ export const UserFilterDropdown = React.memo(() => {
   );
 });
 
-UserFilterDropdown.displayName = 'UserFilterDropdown';
+CreatedByFilterDropdown.displayName = 'CreatedByFilterDropdown';

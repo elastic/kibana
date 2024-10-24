@@ -20,5 +20,5 @@ export const TIMELINE_DESCRIPTION_COMMENT_TEST_ID = `${PREFIX}TimelineDescriptio
 export const NOTE_CONTENT_BUTTON_TEST_ID = `${PREFIX}NoteContentButton` as const;
 export const NOTE_CONTENT_POPOVER_TEST_ID = `${PREFIX}NoteContentPopover` as const;
 export const SEARCH_BAR_TEST_ID = `${PREFIX}SearchBar` as const;
-export const USER_SELECT_TEST_ID = `${PREFIX}UserSelect` as const;
+export const CREATED_BY_SELECT_TEST_ID = `${PREFIX}CreatedBySelect` as const;
 export const ASSOCIATED_NOT_SELECT_TEST_ID = `${PREFIX}AssociatedNoteSelect` as const;

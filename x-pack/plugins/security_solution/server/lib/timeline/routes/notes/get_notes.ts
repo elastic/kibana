@@ -15,6 +15,9 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { StartPlugins } from '../../../../plugin_contract';
 import { AssociatedFilter } from '../../../../../common/notes/constants';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -27,7 +30,10 @@ import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
 /* eslint-disable complexity */
-export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
+export const getNotesRoute = (
+  router: SecuritySolutionPluginRouter,
+  startServices: StartServicesAccessor<StartPlugins>
+) => {
   router.versioned
     .get({
       path: NOTE_URL,
@@ -139,11 +145,41 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
           const filterKueryNodeArray = [filterAsKueryNode];
 
           // retrieve all the notes created by a specific user
-          const userFilter = queryParams?.userFilter;
-          if (userFilter) {
-            filterKueryNodeArray.push(
-              nodeBuilder.is(`${noteSavedObjectType}.attributes.createdBy`, userFilter)
-            );
+          // the createdByFilter value is the uuid of the user
+          const createdByFilter = queryParams?.createdByFilter; // now uuid
+          if (createdByFilter) {
+            // because the notes createdBy property can be either full_name, email or username
+            // see pickSaveNote (https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/timeline/saved_object/notes/saved_object.ts#L302)
+            // which uses the getUserDisplayName (https://github.com/elastic/kibana/blob/main/packages/kbn-user-profile-components/src/user_profile.ts#L138)
+            const [_, { security }] = await startServices();
+            const users: UserProfile[] = await security.userProfiles.bulkGet({
+              uids: new Set([createdByFilter]),
+            });
+            // once we retrieve the user by the uuid we can search all the notes that have the createdBy property with full_name, email or username values
+            if (users && users.length > 0) {
+              const {
+                user: { email, full_name: fullName, username: userName },
+              } = users[0];
+              const createdByNodeArray = [];
+              if (fullName) {
+                createdByNodeArray.push(
+                  nodeBuilder.is(`${noteSavedObjectType}.attributes.createdBy`, fullName)
+                );
+              }
+              if (userName) {
+                createdByNodeArray.push(
+                  nodeBuilder.is(`${noteSavedObjectType}.attributes.createdBy`, userName)
+                );
+              }
+              if (email) {
+                createdByNodeArray.push(
+                  nodeBuilder.is(`${noteSavedObjectType}.attributes.createdBy`, email)
+                );
+              }
+              filterKueryNodeArray.push(nodeBuilder.or(createdByNodeArray));
+            } else {
+              throw new Error(`User with uid ${createdByFilter} not found`);
+            }
           }
 
           const associatedFilter = queryParams?.associatedFilter;

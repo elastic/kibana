@@ -7,8 +7,8 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { UserFilterDropdown } from './user_filter_dropdown';
-import { USER_SELECT_TEST_ID } from './test_ids';
+import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
+import { CREATED_BY_SELECT_TEST_ID } from './test_ids';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 import { useLicense } from '../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
@@ -32,16 +32,25 @@ describe('UserFilterDropdown', () => {
     jest.clearAllMocks();
     (useSuggestUsers as jest.Mock).mockReturnValue({
       isLoading: false,
-      data: [{ user: { username: 'test' } }, { user: { username: 'elastic' } }],
+      data: [
+        {
+          uid: '1',
+          user: { username: 'test' },
+        },
+        {
+          uid: '2',
+          user: { username: 'elastic' },
+        },
+      ],
     });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
     (useUpsellingMessage as jest.Mock).mockReturnValue('upsellingMessage');
   });
 
   it('should render the component enabled', () => {
-    const { getByTestId } = render(<UserFilterDropdown />);
+    const { getByTestId } = render(<CreatedByFilterDropdown />);
 
-    const dropdown = getByTestId(USER_SELECT_TEST_ID);
+    const dropdown = getByTestId(CREATED_BY_SELECT_TEST_ID);
 
     expect(dropdown).toBeInTheDocument();
     expect(dropdown).not.toHaveClass('euiComboBox-isDisabled');
@@ -50,13 +59,13 @@ describe('UserFilterDropdown', () => {
   it('should render the dropdown disabled', async () => {
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
 
-    const { getByTestId } = render(<UserFilterDropdown />);
+    const { getByTestId } = render(<CreatedByFilterDropdown />);
 
-    expect(getByTestId(USER_SELECT_TEST_ID)).toHaveClass('euiComboBox-isDisabled');
+    expect(getByTestId(CREATED_BY_SELECT_TEST_ID)).toHaveClass('euiComboBox-isDisabled');
   });
 
   it('should call the correct action when select a user', async () => {
-    const { getByTestId } = render(<UserFilterDropdown />);
+    const { getByTestId } = render(<CreatedByFilterDropdown />);
 
     const userSelect = getByTestId('comboBoxSearchInput');
     userSelect.focus();
