@@ -154,6 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.openConsole();
     });
 
+    // Failing: See https://github.com/elastic/kibana/issues/193868
     describe.skip('customizable font size', () => {
       it('should allow the font size to be customized', async () => {
         await PageObjects.console.openConfig();
