@@ -85,7 +85,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     const joined = joinByKey(
       [...latestEntities, ...alerts],
       [...identityFieldsPerEntityType.values()].flat()
-    ).filter((entity) => entity['entity.id']);
+    ).filter((entity) => entity['entity.id']) as Entity[];
 
     return {
       entities:
