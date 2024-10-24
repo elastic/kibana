@@ -393,7 +393,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             entry: {
               type: DocumentEntryType.value,
               // TODO: parse title from document
-              name: '',
+              // Disabled so we don't copy that value with copy_to
+              // name: 'unknown',
               text: doc.pageContent,
               kbResource: doc.metadata.kbResource ?? 'unknown',
               required: doc.metadata.required ?? false,
