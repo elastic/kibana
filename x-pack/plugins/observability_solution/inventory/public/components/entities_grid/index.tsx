@@ -41,7 +41,7 @@ interface Props {
   onFilterByType: (entityType: string) => void;
 }
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 20;
 
 export function EntitiesGrid({
   entities,
