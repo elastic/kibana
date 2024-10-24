@@ -6,9 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
@@ -116,16 +115,19 @@ export const EntitiesList: React.FC = () => {
       activePage={(data?.page ?? 1) - 1}
       columns={columns}
       headerCount={data?.total ?? 0}
-      headerTitle={
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle"
-              defaultMessage="Entities"
-            />
-          </h2>
-        </EuiTitle>
-      }
+      titleSize="s"
+      headerTitle={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
+        {
+          defaultMessage: 'Entities',
+        }
+      )}
+      headerTooltip={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip',
+        {
+          defaultMessage: 'Entity data can take a couple of minutes to appear',
+        }
+      )}
       limit={limit}
       loading={isLoading || isRefetching}
       isInspect={false}
