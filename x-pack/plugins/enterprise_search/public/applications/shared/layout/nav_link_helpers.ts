@@ -10,8 +10,10 @@ import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
-import { generateReactRouterProps } from '../react_router_helpers';
-import { GeneratedReactRouterProps } from '../react_router_helpers/generate_react_router_props';
+import {
+  type GeneratedReactRouterProps,
+  generateReactRouterProps,
+} from '../react_router_helpers/generate_react_router_props';
 import { ReactRouterProps } from '../types';
 
 interface Params {

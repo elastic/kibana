@@ -18,13 +18,9 @@ import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../appli
 import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 
 import { KibanaLogic } from '../kibana';
-import {
-  ClassicNavItem,
-  GenerateNavLinkParameters,
-  GenerateNavLinkFromDeepLinkParameters,
-} from '../types';
 
 import { buildBaseClassicNavItems } from './base_nav';
+import { generateSideNavItems } from './classic_nav_helpers';
 import { generateNavLink } from './nav_link_helpers';
 
 /**
@@ -212,89 +208,3 @@ export const useEnterpriseSearchAnalyticsNav = (
 
   return navItems;
 };
-
-export const generateSideNavItems = (
-  navItems: ClassicNavItem[],
-  deepLinks: Record<string, ChromeNavLink | undefined>,
-  subItemsMap: Record<string, Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined> = {}
-): Array<EuiSideNavItemTypeEnhanced<unknown>> => {
-  const sideNavItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [];
-
-  for (const navItem of navItems) {
-    let sideNavChildItems: Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined;
-
-    const { deepLink, items, ...rest } = navItem;
-    const subItems = subItemsMap?.[navItem.id];
-
-    if (items || subItems) {
-      sideNavChildItems = [];
-      if (items) {
-        sideNavChildItems.push(...generateSideNavItems(items, deepLinks, subItemsMap));
-      }
-      if (subItems) {
-        sideNavChildItems.push(...subItems);
-      }
-    }
-
-    let sideNavItem: EuiSideNavItemTypeEnhanced<unknown> | undefined;
-    if (deepLink) {
-      const navLinkParams = getNavLinkParameters(deepLink, deepLinks);
-      if (navLinkParams !== undefined) {
-        const name = navItem.name ?? getDeepLinkTitle(deepLink.link, deepLinks);
-        sideNavItem = {
-          ...rest,
-          name,
-          ...generateNavLink({
-            ...navLinkParams,
-            items: sideNavChildItems,
-          }),
-        };
-      }
-    } else {
-      sideNavItem = {
-        ...rest,
-        items: sideNavChildItems,
-        name: navItem.name,
-      };
-    }
-
-    if (isValidSideNavItem(sideNavItem)) {
-      sideNavItems.push(sideNavItem);
-    }
-  }
-
-  return sideNavItems;
-};
-
-const getNavLinkParameters = (
-  navLink: GenerateNavLinkFromDeepLinkParameters,
-  deepLinks: Record<string, ChromeNavLink | undefined>
-): GenerateNavLinkParameters | undefined => {
-  const { link, ...navLinkProps } = navLink;
-  const deepLink = deepLinks[link];
-  if (!deepLink || !deepLink.url) return undefined;
-  return {
-    ...navLinkProps,
-    shouldNotCreateHref: true,
-    shouldNotPrepend: true,
-    to: deepLink.url,
-  };
-};
-const getDeepLinkTitle = (
-  link: string,
-  deepLinks: Record<string, ChromeNavLink | undefined>
-): string | undefined => {
-  const deepLink = deepLinks[link];
-  if (!deepLink || !deepLink.url) return undefined;
-  return deepLink.title;
-};
-
-function isValidSideNavItem(
-  item: EuiSideNavItemTypeEnhanced<unknown> | undefined
-): item is EuiSideNavItemTypeEnhanced<unknown> {
-  if (item === undefined) return false;
-  if (item.href || item.onClick) return true;
-  if (item?.items?.length ?? 0 > 0) return true;
-
-  return false;
-}
