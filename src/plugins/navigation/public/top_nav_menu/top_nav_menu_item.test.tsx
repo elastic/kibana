@@ -11,6 +11,7 @@ import React from 'react';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { EuiButtonIcon } from '@elastic/eui';
 
 describe('TopNavMenu', () => {
   const ensureMenuItemDisabled = (data: TopNavMenuData) => {
@@ -74,6 +75,23 @@ describe('TopNavMenu', () => {
     component.simulate('click', event);
     expect(data.run).toHaveBeenCalledTimes(1);
     expect(component).toMatchSnapshot();
+  });
+
+  it('Should render an icon-only item', () => {
+    const data: TopNavMenuData = {
+      id: 'test',
+      label: 'test',
+      iconType: 'share',
+      iconOnly: true,
+      run: jest.fn(),
+    };
+
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
+    expect(component).toMatchSnapshot();
+
+    const event = { currentTarget: { value: 'a' } };
+    component.find(EuiButtonIcon).simulate('click', event);
+    expect(data.run).toHaveBeenCalledTimes(1);
   });
 
   it('Should render disabled item and it shouldnt be clickable', () => {
