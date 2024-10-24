@@ -25,6 +25,7 @@ import {
   DegradedFieldResponse,
   DegradedFieldValues,
   NonAggregatableDatasets,
+  UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 import {
@@ -33,6 +34,8 @@ import {
   fetchDataStreamSettingsFailedNotifier,
   fetchDataStreamIntegrationFailedNotifier,
   fetchIntegrationDashboardsFailedNotifier,
+  updateFieldLimitFailedNotifier,
+  rolloverDataStreamFailedNotifier,
 } from './notifications';
 import { Integration } from '../../../common/data_streams_stats/integration';
 
@@ -189,10 +192,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         },
                         done: {
                           on: {
-                            UPDATE_TIME_RANGE: {
-                              target: 'fetching',
-                              actions: ['resetDegradedFieldPageAndRowsPerPage'],
-                            },
                             UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
                               target: 'done',
                               actions: ['storeDegradedFieldTableOptions'],
@@ -200,7 +199,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             OPEN_DEGRADED_FIELD_FLYOUT: {
                               target:
                                 '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
-                              actions: ['storeExpandedDegradedField'],
+                              actions: [
+                                'storeExpandedDegradedField',
+                                'resetFieldLimitServerResponse',
+                              ],
                             },
                             TOGGLE_CURRENT_QUALITY_ISSUES: {
                               target: 'fetching',
@@ -282,48 +284,105 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   ],
                 },
                 open: {
-                  type: 'parallel',
+                  initial: 'initialized',
                   states: {
-                    ignoredValues: {
-                      initial: 'fetching',
+                    initialized: {
+                      type: 'parallel',
                       states: {
-                        fetching: {
-                          invoke: {
-                            src: 'loadDegradedFieldValues',
-                            onDone: {
-                              target: 'done',
-                              actions: ['storeDegradedFieldValues'],
+                        ignoredValues: {
+                          initial: 'fetching',
+                          states: {
+                            fetching: {
+                              invoke: {
+                                src: 'loadDegradedFieldValues',
+                                onDone: {
+                                  target: 'done',
+                                  actions: ['storeDegradedFieldValues'],
+                                },
+                                onError: [
+                                  {
+                                    target: '#DatasetQualityDetailsController.indexNotFound',
+                                    cond: 'isIndexNotFoundError',
+                                  },
+                                  {
+                                    target: 'done',
+                                  },
+                                ],
+                              },
                             },
-                            onError: [
-                              {
-                                target: '#DatasetQualityDetailsController.indexNotFound',
-                                cond: 'isIndexNotFoundError',
-                              },
-                              {
-                                target: 'done',
-                              },
-                            ],
+                            done: {},
                           },
                         },
-                        done: {},
-                      },
-                    },
-                    analyze: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          invoke: {
-                            src: 'analyzeDegradedField',
-                            onDone: {
-                              target: 'done',
-                              actions: ['storeDegradedFieldAnalysis'],
+                        mitigation: {
+                          initial: 'analyzing',
+                          states: {
+                            analyzing: {
+                              invoke: {
+                                src: 'analyzeDegradedField',
+                                onDone: {
+                                  target: 'analyzed',
+                                  actions: ['storeDegradedFieldAnalysis'],
+                                },
+                                onError: {
+                                  target: 'analyzed',
+                                },
+                              },
                             },
-                            onError: {
-                              target: 'done',
+                            analyzed: {
+                              on: {
+                                SET_NEW_FIELD_LIMIT: {
+                                  target: 'mitigating',
+                                  actions: 'storeNewFieldLimit',
+                                },
+                              },
                             },
+                            mitigating: {
+                              invoke: {
+                                src: 'saveNewFieldLimit',
+                                onDone: [
+                                  {
+                                    target: 'askingForRollover',
+                                    actions: 'storeNewFieldLimitResponse',
+                                    cond: 'hasFailedToUpdateLastBackingIndex',
+                                  },
+                                  {
+                                    target: 'success',
+                                    actions: 'storeNewFieldLimitResponse',
+                                  },
+                                ],
+                                onError: {
+                                  target: 'error',
+                                  actions: [
+                                    'storeNewFieldLimitErrorResponse',
+                                    'notifySaveNewFieldLimitError',
+                                  ],
+                                },
+                              },
+                            },
+                            askingForRollover: {
+                              on: {
+                                ROLLOVER_DATA_STREAM: {
+                                  target: 'rollingOver',
+                                },
+                              },
+                            },
+                            rollingOver: {
+                              invoke: {
+                                src: 'rolloverDataStream',
+                                onDone: {
+                                  target: 'success',
+                                  actions: ['raiseForceTimeRangeRefresh'],
+                                },
+                                onError: {
+                                  target: 'error',
+                                  actions: 'notifySaveNewFieldLimitError',
+                                },
+                              },
+                            },
+                            success: {},
+                            error: {},
                           },
                         },
-                        done: {},
                       },
                     },
                   },
@@ -482,9 +541,28 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             isIndexNotFoundError: true,
           };
         }),
+        storeNewFieldLimit: assign((_, event) => {
+          return 'newFieldLimit' in event
+            ? { fieldLimit: { newFieldLimit: event.newFieldLimit } }
+            : {};
+        }),
+        storeNewFieldLimitResponse: assign(
+          (context, event: DoneInvokeEvent<UpdateFieldLimitResponse>) => {
+            return 'data' in event
+              ? { fieldLimit: { ...context.fieldLimit, result: event.data, error: false } }
+              : {};
+          }
+        ),
+        storeNewFieldLimitErrorResponse: assign((context) => {
+          return { fieldLimit: { ...context.fieldLimit, error: true } };
+        }),
+        resetFieldLimitServerResponse: assign(() => ({
+          fieldLimit: undefined,
+        })),
+        raiseForceTimeRangeRefresh: raise('UPDATE_TIME_RANGE'),
       },
       guards: {
-        checkIfActionForbidden: (context, event) => {
+        checkIfActionForbidden: (_, event) => {
           return (
             'data' in event &&
             typeof event.data === 'object' &&
@@ -515,6 +593,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         },
         hasNoDegradedFieldsSelected: (context) => {
           return !Boolean(context.expandedDegradedField);
+        },
+        hasFailedToUpdateLastBackingIndex: (_, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'isLatestBackingIndexUpdated' in event.data &&
+            !event.data.isLatestBackingIndexUpdated
+          );
         },
       },
     }
@@ -552,6 +638,10 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
           'dataStreamSettings' in context ? context.dataStreamSettings?.integration : undefined;
         return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
       },
+      notifySaveNewFieldLimitError: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFieldLimitFailedNotifier(toasts, event.data),
+      notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
+        rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
@@ -603,7 +693,8 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
             dataStream:
               context.showCurrentQualityIssues &&
               'dataStreamSettings' in context &&
-              context.dataStreamSettings
+              context.dataStreamSettings &&
+              context.dataStreamSettings.lastBackingIndexName
                 ? context.dataStreamSettings.lastBackingIndexName
                 : context.dataStream,
             start,
@@ -660,6 +751,21 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         }
 
         return Promise.resolve();
+      },
+      saveNewFieldLimit: (context) => {
+        if ('fieldLimit' in context && context.fieldLimit && context.fieldLimit.newFieldLimit) {
+          return dataStreamDetailsClient.setNewFieldLimit({
+            dataStream: context.dataStream,
+            newFieldLimit: context.fieldLimit.newFieldLimit,
+          });
+        }
+
+        return Promise.resolve();
+      },
+      rolloverDataStream: (context) => {
+        return dataStreamDetailsClient.rolloverDataStream({
+          dataStream: context.dataStream,
+        });
       },
     },
   });
