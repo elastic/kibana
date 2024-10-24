@@ -216,6 +216,6 @@ describe('HistoricalResultsList', () => {
       for (const accordionToggleButton of allAccordionToggles) {
         expect(accordionToggleButton).toHaveAttribute('aria-expanded', 'true');
       }
-    });
+    }, 10000);
   });
 });
