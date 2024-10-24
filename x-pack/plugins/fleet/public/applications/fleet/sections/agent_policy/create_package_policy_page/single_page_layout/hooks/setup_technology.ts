@@ -19,7 +19,12 @@ import type {
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
-import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
+import {
+  AGENTLESS_POLICY_ID,
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+} from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
@@ -150,16 +155,21 @@ export function useSetupTechnology({
   }, [isDefaultAgentlessPolicyEnabled]);
 
   const handleSetupTechnologyChange = useCallback(
-    (setupTechnology: SetupTechnology) => {
+    (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (isAgentlessApiEnabled) {
-          setNewAgentPolicy(newAgentlessPolicy as NewAgentPolicy);
+          const agentlessPolicy = {
+            ...newAgentlessPolicy,
+            ...getAdditionalAgentlessPolicyInfo(policyTemplateName, packageInfo),
+          } as NewAgentPolicy;
+
+          setNewAgentPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
-          updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
+          updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
         // tech debt: remove this when Serverless uses the Agentless API
         // https://github.com/elastic/security-team/issues/9781
@@ -187,6 +197,7 @@ export function useSetupTechnology({
       newAgentlessPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,
+      packageInfo,
     ]
   );
 
@@ -195,3 +206,37 @@ export function useSetupTechnology({
     selectedSetupTechnology,
   };
 }
+
+const getAdditionalAgentlessPolicyInfo = (
+  policyTemplateName?: string,
+  packageInfo?: PackageInfo
+) => {
+  if (!policyTemplateName || !packageInfo) {
+    return {};
+  }
+  const agentlessPolicyTemplate = policyTemplateName
+    ? packageInfo?.policy_templates?.find((policy) => policy.name === policyTemplateName)
+    : undefined;
+
+  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
+  return !agentlessInfo
+    ? {}
+    : {
+        global_data_tags: agentlessInfo
+          ? [
+              {
+                name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+                value: agentlessInfo.organization,
+              },
+              {
+                name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+                value: agentlessInfo.division,
+              },
+              {
+                name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+                value: agentlessInfo.team,
+              },
+            ]
+          : [],
+      };
+};
