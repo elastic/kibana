@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ErrorEmbeddable, IEmbeddable } from '..';
+import { ErrorEmbeddable } from '..';
 
-export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
+export function isErrorEmbeddable<TEmbeddable extends object>(
   embeddable: TEmbeddable | ErrorEmbeddable
 ): embeddable is ErrorEmbeddable {
-  return Boolean(embeddable.fatalError || (embeddable as ErrorEmbeddable).error !== undefined);
+  return Boolean(
+    (embeddable as ErrorEmbeddable).fatalError ||
+      (embeddable as ErrorEmbeddable).error !== undefined
+  );
 }

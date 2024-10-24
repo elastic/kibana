@@ -16,6 +16,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { of } from 'rxjs';
 
+import { i18n } from '@kbn/i18n';
+
 import { SetWorkplaceSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
@@ -35,7 +37,9 @@ describe('WorkplaceSearchPageTemplate', () => {
   it('renders', () => {
     const wrapper = shallow(
       <WorkplaceSearchPageTemplate>
-        <div className="hello">world</div>
+        <div className="hello">
+          {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
+        </div>
       </WorkplaceSearchPageTemplate>
     );
 

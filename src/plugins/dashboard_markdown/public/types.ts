@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const EUI_MARKDOWN_ID = 'euiMarkdown';
-export const ADD_EUI_MARKDOWN_ACTION_ID = 'create_eui_markdown';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
+
+export type MarkdownEditorSerializedState = SerializedTitles & {
+  content: string;
+};
+
+export type MarkdownEditorRuntimeState = MarkdownEditorSerializedState;
+
+export type MarkdownEditorApi = HasEditCapabilities &
+  DefaultEmbeddableApi<MarkdownEditorSerializedState>;
