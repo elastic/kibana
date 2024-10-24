@@ -27,7 +27,7 @@ export const getReasonIfFieldStatsUnavailableForQuery = (
   if (isOfAggregateQueryType(query)) {
     const { root } = parse(query.esql);
 
-    if (Walker.hasFunction(root, 'match')) {
+    if (Walker.hasFunction(root, 'match') || Walker.hasFunction(root, 'qstr')) {
       return i18n.translate(
         'unifiedFieldList.fieldStats.notAvailableForMatchESQLQueryDescription',
         {

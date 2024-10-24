@@ -44,9 +44,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
     const unsupportedReason = getReasonIfFieldStatsUnavailableForQuery(props.esqlQuery);
     return unsupportedReason ? (
-      <EuiCallOut size="m" iconType="warning" color="warning">
-        {unsupportedReason}
-      </EuiCallOut>
+      <EuiCallOut title={unsupportedReason} size="s" iconType="warning" color="warning" />
     ) : (
       <EmbeddableESQLFieldStatsTableWrapper
         id={props.id}

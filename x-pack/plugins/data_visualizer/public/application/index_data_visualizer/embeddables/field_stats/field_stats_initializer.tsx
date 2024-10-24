@@ -259,9 +259,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             />
           ) : null}
           {unsupportedReason ? (
-            <EuiCallOut size="m" iconType="alert" color="warning">
-              {unsupportedReason}
-            </EuiCallOut>
+            <EuiCallOut title={unsupportedReason} size="s" iconType="alert" color="warning" />
           ) : null}
         </EuiFlexGroup>
       </EuiFlyoutBody>

@@ -353,9 +353,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   );
   if (unsupportedReasonForQuery) {
     const messageUnsupportedReason = (
-      <EuiCallOut iconType="warning" color="warning">
-        {unsupportedReasonForQuery}
-      </EuiCallOut>
+      <EuiCallOut size="s" iconType="warning" color="warning" title={unsupportedReasonForQuery} />
     );
 
     return overrideMissingContent
