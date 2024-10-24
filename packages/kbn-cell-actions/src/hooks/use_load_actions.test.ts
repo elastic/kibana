@@ -8,6 +8,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { useBulkLoadActions, useLoadActions, useLoadActionsFn } from './use_load_actions';
 
@@ -26,7 +27,7 @@ describe('loadActions hooks', () => {
   });
   describe('useLoadActions', () => {
     it('should load actions when called', async () => {
-      const { result, waitForNextUpdate } = renderHook(useLoadActions, {
+      const { result } = renderHook(useLoadActions, {
         initialProps: actionContext,
       });
 
@@ -35,22 +36,20 @@ describe('loadActions hooks', () => {
       expect(mockGetActions).toHaveBeenCalledTimes(1);
       expect(mockGetActions).toHaveBeenCalledWith(actionContext);
 
-      await waitForNextUpdate();
-
-      expect(result.current.value).toEqual([action]);
-      expect(result.current.loading).toEqual(false);
+      await waitFor(() => {
+        expect(result.current.value).toEqual([action]);
+        expect(result.current.loading).toEqual(false);
+      });
     });
 
     it('should throw error when getAction is rejected', async () => {
       const message = 'some division by 0';
       mockGetActions.mockRejectedValueOnce(Error(message));
 
-      const { result, waitForNextUpdate } = renderHook(useLoadActions, {
+      const { result } = renderHook(useLoadActions, {
         initialProps: actionContext,
       });
-      await waitForNextUpdate();
-
-      expect(result.error?.message).toEqual(message);
+      await waitFor(() => expect(result.error?.message).toEqual(message));
     });
 
     it('filters out disabled actions', async () => {
@@ -58,19 +57,17 @@ describe('loadActions hooks', () => {
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useLoadActions(actionContext, { disabledActionTypes: [actionDisabled.type] })
       );
 
-      await waitForNextUpdate();
-
-      expect(result.current.value).toEqual([actionEnabled]);
+      await waitFor(() => expect(result.current.value).toEqual([actionEnabled]));
     });
   });
 
   describe('useLoadActionsFn', () => {
     it('should load actions when returned function is called', async () => {
-      const { result, waitForNextUpdate } = renderHook(useLoadActionsFn);
+      const { result } = renderHook(useLoadActionsFn);
       const [{ value: valueBeforeCall, loading: loadingBeforeCall }, loadActions] = result.current;
 
       expect(valueBeforeCall).toBeUndefined();
@@ -87,18 +84,18 @@ describe('loadActions hooks', () => {
       expect(mockGetActions).toHaveBeenCalledTimes(1);
       expect(mockGetActions).toHaveBeenCalledWith(actionContext);
 
-      await waitForNextUpdate();
-
-      const [{ value: valueAfterUpdate, loading: loadingAfterUpdate }] = result.current;
-      expect(valueAfterUpdate).toEqual([action]);
-      expect(loadingAfterUpdate).toEqual(false);
+      await waitFor(() => {
+        const [{ value: valueAfterUpdate, loading: loadingAfterUpdate }] = result.current;
+        expect(valueAfterUpdate).toEqual([action]);
+        expect(loadingAfterUpdate).toEqual(false);
+      });
     });
 
     it('should throw error when getAction is rejected', async () => {
       const message = 'some division by 0';
-      mockGetActions.mockRejectedValueOnce(Error(message));
+      mockGetActions.mockRejectedValueOnce(new Error(message));
 
-      const { result, waitForNextUpdate } = renderHook(useLoadActionsFn);
+      const { result } = renderHook(useLoadActionsFn);
       const [_, loadActions] = result.current;
 
       expect(result.error).toBeUndefined();
@@ -106,9 +103,7 @@ describe('loadActions hooks', () => {
       act(() => {
         loadActions(actionContext);
       });
-      await waitForNextUpdate();
-
-      expect(result.error?.message).toEqual(message);
+      await waitFor(() => expect(result.error?.message).toEqual(message));
     });
 
     it('filters out disabled actions types', async () => {
@@ -116,7 +111,7 @@ describe('loadActions hooks', () => {
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useLoadActionsFn({ disabledActionTypes: [actionDisabled.type] })
       );
       const [_, loadActions] = result.current;
@@ -124,10 +119,10 @@ describe('loadActions hooks', () => {
       act(() => {
         loadActions(actionContext);
       });
-      await waitForNextUpdate();
-
-      const [{ value: valueAfterUpdate }] = result.current;
-      expect(valueAfterUpdate).toEqual([actionEnabled]);
+      await waitFor(() => {
+        const [{ value: valueAfterUpdate }] = result.current;
+        expect(valueAfterUpdate).toEqual([actionEnabled]);
+      });
     });
   });
 
@@ -136,7 +131,7 @@ describe('loadActions hooks', () => {
     const actionContexts = [actionContext, actionContext2];
 
     it('should load bulk actions array when called', async () => {
-      const { result, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+      const { result } = renderHook(useBulkLoadActions, {
         initialProps: actionContexts,
       });
 
@@ -146,22 +141,20 @@ describe('loadActions hooks', () => {
       expect(mockGetActions).toHaveBeenCalledWith(actionContext);
       expect(mockGetActions).toHaveBeenCalledWith(actionContext2);
 
-      await waitForNextUpdate();
-
-      expect(result.current.value).toEqual([[action], [action]]);
-      expect(result.current.loading).toEqual(false);
+      await waitFor(() => {
+        expect(result.current.value).toEqual([[action], [action]]);
+        expect(result.current.loading).toEqual(false);
+      });
     });
 
     it('should throw error when getAction is rejected', async () => {
       const message = 'some division by 0';
       mockGetActions.mockRejectedValueOnce(Error(message));
 
-      const { result, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+      const { result } = renderHook(useBulkLoadActions, {
         initialProps: actionContexts,
       });
-      await waitForNextUpdate();
-
-      expect(result.error?.message).toEqual(message);
+      await waitFor(() => expect(result.error?.message).toEqual(message));
     });
 
     it('filters out disabled actions types', async () => {
@@ -169,40 +162,37 @@ describe('loadActions hooks', () => {
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useBulkLoadActions(actionContexts, { disabledActionTypes: [actionDisabled.type] })
       );
 
-      await waitForNextUpdate();
-
-      expect(result.current.value).toEqual([[actionEnabled], [actionEnabled]]);
+      await waitFor(() => expect(result.current.value).toEqual([[actionEnabled], [actionEnabled]]));
     });
 
     it('should re-render when contexts is changed', async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+      const { result, rerender } = renderHook(useBulkLoadActions, {
         initialProps: [actionContext],
       });
 
-      await waitForNextUpdate();
-      expect(mockGetActions).toHaveBeenCalledWith(actionContext);
+      await waitFor(() => expect(mockGetActions).toHaveBeenCalledWith(actionContext));
 
       rerender([actionContext2]);
-      await waitForNextUpdate();
-      expect(mockGetActions).toHaveBeenCalledWith(actionContext2);
+      await waitFor(() => expect(mockGetActions).toHaveBeenCalledWith(actionContext2));
 
       mockGetActions.mockClear();
 
       rerender([]);
-      await waitForNextUpdate();
-      expect(mockGetActions).toHaveBeenCalledTimes(0);
+      await waitFor(() => {
+        expect(mockGetActions).toHaveBeenCalledTimes(0);
 
-      expect(result.current.value).toBeInstanceOf(Array);
-      expect(result.current.value).toHaveLength(0);
-      expect(result.current.loading).toBe(false);
+        expect(result.current.value).toBeInstanceOf(Array);
+        expect(result.current.value).toHaveLength(0);
+        expect(result.current.loading).toBe(false);
+      });
     });
 
     it('should return the same array after re-render when contexts is undefined', async () => {
-      const { result, rerender, waitFor } = renderHook(useBulkLoadActions, {
+      const { result, rerender } = renderHook(useBulkLoadActions, {
         initialProps: undefined,
       });
 

@@ -47,9 +47,8 @@ describe('useFetchAlerts', () => {
 
     expect(result.current.loading).toBe(true);
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(false);
     expect(result.current.totalItemCount).toBe(10);
     expect(result.current.data).toEqual(['alert1', 'alert2', 'alert3']);
@@ -76,7 +75,7 @@ describe('useFetchAlerts', () => {
 
     expect(result.current.loading).toBe(true);
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(true);

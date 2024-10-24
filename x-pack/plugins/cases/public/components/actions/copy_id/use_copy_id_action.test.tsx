@@ -8,6 +8,7 @@
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useCopyIDAction } from './use_copy_id_action';
 
 import { basicCase } from '../../../containers/mock';
@@ -58,7 +59,7 @@ describe('useCopyIDAction', () => {
   });
 
   it('copies the id of the selected case to the clipboard', async () => {
-    const { result, waitFor } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
+    const { result } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -73,7 +74,7 @@ describe('useCopyIDAction', () => {
   });
 
   it('shows the success toaster correctly when copying the case id', async () => {
-    const { result, waitFor } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
+    const { result } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
       wrapper: appMockRender.AppWrapper,
     });
 

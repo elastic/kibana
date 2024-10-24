@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 import { useDeleteEndpoint } from './use_delete_endpoint';
@@ -43,7 +44,7 @@ describe('useDeleteEndpoint', () => {
   };
 
   it('should call delete endpoint and show success toast on success', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteEndpoint(), { wrapper });
+    const { result } = renderHook(() => useDeleteEndpoint(), { wrapper });
 
     result.current.mutate({ type: 'text_embedding', id: 'in-1' });
 
@@ -60,7 +61,7 @@ describe('useDeleteEndpoint', () => {
   it('should show error toast on failure', async () => {
     const error = { body: { message: 'error' } };
     mockDelete.mockRejectedValue(error);
-    const { result, waitFor } = renderHook(() => useDeleteEndpoint(), { wrapper });
+    const { result } = renderHook(() => useDeleteEndpoint(), { wrapper });
 
     result.current.mutate({ type: 'model', id: '123' });
 

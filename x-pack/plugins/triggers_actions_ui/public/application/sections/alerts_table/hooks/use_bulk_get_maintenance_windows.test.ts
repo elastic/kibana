@@ -96,7 +96,7 @@ describe('useBulkGetMaintenanceWindows', () => {
     const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
-    const { waitForNextUpdate, result } = renderHook(
+    const { result } = renderHook(
       () =>
         useBulkGetMaintenanceWindows({
           ids: ['test-id'],
@@ -107,9 +107,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.data?.get('test-id')).toEqual(mockMaintenanceWindow);
+    await waitFor(() => expect(result.current.data?.get('test-id')).toEqual(mockMaintenanceWindow));
 
     expect(spy).toHaveBeenCalledWith({
       http: expect.anything(),
@@ -185,7 +183,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       .spyOn(api, 'bulkGetMaintenanceWindows')
       .mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useBulkGetMaintenanceWindows({
           ids: ['test-id'],
@@ -196,7 +194,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

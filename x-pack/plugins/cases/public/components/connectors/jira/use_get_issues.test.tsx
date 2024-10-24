@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector as actionConnector } from '../mock';
@@ -30,7 +31,7 @@ describe('useGetIssues', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getIssues');
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useGetIssues({
           http,
@@ -40,13 +41,14 @@ describe('useGetIssues', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(spy).toHaveBeenCalledWith({
-      http,
-      signal: expect.anything(),
-      connectorId: actionConnector.id,
-      title: 'Task',
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+      expect(spy).toHaveBeenCalledWith({
+        http,
+        signal: expect.anything(),
+        connectorId: actionConnector.id,
+        title: 'Task',
+      });
     });
   });
 
@@ -74,7 +76,7 @@ describe('useGetIssues', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useGetIssues({
           http,
@@ -84,9 +86,10 @@ describe('useGetIssues', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isError);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getIssues api returns successfully but contains an error', async () => {
@@ -100,7 +103,7 @@ describe('useGetIssues', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useGetIssues({
           http,
@@ -110,8 +113,9 @@ describe('useGetIssues', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

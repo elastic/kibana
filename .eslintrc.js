@@ -892,6 +892,17 @@ module.exports = {
             message:
               'lodash.template is unsafe, and not compatible with our content security policy.',
           },
+          {
+            object: 'renderHook',
+            property: 'waitFor',
+            message:
+              "use waitFor exported from @testing-library/react instead. waitFor is not available on the returned object from renderHook in it's next version",
+          },
+          {
+            property: 'waitForNextUpdate',
+            message:
+              "use waitFor exported from @testing-library/react instead. waitForNextUpdate is not available on the returned object from renderHook in it's next version.",
+          },
         ],
       },
     },

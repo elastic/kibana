@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
 import type { AppMockRenderer } from '../../common/mock';
@@ -35,16 +36,14 @@ describe('Use get case configuration hook', () => {
       targetConfiguration,
     ]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(targetConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(targetConfiguration));
   });
 
   it('returns the initial configuration if none matches the owner', async () => {
@@ -59,16 +58,14 @@ describe('Use get case configuration hook', () => {
       { ...initialConfiguration, id: 'my-new-configuration-2', owner: 'bar' },
     ]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(initialConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
   });
 
   it('returns the initial configuration if none exists', async () => {
@@ -76,16 +73,14 @@ describe('Use get case configuration hook', () => {
 
     spy.mockResolvedValue([]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(initialConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
   });
 
   it('returns the initial configuration if the owner is undefined', async () => {
@@ -94,15 +89,13 @@ describe('Use get case configuration hook', () => {
 
     spy.mockResolvedValue([]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     /**
      * The response after fetching
      */
-    expect(result.current.data).toEqual(initialConfiguration);
+    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
   });
 });

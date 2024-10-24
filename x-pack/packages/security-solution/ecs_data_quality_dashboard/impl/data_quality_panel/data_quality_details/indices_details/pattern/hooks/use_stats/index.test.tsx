@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../../../../../data_quality_context';
@@ -146,10 +147,10 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockStatsAuditbeatIndex);
 
-      const { waitForNextUpdate } = renderHook(() => useStats({ pattern, startDate, endDate }), {
+      renderHook(() => useStats({ pattern, startDate, endDate }), {
         wrapper: ContextWrapperILMNotAvailable,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
     });
     test(`it calls the stats api with the expected params`, async () => {
       expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
@@ -162,10 +163,10 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockStatsAuditbeatIndex);
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
+      const { result } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       statsResult = await result.current;
     });
 
@@ -193,10 +194,10 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
+      const { result } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       statsResult = await result.current;
     });
 

@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramInputMessage } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';

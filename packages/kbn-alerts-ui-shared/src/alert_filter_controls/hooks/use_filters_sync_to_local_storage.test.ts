@@ -9,6 +9,7 @@
 
 import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useControlGroupSyncToLocalStorage } from './use_control_group_sync_to_local_storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -39,30 +40,34 @@ describe('Filters Sync to Local Storage', () => {
   });
   it('should not be undefined if localStorage has initial value', () => {
     global.localStorage.setItem(TEST_STORAGE_KEY, JSON.stringify(DEFAULT_STORED_VALUE));
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
     );
-    waitForNextUpdate();
-    expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE);
+    waitFor(() => expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE));
   });
   it('should be undefined if localstorage as NO initial value', () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
     );
-    waitForNextUpdate();
-    expect(result.current.controlGroupState).toBeUndefined();
-    expect(result.current.setControlGroupState).toBeTruthy();
+    waitFor(() =>
+      expect(result.current).toBe(
+        expect.objectContaining({
+          controlGroupState: undefined,
+          setControlGroupState: expect.any(Function),
+        })
+      )
+    );
   });
   it('should be update values to local storage when sync is ON', () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,
@@ -82,7 +87,7 @@ describe('Filters Sync to Local Storage', () => {
     });
   });
   it('should not update values to local storage when sync is OFF', () => {
-    const { waitFor, result, rerender } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,

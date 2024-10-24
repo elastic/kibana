@@ -47,7 +47,7 @@ describe('Transform: useIndexData()', () => {
       </QueryClientProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData({
           dataView: {
@@ -62,13 +62,13 @@ describe('Transform: useIndexData()', () => {
       { wrapper }
     );
 
-    const IndexObj: UseIndexDataReturnType = result.current;
+    await waitFor(() => {
+      const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
-
-    expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(INDEX_STATUS.UNUSED);
-    expect(IndexObj.tableItems).toEqual([]);
+      expect(IndexObj.errorMessage).toBe('');
+      expect(IndexObj.status).toBe(INDEX_STATUS.UNUSED);
+      expect(IndexObj.tableItems).toEqual([]);
+    });
   });
 
   test('dataView set triggers loading', async () => {
@@ -78,7 +78,7 @@ describe('Transform: useIndexData()', () => {
       </QueryClientProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData({
           dataView: {
@@ -108,7 +108,7 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(IndexObj.errorMessage).toBe('');
     expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);

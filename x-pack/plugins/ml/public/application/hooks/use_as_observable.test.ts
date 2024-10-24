@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { useAsObservable } from './use_as_observable';
 
 describe('useAsObservable', () => {
@@ -35,7 +36,7 @@ describe('useAsObservable', () => {
   });
 
   test('updates the subject with a new value', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(useAsObservable, {
+    const { result, rerender } = renderHook(useAsObservable, {
       initialProps: 'test',
     });
 
@@ -50,7 +51,6 @@ describe('useAsObservable', () => {
 
     await act(async () => {
       rerender('test update');
-      await waitForNextUpdate();
     });
 
     expect(subscriptionMock).toHaveBeenCalledTimes(2);

@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 
 import { useLastPageUserActions } from './use_user_actions_last_page';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
@@ -32,7 +33,7 @@ describe('useLastPageUserActions', () => {
   });
 
   it('renders correctly', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPageUserActions({
         lastPage: 5,
         userActivityQueryParams,
@@ -79,7 +80,7 @@ describe('useLastPageUserActions', () => {
   it('returns loading state correctly', async () => {
     useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPageUserActions({
         lastPage: 2,
         userActivityQueryParams,
@@ -108,7 +109,7 @@ describe('useLastPageUserActions', () => {
   it('returns empty array when data is undefined', async () => {
     useFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPageUserActions({
         lastPage: 2,
         userActivityQueryParams,

@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -30,7 +31,7 @@ describe('useGetSeverity', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getSeverity');
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useGetSeverity({
           http,
@@ -70,7 +71,7 @@ describe('useGetSeverity', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitFor } = renderHook(
+    renderHook(
       () =>
         useGetSeverity({
           http,
@@ -95,7 +96,7 @@ describe('useGetSeverity', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitFor } = renderHook(
+    renderHook(
       () =>
         useGetSeverity({
           http,
