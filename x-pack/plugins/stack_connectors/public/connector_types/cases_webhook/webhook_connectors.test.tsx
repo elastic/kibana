@@ -593,7 +593,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ).toBeInTheDocument();
     });
 
-    it('validates get incident url with post correctly', async () => {
+    it('validation succeeds get incident url with post correctly', async () => {
       const connector = {
         ...actionConnector,
         config: {
@@ -604,6 +604,9 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           headers: [],
         },
       };
+
+      const { isPreconfigured, ...rest } = actionConnector;
+      const { headers, ...rest2 } = actionConnector.config;
 
       render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
@@ -616,10 +619,25 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
 
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
-      expect(
-        await screen.findByText(i18n.GET_INCIDENT_URL_POST_VALIDATION('{{{external.system.id}}}'))
-      ).toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            __internal__: {
+              hasCA: false,
+              hasHeaders: true,
+            },
+            ...rest,
+            config: {
+              ...rest2,
+              getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+              getIncidentMethod: 'post',
+              getIncidentJson: '{"id": {{{external.system.id}}} }',
+            },
+          },
+          isValid: true,
+        })
+      );
     });
   });
 });

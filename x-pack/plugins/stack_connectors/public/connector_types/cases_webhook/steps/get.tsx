@@ -21,7 +21,6 @@ import {
   containsExternalIdForGet,
   containsExternalIdForPost,
   containsExternalIdOrTitle,
-  doesNotContainExternalIdForPost,
   requiredJsonForPost,
 } from '../validator';
 import { urlVars, urlVarsExt } from '../action_variables';
@@ -91,7 +90,6 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                     validator: urlField(i18n.GET_INCIDENT_URL_REQUIRED),
                   },
                   { validator: containsExternalIdForGet(getIncidentMethod) },
-                  { validator: doesNotContainExternalIdForPost(getIncidentMethod) },
                 ],
                 helpText: i18n.GET_INCIDENT_URL_HELP,
               }}

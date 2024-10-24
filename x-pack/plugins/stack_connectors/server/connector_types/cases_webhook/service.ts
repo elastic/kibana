@@ -103,16 +103,13 @@ export const createExternalService = (
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
-      const getUrl =
-        getIncidentMethod === WebhookMethods.GET
-          ? renderMustacheStringNoEscape(getIncidentUrl, {
-              external: {
-                system: {
-                  id: encodeURIComponent(id),
-                },
-              },
-            })
-          : getIncidentUrl;
+      const getUrl = renderMustacheStringNoEscape(getIncidentUrl, {
+        external: {
+          system: {
+            id: encodeURIComponent(id),
+          },
+        },
+      });
 
       const normalizedUrl = validateAndNormalizeUrl(
         `${getUrl}`,

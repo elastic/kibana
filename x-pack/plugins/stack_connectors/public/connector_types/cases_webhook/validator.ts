@@ -60,28 +60,6 @@ export const containsExternalIdForGet =
       : undefined;
   };
 
-export const doesNotContainExternalIdForPost =
-  (method?: string) =>
-  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value, path }] = args;
-
-    const id = templateActionVariable(
-      urlVars.find((actionVariable) => actionVariable.name === 'external.system.id')!
-    );
-
-    const error = {
-      code: errorCode,
-      path,
-      message: i18n.GET_INCIDENT_URL_POST_VALIDATION(id),
-    };
-
-    return method === WebhookMethods.POST &&
-      value !== null &&
-      containsChars(id)(value as string).doesContain
-      ? error
-      : undefined;
-  };
-
 export const containsExternalIdOrTitle =
   () =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {

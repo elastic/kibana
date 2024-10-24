@@ -217,12 +217,6 @@ export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   }
 );
 
-export const GET_INCIDENT_URL_POST_VALIDATION = (variable: string) =>
-  i18n.translate('xpack.stackConnectors.components.casesWebhook.getIncidentUrlPostValidation', {
-    defaultMessage: '{variable} should not be in the URL for POST method.',
-    values: { variable },
-  });
-
 export const GET_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentJsonHelp',
   {
