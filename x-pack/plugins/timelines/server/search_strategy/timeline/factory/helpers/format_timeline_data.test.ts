@@ -7,12 +7,12 @@
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../../../../../common/search_strategy';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { formatTimelineData } from './format_timeline_data';
 
 describe('formatTimelineData', () => {
   it('should properly format the timeline data', async () => {
-    const res = await formatTimelineData(
+    const res = formatTimelineData(
+      [eventHit],
       [
         '@timestamp',
         'host.name',
@@ -21,8 +21,7 @@ describe('formatTimelineData', () => {
         'source.geo.location',
         'threat.enrichments.matched.field',
       ],
-      TIMELINE_EVENTS_FIELDS,
-      eventHit
+      false
     );
     expect(res).toEqual({
       cursor: {
@@ -240,9 +239,9 @@ describe('formatTimelineData', () => {
 
     expect(
       await formatTimelineData(
+        [response],
         ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
-        TIMELINE_EVENTS_FIELDS,
-        response
+        false
       )
     ).toEqual({
       cursor: {
@@ -347,6 +346,7 @@ describe('formatTimelineData', () => {
 
     expect(
       await formatTimelineData(
+        [response],
         [
           'kibana.alert.status',
           '@timestamp',
@@ -376,8 +376,7 @@ describe('formatTimelineData', () => {
           'event.kind',
           'kibana.alert.rule.parameters',
         ],
-        TIMELINE_EVENTS_FIELDS,
-        response
+        false
       )
     ).toEqual({
       cursor: {
