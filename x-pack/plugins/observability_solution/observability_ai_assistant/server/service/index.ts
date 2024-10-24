@@ -255,10 +255,10 @@ export class ObservabilityAIAssistantService {
 
   async getClient({
     request,
-    scope,
+    scopes,
   }: {
     request: KibanaRequest;
-    scope?: AssistantScope;
+    scopes?: AssistantScope[];
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -297,7 +297,7 @@ export class ObservabilityAIAssistantService {
           }
         : undefined,
       knowledgeBaseService: this.kbService!,
-      scope: scope || 'all',
+      scopes: scopes || ['all'],
     });
   }
 
@@ -306,11 +306,13 @@ export class ObservabilityAIAssistantService {
     signal,
     resources,
     client,
+    scopes,
   }: {
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
+    scopes: AssistantScope[];
   }): Promise<ChatFunctionClient> {
     const fnClient = new ChatFunctionClient(screenContexts);
 
@@ -319,6 +321,7 @@ export class ObservabilityAIAssistantService {
       functions: fnClient,
       resources,
       client,
+      scopes,
     };
 
     await Promise.all(
