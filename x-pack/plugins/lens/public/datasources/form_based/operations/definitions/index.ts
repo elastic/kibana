@@ -444,6 +444,15 @@ interface BaseOperationDefinitionProps<
    * When present returns a dictionary of unsupported layer settings
    */
   getUnsupportedSettings?: () => LayerSettingsFeatures;
+
+  toESQL?: (
+    column: C,
+    columnId: string,
+    indexPattern: IndexPattern,
+    layer: FormBasedLayer,
+    uiSettings: IUiSettingsClient,
+    dateRange: DateRange
+  ) => string | undefined;
 }
 
 interface BaseBuildColumnArgs {
