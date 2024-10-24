@@ -11,7 +11,9 @@ import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
+import { APP_SEARCH_PLUGIN } from '../../../../common/constants';
 import { EnterpriseSearchDeprecationCallout } from '../deprecation_callout/deprecation_callout';
+import { docLinks } from '../doc_links';
 import { KibanaLogic } from '../kibana/kibana_logic';
 import { ProductName } from '../types';
 
@@ -52,11 +54,17 @@ export const RolesEmptyPrompt: React.FC<Props> = ({ onEnable, docsLink, productN
     return null;
   }
 
+  const deprecationLearnMoreLink =
+    productName === APP_SEARCH_PLUGIN.NAME
+      ? docLinks.appSearchGuide
+      : docLinks.workplaceSearchGuide;
+
   return (
     <>
       {showDeprecationCallout ? (
         <EnterpriseSearchDeprecationCallout
           onDismissAction={onDismissDeprecationCallout}
+          learnMoreLinkUrl={deprecationLearnMoreLink}
           restrictWidth
         />
       ) : (

@@ -13,6 +13,7 @@ import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchDeprecationCallout } from '../../../../shared/deprecation_callout/deprecation_callout';
+import { docLinks } from '../../../../shared/doc_links';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { AppLogic } from '../../../app_logic';
@@ -41,6 +42,7 @@ export const EmptyState: React.FC = () => {
       {showDeprecationCallout ? (
         <EnterpriseSearchDeprecationCallout
           onDismissAction={onDismissDeprecationCallout}
+          learnMoreLinkUrl={docLinks.appSearchGuide}
           restrictWidth
         />
       ) : (

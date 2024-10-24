@@ -12,6 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { EnterpriseSearchDeprecationCallout } from '../../../shared/deprecation_callout/deprecation_callout';
+import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
@@ -59,7 +60,10 @@ export const AppSearchPageTemplate: React.FC<
     >
       {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}
       {showDeprecationCallout ? (
-        <EnterpriseSearchDeprecationCallout onDismissAction={onDismissDeprecationCallout} />
+        <EnterpriseSearchDeprecationCallout
+          onDismissAction={onDismissDeprecationCallout}
+          learnMoreLinkUrl={docLinks.appSearchGuide}
+        />
       ) : (
         <></>
       )}

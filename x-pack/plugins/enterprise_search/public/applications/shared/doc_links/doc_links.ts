@@ -170,6 +170,7 @@ class DocLinks {
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
   public workplaceSearchGoogleDrive: string;
+  public workplaceSearchGuide: string;
   public workplaceSearchIndexingSchedule: string;
   public workplaceSearchJiraCloud: string;
   public workplaceSearchJiraServer: string;
@@ -352,6 +353,7 @@ class DocLinks {
     this.workplaceSearchGitHub = '';
     this.workplaceSearchGmail = '';
     this.workplaceSearchGoogleDrive = '';
+    this.workplaceSearchGuide = '';
     this.workplaceSearchIndexingSchedule = '';
     this.workplaceSearchJiraCloud = '';
     this.workplaceSearchJiraServer = '';
@@ -540,6 +542,7 @@ class DocLinks {
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
     this.workplaceSearchGmail = docLinks.links.workplaceSearch.gmail;
     this.workplaceSearchGoogleDrive = docLinks.links.workplaceSearch.googleDrive;
+    this.workplaceSearchGuide = docLinks.links.workplaceSearch.guide;
     this.workplaceSearchIndexingSchedule = docLinks.links.workplaceSearch.indexingSchedule;
     this.workplaceSearchJiraCloud = docLinks.links.workplaceSearch.jiraCloud;
     this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
