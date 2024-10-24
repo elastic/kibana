@@ -51,7 +51,7 @@ describe('useMonitorListFilters', () => {
     const { result } = renderHook(() => useFilters(), { wrapper: Wrapper });
 
     expect(result.current).toStrictEqual(null);
-    expect(spy).toBeCalledWith(fetchMonitorFiltersAction.get());
+    expect(spy).toBeCalledWith(fetchMonitorFiltersAction.get({}));
   });
 
   it('picks up results from filters selector', () => {
@@ -86,6 +86,6 @@ describe('useMonitorListFilters', () => {
     const { result } = renderHook(() => useFilters(), { wrapper: Wrapper });
 
     expect(result.current).toStrictEqual(filters);
-    expect(spy).toBeCalledWith(fetchMonitorFiltersAction.get());
+    expect(spy).toBeCalledWith(fetchMonitorFiltersAction.get({}));
   });
 });

@@ -22,10 +22,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import {
-  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
-} from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -1102,14 +1099,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with enrichments', () => {
-        const kibanaServer = getService('kibanaServer');
-
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
           await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-          await kibanaServer.uiSettings.update({
-            [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-          });
         });
 
         after(async () => {

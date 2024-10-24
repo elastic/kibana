@@ -2,87 +2,77 @@
 [[xpack-spaces]]
 == Spaces
 
-Spaces enable you to organize your dashboards and other saved
-objects into meaningful categories. Once inside a space, you see only
-the dashboards and saved objects that belong to that space.
+You can define multiple spaces in a single {kib} instance from the **Spaces** menu. Each space has its own navigation and saved objects, and users can only access the spaces that they have been granted access to. This access is based on user roles, and a given role can have different permissions per space.
 
 {kib} creates a default space for you.
-After you create your own
-spaces, you're asked to choose a space when you log in to {kib}. You can change your
-current space at any time by using the menu.
+When you create more spaces, users are asked to choose a space when they log in to {kib}, and can change their
+current space at any time from the top menu.
 
 [role="screenshot"]
 image::images/change-space.png["Change current space menu"]
 
+To go to **Spaces**, find **Stack Management** in the navigation menu or use the <<kibana-navigation-search,global search bar>>.
+
 [float]
-==== Required privileges
+=== Required privileges
 
 The `kibana_admin` role or equivalent is required to manage **Spaces**.
 
 [float]
 [[spaces-managing]]
-=== View, create, and delete spaces
+=== Create a space
 
-Open the main menu, then click *Stack Management > Spaces* for an overview of your spaces.  This view provides actions
-for you to create, edit, and delete spaces.
+[[spaces-control-feature-visibility]]
+You can have up to 100 spaces. 
 
-[role="screenshot"]
-image::images/space-management.png["Space management"]
-
-[float]
-==== Create or edit a space
-
-You can create as many spaces as you like. Click *Create a space* and provide a name,
-URL identifier, optional description.
-
+. Select *Create space* and provide a name, description, and URL identifier.
++
 The URL identifier is a short text string that becomes part of the
 {kib} URL when you are inside that space. {kib} suggests a URL identifier based
 on the name of your space, but you can customize the identifier to your liking.
 You cannot change the space identifier once you create the space.
 
+. Select a **Solution view**. This setting controls the navigation that all users of the space will get:
+
+** **Search**: A light navigation menu focused on analytics and Search use cases. Features specific to Observability and Security are hidden.
+** **Observability**: A light navigation menu focused on analytics and Observability use cases. Features specific to Search and Security are hidden.
+** **Security**: A light navigation menu focused on analytics and Security use cases. Features specific to Observability and Search are hidden.
+** **Classic**: All features from all solutions are visible by default using the classic, multilayered navigation menus. You can customize which features are visible individually. 
+
+. If you selected the **Classic** solution view, you can customize the **Feature visibility** as you need it to be for that space.
++
+NOTE: Even when disabled in this menu, some Management features can remain visible to some users depending on their privileges. Additionally, controlling feature visibility is not a security feature. To secure access
+to specific features on a per-user basis, you must configure <<xpack-security-authorization, {kib} Security>>.
+
+. Customize the avatar of the space to your liking.
+
+. Save your new space by selecting **Create space**.
+
+You can edit all of the space settings you just defined at any time, except for the URL identifier.
+
 {kib} also has an <<spaces-api, API>>
 if you prefer to create spaces programmatically.
 
-[role="screenshot"]
-image::images/edit-space.png["Space management"]
+[float]
+[[spaces-control-user-access]]
+=== Define access to a space
+
+Users can access spaces based on the roles that they have. 
+
+* Certain reserved roles can view and access all spaces by default. You can't prevent those roles from accessing a space. Instead, you can grant different roles to your users.
+* When <<kibana-role-management,creating or editing a role>>, you can define which existing spaces that role can access, and with which permissions.
+* When editing a space, you can assign roles to the space and define the permissions within the space for these roles. To do that, go to the **Permissions** tab of the space you're editing.
++
+When a role is assigned to _All Spaces_, you can't remove its access from the space settings. You must instead edit the role to give it more granular access to individual spaces.
 
 [float]
-==== Delete a space
+=== Delete a space
 
 Deleting a space permanently removes the space and all of its contents.
 Find the space on the *Spaces* overview page and click the trash icon in the Actions column.
 You can't delete the default space, but you can customize it to your liking.
 
-[float]
-[[spaces-control-feature-visibility]]
-=== Control feature access based on user needs
-
-You have control over which features are visible in each space.
-For example, you might hide *Dev Tools*
-in your "Executive" space or show *Stack Monitoring* only in your "Admin" space.
-You can define which features to show or hide when you add or edit a space.
-
-Controlling feature
-visibility is not a security feature. To secure access
-to specific features on a per-user basis, you must configure
-<<xpack-security-authorization, {kib} Security>>.
-
-[role="screenshot"]
-image::images/edit-space-feature-visibility.png["Controlling features visibility"]
-
-[float]
-[[spaces-control-user-access]]
-=== Control feature access based on user privileges
-
-When using {kib} with security, you can configure applications and features
-based on your users’ privileges. This means different roles can have access
-to different features in the same space.
-Power users might have privileges to create and edit visualizations and dashboards,
-while analysts or executives might have read-only privileges for *Dashboard* and *Canvas*.
-Refer to <<adding_kibana_privileges>> for details.
-
-[role="screenshot"]
-image::images/spaces-roles.png["Controlling features visibility"]
+//[[spaces-control-feature-visibility]]
 
 [float]
 [[spaces-moving-objects]]
@@ -107,6 +97,6 @@ image::images/spaces-configure-landing-page.png["Configure space-level landing p
 
 [float]
 [[spaces-delete-started]]
-=== Disabling spaces
+=== Disable spaces
 
-Starting in {kib} 8.0, the Spaces feature cannot be disabled.
+Since {kib} 8.0, the Spaces feature cannot be disabled.

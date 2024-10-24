@@ -246,6 +246,7 @@ describe('Assistant', () => {
       });
     });
   });
+
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
       const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
