@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorServerSideDefinition } from '../common/connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors/types/connector_definition';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
