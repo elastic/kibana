@@ -947,6 +947,7 @@ packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
+packages/kbn-transpose-utils @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
@@ -1601,7 +1602,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
 
-/x-pack/test_serverless/functional/test_suites/security/cypress @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution

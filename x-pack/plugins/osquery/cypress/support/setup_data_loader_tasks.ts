@@ -6,12 +6,12 @@
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { LoadUserAndRoleCyTaskOptions } from '../cypress';
-import {
+import { SecurityRoleAndUserLoader } from '@kbn/test-suites-serverless/shared/lib';
+import type {
   LoadedRoleAndUser,
-  SecurityRoleAndUserLoader,
   YamlRoleDefinitions,
-} from '../../../../../shared/lib';
+} from '@kbn/test-suites-serverless/shared/lib';
+import type { LoadUserAndRoleCyTaskOptions } from './e2e';
 
 interface AdditionalDefinitions {
   roleDefinitions?: YamlRoleDefinitions;
@@ -33,9 +33,7 @@ export const setupUserDataLoader = (
   });
 
   const roleAndUserLoaderPromise: Promise<SecurityRoleAndUserLoader> = stackServicesPromise.then(
-    ({ kbnClient, log }) => {
-      return new SecurityRoleAndUserLoader(kbnClient, log, roleDefinitions);
-    }
+    ({ kbnClient, log }) => new SecurityRoleAndUserLoader(kbnClient, log, roleDefinitions)
   );
 
   on('task', {
@@ -43,8 +41,7 @@ export const setupUserDataLoader = (
      * Loads a user/role into Kibana. Used from `login()` task.
      * @param name
      */
-    loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
-      return (await roleAndUserLoaderPromise).load(name, additionalRoleName);
-    },
+    loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> =>
+      (await roleAndUserLoaderPromise).load(name, additionalRoleName),
   });
 };
