@@ -8,7 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Connector } from '@kbn/search-connectors';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { ConnectorDefinition } from '@kbn/search-connectors/types/connector_definition';
 
 import { Status } from '../../../../../../common/types/api';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
