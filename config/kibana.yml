@@ -186,3 +186,11 @@
 # Requires all registry packages to add v9 as a compatible semver range
 # https://github.com/elastic/kibana/issues/192624
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+
+
+discover.experimental.enabledProfiles:
+  - security-root-profile
+
+
+xpack.securitySolution.enableExperimental:
+  - securitySolutionNotesEnabled

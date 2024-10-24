@@ -85,7 +85,6 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
     useIsNewRiskScoreModuleInstalled();
 
-  console.log({ isNewRiskScoreModuleInstalled, riskScoreStatusLoading });
   const defaultIndex =
     spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
       ? riskEntity === RiskScoreEntity.host
