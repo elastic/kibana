@@ -15,7 +15,7 @@ jest.mock('../../../../lib/content_stream', () => ({
 
 import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -101,7 +101,12 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         },
         securityService: {
           authc: {
-            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+            getCurrentUser: () =>
+              securityServiceMock.createMockAuthenticatedUser({
+                roles: ['superuser'],
+                profile_uid: 'tom-riddle',
+                username: 'Tom Riddle',
+              }),
           },
         },
       },

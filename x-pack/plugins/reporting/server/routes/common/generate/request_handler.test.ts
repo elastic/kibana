@@ -10,7 +10,12 @@ jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 import rison from '@kbn/rison';
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
@@ -91,9 +96,11 @@ describe('Handle request to generate', () => {
     mockContext = getMockContext();
     mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
+    const mockUser = securityServiceMock.createMockAuthenticatedUser({ username: 'testymcgee' });
+
     requestHandler = new RequestHandler(
       reportingCore,
-      { username: 'testymcgee' },
+      mockUser,
       mockContext,
       '/api/reporting/test/generate/pdf',
       mockRequest,
@@ -114,7 +121,7 @@ describe('Handle request to generate', () => {
           "_seq_no": undefined,
           "attempts": 0,
           "completed_at": undefined,
-          "created_by": "testymcgee",
+          "created_by": "testymcgee:native:native1",
           "error": undefined,
           "execution_time_ms": undefined,
           "jobtype": "printable_pdf_v2",

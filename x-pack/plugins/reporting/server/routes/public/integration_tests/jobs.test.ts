@@ -15,7 +15,11 @@ import supertest from 'supertest';
 
 import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { coreMock, type ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  securityServiceMock,
+  type ElasticsearchClientMock,
+} from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
@@ -97,7 +101,12 @@ describe(`Reporting Job Management Routes: Public`, () => {
         },
         securityService: {
           authc: {
-            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+            getCurrentUser: () =>
+              securityServiceMock.createMockAuthenticatedUser({
+                roles: ['superuser'],
+                profile_uid: 'tom-riddle',
+                username: 'Tom Riddle',
+              }),
           },
         },
       },
