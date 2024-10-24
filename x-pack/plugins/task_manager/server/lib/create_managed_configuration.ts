@@ -164,6 +164,7 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
       filter(
         (e) =>
           SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
+          SavedObjectsErrorHelpers.isEsUnavailableError(e) ||
           isEsCannotExecuteScriptError(e) ||
           getMsearchStatusCode(e) === 429 ||
           getMsearchStatusCode(e) === 503
