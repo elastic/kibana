@@ -45,7 +45,7 @@
     "@kbn/data-views-plugin",
     "@kbn/discover-utils",
     "@kbn/data-plugin",
-    "@kbn/search-index-documents"
+    "@kbn/search-index-documents",
   ],
   "exclude": [
     "target/**/*",
