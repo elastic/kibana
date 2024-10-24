@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLazy, DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
@@ -20,12 +20,13 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
   const { dataViews, setBreadcrumbs, notifications, dataViewMgmtService } =
     useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();
-  const [indexPattern, setIndexPattern] = useState<DataView>();
+  const [indexPattern, setIndexPattern] = useState<DataViewLazy>();
 
   useEffect(() => {
     dataViews
       .get(decodeURIComponent(props.match.params.id), undefined, true)
       .then((ip: DataView) => {
+        // TODO wrong data view type
         dataViewMgmtService.setDataView(ip);
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));

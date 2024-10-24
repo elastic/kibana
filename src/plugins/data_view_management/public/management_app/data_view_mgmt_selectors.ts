@@ -18,3 +18,4 @@ export const defaultIndexSelector = (state: DataViewMgmtState) => state.defaultI
 export const fieldsSelector = (state: DataViewMgmtState) => state.fields;
 export const indexedFieldTypeSelector = (state: DataViewMgmtState) => state.indexedFieldTypes;
 export const scriptedFieldLangsSelector = (state: DataViewMgmtState) => state.scriptedFieldLangs;
+export const scriptedFieldsSelector = (state: DataViewMgmtState) => state.scriptedFields;
