@@ -16,7 +16,6 @@ import {
   newTelemetryLogger,
 } from '../helpers';
 import {
-  TELEMETRY_CLUSTER_STATS_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
@@ -24,7 +23,7 @@ import {
 } from '../event_based/events';
 import type { CommonPrefixesConfig } from '../collections_helpers';
 import { telemetryConfiguration } from '../configuration';
-import type { ClusterStats, DataStream } from '../indices.metadata.types';
+import type { DataStream } from '../indices.metadata.types';
 import { TelemetryCounter } from '../types';
 
 const COUNTER_LABELS = ['security_solution', 'indices-metadata'];
@@ -56,10 +55,6 @@ export function createTelemetryIndicesMetadataTaskConfig() {
         maxPrefixes: Number(taskConfig.max_prefixes),
         maxGroupSize: Number(taskConfig.max_group_size),
         minPrefixSize: Number(taskConfig.min_group_size),
-      };
-
-      const publishClusterStats = (stats: ClusterStats) => {
-        sender.reportEBT(TELEMETRY_CLUSTER_STATS_EVENT.eventType, stats);
       };
 
       const publishDatastreamsStats = (stats: DataStream[]): number => {
@@ -122,23 +117,18 @@ export function createTelemetryIndicesMetadataTaskConfig() {
 
       try {
         // 1. Get cluster stats and list of indices and datastreams
-        const [clusterStats, indices, dataStreams] = await Promise.all([
-          receiver.getClusterStats(),
+        const [indices, dataStreams] = await Promise.all([
           receiver.getIndices(),
           receiver.getDataStreams(),
         ]);
 
-        // 2. Publish cluster stats
-        publishClusterStats(clusterStats);
-        incrementCounter(TelemetryCounter.DOCS_SENT, 'cluster-stats', 1);
-
-        // 3. Publish datastreams stats
+        // 2. Publish datastreams stats
         const dsCount = publishDatastreamsStats(
           dataStreams.slice(0, taskConfig.datastreams_threshold)
         );
         incrementCounter(TelemetryCounter.DOCS_SENT, 'datastreams-stats', dsCount);
 
-        // 4. Get and publish indices stats
+        // 3. Get and publish indices stats
         const indicesCount: number = await publishIndicesStats(
           indices.slice(0, taskConfig.indices_threshold)
         )
@@ -152,7 +142,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return 0;
           });
 
-        // 5. Get ILM stats and publish them
+        // 4. Get ILM stats and publish them
         const ilmNames = await publishIlmStats(indices.slice(0, taskConfig.indices_threshold))
           .then((names) => {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'ilm-stats', names.size);
@@ -164,7 +154,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return new Set<string>();
           });
 
-        // 6. Publish ILM policies
+        // 5. Publish ILM policies
         const policyCount = await publishIlmPolicies(ilmNames)
           .then((count) => {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'ilm-policies', count);

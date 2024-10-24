@@ -6,7 +6,6 @@
  */
 
 import {
-  TELEMETRY_CLUSTER_STATS_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
@@ -93,27 +92,6 @@ export default ({ getService }: FtrProviderContext) => {
             const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
 
             return hasRun && filtered.length === NUM_INDICES;
-          },
-          'waitForTaskToRun',
-          logger
-        );
-      });
-
-      it('should publish cluster stats events', async () => {
-        const runAt = await launchTask(TASK_ID, kibanaServer, logger);
-
-        const opts = {
-          eventTypes: [TELEMETRY_CLUSTER_STATS_EVENT.eventType],
-          withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
-        };
-
-        await waitFor(
-          async () => {
-            const events = await ebtServer.getEventCount(opts);
-            const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-
-            return hasRun && events === 1;
           },
           'waitForTaskToRun',
           logger

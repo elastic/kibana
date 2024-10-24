@@ -93,7 +93,6 @@ import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/co
 import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 import type { TelemetryLogger } from './telemetry_logger';
 import type {
-  ClusterStats,
   DataStream,
   IlmPhase,
   IlmPhases,
@@ -255,7 +254,6 @@ export interface ITelemetryReceiver {
 
   setNumDocsToSample(n: number): void;
 
-  getClusterStats(): Promise<ClusterStats>;
   getIndices(): Promise<string[]>;
   getDataStreams(): Promise<DataStream[]>;
   getIndicesStats(
@@ -1350,23 +1348,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('elasticsearch client is unavailable');
     }
     return this._esClient;
-  }
-
-  public async getClusterStats(): Promise<ClusterStats> {
-    const es = this.esClient();
-
-    this.logger.l('Fetching cluster stats');
-
-    return es.cluster.stats({}).then(
-      (response) =>
-        ({
-          num_nodes: response.nodes.count.total,
-          num_indices: response.indices.count,
-          num_docs: response.indices.docs.count,
-          num_deleted_docs: response.indices.docs.deleted,
-          total_size_in_bytes: response.indices.store.size_in_bytes,
-        } as ClusterStats)
-    );
   }
 
   public async getIndices(): Promise<string[]> {
