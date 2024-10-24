@@ -15,6 +15,7 @@ import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../explore/users/store/model';
 
 import { useKibana } from '../../../common/lib/kibana';
+import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
 
 export const AnomaliesCountLink = ({
   count,
@@ -36,7 +37,7 @@ export const AnomaliesCountLink = ({
   const onClick = useCallback(() => {
     if (!jobId) return;
 
-    telemetry.reportAnomaliesCountClicked({
+    telemetry.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, {
       jobId,
       count,
     });

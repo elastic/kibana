@@ -9,7 +9,6 @@ import type { AlertWorkflowStatus } from '../../types';
 export { telemetryMiddleware } from './middleware';
 
 export * from './constants';
-export * from './telemetry_client';
 export * from './telemetry_service';
 export * from './track';
 export * from './types';

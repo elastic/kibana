@@ -13,6 +13,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { HeaderActions } from './components/header_actions';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
+import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
 
 interface PanelNavigationProps {
   /**
@@ -35,7 +36,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
         scopeId,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'left',
     });

@@ -71,6 +71,7 @@ import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -134,7 +135,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         banner: HOST_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });

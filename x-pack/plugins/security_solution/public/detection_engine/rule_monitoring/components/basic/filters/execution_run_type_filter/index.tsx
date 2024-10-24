@@ -15,6 +15,7 @@ import {
   RULE_EXECUTION_TYPE_STANDARD,
 } from '../../../../../../common/translations';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { TelemetryEventTypes } from '../../../../../../common/lib/telemetry/constants';
 
 interface ExecutionRunTypeFilterProps {
   items: RuleRunType[];
@@ -42,7 +43,9 @@ const ExecutionRunTypeFilterComponent: React.FC<ExecutionRunTypeFilterProps> = (
   const handleSelectionChange = useCallback(
     (types: RuleRunType[]) => {
       onChange(types);
-      telemetry.reportEventLogFilterByRunType({ runType: types });
+      telemetry.reportEvent(TelemetryEventTypes.EventLogFilterByRunType, {
+        runType: types,
+      });
     },
     [onChange, telemetry]
   );

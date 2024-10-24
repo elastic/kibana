@@ -22,6 +22,7 @@ import {
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
+import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
 
 /**
  * Displays the rule description of a signal document.
@@ -42,7 +43,7 @@ export const AlertDescription: FC = () => {
         isPreviewMode: true,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });

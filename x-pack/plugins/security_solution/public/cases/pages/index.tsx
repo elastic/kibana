@@ -32,6 +32,7 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
+import { TelemetryEventTypes } from '../../common/lib/telemetry/constants';
 
 const CaseContainerComponent: React.FC = () => {
   const { cases, telemetry } = useKibana().services;
@@ -63,7 +64,7 @@ const CaseContainerComponent: React.FC = () => {
           },
         },
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
         location: TimelineId.casePage,
         panel: 'right',
       });

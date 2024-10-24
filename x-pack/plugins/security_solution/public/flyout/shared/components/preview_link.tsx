@@ -24,6 +24,7 @@ import { UserPreviewPanelKey } from '../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
+import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
 
 const PREVIEW_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
 
@@ -133,7 +134,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         id: previewParams.id,
         params: previewParams.params,
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'preview',
       });

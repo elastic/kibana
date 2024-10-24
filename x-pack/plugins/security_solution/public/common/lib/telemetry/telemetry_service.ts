@@ -7,14 +7,16 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { of } from 'rxjs';
 
-import type {
-  TelemetryServiceSetupParams,
-  TelemetryClientStart,
-  TelemetryEventParams,
-} from './types';
+import type { TelemetryServiceSetupParams, TelemetryEventParams } from './types';
 import { telemetryEvents } from './events/telemetry_events';
-import { TelemetryClient } from './telemetry_client';
+import type { TelemetryEventTypeData, TelemetryEventTypes } from './constants';
 
+export interface TelemetryServiceStart {
+  reportEvent: <T extends TelemetryEventTypes>(
+    eventType: T,
+    eventData: TelemetryEventTypeData<T>
+  ) => void;
+}
 /**
  * Service that interacts with the Core's analytics module
  * to trigger custom event for Security Solution plugin features
@@ -45,13 +47,15 @@ export class TelemetryService {
     );
   }
 
-  public start(): TelemetryClientStart {
-    if (!this.analytics) {
+  public start(): TelemetryServiceStart {
+    const reportEvent = this.analytics?.reportEvent.bind(this.analytics);
+
+    if (!this.analytics || !reportEvent) {
       throw new Error(
         'The TelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.'
       );
     }
 
-    return new TelemetryClient(this.analytics);
+    return { reportEvent };
   }
 }

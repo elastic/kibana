@@ -17,6 +17,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { OnCompleteParams } from './types';
 import type { ReducerState } from './reducer';
 import { getStepStatus, isValidationStep } from './helpers';
+import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
 
 interface UseFileChangeCbParams {
   onError: (errorMessage: string, file: File) => void;
@@ -35,7 +36,7 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
       },
       file: File
     ) => {
-      telemetry.reportAssetCriticalityFileSelected({
+      telemetry.reportEvent(TelemetryEventTypes.AssetCriticalityFileSelected, {
         valid: false,
         errorCode: error.code,
         file: {
@@ -62,7 +63,7 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
         return;
       }
 
-      telemetry.reportAssetCriticalityFileSelected({
+      telemetry.reportEvent(TelemetryEventTypes.AssetCriticalityFileSelected, {
         valid: true,
         file: {
           size: file.size,
