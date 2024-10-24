@@ -165,6 +165,17 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Profiling integrations
     'profiler_agent',
+
+    # Removed from serverless
+    'bluecoat',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'netscout',
+    'radware',
+    'tomcat',
   ]
 
 ## Required for force installation of integration packages
