@@ -25,7 +25,7 @@ import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
-import { loadDashboard } from '../../dashboard_api/load_dashboard';
+import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 
 export interface DashboardRendererProps {
@@ -59,7 +59,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboard({ getCreationOptions, savedObjectId })
+    loadDashboardApi({ getCreationOptions, savedObjectId })
       .then((results) => {
         if (!results) return;
         if (canceled) {

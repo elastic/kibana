@@ -21,7 +21,7 @@ import {
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
-export async function loadDashboard({
+export async function loadDashboardApi({
   getCreationOptions,
   savedObjectId,
 }: {
