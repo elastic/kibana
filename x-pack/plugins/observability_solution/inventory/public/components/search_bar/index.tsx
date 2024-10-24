@@ -18,7 +18,7 @@ import { EntityTypesControls } from './entity_types_controls';
 import { DiscoverButton } from './discover_button';
 
 export function SearchBar() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
+  const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
   const {
     services: {
       unifiedSearch,
@@ -53,7 +53,7 @@ export function SearchBar() {
 
   const handleEntityTypesChange = useCallback(
     (nextEntityTypes: EntityType[]) => {
-      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
+      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes });
     },
     [kuery, searchBarContentSubject$]
   );
@@ -63,10 +63,12 @@ export function SearchBar() {
       searchBarContentSubject$.next({
         kuery: query?.query as string,
         entityTypes,
-        refresh: !isUpdate,
       });
+      if (!isUpdate) {
+        refreshSubject$.next();
+      }
     },
-    [entityTypes, searchBarContentSubject$]
+    [entityTypes, searchBarContentSubject$, refreshSubject$]
   );
 
   return (
