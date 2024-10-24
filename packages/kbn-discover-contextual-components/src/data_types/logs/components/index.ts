@@ -9,3 +9,4 @@
 
 export * from './summary_column';
 export * from './log_level_badge_cell/log_level_badge_cell';
+export * from './service_name_badge_with_actions';
