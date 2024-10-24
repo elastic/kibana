@@ -51,7 +51,7 @@ export function SearchBar() {
   }, [syncSearchBarWithUrl]);
 
   const handleEntityTypesChange = useCallback(
-    (nextEntityTypes: EntityType[]) => {
+    (nextEntityTypes: string[]) => {
       searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes });
     },
     [kuery, searchBarContentSubject$]

@@ -11,11 +11,7 @@ import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import {
-  entityPaginationRt,
-  type EntityColumnIds,
-  type EntityType,
-} from '../../../common/entities';
+import { entityPaginationRt, type EntityColumnIds } from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -89,7 +85,7 @@ export function GroupedEntitiesGrid({ field }: Props) {
     });
   }
 
-  function handleTypeFilter(type: EntityType) {
+  function handleTypeFilter(type: string) {
     const { pagination: _, ...rest } = query;
     inventoryRoute.push('/', {
       path: {},

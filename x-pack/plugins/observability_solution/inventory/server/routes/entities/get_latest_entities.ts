@@ -40,7 +40,7 @@ export async function getLatestEntities({
 
   if (entityTypes) {
     where.push(`WHERE ${ENTITY_TYPE} IN (${entityTypes.map(() => '?').join()})`);
-    params.push(...entityTypes.map((entityType) => entityType));
+    params.push(...entityTypes);
   }
 
   const sort = `SORT ${entitiesSortField} ${sortDirection}`;

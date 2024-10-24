@@ -69,8 +69,6 @@ export type EntityView = t.TypeOf<typeof entityViewRt>;
 
 export type EntityPagination = t.TypeOf<typeof entityPaginationRt>;
 
-export type EntityType = t.TypeOf<typeof entityTypeRt>;
-
 export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
 
 export const MAX_NUMBER_OF_ENTITIES = 500;
