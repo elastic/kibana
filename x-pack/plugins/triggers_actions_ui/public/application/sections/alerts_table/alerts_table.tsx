@@ -350,7 +350,7 @@ const AlertsTableContent = typedForwardRef(
     const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
     const maintenanceWindowsQuery = useBulkGetMaintenanceWindowsQuery(
       { ids: maintenanceWindowIds },
-      { enabled: isMaintenanceWindowColumnEnabled(columns) }
+      { enabled: isMaintenanceWindowColumnEnabled(columns), context: AlertsQueryContext }
     );
 
     const queries = useCombinedQueries(casesQuery, maintenanceWindowsQuery, mutedAlertsQuery);

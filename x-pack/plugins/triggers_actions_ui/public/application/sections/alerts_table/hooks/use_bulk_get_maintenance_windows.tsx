@@ -43,7 +43,10 @@ interface UseBulkGetMaintenanceWindowsQueryParams {
 
 export const useBulkGetMaintenanceWindowsQuery = (
   { ids }: UseBulkGetMaintenanceWindowsQueryParams,
-  { enabled }: Pick<QueryOptionsOverrides<typeof bulkGetMaintenanceWindows>, 'enabled'> = {}
+  {
+    enabled,
+    context,
+  }: Pick<QueryOptionsOverrides<typeof bulkGetMaintenanceWindows>, 'enabled' | 'context'> = {}
 ) => {
   const {
     http,
@@ -74,5 +77,6 @@ export const useBulkGetMaintenanceWindowsQuery = (
       );
     },
     enabled: hasLicense && show && ids.length > 0 && enabled !== false,
+    context,
   });
 };
