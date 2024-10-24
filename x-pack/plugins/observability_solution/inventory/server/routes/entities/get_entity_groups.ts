@@ -5,35 +5,29 @@
  * 2.0.
  */
 
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import type { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   ENTITIES_LATEST_ALIAS,
+  type EntityGroup,
   MAX_NUMBER_OF_ENTITIES,
-  type Entity,
-  type EntityColumnIds,
 } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
-export async function getLatestEntities({
+export async function getEntityGroupsBy({
   inventoryEsClient,
-  sortDirection,
-  sortField,
-  entityTypes,
+  field,
   kuery,
+  entityTypes,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
-  sortDirection: 'asc' | 'desc';
-  sortField: EntityColumnIds;
-  entityTypes?: string[];
+  field: string;
   kuery?: string;
+  entityTypes?: string[];
 }) {
-  // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
-  const entitiesSortField = sortField === 'alertsCount' ? ENTITY_LAST_SEEN : sortField;
-
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
   const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
   const params: ScalarValue[] = [];
@@ -43,12 +37,12 @@ export async function getLatestEntities({
     params.push(...entityTypes);
   }
 
-  const sort = `SORT ${entitiesSortField} ${sortDirection}`;
+  const group = `STATS count = COUNT(*) by ${field}`;
+  const sort = `SORT ${field} asc`;
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
+  const query = [from, ...where, group, sort, limit].join(' | ');
 
-  const query = [from, ...where, sort, limit].join(' | ');
-
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
+  const groups = await inventoryEsClient.esql('get_entities_groups', {
     query,
     filter: {
       bool: {
@@ -58,5 +52,5 @@ export async function getLatestEntities({
     params,
   });
 
-  return esqlResultToPlainObjects<Entity>(latestEntitiesEsqlResponse);
+  return esqlResultToPlainObjects<EntityGroup>(groups);
 }
