@@ -36,7 +36,7 @@ const mainApiRequestsToIntercept = [
 ];
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
-
+// flaky test
 describe('Storage Explorer', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
@@ -111,10 +111,11 @@ describe('Storage Explorer', () => {
 
       cy.loginAsMonitorUser();
       cy.visitKibana(storageExplorerHref);
-      cy.wait(mainAliasNames);
     });
 
     it('with the correct environment when changing the environment', () => {
+      cy.wait(mainAliasNames);
+
       cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click({ force: true });
@@ -126,14 +127,19 @@ describe('Storage Explorer', () => {
     });
 
     it('when selecting a different time range and clicking the update button', () => {
+      cy.wait(mainAliasNames);
+
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
+      cy.wait(mainAliasNames);
     });
 
     it('with the correct lifecycle phase when changing the lifecycle phase', () => {
+      cy.wait(mainAliasNames);
+
       cy.getByTestSubj('storageExplorerLifecyclePhaseSelect').click();
       cy.contains('button', 'Warm').click();
 
@@ -160,10 +166,10 @@ describe('Storage Explorer', () => {
 
       cy.loginAsMonitorUser();
       cy.visitKibana(storageExplorerHref);
-      cy.wait(mainAliasNames);
     });
 
     it('shows storage details', () => {
+      cy.wait(mainAliasNames);
       cy.contains('opbeans-node');
 
       cy.getByTestSubj('storageDetailsButton_opbeans-node').click();
