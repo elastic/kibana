@@ -22,7 +22,9 @@ import {
   ScheduleUnit,
   SyntheticsMonitor,
   VerificationMode,
+  BrowserSensitiveSimpleFields,
 } from '../../../../common/runtime_types';
+import { inlineToProjectZip } from '../../../common/inline_to_zip';
 
 const testHTTPConfig: Partial<MonitorFields> = {
   type: 'http' as MonitorTypeEnum,
@@ -309,7 +311,7 @@ describe('formatHeartbeatRequest', () => {
       },
       '{"a":"param"}'
     );
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: heartbeatId,
       fields: {
@@ -337,7 +339,7 @@ describe('formatHeartbeatRequest', () => {
       },
       JSON.stringify({ key: 'value' })
     );
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -355,87 +357,6 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('sets project fields as null when project id is not defined', () => {
-    const monitorId = 'test-monitor-id';
-    const monitor = { ...testBrowserConfig, project_id: undefined } as SyntheticsMonitor;
-    const actual = formatHeartbeatRequest({
-      monitor,
-      configId: monitorId,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
-
-    expect(actual).toEqual({
-      ...monitor,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': undefined,
-        'monitor.project.id': undefined,
-        run_once: undefined,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      fields_under_root: true,
-    });
-  });
-
-  it('sets project fields as null when project id is empty', () => {
-    const monitorId = 'test-monitor-id';
-    const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
-    const actual = formatHeartbeatRequest({
-      monitor,
-      configId: monitorId,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
-
-    expect(actual).toEqual({
-      ...monitor,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': undefined,
-        'monitor.project.id': undefined,
-        run_once: undefined,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      fields_under_root: true,
-    });
-  });
-
-  it('supports run once', () => {
-    const monitorId = 'test-monitor-id';
-    const actual = formatHeartbeatRequest({
-      monitor: testBrowserConfig as SyntheticsMonitor,
-      configId: monitorId,
-      runOnce: true,
-      heartbeatId: monitorId,
-      spaceId: 'test-space-id',
-    });
-
-    expect(actual).toEqual({
-      ...testBrowserConfig,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': testBrowserConfig.project_id,
-        'monitor.project.id': testBrowserConfig.project_id,
-        run_once: true,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      fields_under_root: true,
-    });
-  });
-
   it('supports test_run_id', () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
@@ -447,7 +368,7 @@ describe('formatHeartbeatRequest', () => {
       spaceId: 'test-space-id',
     });
 
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -464,7 +385,7 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('supports empty params', () => {
+  it('does not append project data', () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
     const actual = formatHeartbeatRequest({
@@ -475,7 +396,7 @@ describe('formatHeartbeatRequest', () => {
       spaceId: 'test-space-id',
     });
 
-    expect(actual).toEqual({
+    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
       params: '',
       id: monitorId,
@@ -489,6 +410,52 @@ describe('formatHeartbeatRequest', () => {
           space_id: 'test-space-id',
         },
       },
+      fields_under_root: true,
+    });
+    expect(
+      (actual as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]
+    ).toBeUndefined();
+    expect((actual as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE])
+      .toMatchInlineSnapshot(`
+      "step('Go to https://www.google.com/', async () => {
+        await page.goto('https://www.google.com/');
+      });"
+    `);
+  });
+
+  it('retains project string if there is no inline content', async () => {
+    const monitorId = 'test-monitor-id';
+    const projectZipInput = await inlineToProjectZip(
+      "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
+      monitorId,
+      jest.fn() as any
+    );
+    const actual = formatHeartbeatRequest({
+      monitor: {
+        ...testBrowserConfig,
+        [ConfigKey.SOURCE_INLINE]: '',
+        [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZipInput,
+      } as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
+
+    expect(actual).toEqual({
+      ...testBrowserConfig,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': testBrowserConfig.project_id,
+        'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
+        test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
+      },
+      [ConfigKey.SOURCE_INLINE]: '',
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZipInput,
       fields_under_root: true,
     });
   });
