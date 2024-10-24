@@ -160,6 +160,10 @@ export type DatasetQualityDetailsControllerTypeState =
       context: WithDefaultControllerState & WithDataStreamSettings & WithIntegration;
     }
   | {
+      value: 'initializing.degradedFieldFlyout.open';
+      context: WithDefaultControllerState;
+    }
+  | {
       value:
         | 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
         | 'initializing.degradedFieldFlyout.open.initialized.mitigation.analyzing';

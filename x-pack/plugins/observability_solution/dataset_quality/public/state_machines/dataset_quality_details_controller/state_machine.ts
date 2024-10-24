@@ -562,7 +562,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         raiseForceTimeRangeRefresh: raise('UPDATE_TIME_RANGE'),
       },
       guards: {
-        checkIfActionForbidden: (context, event) => {
+        checkIfActionForbidden: (_, event) => {
           return (
             'data' in event &&
             typeof event.data === 'object' &&
@@ -597,6 +597,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         hasFailedToUpdateLastBackingIndex: (_, event) => {
           return (
             'data' in event &&
+            typeof event.data === 'object' &&
             'isLatestBackingIndexUpdated' in event.data &&
             !event.data.isLatestBackingIndexUpdated
           );

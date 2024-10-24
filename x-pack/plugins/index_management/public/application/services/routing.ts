@@ -11,6 +11,7 @@ import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
 import { ExtensionsService } from '../../services/extensions_service';
 import { IndexDetailsSection } from '../../../common/constants';
+
 export const getTemplateListLink = () => `/templates`;
 
 export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
@@ -84,7 +85,7 @@ export const getComponentTemplatesLink = (usedByTemplateName?: string) => {
 
 export const getComponentTemplateDetailLink = (name: string) => {
   return `/component_templates/${encodeURIComponent(name)}`;
-}
+};
 
 export const navigateToIndexDetailsPage = (
   indexName: string,
