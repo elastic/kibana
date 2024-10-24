@@ -124,66 +124,50 @@ On the server side, `uiSettings` are accessible directly from `core`. The follow
 The example also shows how plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the Configure Kibana guide.
 
 <DocCallOut>
-  Refer to [the server-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
+  Refer to [the server-side uiSettings service API
+  docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
 </DocCallOut>
 
-**src/plugins/charts/server/plugin.ts**
+**src/plugins/dev_tools/server/plugin.ts**
 
 ```ts
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
-import { ExpressionsServerSetup } from '../../expressions/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
-interface SetupDependencies {
-  expressions: ExpressionsServerSetup;
-}
+import { uiSettings } from './ui_settings';
+export class DevToolsServerPlugin implements Plugin<object, object> {
+  constructor(initializerContext: PluginInitializerContext) {}
 
-export class ChartsServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup, dependencies: SetupDependencies) {
-    dependencies.expressions.registerFunction(palette);
-    dependencies.expressions.registerFunction(systemPalette);
+  public setup(core: CoreSetup<object>) {
+    /**
+     * Register Dev Tools UI Settings
+     */
     core.uiSettings.register({
-      [COLOR_MAPPING_SETTING]: {
-        name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {
-          defaultMessage: 'Color mapping',
-        }),
-        value: JSON.stringify({
-          Count: '#00A69B',
-        }),
-        type: 'json',
-        description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
+      [ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID]: {
+        category: [DEV_TOOLS_FEATURE_ID],
+        description: i18n.translate('devTools.uiSettings.persistentConsole.description', {
           defaultMessage:
-            'Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.',
+            'Enables a persistent console in the Kibana UI. This setting does not affect the standard Console in Dev Tools.',
         }),
-        deprecation: {
-          message: i18n.translate(
-            'charts.advancedSettings.visualization.colorMappingTextDeprecation',
-            {
-              defaultMessage:
-                'This setting is deprecated and will not be supported in a future version.',
-            }
-          ),
-          docLinksKey: 'visualizationSettings',
-        },
-        category: ['visualization'],
-        schema: schema.string(),
+        name: i18n.translate('devTools.uiSettings.persistentConsole.name', {
+          defaultMessage: 'Persistent Console',
+        }),
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        value: true,
       },
-    ...
     });
-    
     return {};
   }
-  
+
   public start() {
     return {};
   }
 
   public stop() {}
-}  
+}
 ```
-For optimal Kibana performance, `uiSettings` are cached. Any changes that require a cache refresh should use the `requiresPageReload` parameter on registration. 
+
+For optimal Kibana performance, `uiSettings` are cached. Any changes that require a cache refresh should use the `requiresPageReload` parameter on registration.
 
 For example, changing the time filter refresh interval triggers a prompt in the UI that the page needs to be refreshed to save the new value:
 
