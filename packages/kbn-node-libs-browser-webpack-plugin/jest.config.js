@@ -7,20 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
-import { EuiMarkdownFormat } from '@elastic/eui';
-// @ts-ignore
-import overviewMarkdown from '@kbn/embeddable-plugin/README.md?raw';
-
-export const Overview = () => {
-  return (
-    <EuiMarkdownFormat
-      css={css`
-        width: 75%;
-      `}
-    >
-      {overviewMarkdown}
-    </EuiMarkdownFormat>
-  );
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-node-libs-browser-webpack-plugin'],
 };

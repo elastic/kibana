@@ -10,7 +10,12 @@
 const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
 /** @type {import('@babel/core').ConfigFunction} */
-module.exports = (api, options = {}) => {
+module.exports = (
+  api,
+  options = {
+    useTransformRequireDefault: false,
+  }
+) => {
   return {
     presets: [
       [
@@ -26,6 +31,18 @@ module.exports = (api, options = {}) => {
         },
       ],
       [require('./common_preset'), options],
+    ],
+    plugins: [
+      // Conditionally include babel-plugin-transform-require-default
+      //
+      // We need to include this plugin in the main worker webpack config that handles our
+      // non node modules code base in order to support resolving esm
+      // as a priority over cjs (if that's defined in the mainFields). Without that we might run into
+      // cases where we have a repo wide cjs code that requires an esm module (coming from the ui-shared-deps that also prioritizes esm)
+      // which will not be applying the .default key in the require itself.
+      ...(options.useTransformRequireDefault
+        ? [require.resolve('babel-plugin-transform-require-default')]
+        : []),
     ],
     env: {
       production: {
