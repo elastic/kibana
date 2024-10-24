@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '../parser';
-import { BasicPrettyPrinter } from '../pretty_print';
-import * as generic from './generic';
+import { parse } from '../../../parser';
+import { BasicPrettyPrinter } from '../../../pretty_print';
+import * as generic from '..';
 
-describe('generic', () => {
-  describe('.listCommands()', () => {
+describe('generic.commands', () => {
+  describe('.list()', () => {
     it('lists all commands', () => {
       const src = 'FROM index | WHERE a == b | LIMIT 123';
       const { root } = parse(src);
-      const commands = [...generic.listCommands(root)].map((cmd) => cmd.name);
+      const commands = [...generic.commands.list(root)].map((cmd) => cmd.name);
 
       expect(commands).toEqual(['from', 'where', 'limit']);
     });
   });
 
-  describe('.findCommand()', () => {
+  describe('.find()', () => {
     it('can the first command', () => {
       const src = 'FROM index | WHERE a == b | LIMIT 123';
       const { root } = parse(src);
-      const command = generic.findCommand(root, (cmd) => cmd.name === 'from');
+      const command = generic.commands.find(root, (cmd) => cmd.name === 'from');
 
       expect(command).toMatchObject({
         type: 'command',
@@ -42,7 +42,7 @@ describe('generic', () => {
     it('can the last command', () => {
       const src = 'FROM index | WHERE a == b | LIMIT 123';
       const { root } = parse(src);
-      const command = generic.findCommand(root, (cmd) => cmd.name === 'limit');
+      const command = generic.commands.find(root, (cmd) => cmd.name === 'limit');
 
       expect(command).toMatchObject({
         type: 'command',
@@ -58,7 +58,7 @@ describe('generic', () => {
     it('find the specific of multiple commands', () => {
       const src = 'FROM index | WHERE a == b | LIMIT 1 | LIMIT 2 | LIMIT 3';
       const { root } = parse(src);
-      const command = generic.findCommand(
+      const command = generic.commands.find(
         root,
         (cmd) => cmd.name === 'limit' && (cmd.args?.[0] as any).value === 2
       );
@@ -76,34 +76,13 @@ describe('generic', () => {
     });
   });
 
-  describe('.findCommandOptionByName()', () => {
-    it('can the find a command option', () => {
-      const src = 'FROM index METADATA _score';
-      const { root } = parse(src);
-      const option = generic.findCommandOptionByName(root, 'from', 'metadata');
-
-      expect(option).toMatchObject({
-        type: 'option',
-        name: 'metadata',
-      });
-    });
-
-    it('returns undefined if there is no option', () => {
-      const src = 'FROM index';
-      const { root } = parse(src);
-      const option = generic.findCommandOptionByName(root, 'from', 'metadata');
-
-      expect(option).toBe(undefined);
-    });
-  });
-
-  describe('.removeCommand()', () => {
+  describe('.remove()', () => {
     it('can remove the last command', () => {
       const src = 'FROM index | LIMIT 10';
       const { root } = parse(src);
-      const command = generic.findCommandByName(root, 'limit', 0);
+      const command = generic.commands.findByName(root, 'limit', 0);
 
-      generic.removeCommand(root, command!);
+      generic.commands.remove(root, command!);
 
       const src2 = BasicPrettyPrinter.print(root);
 
@@ -113,9 +92,9 @@ describe('generic', () => {
     it('can remove the second command out of 3 with the same name', () => {
       const src = 'FROM index | LIMIT 1 | LIMIT 2 | LIMIT 3';
       const { root } = parse(src);
-      const command = generic.findCommandByName(root, 'limit', 1);
+      const command = generic.commands.findByName(root, 'limit', 1);
 
-      generic.removeCommand(root, command!);
+      generic.commands.remove(root, command!);
 
       const src2 = BasicPrettyPrinter.print(root);
 
@@ -125,29 +104,15 @@ describe('generic', () => {
     it('can remove all commands', () => {
       const src = 'FROM index | WHERE a == b | LIMIT 123';
       const { root } = parse(src);
-      const cmd1 = generic.findCommandByName(root, 'where');
-      const cmd2 = generic.findCommandByName(root, 'limit');
-      const cmd3 = generic.findCommandByName(root, 'from');
+      const cmd1 = generic.commands.findByName(root, 'where');
+      const cmd2 = generic.commands.findByName(root, 'limit');
+      const cmd3 = generic.commands.findByName(root, 'from');
 
-      generic.removeCommand(root, cmd1!);
-      generic.removeCommand(root, cmd2!);
-      generic.removeCommand(root, cmd3!);
+      generic.commands.remove(root, cmd1!);
+      generic.commands.remove(root, cmd2!);
+      generic.commands.remove(root, cmd3!);
 
       expect(root.commands.length).toBe(0);
-    });
-  });
-
-  describe('.removeCommandOption()', () => {
-    it('can remove existing command option', () => {
-      const src = 'FROM index METADATA _score';
-      const { root } = parse(src);
-      const option = generic.findCommandOptionByName(root, 'from', 'metadata');
-
-      generic.removeCommandOption(root, option!);
-
-      const src2 = BasicPrettyPrinter.print(root);
-
-      expect(src2).toBe('FROM index');
     });
   });
 });
