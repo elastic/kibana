@@ -116,6 +116,5 @@
     "@kbn/server-http-tools",
     "@kbn/avc-banner",
     "@kbn/zod",
-    "@kbn/saved-objects-tagging-oss-plugin",
   ]
 }
