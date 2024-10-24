@@ -20,7 +20,7 @@ import { ActionsConfig } from '../config';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1d' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
@@ -166,7 +166,7 @@ export class ConnectorUsageReportingTask {
       projectId: this.projectId,
     });
 
-    this.logger.warn(`Record: ${JSON.stringify(record)}`);
+    this.logger.debug(`Record: ${JSON.stringify(record)}`);
 
     try {
       attempts = attempts + 1;
