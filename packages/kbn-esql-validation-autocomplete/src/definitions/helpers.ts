@@ -60,10 +60,9 @@ export function getCommandSignature(
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name.toUpperCase()} ${printCommandArguments(
-      signature,
-      withTypes
-    )} ${options.map(
+    declaration: `${name.toUpperCase()} ${printCommandArguments(signature, withTypes)} ${(
+      options || []
+    ).map(
       (option) =>
         `${
           option.wrapped ? option.wrapped[0] : ''
