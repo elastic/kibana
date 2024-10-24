@@ -214,6 +214,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           kibanaVersion: options.kibanaVersion,
         });
       }),
+      getInferenceClient: startPlugins.inference.getClient,
     };
   }
 }

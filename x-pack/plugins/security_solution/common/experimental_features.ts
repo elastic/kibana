@@ -235,6 +235,11 @@ export const allowedExperimentalValues = Object.freeze({
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
