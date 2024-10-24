@@ -46,7 +46,6 @@
     "@kbn/discover-utils",
     "@kbn/data-plugin",
     "@kbn/search-index-documents",
-    "@kbn/search-playground"
   ],
   "exclude": [
     "target/**/*",
