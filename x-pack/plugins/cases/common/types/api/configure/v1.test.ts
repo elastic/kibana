@@ -89,6 +89,24 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with observableTypes', () => {
+      const request = {
+        ...defaultRequest,
+        observableTypes: [
+          {
+            key: '371357ae-77ce-44bd-88b7-fbba9c80501f',
+            label: 'Example Label',
+          },
+        ],
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
     it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
       const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'text_custom_field',
@@ -164,6 +182,12 @@ describe('configure', () => {
       connector: serviceNow,
       closure_type: 'close-by-user',
       version: 'WzQ3LDFd',
+      observableTypes: [
+        {
+          label: 'Example Label',
+          key: '1e4650b3-b66b-4067-bc5d-6867be6ee73b',
+        },
+      ],
     };
 
     it('has expected attributes in request', () => {

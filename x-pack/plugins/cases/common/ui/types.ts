@@ -127,6 +127,7 @@ export type CasesConfigurationUI = Pick<
   | 'id'
   | 'version'
   | 'owner'
+  | 'observableTypes'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -189,6 +190,13 @@ export type CaseUser = SnakeToCamelCase<User>;
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface SimilarCasesProps extends ApiProps {
+  caseId: string;
+  observables: Record<string, string[]>;
+  pageSize: number;
+  pageIndex: number;
 }
 
 export interface ApiProps {

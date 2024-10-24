@@ -97,6 +97,7 @@ const basicConfigFields = {
       },
     },
   ],
+  observableTypes: [],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -241,6 +242,7 @@ describe('CaseConfigureService', () => {
                 "type": "text",
               },
             ],
+            "observableTypes": Array [],
             "owner": "securitySolution",
             "templates": Array [
               Object {
@@ -567,6 +569,7 @@ describe('CaseConfigureService', () => {
                 "type": "text",
               },
             ],
+            "observableTypes": Array [],
             "owner": "securitySolution",
             "templates": Array [
               Object {

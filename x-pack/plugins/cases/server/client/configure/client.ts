@@ -521,6 +521,7 @@ export async function create(
         created_by: user,
         updated_at: null,
         updated_by: null,
+        observableTypes: validatedConfigurationRequest.observableTypes ?? [],
       },
       id: savedObjectID,
     });

@@ -22,6 +22,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_OBSERVABLES_PER_CASE,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -29,7 +30,7 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
+import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt, ObservablePatch } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -435,7 +436,23 @@ export const CasePatchRequestRt = rt.intersection([
   /**
    * The saved object ID and version
    */
-  rt.strict({ id: rt.string, version: rt.string }),
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      /*
+       * Observables assigned to this case
+       */
+      observables: limitedArraySchema({
+        codec: ObservablePatch,
+        fieldName: 'observables',
+        min: 0,
+        max: MAX_OBSERVABLES_PER_CASE,
+      }),
+    })
+  ),
 ]);
 
 export const CasesPatchRequestRt = rt.strict({
@@ -502,6 +519,13 @@ export const CasesByAlertIDRequestRt = rt.exact(
 
 export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
+export const SimilarCasesSearchRequestRt = rt.strict({
+  case_id: rt.string,
+  observables: rt.record(rt.string, rt.array(rt.string)),
+  pageSize: rt.number,
+  pageIndex: rt.number,
+});
+
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
@@ -525,3 +549,4 @@ export type CaseRequestCustomFields = rt.TypeOf<typeof CaseRequestCustomFieldsRt
 export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
+export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;

@@ -20,7 +20,11 @@ import {
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
-import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
+import {
+  ConfigurationBasicWithoutOwnerRt,
+  ClosureTypeRt,
+  ObservableTypesConfigurationRt,
+} from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
@@ -143,6 +147,7 @@ export const ConfigurationRequestRt = rt.intersection([
     rt.partial({
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
+      observableTypes: ObservableTypesConfigurationRt,
     })
   ),
 ]);
@@ -168,6 +173,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       connector: ConfigurationBasicWithoutOwnerRt.type.props.connector,
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
+      observableTypes: ObservableTypesConfigurationRt,
     })
   ),
   rt.strict({ version: rt.string }),

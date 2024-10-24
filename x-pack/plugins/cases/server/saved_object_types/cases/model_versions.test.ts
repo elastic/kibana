@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { modelVersion1 } from './model_versions';
+import { modelVersion1, modelVersion2 } from './model_versions';
 
 describe('Model versions', () => {
   describe('1', () => {
@@ -45,6 +45,53 @@ describe('Model versions', () => {
                           "type": "text",
                         },
                       },
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+              },
+              "type": "mappings_addition",
+            },
+          ],
+        }
+      `);
+    });
+  });
+
+  describe('2', () => {
+    it('returns the model version correctly', () => {
+      expect(modelVersion2).toMatchInlineSnapshot(`
+        Object {
+          "changes": Array [
+            Object {
+              "addedMappings": Object {
+                "observables": Object {
+                  "properties": Object {
+                    "createdAt": Object {
+                      "ignore_malformed": true,
+                      "type": "date",
+                    },
+                    "description": Object {
+                      "type": "text",
+                    },
+                    "hasBeenSighted": Object {
+                      "type": "boolean",
+                    },
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "isIoc": Object {
+                      "type": "boolean",
+                    },
+                    "typeKey": Object {
+                      "type": "keyword",
+                    },
+                    "updatedAt": Object {
+                      "ignore_malformed": true,
+                      "type": "date",
+                    },
+                    "value": Object {
                       "type": "keyword",
                     },
                   },
