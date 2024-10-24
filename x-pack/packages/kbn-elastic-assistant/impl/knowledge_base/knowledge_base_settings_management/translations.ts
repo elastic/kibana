@@ -335,3 +335,25 @@ export const PRIVATE = i18n.translate(
     defaultMessage: 'Private',
   }
 );
+
+export const SAVE_BUTTON_TEXT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.saveButtonText',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const DUPLICATE_ENTRY_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.duplicateEntryConfirmationTitle',
+  {
+    defaultMessage: 'Duplicate entry?',
+  }
+);
+
+export const DUPLICATE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.duplicateEntryConfirmationContent',
+  {
+    defaultMessage:
+      'Changing a knowledge base entry from global to private will create a private copy of the original global entry. Please delete the global entry if you would like to revoke the content for other users.',
+  }
+);
