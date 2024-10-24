@@ -38,7 +38,7 @@ export async function unpackBufferToAssetsMap({
 }): Promise<{ paths: string[]; assetsMap: AssetsMap }> {
   const assetsMap = new Map<string, Buffer | undefined>();
   const paths: string[] = [];
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+  const entries = await unpackArchiveEntriesIntoMemory(archiveBuffer, contentType);
 
   entries.forEach((entry) => {
     const { path, buffer } = entry;
@@ -51,35 +51,54 @@ export async function unpackBufferToAssetsMap({
   return { assetsMap, paths };
 }
 
-export async function unpackBufferEntries(
+/**
+ * This function extracts all archive entries into memory.
+ *
+ * NOTE: This is potentially dangerous for large archives and can cause OOM
+ * errors. Use 'traverseArchiveEntries' instead to iterate over the entries
+ * without storing them all in memory at once.
+ *
+ * @param archiveBuffer
+ * @param contentType
+ * @returns All the entries in the archive buffer
+ */
+export async function unpackArchiveEntriesIntoMemory(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveEntry[]> {
-  const bufferExtractor = getBufferExtractor({ contentType });
-  if (!bufferExtractor) {
-    throw new PackageUnsupportedMediaTypeError(
-      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
-    );
-  }
   const entries: ArchiveEntry[] = [];
-  try {
-    const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
-    const addToEntries = (entry: ArchiveEntry) => entries.push(entry);
-    await bufferExtractor(archiveBuffer, onlyFiles, addToEntries);
-  } catch (error) {
-    throw new PackageInvalidArchiveError(
-      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
-    );
-  }
+  const addToEntries = async (entry: ArchiveEntry) => void entries.push(entry);
+  await traverseArchiveEntries(archiveBuffer, contentType, addToEntries);
 
-  // While unpacking a tar.gz file with unzipBuffer() will result in a thrown error in the try-catch above,
-  // unpacking a zip file with untarBuffer() just results in nothing.
+  // While unpacking a tar.gz file with unzipBuffer() will result in a thrown
+  // error, unpacking a zip file with untarBuffer() just results in nothing.
   if (entries.length === 0) {
     throw new PackageInvalidArchiveError(
       `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
   return entries;
+}
+
+export async function traverseArchiveEntries(
+  archiveBuffer: Buffer,
+  contentType: string,
+  onEntry: (entry: ArchiveEntry) => Promise<void>
+) {
+  const bufferExtractor = getBufferExtractor({ contentType });
+  if (!bufferExtractor) {
+    throw new PackageUnsupportedMediaTypeError(
+      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
+    );
+  }
+  try {
+    const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
+    await bufferExtractor(archiveBuffer, onlyFiles, onEntry);
+  } catch (error) {
+    throw new PackageInvalidArchiveError(
+      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
+    );
+  }
 }
 
 export const deletePackageCache = ({ name, version }: SharedKey) => {

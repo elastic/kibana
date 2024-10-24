@@ -23,6 +23,8 @@ import { deleteKibanaAssets } from '../../remove';
 
 import { KibanaSavedObjectType, type Installation } from '../../../../../types';
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import { stepInstallKibanaAssets, cleanUpKibanaAssetsStep } from './step_install_kibana_assets';
 
 jest.mock('../../../kibana/assets/install');
@@ -58,6 +60,7 @@ const packageInstallContext = {
   } as any,
   paths: ['some/path/1', 'some/path/2'],
   assetsMap: new Map(),
+  archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
 
 describe('stepInstallKibanaAssets', () => {
@@ -82,6 +85,7 @@ describe('stepInstallKibanaAssets', () => {
       logger: loggerMock.create(),
       packageInstallContext: {
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -121,6 +125,7 @@ describe('stepInstallKibanaAssets', () => {
       logger: loggerMock.create(),
       packageInstallContext: {
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
