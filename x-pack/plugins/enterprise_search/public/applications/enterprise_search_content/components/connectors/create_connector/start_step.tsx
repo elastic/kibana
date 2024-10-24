@@ -63,7 +63,8 @@ export const StartStep: React.FC<StartStepProps> = ({
     isGenerateLoading,
     isCreateLoading,
   } = useValues(NewConnectorLogic);
-  const { setRawName, createConnector, generateConnectorName } = useActions(NewConnectorLogic);
+  const { setRawName, createConnector, generateConnectorName, setFormDirty } =
+    useActions(NewConnectorLogic);
   const { connector } = useValues(ConnectorViewLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -235,6 +236,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     createConnector({
                       isSelfManaged: true,
                     });
+                    setFormDirty(true);
                     setCurrentStep('deployment');
                   }
                 }}
@@ -293,7 +295,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <EuiButton
                     data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
                     fill
-                    onClick={() => setCurrentStep('configure')}
+                    onClick={() => {
+                      setCurrentStep('configure');
+                    }}
                   >
                     {Constants.NEXT_BUTTON_LABEL}
                   </EuiButton>
@@ -309,6 +313,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                       iconType="sparkles"
                       isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
+                        setFormDirty(true);
                         createConnector({
                           isSelfManaged: false,
                         });
