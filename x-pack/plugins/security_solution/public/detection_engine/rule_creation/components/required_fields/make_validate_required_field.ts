@@ -8,6 +8,7 @@
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { ERROR_CODE, FormData, ValidationFunc } from '../../../../shared_imports';
 import * as i18n from './translations';
+import { getFlattenedArrayFieldNames } from './utils';
 
 export function makeValidateRequiredField(parentFieldPath: string) {
   return function validateRequiredField(
@@ -15,11 +16,16 @@ export function makeValidateRequiredField(parentFieldPath: string) {
   ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined {
     const [{ value, path, form }] = args;
 
-    const formData = form.getFormData();
-    const parentFieldData: RequiredFieldInput[] = formData[parentFieldPath];
+    const flattenedFieldNames = getFlattenedArrayFieldNames(form, parentFieldPath);
+
+    const fields = form.getFields();
+
+    const allRequiredFields = flattenedFieldNames.map(
+      (fieldName) => fields[fieldName]?.value ?? {}
+    ) as RequiredFieldInput[];
 
     const isFieldNameUsedMoreThanOnce =
-      parentFieldData.filter((field) => field.name === value.name).length > 1;
+      allRequiredFields.filter((field) => field.name === value.name).length > 1;
 
     if (isFieldNameUsedMoreThanOnce) {
       return {

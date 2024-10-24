@@ -43,6 +43,12 @@ import {
   relatedIntegrationsSerializer,
 } from './fields/related_integrations';
 import {
+  RequiredFieldsEdit,
+  requiredFieldsSchema,
+  requiredFieldsDeserializer,
+  requiredFieldsSerializer,
+} from './fields/required_fields';
+import {
   RuleNameOverrideEdit,
   ruleNameOverrideDeserializer,
   ruleNameOverrideSerializer,
@@ -133,6 +139,15 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={relatedIntegrationsSchema}
           serializer={relatedIntegrationsSerializer}
           deserializer={relatedIntegrationsDeserializer}
+        />
+      );
+    case 'required_fields':
+      return (
+        <FieldFormWrapper
+          component={RequiredFieldsEdit}
+          fieldFormSchema={requiredFieldsSchema}
+          serializer={requiredFieldsSerializer}
+          deserializer={requiredFieldsDeserializer}
         />
       );
     case 'rule_name_override':

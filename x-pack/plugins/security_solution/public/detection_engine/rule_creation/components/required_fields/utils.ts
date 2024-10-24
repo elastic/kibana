@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FormHook, ArrayItem } from '../../../../shared_imports';
+
 interface PickTypeForNameParameters {
   name: string;
   type: string;
@@ -25,4 +27,14 @@ export function pickTypeForName({ name, type, typesByFieldName = {} }: PickTypeF
     If no type is available, use the current type.
   */
   return typesAvailableForName[0] ?? type;
+}
+
+export function getFlattenedArrayFieldNames(
+  form: { getFields: FormHook['getFields'] },
+  path: string
+): string[] {
+  const internalField = form.getFields()[`${path}__array__`] ?? {};
+  const internalFieldValue = (internalField?.value ?? []) as ArrayItem[];
+
+  return internalFieldValue.map((item) => item.path);
 }
