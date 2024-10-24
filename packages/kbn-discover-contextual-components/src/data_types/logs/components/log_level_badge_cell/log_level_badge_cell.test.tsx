@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { getLogLevelBadgeCell } from './log_level_badge_cell';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 
 const renderCell = (logLevelField: string, record: DataTableRecord) => {
   const LogLevelBadgeCell = getLogLevelBadgeCell(logLevelField);
