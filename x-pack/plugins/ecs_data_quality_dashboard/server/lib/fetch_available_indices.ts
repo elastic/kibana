@@ -4,18 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getRequestBody } from '../helpers/get_available_indices';
+import type { CatIndicesIndicesRecord } from '@elastic/elasticsearch/lib/api/types';
+import dateMath from '@kbn/datemath';
 
-type AggregateName = 'index';
-interface Result {
-  index: {
-    buckets: Array<{ key: string }>;
-    doc_count: number;
-  };
-}
+export type FetchAvailableCatIndicesResponseRequired = Array<
+  Required<Pick<CatIndicesIndicesRecord, 'index' | 'creation.date'>>
+>;
 
-export const fetchAvailableIndices = (
+export const fetchAvailableIndices = async (
   esClient: ElasticsearchClient,
   params: { indexPattern: string; startDate: string; endDate: string }
-) => esClient.search<AggregateName, Result>(getRequestBody(params));
+): Promise<string[]> => {
+  const { indexPattern, startDate, endDate } = params;
+
+  const startDateMoment = dateMath.parse(startDate);
+  const endDateMoment = dateMath.parse(endDate, { roundUp: true });
+
+  if (
+    !startDateMoment ||
+    !endDateMoment ||
+    !startDateMoment.isValid() ||
+    !endDateMoment.isValid()
+  ) {
+    throw new Error('Invalid date format in startDate or endDate');
+  }
+
+  const startDateMillis = startDateMoment.valueOf();
+  const endDateMillis = endDateMoment.valueOf();
+
+  const indices = (await esClient.cat.indices({
+    index: indexPattern,
+    format: 'json',
+    h: 'index,creation.date',
+  })) as FetchAvailableCatIndicesResponseRequired;
+
+  const filteredIndices = indices.filter((indexInfo) => {
+    const creationDate: string = indexInfo['creation.date'] ?? '';
+    const creationDateMillis = parseInt(creationDate, 10);
+
+    if (isNaN(creationDateMillis)) {
+      return false;
+    }
+
+    return creationDateMillis >= startDateMillis && creationDateMillis <= endDateMillis;
+  });
+
+  return filteredIndices.map((indexInfo) => indexInfo.index);
+};
