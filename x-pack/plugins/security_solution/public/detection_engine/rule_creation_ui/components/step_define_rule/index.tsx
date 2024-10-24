@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
@@ -184,7 +183,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
   isQueryBarValid,
   isUpdateView = false,
-  kibanaDataViews,
   optionsSelected,
   queryBarSavedId,
   queryBarTitle,
@@ -653,21 +651,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [dataSourceType]
   );
 
-  const DataViewSelectorMemo = useMemo(() => {
-    return kibanaDataViews == null || Object.keys(kibanaDataViews).length === 0 ? (
-      <EuiLoadingSpinner size="l" />
-    ) : (
-      <UseField
-        key="DataViewSelector"
-        path="dataViewId"
-        component={DataViewSelector}
-        componentProps={{
-          kibanaDataViews,
-        }}
-      />
-    );
-  }, [kibanaDataViews]);
-
   const DataSource = useMemo(() => {
     return (
       <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
@@ -714,7 +697,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiFlexItem>
             <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.DataView}>
-              {DataViewSelectorMemo}
+              <UseField key="DataViewSelector" path="dataViewId" component={DataViewSelector} />
             </StyledVisibleContainer>
             <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.IndexPatterns}>
               <CommonUseField
@@ -748,7 +731,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     dataSourceType,
     onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
-    DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
   ]);

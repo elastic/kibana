@@ -20,9 +20,11 @@ import type {
   UpgradeableThreatMatchFields,
   UpgradeableThresholdFields,
   UpgradeableNewTermsFields,
+  UpgradeableEqlFields,
 } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { useFinalSideContext } from '../final_side/final_side_context';
+import { EqlRuleFieldEdit } from './eql_rule_field_edit';
 
 export function FinalEdit() {
   const { finalDiffableRule } = useDiffableRuleContext();
@@ -40,7 +42,7 @@ export function FinalEdit() {
     case 'saved_query':
       return <SavedQueryRuleFieldEdit fieldName={fieldName as UpgradeableSavedQueryFields} />;
     case 'eql':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <EqlRuleFieldEdit fieldName={fieldName as UpgradeableEqlFields} />;
     case 'esql':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'threat_match':
