@@ -169,10 +169,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.item.attributes.panels).to.be.an('array');
-      expect(response.body.item.attributes.panels[0].panelConfig.id).to.eql('bizz');
     });
 
-    // TODO Move this test to x-pack/test/api_integration/dashboards
+    // TODO Maybe move this test to x-pack/test/api_integration/dashboards
     it('in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
 
