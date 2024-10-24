@@ -18,7 +18,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -125,7 +124,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <AddToFavoritesButton timelineId={timelineId} isPartOfGuidedTour />
+                <AddToFavoritesButton timelineId={timelineId} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
@@ -143,7 +142,6 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
-              id={TIMELINE_TOUR_CONFIG_ANCHORS.ACTION_MENU}
               justifyContent="flexEnd"
               alignItems="center"
               gutterSize="xs"
