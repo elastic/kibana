@@ -42,7 +42,7 @@ export const GridPanel = forwardRef<
   ) => {
     const { euiTheme } = useEuiTheme();
 
-    // set initial styles based on state at mount to prevent styles from "blipping"
+    /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
       return css`
@@ -55,6 +55,7 @@ export const GridPanel = forwardRef<
 
     useEffect(
       () => {
+        /** Update the styles of the panel via a subscription to prevent re-renders */
         const styleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,

@@ -55,7 +55,7 @@ export const GridRow = forwardRef<
       [rowIndex]
     );
 
-    // set initial styles based on state at mount to prevent styles from "blipping"
+    /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
@@ -73,6 +73,7 @@ export const GridRow = forwardRef<
 
     useEffect(
       () => {
+        /** Update the styles of the grid row via a subscription to prevent re-renders */
         const styleSubscription = combineLatest([
           gridLayoutStateManager.interactionEvent$,
           gridLayoutStateManager.gridLayout$,
@@ -114,9 +115,14 @@ export const GridRow = forwardRef<
             }
           });
 
-        const rowDataSubscription = gridLayoutStateManager.gridLayout$
+        /**
+         * The things that should trigger a re-render are title, collapsed state, and panel ids - panel positions
+         * are being controlled via CSS styles, so they do not need to trigger a re-render. This subscription ensures
+         * that the row will re-render when one of those three things changes.
+         */
+        const rowStateSubscription = gridLayoutStateManager.gridLayout$
           .pipe(
-            skip(1),
+            skip(1), // we are initializing all row state with a value, so skip the initial emit
             map((gridLayout) => {
               return {
                 title: gridLayout[rowIndex].title,
@@ -136,7 +142,7 @@ export const GridRow = forwardRef<
 
         return () => {
           styleSubscription.unsubscribe();
-          rowDataSubscription.unsubscribe();
+          rowStateSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

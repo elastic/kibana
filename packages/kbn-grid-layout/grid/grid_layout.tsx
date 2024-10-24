@@ -34,9 +34,13 @@ export const GridLayout = ({
   );
 
   useEffect(() => {
+    /**
+     * The only thing that should cause the entire layout to re-render is adding a new row;
+     * this subscription ensures this by updating the `rowCount` state when it changes.
+     */
     const rowCountSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        skip(1),
+        skip(1), // we initialized `rowCount` above, so skip the initial emit
         map((newLayout) => newLayout.length),
         distinctUntilChanged()
       )
@@ -66,12 +70,6 @@ export const GridLayout = ({
                   const currentLayout = gridLayoutStateManager.gridLayout$.value;
                   currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
                   gridLayoutStateManager.gridLayout$.next(currentLayout);
-                  const currentRow = currentLayout[rowIndex];
-                  gridLayoutStateManager.rows$[rowIndex].next({
-                    title: currentRow.title,
-                    isCollapsed: currentRow.isCollapsed,
-                    panelIds: Object.keys(currentRow.panels),
-                  });
                 }}
                 setInteractionEvent={(nextInteractionEvent) => {
                   if (nextInteractionEvent?.type === 'drop') {
