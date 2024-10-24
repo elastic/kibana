@@ -20,7 +20,7 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityColumnIds, EntityType } from '../../../common/entities';
+import { EntityColumnIds, EntityType } from '../../../common/entities';
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
@@ -79,7 +79,7 @@ export function EntitiesGrid({
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const entity: Entity = entities[rowIndex];
+      const entity = entities[rowIndex];
       if (entity === undefined) {
         return null;
       }
