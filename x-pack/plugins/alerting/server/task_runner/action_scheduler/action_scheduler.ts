@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  createTaskRunError,
-  isEphemeralTaskRejectedDueToCapacityError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
   ExecuteOptions as EnqueueExecutionOptions,
   ExecutionResponseItem,
@@ -51,8 +47,6 @@ export class ActionScheduler<
     IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
   > = [];
 
-  private ephemeralActionsToSchedule: number;
-
   constructor(
     private readonly context: ActionSchedulerOptions<
       Params,
@@ -65,7 +59,6 @@ export class ActionScheduler<
       AlertData
     >
   ) {
-    this.ephemeralActionsToSchedule = context.taskRunnerContext.maxEphemeralActionsPerRule;
     for (const [_, scheduler] of Object.entries(schedulers)) {
       this.schedulers.push(new scheduler(context));
     }
@@ -104,10 +97,7 @@ export class ActionScheduler<
     const bulkScheduleRequest: EnqueueExecutionOptions[] = [];
 
     for (const result of allActionsToScheduleResult) {
-      await this.runActionAsEphemeralOrAddToBulkScheduleRequest({
-        enqueueOptions: result.actionToEnqueue,
-        bulkScheduleRequest,
-      });
+      bulkScheduleRequest.push(result.actionToEnqueue);
     }
 
     let bulkScheduleResponse: ExecutionResponseItem[] = [];
@@ -174,29 +164,5 @@ export class ActionScheduler<
     }
 
     return { throttledSummaryActions };
-  }
-
-  private async runActionAsEphemeralOrAddToBulkScheduleRequest({
-    enqueueOptions,
-    bulkScheduleRequest,
-  }: {
-    enqueueOptions: EnqueueExecutionOptions;
-    bulkScheduleRequest: EnqueueExecutionOptions[];
-  }) {
-    if (
-      this.context.taskRunnerContext.supportsEphemeralTasks &&
-      this.ephemeralActionsToSchedule > 0
-    ) {
-      this.ephemeralActionsToSchedule--;
-      try {
-        await this.context.actionsClient!.ephemeralEnqueuedExecution(enqueueOptions);
-      } catch (err) {
-        if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-          bulkScheduleRequest.push(enqueueOptions);
-        }
-      }
-    } else {
-      bulkScheduleRequest.push(enqueueOptions);
-    }
   }
 }

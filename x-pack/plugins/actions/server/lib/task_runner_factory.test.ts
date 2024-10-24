@@ -35,7 +35,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const executeParamsFields = [
   'actionId',
-  'isEphemeral',
   'params',
   'relatedSavedObjects',
   'executionId',
@@ -173,7 +172,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -233,7 +231,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '9',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [],
@@ -289,7 +286,6 @@ describe('Task Runner Factory', () => {
     expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
       actionId: '2',
       consumer: 'test-consumer',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -346,7 +342,6 @@ describe('Task Runner Factory', () => {
     expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
       actionId: '2',
       consumer: 'test-consumer',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -407,7 +402,6 @@ describe('Task Runner Factory', () => {
     expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
       actionId: '2',
       consumer: 'test-consumer',
-      isEphemeral: false,
       params: { baz: true },
       relatedSavedObjects: [],
       executionId: '123abc',
@@ -569,7 +563,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [],
@@ -627,7 +620,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [
@@ -680,7 +672,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [
@@ -739,7 +730,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       request: {
         headers: {
@@ -785,7 +775,6 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(pick(executeParams, executeParamsFields)).toEqual({
       actionId: '2',
-      isEphemeral: false,
       params: { baz: true },
       executionId: '123abc',
       relatedSavedObjects: [],
