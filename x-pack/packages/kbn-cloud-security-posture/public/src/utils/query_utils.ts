@@ -64,7 +64,8 @@ export const encodeQueryUrl = (
   });
 };
 
-export const queryFilters = (
+// dataViewId is used to prevent FilterManager from falling back to the default in the sorcerer (logs-*)
+export const composeQueryFilters = (
   filterParams: NavFilter = {},
   dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID
 ): Filter[] => {

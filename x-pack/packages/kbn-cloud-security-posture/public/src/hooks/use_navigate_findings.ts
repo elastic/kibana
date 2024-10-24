@@ -7,25 +7,21 @@
 
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  SECURITY_DEFAULT_DATA_VIEW_ID,
-  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
-} from '@kbn/cloud-security-posture-common';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { findingsNavigation } from '../constants/navigation';
 import { useDataView } from './use_data_view';
 import { CspClientPluginStartDeps } from '../..';
-import { NavFilter, encodeQueryUrl, queryFilters } from '../utils/query_utils';
+import { NavFilter, encodeQueryUrl, composeQueryFilters } from '../utils/query_utils';
 
-// dataViewId is used to prevent FilterManager from falling back to the default in the sorcerer (logs-*)
-const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID) => {
+const useNavigate = (pathname: string, dataViewId?: string) => {
   const history = useHistory();
 
   const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
   return useCallback(
     (filterParams: NavFilter = {}, groupBy?: string[]) => {
-      const filters = queryFilters(filterParams, dataViewId);
+      const filters = composeQueryFilters(filterParams, dataViewId);
 
       history.push({
         pathname,

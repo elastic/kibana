@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { encodeQueryUrl, queryFilters } from './query_utils';
+import { encodeQueryUrl, composeQueryFilters } from './query_utils';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
-describe('queryFilters', () => {
+describe('composeQueryFilters', () => {
   it('Should return correct filters given some filterParams', () => {
     const testFilterParams = {
       test_field: 'test_value',
@@ -28,11 +28,11 @@ describe('queryFilters', () => {
         query: { match_phrase: { test_field: 'test_value' } },
       },
     ];
-    expect(queryFilters(testFilterParams)).toEqual(testResult);
+    expect(composeQueryFilters(testFilterParams)).toEqual(testResult);
   });
 
   it('Should return empty filters given empty filterParams', () => {
-    expect(queryFilters({})).toEqual([]);
+    expect(composeQueryFilters({})).toEqual([]);
   });
 
   it('Should return correct filters given some filterParams and dataviewId', () => {
@@ -52,7 +52,7 @@ describe('queryFilters', () => {
         query: { match_phrase: { test_field: 'test_value' } },
       },
     ];
-    expect(queryFilters(testFilterParams, 'test-data-view')).toEqual(testResult);
+    expect(composeQueryFilters(testFilterParams, 'test-data-view')).toEqual(testResult);
   });
 });
 
