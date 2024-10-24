@@ -137,7 +137,7 @@ export const findDocuments = async <TSearchSchema>({
     return {
       data: { ...responseStats, hits: { hits: results } },
       page,
-      perPage,
+      perPage: perPage + mSearch.perPage,
       total: results.length,
     };
   } catch (err) {

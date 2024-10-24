@@ -40,7 +40,7 @@ export interface UseFetchCurrentUserConversationsParams {
  */
 const query = {
   page: 1,
-  per_page: 90,
+  per_page: 99,
 };
 
 export const CONVERSATIONS_QUERY_KEYS = [
