@@ -25,7 +25,7 @@ const defaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: 'apm' }),
+        href: locator?.getRedirectUrl({ category: 'application' }),
         label: i18n.translate('xpack.apm.serviceTabEmptyState.defaultPrimaryActionLabel', {
           defaultMessage: 'Add APM',
         }),
