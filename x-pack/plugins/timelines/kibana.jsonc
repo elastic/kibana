@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/timelines-plugin",
-  "owner": "@elastic/security-threat-hunting-investigations",
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "timelines",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "timelines"
