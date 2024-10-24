@@ -238,8 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // eslint-disable-next-line ban/ban
-    describe.only('insights', function () {
+    describe('insights', function () {
       this.tags('skipFIPS');
       const DASHBOARD_NAME = 'Insights Dashboard';
 
