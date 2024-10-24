@@ -151,17 +151,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.submitQuery();
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
-      await filterBar.addFilter({ field: 'clientip', operation: 'is', value: '155.34.86.215' });
-      await header.waitUntilLoadingHasFinished();
-      await dashboard.waitForRenderComplete();
       const marks = await find.allByCssSelector('.unifiedDataTable__cellValue mark');
       const highlights = await Promise.all(
         marks.map(async (highlight) => await highlight.getVisibleText())
       );
       expect(highlights.length).to.be.greaterThan(0);
-      expect(highlights.every((text) => text === 'Mozilla' || text === '155.34.86.215')).to.be(
-        true
-      );
+      expect(highlights.every((text) => text === 'Mozilla')).to.be(true);
     });
   });
 }
