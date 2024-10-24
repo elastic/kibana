@@ -221,15 +221,6 @@ export class SyntheticsServices {
     }
   }
 
-  async getRules() {
-    const response = await this.requester.request({
-      path: `/internal/alerting/rules/_find`,
-      method: 'GET',
-    });
-
-    return response.data?.data;
-  }
-
   async setupTestConnector() {
     const indexConnector = {
       name: 'test index',

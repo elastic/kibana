@@ -6,7 +6,6 @@
  */
 
 import { journey, step, before, after } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
@@ -14,8 +13,6 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
-  const getService = params.getService;
-  const retry: RetryService = getService('retry');
 
   const firstCheckTime = new Date(Date.now()).toISOString();
 
