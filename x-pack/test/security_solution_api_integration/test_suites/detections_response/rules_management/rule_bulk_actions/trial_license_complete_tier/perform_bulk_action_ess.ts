@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { Rule } from '@kbn/alerting-plugin/common';
-import expect from '@kbn/expect';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
@@ -30,9 +30,11 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   getRuleSOById,
-  getSimpleRule,
   getWebHookAction,
 } from '../../../utils';
+
+// Rule's interval must be less or equal rule action's interval
+const MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION = '1h';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -46,10 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
-  // Failing: See https://github.com/elastic/kibana/issues/173804
-  // Failing: See https://github.com/elastic/kibana/issues/196470
-  // Failing: See https://github.com/elastic/kibana/issues/196462
-  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
+  describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -67,14 +66,22 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, getSimpleRule(ruleId, false)),
+
+        createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+          })
+        ),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
-      expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
+      expect(sidecarActionsResults.hits.hits.length).toBe(1);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule1.id);
 
       const { body } = await securitySolutionApi
         .performRulesBulkAction({
@@ -83,14 +90,14 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the deleted rule is returned with the response
-      expect(body.attributes.results.deleted[0].name).to.eql(rule1.name);
+      expect(body.attributes.results.deleted[0].name).toEqual(rule1.name);
 
       // legacy sidecar action should be gone
       const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
 
       // Check that the updates have been persisted
       await securitySolutionApi.readRule({ query: { rule_id: ruleId } }).expect(404);
@@ -109,14 +116,22 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, { ...getSimpleRule(ruleId, false), index: ['*'] }),
+        createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            index: ['*'],
+            interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+          })
+        ),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
-      expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
+      expect(sidecarActionsResults.hits.hits.length).toBe(1);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule1.id);
 
       const { body } = await securitySolutionApi
         .performRulesBulkAction({
@@ -125,10 +140,10 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).to.eql(true);
+      expect(body.attributes.results.updated[0].enabled).toBeTruthy();
 
       // Check that the updates have been persisted
       const { body: ruleBody } = await securitySolutionApi
@@ -137,10 +152,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // legacy sidecar action should be gone
       const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
 
-      expect(ruleBody.enabled).to.eql(true);
-      expect(ruleBody.actions).to.eql([
+      expect(ruleBody.enabled).toBeTruthy();
+      expect(ruleBody.actions).toEqual([
         {
           action_type_id: '.slack',
           group: 'default',
@@ -148,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
-          uuid: ruleBody.actions[0].uuid,
+          uuid: expect.any(String),
           frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
@@ -169,14 +184,21 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, getSimpleRule(ruleId, true)),
+        createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+          })
+        ),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
-      expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
+      expect(sidecarActionsResults.hits.hits.length).toBe(1);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule1.id);
 
       const { body } = await securitySolutionApi
         .performRulesBulkAction({
@@ -185,10 +207,10 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).to.eql(false);
+      expect(body.attributes.results.updated[0].enabled).toBeFalsy();
 
       // Check that the updates have been persisted
       const { body: ruleBody } = await securitySolutionApi
@@ -197,10 +219,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // legacy sidecar action should be gone
       const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
 
-      expect(ruleBody.enabled).to.eql(false);
-      expect(ruleBody.actions).to.eql([
+      expect(ruleBody.enabled).toBeFalsy();
+      expect(ruleBody.actions).toEqual([
         {
           action_type_id: '.slack',
           group: 'default',
@@ -208,7 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
-          uuid: ruleBody.actions[0].uuid,
+          uuid: expect.any(String),
           frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
@@ -227,14 +249,21 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, getSimpleRule(ruleId, true)),
+        createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+          })
+        ),
       ]);
       await createLegacyRuleAction(supertest, ruleToDuplicate.id, connector.body.id);
 
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
-      expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+      expect(sidecarActionsResults.hits.hits.length).toBe(1);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(
         ruleToDuplicate.id
       );
 
@@ -249,22 +278,21 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the duplicated rule is returned with the response
-      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+      expect(body.attributes.results.created[0].name).toBe(`${ruleToDuplicate.name} [Duplicate]`);
 
       // Check that the updates have been persisted
       const { body: rulesResponse } = await securitySolutionApi
         .findRules({ query: {} })
         .expect(200);
 
-      expect(rulesResponse.total).to.eql(2);
+      expect(rulesResponse.total).toBe(2);
 
       rulesResponse.data.forEach((rule: RuleResponse) => {
-        const uuid = rule.actions[0].uuid;
-        expect(rule.actions).to.eql([
-          {
+        expect(rule.actions).toEqual([
+          expect.objectContaining({
             action_type_id: '.slack',
             group: 'default',
             id: connector.body.id,
@@ -272,9 +300,8 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            ...(uuid ? { uuid } : {}),
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
-          },
+          }),
         ]);
       });
     });
@@ -294,7 +321,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       // Check that the duplicated rule is returned with the correct rule_source
-      expect(body.attributes.results.created[0].rule_source).to.eql({
+      expect(body.attributes.results.created[0].rule_source).toEqual({
         type: 'internal',
       });
     });
@@ -320,8 +347,13 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(500);
 
-          expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
-          expect(body.attributes.errors[0]).to.eql({
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
             message:
               "Index patterns can't be added. ES|QL rule doesn't have index patterns property",
             status_code: 500,
@@ -348,14 +380,22 @@ export default ({ getService }: FtrProviderContext): void => {
                 webhookUrl: 'http://localhost:1234',
               },
             }),
-          createRule(supertest, log, getSimpleRule(ruleId, true)),
+          createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              enabled: true,
+              interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+            })
+          ),
         ]);
         await createLegacyRuleAction(supertest, ruleToDuplicate.id, connector.body.id);
 
         // check for legacy sidecar action
         const sidecarActionsResults = await getLegacyActionSO(es);
-        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+        expect(sidecarActionsResults.hits.hits.length).toBe(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(
           ruleToDuplicate.id
         );
 
@@ -372,7 +412,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           query: {},
         });
-        expect(setTagsBody.attributes.summary).to.eql({
+
+        expect(setTagsBody.attributes.summary).toEqual({
           failed: 0,
           skipped: 0,
           succeeded: 1,
@@ -386,11 +427,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Sidecar should be removed
         const sidecarActionsPostResults = await getLegacyActionSO(es);
-        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
-        expect(setTagsRule.tags).to.eql(['reset-tag']);
-
-        expect(setTagsRule.actions).to.eql([
+        expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
+        expect(setTagsRule.tags).toEqual(['reset-tag']);
+        expect(setTagsRule.actions).toEqual([
           {
             action_type_id: '.slack',
             group: 'default',
@@ -399,7 +439,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            uuid: setTagsRule.actions[0].uuid,
+            uuid: expect.any(String),
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
@@ -427,7 +467,14 @@ export default ({ getService }: FtrProviderContext): void => {
                     webhookUrl: 'http://localhost:1234',
                   },
                 }),
-              createRule(supertest, log, getSimpleRule(ruleId, true)),
+              createRule(
+                supertest,
+                log,
+                getCustomQueryRuleParams({
+                  rule_id: ruleId,
+                  interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+                })
+              ),
             ]);
             // create a new connector
             const webHookConnector = await createWebHookConnector();
@@ -436,8 +483,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
             // check for legacy sidecar action
             const sidecarActionsResults = await getLegacyActionSO(es);
-            expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-            expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+            expect(sidecarActionsResults.hits.hits.length).toBe(1);
+            expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(
               createdRule.id
             );
 
@@ -470,24 +517,24 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
-                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                uuid: expect.any(String),
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
             // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+            expect(body.attributes.results.updated[0].actions).toEqual(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await securitySolutionApi
               .readRule({ query: { rule_id: ruleId } })
               .expect(200);
 
-            expect(readRule.actions).to.eql(expectedRuleActions);
+            expect(readRule.actions).toEqual(expectedRuleActions);
 
             // Sidecar should be removed
             const sidecarActionsPostResults = await getLegacyActionSO(es);
-            expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+            expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
           });
         });
       });
@@ -510,7 +557,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         ruleWithIntendedInvestigationField = await createRule(supertest, log, {
-          ...getSimpleRule('rule-with-investigation-field'),
+          ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
           name: 'Test investigation fields object',
           investigation_fields: { field_names: ['host.name'] },
         });
@@ -533,21 +580,21 @@ export default ({ getService }: FtrProviderContext): void => {
         const exportedRuleWithLegacyInvestigationField = exportedRules.find(
           (rule) => rule.id === ruleWithLegacyInvestigationField.id
         );
-        expect(exportedRuleWithLegacyInvestigationField.investigation_fields).to.eql({
+        expect(exportedRuleWithLegacyInvestigationField.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
 
         const exportedRuleWithLegacyInvestigationFieldEmptyArray = exportedRules.find(
           (rule) => rule.id === ruleWithLegacyInvestigationFieldEmptyArray.id
         );
-        expect(exportedRuleWithLegacyInvestigationFieldEmptyArray.investigation_fields).to.eql(
+        expect(exportedRuleWithLegacyInvestigationFieldEmptyArray.investigation_fields).toEqual(
           undefined
         );
 
         const exportedRuleWithInvestigationField = exportedRules.find(
           (rule) => rule.id === ruleWithIntendedInvestigationField.id
         );
-        expect(exportedRuleWithInvestigationField.investigation_fields).to.eql({
+        expect(exportedRuleWithInvestigationField.investigation_fields).toEqual({
           field_names: ['host.name'],
         });
 
@@ -563,10 +610,10 @@ export default ({ getService }: FtrProviderContext): void => {
           JSON.parse(rule1).id
         );
 
-        expect(isInvestigationFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldMigratedInSo).toBeFalsy();
 
         const exportDetails = JSON.parse(exportDetailsJson);
-        expect(exportDetails).to.eql({
+        expect(exportDetails).toEqual({
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
           exported_count: 3,
@@ -593,22 +640,22 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
 
         // Check that the deleted rule is returned with the response
         const names = body.attributes.results.deleted.map(
           (returnedRule: RuleResponse) => returnedRule.name
         );
-        expect(names.includes('Test investigation fields')).to.eql(true);
-        expect(names.includes('Test investigation fields empty array')).to.eql(true);
-        expect(names.includes('Test investigation fields object')).to.eql(true);
+        expect(names.includes('Test investigation fields')).toBeTruthy();
+        expect(names.includes('Test investigation fields empty array')).toBeTruthy();
+        expect(names.includes('Test investigation fields object')).toBeTruthy();
 
         const ruleWithLegacyField = body.attributes.results.deleted.find(
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationField.params.ruleId
         );
 
-        expect(ruleWithLegacyField.investigation_fields).to.eql({
+        expect(ruleWithLegacyField.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
 
@@ -634,7 +681,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
 
         // Check that the updated rule is returned with the response
         // and field transformed on response
@@ -642,13 +689,13 @@ export default ({ getService }: FtrProviderContext): void => {
           body.attributes.results.updated.every(
             (returnedRule: RuleResponse) => returnedRule.enabled
           )
-        ).to.eql(true);
+        ).toBeTruthy();
 
         const ruleWithLegacyField = body.attributes.results.updated.find(
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationField.params.ruleId
         );
-        expect(ruleWithLegacyField.investigation_fields).to.eql({
+        expect(ruleWithLegacyField.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
 
@@ -656,12 +703,12 @@ export default ({ getService }: FtrProviderContext): void => {
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId
         );
-        expect(ruleWithEmptyArray.investigation_fields).to.eql(undefined);
+        expect(ruleWithEmptyArray.investigation_fields).toBeUndefined();
 
         const ruleWithIntendedType = body.attributes.results.updated.find(
           (returnedRule: RuleResponse) => returnedRule.rule_id === 'rule-with-investigation-field'
         );
-        expect(ruleWithIntendedType.investigation_fields).to.eql({ field_names: ['host.name'] });
+        expect(ruleWithIntendedType.investigation_fields).toEqual({ field_names: ['host.name'] });
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
@@ -677,24 +724,24 @@ export default ({ getService }: FtrProviderContext): void => {
           field_names: ['client.address', 'agent.name'],
         });
 
-        expect(isInvestigationFieldMigratedInSo).to.eql(false);
-        expect(ruleSO?.alert?.enabled).to.eql(true);
+        expect(isInvestigationFieldMigratedInSo).toBeFalsy();
+        expect(ruleSO?.alert?.enabled).toBeTruthy();
 
         const {
           hits: {
             hits: [{ _source: ruleSO2 }],
           },
         } = await getRuleSOById(es, ruleWithEmptyArray.id);
-        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
-        expect(ruleSO?.alert?.enabled).to.eql(true);
+        expect(ruleSO2?.alert?.params?.investigationFields).toEqual([]);
+        expect(ruleSO?.alert?.enabled).toBeTruthy();
 
         const {
           hits: {
             hits: [{ _source: ruleSO3 }],
           },
         } = await getRuleSOById(es, ruleWithIntendedType.id);
-        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
-        expect(ruleSO?.alert?.enabled).to.eql(true);
+        expect(ruleSO3?.alert?.params?.investigationFields).toEqual({ field_names: ['host.name'] });
+        expect(ruleSO?.alert?.enabled).toBeTruthy();
       });
 
       it('should disable rules with legacy investigation fields and transform legacy field in response', async () => {
@@ -705,7 +752,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
 
         // Check that the updated rule is returned with the response
         // and field transformed on response
@@ -713,13 +760,13 @@ export default ({ getService }: FtrProviderContext): void => {
           body.attributes.results.updated.every(
             (returnedRule: RuleResponse) => !returnedRule.enabled
           )
-        ).to.eql(true);
+        ).toBeTruthy();
 
         const ruleWithLegacyField = body.attributes.results.updated.find(
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationField.params.ruleId
         );
-        expect(ruleWithLegacyField.investigation_fields).to.eql({
+        expect(ruleWithLegacyField.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
 
@@ -727,12 +774,12 @@ export default ({ getService }: FtrProviderContext): void => {
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId
         );
-        expect(ruleWithEmptyArray.investigation_fields).to.eql(undefined);
+        expect(ruleWithEmptyArray.investigation_fields).toBeUndefined();
 
         const ruleWithIntendedType = body.attributes.results.updated.find(
           (returnedRule: RuleResponse) => returnedRule.rule_id === 'rule-with-investigation-field'
         );
-        expect(ruleWithIntendedType.investigation_fields).to.eql({ field_names: ['host.name'] });
+        expect(ruleWithIntendedType.investigation_fields).toEqual({ field_names: ['host.name'] });
 
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
@@ -748,7 +795,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithLegacyField.id
           );
-        expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).toBeFalsy();
 
         const isInvestigationFieldForRuleWithEmptyArraydMigratedInSo =
           await checkInvestigationFieldSoValue(
@@ -759,7 +806,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithEmptyArray.id
           );
-        expect(isInvestigationFieldForRuleWithEmptyArraydMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForRuleWithEmptyArraydMigratedInSo).toBeFalsy();
 
         const isInvestigationFieldForRuleWithIntendedTypeMigratedInSo =
           await checkInvestigationFieldSoValue(
@@ -768,7 +815,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithIntendedType.id
           );
-        expect(isInvestigationFieldForRuleWithIntendedTypeMigratedInSo).to.eql(true);
+        expect(isInvestigationFieldForRuleWithIntendedTypeMigratedInSo).toBeTruthy();
       });
 
       it('should duplicate rules with legacy investigation fields and transform field in response', async () => {
@@ -783,22 +830,22 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
 
         // Check that the duplicated rule is returned with the response
         const names = body.attributes.results.created.map(
           (returnedRule: RuleResponse) => returnedRule.name
         );
-        expect(names.includes('Test investigation fields [Duplicate]')).to.eql(true);
-        expect(names.includes('Test investigation fields empty array [Duplicate]')).to.eql(true);
-        expect(names.includes('Test investigation fields object [Duplicate]')).to.eql(true);
+        expect(names.includes('Test investigation fields [Duplicate]')).toBeTruthy();
+        expect(names.includes('Test investigation fields empty array [Duplicate]')).toBeTruthy();
+        expect(names.includes('Test investigation fields object [Duplicate]')).toBeTruthy();
 
         // Check that the updates have been persisted
         const { body: rulesResponse } = await await securitySolutionApi
           .findRules({ query: {} })
           .expect(200);
 
-        expect(rulesResponse.total).to.eql(6);
+        expect(rulesResponse.total).toBe(6);
 
         const ruleWithLegacyField = body.attributes.results.created.find(
           (returnedRule: RuleResponse) =>
@@ -827,7 +874,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithLegacyField.id
           );
-        expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).toBeFalsy();
 
         const isInvestigationFieldForRuleWithEmptyArrayMigratedInSo =
           await checkInvestigationFieldSoValue(
@@ -836,7 +883,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithEmptyArray.id
           );
-        expect(isInvestigationFieldForRuleWithEmptyArrayMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForRuleWithEmptyArrayMigratedInSo).toBeFalsy();
 
         /*
           It's duplicate of a rule with properly formatted "investigation fields".
@@ -850,7 +897,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithIntendedType.id
           );
-        expect(isInvestigationFieldForRuleWithIntendedTypeInSo).to.eql(true);
+        expect(isInvestigationFieldForRuleWithIntendedTypeInSo).toBeTruthy();
 
         // ORIGINAL RULES - rules selected to be duplicated
         /**
@@ -866,7 +913,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithLegacyInvestigationField.id
           );
-        expect(isInvestigationFieldForOriginalRuleWithLegacyFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForOriginalRuleWithLegacyFieldMigratedInSo).toBeFalsy();
 
         const isInvestigationFieldForOriginalRuleWithEmptyArrayMigratedInSo =
           await checkInvestigationFieldSoValue(
@@ -875,7 +922,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithLegacyInvestigationFieldEmptyArray.id
           );
-        expect(isInvestigationFieldForOriginalRuleWithEmptyArrayMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForOriginalRuleWithEmptyArrayMigratedInSo).toBeFalsy();
 
         /*
           Since this rule was created with intended "investigation fields" format,
@@ -888,7 +935,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithIntendedInvestigationField.id
           );
-        expect(isInvestigationFieldForOriginalRuleWithIntendedTypeInSo).to.eql(true);
+        expect(isInvestigationFieldForOriginalRuleWithIntendedTypeInSo).toBeTruthy();
       });
 
       it('should edit rules with legacy investigation fields', async () => {
@@ -905,7 +952,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           query: {},
         });
-        expect(body.attributes.summary).to.eql({
+        expect(body.attributes.summary).toEqual({
           failed: 0,
           skipped: 0,
           succeeded: 3,
@@ -918,23 +965,23 @@ export default ({ getService }: FtrProviderContext): void => {
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationField.params.ruleId
         );
-        expect(ruleWithLegacyField.investigation_fields).to.eql({
+        expect(ruleWithLegacyField.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
-        expect(ruleWithLegacyField.tags).to.eql(['reset-tag']);
+        expect(ruleWithLegacyField.tags).toEqual(['reset-tag']);
 
         const ruleWithEmptyArray = body.attributes.results.updated.find(
           (returnedRule: RuleResponse) =>
             returnedRule.rule_id === ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId
         );
-        expect(ruleWithEmptyArray.investigation_fields).to.eql(undefined);
-        expect(ruleWithEmptyArray.tags).to.eql(['reset-tag']);
+        expect(ruleWithEmptyArray.investigation_fields).toBeUndefined();
+        expect(ruleWithEmptyArray.tags).toEqual(['reset-tag']);
 
         const ruleWithIntendedType = body.attributes.results.updated.find(
           (returnedRule: RuleResponse) => returnedRule.rule_id === 'rule-with-investigation-field'
         );
-        expect(ruleWithIntendedType.investigation_fields).to.eql({ field_names: ['host.name'] });
-        expect(ruleWithIntendedType.tags).to.eql(['reset-tag']);
+        expect(ruleWithIntendedType.investigation_fields).toEqual({ field_names: ['host.name'] });
+        expect(ruleWithIntendedType.tags).toEqual(['reset-tag']);
 
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
@@ -948,7 +995,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithLegacyInvestigationField.id
           );
-        expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).toBeFalsy();
 
         const isInvestigationFieldForRuleWithEmptyArrayFieldMigratedInSo =
           await checkInvestigationFieldSoValue(
@@ -957,7 +1004,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithLegacyInvestigationFieldEmptyArray.id
           );
-        expect(isInvestigationFieldForRuleWithEmptyArrayFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldForRuleWithEmptyArrayFieldMigratedInSo).toBeFalsy();
 
         const isInvestigationFieldForRuleWithIntendedTypeMigratedInSo =
           await checkInvestigationFieldSoValue(
@@ -966,7 +1013,7 @@ export default ({ getService }: FtrProviderContext): void => {
             es,
             ruleWithIntendedType.id
           );
-        expect(isInvestigationFieldForRuleWithIntendedTypeMigratedInSo).to.eql(true);
+        expect(isInvestigationFieldForRuleWithIntendedTypeMigratedInSo).toBeTruthy();
       });
     });
   });
