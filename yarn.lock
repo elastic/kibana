@@ -7033,6 +7033,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/transpose-utils@link:packages/kbn-transpose-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/triggers-actions-ui-example-plugin@link:x-pack/examples/triggers_actions_ui_example":
   version "0.0.0"
   uid ""
