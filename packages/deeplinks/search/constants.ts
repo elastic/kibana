@@ -21,3 +21,7 @@ export const SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID = 'searchInferenceEndpo
 export const SEARCH_HOMEPAGE = 'searchHomepage';
 export const SEARCH_INDICES_START = 'elasticsearchStart';
 export const SEARCH_INDICES = 'elasticsearchIndices';
+export const SEARCH_ELASTICSEARCH = 'enterpriseSearchElasticsearch';
+export const SEARCH_VECTOR_SEARCH = 'enterpriseSearchVectorSearch';
+export const SEARCH_SEMANTIC_SEARCH = 'enterpriseSearchSemanticSearch';
+export const SEARCH_AI_SEARCH = 'enterpriseSearchAISearch';

@@ -19,13 +19,14 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
+  const navItems = useEnterpriseSearchNav();
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       restrictWidth
       solutionNav={{
         name: SEARCH_PRODUCT_NAME,
-        items: useEnterpriseSearchNav(),
+        items: navItems,
       }}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >
