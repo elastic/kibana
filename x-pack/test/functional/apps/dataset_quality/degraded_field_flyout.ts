@@ -760,7 +760,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           const newFieldLimitValue = await newFieldLimitInput.getAttribute('value');
           const newFieldLimit = parseInt(newFieldLimitValue, 10);
-          const newFieldLimitDisabledStatus = await newFieldLimitInput.getAttribute('disabled');
 
           // Should be 30% more the current limit
           const newLimit = Math.round(currentFieldLimit * 1.3);
