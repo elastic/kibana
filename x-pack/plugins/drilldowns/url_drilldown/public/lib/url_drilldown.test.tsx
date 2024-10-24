@@ -7,19 +7,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { IExternalUrl } from '@kbn/core/public';
-import { UrlDrilldown, Config } from './url_drilldown';
+import { render, waitFor } from '@testing-library/react';
+import { Config, UrlDrilldown } from './url_drilldown';
 import {
-  ValueClickContext,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  ValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { of } from '@kbn/kibana-utils-plugin/common';
 import { createPoint, rowClickData } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import React from 'react';
 
 const mockDataPoints = [
   {
@@ -61,6 +62,7 @@ const mockEmbeddableApi = {
     filters$: new BehaviorSubject([]),
     query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    viewMode: new BehaviorSubject('edit'),
   },
 };
 
@@ -93,6 +95,20 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
   return drilldown;
 };
 
+const renderActionMenuItem = async (
+  drilldown: UrlDrilldown,
+  config: Config,
+  context: ValueClickContext
+) => {
+  const { getByTestId } = render(
+    <drilldown.actionMenuItem config={{ name: 'test', config }} context={context} />
+  );
+  await waitFor(() => null); // wait for effects to complete
+  return {
+    getError: () => getByTestId('urlDrilldown-error'),
+  };
+};
+
 describe('UrlDrilldown', () => {
   const urlDrilldown = createDrilldown();
 
@@ -119,7 +135,7 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.isCompatible(config, context)).rejects.toThrowError();
     });
 
-    test('compatible if url is valid', async () => {
+    test('compatible in edit mode if url is valid', async () => {
       const config: Config = {
         url: {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
@@ -139,7 +155,74 @@ describe('UrlDrilldown', () => {
       await expect(result).resolves.toBe(true);
     });
 
-    test('not compatible if url is invalid', async () => {
+    test('compatible in edit mode if url is invalid', async () => {
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
+        },
+        openInNewTab: false,
+        encodeUrl: true,
+      };
+
+      const context: ValueClickContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddableApi,
+      };
+
+      await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(true);
+    });
+
+    test('compatible in edit mode if external URL is denied', async () => {
+      const drilldown1 = createDrilldown(true);
+      const drilldown2 = createDrilldown(false);
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+        encodeUrl: true,
+      };
+
+      const context: ValueClickContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddableApi,
+      };
+
+      const result1 = await drilldown1.isCompatible(config, context);
+      const result2 = await drilldown2.isCompatible(config, context);
+
+      expect(result1).toBe(true);
+      expect(result2).toBe(true);
+    });
+
+    test('compatible in view mode if url is valid', async () => {
+      mockEmbeddableApi.parentApi.viewMode.next('view');
+
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+        encodeUrl: true,
+      };
+
+      const context: ValueClickContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddableApi,
+      };
+
+      const result = urlDrilldown.isCompatible(config, context);
+      await expect(result).resolves.toBe(true);
+    });
+
+    test('not compatible in view mode if url is invalid', async () => {
+      mockEmbeddableApi.parentApi.viewMode.next('view');
       const config: Config = {
         url: {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
@@ -158,7 +241,8 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(false);
     });
 
-    test('not compatible if external URL is denied', async () => {
+    test('not compatible in view mode if external URL is denied', async () => {
+      mockEmbeddableApi.parentApi.viewMode.next('view');
       const drilldown1 = createDrilldown(true);
       const drilldown2 = createDrilldown(false);
       const config: Config = {
@@ -184,7 +268,7 @@ describe('UrlDrilldown', () => {
     });
   });
 
-  describe('getHref & execute', () => {
+  describe('getHref & execute & title', () => {
     beforeEach(() => {
       mockNavigateToUrl.mockReset();
     });
@@ -210,6 +294,9 @@ describe('UrlDrilldown', () => {
 
       await urlDrilldown.execute(config, context);
       expect(mockNavigateToUrl).toBeCalledWith(url);
+
+      const { getError } = await renderActionMenuItem(urlDrilldown, config, context);
+      expect(() => getError()).toThrow();
     });
 
     test('invalid url', async () => {
@@ -228,12 +315,17 @@ describe('UrlDrilldown', () => {
         embeddable: mockEmbeddableApi,
       };
 
-      await expect(urlDrilldown.getHref(config, context)).rejects.toThrowError();
-      await expect(urlDrilldown.execute(config, context)).rejects.toThrowError();
+      await expect(urlDrilldown.getHref(config, context)).resolves.toBeUndefined();
+      await expect(urlDrilldown.execute(config, context)).resolves.toBeUndefined();
       expect(mockNavigateToUrl).not.toBeCalled();
+
+      const { getError } = await renderActionMenuItem(urlDrilldown, config, context);
+      expect(getError()).toHaveTextContent(
+        `Error building URL: The URL template is not valid in the given context.`
+      );
     });
 
-    test('should throw on denied external URL', async () => {
+    test('should not throw on denied external URL', async () => {
       const drilldown1 = createDrilldown(true);
       const drilldown2 = createDrilldown(false);
       const config: Config = {
@@ -257,17 +349,11 @@ describe('UrlDrilldown', () => {
       expect(url).toMatchInlineSnapshot(`"https://elasti.co/?test&(language:kuery,query:test)"`);
       expect(mockNavigateToUrl).toBeCalledWith(url);
 
-      const [, error1] = await of(drilldown2.getHref(config, context));
-      const [, error2] = await of(drilldown2.execute(config, context));
+      await expect(drilldown2.getHref(config, context)).resolves.toBeUndefined();
+      await expect(drilldown2.execute(config, context)).resolves.toBeUndefined();
 
-      expect(error1).toBeInstanceOf(Error);
-      expect(error1.message).toMatchInlineSnapshot(
-        `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
-      );
-      expect(error2).toBeInstanceOf(Error);
-      expect(error2.message).toMatchInlineSnapshot(
-        `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
-      );
+      const { getError } = await renderActionMenuItem(drilldown2, config, context);
+      expect(getError()).toHaveTextContent(`Error building URL: external URL was denied.`);
     });
   });
 
