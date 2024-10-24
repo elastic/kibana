@@ -2098,7 +2098,7 @@
             }
           }
         },
-        "enterpriseSearchRelevance": {
+        "searchInferenceEndpoints": {
           "properties": {
             "appId": {
               "type": "keyword",
