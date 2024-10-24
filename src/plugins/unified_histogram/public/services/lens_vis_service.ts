@@ -518,9 +518,6 @@ export class LensVisService {
       if (breakdownColumn) {
         context.textBasedColumns.push(breakdownColumn);
       }
-      // const preferredChartType = preferredVisAttributes
-      //   ? getPreferredChartType(preferredVisAttributes)
-      //   : undefined;
 
       const preferredChartType = preferredVisAttributes?.visualizationType.replace(
         LENS_PREFIX,
@@ -613,10 +610,6 @@ export class LensVisService {
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion[] => {
     const { dataView, columns, query, isPlainRecord } = queryParams;
-
-    // const preferredChartType = preferredVisAttributes
-    //   ? getPreferredChartType(preferredVisAttributes)
-    //   : undefined;
 
     const preferredChartType = preferredVisAttributes?.visualizationType.replace(
       LENS_PREFIX,
