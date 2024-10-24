@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { CLOUD_PROVIDERS, getBenchmarkApplicableTo } from '../../common/utils/helpers';
 import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/constants';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
@@ -61,7 +62,10 @@ export const AccountsEvaluatedWidget = ({
   const navToFindings = useNavigateFindings();
 
   const navToFindingsByCloudProvider = (provider: string) => {
-    navToFindings({ 'cloud.provider': provider }, [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]);
+    navToFindings(
+      { 'cloud.provider': provider, 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE },
+      [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]
+    );
   };
 
   const navToFindingsByCisBenchmark = (cisBenchmark: string) => {
