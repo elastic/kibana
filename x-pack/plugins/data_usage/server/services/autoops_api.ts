@@ -13,6 +13,7 @@ import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
 import {
+  UsageMetricsAutoOpsResponseSchema,
   UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestBody,
 } from '../../common/rest_types';
@@ -134,8 +135,10 @@ export class AutoOpsAPIService {
       }
     );
 
+    const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
+
     logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
-    return response;
+    return validatedResponse;
   }
 
   private createTlsConfig(autoopsConfig: AutoOpsConfig | undefined) {
