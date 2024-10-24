@@ -56,13 +56,13 @@ const fieldsConfig: FieldsConfig = {
   model_id: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.inferenceForm.modelIDFieldLabel', {
-      defaultMessage: 'Deployment or model ID',
+      defaultMessage: 'Deployment, inference, or model ID',
     }),
     deserializer: String,
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.modelIDFieldHelpText',
       {
-        defaultMessage: 'ID of the deployment or the model to infer against.',
+        defaultMessage: 'ID of the deployment, the inference endpoint, or the model to infer against.',
       }
     ),
     validations: [
@@ -71,7 +71,7 @@ const fieldsConfig: FieldsConfig = {
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.inferenceForm.patternRequiredError',
             {
-              defaultMessage: 'A deployment or model ID value is required.',
+              defaultMessage: 'A deployment, an inference, or a model ID value is required.',
             }
           )
         ),
