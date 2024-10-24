@@ -11,16 +11,21 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
+  const testModelId = 'lang_ident_model_1';
+
   describe('machine learning trained models page Accessibility', function () {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
+      await ml.api.createIngestPipeline(testModelId);
       await ml.securityUI.loginAsMlPowerUser();
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToTrainedModels();
     });
 
     after(async () => {
+      await ml.api.deleteIngestPipeline(testModelId);
+
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
       await ml.securityUI.logout();
@@ -31,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('trained model details', async () => {
-      await ml.trainedModelsTable.ensureRowIsExpanded('lang_ident_model_1');
+      await ml.trainedModelsTable.ensureRowIsExpanded(testModelId);
       await a11y.testAppSnapshot();
 
       await ml.testExecution.logTestStep('Assert the Details tab content');
