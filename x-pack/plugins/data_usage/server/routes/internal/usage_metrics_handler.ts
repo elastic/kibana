@@ -44,12 +44,22 @@ export const getUsageMetricsHandler = (
           new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400)
         );
       }
+      let dataStreamsResponse;
 
-      const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
-        await esClient.indices.getDataStream({
+      try {
+        // Attempt to fetch data streams
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
           name: requestDsNames,
           expand_wildcards: 'all',
         });
+        dataStreamsResponse = dataStreams;
+      } catch (error) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('Failed to retrieve data streams', 400)
+        );
+      }
       const metrics = await dataUsageService.getMetrics({
         from,
         to,

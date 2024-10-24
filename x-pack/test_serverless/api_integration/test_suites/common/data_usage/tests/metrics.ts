@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testDataStreamName = 'test-data-stream';
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
-      it('returns 500 with non-existent data streams', async () => {
+      it('returns 400 with non-existent data streams', async () => {
         const requestBody: UsageMetricsRequestBody = {
           from: 'now-24h/h',
           to: 'now',
@@ -53,7 +53,40 @@ export default function ({ getService }: FtrProviderContext) {
           .post(DATA_USAGE_METRICS_API_ROUTE)
           .set('elastic-api-version', '1')
           .send(requestBody);
-        expect(res.statusCode).to.be(500);
+        expect(res.statusCode).to.be(400);
+        expect(res.body.message).to.be('Failed to retrieve data streams');
+      });
+
+      it('returns 400 when requesting no data streams', async () => {
+        const requestBody = {
+          from: 'now-24h/h',
+          to: 'now',
+          metricTypes: ['ingest_rate'],
+          dataStreams: [],
+        };
+        const res = await supertestAdminWithCookieCredentials
+          .post(DATA_USAGE_METRICS_API_ROUTE)
+          .set('elastic-api-version', '1')
+          .send(requestBody);
+        expect(res.statusCode).to.be(400);
+        expect(res.body.message).to.be('[request body.dataStreams]: no data streams selected');
+      });
+
+      it('returns 400 when requesting an invalid metric type', async () => {
+        const requestBody = {
+          from: 'now-24h/h',
+          to: 'now',
+          metricTypes: [testDataStreamName],
+          dataStreams: ['datastream'],
+        };
+        const res = await supertestAdminWithCookieCredentials
+          .post(DATA_USAGE_METRICS_API_ROUTE)
+          .set('elastic-api-version', '1')
+          .send(requestBody);
+        expect(res.statusCode).to.be(400);
+        expect(res.body.message).to.be(
+          '[request body.metricTypes]: must be one of ingest_rate, storage_retained, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
+        );
       });
 
       it('returns 200 with valid request', async () => {
