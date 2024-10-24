@@ -12,14 +12,13 @@ import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { useArgs } from '@storybook/addons';
 import { EntitiesGrid } from '.';
-import { EntityType } from '../../../common/entities';
 import { entitiesMock } from './mock/entities_mock';
 
 interface EntityGridStoriesArgs {
-  entityType?: EntityType;
+  entityType?: string;
 }
 
-const entityTypeOptions: EntityType[] = ['host', 'container', 'service'];
+const entityTypeOptions = ['host', 'container', 'service'];
 
 const stories: Meta<EntityGridStoriesArgs> = {
   title: 'app/inventory/entities_grid',

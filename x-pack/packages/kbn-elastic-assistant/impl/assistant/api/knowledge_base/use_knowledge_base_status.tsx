@@ -91,8 +91,7 @@ export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undef
     (kbStatus?.elser_exists &&
       kbStatus?.security_labs_exists &&
       kbStatus?.index_exists &&
-      kbStatus?.pipeline_exists &&
-      !kbStatus.is_setup_in_progress) ??
+      kbStatus?.pipeline_exists) ??
     false
   );
 };
