@@ -10,6 +10,13 @@ import { Observable, Subscription } from 'rxjs';
 
 import { ILicense } from '@kbn/licensing-plugin/public';
 
+import {
+  hasEnterpriseLicense,
+  hasGoldLicense,
+  hasPlatinumLicense,
+  isTrialLicense,
+} from '../../../../common/utils/licensing';
+
 interface LicensingValues {
   license: ILicense | null;
   licenseSubscription: Subscription | null;
@@ -50,29 +57,14 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
   selectors: {
     hasPlatinumLicense: [
       (selectors) => [selectors.license],
-      (license) => {
-        const qualifyingLicenses = ['platinum', 'enterprise', 'trial'];
-        return license?.isActive && qualifyingLicenses.includes(license?.type);
-      },
+      (license) => hasPlatinumLicense(license),
     ],
     hasEnterpriseLicense: [
       (selectors) => [selectors.license],
-      (license) => {
-        const qualifyingLicenses = ['enterprise', 'trial'];
-        return license?.isActive && qualifyingLicenses.includes(license?.type);
-      },
+      (license) => hasEnterpriseLicense(license),
     ],
-    hasGoldLicense: [
-      (selectors) => [selectors.license],
-      (license) => {
-        const qualifyingLicenses = ['gold', 'platinum', 'enterprise', 'trial'];
-        return license?.isActive && qualifyingLicenses.includes(license?.type);
-      },
-    ],
-    isTrial: [
-      (selectors) => [selectors.license],
-      (license) => license?.isActive && license?.type === 'trial',
-    ],
+    hasGoldLicense: [(selectors) => [selectors.license], (license) => hasGoldLicense(license)],
+    isTrial: [(selectors) => [selectors.license], (license) => isTrialLicense(license)],
   },
   events: ({ props, actions, values }) => ({
     afterMount: () => {
