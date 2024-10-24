@@ -25,7 +25,7 @@ describe(
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolutionServerless.usageReportingTaskInterval=1m`,
-          `--xpack.securitySolutionServerless.usageApi.url=https://localhost:3623`,
+          `--xpack.securitySolutionServerless.usageApi.url=http://localhost:3623`,
         ],
       },
     },
@@ -59,7 +59,8 @@ describe(
       stopTransparentApiProxy();
     });
 
-    describe('Usage Reporting Task', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187083
+    describe.skip('Usage Reporting Task', () => {
       it('properly sends indexed heartbeats to the metering api', () => {
         const expectedChunks = Math.ceil(HEARTBEAT_COUNT / METERING_SERVICE_BATCH_SIZE);
 

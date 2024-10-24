@@ -771,7 +771,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (options.ignoreMissing && so.error.statusCode === 404) {
             return null;
           } else if (so.error.statusCode === 404) {
-            throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`);
+            throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`, {
+              packagePolicyId: so.id,
+            });
           } else {
             throw new FleetError(so.error.message);
           }

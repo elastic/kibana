@@ -596,6 +596,17 @@ async function getExpressionSuggestionsByType(
 
   const suggestions: SuggestionRawDefinition[] = [];
 
+  // When user types and accepts autocomplete suggestion, and cursor is placed at the end of a valid field
+  // we should not show irrelevant functions that might have words matching
+  const columnWithActiveCursor = commands.find(
+    (c) =>
+      c.name === command.name &&
+      command.name === 'eval' &&
+      c.args.some((arg) => isColumnItem(arg) && arg.name.includes(EDITOR_MARKER))
+  );
+
+  const shouldShowFunctions = !columnWithActiveCursor;
+
   // in this flow there's a clear plan here from argument definitions so try to follow it
   if (argDef) {
     if (argDef.type === 'column' || argDef.type === 'any' || argDef.type === 'function') {
@@ -722,7 +733,7 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: true,
+              functions: shouldShowFunctions,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
               literals: argDef.constantOnly,
@@ -1780,10 +1791,15 @@ async function getOptionArgsSuggestions(
             innerText,
             command,
             option,
-            { type: argDef?.type || 'any' },
+            { type: argDef?.type || 'unknown' },
             nodeArg,
             nodeArgType as string,
-            references,
+            {
+              fields: references.fields,
+              // you can't use a variable defined
+              // in the stats command in the by clause
+              variables: new Map(),
+            },
             getFieldsByType
           ))
         );

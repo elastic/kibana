@@ -27,8 +27,16 @@ describe('useEsqlIndex', () => {
     expect(result.current).toEqual([]);
   });
 
+  it('returns indices which appear in source before syntax error', async () => {
+    const typeErrorCausingQuery = 'from auditbeat* [, auditbeat2*';
+
+    const { result } = renderHook(() => useEsqlIndex(typeErrorCausingQuery, 'esql'));
+
+    expect(result.current).toEqual(['auditbeat*']);
+  });
+
   it('should return empty array if invalid query is causing a TypeError in ES|QL parser', async () => {
-    const typeErrorCausingQuery = 'from auditbeat* []';
+    const typeErrorCausingQuery = 'from []';
 
     const { result } = renderHook(() => useEsqlIndex(typeErrorCausingQuery, 'esql'));
 

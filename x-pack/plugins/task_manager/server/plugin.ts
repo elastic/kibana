@@ -136,6 +136,7 @@ export class TaskManagerPlugin
       deploymentId: plugins.cloud?.deploymentId,
       isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
       isCloud: plugins.cloud?.isCloudEnabled ?? false,
+      isElasticStaffOwned: plugins.cloud?.isElasticStaffOwned ?? false,
       logger: this.logger,
     });
 

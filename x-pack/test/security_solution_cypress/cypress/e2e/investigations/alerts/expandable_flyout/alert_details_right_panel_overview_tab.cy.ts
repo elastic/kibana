@@ -42,6 +42,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_NO_DATA,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   navigateToCorrelationsDetails,
@@ -161,10 +162,8 @@ describe(
 
         cy.log('session view preview');
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER).should(
-          'contain.text',
-          'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.'
-        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER).should('exist');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_NO_DATA).should('exist');
 
         cy.log('analyzer graph preview');
 

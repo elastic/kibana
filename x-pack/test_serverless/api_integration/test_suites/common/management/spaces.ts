@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,6 +16,21 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+
+  async function createSpace(id: string) {
+    await supertestAdminWithApiKey
+      .post('/api/spaces/space')
+      .send({
+        id,
+        name: id,
+        disabledFeatures: [],
+      })
+      .expect(200);
+  }
+
+  async function deleteSpace(id: string) {
+    await supertestAdminWithApiKey.delete(`/api/spaces/space/${id}`).expect(204);
+  }
 
   describe('spaces', function () {
     before(async () => {
@@ -34,76 +50,212 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestAdminWithApiKey.destroy();
     });
 
-    describe('route access', () => {
-      describe('public (CRUD)', () => {
-        // Skipped due to change in QA environment for role management and spaces
-        // TODO: revisit once the change is rolled out to all environments
-        it.skip('#create', async () => {
-          const { body, status } = await supertestAdminWithApiKey.post('/api/spaces/space').send({
-            id: 'custom',
-            name: 'Custom',
-            disabledFeatures: [],
-          });
+    // The create and update test cases are unique to serverless because
+    // setting feature visibility is not possible in serverless
+    describe('CRUD', () => {
+      after(async () => {
+        // delete any lingering spaces
+        const { body } = await supertestAdminWithApiKey.get('/api/spaces/space').send().expect(200);
 
-          svlCommonApi.assertResponseStatusCode(400, status, body);
+        const toDelete = (body as Array<{ id: string }>).filter((f) => f.id !== 'default');
 
-          // Should fail due to maximum spaces limit, not because of lacking internal header
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting',
-          });
-        });
-
-        it('#get', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get('/api/spaces/space/default');
-          // expect success because we're using the internal header
-          expect(body).toEqual(expect.objectContaining({ id: 'default' }));
-          expect(status).toBe(200);
-        });
-
-        it('#getAll', async () => {
-          const { body, status } = await supertestAdminWithApiKey.get('/api/spaces/space');
-          // expect success because we're using the internal header
-          expect(body).toEqual(
-            expect.arrayContaining([
-              expect.objectContaining({
-                id: 'default',
-              }),
-            ])
-          );
-          expect(status).toBe(200);
-        });
-
-        it('#update', async () => {
-          const { body, status } = await supertestAdminWithApiKey
-            .put('/api/spaces/space/default')
-            .send({
-              id: 'default',
-              name: 'UPDATED!',
-              disabledFeatures: [],
-            });
-
-          svlCommonApi.assertResponseStatusCode(200, status, body);
-        });
-
-        it('#delete', async () => {
-          const { body, status } = await supertestAdminWithApiKey.delete(
-            '/api/spaces/space/default'
-          );
-
-          svlCommonApi.assertResponseStatusCode(400, status, body);
-
-          // 400 with specific reason - cannot delete the default space
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'The default space cannot be deleted because it is reserved.',
-          });
+        await asyncForEach(toDelete, async (space) => {
+          await deleteSpace(space.id);
         });
       });
 
+      describe('Create (POST /api/spaces/space)', () => {
+        it('should allow us to create a space', async () => {
+          await supertestAdminWithApiKey
+            .post('/api/spaces/space')
+            .send({
+              id: 'custom_space_1',
+              name: 'custom_space_1',
+              disabledFeatures: [],
+            })
+            .expect(200);
+        });
+
+        it('should not allow us to create a space with disabled features', async () => {
+          await supertestAdminWithApiKey
+            .post('/api/spaces/space')
+            .send({
+              id: 'custom_space_2',
+              name: 'custom_space_2',
+              disabledFeatures: ['discover'],
+            })
+            .expect(400);
+        });
+      });
+
+      describe('Read (GET /api/spaces/space)', () => {
+        before(async () => {
+          await createSpace('space_to_get_1');
+          await createSpace('space_to_get_2');
+          await createSpace('space_to_get_3');
+        });
+
+        after(async () => {
+          await deleteSpace('space_to_get_1');
+          await deleteSpace('space_to_get_2');
+          await deleteSpace('space_to_get_3');
+        });
+
+        it('should allow us to get a space', async () => {
+          await supertestAdminWithApiKey
+            .get('/api/spaces/space/space_to_get_1')
+            .send()
+            .expect(200, {
+              id: 'space_to_get_1',
+              name: 'space_to_get_1',
+              disabledFeatures: [],
+            });
+        });
+
+        it('should allow us to get all spaces', async () => {
+          const { body } = await supertestAdminWithApiKey
+            .get('/api/spaces/space')
+            .send()
+            .expect(200);
+
+          expect(body).toEqual(
+            expect.arrayContaining([
+              {
+                _reserved: true,
+                color: '#00bfb3',
+                description: 'This is your default space!',
+                disabledFeatures: [],
+                id: 'default',
+                name: 'Default',
+              },
+              { id: 'space_to_get_1', name: 'space_to_get_1', disabledFeatures: [] },
+              { id: 'space_to_get_2', name: 'space_to_get_2', disabledFeatures: [] },
+              { id: 'space_to_get_3', name: 'space_to_get_3', disabledFeatures: [] },
+            ])
+          );
+        });
+      });
+
+      describe('Update (PUT /api/spaces/space)', () => {
+        before(async () => {
+          await createSpace('space_to_update');
+        });
+
+        after(async () => {
+          await deleteSpace('space_to_update');
+        });
+
+        it('should allow us to update a space', async () => {
+          await supertestAdminWithApiKey
+            .put('/api/spaces/space/space_to_update')
+            .send({
+              id: 'space_to_update',
+              name: 'some new name',
+              initials: 'SN',
+              disabledFeatures: [],
+            })
+            .expect(200);
+
+          await supertestAdminWithApiKey
+            .get('/api/spaces/space/space_to_update')
+            .send()
+            .expect(200, {
+              id: 'space_to_update',
+              name: 'some new name',
+              initials: 'SN',
+              disabledFeatures: [],
+            });
+        });
+
+        it('should not allow us to update a space with disabled features', async () => {
+          await supertestAdminWithApiKey
+            .put('/api/spaces/space/space_to_update')
+            .send({
+              id: 'space_to_update',
+              name: 'some new name',
+              initials: 'SN',
+              disabledFeatures: ['discover'],
+            })
+            .expect(400);
+        });
+      });
+
+      describe('Delete (DELETE /api/spaces/space)', () => {
+        it('should allow us to delete a space', async () => {
+          await createSpace('space_to_delete');
+
+          await supertestAdminWithApiKey.delete(`/api/spaces/space/space_to_delete`).expect(204);
+        });
+      });
+
+      describe('Get active space (GET /internal/spaces/_active_space)', () => {
+        before(async () => {
+          await createSpace('foo-space');
+        });
+
+        after(async () => {
+          await deleteSpace('foo-space');
+        });
+
+        it('returns the default space', async () => {
+          const response = await supertestAdminWithCookieCredentials
+            .get('/internal/spaces/_active_space')
+            .set(samlAuth.getInternalRequestHeader())
+            .expect(200);
+
+          const { id, name, _reserved } = response.body;
+          expect({ id, name, _reserved }).toEqual({
+            id: 'default',
+            name: 'Default',
+            _reserved: true,
+          });
+        });
+
+        it('returns the default space when explicitly referenced', async () => {
+          const response = await supertestAdminWithCookieCredentials
+            .get('/s/default/internal/spaces/_active_space')
+            .set(samlAuth.getInternalRequestHeader())
+            .expect(200);
+
+          const { id, name, _reserved } = response.body;
+          expect({ id, name, _reserved }).toEqual({
+            id: 'default',
+            name: 'Default',
+            _reserved: true,
+          });
+        });
+
+        it('returns the foo space', async () => {
+          await supertestAdminWithCookieCredentials
+            .get('/s/foo-space/internal/spaces/_active_space')
+            .set(samlAuth.getInternalRequestHeader())
+            .expect(200, {
+              id: 'foo-space',
+              name: 'foo-space',
+              disabledFeatures: [],
+            });
+        });
+
+        it('returns 404 when the space is not found', async () => {
+          await supertestAdminWithCookieCredentials
+            .get('/s/not-found-space/internal/spaces/_active_space')
+            .set(samlAuth.getInternalRequestHeader())
+            .expect(404, {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [space/not-found-space] not found',
+            });
+        });
+      });
+    });
+
+    describe('route access', () => {
+      // The 'internal route access' tests check that the internal header
+      // is needed for these specific endpoints.
+      // When accessed without internal headers they will return 400.
+      // They could be moved to deployment agnostic testing if there is
+      // a way to specify which tests to run when stateful vs serverles,
+      // as internal vs disabled is different in serverless.
       describe('internal', () => {
         it('#getActiveSpace requires internal header', async () => {
           let body: any;
@@ -251,6 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
+      // Disabled in serverless, but public in stateful
       describe('disabled', () => {
         it('#disableLegacyUrlAliases', async () => {
           const { body, status } = await supertestAdminWithApiKey
@@ -262,26 +415,5 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
-
-    // TODO: Re-enable test-suite once users can create and update spaces in the Serverless offering.
-    // it('rejects request to update a space with disabledFeatures', async () => {
-    //   const { body, status } = await supertest
-    //     .put('/api/spaces/space/default')
-    //     .set(svlCommonApi.getInternalRequestHeader())
-    //     .send({
-    //       id: 'custom',
-    //       name: 'Custom',
-    //       disabledFeatures: ['some-feature'],
-    //     });
-    //
-    //   // in a non-serverless environment this would succeed with a 200
-    //   expect(body).toEqual({
-    //     statusCode: 400,
-    //     error: 'Bad Request',
-    //     message:
-    //       'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled',
-    //   });
-    //   expect(status).toBe(400);
-    // });
   });
 }

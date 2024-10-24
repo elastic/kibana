@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { randomInt } from 'crypto';
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
@@ -180,3 +178,12 @@ export const log = {
   create,
   createMinimal,
 };
+
+function randomInt(min: number, max: number) {
+  if (min > max) {
+    throw new Error('Min value must be less than or equal to max value.');
+  }
+
+  const random = Math.floor(Math.random() * (max - min + 1)) + min;
+  return random;
+}

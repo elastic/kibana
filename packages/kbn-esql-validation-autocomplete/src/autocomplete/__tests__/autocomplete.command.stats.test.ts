@@ -259,7 +259,6 @@ describe('autocomplete.suggest', () => {
           ...getFieldNamesByType('integer'),
           ...getFieldNamesByType('double'),
           ...getFieldNamesByType('long'),
-          '`avg(b)`',
           ...getFunctionSignaturesByReturnType('eval', ['integer', 'double', 'long'], {
             scalar: true,
           }),
@@ -284,10 +283,18 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '| ']);
+        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '| '], {
+          triggerCharacter: ' ',
+        });
 
         await assertSuggestions(
           'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
           [',', '| ', '+ $0', '- $0']
+        );
+        await assertSuggestions(
+          'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day) /',
+          [',', '| ', '+ $0', '- $0'],
+          { triggerCharacter: ' ' }
         );
       });
       test('on space within bucket()', async () => {
