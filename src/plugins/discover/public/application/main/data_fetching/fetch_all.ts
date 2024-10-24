@@ -13,6 +13,7 @@ import { BehaviorSubject, combineLatest, filter, firstValueFrom, switchMap } fro
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { CoreStart } from '@kbn/core/public';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -42,6 +43,7 @@ export interface FetchDeps {
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
+  core: CoreStart;
 }
 
 /**
@@ -106,6 +108,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
+          core: fetchDeps.core,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -152,6 +155,8 @@ export function fetchAll(
           isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
+
+        (window as unknown as { currentESQLData: unknown }).currentESQLData = records;
 
         dataSubjects.documents$.next({
           fetchStatus,

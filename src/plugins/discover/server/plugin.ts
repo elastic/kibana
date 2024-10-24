@@ -14,6 +14,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { PluginInitializerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -53,6 +54,156 @@ export class DiscoverServerPlugin
         new DiscoverAppLocatorDefinition({ useHash: false, setStateToKbnUrl })
       );
     }
+
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/api/add_runtime_field',
+        validate: {
+          body: schema.object({
+            indexPattern: schema.string(),
+            fieldName: schema.string(),
+            fieldType: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // expand index pattern into list of indices
+        const matchingIndices = await esClient.transport.request<Record<string, unknown>>({
+          method: 'GET',
+          path: `/${request.body.indexPattern}`,
+        });
+
+        const indices: string[] = Object.keys(matchingIndices);
+
+        await Promise.all(
+          indices.map(async (index) => {
+            await esClient.transport.request({
+              method: 'PUT',
+              path: `${index}/_mapping`,
+              body: {
+                runtime: {
+                  [request.body.fieldName]: {
+                    type: request.body.fieldType,
+                  },
+                },
+              },
+            });
+          })
+        );
+        return response.ok({
+          body: {
+            field: request.body.fieldName,
+            type: request.body.fieldType,
+          },
+        });
+      }
+    );
+
+    router.post(
+      {
+        path: '/api/remove_runtime_field',
+        validate: {
+          body: schema.object({
+            indexPattern: schema.string(),
+            fieldName: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // expand index pattern into list of indices
+        const matchingIndices = await esClient.transport.request<Record<string, unknown>>({
+          method: 'GET',
+          path: `/${request.body.indexPattern}`,
+        });
+
+        const indices: string[] = Object.keys(matchingIndices);
+
+        await Promise.all(
+          indices.map(async (index) => {
+            await esClient.transport.request({
+              method: 'PUT',
+              path: `${index}/_mapping`,
+              body: {
+                runtime: {
+                  [request.body.fieldName]: null,
+                },
+              },
+            });
+          })
+        );
+        return response.ok({
+          body: {
+            field: request.body.fieldName,
+          },
+        });
+      }
+    );
+    router.post(
+      {
+        path: '/api/value_field_suggest',
+        validate: {
+          body: schema.object({
+            indexPattern: schema.string(),
+            valuePrefix: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const r = await esClient.transport.request<{
+          hits: { hits: Array<{ _source: Record<string, unknown> }> };
+        }>({
+          method: 'GET',
+          path: `${request.body.indexPattern}/_search`,
+          body: {
+            size: 100,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: `${request.body.valuePrefix}*`,
+                    },
+                  },
+                ],
+              },
+            },
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+        const docs = r.hits.hits;
+
+        const matchingFieldValuePairs = new Map<string, Set<string>>();
+
+        for (const doc of docs) {
+          for (const [key, value] of Object.entries(doc._source)) {
+            const stringValue = String(value);
+            if (stringValue.startsWith(request.body.valuePrefix)) {
+              const values = matchingFieldValuePairs.get(key) ?? new Set<string>();
+              values.add(stringValue);
+              matchingFieldValuePairs.set(key, values);
+            }
+          }
+        }
+
+        // compile list of suggestions (<field>: "<value>")
+        const suggestions = [];
+        for (const [field, values] of matchingFieldValuePairs) {
+          for (const value of values) {
+            suggestions.push(`${field} == "${value}"`);
+          }
+        }
+
+        return response.ok({
+          body: {
+            suggestions,
+          },
+        });
+      }
+    );
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
 

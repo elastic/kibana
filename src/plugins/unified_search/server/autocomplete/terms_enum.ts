@@ -42,6 +42,7 @@ export async function termsEnumSuggestions(
   const body = {
     field: field?.name ?? fieldName,
     string: query,
+    size: 30,
     index_filter: {
       bool: {
         must: filters ?? [],
