@@ -16,7 +16,7 @@ import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/compo
 import { useRuleIndexPattern } from '../../../../../../../rule_creation_ui/pages/form';
 import { DataSourceType as DataSourceTypeSnakeCase } from '../../../../../../../../../common/api/detection_engine';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { useDefaultIndexPattern } from '../../../../use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../../../../../hooks/use_default_index_pattern';
 import { DataSourceType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';

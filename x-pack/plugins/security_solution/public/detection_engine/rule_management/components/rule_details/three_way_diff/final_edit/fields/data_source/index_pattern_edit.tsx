@@ -9,9 +9,8 @@ import React, { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/css';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useDefaultIndexPattern } from '../../../../../../hooks/use_default_index_pattern';
 import type { FieldHook } from '../../../../../../../../shared_imports';
-import { useUiSetting$ } from '../../../../../../../../common/lib/kibana';
-import { DEFAULT_INDEX_KEY } from '../../../../../../../../../common/constants';
 import { Field } from '../../../../../../../../shared_imports';
 import * as i18n from './translations';
 
@@ -20,7 +19,7 @@ interface IndexPatternFieldProps {
 }
 
 export function IndexPatternField({ field }: IndexPatternFieldProps): JSX.Element {
-  const [defaultIndexPattern] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const defaultIndexPattern = useDefaultIndexPattern();
   const isIndexModified = !isEqual(field.value, defaultIndexPattern);
 
   const handleResetIndices = useCallback(
