@@ -6409,6 +6409,7 @@
     },
     "/api/fleet/agent-status": {
       "get": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
         "parameters": [
           {
@@ -17478,6 +17479,7 @@
         ]
       },
       "put": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
         "parameters": [
           {
@@ -18223,6 +18225,7 @@
         "tags": []
       },
       "post": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#1",
         "parameters": [
           {
@@ -25047,6 +25050,7 @@
     },
     "/api/fleet/epm/packages/{pkgkey}": {
       "delete": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
         "parameters": [
           {
@@ -25104,6 +25108,7 @@
         "tags": []
       },
       "get": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
         "parameters": [
           {
@@ -25165,6 +25170,7 @@
         "tags": []
       },
       "post": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
         "parameters": [
           {
@@ -25248,6 +25254,7 @@
         "tags": []
       },
       "put": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
         "parameters": [
           {
@@ -40462,6 +40469,7 @@
     },
     "/api/fleet/service-tokens": {
       "post": {
+        "deprecated": true,
         "description": "Create a service token",
         "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
         "parameters": [
