@@ -9,20 +9,25 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
 import { CspClientPluginStartDeps } from '../types';
-import { encodeQueryUrl, queryFilters } from '../utils/query_utils';
-import { NavFilter } from './use_navigate_findings';
+import { NavFilter, encodeQueryUrl, queryFilters } from '../utils/query_utils';
 
 export const useGetNavigationUrlParams = () => {
   const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
 
-  return useCallback(
-    (filterParams: NavFilter = {}, groupBy?: string[]) => {
+  const getNavUrlParams = useCallback(
+    (
+      filterParams: NavFilter = {},
+      findingsType?: 'configurations' | 'vulnerabilities',
+      groupBy?: string[]
+    ) => {
       const filters = queryFilters(filterParams);
 
-      const searchParams = new URLSearchParams(encodeQueryUrl(services, filters, groupBy));
+      const searchParams = new URLSearchParams(encodeQueryUrl(services.data, filters, groupBy));
 
-      return `?${searchParams.toString()}`;
+      return `${findingsType ? findingsType : ''}?${searchParams.toString()}`;
     },
     [services]
   );
+
+  return getNavUrlParams;
 };

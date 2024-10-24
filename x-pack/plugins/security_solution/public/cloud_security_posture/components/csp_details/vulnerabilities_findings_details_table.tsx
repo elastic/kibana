@@ -97,10 +97,10 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
     }
   };
 
-  const navUrlParams = useGetNavigationUrlParams();
+  const getNavUrlParams = useGetNavigationUrlParams();
 
   const getVulnerabilityUrl = (name: string, queryField: 'host.name' | 'user.name') => {
-    return navUrlParams({ [queryField]: name });
+    return getNavUrlParams({ [queryField]: name }, 'vulnerabilities');
   };
 
   const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
@@ -109,12 +109,15 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
     vulnerabilityPackageName: string,
     vulnerabilityPackageVersion: string
   ) => {
-    return navUrlParams({
-      'vulnerability.id': vulnerabilityId,
-      'resource.id': resourceId,
-      'vulnerability.package.name': vulnerabilityPackageName,
-      'vulnerability.package.version': vulnerabilityPackageVersion,
-    });
+    return getNavUrlParams(
+      {
+        'vulnerability.id': vulnerabilityId,
+        'resource.id': resourceId,
+        'vulnerability.package.name': vulnerabilityPackageName,
+        'vulnerability.package.version': vulnerabilityPackageVersion,
+      },
+      'vulnerabilities'
+    );
   };
 
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
@@ -128,7 +131,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       ) => (
         <SecuritySolutionLinkAnchor
           deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          path={`vulnerabilities${getVulnerabilityUrlFilteredByVulnerabilityAndResourceId(
+          path={`${getVulnerabilityUrlFilteredByVulnerabilityAndResourceId(
             vulnerability?.id,
             finding?.resource?.id || '',
             vulnerability?.package?.name,
@@ -201,7 +204,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       <EuiPanel hasShadow={false}>
         <SecuritySolutionLinkAnchor
           deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          path={`vulnerabilities${getVulnerabilityUrl(queryName, 'host.name')}`}
+          path={`${getVulnerabilityUrl(queryName, 'host.name')}`}
           target={'_blank'}
           external={false}
           onClick={() => {

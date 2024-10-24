@@ -116,14 +116,14 @@ export const MisconfigurationFindingsDetailsTable = memo(
       }
     };
 
-    const navUrlParams = useGetNavigationUrlParams();
+    const getNavUrlParams = useGetNavigationUrlParams();
 
     const getFindingsPageUrlFilteredByRuleAndResourceId = (ruleId: string, resourceId: string) => {
-      return navUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId });
+      return getNavUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId }, 'configurations');
     };
 
     const getFindingsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
-      return navUrlParams({ [queryField]: name }, ['rule.name']);
+      return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
@@ -134,7 +134,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`configurations${getFindingsPageUrlFilteredByRuleAndResourceId(
+            path={`${getFindingsPageUrlFilteredByRuleAndResourceId(
               rule?.id,
               finding?.resource?.id
             )}`}
@@ -180,7 +180,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`configurations${getFindingsPageUrl(queryName, fieldName)}`}
+            path={`${getFindingsPageUrl(queryName, fieldName)}`}
             target={'_blank'}
             external={false}
             onClick={() => {
