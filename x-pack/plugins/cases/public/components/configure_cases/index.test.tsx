@@ -712,11 +712,7 @@ describe('ConfigureCases', () => {
             fields: null,
           },
           closureType: 'close-by-user',
-          customFields: [
-            { ...customFieldsConfigurationMock[1] },
-            { ...customFieldsConfigurationMock[2] },
-            { ...customFieldsConfigurationMock[3] },
-          ],
+          customFields: customFieldsConfigurationMock.slice(1),
           templates: [],
           id: '',
           version: '',
@@ -771,11 +767,7 @@ describe('ConfigureCases', () => {
             fields: null,
           },
           closureType: 'close-by-user',
-          customFields: [
-            { ...customFieldsConfigurationMock[1] },
-            { ...customFieldsConfigurationMock[2] },
-            { ...customFieldsConfigurationMock[3] },
-          ],
+          customFields: customFieldsConfigurationMock.slice(1),
           templates: [
             {
               key: 'test_template_4',
@@ -848,26 +840,15 @@ describe('ConfigureCases', () => {
               name: 'Fourth test template',
               caseFields: {
                 customFields: [
-                  {
-                    key: customFieldsConfigurationMock[0].key,
-                    type: customFieldsConfigurationMock[0].type,
-                    value: customFieldsConfigurationMock[0].defaultValue,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[1].key,
-                    type: customFieldsConfigurationMock[1].type,
-                    value: customFieldsConfigurationMock[1].defaultValue,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[2].key,
-                    type: customFieldsConfigurationMock[2].type,
-                    value: null,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[3].key,
-                    type: customFieldsConfigurationMock[3].type,
-                    value: false,
-                  },
+                  ...customFieldsConfigurationMock.map(({ key, type, defaultValue, required }) => ({
+                    key,
+                    type,
+                    value: required
+                      ? defaultValue
+                      : type === CustomFieldTypes.TOGGLE
+                      ? false
+                      : null,
+                  })),
                   {
                     key: expect.anything(),
                     type: CustomFieldTypes.TEXT as const,
@@ -928,9 +909,7 @@ describe('ConfigureCases', () => {
               required: !customFieldsConfigurationMock[0].required,
               defaultValue: customFieldsConfigurationMock[0].defaultValue,
             },
-            { ...customFieldsConfigurationMock[1] },
-            { ...customFieldsConfigurationMock[2] },
-            { ...customFieldsConfigurationMock[3] },
+            ...customFieldsConfigurationMock.slice(1),
           ],
           templates: [],
           id: '',
@@ -1087,28 +1066,17 @@ describe('ConfigureCases', () => {
                 settings: {
                   syncAlerts: true,
                 },
-                customFields: [
-                  {
-                    key: customFieldsConfigurationMock[0].key,
-                    type: customFieldsConfigurationMock[0].type,
-                    value: customFieldsConfigurationMock[0].defaultValue,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[1].key,
-                    type: customFieldsConfigurationMock[1].type,
-                    value: customFieldsConfigurationMock[1].defaultValue,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[2].key,
-                    type: customFieldsConfigurationMock[2].type,
-                    value: null,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[3].key,
-                    type: customFieldsConfigurationMock[3].type,
-                    value: false, // when no default value for toggle, we set it to false
-                  },
-                ],
+                customFields: customFieldsConfigurationMock.map(
+                  ({ key, type, defaultValue, required }) => ({
+                    key,
+                    type,
+                    value: required
+                      ? defaultValue
+                      : type === CustomFieldTypes.TOGGLE
+                      ? false
+                      : null,
+                  })
+                ),
               },
             },
           ],

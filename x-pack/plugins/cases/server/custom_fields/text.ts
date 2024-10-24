@@ -7,12 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { isString } from 'lodash';
+import type { FilteringValues } from './types';
 
 export const getCasesTextCustomField = () => ({
   isFilterable: false,
   isSortable: false,
   savedObjectMappingType: 'string',
-  validateFilteringValues: (values: Array<string | number | boolean | null>) => {
+  validateFilteringValues: (values: FilteringValues) => {
     values.forEach((value) => {
       if (value !== null && !isString(value)) {
         throw Boom.badRequest(`Unsupported filtering value for custom field of type text.`);

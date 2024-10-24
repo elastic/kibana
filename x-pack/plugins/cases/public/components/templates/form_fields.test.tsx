@@ -336,6 +336,7 @@ describe('form fields', () => {
             test_key_1: 'My text test value 1',
             test_key_2: false,
             test_key_4: false,
+            test_key_5: 'option_1',
           },
           syncAlerts: true,
           templateTags: [],

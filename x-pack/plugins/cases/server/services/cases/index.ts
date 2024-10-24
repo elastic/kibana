@@ -597,6 +597,8 @@ export class CasesService {
       transformedAttributes.attributes.total_alerts = -1;
       transformedAttributes.attributes.total_comments = -1;
 
+      console.log('transformedAttributes', JSON.stringify(transformedAttributes, null, 4));
+
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
@@ -604,7 +606,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(createdCase);
+      console.log('RES', JSON.stringify(res, null, 4));
       const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      console.log('DECODDED RES', decodedRes);
 
       return { ...res, attributes: decodedRes };
     } catch (error) {

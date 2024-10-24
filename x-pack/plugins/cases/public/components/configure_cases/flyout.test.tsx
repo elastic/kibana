@@ -397,7 +397,7 @@ describe('CommonFlyout ', () => {
             label: 'First custom field',
             required: true,
           },
-        ],
+        ] as CustomFieldConfiguration[],
       };
 
       appMockRender = createAppMockRenderer({ license });
@@ -597,21 +597,13 @@ describe('CommonFlyout ', () => {
                 type: 'text',
                 value: 'this is a sample text!',
               },
-              {
-                key: 'test_key_2',
-                type: 'toggle',
-                value: true,
-              },
-              {
-                key: 'test_key_3',
-                type: 'text',
-                value: null,
-              },
-              {
-                key: 'test_key_4',
-                type: 'toggle',
-                value: false,
-              },
+              ...customFieldsConfigurationMock
+                .slice(1)
+                .map(({ key, type, defaultValue, required }) => ({
+                  key,
+                  type,
+                  value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
+                })),
             ],
           },
         });
@@ -691,7 +683,7 @@ describe('CommonFlyout ', () => {
             label: 'First custom field',
             required: true,
           },
-        ],
+        ] as CustomFieldConfiguration[],
         connector: {
           id: 'servicenow-1',
           name: 'My SN connector',
