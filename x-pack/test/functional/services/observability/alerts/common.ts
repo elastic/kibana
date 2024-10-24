@@ -139,7 +139,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('alertsStateTableEmptyState');
+    return await testSubjects.existOrFail('alertsTableEmptyState');
   };
 
   // Query Bar

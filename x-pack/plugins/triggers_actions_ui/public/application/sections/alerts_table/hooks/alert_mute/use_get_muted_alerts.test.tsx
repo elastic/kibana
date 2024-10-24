@@ -6,50 +6,47 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import * as api from '../apis/get_rules_muted_alerts';
+import * as api from '../apis/get_rules_with_muted_alerts';
 import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
-import { useGetMutedAlerts } from './use_get_muted_alerts';
+import { useGetMutedAlertsQuery } from './use_get_muted_alerts';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
-jest.mock('../apis/get_rules_muted_alerts');
+jest.mock('../apis/get_rules_with_muted_alerts');
 jest.mock('../../../../../common/lib/kibana');
 
 const ruleIds = ['a', 'b'];
 
 describe('useGetMutedAlerts', () => {
-  const addErrorMock = useKibana().services.notifications.toasts.addError as jest.Mock;
+  const addErrorMock = jest.mocked(useKibana().services.notifications.toasts.addError);
 
-  let appMockRender: AppMockRenderer;
+  const appMockRender: AppMockRenderer = createAppMockRenderer({
+    queryClientContext: AlertsQueryContext,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsQueryContext);
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const muteAlertInstanceSpy = jest.spyOn(api, 'getMutedAlerts');
+    const muteAlertInstanceSpy = jest.spyOn(api, 'getRulesWithMutedAlerts');
 
-    const { waitForNextUpdate } = renderHook(() => useGetMutedAlerts(ruleIds), {
+    const { waitForNextUpdate } = renderHook(() => useGetMutedAlertsQuery({ ruleIds }), {
       wrapper: appMockRender.AppWrapper,
     });
 
     await waitForNextUpdate();
 
     await waitFor(() => {
-      expect(muteAlertInstanceSpy).toHaveBeenCalledWith(
-        expect.anything(),
-        { ids: ruleIds },
-        expect.any(AbortSignal)
-      );
+      expect(muteAlertInstanceSpy).toHaveBeenCalledWith(expect.objectContaining({ ids: ruleIds }));
     });
   });
 
-  it('does not call the api if the fetchCases is false', async () => {
-    const spy = jest.spyOn(api, 'getMutedAlerts');
+  it('does not call the api if the enabled option is false', async () => {
+    const spy = jest.spyOn(api, 'getRulesWithMutedAlerts');
 
-    renderHook(() => useGetMutedAlerts(ruleIds, false), {
+    renderHook(() => useGetMutedAlertsQuery({ ruleIds }, { enabled: false }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -57,9 +54,9 @@ describe('useGetMutedAlerts', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest.spyOn(api, 'getMutedAlerts').mockRejectedValue(new Error('An error'));
+    const spy = jest.spyOn(api, 'getRulesWithMutedAlerts').mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(() => useGetMutedAlerts(ruleIds), {
+    const { waitForNextUpdate } = renderHook(() => useGetMutedAlertsQuery({ ruleIds }), {
       wrapper: appMockRender.AppWrapper,
     });
 

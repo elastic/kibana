@@ -6091,6 +6091,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-query-utils@link:packages/kbn-react-query-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/recently-accessed@link:packages/kbn-recently-accessed":
   version "0.0.0"
   uid ""

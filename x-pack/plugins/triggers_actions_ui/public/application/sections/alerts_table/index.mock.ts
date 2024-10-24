@@ -28,7 +28,7 @@ const helpersMock: jest.Mocked<CasesService['helpers']> = {
   groupAlertsByRule: jest.fn(),
 };
 
-export const createCasesServiceMock = (): CasesService => ({
+export const createCasesServiceMock = () => ({
   ui: uiMock,
   hooks: hooksMock,
   helpers: helpersMock,

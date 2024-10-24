@@ -20,27 +20,22 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { ObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { parseAlert } from '../helpers/parse_alert';
-import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
-import type { ConfigSchema } from '../../../plugin';
+import { observabilityFeatureId } from '../../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
-export interface ObservabilityAlertActionsProps extends AlertActionsProps {
-  config: ConfigSchema;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}
-
-export function AlertActions({
+// eslint-disable-next-line react/function-component-definition
+export const AlertActions: ObservabilityAlertsTableProp<'renderActionsCell'> = ({
   config,
   observabilityRuleTypeRegistry,
   ...customActionsProps
-}: ObservabilityAlertActionsProps) {
+}) => {
   const { alert, refresh, id } = customActionsProps;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
@@ -252,4 +247,4 @@ export function AlertActions({
       </EuiFlexItem>
     </>
   );
-}
+};

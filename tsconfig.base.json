@@ -1398,6 +1398,8 @@
       "@kbn/react-kibana-context-theme/*": ["packages/react/kibana_context/theme/*"],
       "@kbn/react-kibana-mount": ["packages/react/kibana_mount"],
       "@kbn/react-kibana-mount/*": ["packages/react/kibana_mount/*"],
+      "@kbn/react-query-utils": ["packages/kbn-react-query-utils"],
+      "@kbn/react-query-utils/*": ["packages/kbn-react-query-utils/*"],
       "@kbn/recently-accessed": ["packages/kbn-recently-accessed"],
       "@kbn/recently-accessed/*": ["packages/kbn-recently-accessed/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],

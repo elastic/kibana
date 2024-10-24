@@ -87,3 +87,9 @@ export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
     icon: 'beaker',
   },
 };
+
+export const CELL_ACTIONS_POPOVER_TEST_ID = 'euiDataGridExpansionPopover';
+export const CELL_ACTIONS_EXPAND_TEST_ID = 'euiDataGridCellExpandButton';
+export const FIELD_BROWSER_TEST_ID = 'fields-browser-container';
+export const FIELD_BROWSER_BTN_TEST_ID = 'show-field-browser';
+export const FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID = 'field-browser-custom-create-btn';

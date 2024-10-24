@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { QueryClientProviderProps, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ServerError } from '../types';
 import { useLicense } from '../../../hooks/use_license';
@@ -36,15 +37,17 @@ const transformMaintenanceWindows = (
   return maintenanceWindowsMap;
 };
 
-interface UseBulkGetMaintenanceWindowsProps {
+interface UseBulkGetMaintenanceWindowsQueryParams {
   ids: string[];
-  canFetchMaintenanceWindows?: boolean;
-  queryContext?: QueryClientProviderProps['context'];
 }
 
-export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindowsProps) => {
-  const { ids, canFetchMaintenanceWindows = false, queryContext } = props;
-
+export const useBulkGetMaintenanceWindowsQuery = (
+  { ids }: UseBulkGetMaintenanceWindowsQueryParams,
+  {
+    enabled,
+    context,
+  }: Pick<QueryOptionsOverrides<typeof bulkGetMaintenanceWindows>, 'enabled' | 'context'> = {}
+) => {
   const {
     http,
     notifications: { toasts },
@@ -58,27 +61,22 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
   const { isAtLeastPlatinum } = useLicense();
   const hasLicense = isAtLeastPlatinum();
 
-  const queryFn = () => {
-    return bulkGetMaintenanceWindows({ http, ids });
-  };
-
-  const onError = (error: ServerError) => {
-    toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-      title: ERROR_TITLE,
-    });
-  };
-
-  const { data, isFetching } = useQuery({
+  return useQuery({
     queryKey: triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(ids),
-    enabled: hasLicense && show && ids.length > 0 && canFetchMaintenanceWindows,
+    queryFn: () => bulkGetMaintenanceWindows({ http, ids }),
     select: transformMaintenanceWindows,
-    queryFn,
-    onError,
-    context: queryContext,
+    onError: (error) => {
+      const serverError = error as ServerError;
+      toasts.addError(
+        serverError.body && serverError.body.message
+          ? new Error(serverError.body.message)
+          : serverError,
+        {
+          title: ERROR_TITLE,
+        }
+      );
+    },
+    enabled: hasLicense && show && ids.length > 0 && enabled !== false,
+    context,
   });
-
-  return {
-    data,
-    isFetching,
-  };
 };
