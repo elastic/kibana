@@ -31,15 +31,15 @@ export type EntityFields = Fields &
     'source_data_stream.type': string | string[];
     'source_data_stream.dataset': string | string[];
     'event.ingested': string;
-    sourceIndex: string;
-    'entity.lastSeenTimestamp': string;
-    'entity.schemaVersion': string;
-    'entity.definitionVersion': string;
-    'entity.displayName': string;
-    'entity.identityFields': string | string[];
+    source_index: string;
+    'entity.last_seen_timestamp': string;
+    'entity.schema_version': string;
+    'entity.definition_version': string;
+    'entity.display_name': string;
+    'entity.identity_fields': string | string[];
     'entity.id': string;
     'entity.type': string;
-    'entity.definitionId': string;
+    'entity.definition_id': string;
     [key: string]: any;
   }>;
 

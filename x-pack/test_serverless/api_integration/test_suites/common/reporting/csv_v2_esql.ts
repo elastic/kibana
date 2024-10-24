@@ -9,20 +9,20 @@ import expect from '@kbn/expect';
 import request from 'supertest';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const reportingAPI = getService('svlReportingApi');
   const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  let roleAuthc: RoleCredentials;
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   // Helper function
@@ -38,7 +38,12 @@ export default ({ getService }: FtrProviderContext) => {
     };
     log.info(`sending request for query: ${JSON.stringify(job.locatorParams[0].params.query)}`);
 
-    return await reportingAPI.createReportJobInternal('csv_v2', job, roleAuthc, internalReqHeader);
+    return await reportingAPI.createReportJobInternal(
+      'csv_v2',
+      job,
+      cookieCredentials,
+      internalReqHeader
+    );
   };
 
   describe('CSV Generation from ES|QL', () => {
@@ -84,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       before(async () => {
         await loadTimelessData();
-        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+        cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
         internalReqHeader = svlCommonApi.getInternalRequestHeader();
       });
 
@@ -112,8 +117,8 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           }));
-          await reportingAPI.waitForJobToFinish(path, roleAuthc, internalReqHeader);
-          response = await supertest.get(path);
+          await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
+          response = await supertestWithoutAuth.get(path).set(cookieCredentials);
           csvFile = response.text;
         });
 
@@ -184,8 +189,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               title: 'Untitled discover search',
             }));
-            await reportingAPI.waitForJobToFinish(path, roleAuthc, internalReqHeader);
-            response = await supertest.get(path);
+            await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
+            response = await supertestWithoutAuth.get(path).set(cookieCredentials);
             csvFile = response.text;
           });
 
