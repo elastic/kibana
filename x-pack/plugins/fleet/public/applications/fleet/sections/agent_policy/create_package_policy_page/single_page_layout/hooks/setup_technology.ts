@@ -23,6 +23,7 @@ import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
+  isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
@@ -92,9 +93,13 @@ export function useSetupTechnology({
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
-  const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
-    SetupTechnology.AGENT_BASED
-  );
+  const getDefaultSetupTechnology = useCallback(() => {
+    return isOnlyAgentlessIntegration(packageInfo)
+      ? SetupTechnology.AGENTLESS
+      : SetupTechnology.AGENT_BASED;
+  }, [packageInfo]);
+  const [selectedSetupTechnology, setSelectedSetupTechnology] =
+    useState<SetupTechnology>(getDefaultSetupTechnology);
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(() => {
     const agentless = generateNewAgentPolicyWithDefaults({
       inactivity_timeout: 3600,
@@ -148,6 +153,13 @@ export function useSetupTechnology({
       fetchAgentlessPolicy();
     }
   }, [isDefaultAgentlessPolicyEnabled]);
+
+  useEffect(() => {
+    if (isEditPage) {
+      return;
+    }
+    setSelectedSetupTechnology(getDefaultSetupTechnology());
+  }, [packageInfo, getDefaultSetupTechnology, isEditPage]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology) => {
