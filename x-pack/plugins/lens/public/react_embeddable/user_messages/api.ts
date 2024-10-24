@@ -112,6 +112,7 @@ export function buildUserMessagesHelpers(
   updateMessages: (messages: UserMessage[]) => void;
   resetMessages: () => void;
   updateBlockingErrors: (blockingMessages: UserMessage[] | Error) => void;
+  updateValidationErrors: (messages: UserMessage[]) => void;
 } {
   let runtimeUserMessages: Record<string, UserMessage> = {};
   const addUserMessages = (messages: UserMessage[]) => {
@@ -142,6 +143,7 @@ export function buildUserMessagesHelpers(
       activeData,
     } = getUpdatedState(getVisualizationContext, visualizationMap, datasourceMap);
     const userMessages: UserMessage[] = [];
+
     userMessages.push(
       ...getApplicationUserMessages({
         visualizationType: doc?.visualizationType,
@@ -240,6 +242,14 @@ export function buildUserMessagesHelpers(
         internalApi.updateMessages(messages);
       }
     },
+    updateValidationErrors: (messages: UserMessage[]) => {
+      addLog(
+        `Validation error: ${
+          messages.length ? messages.map(({ uniqueId }) => uniqueId).join(', ') : 'No errors'
+        }`
+      );
+      internalApi.updateValidationMessages(messages);
+    },
     /**
      * This type of errors are those who need to be rendered in the embeddable native error panel
      * like runtime errors.
@@ -260,9 +270,6 @@ export function buildUserMessagesHelpers(
         addLog(`Blocking error: ${error?.message}`);
       }
 
-      if (Array.isArray(blockingMessages)) {
-        internalApi.updateBlockingMessages(blockingMessages);
-      }
       if (error?.message !== api.blockingError.getValue()?.message) {
         const finalError = error?.message === '' ? undefined : error;
         (api.blockingError as BehaviorSubject<Error | undefined>).next(finalError);
