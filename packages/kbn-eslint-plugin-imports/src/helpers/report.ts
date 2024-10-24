@@ -30,3 +30,19 @@ export function report(context: Rule.RuleContext, options: ReportOptions) {
       : null,
   });
 }
+
+export const toList = (strings: string[]) => {
+  const items = strings.map((s) => `"${s}"`);
+  const list = items.slice(0, -1).join(', ');
+  const last = items.at(-1);
+  return !list.length ? last ?? '' : `${list} or ${last}`;
+};
+
+export const formatSuggestions = (suggestions: string[]) => {
+  const s = suggestions.map((l) => l.trim()).filter(Boolean);
+  if (!s.length) {
+    return '';
+  }
+
+  return ` \nSuggestions:\n - ${s.join('\n - ')}\n\n`;
+};
