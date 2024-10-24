@@ -28,6 +28,7 @@ export function registerActionAuditLogRoutes(
       access: 'public',
       path: ENDPOINT_ACTION_LOG_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
+      deprecated: true,
     })
     .addVersion(
       {

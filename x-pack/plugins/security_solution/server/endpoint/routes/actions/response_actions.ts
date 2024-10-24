@@ -81,6 +81,7 @@ export function registerResponseActionRoutes(
       access: 'public',
       path: ISOLATE_HOST_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
+      deprecated: true,
     })
     .addVersion(
       {
@@ -100,6 +101,7 @@ export function registerResponseActionRoutes(
       access: 'public',
       path: UNISOLATE_HOST_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
+      deprecated: true,
     })
     .addVersion(
       {
