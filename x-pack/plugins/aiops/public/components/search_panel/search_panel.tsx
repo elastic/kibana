@@ -9,13 +9,13 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Query, Filter } from '@kbn/es-query';
+import { type Query, type Filter, buildEsQuery } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
   searchString: Query['query'];
   searchQuery: Query['query'];
@@ -66,11 +66,11 @@ export const SearchPanel: FC<Props> = ({ searchString, searchQueryLanguage, setS
         queryManager.filterManager.setFilters(mergedFilters);
       }
 
-      const combinedQuery = createMergedEsQuery(
+      const combinedQuery = buildEsQuery(
+        dataView,
         mergedQuery,
         queryManager.filterManager.getFilters() ?? [],
-        dataView,
-        uiSettings
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
 
       setSearchParams({

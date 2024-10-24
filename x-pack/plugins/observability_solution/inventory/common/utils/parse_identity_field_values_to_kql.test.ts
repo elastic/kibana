@@ -26,7 +26,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   it('should return the value when identityFields is a single string', () => {
     const entity: ServiceEntity = {
       'agent.name': 'node',
-      'entity.identityFields': 'service.name',
+      'entity.identity_fields': 'service.name',
       'service.name': 'my-service',
       'entity.type': 'service',
       ...commonEntityFields,
@@ -39,7 +39,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   it('should return values when identityFields is an array of strings', () => {
     const entity: ServiceEntity = {
       'agent.name': 'node',
-      'entity.identityFields': ['service.name', 'service.environment'],
+      'entity.identity_fields': ['service.name', 'service.environment'],
       'service.name': 'my-service',
       'entity.type': 'service',
       'service.environment': 'staging',
@@ -53,7 +53,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   it('should return an empty string if identityFields is empty string', () => {
     const entity: ServiceEntity = {
       'agent.name': 'node',
-      'entity.identityFields': '',
+      'entity.identity_fields': '',
       'service.name': 'my-service',
       'entity.type': 'service',
       ...commonEntityFields,
@@ -65,7 +65,7 @@ describe('parseIdentityFieldValuesToKql', () => {
   it('should return an empty array if identityFields is empty array', () => {
     const entity: ServiceEntity = {
       'agent.name': 'node',
-      'entity.identityFields': [],
+      'entity.identity_fields': [],
       'service.name': 'my-service',
       'entity.type': 'service',
       ...commonEntityFields,
@@ -77,7 +77,7 @@ describe('parseIdentityFieldValuesToKql', () => {
 
   it('should ignore fields that are not present in the entity', () => {
     const entity: HostEntity = {
-      'entity.identityFields': ['host.name', 'foo.bar'],
+      'entity.identity_fields': ['host.name', 'foo.bar'],
       'host.name': 'my-host',
       'entity.type': 'host',
       'cloud.provider': null,
