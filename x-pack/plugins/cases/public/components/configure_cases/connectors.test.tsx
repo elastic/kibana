@@ -28,6 +28,7 @@ const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked
   typeof useApplicationCapabilities
 >;
 jest.mock('../../common/lib/kibana');
+
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   let appMockRender: AppMockRenderer;
@@ -168,16 +169,14 @@ describe('Connectors', () => {
   });
 
   it('shows the actions permission message if the user does not have read access to actions', async () => {
-    appMockRender.coreStart.application.capabilities = {
-      ...appMockRender.coreStart.application.capabilities,
-      actions: { save: false, show: false },
-    };
+    useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
-    const result = appMockRender.render(<Connectors {...props} />);
+    appMockRender.render(<Connectors {...props} />);
+
     expect(
-      result.getByTestId('configure-case-connector-permissions-error-msg')
+      await screen.findByTestId('configure-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
-    expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+    expect(screen.queryByTestId('case-connectors-dropdown')).not.toBeInTheDocument();
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
@@ -192,6 +191,7 @@ describe('Connectors', () => {
 
   it('it should hide the "Add Connector" button when the user lacks the capability to add a new connector', async () => {
     useApplicationCapabilitiesMock().actions = { crud: false, read: true };
+
     appMockRender.render(<Connectors {...props} />);
 
     expect(screen.queryByTestId('add-new-connector')).not.toBeInTheDocument();

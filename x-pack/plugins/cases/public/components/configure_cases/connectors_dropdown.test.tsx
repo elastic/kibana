@@ -15,13 +15,6 @@ import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
-import userEvent from '@testing-library/user-event';
-import { useApplicationCapabilities } from '../../common/lib/kibana';
-
-const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
-  typeof useApplicationCapabilities
->;
-jest.mock('../../common/lib/kibana');
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;

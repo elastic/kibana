@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 
 import type { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
-import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 
 export interface Props {
