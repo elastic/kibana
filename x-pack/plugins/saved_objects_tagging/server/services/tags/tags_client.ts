@@ -11,8 +11,8 @@ import type {
   ITagsClient,
   Tag,
   TagAttributes,
-} from '@kbn/saved-objects-tagging-oss-plugin/common';
-import type { TagSavedObject } from '../../../common/types';
+  TagSavedObject,
+} from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagValidationError } from './errors';
 import { validateTag } from './validate_tag';

@@ -8,8 +8,7 @@
 import { validateTagMock } from './tags_client.test.mocks';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
-import type { TagSavedObject } from '../../../common/types';
+import type { TagAttributes, TagSavedObject } from '../../../common/types';
 import type { TagValidation } from '../../../common/validation';
 import { TagsClient } from './tags_client';
 import { TagValidationError } from './errors';

@@ -16,3 +16,13 @@ export type TagWithRelations = Tag & {
    */
   relationCount: number;
 };
+
+// re-export types from oss definition
+export type {
+  Tag,
+  CreateTagOptions,
+  TagAttributes,
+  TagWithOptionalId,
+  GetAllTagsOptions,
+  ITagsClient,
+} from '@kbn/saved-objects-tagging-oss-plugin/common';

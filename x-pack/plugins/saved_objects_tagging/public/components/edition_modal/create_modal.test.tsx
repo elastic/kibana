@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CreateTagModal } from './create_modal';
 import type { IToasts, NotificationsStart } from '@kbn/core-notifications-browser';
-import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import type { ITagsClient, Tag } from '../../../common/types';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils';
