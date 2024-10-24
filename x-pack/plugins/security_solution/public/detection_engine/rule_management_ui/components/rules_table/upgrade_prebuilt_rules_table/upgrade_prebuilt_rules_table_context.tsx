@@ -118,6 +118,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
     filter: '',
     tags: [],
+    ruleSource: [],
   });
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();

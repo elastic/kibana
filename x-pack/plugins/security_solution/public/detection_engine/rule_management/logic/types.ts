@@ -99,6 +99,7 @@ export interface FilterOptions {
   excludeRuleTypes?: Type[];
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
+  ruleSource?: RuleSourceTypesEnum[]; // undefined is to display all the rules
 }
 
 export interface FetchRulesResponse {
@@ -201,4 +202,9 @@ export interface FindRulesReferencedByExceptionsListProp {
 export interface FindRulesReferencedByExceptionsProps {
   lists: FindRulesReferencedByExceptionsListProp[];
   signal?: AbortSignal;
+}
+
+export enum RuleSourceTypesEnum {
+  MODIFIED = 'MODIFIED',
+  UNMODIFIED = 'UNMODIFIED',
 }
