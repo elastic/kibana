@@ -15,6 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 interface IndexHeaderProps {
   indexPattern: DataView;
   defaultIndex?: string;
+  dataViewName?: string;
   setDefault?: () => void;
   editIndexPatternClick?: () => void;
   deleteIndexPatternClick?: () => void;
