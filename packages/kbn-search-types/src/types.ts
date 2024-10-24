@@ -114,6 +114,11 @@ export interface ISearchOptions {
    * To pass an abort signal, use {@link ISearchOptions.abortSignal}
    */
   transport?: Omit<TransportRequestOptions, 'signal'>;
+
+  /**
+   * When set es results are streamed back to the caller without any parsing of the content.
+   */
+  stream?: boolean;
 }
 
 /**
@@ -130,4 +135,5 @@ export type ISearchOptionsSerializable = Pick<
   | 'isRestore'
   | 'retrieveResults'
   | 'executionContext'
+  | 'stream'
 >;
