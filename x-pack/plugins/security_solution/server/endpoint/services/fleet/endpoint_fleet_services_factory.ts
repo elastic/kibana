@@ -261,10 +261,10 @@ const fetchEndpointPolicyNamespace = async ({
   }
 
   for (const integrationPolicyId of integrationPolicies) {
-    response.integrationPolicy[integrationPolicyId] = retrievedIntegrationPolicies[
-      integrationPolicyId
-    ].namespace
-      ? [retrievedIntegrationPolicies[integrationPolicyId].namespace]
+    const integrationPolicyNamespace = retrievedIntegrationPolicies[integrationPolicyId].namespace;
+
+    response.integrationPolicy[integrationPolicyId] = integrationPolicyNamespace
+      ? [integrationPolicyNamespace]
       : retrievedIntegrationPolicies[integrationPolicyId].policy_ids.map((agentPolicyId) => {
           return retrievedAgentPolicies[agentPolicyId].namespace;
         });

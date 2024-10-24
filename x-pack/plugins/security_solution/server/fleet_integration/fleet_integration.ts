@@ -326,7 +326,7 @@ export const getPackagePolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    });
+    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
     return packagePolicy;
   };
@@ -349,7 +349,7 @@ export const getPackagePolicyPostCreateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    });
+    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 
@@ -434,7 +434,7 @@ export const getAgentPolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [endpointPolicy.id],
-    });
+    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
     return agentPolicy;
   };

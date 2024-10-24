@@ -97,7 +97,8 @@ jest.mock('./handlers/create_policy_datastreams', () => {
   };
 });
 
-const createPolicyDataStreamsIfNeededMock = _createPolicyDataStreamsIfNeeded as jest.Mock;
+const createPolicyDataStreamsIfNeededMock =
+  _createPolicyDataStreamsIfNeeded as unknown as jest.Mock;
 
 describe('Fleet integrations', () => {
   let endpointAppContextStartContract: EndpointAppContextServiceStartContract;
