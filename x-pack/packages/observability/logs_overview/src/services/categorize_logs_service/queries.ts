@@ -116,7 +116,7 @@ export const createCategorizationRequestParams = ({
               // @ts-expect-error the official types don't support inline char filters
               {
                 type: 'pattern_replace',
-                pattern: '\b[0-9a-fA-F]+\b',
+                pattern: '\\b(?:[0-9]+[a-zA-Z]+|[a-zA-Z]+[0-9]+)[0-9a-fA-F]+\\b',
                 replacement: '',
               },
             ],
