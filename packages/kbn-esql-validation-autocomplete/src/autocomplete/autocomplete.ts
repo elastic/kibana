@@ -112,7 +112,7 @@ import {
 } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
-import { countBracketsUnclosed } from '../shared/helpers';
+import { countUnclosedParens } from '../shared/helpers';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
@@ -165,6 +165,11 @@ export async function suggest(
   const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
+
+  if (astContext.type === 'comment') {
+    return [];
+  }
+
   // build the correct query to fetch the list of fields
   const queryForFields = getQueryForFields(
     buildQueryUntilPreviousCommand(ast, correctedQuery),
@@ -1850,7 +1855,7 @@ async function getOptionArgsSuggestions(
         );
         // Checks if cursor is still within function ()
         // by checking if the marker editor/cursor is within an unclosed parenthesis
-        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
+        const canHaveAssignment = countUnclosedParens(innerText) === 0;
 
         if (option.name === 'by') {
           // Add quick snippet for for stats ... by bucket(<>)
