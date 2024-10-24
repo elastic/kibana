@@ -18,7 +18,7 @@ import {
   ArrayItem,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor, DragAndDropTextList } from '../field_components';
+import { DragAndDropTextList, UnexpandedJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
@@ -149,7 +149,7 @@ export const Grok: FunctionComponent = () => {
       </UseArray>
 
       <UseField
-        component={XJsonEditor}
+        component={UnexpandedJsonEditor}
         config={fieldsConfig.pattern_definitions}
         componentProps={{
           editorProps: {
