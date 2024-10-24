@@ -232,31 +232,11 @@ export const createCaseSavedObjectType = (
       observables: {
         type: 'nested',
         properties: {
-          id: {
-            type: 'keyword',
-          },
           typeKey: {
             type: 'keyword',
           },
           value: {
             type: 'keyword',
-          },
-          description: {
-            type: 'text',
-          },
-          isIoc: {
-            type: 'boolean',
-          },
-          hasBeenSighted: {
-            type: 'boolean',
-          },
-          createdAt: {
-            type: 'date',
-            ignore_malformed: true,
-          },
-          updatedAt: {
-            type: 'date',
-            ignore_malformed: true,
           },
         },
       },
