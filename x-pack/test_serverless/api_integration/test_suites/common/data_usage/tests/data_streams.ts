@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { DataStreamsResponseBodySchemaBody } from '@kbn/data-usage-plugin/common/rest_types';
+import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '@kbn/data-usage-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const API_PATH = '/internal/api/data_usage/data_streams';
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
-  describe(`GET ${API_PATH}`, function () {
+  describe(`GET ${DATA_USAGE_DATA_STREAMS_API_ROUTE}`, function () {
     // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is on by default
     this.tags(['skipMKI']);
     before(async () => {
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns created data streams', async () => {
       const res = await supertestAdminWithCookieCredentials
-        .get(API_PATH)
+        .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .set('elastic-api-version', '1');
       const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
       const foundStream = dataStreams.find((stream) => stream.name === testDataStreamName);
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     it('returns system indices', async () => {
       const res = await supertestAdminWithCookieCredentials
-        .get(API_PATH)
+        .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .set('elastic-api-version', '1');
       const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
       const systemDataStreams = dataStreams.filter((stream) => stream.name.startsWith('.'));

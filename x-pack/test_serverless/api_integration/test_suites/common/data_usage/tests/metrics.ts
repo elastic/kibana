@@ -10,10 +10,10 @@ import http from 'http';
 
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
+import { DATA_USAGE_METRICS_API_ROUTE } from '@kbn/data-usage-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from '../mock_api';
 
-const API_PATH = '/internal/api/data_usage/metrics';
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => {
       mockApiServer.close();
     });
-    describe(`POST ${API_PATH}`, () => {
+    describe(`POST ${DATA_USAGE_METRICS_API_ROUTE}`, () => {
       const testDataStreamName = 'test-data-stream';
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
           dataStreams: ['invalid-data-stream'],
         };
         const res = await supertestAdminWithCookieCredentials
-          .post(API_PATH)
+          .post(DATA_USAGE_METRICS_API_ROUTE)
           .set('elastic-api-version', '1')
           .send(requestBody);
         expect(res.statusCode).to.be(500);
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
           dataStreams: [testDataStreamName],
         };
         const res = await supertestAdminWithCookieCredentials
-          .post(API_PATH)
+          .post(DATA_USAGE_METRICS_API_ROUTE)
           .set('elastic-api-version', '1')
           .send(requestBody);
         expect(res.statusCode).to.be(200);
