@@ -1229,6 +1229,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
+/x-pack/test_serverless/api_integration/test_suites/security/fleet @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
@@ -1294,6 +1295,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
 # Machine Learning
+/x-pack/test_serverless/functional/test_suites/security/ml @elastic/ml-ui
 /x-pack/test/api_integration/apis/file_upload @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
@@ -1442,6 +1444,10 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
+/x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/security/cypress @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
@@ -1572,6 +1578,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution
+/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution
@@ -1583,13 +1590,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
-/x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/security-solution
-
-/x-pack/test_serverless/functional/test_suites/security/cypress @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 /x-pack/test/functional/es_archives/cases/signals/duplicate_ids @elastic/response-ops
 
