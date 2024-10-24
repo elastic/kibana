@@ -186,7 +186,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
-    getByIDs: jest.fn(),
+    getByIDs: jest.fn(async () => {}),
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
@@ -223,14 +223,15 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  * Create mock AgentPolicyService
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
+  const fakeHandler = async () => {};
   return {
-    get: jest.fn(),
-    list: jest.fn(),
-    getFullAgentPolicy: jest.fn(),
-    getByIds: jest.fn(),
-    turnOffAgentTamperProtections: jest.fn(),
-    fetchAllAgentPolicies: jest.fn(),
-    fetchAllAgentPolicyIds: jest.fn(),
+    get: jest.fn(fakeHandler),
+    list: jest.fn(fakeHandler),
+    getFullAgentPolicy: jest.fn(fakeHandler),
+    getByIds: jest.fn(fakeHandler),
+    turnOffAgentTamperProtections: jest.fn(fakeHandler),
+    fetchAllAgentPolicies: jest.fn(fakeHandler),
+    fetchAllAgentPolicyIds: jest.fn(fakeHandler),
   };
 };
 
