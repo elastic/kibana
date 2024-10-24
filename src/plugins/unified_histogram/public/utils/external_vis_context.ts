@@ -103,6 +103,37 @@ export const isSuggestionShapeAndVisContextCompatible = (
   );
 };
 
+export const assingQueryToLensLayers = (
+  visAttributes: UnifiedHistogramVisContext['attributes'],
+  query: AggregateQuery
+) => {
+  const datasourceId: 'formBased' | 'textBased' | undefined = [
+    'formBased' as const,
+    'textBased' as const,
+  ].find((key) => Boolean(visAttributes.state.datasourceStates[key]));
+
+  // if the datasource is formBased, we should not fix the query
+  if (!datasourceId || datasourceId === 'formBased') {
+    return visAttributes;
+  }
+  const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
+
+  Object.values(datasourceState.layers).forEach((layer) => {
+    layer.query = query;
+  });
+
+  return {
+    ...visAttributes,
+    state: {
+      ...visAttributes.state,
+      datasourceStates: {
+        ...visAttributes.state.datasourceStates,
+        [datasourceId]: datasourceState,
+      },
+    },
+  };
+};
+
 export function deriveLensSuggestionFromLensAttributes({
   externalVisContext,
   queryParams,
