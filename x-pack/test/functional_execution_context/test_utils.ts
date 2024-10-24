@@ -47,7 +47,6 @@ export function assertLogContains({
   description: string;
 }) {
   if (!logs.some(predicate)) {
-    console.log(logs.map((log) => JSON.stringify(log, null, 2)).join('\n'));
     throw new Error(`Unable to find log entries: ${description}`);
   }
 }
