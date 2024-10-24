@@ -7,12 +7,14 @@
 
 import expect from '@kbn/expect';
 import { REPORT_TABLE_ID } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'reporting', 'settings', 'console']);
   const log = getService('log');
   const retry = getService('retry');
+  const reporting = getService('reporting');
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -116,6 +118,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         expect(actualRequest).to.contain('POST /_search');
+      });
+    });
+
+    describe('job visibility', () => {
+      let reportJobTestUser: ReportApiJSON;
+      let reportJobElasticUser: ReportApiJSON;
+
+      const getJobParams = (title: string) => ({
+        title,
+        browserTimezone: 'UTC',
+        objectType: 'search',
+        version: '7.15.0',
+        searchSource: {
+          version: true,
+          query: { query: '', language: 'kuery' },
+          index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+          fields: ['*'],
+          filter: [],
+        },
+      });
+
+      before(async () => {
+        await reporting.initLogs();
+
+        const [resultTestUser, resultElasticUser] = await Promise.all([
+          reporting.generateCsv(getJobParams('csv-report-from-test-user'), 'test_user', 'changeme'),
+          reporting.generateCsv(getJobParams('csv-report-from-elastic-user'), 'elastic', 'changeme'),
+        ]); // prettier-ignore
+
+        reportJobTestUser = resultTestUser.body.job;
+        reportJobElasticUser = resultElasticUser.body.job;
+      });
+
+      after(async () => {
+        await reporting.teardownLogs();
+      });
+
+      it('user can only see jobs they have created', async () => {
+        await testSubjects.existOrFail(`viewReportingLink-${reportJobTestUser.id}`);
+        await testSubjects.missingOrFail(`viewReportingLink-${reportJobElasticUser.id}`);
       });
     });
   });
