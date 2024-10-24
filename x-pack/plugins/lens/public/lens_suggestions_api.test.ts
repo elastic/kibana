@@ -265,6 +265,9 @@ describe('suggestionsApi', () => {
     datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
       generateSuggestion(),
     ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
     const context = {
       dataViewSpec: {
         id: 'index1',

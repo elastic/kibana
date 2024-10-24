@@ -67,11 +67,33 @@ export const suggestionsApi = ({
     dataViews,
   });
   if (!suggestions.length) return [];
+  const activeVisualization = suggestions[0];
+  if (
+    activeVisualization.incomplete ||
+    excludedVisualizations?.includes(activeVisualization.visualizationId)
+  ) {
+    return [];
+  }
+  // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
+  const newSuggestions = getSuggestions({
+    datasourceMap,
+    datasourceStates: {
+      textBased: {
+        isLoading: false,
+        state: activeVisualization.datasourceState,
+      },
+    },
+    visualizationMap,
+    activeVisualization: visualizationMap[activeVisualization.visualizationId],
+    visualizationState: activeVisualization.visualizationState,
+    dataViews,
+  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
+
   // check if there is an XY chart suggested
   // if user has requested for a line or area, we want to sligthly change the state
   // to return line / area instead of a bar chart
   const chartType = preferredChartType?.toLowerCase();
-  const XYSuggestion = suggestions.find((sug) => sug.visualizationId === 'lnsXY');
+  const XYSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
   // a type can be area, line, area_stacked, area_percentage etc
   const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
   if (XYSuggestion && chartType && isAreaOrLine) {
@@ -95,27 +117,7 @@ export const suggestionsApi = ({
       return [suggestionFromModel];
     }
   }
-  const activeVisualization = suggestions[0];
-  if (
-    activeVisualization.incomplete ||
-    excludedVisualizations?.includes(activeVisualization.visualizationId)
-  ) {
-    return [];
-  }
-  // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
-  const newSuggestions = getSuggestions({
-    datasourceMap,
-    datasourceStates: {
-      textBased: {
-        isLoading: false,
-        state: activeVisualization.datasourceState,
-      },
-    },
-    visualizationMap,
-    activeVisualization: visualizationMap[activeVisualization.visualizationId],
-    visualizationState: activeVisualization.visualizationState,
-    dataViews,
-  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
+
   const suggestionsList = [activeVisualization, ...newSuggestions];
 
   // if there is no preference from the user, send everything
