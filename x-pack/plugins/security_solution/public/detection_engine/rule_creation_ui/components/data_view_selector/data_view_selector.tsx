@@ -13,8 +13,9 @@ import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useDataViews } from './use_data_views';
 import * as i18n from './translations';
+import { isDataViewIdValid } from '../../validators/data_view_id_validator_factory';
 
-type DataViewId = string | null | undefined;
+type DataViewId = string;
 
 export interface DataViewSelectorProps {
   field: FieldHook<DefineStepRule['dataViewId']>;
@@ -22,7 +23,7 @@ export interface DataViewSelectorProps {
 
 export const DataViewSelector = ({ field }: DataViewSelectorProps) => {
   const kibanaDataViews = useDataViews();
-  const dataViewId: DataViewId = field?.value;
+  const dataViewId: DataViewId | null | undefined = field?.value;
   const fieldAndError = field ? getFieldValidityAndErrorMessage(field) : undefined;
   const isInvalid = fieldAndError?.isInvalid;
   const errorMessage = fieldAndError?.errorMessage;
@@ -129,7 +130,3 @@ export const DataViewSelector = ({ field }: DataViewSelectorProps) => {
     </>
   );
 };
-
-function isDataViewIdValid(dataViewId: DataViewId): dataViewId is string {
-  return typeof dataViewId === 'string' && dataViewId !== '';
-}

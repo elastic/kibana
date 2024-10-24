@@ -8,9 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import { indexPatternValidatorFactory } from '../../../../../../../rule_creation_ui/validators/index_pattern_validator_factory';
+import { dataViewIdValidatorFactory } from '../../../../../../../rule_creation_ui/validators/data_view_id_validator_factory';
 import type { ValidationFunc, ERROR_CODE } from '../../../../../../../../shared_imports';
 import {
-  fieldValidators,
   type FormData,
   type FormSchema,
   FIELD_TYPES,
@@ -70,14 +71,7 @@ const dataSourceSchema = {
             return;
           }
 
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.indexPatterns.requiredError',
-              {
-                defaultMessage: 'A minimum of one index pattern is required.',
-              }
-            )
-          )(...args);
+          return indexPatternValidatorFactory()(...args);
         },
       },
     ],
@@ -91,26 +85,14 @@ const dataSourceSchema = {
     ),
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData, path, value }] = args;
+        validator: (...args: Parameters<ValidationFunc>) => {
+          const [{ formData }] = args;
 
           if (formData.type !== DataSourceType.data_view) {
             return;
           }
 
-          return value == null || value === ''
-            ? {
-                path,
-                message: i18n.translate(
-                  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.dataView.requiredError',
-                  {
-                    defaultMessage: 'Please select an available Data View.',
-                  }
-                ),
-              }
-            : undefined;
+          return dataViewIdValidatorFactory()(...args);
         },
       },
     ],
