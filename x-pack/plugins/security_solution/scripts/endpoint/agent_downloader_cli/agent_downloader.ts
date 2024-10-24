@@ -45,7 +45,7 @@ const downloadAndStoreElasticAgent = async (
 ): Promise<void> => {
   const versionsToDownload = getVersionsToDownload(version);
 
-  // Although we have a list of versions to try downloading, we only need to download one, and will return as soon as it succeeds.
+  // Download all the versions in the list
   for (const versionToDownload of versionsToDownload) {
     try {
       const { url } = await getAgentDownloadUrl(versionToDownload, closestMatch, log);
@@ -53,13 +53,10 @@ const downloadAndStoreElasticAgent = async (
 
       await downloadAndStoreAgent(url, fileName);
       log.info(`Successfully downloaded and stored version ${versionToDownload}`);
-      return; // Exit once successful
     } catch (error) {
       log.error(`Failed to download or store version ${versionToDownload}: ${error.message}`);
     }
   }
-
-  log.error(`Failed to download agent for any available version: ${versionsToDownload.join(', ')}`);
 };
 
 export const agentDownloaderRunner: RunFn = async (cliContext) => {

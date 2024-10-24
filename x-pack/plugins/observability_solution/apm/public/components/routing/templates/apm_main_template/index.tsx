@@ -176,7 +176,7 @@ export function ApmMainTemplate({
             <EuiFlexGroup direction="column">
               {showEntitiesInventoryCallout ? (
                 <EntitiesInventoryCallout
-                  onDissmiss={() => {
+                  onDismiss={() => {
                     setdismissedEntitiesInventoryCallout(true);
                   }}
                 />

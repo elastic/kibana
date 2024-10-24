@@ -10,8 +10,8 @@ import path from 'path';
 import { load as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import type { YamlRoleDefinitions } from '@kbn/test-suites-serverless/shared/lib';
-import { setupUserDataLoader } from '@kbn/test-suites-serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 import { samlAuthentication } from '@kbn/security-solution-plugin/public/management/cypress/support/saml_authentication';
+import { setupUserDataLoader } from './support/setup_data_loader_tasks';
 import { getFailedSpecVideos } from './support/filter_videos';
 
 const ROLES_YAML_FILE_PATH = path.join(

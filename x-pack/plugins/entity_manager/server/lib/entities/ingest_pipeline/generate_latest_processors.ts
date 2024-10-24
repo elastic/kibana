@@ -117,25 +117,25 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     },
     {
       set: {
-        field: 'entity.definitionId',
+        field: 'entity.definition_id',
         value: definition.id,
       },
     },
     {
       set: {
-        field: 'entity.definitionVersion',
+        field: 'entity.definition_version',
         value: definition.version,
       },
     },
     {
       set: {
-        field: 'entity.schemaVersion',
+        field: 'entity.schema_version',
         value: ENTITY_SCHEMA_VERSION_V1,
       },
     },
     {
       set: {
-        field: 'entity.identityFields',
+        field: 'entity.identity_fields',
         value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
@@ -173,7 +173,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     // This must happen AFTER we lift the identity fields into the root of the document
     {
       set: {
-        field: 'entity.displayName',
+        field: 'entity.display_name',
         value: definition.displayNameTemplate,
       },
     },

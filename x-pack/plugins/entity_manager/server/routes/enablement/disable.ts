@@ -67,12 +67,13 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 
+      logger.info('Disabling managed entity discovery');
       await uninstallBuiltInEntityDefinitions({
         entityClient,
         deleteData: params.query.deleteData,
       });
 
-      server.logger.debug('reading entity discovery API key from saved object');
+      logger.debug('reading entity discovery API key from saved object');
       const apiKey = await readEntityDiscoveryAPIKey(server);
       // api key could be deleted outside of the apis, it does not affect the
       // disablement flow
@@ -82,6 +83,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
           ids: [apiKey.id],
         });
       }
+      logger.info('Managed entity discovery is disabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {

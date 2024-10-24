@@ -18,11 +18,6 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi
 	@node scripts/merge_serverless_oas.js
 	@node scripts/merge_ess_oas.js
 
-.PHONY: api-docs-staging
-api-docs-staging: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
-	@node scripts/merge_serverless_oas_staging.js
-	@node scripts/merge_ess_oas_staging.js
-
 .PHONY: api-docs-stateful
 api-docs-stateful: ## Generate only kibana.yaml
 	@node scripts/merge_ess_oas.js
@@ -30,9 +25,9 @@ api-docs-stateful: ## Generate only kibana.yaml
 .PHONY: api-docs-serverless
 api-docs-serverless: ## Generate only kibana.serverless.yaml
 	@node scripts/merge_serverless_oas.js
-	
+
 .PHONY: api-docs-lint
-api-docs-lint: ## Run spectral API docs linter 
+api-docs-lint: ## Run spectral API docs linter
 	@npx @stoplight/spectral-cli lint "output/*.yaml" --ruleset ".spectral.yaml"
 
 .PHONY: api-docs-lint-errs

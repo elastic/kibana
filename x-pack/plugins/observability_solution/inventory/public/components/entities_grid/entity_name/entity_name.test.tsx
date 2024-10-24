@@ -8,7 +8,7 @@
 import { type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import * as useKibana from '../../../hooks/use_kibana';
 import { EntityName } from '.';
-import { ContainerEntity, HostEntity, ServiceEntity } from '../../../../common/entities';
+import type { Entity } from '../../../../common/entities';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common/locators/infra/asset_details_locator';
@@ -40,14 +40,14 @@ describe('EntityName', () => {
   });
 
   it('returns host link', () => {
-    const entity: HostEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'host',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'host.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'host.name',
       'host.name': 'foo',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
     };
     render(<EntityName entity={entity} />);
@@ -58,14 +58,14 @@ describe('EntityName', () => {
   });
 
   it('returns container link', () => {
-    const entity: ContainerEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'container',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'container.id',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'container.id',
       'container.id': 'foo',
-      'entity.definitionId': 'container',
+      'entity.definition_id': 'container',
       'cloud.provider': null,
     };
     render(<EntityName entity={entity} />);
@@ -76,14 +76,14 @@ describe('EntityName', () => {
   });
 
   it('returns service link without environment', () => {
-    const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'service.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'service.name',
       'service.name': 'foo',
-      'entity.definitionId': 'service',
+      'entity.definition_id': 'service',
       'agent.name': 'bar',
     };
     render(<EntityName entity={entity} />);
@@ -94,14 +94,14 @@ describe('EntityName', () => {
   });
 
   it('returns service link with environment', () => {
-    const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'service.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'service.name',
       'service.name': 'foo',
-      'entity.definitionId': 'service',
+      'entity.definition_id': 'service',
       'agent.name': 'bar',
       'service.environment': 'baz',
     };
@@ -113,14 +113,14 @@ describe('EntityName', () => {
   });
 
   it('returns service link with first environment when it is an array', () => {
-    const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'service.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'service.name',
       'service.name': 'foo',
-      'entity.definitionId': 'service',
+      'entity.definition_id': 'service',
       'agent.name': 'bar',
       'service.environment': ['baz', 'bar', 'foo'],
     };
@@ -132,14 +132,14 @@ describe('EntityName', () => {
   });
 
   it('returns service link identity fields is an array', () => {
-    const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': ['service.name', 'service.environment'],
+      'entity.display_name': 'foo',
+      'entity.identity_fields': ['service.name', 'service.environment'],
       'service.name': 'foo',
-      'entity.definitionId': 'service',
+      'entity.definition_id': 'service',
       'agent.name': 'bar',
       'service.environment': 'baz',
     };

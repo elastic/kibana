@@ -62,7 +62,7 @@ function lastSeenTimestampTransform() {
       const timestamp = document['@timestamp'];
       if (timestamp) {
         const isoString = new Date(timestamp).toISOString();
-        document['entity.lastSeenTimestamp'] = isoString;
+        document['entity.last_seen_timestamp'] = isoString;
         document['event.ingested'] = isoString;
         delete document['@timestamp'];
       }

@@ -44,6 +44,14 @@ const seedValidator = {
       values: { minValue: SEED_MIN_VALUE },
     }),
   }),
+  int: fieldValidators.isInteger({
+    message: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.communityId.integerRequiredError',
+      {
+        defaultMessage: 'Only integers are allowed.',
+      }
+    ),
+  }),
 };
 
 const fieldsConfig: FieldsConfig = {
@@ -183,7 +191,7 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: (field) => {
           if (field.value) {
-            return seedValidator.max(field) ?? seedValidator.min(field);
+            return seedValidator.max(field) ?? seedValidator.min(field) ?? seedValidator.int(field);
           }
         },
       },

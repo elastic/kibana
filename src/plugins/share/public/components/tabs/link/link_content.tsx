@@ -138,6 +138,7 @@ export const LinkContent = ({
             <EuiSpacer size="m" />
             <EuiCallOut
               color="warning"
+              iconType="warning"
               title={
                 <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
               }

@@ -33,14 +33,14 @@ export async function invokeChatCompleteWithFunctionRequest({
   connectorId,
   observabilityAIAssistantAPIClient,
   functionCall,
-  scope,
+  scopes,
 }: {
   connectorId: string;
   observabilityAIAssistantAPIClient: Awaited<
     ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
   >;
   functionCall: Message['message']['function_call'];
-  scope?: AssistantScope;
+  scopes?: AssistantScope[];
 }) {
   const { body } = await observabilityAIAssistantAPIClient
     .editorUser({
@@ -60,7 +60,7 @@ export async function invokeChatCompleteWithFunctionRequest({
           connectorId,
           persist: false,
           screenContexts: [],
-          scope: scope || 'observability',
+          scopes: scopes || ['observability' as AssistantScope],
         },
       },
     })
