@@ -37,7 +37,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 // flaky test
-describe.skip('Storage Explorer', () => {
+describe('Storage Explorer', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
