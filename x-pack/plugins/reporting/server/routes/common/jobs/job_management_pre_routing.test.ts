@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
@@ -30,7 +30,11 @@ const mockCounters = {
   usageCounter: jest.fn(),
   errorCounter: jest.fn(),
 };
-const mockUser = { username: 'joeuser' };
+const mockUser = securityServiceMock.createMockAuthenticatedUser({
+  roles: ['superuser'],
+  profile_uid: 'tom-riddle',
+  username: 'Tom Riddle',
+});
 const options = { isInternal: false };
 
 beforeEach(async () => {
@@ -42,7 +46,7 @@ beforeEach(async () => {
     {
       securityService: {
         authc: {
-          getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+          getCurrentUser: () => mockUser,
         },
       },
     },

@@ -25,6 +25,7 @@ import type {
   ReportingRequestHandlerContext,
   ReportingUser,
 } from '../../../types';
+import { getUserTriple } from '../get_user';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -99,7 +100,7 @@ export class RequestHandler {
     const report = await store.addReport(
       new Report({
         jobtype: exportType.jobType,
-        created_by: user ? user.username : false,
+        created_by: user ? getUserTriple(user) : false,
         payload,
         migration_version: jobParams.version,
         meta: {

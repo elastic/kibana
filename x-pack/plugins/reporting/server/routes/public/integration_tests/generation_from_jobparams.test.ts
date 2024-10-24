@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
@@ -78,7 +78,12 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         },
         securityService: {
           authc: {
-            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+            getCurrentUser: () =>
+              securityServiceMock.createMockAuthenticatedUser({
+                roles: ['superuser'],
+                profile_uid: 'tom-riddle',
+                username: 'Tom Riddle',
+              }),
           },
         },
       },
@@ -211,7 +216,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         expect(body).toMatchObject({
           job: {
             attempts: 0,
-            created_by: 'Tom Riddle',
+            created_by: 'Tom Riddle:native:native1',
             id: 'foo',
             index: 'foo-index',
             jobtype: 'printable_pdf_v2',
@@ -252,7 +257,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         expect(body).toMatchObject({
           job: {
             attempts: 0,
-            created_by: 'Tom Riddle',
+            created_by: 'Tom Riddle:native:native1',
             id: 'foo',
             index: 'foo-index',
             jobtype: 'printable_pdf',

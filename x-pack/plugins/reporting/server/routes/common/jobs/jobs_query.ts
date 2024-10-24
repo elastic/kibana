@@ -17,9 +17,9 @@ import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fiel
 import type { ReportingUser } from '../../../types';
 import type { Payload } from './get_document_payload';
 import { getDocumentPayloadFactory } from './get_document_payload';
+import { getUsername, getUserTriple } from '../get_user';
 
 const defaultSize = 10;
-const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
 function getSearchBody(body: estypes.SearchRequest): estypes.SearchRequest {
   return {
@@ -75,6 +75,8 @@ export function jobsQueryFactory(
   return {
     async list(user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
+      const userTriple = getUserTriple(user);
+
       const body = getSearchBody({
         size,
         from: size * page,
@@ -82,10 +84,9 @@ export function jobsQueryFactory(
           constant_score: {
             filter: {
               bool: {
-                must: [
-                  { term: { created_by: username } },
-                  ...(jobIds ? [{ ids: { values: jobIds } }] : []),
-                ],
+                should: [{ term: { created_by: username } }, { term: { created_by: userTriple } }],
+                must: jobIds ? [{ ids: { values: jobIds } }] : [],
+                minimum_should_match: 1,
               },
             },
           },
@@ -111,12 +112,14 @@ export function jobsQueryFactory(
 
     async count(user) {
       const username = getUsername(user);
+      const userTriple = getUserTriple(user);
       const body = {
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ term: { created_by: username } }],
+                should: [{ term: { created_by: username } }, { term: { created_by: userTriple } }],
+                minimum_should_match: 1,
               },
             },
           },
@@ -138,13 +141,16 @@ export function jobsQueryFactory(
       }
 
       const username = getUsername(user);
+      const userTriple = getUserTriple(user);
 
       const body = getSearchBody({
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+                should: [{ term: { created_by: username } }, { term: { created_by: userTriple } }],
+                must: [{ term: { _id: id } }],
+                minimum_should_match: 1,
               },
             },
           },

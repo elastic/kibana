@@ -133,7 +133,7 @@ export interface ReportSource {
    * generate the report
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
-  created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
+  created_by: string | false; // uses the `username:realm-type:realm-name` triple format, or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
   meta: {
     // for telemetry
