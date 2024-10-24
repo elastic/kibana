@@ -19,7 +19,7 @@ Plugin developers must release a new version of their plugin for each new {kib} 
 
 The known plugins were tested for {kib} *5.x*, so we are unable to guarantee compatibility with your version of {kib}. The {kib} installer rejects any plugins that haven't been published for your specific version of {kib}. 
 
-[Important] Known plugins are developed outside of the Elastic company, hence we are unable to evaluate or maintain these plugins. In case of facing any issue with community plugins, it is unsuported by Elastic. Customers should create an issue directly to the repository owner.
+IMPORTANT: Known plugins are developed and maintained outside of Elastic. They are not supported by Elastic. If you encounter an issue with a community plugin, contact the plugin's owner.
 
 [float]
 === Apps
