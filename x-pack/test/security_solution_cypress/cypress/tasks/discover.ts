@@ -98,11 +98,11 @@ export const openAddDiscoverFilterPopover = () => {
 };
 
 export const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).type(fieldId);
+  cy.get(DISCOVER_FIELD_SEARCH).first().type(fieldId);
 };
 
 export const clearFieldSearch = () => {
-  cy.get(DISCOVER_FIELD_SEARCH).clear();
+  cy.get(DISCOVER_FIELD_SEARCH).first().clear();
 };
 
 export const addFieldToTable = (fieldId: string) => {

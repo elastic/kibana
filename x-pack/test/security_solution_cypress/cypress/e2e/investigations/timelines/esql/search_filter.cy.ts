@@ -57,14 +57,14 @@ describe(
     });
 
     it('should show data according to the esql query', () => {
-      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       cy.get(DISCOVER_RESULT_HITS).should('have.text', 1);
     });
 
     it('should be able to add fields to the table', () => {
-      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
@@ -87,6 +87,8 @@ describe(
     });
 
     it(`should change the timerange to ${DEFAULT_DATE} when back is pressed after modifying timerange to ${NEW_START_DATE} without saving`, () => {
+      // The datepicker is only active when a query exists.
+      addDiscoverEsqlQuery(esqlQuery);
       cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).click();
       cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
 
