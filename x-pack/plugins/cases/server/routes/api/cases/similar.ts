@@ -32,7 +32,7 @@ export const similarCaseRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to find cases in route: ${error}`,
+        message: `Failed to find similar cases in route for case with ID ${request.params.case_id}: ${error}`,
         error,
       });
     }
