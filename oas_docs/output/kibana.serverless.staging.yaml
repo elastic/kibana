@@ -1395,73 +1395,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -1609,11 +1550,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -1621,16 +1564,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -1641,6 +1587,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -1654,11 +1601,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -1666,6 +1615,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -2568,73 +2518,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -2782,11 +2673,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -2794,16 +2687,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -2814,6 +2710,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -2827,11 +2724,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -2839,6 +2738,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -3712,73 +3612,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -3926,11 +3767,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -3938,16 +3781,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -3958,6 +3804,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -3971,11 +3818,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -3983,6 +3832,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -4950,73 +4800,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -5164,11 +4955,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -5176,16 +4969,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -5196,6 +4992,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -5209,11 +5006,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -5221,6 +5020,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-

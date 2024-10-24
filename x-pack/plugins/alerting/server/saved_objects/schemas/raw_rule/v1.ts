@@ -7,14 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 
-const executionStatusWarningReason = schema.oneOf([
+export const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
   schema.literal('maxQueuedActions'),
   schema.literal('ruleExecution'),
 ]);
 
-const executionStatusErrorReason = schema.oneOf([
+export const executionStatusErrorReason = schema.oneOf([
   schema.literal('read'),
   schema.literal('decrypt'),
   schema.literal('execute'),
@@ -25,7 +25,7 @@ const executionStatusErrorReason = schema.oneOf([
   schema.literal('validate'),
 ]);
 
-const rawRuleExecutionStatusSchema = schema.object({
+export const rawRuleExecutionStatusSchema = schema.object({
   status: schema.oneOf([
     schema.literal('ok'),
     schema.literal('active'),
@@ -50,7 +50,7 @@ const rawRuleExecutionStatusSchema = schema.object({
   ),
 });
 
-const ISOWeekdaysSchema = schema.oneOf([
+export const ISOWeekdaysSchema = schema.oneOf([
   schema.literal(1),
   schema.literal(2),
   schema.literal(3),
@@ -60,7 +60,7 @@ const ISOWeekdaysSchema = schema.oneOf([
   schema.literal(7),
 ]);
 
-const rRuleSchema = schema.object({
+export const rRuleSchema = schema.object({
   dtstart: schema.string(),
   tzid: schema.string(),
   freq: schema.maybe(
@@ -99,13 +99,13 @@ const rRuleSchema = schema.object({
   bysecond: schema.maybe(schema.number()),
 });
 
-const outcome = schema.oneOf([
+export const outcome = schema.oneOf([
   schema.literal('succeeded'),
   schema.literal('warning'),
   schema.literal('failed'),
 ]);
 
-const rawRuleLastRunSchema = schema.object({
+export const rawRuleLastRunSchema = schema.object({
   outcome,
   outcomeOrder: schema.maybe(schema.number()),
   alertsCount: schema.object({
@@ -120,7 +120,7 @@ const rawRuleLastRunSchema = schema.object({
   ),
 });
 
-const rawRuleMonitoringSchema = schema.object({
+export const rawRuleMonitoringSchema = schema.object({
   run: schema.object({
     history: schema.arrayOf(
       schema.object({
@@ -150,7 +150,7 @@ const rawRuleMonitoringSchema = schema.object({
   }),
 });
 
-const rawRuleAlertsFilterSchema = schema.object({
+export const rawRuleAlertsFilterSchema = schema.object({
   query: schema.maybe(
     schema.object({
       kql: schema.string(),
@@ -194,7 +194,7 @@ const rawRuleAlertsFilterSchema = schema.object({
   ),
 });
 
-const rawRuleActionSchema = schema.object({
+export const rawRuleActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.maybe(schema.string()),
   actionRef: schema.string(),
