@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { usePageReady } from '@kbn/ebt-tools';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -404,7 +405,11 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
-  if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
+  const isPageLoading = isDataViewLoading || (isEmptyDataResult && isDataLoading);
+
+  usePageReady({ isReady: !isPageLoading });
+
+  if (isPageLoading) {
     return (
       <div className="dscDocuments__loading">
         <EuiText size="xs" color="subdued">
