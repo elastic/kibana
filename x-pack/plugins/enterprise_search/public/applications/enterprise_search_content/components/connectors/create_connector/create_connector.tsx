@@ -61,7 +61,7 @@ export const CreateConnector: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
 
-  const { selectedConnector, currentStep, isFormDirty } = useValues(NewConnectorLogic);
+  const { selectedConnector, currentStep } = useValues(NewConnectorLogic);
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
 
@@ -160,7 +160,7 @@ export const CreateConnector: React.FC = () => {
         defaultMessage: 'Leave the page',
       }
     ),
-    hasUnsavedChanges: isFormDirty,
+    hasUnsavedChanges: true,
     history,
     http,
     messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
