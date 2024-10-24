@@ -1,0 +1,19 @@
+diff --git a/node_modules/@testing-library/react-hooks/lib/pure.js b/node_modules/@testing-library/react-hooks/lib/pure.js
+index 05be2d5..54f9765 100644
+--- a/node_modules/@testing-library/react-hooks/lib/pure.js
++++ b/node_modules/@testing-library/react-hooks/lib/pure.js
+@@ -27,11 +27,11 @@ Object.keys(_react).forEach(function (key) {
+   });
+ });
+ const renderers = [{
+-  required: 'react-test-renderer',
+-  renderer: './native/pure'
+-}, {
+   required: 'react-dom',
+   renderer: './dom/pure'
++},{
++  required: 'react-test-renderer',
++  renderer: './native/pure'
+ }];
+ 
+ function hasDependency(name) {
