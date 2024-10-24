@@ -99,8 +99,12 @@ const NameColumn = ({
     <>
       <EuiText size={'s'}>{entry.name}</EuiText>
       {showMissingIndexWarning && (
-        <EuiToolTip content={i18n.MISSING_INDEX_TOOLTIP_CONTENT}>
+        <EuiToolTip
+          data-test-subj="missing-index-tooltip"
+          content={i18n.MISSING_INDEX_TOOLTIP_CONTENT}
+        >
           <EuiIcon
+            data-test-subj="missing-index-icon"
             type="warning"
             color="danger"
             css={css`
