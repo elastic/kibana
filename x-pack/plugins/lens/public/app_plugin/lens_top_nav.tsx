@@ -37,22 +37,24 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
-  showSaveAndReturn,
   showReplaceInDashboard,
   showReplaceInCanvas,
+  isDefaultSaveButtonEnabled,
+  actions,
 }: {
   contextFromEmbeddable: boolean | undefined;
-  showSaveAndReturn: boolean;
   showReplaceInDashboard: boolean;
   showReplaceInCanvas: boolean;
+  isDefaultSaveButtonEnabled?: boolean;
+  actions: LensTopNavActions;
 }) {
-  if (showSaveAndReturn) {
+  const disableSaveAndReturn = !actions.saveAndReturn.enabled;
+  if (actions.saveAndReturn.visible) {
     return {
       label: contextFromEmbeddable
         ? i18n.translate('xpack.lens.app.saveAndReplace', {
@@ -67,6 +69,8 @@ function getSaveButtonMeta({
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
+      disableButton: disableSaveAndReturn,
+      run: actions.saveAndReturn.execute,
     };
   }
 
@@ -82,6 +86,8 @@ function getSaveButtonMeta({
         defaultMessage:
           'Replace legacy visualization with lens visualization and return to the dashboard',
       }),
+      disableButton: disableSaveAndReturn,
+      run: actions.saveAndReturn.execute,
     };
   }
 
@@ -97,8 +103,23 @@ function getSaveButtonMeta({
         defaultMessage:
           'Replace legacy visualization with lens visualization and return to the canvas',
       }),
+      disableButton: disableSaveAndReturn,
+      run: actions.saveAndReturn.execute,
     };
   }
+  return {
+    label: i18n.translate('xpack.lens.app.save', {
+      defaultMessage: 'Save',
+    }),
+    iconType: 'save',
+    emphasize: true,
+    testId: 'lnsApp_saveButton',
+    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
+      defaultMessage: 'Save the current lens visualization',
+    }),
+    disableButton: !isDefaultSaveButtonEnabled,
+    run: actions.showSaveModal.execute,
+  };
 }
 
 function getLensTopNavConfig(options: {
@@ -123,24 +144,6 @@ function getLensTopNavConfig(options: {
     isByValueMode,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
-
-  const showSaveAndReturn = actions.saveAndReturn.visible;
-
-  const enableSaveButton =
-    savingToLibraryPermitted ||
-    (savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
-
-  const saveButtonLabel = isByValueMode
-    ? i18n.translate('xpack.lens.app.addToLibrary', {
-        defaultMessage: 'Save to library',
-      })
-    : actions.saveAndReturn.visible
-    ? i18n.translate('xpack.lens.app.saveAs', {
-        defaultMessage: 'Save as',
-      })
-    : i18n.translate('xpack.lens.app.save', {
-        defaultMessage: 'Save',
-      });
 
   if (contextOriginatingApp && !actions.cancel.visible) {
     topNavMenu.push({
@@ -229,34 +232,18 @@ function getLensTopNavConfig(options: {
     });
   }
 
-  topNavMenu.push({
-    label: saveButtonLabel,
-    iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
-      ? 'save'
-      : undefined,
-    emphasize: showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn,
-    run: actions.showSaveModal.execute,
-    testId: 'lnsApp_saveButton',
-    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
-      defaultMessage: 'Save the current lens visualization',
-    }),
-    disableButton: !enableSaveButton,
-  });
+  const isDefaultSaveButtonEnabled =
+    savingToLibraryPermitted || (savingToDashboardPermitted && !isByValueMode);
 
-  const saveButtonMeta = getSaveButtonMeta({
-    showSaveAndReturn,
-    showReplaceInDashboard,
-    showReplaceInCanvas,
-    contextFromEmbeddable,
-  });
-
-  if (saveButtonMeta) {
-    topNavMenu.push({
-      ...saveButtonMeta,
-      run: actions.saveAndReturn.execute,
-      disableButton: !actions.saveAndReturn.enabled,
-    });
-  }
+  topNavMenu.push(
+    getSaveButtonMeta({
+      showReplaceInDashboard,
+      showReplaceInCanvas,
+      contextFromEmbeddable,
+      isDefaultSaveButtonEnabled,
+      actions,
+    })
+  );
 
   return topNavMenu;
 }
@@ -291,7 +278,6 @@ export const LensTopNavMenu = ({
     navigation,
     uiSettings,
     application,
-    attributeService,
     share,
     dataViewFieldEditor,
     dataViewEditor,
@@ -529,11 +515,9 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
@@ -679,8 +663,7 @@ export const LensTopNavMenu = ({
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                  saveToLibrary: Boolean(initialInput?.savedObjectId),
                 }
               );
             }
@@ -790,7 +773,6 @@ export const LensTopNavMenu = ({
     defaultLensTitle,
     onAppLeave,
     runSave,
-    attributeService,
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,

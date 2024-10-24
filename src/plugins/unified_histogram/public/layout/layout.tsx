@@ -9,7 +9,6 @@
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -99,7 +98,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   hits?: UnifiedHistogramHitsContext;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -214,7 +213,7 @@ export const UnifiedHistogramLayout = ({
   request,
   hits,
   lensAdapters,
-  lensEmbeddableOutput$,
+  dataLoading$,
   chart: originalChart,
   breakdown,
   container,
@@ -372,7 +371,7 @@ export const UnifiedHistogramLayout = ({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           lensAdapters={lensAdapters}
-          lensEmbeddableOutput$={lensEmbeddableOutput$}
+          dataLoading$={dataLoading$}
           withDefaultActions={withDefaultActions}
           columns={columns}
         />

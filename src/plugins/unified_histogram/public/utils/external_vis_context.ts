@@ -42,7 +42,7 @@ export const exportVisContext = (
       ? {
           suggestionType: visContext.suggestionType,
           requestData: visContext.requestData,
-          attributes: removeTablesFromLensAttributes(visContext.attributes),
+          attributes: removeTablesFromLensAttributes(visContext.attributes).attributes,
         }
       : undefined;
 

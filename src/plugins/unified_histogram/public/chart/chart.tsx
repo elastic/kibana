@@ -8,7 +8,6 @@
  */
 
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -70,7 +69,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -105,7 +104,7 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensAdapters,
-  lensEmbeddableOutput$,
+  dataLoading$,
   isChartLoading,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -383,9 +382,7 @@ export function Chart({
       )}
       {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
         <LensSaveModalComponent
-          initialInput={
-            removeTablesFromLensAttributes(visContext.attributes) as unknown as LensEmbeddableInput
-          }
+          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
@@ -393,18 +390,16 @@ export function Chart({
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
         <ChartConfigPanel
-          {...{
-            services,
-            visContext,
-            lensAdapters,
-            lensEmbeddableOutput$,
-            isFlyoutVisible,
-            setIsFlyoutVisible,
-            isPlainRecord,
-            query,
-            currentSuggestionContext: lensVisServiceCurrentSuggestionContext,
-            onSuggestionContextEdit,
-          }}
+          services={services}
+          visContext={visContext}
+          lensAdapters={lensAdapters}
+          dataLoading$={dataLoading$}
+          isFlyoutVisible={isFlyoutVisible}
+          setIsFlyoutVisible={setIsFlyoutVisible}
+          isPlainRecord={isPlainRecord}
+          query={query}
+          currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
+          onSuggestionContextEdit={onSuggestionContextEdit}
         />
       )}
     </EuiFlexGroup>

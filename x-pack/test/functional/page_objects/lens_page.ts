@@ -2040,5 +2040,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
     },
+
+    async toggleDebug(enable: boolean = true) {
+      await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
+    },
   });
 }

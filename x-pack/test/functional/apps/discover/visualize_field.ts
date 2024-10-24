@@ -51,6 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
     beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -62,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'

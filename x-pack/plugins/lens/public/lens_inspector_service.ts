@@ -18,7 +18,7 @@ export const getLensInspectorService = (inspector: InspectorStartContract) => {
   const adapters: Adapters = createDefaultInspectorAdapters();
   let overlayRef: InspectorSession | undefined;
   return {
-    adapters,
+    getInspectorAdapters: () => adapters,
     inspect: (options?: InspectorOptions) => {
       overlayRef = inspector.open(adapters, options);
       overlayRef.onClose.then(() => {
@@ -28,7 +28,7 @@ export const getLensInspectorService = (inspector: InspectorStartContract) => {
       });
       return overlayRef;
     },
-    close: () => overlayRef?.close(),
+    closeInspector: async () => overlayRef?.close(),
   };
 };
 
