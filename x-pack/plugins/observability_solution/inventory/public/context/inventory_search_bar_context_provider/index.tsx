@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 interface InventorySearchBarContextType {
   searchBarContentSubject$: Subject<{
     kuery?: string;
-    entityTypes?: EntityType[];
+    entityTypes?: string[];
   }>;
   refreshSubject$: Subject<void>;
 }

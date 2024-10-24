@@ -20,7 +20,7 @@ const ENTITIES_COUNT_BADGE = i18n.translate(
 export interface InventoryGroupAccordionProps {
   group: EntityGroup;
   groupBy: string;
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
 export function InventoryGroupAccordion({

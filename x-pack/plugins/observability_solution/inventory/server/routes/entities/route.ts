@@ -115,7 +115,7 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     t.partial({
       query: t.partial({
         kuery: t.string,
-        entityTypes: jsonRt.pipe(t.array(entityTypeRt)),
+        entityTypes: jsonRt.pipe(t.array(t.string)),
       }),
     }),
   ]),

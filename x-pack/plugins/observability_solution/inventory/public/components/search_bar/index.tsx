@@ -83,7 +83,7 @@ export function SearchBar() {
   );
 
   const handleEntityTypesChange = useCallback(
-    (nextEntityTypes: EntityType[]) => {
+    (nextEntityTypes: string[]) => {
       searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes });
       registerEntityTypeFilteredEvent({ filterEntityTypes: nextEntityTypes, filterKuery: kuery });
     },
