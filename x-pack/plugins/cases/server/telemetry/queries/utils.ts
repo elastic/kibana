@@ -27,6 +27,7 @@ import type {
   FileAttachmentAggsResult,
   AttachmentFrameworkAggsResult,
   CustomFieldsTelemetry,
+  AlertBuckets,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -43,6 +44,27 @@ export const getCountsAggregationQuery = (savedObjectType: string) => ({
         { from: 'now-1w', to: 'now' },
         { from: 'now-1M', to: 'now' },
       ],
+    },
+  },
+});
+
+export const getAlertsCountsAggregationQuery = (savedObjectType: string) => ({
+  counts: {
+    date_range: {
+      field: `${savedObjectType}.attributes.created_at`,
+      format: 'dd/MM/YYYY',
+      ranges: [
+        { from: 'now-1d', to: 'now' },
+        { from: 'now-1w', to: 'now' },
+        { from: 'now-1M', to: 'now' },
+      ],
+    },
+    aggregations: {
+      topAlertsPerBucket: {
+        cardinality: {
+          field: `${savedObjectType}.attributes.alertId`,
+        },
+      },
     },
   },
 });
@@ -72,6 +94,55 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
           },
         },
       },
+    },
+  },
+});
+
+export const getAlertsMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => ({
+  references: {
+    nested: {
+      path: `${savedObjectType}.references`,
+    },
+    aggregations: {
+      cases: {
+        filter: {
+          term: {
+            [`${savedObjectType}.references.type`]: CASE_SAVED_OBJECT,
+          },
+        },
+        aggregations: {
+          ids: {
+            terms: {
+              field: `${savedObjectType}.references.id`,
+            },
+            aggregations: {
+              reverse: {
+                reverse_nested: {},
+                aggregations: {
+                  topAlerts: {
+                    cardinality: {
+                      field: `${savedObjectType}.attributes.alertId`,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          max: {
+            max_bucket: {
+              buckets_path: 'ids>reverse.topAlerts',
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+export const getUniqueAlertCommentsCountQuery = (savedObjectType: string) => ({
+  uniqueAlertCommentsCount: {
+    cardinality: {
+      field: `${savedObjectType}.attributes.alertId`,
     },
   },
 });
@@ -121,6 +192,54 @@ export const getCountsFromBuckets = (buckets: Buckets['buckets']) => ({
   monthly: buckets?.[0]?.doc_count ?? 0,
 });
 
+export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => ({
+  daily: buckets?.[2]?.topAlertsPerBucket?.value ?? 0,
+  weekly: buckets?.[1]?.topAlertsPerBucket?.value ?? 0,
+  monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
+});
+
+export const getCountsAndMaxAlertsData = async ({
+  savedObjectsClient,
+  savedObjectType,
+  filter,
+}: {
+  savedObjectsClient: TelemetrySavedObjectsClient;
+  savedObjectType: string;
+  filter?: KueryNode;
+}) => {
+  const res = await savedObjectsClient.find<
+    unknown,
+    {
+      counts: AlertBuckets;
+      references: MaxBucketOnCaseAggregation['references'];
+      uniqueAlertCommentsCount: { value: number };
+    }
+  >({
+    page: 0,
+    perPage: 0,
+    filter,
+    type: savedObjectType,
+    namespaces: ['*'],
+    aggs: {
+      ...getAlertsCountsAggregationQuery(savedObjectType),
+      ...getAlertsMaxBucketOnCaseAggregationQuery(savedObjectType),
+      ...getUniqueAlertCommentsCountQuery(savedObjectType),
+    },
+  });
+
+  const countsBuckets = res.aggregations?.counts?.buckets ?? [];
+  const totalAlerts = res.aggregations?.uniqueAlertCommentsCount.value ?? 0;
+  const maxOnACase = res.aggregations?.references?.cases?.max?.value ?? 0;
+
+  return {
+    all: {
+      total: totalAlerts,
+      ...getAlertsCountsFromBuckets(countsBuckets),
+      maxOnACase,
+    },
+  };
+};
+
 export const getCountsAndMaxData = async ({
   savedObjectsClient,
   savedObjectType,
@@ -132,7 +251,10 @@ export const getCountsAndMaxData = async ({
 }) => {
   const res = await savedObjectsClient.find<
     unknown,
-    { counts: Buckets; references: MaxBucketOnCaseAggregation['references'] }
+    {
+      counts: Buckets;
+      references: MaxBucketOnCaseAggregation['references'];
+    }
   >({
     page: 0,
     perPage: 0,
