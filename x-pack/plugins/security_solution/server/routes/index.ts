@@ -140,7 +140,7 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled, siemMigrationsEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
@@ -148,10 +148,7 @@ export const initRoutes = (
   }
 
   registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
-
-  if (siemMigrationsEnabled) {
-    registerSiemMigrationsRoutes(router, logger);
-  }
+  registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);

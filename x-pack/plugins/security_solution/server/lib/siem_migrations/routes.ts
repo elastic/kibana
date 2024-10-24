@@ -8,10 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import { registerSiemRuleMigrationsRoutes } from './rules/api';
 import type { SecuritySolutionPluginRouter } from '../../types';
+import type { ConfigType } from '../../config';
 
 export const registerSiemMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
+  config: ConfigType,
   logger: Logger
 ) => {
-  registerSiemRuleMigrationsRoutes(router, logger);
+  if (config.experimentalFeatures.siemMigrationsEnabled) {
+    registerSiemRuleMigrationsRoutes(router, logger);
+  }
 };
