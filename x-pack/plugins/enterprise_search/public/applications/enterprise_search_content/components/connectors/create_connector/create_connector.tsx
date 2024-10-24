@@ -28,6 +28,11 @@ import {
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+
+import { HttpLogic } from '../../../../shared/http';
+import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
@@ -47,6 +52,11 @@ import { StartStep } from './start_step';
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
 export const CreateConnector: React.FC = () => {
+  const { overlays } = useKibana().services;
+
+  const { http } = useValues(HttpLogic);
+  const { application, history } = useValues(KibanaLogic);
+
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
@@ -136,6 +146,33 @@ export const CreateConnector: React.FC = () => {
       />
     ),
   };
+
+  useUnsavedChangesPrompt({
+    cancelButtonText: i18n.translate(
+      'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
+      {
+        defaultMessage: 'Keep ',
+      }
+    ),
+    confirmButtonText: i18n.translate(
+      'xpack.enterpriseSearch.createConnector.unsavedPrompt.confirm',
+      {
+        defaultMessage: 'Leave ',
+      }
+    ),
+    hasUnsavedChanges: true,
+    history,
+    http,
+    messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
+      defaultMessage:
+        'The connector was created, but there are still some data that needs to be provided.',
+    }),
+    navigateToUrl: application.navigateToUrl,
+    openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
+    titleText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
+      defaultMessage: 'Leaving the connector creation flow?',
+    }),
+  });
 
   return (
     <EnterpriseSearchContentPageTemplate
