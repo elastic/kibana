@@ -92,7 +92,6 @@ export function InternalDashboardTopNav({
     hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
-    managed,
     query,
     title,
     viewMode,
@@ -103,7 +102,6 @@ export function InternalDashboardTopNav({
     dashboardApi.hasRunMigrations$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId,
-    dashboardApi.managed$,
     dashboardApi.query$,
     dashboardApi.panelTitle,
     dashboardApi.viewMode
@@ -303,7 +301,7 @@ export function InternalDashboardTopNav({
     }
 
     const { showWriteControls } = getDashboardCapabilities();
-    if (showWriteControls && managed) {
+    if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
@@ -330,9 +328,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboardApi
-                          .runInteractiveSave(viewMode)
-                          .then((result) => maybeRedirect(result));
+                        dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
                     >
@@ -351,15 +347,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [
-    hasUnsavedChanges,
-    viewMode,
-    hasRunMigrations,
-    managed,
-    isPopoverOpen,
-    dashboardApi,
-    maybeRedirect,
-  ]);
+  }, [hasUnsavedChanges, viewMode, hasRunMigrations, isPopoverOpen, dashboardApi, maybeRedirect]);
 
   return (
     <div className="dashboardTopNav">

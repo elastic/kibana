@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import { coreServices } from '../services/kibana_services';
 
-export interface PublishesReload {
-  reload$: Observable<void>;
+// seperate from performance metrics
+// reports when a dashboard renders with data
+export function initializeTrackContentfulRender() {
+  let hadContentfulRender = false;
+
+  return {
+    trackContentfulRender: () => {
+      if (!hadContentfulRender) {
+        coreServices.analytics.reportEvent('dashboard_loaded_with_data', {});
+      }
+      hadContentfulRender = true;
+    },
+  };
 }
-
-export const apiPublishesReload = (unknownApi: null | unknown): unknownApi is PublishesReload => {
-  return Boolean(unknownApi && (unknownApi as PublishesReload)?.reload$ !== undefined);
-};

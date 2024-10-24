@@ -7,13 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment, { Moment } from 'moment';
 import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
-import { DashboardContainer } from '../../dashboard_container';
+import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+
+const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
+  if (moment(time).isValid()) {
+    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+  } else {
+    // If it's not a valid moment date, then it should be a string representing a relative time
+    // like 'now' or 'now-15m'.
+    return time as string;
+  }
+};
+
+export const areTimesEqual = (
+  timeA?: string | Moment | undefined,
+  timeB?: string | Moment | undefined
+) => {
+  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
+};
 
 export function newSession$(api: unknown) {
   const observables: Array<Observable<unknown>> = [];
@@ -21,7 +37,6 @@ export function newSession$(api: unknown) {
   if (apiPublishesUnifiedSearch(api)) {
     observables.push(
       api.filters$.pipe(
-        // TODO move onlyDisabledFiltersChanged to appliedFilters$ interface
         distinctUntilChanged((previous: Filter[] | undefined, current: Filter[] | undefined) => {
           return onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions);
         })
@@ -57,9 +72,8 @@ export function newSession$(api: unknown) {
     }
   }
 
-  // TODO replace lastReloadRequestTime$ with reload$ when removing legacy embeddable framework
-  if ((api as DashboardContainer).lastReloadRequestTime$) {
-    observables.push((api as DashboardContainer).lastReloadRequestTime$);
+  if (apiPublishesReload(api)) {
+    observables.push(api.reload$);
   }
 
   return combineLatest(observables).pipe(skip(1));

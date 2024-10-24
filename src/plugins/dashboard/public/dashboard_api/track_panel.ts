@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Promise<unknown>) {
+export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);

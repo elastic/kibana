@@ -9,12 +9,12 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { PerformanceMetricEvent } from '@kbn/ebt-tools';
-import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { PhaseEvent, PhaseEventType, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { startQueryPerformanceTracking } from './query_performance_tracking';
+import { PerformanceState, startQueryPerformanceTracking } from './query_performance_tracking';
 
 const mockMetricEvent = jest.fn();
 jest.mock('@kbn/ebt-tools', () => ({
@@ -26,7 +26,8 @@ jest.mock('@kbn/ebt-tools', () => ({
 const mockDashboard = (
   children: {} = {}
 ): {
-  dashboard: PresentationContainer & TracksQueryPerformance;
+  dashboard: PresentationContainer;
+  performanceState: PerformanceState;
   children$: BehaviorSubject<{ [key: string]: unknown }>;
 } => {
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>(children);
@@ -35,6 +36,8 @@ const mockDashboard = (
       ...getMockPresentationContainer(),
       children$,
       getPanelCount: () => Object.keys(children$.value).length,
+    },
+    performanceState: {
       firstLoad: true,
       creationStartTime: Date.now(),
     },
@@ -68,16 +71,16 @@ describe('startQueryPerformanceTracking', () => {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
       },
     };
-    const { dashboard } = mockDashboard(children);
-    startQueryPerformanceTracking(dashboard);
+    const { dashboard, performanceState } = mockDashboard(children);
+    startQueryPerformanceTracking(dashboard, performanceState);
 
-    expect(dashboard.lastLoadStartTime).toBeDefined();
+    expect(performanceState.lastLoadStartTime).toBeDefined();
   });
 
   it('sets creation end time when no children are present', async () => {
-    const { dashboard } = mockDashboard();
-    startQueryPerformanceTracking(dashboard);
-    expect(dashboard.creationEndTime).toBeDefined();
+    const { dashboard, performanceState } = mockDashboard();
+    startQueryPerformanceTracking(dashboard, performanceState);
+    expect(performanceState.creationEndTime).toBeDefined();
   });
 
   it('sets creation end time when all panels with phase event reporting have rendered', async () => {
@@ -89,11 +92,11 @@ describe('startQueryPerformanceTracking', () => {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
       },
     };
-    const { dashboard } = mockDashboard(children);
-    startQueryPerformanceTracking(dashboard);
+    const { dashboard, performanceState } = mockDashboard(children);
+    startQueryPerformanceTracking(dashboard, performanceState);
     setChildrenStatus(children, 'rendered');
     await waitFor(() => {
-      expect(dashboard.creationEndTime).toBeDefined();
+      expect(performanceState.creationEndTime).toBeDefined();
     });
   });
 
@@ -106,8 +109,8 @@ describe('startQueryPerformanceTracking', () => {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
       },
     };
-    const { dashboard } = mockDashboard(children);
-    startQueryPerformanceTracking(dashboard);
+    const { dashboard, performanceState } = mockDashboard(children);
+    startQueryPerformanceTracking(dashboard, performanceState);
 
     expect(mockMetricEvent).not.toHaveBeenCalled();
     setChildrenStatus(children, 'rendered');
@@ -136,8 +139,8 @@ describe('startQueryPerformanceTracking', () => {
       panel3: { wow: 'wow' },
       panel4: { wow: 'wow' },
     };
-    const { dashboard } = mockDashboard(children);
-    startQueryPerformanceTracking(dashboard);
+    const { dashboard, performanceState } = mockDashboard(children);
+    startQueryPerformanceTracking(dashboard, performanceState);
     setChildrenStatus(children, 'rendered');
 
     expect(mockMetricEvent).toHaveBeenCalledWith(
@@ -164,8 +167,8 @@ describe('startQueryPerformanceTracking', () => {
       panel3: { wow: 'wow' },
       panel4: { wow: 'wow' },
     };
-    const { dashboard } = mockDashboard(children);
-    startQueryPerformanceTracking(dashboard);
+    const { dashboard, performanceState } = mockDashboard(children);
+    startQueryPerformanceTracking(dashboard, performanceState);
     setChildrenStatus(children, 'rendered');
 
     await waitFor(() => {
@@ -193,8 +196,8 @@ describe('startQueryPerformanceTracking', () => {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
       },
     };
-    const { dashboard, children$ } = mockDashboard(children);
-    startQueryPerformanceTracking(dashboard);
+    const { dashboard, performanceState, children$ } = mockDashboard(children);
+    startQueryPerformanceTracking(dashboard, performanceState);
     setChildrenStatus(children, 'rendered');
     expect(mockMetricEvent).toHaveBeenCalledTimes(1);
 
@@ -218,9 +221,9 @@ describe('startQueryPerformanceTracking', () => {
 
   it('ensures the duration is at least as long as the time to data', async () => {
     // start an empty Dashboard. This will set the creation end time to some short value
-    const { dashboard, children$ } = mockDashboard();
-    startQueryPerformanceTracking(dashboard);
-    expect(dashboard.creationEndTime).toBeDefined();
+    const { dashboard, children$, performanceState } = mockDashboard();
+    startQueryPerformanceTracking(dashboard, performanceState);
+    expect(performanceState.creationEndTime).toBeDefined();
 
     // add a panel that takes a long time to load
     const children = {

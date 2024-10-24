@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { buildMockDashboard } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
@@ -53,7 +52,7 @@ describe('Internal dashboard top nav', () => {
     const container = buildMockDashboard();
     const dashboardApi = {
       ...container,
-      managed$: new BehaviorSubject(true),
+      isManaged: true,
     } as unknown as DashboardApi;
     const component = render(
       <DashboardContext.Provider value={dashboardApi}>
