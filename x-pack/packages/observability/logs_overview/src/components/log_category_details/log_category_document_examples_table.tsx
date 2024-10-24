@@ -10,12 +10,11 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import moment from 'moment';
-import { AllSummaryColumnProps } from '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { LogLevelBadgeCell } from '@kbn/discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { getLogLevelBadgeCell, LazySummaryColumn } from '@kbn/discover-contextual-components';
 import type { LogCategoryDocument } from '../../services/category_details_service/types';
 import { type ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
@@ -24,10 +23,6 @@ export interface LogCategoryDocumentExamplesTableDependencies {
   uiSettings: SettingsStart;
   fieldFormats: FieldFormatsStart;
   share: SharePluginStart;
-  columns: {
-    SummaryColumn: React.ComponentType<AllSummaryColumnProps>;
-    LogLevelCell: LogLevelBadgeCell;
-  };
 }
 
 export interface LogCategoryDocumentExamplesTableProps {
@@ -56,6 +51,8 @@ const TimestampCell = ({
   }
 };
 
+const LogLevelBadgeCell = getLogLevelBadgeCell('log.level');
+
 export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamplesTableProps> = ({
   categoryDocuments,
   dependencies,
@@ -65,7 +62,7 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
     {
       field: 'row',
       name: 'Timestamp',
-      width: '20%',
+      width: '25%',
       render: (row: any) => {
         return (
           <TimestampCell
@@ -81,7 +78,7 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
       width: '10%',
       render: (row: any) => {
         return (
-          <dependencies.columns.LogLevelCell
+          <LogLevelBadgeCell
             rowIndex={0}
             colIndex={0}
             columnId="row"
@@ -100,10 +97,10 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
     {
       field: 'row',
       name: 'Summary',
-      width: '70%',
+      width: '65%',
       render: (row: any) => {
         return (
-          <dependencies.columns.SummaryColumn
+          <LazySummaryColumn
             rowIndex={0}
             colIndex={0}
             columnId="_source"

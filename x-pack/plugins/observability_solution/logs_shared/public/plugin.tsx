@@ -6,8 +6,6 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components';
 import {
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
@@ -22,13 +20,6 @@ import {
   LogsSharedClientSetupDeps,
   LogsSharedClientStartDeps,
 } from './types';
-
-const LazySummaryColumn = dynamic(
-  () =>
-    import(
-      '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column'
-    )
-);
 
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
@@ -89,10 +80,6 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       share,
       dataViews,
       fieldFormats,
-      columns: {
-        SummaryColumn: LazySummaryColumn,
-        LogLevelCell: getLogLevelBadgeCell('log.level'),
-      },
     });
 
     if (!observabilityAIAssistant) {
