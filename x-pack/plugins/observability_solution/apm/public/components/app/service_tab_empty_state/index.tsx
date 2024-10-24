@@ -20,7 +20,7 @@ import { addAPMCalloutDefinitions, AddAPMCalloutKeys } from './constants';
 
 export interface ServiceTabEmptyStateProps {
   id: AddAPMCalloutKeys;
-  onDissmiss?: () => void;
+  onDismiss?: () => void;
 }
 
 const baseImgFolder = '/plugins/apm/assets/service_tab_empty_state';
@@ -32,7 +32,7 @@ const defaultClickTelemetryParams: EmptyStateClickParams = {
   view: 'add_apm_cta',
 };
 
-export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
+export function ServiceTabEmptyState({ id, onDismiss }: ServiceTabEmptyStateProps) {
   const {
     services: { telemetry },
   } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -58,7 +58,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
   }
 
   function handleDismiss() {
-    onDissmiss?.();
+    onDismiss?.();
   }
 
   return (
@@ -69,7 +69,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
       onAddData={handleAddAPMClick}
       onTryIt={handleTryItClick}
       onLearnMore={handleLearnMoreClick}
-      onDissmiss={onDissmiss && handleDismiss}
+      onDismiss={onDismiss && handleDismiss}
     />
   );
 }
