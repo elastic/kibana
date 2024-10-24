@@ -27,7 +27,7 @@ export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit
   const proposedNewLimit = Math.round(totalFieldLimit * 1.3);
   const [newFieldLimit, setNewFieldLimit] = useState<number>(proposedNewLimit);
   const [isInvalid, setIsInvalid] = useState(false);
-  const { updateNewFieldLimit, isSavingNewFieldLimitInProgress } = useDegradedFields();
+  const { updateNewFieldLimit, isMitigationInProgress } = useDegradedFields();
 
   const validateNewLimit = (newLimit: string) => {
     const parsedLimit = parseInt(newLimit, 10);
@@ -72,7 +72,7 @@ export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit
             data-test-subj="datasetQualityIncreaseFieldMappingLimitButtonButton"
             disabled={isInvalid}
             onClick={() => updateNewFieldLimit(newFieldLimit)}
-            isLoading={isSavingNewFieldLimitInProgress}
+            isLoading={isMitigationInProgress}
           >
             {fieldLimitMitigationApplyButtonText}
           </EuiButton>

@@ -147,44 +147,6 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
-        | 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
-        | 'initializing.degradedFieldFlyout.open.initialized.analyze.fetching';
-      context: WithDefaultControllerState & WithDegradedFieldsData;
-    }
-  | {
-      value: 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.done';
-      context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
-    }
-  | {
-      value: 'initializing.degradedFieldFlyout.open.initialized.analyze.done';
-      context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradeFieldAnalysis;
-    }
-  | {
-      value: 'initializing.degradedFieldFlyout.open';
-      context: WithDefaultControllerState &
-        WithDegradedFieldsData &
-        WithDegradedFieldValues &
-        WithDegradeFieldAnalysis;
-    }
-  | {
-      value: 'initializing.mitigations.savingNewFieldLimit';
-      context: WithDefaultControllerState &
-        WithDegradedFieldsData &
-        WithDegradedFieldValues &
-        WithDegradeFieldAnalysis &
-        WithNewFieldLimit;
-    }
-  | {
-      value: 'initializing.mitigations.done';
-      context: WithDefaultControllerState &
-        WithDegradedFieldsData &
-        WithDegradedFieldValues &
-        WithDegradeFieldAnalysis &
-        WithNewFieldLimit &
-        WithNewFieldLimitResponse;
-    }
-  | {
-      value:
         | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields'
         | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.fetching'
         | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.fetching'
@@ -196,6 +158,35 @@ export type DatasetQualityDetailsControllerTypeState =
         | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.done'
         | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.done';
       context: WithDefaultControllerState & WithDataStreamSettings & WithIntegration;
+    }
+  | {
+      value:
+        | 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.analyzing';
+      context: WithDefaultControllerState & WithDegradedFieldsData;
+    }
+  | {
+      value: 'initializing.degradedFieldFlyout.open.initialized.ignoredValues.done';
+      context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
+    }
+  | {
+      value:
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.analyzed'
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating'
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver'
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.success'
+        | 'initializing.degradedFieldFlyout.open.initialized.mitigation.error';
+      context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradeFieldAnalysis;
+    }
+  | {
+      value: 'initializing.degradedFieldFlyout.open.initialized.mitigation.success';
+      context: WithDefaultControllerState &
+        WithDegradedFieldsData &
+        WithDegradedFieldValues &
+        WithDegradeFieldAnalysis &
+        WithNewFieldLimit &
+        WithNewFieldLimitResponse;
     };
 
 export type DatasetQualityDetailsControllerContext =

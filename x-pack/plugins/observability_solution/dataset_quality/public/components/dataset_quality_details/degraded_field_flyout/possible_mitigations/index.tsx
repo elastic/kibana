@@ -18,16 +18,18 @@ export function PossibleMitigations() {
   const isIntegration = Boolean(integrationDetails?.integration);
 
   return (
-    <div>
-      <PossibleMitigationTitle />
-      <EuiSpacer size="m" />
-      {!isAnalysisInProgress && degradedFieldAnalysis?.isFieldLimitIssue && (
-        <>
-          <FieldMappingLimit isIntegration={isIntegration} />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {!isAnalysisInProgress && <ManualMitigations />}
-    </div>
+    !isAnalysisInProgress && (
+      <div>
+        <PossibleMitigationTitle />
+        <EuiSpacer size="m" />
+        {degradedFieldAnalysis?.isFieldLimitIssue && (
+          <>
+            <FieldMappingLimit isIntegration={isIntegration} />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <ManualMitigations />
+      </div>
+    )
   );
 }

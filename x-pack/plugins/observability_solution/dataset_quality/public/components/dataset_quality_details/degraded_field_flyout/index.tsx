@@ -50,7 +50,7 @@ export default function DegradedFieldFlyout() {
     expandedDegradedField,
     renderedItems,
     isAnalysisInProgress,
-    degradedFieldAnalysisResult,
+    degradedFieldAnalysisFormattedResult,
   } = useDegradedFields();
   const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
@@ -129,8 +129,8 @@ export default function DegradedFieldFlyout() {
         )}
         {isUserViewingTheIssueOnLatestBackingIndex &&
           !isAnalysisInProgress &&
-          degradedFieldAnalysisResult &&
-          !degradedFieldAnalysisResult.identifiedUsingHeuristics && (
+          degradedFieldAnalysisFormattedResult &&
+          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics && (
             <>
               <EuiSpacer size="s" />
               <EuiTextColor

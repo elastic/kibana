@@ -110,12 +110,19 @@ export function useDegradedFields() {
   );
 
   const degradedFieldAnalysis = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.analyze.done')
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.analyzed') ||
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating') ||
+    state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
+    ) ||
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver') ||
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success') ||
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.error')
       ? state.context.degradedFieldAnalysis
       : undefined
   );
 
-  const degradedFieldAnalysisResult = useMemo(() => {
+  const degradedFieldAnalysisFormattedResult = useMemo(() => {
     if (!degradedFieldAnalysis) {
       return undefined;
     }
@@ -162,8 +169,24 @@ export function useDegradedFields() {
     );
   });
 
+  const isRolloverRequired = useSelector(service, (state) => {
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
+    );
+  });
+
+  const isMitigationAppliedSuccessfully = useSelector(service, (state) => {
+    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success');
+  });
+
   const isAnalysisInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.analyze.fetching');
+    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.analyzing');
+  });
+
+  const isRolloverInProgress = useSelector(service, (state) => {
+    return state.matches(
+      'initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver'
+    );
   });
 
   const updateNewFieldLimit = useCallback(
@@ -173,12 +196,15 @@ export function useDegradedFields() {
     [service]
   );
 
-  const isSavingNewFieldLimitInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.mitigations.savingNewFieldLimit');
+  const isMitigationInProgress = useSelector(service, (state) => {
+    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating');
   });
 
   const newFieldLimitData = useSelector(service, (state) =>
-    state.matches('initializing.mitigations.done') ? state.context.fieldLimit : undefined
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success') ||
+    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.error')
+      ? state.context.fieldLimit
+      : undefined
   );
 
   const triggerRollover = useCallback(() => {
@@ -200,13 +226,16 @@ export function useDegradedFields() {
     isDegradedFieldsValueLoading,
     isAnalysisInProgress,
     degradedFieldAnalysis,
-    degradedFieldAnalysisResult,
+    degradedFieldAnalysisFormattedResult,
     toggleCurrentQualityIssues,
     showCurrentQualityIssues,
     expandedRenderedItem,
     updateNewFieldLimit,
-    isSavingNewFieldLimitInProgress,
+    isMitigationInProgress,
+    isRolloverInProgress,
     newFieldLimitData,
+    isRolloverRequired,
+    isMitigationAppliedSuccessfully,
     triggerRollover,
   };
 }

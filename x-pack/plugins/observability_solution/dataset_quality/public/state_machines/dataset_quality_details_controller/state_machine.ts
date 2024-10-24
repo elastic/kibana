@@ -313,22 +313,74 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             done: {},
                           },
                         },
-                        analyze: {
-                          initial: 'fetching',
+                        mitigation: {
+                          initial: 'analyzing',
                           states: {
-                            fetching: {
+                            analyzing: {
                               invoke: {
                                 src: 'analyzeDegradedField',
                                 onDone: {
-                                  target: 'done',
+                                  target: 'analyzed',
                                   actions: ['storeDegradedFieldAnalysis'],
                                 },
                                 onError: {
-                                  target: 'done',
+                                  target: 'analyzed',
                                 },
                               },
                             },
-                            done: {},
+                            analyzed: {
+                              on: {
+                                SET_NEW_FIELD_LIMIT: {
+                                  target: 'mitigating',
+                                  actions: 'storeNewFieldLimit',
+                                },
+                              },
+                            },
+                            mitigating: {
+                              invoke: {
+                                src: 'saveNewFieldLimit',
+                                onDone: [
+                                  {
+                                    target: 'askingForRollover',
+                                    actions: 'storeNewFieldLimitResponse',
+                                    cond: 'hasFailedToUpdateLastBackingIndex',
+                                  },
+                                  {
+                                    target: 'success',
+                                    actions: 'storeNewFieldLimitResponse',
+                                  },
+                                ],
+                                onError: {
+                                  target: 'error',
+                                  actions: [
+                                    'storeNewFieldLimitErrorResponse',
+                                    'notifySaveNewFieldLimitError',
+                                  ],
+                                },
+                              },
+                            },
+                            askingForRollover: {
+                              on: {
+                                ROLLOVER_DATA_STREAM: {
+                                  target: 'rollingOver',
+                                },
+                              },
+                            },
+                            rollingOver: {
+                              invoke: {
+                                src: 'rolloverDataStream',
+                                onDone: {
+                                  target: 'success',
+                                  actions: ['raiseForceTimeRangeRefresh'],
+                                },
+                                onError: {
+                                  target: 'error',
+                                  actions: 'notifySaveNewFieldLimitError',
+                                },
+                              },
+                            },
+                            success: {},
+                            error: {},
                           },
                         },
                       },
@@ -342,14 +394,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     UPDATE_TIME_RANGE: {
                       target:
                         '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
-                    },
-                    SET_NEW_FIELD_LIMIT: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.mitigations.savingNewFieldLimit',
-                      actions: 'storeNewFieldLimit',
-                    },
-                    ROLLOVER_DATA_STREAM: {
-                      target: '#DatasetQualityDetailsController.initializing.mitigations.rollover',
                     },
                   },
                 },
@@ -374,39 +418,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     actions: ['storeExpandedDegradedField'],
                   },
                 ],
-              },
-            },
-            mitigations: {
-              initial: 'pending',
-              states: {
-                pending: {},
-                savingNewFieldLimit: {
-                  invoke: {
-                    src: 'saveNewFieldLimit',
-                    onDone: {
-                      target: 'done',
-                      actions: 'storeNewFieldLimitResponse',
-                    },
-                    onError: {
-                      target: 'done',
-                      actions: ['storeNewFieldLimitErrorResponse', 'notifySaveNewFieldLimitError'],
-                    },
-                  },
-                },
-                rollover: {
-                  invoke: {
-                    src: 'rolloverDataStream',
-                    onDone: {
-                      target: 'done',
-                      actions: ['raiseForceTimeRangeRefresh'],
-                    },
-                    onError: {
-                      target: 'done',
-                      actions: 'notifySaveNewFieldLimitError',
-                    },
-                  },
-                },
-                done: {},
               },
             },
           },
@@ -582,6 +593,13 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         },
         hasNoDegradedFieldsSelected: (context) => {
           return !Boolean(context.expandedDegradedField);
+        },
+        hasFailedToUpdateLastBackingIndex: (_, event) => {
+          return (
+            'data' in event &&
+            'isLatestBackingIndexUpdated' in event.data &&
+            !event.data.isLatestBackingIndexUpdated
+          );
         },
       },
     }

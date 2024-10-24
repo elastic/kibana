@@ -21,22 +21,24 @@ import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../c
 import { useKibanaContextForPlugin } from '../../../../../utils';
 
 export function MessageCallout() {
-  const { isSavingNewFieldLimitInProgress, newFieldLimitData } = useDegradedFields();
-  const { result, error: serverError } = newFieldLimitData ?? {};
-  const { isComponentTemplateUpdated, isLatestBackingIndexUpdated } = result ?? {};
-  const isSuccess = isComponentTemplateUpdated && isLatestBackingIndexUpdated;
-  const isPartialSuccess = isComponentTemplateUpdated && !Boolean(isLatestBackingIndexUpdated);
+  const {
+    isMitigationInProgress,
+    newFieldLimitData,
+    isRolloverRequired,
+    isMitigationAppliedSuccessfully,
+  } = useDegradedFields();
+  const { error: serverError } = newFieldLimitData ?? {};
 
   if (serverError) {
     return <ErrorCallout />;
   }
 
-  if (!isSavingNewFieldLimitInProgress && isSuccess) {
-    return <SuccessCallout />;
+  if (!isMitigationInProgress && isRolloverRequired) {
+    return <ManualRolloverCallout />;
   }
 
-  if (!isSavingNewFieldLimitInProgress && isPartialSuccess) {
-    return <ManualRolloverCallout />;
+  if (!isMitigationInProgress && isMitigationAppliedSuccessfully) {
+    return <SuccessCallout />;
   }
 
   return null;
@@ -80,7 +82,7 @@ export function SuccessCallout() {
 }
 
 export function ManualRolloverCallout() {
-  const { triggerRollover } = useDegradedFields();
+  const { triggerRollover, isRolloverInProgress } = useDegradedFields();
   return (
     <EuiCallOut
       title={fieldLimitMitigationPartiallyFailedMessage}
@@ -95,6 +97,7 @@ export function ManualRolloverCallout() {
         size="s"
         title={fieldLimitMitigationRolloverButton}
         color="danger"
+        isLoading={isRolloverInProgress}
       >
         {fieldLimitMitigationRolloverButton}
       </EuiButton>
