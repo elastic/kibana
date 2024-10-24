@@ -108,11 +108,14 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         setDataViewId(adhocDataView.id);
       }
 
-      await onPreview({
-        viewType,
-        dataViewId: adhocDataView?.id,
-        query,
-      });
+      const supported = getReasonIfFieldStatsUnavailableForQuery(query) === undefined;
+      if (supported) {
+        await onPreview({
+          viewType,
+          dataViewId: adhocDataView?.id,
+          query,
+        });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isEsqlMode]
