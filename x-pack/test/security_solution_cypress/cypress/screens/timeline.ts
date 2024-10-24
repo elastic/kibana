@@ -166,6 +166,9 @@ export const TIMELINE_EVENTS_COUNT_PREV_PAGE =
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
+export const TIMELINE_DISCOVER_FIELDS_BUTTON =
+  '[data-test-subj="timeline"] [data-test-subj="dataView-add-field_btn"]';
+
 export const TIMELINE_FILTER = (filter: TimelineFilter) =>
   `[data-test-subj~="filter"][data-test-subj~="filter-enabled"][data-test-subj~="filter-key-${
     filter.field
@@ -297,10 +300,6 @@ export const HOVER_ACTIONS = {
 };
 
 export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
-
-export const GET_TIMELINE_HEADER = (fieldName: string) => {
-  return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
-};
 
 export const ESQL_TAB = getDataTestSubjectSelector('timelineTabs-esql');
 
