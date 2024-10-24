@@ -1585,7 +1585,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/security-solution
 
 /x-pack/test_serverless/functional/test_suites/security/cypress @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
@@ -1649,7 +1648,12 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
-## Security Solution sub teams - Threat Hunting Investigations
+## Security Solution sub teams - Threat Hunting
+
+/x-pack/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
+
+## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
 /x-pack/plugins/security_solution/common/api/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
@@ -1679,7 +1683,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 /x-pack/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
 
-## Security Solution sub teams - Threat Hunting Explore
+## Security Solution Threat Hunting areas - Threat Hunting Explore
 /x-pack/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
@@ -1968,6 +1972,8 @@ packages/react @elastic/appex-sharedux
 test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
+/x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
+/x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/.spectral.yaml                       @elastic/platform-docs
