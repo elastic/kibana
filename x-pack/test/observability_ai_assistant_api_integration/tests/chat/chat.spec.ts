@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages,
           connectorId: 'does not exist',
           functions: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .expect(404);
     });
@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 messages,
                 connectorId,
                 functions: [],
-                scope: 'all',
+                scopes: ['all'],
               })
               .pipe(passThrough);
 
@@ -146,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages,
           connectorId,
           functions: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .expect(200)
         .pipe(passThrough);
