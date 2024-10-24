@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Transaction } from 'elastic-apm-node';
 import { pickBy } from 'lodash';
+import { withSyncSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
   PickVersionValuesEnum,
@@ -25,6 +27,7 @@ import { getValueForField } from './get_value_for_field';
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
   requestBody: PerformRuleUpgradeRequestBody;
+  transaction: Transaction;
 }
 
 interface ProcessedRules {
@@ -35,78 +38,85 @@ interface ProcessedRules {
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   requestBody,
+  transaction,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
-  const { pick_version: globalPickVersion = PickVersionValuesEnum.MERGED, mode } = requestBody;
+  return withSyncSecuritySpan(transaction, 'createModifiedPrebuiltRuleAssets', () => {
+    const { pick_version: globalPickVersion = PickVersionValuesEnum.MERGED, mode } = requestBody;
 
-  const { modifiedPrebuiltRuleAssets, processingErrors } = upgradeableRules.reduce<ProcessedRules>(
-    (processedRules, upgradeableRule) => {
-      const targetRuleType = upgradeableRule.target.type;
-      const ruleId = upgradeableRule.target.rule_id;
-      const fieldNames = FIELD_NAMES_BY_RULE_TYPE_MAP.get(targetRuleType);
+    const { modifiedPrebuiltRuleAssets, processingErrors } =
+      upgradeableRules.reduce<ProcessedRules>(
+        (processedRules, upgradeableRule) => {
+          const targetRuleType = upgradeableRule.target.type;
+          const ruleId = upgradeableRule.target.rule_id;
+          const fieldNames = FIELD_NAMES_BY_RULE_TYPE_MAP.get(targetRuleType);
 
-      try {
-        if (fieldNames === undefined) {
-          throw new Error(`Unexpected rule type: ${targetRuleType}`);
-        }
+          try {
+            if (fieldNames === undefined) {
+              throw new Error(`Unexpected rule type: ${targetRuleType}`);
+            }
 
-        const { current, target } = upgradeableRule;
-        if (current.type !== target.type) {
-          assertPickVersionIsTarget({ ruleId, requestBody });
-        }
+            const { current, target } = upgradeableRule;
+            if (current.type !== target.type) {
+              assertPickVersionIsTarget({ ruleId, requestBody });
+            }
 
-        const calculatedRuleDiff = calculateRuleFieldsDiff({
-          base_version: upgradeableRule.base
-            ? convertRuleToDiffable(convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base))
-            : MissingVersion,
-          current_version: convertRuleToDiffable(upgradeableRule.current),
-          target_version: convertRuleToDiffable(
-            convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
-          ),
-        }) as AllFieldsDiff;
+            const calculatedRuleDiff = calculateRuleFieldsDiff({
+              base_version: upgradeableRule.base
+                ? convertRuleToDiffable(
+                    convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
+                  )
+                : MissingVersion,
+              current_version: convertRuleToDiffable(upgradeableRule.current),
+              target_version: convertRuleToDiffable(
+                convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
+              ),
+            }) as AllFieldsDiff;
 
-        if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
-          const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
-          if (fieldsWithConflicts.length > 0) {
-            // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
-            // than "MERGED", so throw an error for the fields that have conflicts.
-            throw new Error(
-              `Merge conflicts found in rule '${ruleId}' for fields: ${fieldsWithConflicts.join(
-                ', '
-              )}. Please resolve the conflict manually or choose another value for 'pick_version'`
-            );
+            if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
+              const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
+              if (fieldsWithConflicts.length > 0) {
+                // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
+                // than "MERGED", so throw an error for the fields that have conflicts.
+                throw new Error(
+                  `Merge conflicts found in rule '${ruleId}' for fields: ${fieldsWithConflicts.join(
+                    ', '
+                  )}. Please resolve the conflict manually or choose another value for 'pick_version'`
+                );
+              }
+            }
+
+            const modifiedPrebuiltRuleAsset = createModifiedPrebuiltRuleAsset({
+              upgradeableRule,
+              fieldNames,
+              requestBody,
+              globalPickVersion,
+              calculatedRuleDiff,
+              transaction,
+            });
+
+            processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
+
+            return processedRules;
+          } catch (err) {
+            processedRules.processingErrors.push({
+              error: err,
+              item: { rule_id: ruleId },
+            });
+
+            return processedRules;
           }
+        },
+        {
+          modifiedPrebuiltRuleAssets: [],
+          processingErrors: [],
         }
+      );
 
-        const modifiedPrebuiltRuleAsset = createModifiedPrebuiltRuleAsset({
-          upgradeableRule,
-          fieldNames,
-          requestBody,
-          globalPickVersion,
-          calculatedRuleDiff,
-        });
-
-        processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
-
-        return processedRules;
-      } catch (err) {
-        processedRules.processingErrors.push({
-          error: err,
-          item: { rule_id: ruleId },
-        });
-
-        return processedRules;
-      }
-    },
-    {
-      modifiedPrebuiltRuleAssets: [],
-      processingErrors: [],
-    }
-  );
-
-  return {
-    modifiedPrebuiltRuleAssets,
-    processingErrors,
-  };
+    return {
+      modifiedPrebuiltRuleAssets,
+      processingErrors,
+    };
+  });
 };
 
 interface CreateModifiedPrebuiltRuleAssetParams {
@@ -115,6 +125,7 @@ interface CreateModifiedPrebuiltRuleAssetParams {
   globalPickVersion: PickVersionValues;
   requestBody: PerformRuleUpgradeRequestBody;
   calculatedRuleDiff: AllFieldsDiff;
+  transaction: Transaction;
 }
 
 function createModifiedPrebuiltRuleAsset({
@@ -123,20 +134,23 @@ function createModifiedPrebuiltRuleAsset({
   globalPickVersion,
   requestBody,
   calculatedRuleDiff,
+  transaction,
 }: CreateModifiedPrebuiltRuleAssetParams): PrebuiltRuleAsset {
-  const modifiedPrebuiltRuleAsset = {} as Record<string, unknown>;
+  return withSyncSecuritySpan(transaction, 'createModifiedPrebuiltRuleAsset', () => {
+    const modifiedPrebuiltRuleAsset = {} as Record<string, unknown>;
 
-  for (const fieldName of fieldNames) {
-    modifiedPrebuiltRuleAsset[fieldName] = getValueForField({
-      fieldName,
-      upgradeableRule,
-      globalPickVersion,
-      requestBody,
-      ruleFieldsDiff: calculatedRuleDiff,
-    });
-  }
+    for (const fieldName of fieldNames) {
+      modifiedPrebuiltRuleAsset[fieldName] = getValueForField({
+        fieldName,
+        upgradeableRule,
+        globalPickVersion,
+        requestBody,
+        ruleFieldsDiff: calculatedRuleDiff,
+      });
+    }
 
-  return modifiedPrebuiltRuleAsset as PrebuiltRuleAsset;
+    return modifiedPrebuiltRuleAsset as PrebuiltRuleAsset;
+  });
 }
 
 const getFieldsDiffConflicts = (ruleFieldsDiff: Partial<AllFieldsDiff>) =>
