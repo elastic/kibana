@@ -20,19 +20,13 @@ export default createTestConfig({
   // add feature flags
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
-    `--xpack.cloud.serverless.project_id=fakeprojectid`,
-    `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
-    `--xpack.cloud.projects_url=/projects/`,
-    `--xpack.cloud.organization_url=/account/members`,
-    `--xpack.security.roleManagementEnabled=true`,
-    `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
-  esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
+  esServerArgs: [],
   apps: {
     serverlessElasticsearch: {
       pathname: '/app/elasticsearch/getting_started',
