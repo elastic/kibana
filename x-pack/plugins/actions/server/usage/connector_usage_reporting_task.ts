@@ -289,7 +289,7 @@ export class ConnectorUsageReportingTask {
   };
 
   private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(this.usageApiUrl, record, {
+    return axios.post(this.usageApiUrl, [record], {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({

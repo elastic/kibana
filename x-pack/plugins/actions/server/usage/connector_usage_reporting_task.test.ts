@@ -287,20 +287,22 @@ describe('ConnectorUsageReportingTask', () => {
 
     const response = await taskRunner.run();
 
-    const report = {
-      creation_timestamp: nowStr,
-      id: 'connector-request-body-bytes-2024-01-01T12:00:00.000Z',
-      source: {
-        id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
-        instance_group_id: 'test-project',
+    const report = [
+      {
+        creation_timestamp: nowStr,
+        id: 'connector-request-body-bytes-2024-01-01T12:00:00.000Z',
+        source: {
+          id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
+          instance_group_id: 'test-project',
+        },
+        usage: {
+          period_seconds: 43200,
+          quantity: 0,
+          type: 'connector_request_body_bytes',
+        },
+        usage_timestamp: nowStr,
       },
-      usage: {
-        period_seconds: 43200,
-        quantity: 0,
-        type: 'connector_request_body_bytes',
-      },
-      usage_timestamp: nowStr,
-    };
+    ];
 
     expect(mockedAxiosPost).toHaveBeenCalledWith('usage-api', report, {
       headers: { 'Content-Type': 'application/json' },

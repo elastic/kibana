@@ -39,7 +39,7 @@ describe('config validation', () => {
         "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
         "usage": Object {
-          "url": "https://usage-api.elastic-system/api/v1/usage",
+          "url": "https://usage-api.usage-api/api/v1/usage",
         },
       }
     `);
@@ -89,7 +89,7 @@ describe('config validation', () => {
         "rejectUnauthorized": false,
         "responseTimeout": "PT1M",
         "usage": Object {
-          "url": "https://usage-api.elastic-system/api/v1/usage",
+          "url": "https://usage-api.usage-api/api/v1/usage",
         },
       }
     `);
@@ -232,7 +232,7 @@ describe('config validation', () => {
           "verificationMode": "none",
         },
         "usage": Object {
-          "url": "https://usage-api.elastic-system/api/v1/usage",
+          "url": "https://usage-api.usage-api/api/v1/usage",
         },
       }
     `);
