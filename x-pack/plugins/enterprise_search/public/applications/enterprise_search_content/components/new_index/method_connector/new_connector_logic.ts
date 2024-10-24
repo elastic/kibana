@@ -56,6 +56,7 @@ export interface NewConnectorValues {
     | undefined;
   generatedNameData: GenerateConnectorNamesApiResponse | undefined;
   isCreateLoading: boolean;
+  isFormDirty: boolean;
   isGenerateLoading: boolean;
   rawName: string;
   selectedConnector: ConnectorDefinition | null;
@@ -85,6 +86,7 @@ type NewConnectorActions = {
   createConnectorApi: AddConnectorApiLogicActions['makeRequest'];
   fetchConnector: ConnectorViewActions['fetchConnector'];
   setCurrentStep(step: ConnectorCreationSteps): { step: ConnectorCreationSteps };
+  setFormDirty(isDirty: boolean): { isDirty: boolean };
   setRawName(rawName: string): { rawName: string };
   setSelectedConnector(connector: ConnectorDefinition | null): {
     connector: ConnectorDefinition | null;
@@ -103,6 +105,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       shouldNavigateToConnectorAfterCreate,
     }),
     setCurrentStep: (step) => ({ step }),
+    setFormDirty: (isDirty) => ({ isDirty }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedConnector: (connector) => ({ connector }),
   },
@@ -217,6 +220,15 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         ) => step,
       },
     ],
+    isFormDirty: [
+      false,
+      {
+        setFormDirty: (
+          _: NewConnectorValues['isFormDirty'],
+          { isDirty }: { isDirty: NewConnectorValues['isFormDirty'] }
+        ) => isDirty,
+      },
+    ],
     rawName: [
       '',
       {
@@ -249,6 +261,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       () => [selectors.createConnectorApiStatus],
       (status) => status === Status.LOADING,
     ],
+    isFormDirty: [() => [selectors.isFormDirty], (isFormDirty) => isFormDirty],
     isGenerateLoading: [
       () => [selectors.generateConfigurationStatus],
       (status) => status === Status.LOADING,
