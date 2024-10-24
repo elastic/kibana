@@ -372,6 +372,8 @@ export class ConsolePageObject extends FtrService {
       await fontSizeInput.clearValue({ withJS: true });
       await fontSizeInput.click();
       await fontSizeInput.type(String(newSize));
+      // eslint-disable-next-line no-console
+      console.log(await fontSizeInput.getAttribute('value'));
     });
   }
 
