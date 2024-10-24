@@ -9,6 +9,9 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
+      - linting_with_types
+      - check_types
     timeout_in_minutes: 60
     parallelism: 20
     retry:
@@ -26,6 +29,9 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
+      - linting_with_types
+      - check_types
     timeout_in_minutes: 60
     parallelism: 14
     retry:
