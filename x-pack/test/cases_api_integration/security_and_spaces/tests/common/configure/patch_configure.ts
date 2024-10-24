@@ -87,6 +87,19 @@ export default ({ getService }: FtrProviderContext): void => {
           required: false,
           defaultValue: true,
         },
+        {
+          key: 'date_field_1',
+          label: '#5',
+          type: CustomFieldTypes.DATE,
+          required: true,
+          defaultValue: '2025-01-01',
+        },
+        {
+          key: 'date_field_2',
+          label: '#6',
+          type: CustomFieldTypes.DATE,
+          required: false,
+        },
       ] as ConfigurationPatchRequest['customFields'];
       const configuration = await createConfiguration(supertest);
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
@@ -145,6 +158,12 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CustomFieldTypes.TOGGLE,
           required: false,
         },
+        {
+          key: 'date_field_1',
+          label: '#3',
+          type: CustomFieldTypes.DATE,
+          required: false,
+        },
       ];
 
       const mockTemplates = [
@@ -176,6 +195,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: true,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'date_field_1',
+                type: CustomFieldTypes.DATE,
+                value: '2019-04-17',
               },
             ],
             connector: {
@@ -228,6 +252,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   value: false,
                   type: CustomFieldTypes.TOGGLE,
                 },
+                {
+                  key: 'date_field_1',
+                  type: CustomFieldTypes.DATE,
+                  value: null,
+                },
               ],
             },
           },
@@ -246,6 +275,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   key: 'toggle_field_1',
                   value: false,
                   type: CustomFieldTypes.TOGGLE,
+                },
+                {
+                  key: 'date_field_1',
+                  type: CustomFieldTypes.DATE,
+                  value: null,
                 },
               ],
             },

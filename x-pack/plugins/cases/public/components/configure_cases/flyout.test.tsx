@@ -597,21 +597,13 @@ describe('CommonFlyout ', () => {
                 type: 'text',
                 value: 'this is a sample text!',
               },
-              {
-                key: 'test_key_2',
-                type: 'toggle',
-                value: true,
-              },
-              {
-                key: 'test_key_3',
-                type: 'text',
-                value: null,
-              },
-              {
-                key: 'test_key_4',
-                type: 'toggle',
-                value: false,
-              },
+              ...customFieldsConfigurationMock
+                .slice(1)
+                .map(({ key, type, defaultValue, required }) => ({
+                  key,
+                  type,
+                  value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
+                })),
             ],
           },
         });

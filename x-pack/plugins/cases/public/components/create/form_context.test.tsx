@@ -544,6 +544,8 @@ describe('Create case', () => {
             { ...customFieldsMock[1], value: false }, // toggled the default
             customFieldsMock[2],
             { ...customFieldsMock[3], value: false },
+            { ...customFieldsMock[4], value: customFieldsConfigurationMock[4].defaultValue },
+            customFieldsMock[5],
             {
               key: 'my_custom_field_key',
               type: CustomFieldTypes.TEXT,

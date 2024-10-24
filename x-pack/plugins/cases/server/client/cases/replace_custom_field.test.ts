@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CustomFieldDate } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { mockCases } from '../../mocks';
@@ -22,6 +23,11 @@ describe('Replace custom field', () => {
       key: 'second_key',
       type: CustomFieldTypes.TOGGLE as const,
       value: null,
+    },
+    {
+      key: 'third_key',
+      type: CustomFieldTypes.DATE as const,
+      value: '2020-09-01' as CustomFieldDate,
     },
   ];
 
@@ -51,6 +57,12 @@ describe('Replace custom field', () => {
             type: CustomFieldTypes.TOGGLE,
             label: 'foo',
             required: false,
+          },
+          {
+            key: 'third_key',
+            type: CustomFieldTypes.DATE,
+            label: 'date custom field',
+            required: true,
           },
         ],
       },
@@ -95,6 +107,11 @@ describe('Replace custom field', () => {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE as const,
               value: null,
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.DATE as const,
+              value: '2020-09-01',
             },
           ],
           updated_at: expect.any(String),
@@ -143,6 +160,64 @@ describe('Replace custom field', () => {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
               value: 'this is a text field value',
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.DATE as const,
+              value: '2020-09-01',
+            },
+          ],
+          updated_at: expect.any(String),
+          updated_by: expect.any(Object),
+        },
+        refresh: false,
+      })
+    );
+  });
+
+  it('can replace date customField', async () => {
+    clientArgs.services.caseService.patchCase.mockResolvedValue({
+      ...theCase,
+    });
+
+    await expect(
+      replaceCustomField(
+        {
+          caseId: theCase.id,
+          customFieldId: 'third_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: '2024-12-31',
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).resolves.not.toThrow();
+
+    expect(clientArgs.services.caseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: theCase.id,
+        version: theCase.version,
+        originalCase: {
+          ...theCase,
+        },
+        updatedAttributes: {
+          customFields: [
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.DATE as const,
+              value: '2024-12-31',
+            },
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT as const,
+              value: 'this is a text field value',
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE as const,
+              value: null,
             },
           ],
           updated_at: expect.any(String),
@@ -244,6 +319,25 @@ describe('Replace custom field', () => {
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"            \\" supplied to \\"value\\",The value field cannot be an empty string."`
+    );
+  });
+
+  it('throws error when required customField of type date has invalid date', async () => {
+    await expect(
+      replaceCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'third_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: 'hello',
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to replace customField, id: third_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"hello\\" supplied to \\"value\\""`
     );
   });
 

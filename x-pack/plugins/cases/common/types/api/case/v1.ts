@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { dateRt } from '@kbn/io-ts-utils';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -29,7 +30,11 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
+import {
+  CaseCustomFieldDateRt,
+  CaseCustomFieldToggleRt,
+  CustomFieldTextTypeRt,
+} from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -49,7 +54,11 @@ const CaseCustomFieldTextWithValidationRt = rt.strict({
   value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
-const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
+const CustomFieldRt = rt.union([
+  CaseCustomFieldTextWithValidationRt,
+  CaseCustomFieldToggleRt,
+  CaseCustomFieldDateRt,
+]);
 
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
@@ -360,7 +369,7 @@ export const CasesSearchRequestRt = rt.intersection([
        */
       customFields: rt.record(
         rt.string,
-        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+        rt.array(rt.union([rt.string, dateRt, rt.boolean, rt.number, rt.null]))
       ),
     })
   ),

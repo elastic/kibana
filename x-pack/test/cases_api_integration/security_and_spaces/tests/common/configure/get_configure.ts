@@ -70,6 +70,12 @@ export default ({ getService }: FtrProviderContext): void => {
             required: true,
             defaultValue: false,
           },
+          {
+            key: 'we_meet_again',
+            label: 'date',
+            type: CustomFieldTypes.DATE,
+            required: false,
+          },
         ],
       };
       await createConfiguration(
