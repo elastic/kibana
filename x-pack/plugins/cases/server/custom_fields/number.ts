@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 export const getCasesNumberCustomField = () => ({
-  isFilterable: true,
+  isFilterable: false,
   isSortable: false,
   savedObjectMappingType: 'long',
   validateFilteringValues: (values: Array<string | number | boolean | null>) => {

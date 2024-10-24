@@ -441,8 +441,8 @@ describe('Edit ', () => {
 
     expect(screen.queryByText('My test label 1 is required.')).not.toBeInTheDocument();
   });
-  // rewrite
-  it('shows validation error if the field is too long', async () => {
+
+  it('shows validation error if the number is too big', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -454,5 +454,22 @@ describe('Edit ', () => {
         />
       </FormTestComponent>
     );
+
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-edit-button-test_key_5')
+    );
+    await userEvent.clear(
+      await screen.findByTestId('case-number-custom-field-form-field-test_key_5')
+    );
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-form-field-test_key_5')
+    );
+    await userEvent.paste(`${2 ** 53 + 1}`);
+
+    expect(
+      await screen.findByText(
+        'The value of the My test label 5 should be an integer between -(2^53 - 1) to 2^53 - 1, inclusive.'
+      )
+    ).toBeInTheDocument();
   });
 });

@@ -43,7 +43,7 @@ describe('CaseCustomFieldRt', () => {
       },
     ],
     [
-      'type number value boolean',
+      'type number value number',
       {
         key: 'number_custom_field_1',
         type: 'number',

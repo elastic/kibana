@@ -164,7 +164,7 @@ export const limitedNumberAsIntegerSchema = ({ fieldName }: { fieldName: string 
           return rt.failure(
             input,
             context,
-            `The ${fieldName} field should be a safe integer number.`
+            `The ${fieldName} field should be an integer between -(2^53 - 1) to 2^53 - 1, inclusive.`
           );
         }
         return rt.success(s);

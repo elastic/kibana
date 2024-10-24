@@ -136,7 +136,7 @@ describe('Create ', () => {
     await userEvent.click(await screen.findByText('Submit'));
 
     expect(
-      await screen.findByText('The value of the My test label 5 should be a safe integer number.')
+      await screen.findByText('The value of the My test label 5 should be an integer between -(2^53 - 1) to 2^53 - 1, inclusive.')
     ).toBeInTheDocument();
 
     await waitFor(() => {
@@ -165,7 +165,7 @@ describe('Create ', () => {
     await userEvent.click(await screen.findByText('Submit'));
 
     expect(
-      await screen.findByText('The value of the My test label 5 should be a safe integer number.')
+      await screen.findByText('The value of the My test label 5 should be an integer between -(2^53 - 1) to 2^53 - 1, inclusive.')
     ).toBeInTheDocument();
 
     await waitFor(() => {

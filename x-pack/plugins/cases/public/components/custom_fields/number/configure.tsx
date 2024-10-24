@@ -41,7 +41,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldNumber>['Configure'] = 
           label: i18n.DEFAULT_VALUE,
           euiFieldProps: {
             'data-test-subj': 'number-custom-field-default-value',
-            step: 'any',
+            step: 1,
           },
         }}
       />
