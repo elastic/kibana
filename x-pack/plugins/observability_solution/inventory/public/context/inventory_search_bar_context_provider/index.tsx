@@ -12,7 +12,6 @@ interface InventorySearchBarContextType {
   searchBarContentSubject$: Subject<{
     kuery?: string;
     entityTypes?: EntityType[];
-    refresh: boolean;
   }>;
   refreshSubject$: Subject<void>;
 }

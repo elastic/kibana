@@ -7,7 +7,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
-import type { Subject } from 'rxjs';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { InventoryGroupAccordion } from './inventory_group_accordion';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
@@ -15,10 +14,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { InventorySummary } from './inventory_summary';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-
-export interface GroupedInventoryPageProps {
-  refresh: Subject<void>;
-}
 
 export function GroupedInventory() {
   const {
@@ -28,23 +23,24 @@ export function GroupedInventory() {
   const { kuery, entityTypes } = query;
   const { refreshSubject$ } = useInventorySearchBarContext();
 
-  const { value = { groupBy: ENTITY_TYPE, groups: [] }, refresh } = useInventoryAbortableAsync(
-    ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
-        params: {
-          path: {
-            field: ENTITY_TYPE,
+  const { value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 }, refresh } =
+    useInventoryAbortableAsync(
+      ({ signal }) => {
+        return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
+          params: {
+            path: {
+              field: ENTITY_TYPE,
+            },
+            query: {
+              kuery,
+              entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
+            },
           },
-          query: {
-            kuery,
-            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
-          },
-        },
-        signal,
-      });
-    },
-    [entityTypes, inventoryAPIClient, kuery]
-  );
+          signal,
+        });
+      },
+      [entityTypes, inventoryAPIClient, kuery]
+    );
 
   useEffectOnce(() => {
     const refreshSubscription = refreshSubject$.subscribe(() => {
@@ -54,11 +50,9 @@ export function GroupedInventory() {
     return () => refreshSubscription.unsubscribe();
   });
 
-  const totalEntities = value.groups.reduce((acc, group) => acc + group.count, 0);
-
   return (
     <>
-      <InventorySummary totalEntities={totalEntities} totalGroups={value.groups.length} />
+      <InventorySummary totalEntities={value.entitiesCount} totalGroups={value.groups.length} />
       <EuiSpacer size="m" />
       {value.groups.map((group) => (
         <InventoryGroupAccordion
