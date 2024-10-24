@@ -125,7 +125,7 @@ describe('EQL Tab', () => {
         </TestProviders>
       );
 
-      expect(await screen.findByTestId('dataGridHeader')).toBeVisible();
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
     });
 
     test('should render correct placeholder when there are not results', async () => {
