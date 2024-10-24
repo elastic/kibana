@@ -47,11 +47,11 @@ const coreStart = coreMock.createStart();
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 mockUseSourcererDataView.mockReturnValue({
-  indexPattern: { fields: [] },
   missingPatterns: {},
   selectedPatterns: {},
   scopeSelectedPatterns: {},
   loading: false,
+  sourcererDataView: {},
 });
 
 const mockUseRuleExecutionEvents = useExecutionResults as jest.Mock;
