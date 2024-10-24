@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const BASE_PATH = '';
 export const DEFAULT_SECTION: Section = 'snapshots';
 export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policies';
@@ -112,3 +114,18 @@ export const UIM_POLICY_CREATE = 'policy_create';
 export const UIM_POLICY_UPDATE = 'policy_update';
 export const UIM_RETENTION_SETTINGS_UPDATE = 'retention_settings_update';
 export const UIM_RETENTION_EXECUTE = 'retention_execute';
+
+// DisableToolTip messages
+export const MANAGED_REPOSITORY_TOOLTIP_MESSAGE = i18n.translate(
+  'xpack.snapshotRestore.repositoryForm.disableToolTip',
+  {
+    defaultMessage: 'This field is disabled because you are editing a managed repository.',
+  }
+);
+
+export const MANAGED_POLICY_TOOLTIP_MESSAGE = i18n.translate(
+  'xpack.snapshotRestore.policyForm.disableToolTip',
+  {
+    defaultMessage: 'This field is disabled because you are editing a managed policy.',
+  }
+);
