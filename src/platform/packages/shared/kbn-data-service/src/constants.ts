@@ -32,5 +32,4 @@ export const UI_SETTINGS = {
   AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: 'autocomplete:valueSuggestionMethod',
   DATE_FORMAT: 'dateFormat',
   DATEFORMAT_TZ: 'dateFormat:tz',
-  LENS_GENERATE_ESQL: 'lens:generateESQL',
 } as const;
