@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
-import { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -84,7 +83,7 @@ export function SearchBar() {
   );
 
   const handleEntityTypesChange = useCallback(
-    (nextEntityTypes: EntityType[]) => {
+    (nextEntityTypes: string[]) => {
       searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
       registerEntityTypeFilteredEvent({ filterEntityTypes: nextEntityTypes, filterKuery: kuery });
     },
