@@ -20,7 +20,7 @@ import type {
   RouteValidationFunction,
   LazyValidator,
 } from '../..';
-
+import type { RouteDeprecationInfo } from '../router/route';
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
@@ -35,7 +35,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<
     RouteConfigOptions<Method>,
-    'access' | 'description' | 'deprecated' | 'discontinued' | 'security'
+    'access' | 'description' | 'summary' | 'deprecated' | 'discontinued' | 'security'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
@@ -90,16 +90,8 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   description?: string;
 
   /**
-   * Declares this operation to be deprecated. Consumers SHOULD refrain from usage
-   * of this route. This will be surfaced in OAS documentation.
-   *
-   * @default false
-   */
-  deprecated?: boolean;
-
-  /**
    * Release version or date that this route will be removed
-   * Use with `deprecated: true`
+   * Use with `deprecated: {@link RouteDeprecationInfo}`
    *
    * @default undefined
    */
@@ -234,6 +226,11 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
    * @track-adoption
    */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
+
+  /**
+   * @public
+   */
+  getRoutes: () => VersionedRouterRoute[];
 }
 
 /** @public */
@@ -341,6 +338,10 @@ export interface AddVersionOpts<P, Q, B> {
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
   security?: Exclude<RouteConfigOptions<RouteMethod>['security'], undefined>;
+
+  options?: {
+    deprecated?: RouteDeprecationInfo;
+  };
 }
 
 /**
@@ -362,4 +363,12 @@ export interface VersionedRoute<
     options: AddVersionOpts<P, Q, B>,
     handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => MaybePromise<IKibanaResponse>
   ): VersionedRoute<Method, Ctx>;
+}
+
+export interface VersionedRouterRoute<P = unknown, Q = unknown, B = unknown> {
+  method: string;
+  path: string;
+  options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
+  handlers: Array<{ fn: RequestHandler<P, Q, B>; options: AddVersionOpts<P, Q, B> }>;
+  isVersioned: true;
 }
