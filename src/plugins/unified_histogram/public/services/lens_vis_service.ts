@@ -47,6 +47,7 @@ import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
+import { getPreferredChartType } from '../utils/get_preferred_chart_type';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
@@ -147,7 +148,10 @@ export class LensVisService {
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => void;
   }) => {
-    const allSuggestions = this.getAllSuggestions({ queryParams });
+    const allSuggestions = this.getAllSuggestions({
+      queryParams,
+      preferredVisAttributes: externalVisContext?.attributes,
+    });
 
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
@@ -252,6 +256,7 @@ export class LensVisService {
       const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
         queryParams,
         breakdownField,
+        preferredVisAttributes: externalVisContext?.attributes,
       });
       if (histogramSuggestionForESQL) {
         // In case if histogram suggestion, we want to empty the array and push the new suggestion
@@ -463,9 +468,11 @@ export class LensVisService {
   private getHistogramSuggestionForESQL = ({
     queryParams,
     breakdownField,
+    preferredVisAttributes,
   }: {
     queryParams: QueryParams;
     breakdownField?: DataViewField;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
     const { dataView, query, timeRange, columns } = queryParams;
     const breakdownColumn = breakdownField?.name
@@ -510,7 +517,12 @@ export class LensVisService {
       if (breakdownColumn) {
         context.textBasedColumns.push(breakdownColumn);
       }
-      const suggestions = this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
+      const preferredChartType = preferredVisAttributes
+        ? getPreferredChartType(preferredVisAttributes)
+        : undefined;
+
+      const suggestions =
+        this.lensSuggestionsApi(context, dataView, ['lnsDatatable'], preferredChartType) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
         const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -574,8 +586,18 @@ export class LensVisService {
     );
   };
 
-  private getAllSuggestions = ({ queryParams }: { queryParams: QueryParams }): Suggestion[] => {
+  private getAllSuggestions = ({
+    queryParams,
+    preferredVisAttributes,
+  }: {
+    queryParams: QueryParams;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
+  }): Suggestion[] => {
     const { dataView, columns, query, isPlainRecord } = queryParams;
+
+    const preferredChartType = preferredVisAttributes
+      ? getPreferredChartType(preferredVisAttributes)
+      : undefined;
 
     const context = {
       dataViewSpec: dataView?.toSpec(),
@@ -584,7 +606,7 @@ export class LensVisService {
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord
-      ? this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
+      ? this.lensSuggestionsApi(context, dataView, ['lnsDatatable'], preferredChartType) ?? []
       : [];
 
     return allSuggestions;

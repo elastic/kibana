@@ -6,9 +6,10 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { ChartType } from '@kbn/visualization-utils';
 import { createMockVisualization, DatasourceMock, createMockDatasource } from './mocks';
 import { DatasourceSuggestion } from './types';
-import { suggestionsApi, ChartType } from './lens_suggestions_api';
+import { suggestionsApi } from './lens_suggestions_api';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -262,6 +263,9 @@ describe('suggestionsApi', () => {
       },
     };
     datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(),
     ]);
     const context = {
