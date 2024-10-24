@@ -68,18 +68,13 @@ export interface FunctionHandler {
 
 export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
 
-export interface InstructionOrCallbackWithScopes {
-  instruction: InstructionOrCallback;
-  scopes: AssistantScope[];
-}
-
 export type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
 }) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
 
-export type RegisterInstruction = (...instruction: InstructionOrCallbackWithScopes[]) => void;
+export type RegisterInstruction = (...instruction: InstructionOrCallback[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
@@ -87,17 +82,14 @@ export type RegisterFunction = <
   TArguments = FromSchema<TParameters>
 >(
   definition: FunctionDefinition<TParameters>,
-  respond: RespondFunction<TArguments, TResponse>,
-  scopes: AssistantScope[]
+  respond: RespondFunction<TArguments, TResponse>
 ) => void;
-export type FunctionHandlerRegistry = Map<
-  string,
-  { handler: FunctionHandler; scopes: AssistantScope[] }
->;
+export type FunctionHandlerRegistry = Map<string, { handler: FunctionHandler }>;
 
 export type RegistrationCallback = ({}: {
   signal: AbortSignal;
   resources: RespondFunctionResources;
   client: ObservabilityAIAssistantClient;
   functions: ChatFunctionClient;
+  scopes: AssistantScope[];
 }) => Promise<void>;
