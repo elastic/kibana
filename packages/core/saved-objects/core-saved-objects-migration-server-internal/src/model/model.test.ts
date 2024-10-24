@@ -2689,6 +2689,18 @@ describe('migrations v2 model', () => {
           });
         });
 
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_META if ONLY new SO types have been added', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'types_added' as const,
+            updatedFields: [],
+            newTypes: ['newFeatureType'],
+          });
+          const newState = model(checkTargetTypesMappingsState, res) as UpdateTargetMappingsMeta;
+          expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_META');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+
         it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if types match (there might be additions in core fields)', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
             type: 'types_match' as const,
