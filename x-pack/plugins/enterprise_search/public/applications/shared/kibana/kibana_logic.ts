@@ -28,7 +28,7 @@ import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { ConnectorDefinition } from '@kbn/search-connectors';
 import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';

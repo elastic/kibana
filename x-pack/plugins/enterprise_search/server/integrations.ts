@@ -7,6 +7,8 @@
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+
 import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
