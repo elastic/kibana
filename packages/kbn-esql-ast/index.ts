@@ -44,6 +44,8 @@ export {
   ESQLErrorListener,
 } from './src/parser';
 
+export { tokenize } from './src/tokenizer/tokenize';
+
 export { Walker, type WalkerOptions, walk } from './src/walker';
 
 export {

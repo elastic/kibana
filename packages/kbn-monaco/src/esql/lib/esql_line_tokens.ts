@@ -15,9 +15,9 @@ export class ESQLLineTokens implements monaco.languages.ILineTokens {
   endState: ESQLState;
   tokens: monaco.languages.IToken[];
 
-  constructor(tokens: monaco.languages.IToken[], line: number) {
+  constructor(tokens: monaco.languages.IToken[], inComment: boolean) {
     this.endState = new ESQLState();
-    this.endState.setLineNumber(line);
+    this.endState.setInComment(inComment);
     this.tokens = tokens;
   }
 }
