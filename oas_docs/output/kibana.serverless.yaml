@@ -3,7 +3,7 @@ info:
   contact:
     name: Kibana Team
   description: >
-    **Technical preview**
+    **Technical preview**  
 
     This functionality is in technical preview and may be changed or removed in
     a future release.
@@ -170,7 +170,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -269,7 +269,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -361,7 +361,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -447,7 +447,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -569,7 +569,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -665,7 +665,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -757,7 +757,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -845,7 +845,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
