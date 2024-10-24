@@ -43,9 +43,7 @@ export function GroupedInventory() {
     );
 
   useEffectOnce(() => {
-    const refreshSubscription = refreshSubject$.subscribe(() => {
-      refresh();
-    });
+    const refreshSubscription = refreshSubject$.subscribe(refresh);
 
     return () => refreshSubscription.unsubscribe();
   });

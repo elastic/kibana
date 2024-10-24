@@ -18,13 +18,11 @@ export function InventoryPage() {
 
   useEffect(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh, ...queryParams }) => {
-        if (!refresh) {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
+      ({ ...queryParams }) => {
+        inventoryRoute.push('/', {
+          path: {},
+          query: { ...query, ...queryParams },
+        });
       }
     );
     return () => {
