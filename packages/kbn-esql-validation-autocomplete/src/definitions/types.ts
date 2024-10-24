@@ -8,6 +8,7 @@
  */
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
+import { GetFieldsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -166,6 +167,12 @@ export interface CommandBaseDefinition {
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
+  suggest?: (
+    innerText: string,
+    getFieldsByType: GetFieldsByTypeFn,
+    columnExists: (column: string) => boolean
+  ) => Promise<SuggestionRawDefinition[]>;
+  /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
     // innerTypes here is useful to drill down the type in case of "column"
@@ -202,10 +209,12 @@ export interface CommandModeDefinition {
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {
-  options: CommandOptionsDefinition[];
+  /** @deprecated this property will disappear in the future */
+  options?: CommandOptionsDefinition[];
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
-  modes: CommandModeDefinition[];
+  /** @deprecated this property will disappear in the future */
+  modes?: CommandModeDefinition[];
   hasRecommendedQueries?: boolean;
 }
 

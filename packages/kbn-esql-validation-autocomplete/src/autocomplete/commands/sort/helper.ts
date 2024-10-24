@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import { SuggestionRawDefinition } from '../../types';
+
 const regexStart = /.+\|\s*so?r?(?<start>t?)(.+,)?(?<space1>\s+)?/i;
 const regex =
   /.+\|\s*sort(.+,)?((?<space1>\s+)(?<column>[^\s]+)(?<space2>\s*)(?<order>(AS?C?)|(DE?S?C?))?(?<space3>\s*)(?<nulls>NU?L?L?S? ?(FI?R?S?T?|LA?S?T?)?)?(?<space4>\s*))?/i;
@@ -42,6 +45,41 @@ export interface SortCaretPosition {
     | 'space4';
   nulls: string;
 }
+
+export const sortModifierSuggestions = {
+  ASC: {
+    label: 'ASC',
+    text: 'ASC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-ASC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  DESC: {
+    label: 'DESC',
+    text: 'DESC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-DESC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_FIRST: {
+    label: 'NULLS FIRST',
+    text: 'NULLS FIRST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS FIRST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_LAST: {
+    label: 'NULLS LAST',
+    text: 'NULLS LAST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS LAST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+};
 
 export const getSortPos = (query: string): SortCaretPosition => {
   const match = query.match(regex);
