@@ -10,7 +10,6 @@
 import { isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -18,6 +17,7 @@ import { backupServiceStrings } from '../dashboard_container/_dashboard_containe
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { coreServices, spacesService } from './kibana_services';
 import { DashboardState } from '../dashboard_api/types';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
@@ -158,7 +158,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       [...Object.keys(panelStatesInSpace), ...Object.keys(dashboardStatesInSpace)].map(
         (dashboardId) => {
           if (
-            dashboardStatesInSpace[dashboardId].viewMode === ViewMode.EDIT &&
+            dashboardStatesInSpace[dashboardId].viewMode === 'edit' &&
             (Object.keys(dashboardStatesInSpace[dashboardId]).some(
               (stateKey) => stateKey !== 'viewMode'
             ) ||

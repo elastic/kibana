@@ -24,6 +24,7 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 
 export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
+  index?: number;
   type: DashboardPanelState['type'];
   expandedPanelId?: string;
   focusedPanelId?: string;
@@ -37,6 +38,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       expandedPanelId,
       focusedPanelId,
       id,
+      index,
       type,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
