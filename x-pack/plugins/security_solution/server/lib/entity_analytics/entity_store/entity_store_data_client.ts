@@ -10,6 +10,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   AuditLogger,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -52,10 +53,12 @@ import {
   isPromiseFulfilled,
   isPromiseRejected,
 } from './utils';
+import type { EntityRecord } from './types';
+import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 
 interface EntityStoreClientOpts {
   logger: Logger;
-  esClient: ElasticsearchClient;
+  clusterClient: IScopedClusterClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
   taskManager?: TaskManagerStartContract;
@@ -79,12 +82,14 @@ export class EntityStoreDataClient {
   private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   private entityClient: EntityClient;
   private riskScoreDataClient: RiskScoreDataClient;
+  private esClient: ElasticsearchClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
-    const { esClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    const { clusterClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    this.esClient = clusterClient.asCurrentUser;
 
     this.entityClient = new EntityClient({
-      esClient,
+      clusterClient,
       soClient,
       logger,
     });
@@ -95,14 +100,14 @@ export class EntityStoreDataClient {
     });
 
     this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
-      esClient,
+      esClient: this.esClient,
       logger,
       auditLogger,
     });
 
     this.riskScoreDataClient = new RiskScoreDataClient({
       soClient,
-      esClient,
+      esClient: this.esClient,
       logger,
       namespace,
       kibanaVersion,
@@ -165,7 +170,7 @@ export class EntityStoreDataClient {
     filter: string,
     pipelineDebugMode: boolean
   ) {
-    const { esClient, logger, namespace, appClient, dataViewsService } = this.options;
+    const { logger, namespace, appClient, dataViewsService } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
     const unitedDefinition = getUnitedEntityDefinition({
@@ -200,12 +205,12 @@ export class EntityStoreDataClient {
       // this is because the enrich policy will fail if the index does not exist with the correct fields
       await createEntityIndexComponentTemplate({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       debugLog(`Created entity index component template`);
       await createEntityIndex({
         entityType,
-        esClient,
+        esClient: this.esClient,
         namespace,
         logger,
       });
@@ -215,12 +220,12 @@ export class EntityStoreDataClient {
       // this is because the pipeline will fail if the enrich index does not exist
       await createFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       debugLog(`Created field retention enrich policy`);
       await executeFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
         logger,
       });
       debugLog(`Executed field retention enrich policy`);
@@ -228,7 +233,7 @@ export class EntityStoreDataClient {
         debugMode: pipelineDebugMode,
         unitedDefinition,
         logger,
-        esClient,
+        esClient: this.esClient,
       });
       debugLog(`Created @platform pipeline`);
 
@@ -242,7 +247,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized`);
+      logger.info(`Entity store initialized for ${entityType}`);
 
       return updated;
     } catch (err) {
@@ -325,8 +330,9 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     options = { deleteData: false, deleteEngine: true }
   ) {
-    const { namespace, logger, esClient, appClient, dataViewsService } = this.options;
+    const { namespace, logger, appClient, dataViewsService } = this.options;
     const { deleteData, deleteEngine } = options;
+
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
     const unitedDefinition = getUnitedEntityDefinition({
@@ -348,22 +354,23 @@ export class EntityStoreDataClient {
       }
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       await deletePlatformPipeline({
         unitedDefinition,
         logger,
-        esClient,
+        esClient: this.esClient,
       });
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
+        logger,
       });
 
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
-          esClient,
+          esClient: this.esClient,
           namespace,
           logger,
         });
@@ -402,7 +409,7 @@ export class EntityStoreDataClient {
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
     const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
-    const response = await this.options.esClient.search<Entity>({
+    const response = await this.esClient.search<EntityRecord>({
       index,
       query,
       size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
@@ -414,7 +421,19 @@ export class EntityStoreDataClient {
 
     const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
 
-    const records = hits.hits.map((hit) => hit._source as Entity);
+    const records = hits.hits.map((hit) => {
+      const { asset, ...source } = hit._source as EntityRecord;
+
+      const assetOverwrite: Pick<Entity, 'asset'> =
+        asset && asset.criticality !== CRITICALITY_VALUES.DELETED
+          ? { asset: { criticality: asset.criticality } }
+          : {};
+
+      return {
+        ...source,
+        ...assetOverwrite,
+      };
+    });
 
     const inspect: InspectQuery = {
       dsl: [JSON.stringify({ index, body: query }, null, 2)],
@@ -446,7 +465,7 @@ export class EntityStoreDataClient {
           originalStatus === ENGINE_STATUS.UPDATING
         ) {
           throw new Error(
-            `Error updating entity store: There is an changes already in progress for engine ${id}`
+            `Error updating entity store: There are changes already in progress for engine ${id}`
           );
         }
 

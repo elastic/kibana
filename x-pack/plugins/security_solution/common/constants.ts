@@ -424,7 +424,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
   FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
-  ATTACK_DISCOVERY: 'securitySolution.attackDiscovery.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -513,3 +512,8 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+
+/*
+ * Whether it is a Jest environment
+ */
+export const JEST_ENVIRONMENT = typeof jest !== 'undefined';

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import https from 'https';
-
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
@@ -60,9 +58,6 @@ export const postHealthCheckHandler: FleetRequestHandler<
         accept: '*/*',
       },
       method: 'GET',
-      agent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
       signal: abortController.signal,
     });
     const bodyRes = await res.json();

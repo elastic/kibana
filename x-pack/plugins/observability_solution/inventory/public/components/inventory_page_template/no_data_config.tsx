@@ -33,8 +33,20 @@ export function getEntityManagerEnablement({
         description: (
           <FormattedMessage
             id="xpack.inventory.noData.card.description"
-            defaultMessage="The inventory uses the {link} to show all of your observed entities in one place."
+            defaultMessage="The {inventoryLink} uses the {link} to show all of your observed entities in one place."
             values={{
+              inventoryLink: (
+                <EuiLink
+                  data-test-subj="inventoryNoDataCardInventoryLink"
+                  href="https://ela.st/docs-entity-inventory"
+                  external
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.inventory.noData.card.description.inventory', {
+                    defaultMessage: 'Inventory',
+                  })}
+                </EuiLink>
+              ),
               link: (
                 <EuiLink
                   data-test-subj="inventoryNoDataCardLink"

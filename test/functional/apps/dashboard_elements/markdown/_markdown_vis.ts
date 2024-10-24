@@ -12,25 +12,26 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, visEditor, visChart, header } = getPageObjects([
-    'visualize',
+  const { visEditor, visChart, header, dashboard } = getPageObjects([
+    'dashboard',
     'visEditor',
     'visChart',
     'header',
   ]);
   const find = getService('find');
   const inspector = getService('inspector');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const markdown = `
 # Heading 1
 
 <h3>Inline HTML that should not be rendered as html</h3>
   `;
 
-  describe('markdown app in visualize app', () => {
+  describe('markdown app', () => {
     before(async function () {
-      await visualize.initTests();
-      await visualize.navigateToNewVisualization();
-      await visualize.clickMarkdownWidget();
+      await dashboard.initTests();
+      await dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickMarkdownQuickButton();
       await visEditor.setMarkdownTxt(markdown);
       await visEditor.clickGo();
     });
