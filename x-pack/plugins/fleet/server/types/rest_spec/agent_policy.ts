@@ -171,3 +171,17 @@ export const GetK8sManifestRequestSchema = {
 export const GetK8sManifestResponseScheme = schema.object({
   item: schema.string(),
 });
+
+export const GetAgentPolicyOutputsRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};
+
+export const GetListAgentPolicyOutputsRequestSchema = {
+  body: schema.object({
+    ids: schema.arrayOf(schema.string(), {
+      meta: { description: 'list of package policy ids' },
+    }),
+  }),
+};
