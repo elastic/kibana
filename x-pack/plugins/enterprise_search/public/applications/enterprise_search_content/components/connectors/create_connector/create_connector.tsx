@@ -57,10 +57,8 @@ export const CreateConnector: React.FC = () => {
 
   useEffect(() => {
     // TODO: separate this to ability and preference
-    if (!selectedConnector?.isNative || !selfManagePreference) {
+    if (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') {
       setSelfManagePreference('selfManaged');
-    } else {
-      setSelfManagePreference('native');
     }
   }, [selectedConnector]);
 
@@ -239,11 +237,11 @@ export const CreateConnector: React.FC = () => {
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiBadge color="hollow">
-                  {selfManagePreference
+                  {selfManagePreference === 'selfManaged'
                     ? i18n.translate(
                         'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
                         {
-                          defaultMessage: 'Self managed',
+                          defaultMessage: 'Self-managed',
                         }
                       )
                     : i18n.translate(
