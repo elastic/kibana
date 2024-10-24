@@ -21,6 +21,7 @@ interface Props {
 const toComboBoxOption = (entityType: EntityType): EuiComboBoxOptionOption<EntityType> => ({
   key: entityType,
   label: getEntityTypeLabel(entityType),
+  'data-test-subj': `entityTypesFilter${entityType}Option`,
 });
 
 export function EntityTypesControls({ onChange }: Props) {
@@ -44,6 +45,7 @@ export function EntityTypesControls({ onChange }: Props) {
 
   return (
     <EuiComboBox<EntityType>
+      data-test-subj="entityTypesFilterComboBox"
       isLoading={loading}
       css={css`
         max-width: 325px;

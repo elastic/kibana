@@ -17,6 +17,7 @@ type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;
+  isRoleManagementEnabled: boolean;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
