@@ -27,6 +27,8 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
         <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
         <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0"></script>
         <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0"></script>
         <script src="https://cdn.jsdelivr.net/npm/vega-lite-api@5.6.0"></script>
@@ -90,8 +92,8 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
               if (typeof UserComponent === 'function') {
                 ReactDOM.render(
                   React.createElement(UserComponent, {
-                    data: data.data,
-                    crossfilter: data.dataCrossfilter,
+                    data: data?.data,
+                    crossfilter: data?.dataCrossfilter,
                     width, height, dispatch
                   }),
                   document.getElementById('root')
@@ -124,6 +126,7 @@ export function getIframeContent(iframeID: string, hashedJs: string) {
               // iframe sends a "ready" message to the parent
               window.parent.postMessage({ source: '${iframeID}', type: 'iframeReady' }, '*');
               } catch (e) {
+               console.log('error transpiling', e);
               window.parent.postMessage({ source: '${iframeID}', type: 'error', payload: {
                 errorType: 'Error transpiling user input',
                 error: e
