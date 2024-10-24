@@ -229,6 +229,10 @@ const searchSourceSchema = schema.object(
       )
     ),
   },
+  /**
+   The Dashboard _should_ only ever uses the query and filters fields on the search
+   source. But we should be liberal in what we accept, so we allow unknowns.
+   */
   { defaultValue: {}, unknowns: 'allow' }
 );
 

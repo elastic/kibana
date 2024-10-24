@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       // panel index is a random uuid when not provided
       expect(response.body.item.attributes.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
       expect(response.body.item.attributes.panels[0].panelIndex).to.eql(
-        response.body.item.attributes.panels[0].panelConfig.id
+        response.body.item.attributes.panels[0].gridData.i
       );
     });
 
