@@ -15,6 +15,7 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
 import { registerCelInputRoutes } from './cel_routes';
 import { ExperimentalFeatures } from '../../common/experimental_features';
+import { registerEvaluationRoute } from './evaluate/run_evaluation_route';
 
 export function registerRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>,
@@ -26,6 +27,7 @@ export function registerRoutes(
   registerCategorizationRoutes(router);
   registerRelatedRoutes(router);
   registerPipelineRoutes(router);
+  registerEvaluationRoute(router);
 
   if (experimentalFeatures.generateCel) {
     registerCelInputRoutes(router);
