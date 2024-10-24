@@ -757,7 +757,11 @@ export class LensPlugin {
         const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         return {
           formula: createFormulaPublicApi(),
-          chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
+          chartInfo: createChartInfoApi(
+            startDependencies.dataViews,
+            visualizationMap,
+            datasourceMap
+          ),
           suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
             return suggestionsApi({
               datasourceMap,

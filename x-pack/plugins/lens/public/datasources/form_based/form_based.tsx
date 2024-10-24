@@ -869,13 +869,11 @@ export function getFormBasedDatasource({
 
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const layers = references ? injectReferences(state, references).layers : state.layers;
-      const indexPatterns: DataView[] = [];
-      for (const { indexPatternId } of Object.values(layers)) {
-        const dataView = await dataViewsService?.get(indexPatternId);
-        if (dataView) {
-          indexPatterns.push(dataView);
-        }
-      }
+      const indexPatterns: DataView[] = await Promise.all(
+        Object.values(layers)
+          .map(({ indexPatternId }) => dataViewsService?.get(indexPatternId))
+          .filter(nonNullable)
+      );
       return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const dataView = indexPatterns?.find(
           (indexPattern) => indexPattern.id === layer.indexPatternId
