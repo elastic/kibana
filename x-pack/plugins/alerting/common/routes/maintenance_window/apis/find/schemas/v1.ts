@@ -20,10 +20,10 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object({
   ),
   per_page: schema.maybe(
     schema.number({
-      defaultValue: 10, // should it be 25? should I have max boundery as well
+      defaultValue: 10,
       min: 0,
       meta: {
-        description: 'The number of rules to return per page.',
+        description: 'The number of maintenance windows to return per page.',
       },
     })
   ),

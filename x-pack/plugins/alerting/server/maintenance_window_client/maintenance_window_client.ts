@@ -78,7 +78,7 @@ export class MaintenanceWindowClient {
     getMaintenanceWindow(this.context, params);
   public update = (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
     updateMaintenanceWindow(this.context, params);
-  public find = (params: FindMaintenanceWindowsParams): Promise<FindMaintenanceWindowsResult> =>
+  public find = (params?: FindMaintenanceWindowsParams): Promise<FindMaintenanceWindowsResult> =>
     findMaintenanceWindows(this.context, params);
   public delete = (params: DeleteMaintenanceWindowParams): Promise<{}> =>
     deleteMaintenanceWindow(this.context, params);

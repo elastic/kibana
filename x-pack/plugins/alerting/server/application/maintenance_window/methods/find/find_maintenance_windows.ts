@@ -14,14 +14,16 @@ import { findMaintenanceWindowsParamsSchema } from './schemas';
 
 export async function findMaintenanceWindows(
   context: MaintenanceWindowClientContext,
-  params: FindMaintenanceWindowsParams
+  params?: FindMaintenanceWindowsParams
 ): Promise<FindMaintenanceWindowsResult> {
   const { savedObjectsClient, logger } = context;
 
   try {
-    findMaintenanceWindowsParamsSchema.validate(params);
+    if (params) {
+      findMaintenanceWindowsParamsSchema.validate(params);
+    }
   } catch (error) {
-    throw Boom.badRequest(`Error validating find data - ${error.message}`);
+    throw Boom.badRequest(`Error validating find maintenance windows data - ${error.message}`);
   }
 
   try {

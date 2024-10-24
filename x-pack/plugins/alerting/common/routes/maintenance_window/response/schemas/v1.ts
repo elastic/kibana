@@ -10,7 +10,6 @@ import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constan
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../shared';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
-// import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../../constants/v1';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),
