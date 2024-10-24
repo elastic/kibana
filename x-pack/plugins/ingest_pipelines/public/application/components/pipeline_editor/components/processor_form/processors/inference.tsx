@@ -62,7 +62,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.modelIDFieldHelpText',
       {
-        defaultMessage: 'ID of the deployment, the inference endpoint, or the model to infer against.',
+        defaultMessage:
+          'ID of the deployment, the inference endpoint, or the model to infer against.',
       }
     ),
     validations: [
