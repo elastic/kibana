@@ -23,6 +23,20 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 
+const mockOnInitialRenderCompleteMock = jest.fn();
+const mockUseReportPageRenderComplete = jest.fn((isReady: boolean) => {
+  return mockOnInitialRenderCompleteMock;
+});
+jest.mock('../../services/telemetry', () => {
+  const originalModule = jest.requireActual('../../services/telemetry');
+  return {
+    ...originalModule,
+    useReportPageRenderComplete: (isReady: boolean) => {
+      return mockUseReportPageRenderComplete(isReady);
+    },
+  };
+});
+
 const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
   fields: deepMockedFields,
@@ -93,25 +107,38 @@ describe('ContextAppContent test', () => {
     return component;
   };
 
+  beforeEach(() => {
+    mockUseReportPageRenderComplete.mockClear();
+    mockOnInitialRenderCompleteMock.mockClear();
+  });
+
   it('should render legacy table correctly', async () => {
     const component = await mountComponent({});
     expect(component.find(DocTableWrapper).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   });
 
   it('renders loading indicator', async () => {
-    const component = await mountComponent({ anchorStatus: LoadingStatus.LOADING });
+    const component = await mountComponent({
+      anchorStatus: LoadingStatus.LOADING,
+    });
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(component.find(DocTableWrapper).length).toBe(1);
     expect(loadingIndicator.length).toBe(1);
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   });
 
   it('should render discover grid correctly', async () => {
     const component = await mountComponent({ isLegacy: false });
     expect(component.find(UnifiedDataTable).length).toBe(1);
     expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(false);
+    expect(mockOnInitialRenderCompleteMock).toHaveBeenCalled();
   });
 
   it('should not show display options button', async () => {

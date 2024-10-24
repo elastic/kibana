@@ -24,7 +24,7 @@ export function usePerformanceContext() {
   const api = useContext(PerformanceContext);
 
   if (!api) {
-    throw new Error('Missing Performance API in context');
+    throw new Error('No performance context provided');
   }
 
   return api;

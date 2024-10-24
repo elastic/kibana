@@ -16,6 +16,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useReportPageRenderComplete } from '../../services/telemetry';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -49,6 +50,8 @@ export function ContextAppRoute() {
   const anchorId = decodeURIComponent(id);
 
   const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
+
+  useReportPageRenderComplete(Boolean(error));
 
   if (error) {
     return (

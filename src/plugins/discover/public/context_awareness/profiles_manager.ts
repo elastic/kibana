@@ -25,7 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { DiscoverEBTManager } from '../services/telemetry';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];

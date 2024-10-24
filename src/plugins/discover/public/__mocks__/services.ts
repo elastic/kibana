@@ -45,7 +45,7 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { urlTrackerMock } from './url_tracker.mock';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { DiscoverEBTManager } from '../services/telemetry';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();

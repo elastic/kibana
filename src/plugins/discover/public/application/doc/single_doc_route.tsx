@@ -19,6 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import { DocHistoryLocationState } from './locator';
+import { useReportPageRenderComplete } from '../../services/telemetry';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -52,6 +53,8 @@ export const SingleDocRoute = () => {
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
+
+  useReportPageRenderComplete(Boolean(error) || !id);
 
   if (error) {
     return (

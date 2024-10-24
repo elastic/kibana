@@ -42,6 +42,7 @@ import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inlin
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useRootProfile } from '../../context_awareness';
+import { useReportPageRenderComplete } from '../../services/telemetry';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -347,6 +348,8 @@ export function DiscoverMainRoute({
 
   const { solutionNavId } = customizationContext;
   const { rootProfileLoading } = useRootProfile({ solutionNavId });
+
+  useReportPageRenderComplete(showNoDataPage || Boolean(error));
 
   if (error) {
     return <DiscoverError error={error} />;

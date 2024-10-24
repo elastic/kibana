@@ -64,7 +64,7 @@ import type { DiscoverContextAppLocator } from './application/context/services/l
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
-import type { DiscoverEBTManager } from './services/discover_ebt_manager';
+import type { DiscoverEBTManager } from './services/telemetry';
 
 /**
  * Location state of internal Discover history instance

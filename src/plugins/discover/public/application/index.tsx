@@ -15,6 +15,7 @@ import type { ExperimentalFeatures } from '../../server/config';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
+import { resetPageRenderCompleteReport } from '../services/telemetry';
 
 export interface RenderAppProps {
   element: HTMLElement;
@@ -55,5 +56,6 @@ export const renderApp = ({
   return () => {
     unmount();
     data.search.session.clear();
+    resetPageRenderCompleteReport();
   };
 };

@@ -79,6 +79,7 @@ import {
   useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
+import { useReportPageRenderComplete } from '../../../../services/telemetry';
 
 const containerStyles = css`
   position: relative;
@@ -404,6 +405,8 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const onInitialRenderComplete = useReportPageRenderComplete(isLegacy);
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -520,6 +523,7 @@ function DiscoverDocumentsComponent({
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
+                onInitialRenderComplete={onInitialRenderComplete}
               />
             </CellActionsProvider>
           </div>
