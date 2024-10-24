@@ -273,6 +273,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      if (!agentPolicy) {
+        throw new AgentPolicyNotFoundError('Agent policy not found');
+      }
+
       agentPolicies.push(agentPolicy);
 
       // If package policy did not set an output_id, see if the agent policy's output is compatible
@@ -284,7 +288,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
 
-      await validateIsNotHostedPolicy(soClient, policyId, options?.force);
+      await validateIsNotHostedPolicy(soClient, agentPolicy, options?.force);
 
       if (useSpaceAwareness && enrichedPackagePolicy.policy_ids.length > 1) {
         if (agentPolicy?.space_ids?.length ?? 0 > 1) {
@@ -508,8 +512,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
-    for (const agentPolicyId of agentPolicyIds) {
-      await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
+    const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
+    for (const agentPolicy of agentPolicies) {
+      await validateIsNotHostedPolicy(soClient, agentPolicy, options?.force);
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
@@ -1418,9 +1423,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        const agentPolicy = await validateIsNotHostedPolicy(
+        const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+        if (!agentPolicy) {
+          throw new AgentPolicyNotFoundError('Agent policy not found');
+        }
+
+        await validateIsNotHostedPolicy(
           soClient,
-          agentPolicyId,
+          agentPolicy,
           options?.force,
           'Cannot remove integrations of hosted agent policy'
         );
@@ -3064,21 +3074,15 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 
 async function validateIsNotHostedPolicy(
   soClient: SavedObjectsClientContract,
-  id: string,
+  agentPolicy: AgentPolicy,
   force = false,
   errorMessage?: string
 ): Promise<AgentPolicy> {
-  const agentPolicy = await agentPolicyService.get(soClient, id, false);
-
-  if (!agentPolicy) {
-    throw new AgentPolicyNotFoundError('Agent policy not found');
-  }
-
   const isManagedPolicyWithoutServerlessSupport = agentPolicy.is_managed && !force;
 
   if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(
-      errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
+      errorMessage ?? `Cannot update integrations of hosted agent policy ${agentPolicy.id}`
     );
   }
 

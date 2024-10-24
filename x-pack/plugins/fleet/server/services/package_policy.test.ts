@@ -223,6 +223,24 @@ const mockAgentPolicyGet = () => {
       });
     }
   );
+  mockAgentPolicyService.getByIDs.mockImplementation(
+    // @ts-ignore
+    (_soClient: SavedObjectsClientContract, ids: string[]) => {
+      return Promise.resolve(
+        ids.map((id) => ({
+          id,
+          name: 'Test Agent Policy',
+          namespace: 'test',
+          status: 'active',
+          is_managed: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+          revision: 1,
+          is_protected: false,
+        }))
+      );
+    }
+  );
 };
 
 describe('Package policy service', () => {
