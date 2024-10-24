@@ -34,7 +34,6 @@ export const HISTOGRAM_BAR_TARGET_ID = 'histogram:barTarget';
 export const HISTOGRAM_MAX_BARS_ID = 'histogram:maxBars';
 export const HISTORY_LIMIT_ID = 'history:limit';
 export const META_FIELDS_ID = 'metaFields';
-export const METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID = 'metrics:allowCheckingForFailedShards';
 export const METRICS_ALLOW_STRING_INDICES_ID = 'metrics:allowStringIndices';
 export const METRICS_MAX_BUCKETS_ID = 'metrics:max_buckets';
 export const QUERY_ALLOW_LEADING_WILDCARDS_ID = 'query:allowLeadingWildcards';
