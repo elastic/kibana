@@ -57,10 +57,12 @@ export const CreateConnector: React.FC = () => {
 
   useEffect(() => {
     // TODO: separate this to ability and preference
-    if (!selectedConnector?.isNative || !selfManagePreference) {
-      setSelfManagePreference('selfManaged');
-    } else {
-      setSelfManagePreference('native');
+    if (selectedConnector) {
+      if (!selectedConnector?.isNative || !selfManagePreference) {
+        setSelfManagePreference('selfManaged');
+      } else {
+        setSelfManagePreference('native');
+      }
     }
   }, [selectedConnector]);
 
