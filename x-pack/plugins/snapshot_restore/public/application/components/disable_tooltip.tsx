@@ -15,7 +15,8 @@ interface Props {
 }
 
 /**
- * Component that wraps a given component with a tooltip if isManaged is true.
+ * Component that wraps a given component (disabled field) with a tooltip if a repository
+ * or policy is managed (isManaged === true).
  *
  * @param {boolean} isManaged - Determines if the tooltip should be displayed.
  * @param {string} tooltipMessage - The message to display inside the tooltip.
