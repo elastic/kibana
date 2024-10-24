@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-export { Graph } from './graph/graph';
-export type { GraphProps } from './graph/graph';
-export type {
-  NodeViewModel,
-  EdgeViewModel,
-  GroupNodeViewModel,
-  LabelNodeViewModel,
-  EntityNodeViewModel,
-  NodeProps,
-} from './types';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { mockReactFlow } from './src/components/mock/react_flow';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';
+
+mockReactFlow();

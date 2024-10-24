@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { defaultConfig } from '@kbn/storybook';
+
 module.exports = {
-  preset: '@kbn/test',
-  roots: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture/graph'],
-  rootDir: '../../../..',
-  setupFiles: ['jest-canvas-mock'],
-  setupFilesAfterEnv: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture/graph/setup_tests.ts'],
+  ...defaultConfig,
+  stories: ['../../**/*.stories.+(tsx|mdx)'],
+  reactOptions: {
+    strictMode: true,
+  },
 };
