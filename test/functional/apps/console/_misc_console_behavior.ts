@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.openConsole();
     });
 
-    describe.skip('customizable font size', () => {
+    describe('customizable font size', () => {
       it('should allow the font size to be customized', async () => {
         await PageObjects.console.openConfig();
         await PageObjects.console.setFontSizeSetting(20);
@@ -162,7 +162,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
-          expect(await PageObjects.console.getFontSize()).to.be('20px');
+          const fontSize = await PageObjects.console.getFontSize();
+          // eslint-disable-next-line no-console
+          console.log(fontSize);
+          expect(fontSize).to.be('20px');
         });
 
         await PageObjects.console.openConfig();
@@ -171,7 +174,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
-          expect(await PageObjects.console.getFontSize()).to.be('24px');
+          const fontSize = await PageObjects.console.getFontSize();
+          // eslint-disable-next-line no-console
+          console.log(fontSize);
+          expect(fontSize).to.be('24px');
         });
       });
     });
