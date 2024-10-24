@@ -176,8 +176,9 @@ describe('checkTargetTypesMappings', () => {
 
             const result = await task();
             expect(result).toEqual(
-              Either.right({
-                type: 'types_match' as const,
+              Either.left({
+                type: 'types_added' as const,
+                newTypes: ['type3'],
               })
             );
           });

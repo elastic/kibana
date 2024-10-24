@@ -237,18 +237,6 @@ export const reportingExportModalProvider = ({
       generateExportUrl: generateExportUrlPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
-      helpText: (
-        <FormattedMessage
-          id="reporting.printablePdfV2.helpText"
-          defaultMessage="Select the file type you would like to export for this visualization."
-        />
-      ),
-      generateExportButton: (
-        <FormattedMessage
-          id="reporting.printablePdfV2.generateButtonLabel"
-          defaultMessage="Export file"
-        />
-      ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderLayoutOptionSwitch: objectType === 'dashboard',
       renderCopyURLButton: true,
@@ -268,15 +256,6 @@ export const reportingExportModalProvider = ({
       generateExportUrl: generateExportUrlPNG,
       reportType: 'pngV2',
       requiresSavedState,
-      helpText: (
-        <FormattedMessage
-          id="reporting.pngV2.helpText"
-          defaultMessage="Select the file type you would like to export for this visualization."
-        />
-      ),
-      generateExportButton: (
-        <FormattedMessage id="reporting.pngV2.generateButtonLabel" defaultMessage="Export file" />
-      ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderCopyURLButton: true,
     });

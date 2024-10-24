@@ -50,6 +50,7 @@ import {
   ListingLimitWarning,
   ItemDetails,
   UpdatedAtField,
+  FORBIDDEN_SEARCH_CHARS,
 } from './components';
 import { useServices } from './services';
 import type { SavedObjectsFindOptionsReference } from './services';
@@ -57,7 +58,7 @@ import { getReducer } from './reducer';
 import { type SortColumnField, getInitialSorting, saveSorting } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions } from './types';
+import type { RowActions, SearchQueryError, TableItemsRowActions } from './types';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
@@ -146,6 +147,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   searchQuery: {
     text: string;
     query: Query;
+    error: SearchQueryError | null;
   };
   selectedIds: string[];
   totalItems: number;
@@ -188,6 +190,8 @@ interface URLQueryParams {
 
   [key: string]: unknown;
 }
+
+const FORBIDDEN_SEARCH_CHARS_ARRAY = FORBIDDEN_SEARCH_CHARS.split('');
 
 /**
  * Deserializer to convert the URL query params to a sanitized object
@@ -407,7 +411,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       hasCreatedByMetadata: false,
       hasRecentlyAccessedMetadata: recentlyAccessed ? recentlyAccessed.get().length > 0 : false,
       selectedIds: [],
-      searchQuery: { text: '', query: new Query(Ast.create([]), undefined, '') },
+      searchQuery: { text: '', query: new Query(Ast.create([]), undefined, ''), error: null },
       pagination: {
         pageIndex: 0,
         totalItemCount: 0,
@@ -492,14 +496,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
 
   const updateQuery = useCallback(
-    (query: Query) => {
-      if (urlStateEnabled) {
+    (query: Query | null, error: SearchQueryError | null) => {
+      if (urlStateEnabled && query) {
         setUrlState({ s: query.text });
       }
 
       dispatch({
         type: 'onSearchQueryChange',
-        data: { query, text: query.text },
+        data: query ? { query, text: query.text, error } : { error },
       });
     },
     [urlStateEnabled, setUrlState]
@@ -809,14 +813,32 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const onTableSearchChange = useCallback(
-    (arg: { query: Query | null; queryText: string }) => {
-      if (arg.query) {
-        updateQuery(arg.query);
+    (arg: {
+      query: Query | null;
+      queryText: string;
+      error?: { message: string; name: string };
+    }) => {
+      const { query, queryText, error: _error } = arg;
+
+      let error: SearchQueryError | null = null;
+      if (_error) {
+        const containsForbiddenChars = FORBIDDEN_SEARCH_CHARS_ARRAY.some((char) =>
+          queryText.includes(char)
+        );
+        error = {
+          ..._error,
+          queryText,
+          containsForbiddenChars,
+        };
+      }
+
+      if (query || error) {
+        updateQuery(query, error);
       } else {
         const idx = tableSearchChangeIdx.current + 1;
-        buildQueryFromText(arg.queryText).then((query) => {
+        buildQueryFromText(queryText).then((q) => {
           if (idx === tableSearchChangeIdx.current) {
-            updateQuery(query);
+            updateQuery(q, null);
           }
         });
       }
@@ -1036,6 +1058,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           query: updatedQuery,
           text,
+          error: null,
         },
       });
     };
@@ -1089,7 +1112,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   useEffect(() => {
     if (initialQuery && !initialQueryInitialized.current) {
       initialQueryInitialized.current = true;
-      buildQueryFromText(initialQuery).then(updateQuery);
+      buildQueryFromText(initialQuery).then((q) => updateQuery(q, null));
     }
   }, [initialQuery, buildQueryFromText, updateQuery]);
 

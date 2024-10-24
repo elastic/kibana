@@ -111,7 +111,7 @@ export const SolutionView: FunctionComponent<Props> = ({
 
   return (
     <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
-      <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexGroup alignItems="baseline">
         <EuiFlexItem>
           <EuiTitle size="xs">
             <EuiFlexGroup gutterSize="s">
@@ -163,6 +163,7 @@ export const SolutionView: FunctionComponent<Props> = ({
               onChange={(solution) => {
                 onChange({ ...space, solution });
               }}
+              fullWidth={true}
               placeholder={i18n.translate(
                 'xpack.spaces.management.navigation.solutionViewDefaultValue',
                 { defaultMessage: 'Select solution view' }
@@ -180,7 +181,7 @@ export const SolutionView: FunctionComponent<Props> = ({
                 />
               </EuiText>
 
-              <EuiSpacer />
+              <EuiSpacer size="m" />
               <EuiCallOut
                 color="primary"
                 size="s"

@@ -181,7 +181,7 @@ Object {
             "goodEvents": "slo.numerator>value",
             "totalEvents": "slo.denominator>value",
           },
-          "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
+          "script": "if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0 }",
         },
       },
       "slo.numerator": Object {

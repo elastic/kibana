@@ -57,7 +57,7 @@ export const IntegrationRT = t.type({
   pkgName: t.string,
   pkgVersion: t.string,
   title: t.string,
-  inputs: t.array(t.unknown),
+  config: t.string,
   dataStreams: t.array(
     t.type({
       type: t.string,

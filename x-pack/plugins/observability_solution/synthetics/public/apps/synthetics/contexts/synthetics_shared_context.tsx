@@ -50,6 +50,9 @@ export const SyntheticsSharedContext: React.FC<
                 coreStart={{
                   application: coreStart.application,
                 }}
+                style={{
+                  height: '100%',
+                }}
               >
                 {children}
               </RedirectAppLinks>

@@ -230,5 +230,6 @@
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
     "@kbn/core-user-profile-browser",
+    "@kbn/data-stream-adapter",
   ]
 }

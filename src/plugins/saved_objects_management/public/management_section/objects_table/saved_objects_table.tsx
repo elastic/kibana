@@ -688,7 +688,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = allowedTypes.map((type) => ({
+    const filtersWithoutTags = allowedTypes.filter((t) => t.name !== 'tag');
+    const itemsWithoutTags = savedObjects.filter((t) => t.type !== 'tag');
+
+    const filterOptions = filtersWithoutTags.map((type) => ({
       value: type.displayName,
       name: type.displayName,
       view: `${type.displayName} (${savedObjectCounts[type.name] || 0})`,
@@ -733,7 +736,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             pageIndex={page}
             pageSize={perPage}
             sort={sort}
-            items={savedObjects}
+            items={itemsWithoutTags}
             totalItemCount={filteredItemCount}
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}

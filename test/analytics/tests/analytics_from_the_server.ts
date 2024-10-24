@@ -203,6 +203,30 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(eventCount).to.be(1);
         });
+        it('should return 0 events when filtering by invalid properties', async () => {
+          const eventCount = await ebtServerHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+            filters: {
+              'properties.plugin': {
+                eq: 'analyticsPluginB',
+              },
+            },
+          });
+          expect(eventCount).to.be(0);
+        });
+        it('should return 1 event when filtering by valid properties', async () => {
+          const eventCount = await ebtServerHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+            filters: {
+              'properties.step': {
+                eq: 'start',
+              },
+            },
+          });
+          expect(eventCount).to.be(1);
+        });
       });
     });
   });

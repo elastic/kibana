@@ -44,7 +44,7 @@ describe('Delete Action', () => {
   });
 
   it('disable the delete action for preconfigured endpoint', () => {
-    const preconfiguredMockItem = { ...mockItem, endpoint: '.elser-2' };
+    const preconfiguredMockItem = { ...mockItem, endpoint: '.multilingual-e5-small-elasticsearch' };
     render(<Wrapper item={preconfiguredMockItem} />);
 
     expect(screen.getByTestId('inferenceUIDeleteAction')).toBeDisabled();

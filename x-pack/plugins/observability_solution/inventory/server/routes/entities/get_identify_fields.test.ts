@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ContainerEntity, HostEntity, ServiceEntity } from '../../../common/entities';
+import type { Entity } from '../../../common/entities';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
+  ENTITY_IDENTITY_FIELDS,
   ENTITY_LAST_SEEN,
 } from '@kbn/observability-shared-plugin/common';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
@@ -27,24 +28,24 @@ describe('getIdentityFields', () => {
     expect(result.size).toBe(0);
   });
   it('should return a Map with unique entity types and their respective identity fields', () => {
-    const serviceEntity: ServiceEntity = {
+    const serviceEntity: Entity = {
       'agent.name': 'node',
-      'entity.identityFields': ['service.name', 'service.environment'],
+      'entity.identity_fields': ['service.name', 'service.environment'],
       'service.name': 'my-service',
       'entity.type': 'service',
       ...commonEntityFields,
     };
 
-    const hostEntity: HostEntity = {
-      'entity.identityFields': ['host.name'],
+    const hostEntity: Entity = {
+      [ENTITY_IDENTITY_FIELDS]: ['host.name'],
       'host.name': 'my-host',
       'entity.type': 'host',
       'cloud.provider': null,
       ...commonEntityFields,
     };
 
-    const containerEntity: ContainerEntity = {
-      'entity.identityFields': 'container.id',
+    const containerEntity: Entity = {
+      [ENTITY_IDENTITY_FIELDS]: 'container.id',
       'host.name': 'my-host',
       'entity.type': 'container',
       'cloud.provider': null,

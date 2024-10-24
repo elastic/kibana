@@ -6926,7 +6926,7 @@
         "label": "ENTITY_DEFINITION_ID",
         "description": [],
         "signature": [
-          "\"entity.definitionId\""
+          "\"entity.definition_id\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
@@ -6941,7 +6941,7 @@
         "label": "ENTITY_DISPLAY_NAME",
         "description": [],
         "signature": [
-          "\"entity.displayName\""
+          "\"entity.display_name\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
@@ -6956,7 +6956,7 @@
         "label": "ENTITY_FIRST_SEEN",
         "description": [],
         "signature": [
-          "\"entity.firstSeenTimestamp\""
+          "\"entity.first_seen_timestamp\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
@@ -6986,7 +6986,7 @@
         "label": "ENTITY_IDENTITY_FIELDS",
         "description": [],
         "signature": [
-          "\"entity.identityFields\""
+          "\"entity.identity_fields\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
@@ -7001,7 +7001,7 @@
         "label": "ENTITY_LAST_SEEN",
         "description": [],
         "signature": [
-          "\"entity.lastSeenTimestamp\""
+          "\"entity.last_seen_timestamp\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,

@@ -15,8 +15,8 @@ const timeRange = {
   rangeFrom: start,
   rangeTo: end,
 };
-
-describe('Transaction details', () => {
+// flaky
+describe.skip('Transaction details', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -34,7 +34,8 @@ describe('Transaction details', () => {
     cy.loginAsViewerUser();
   });
 
-  it('shows transaction name and transaction charts', () => {
+  // skipping this as it´s been failing a lot lately, more information here https://github.com/elastic/kibana/issues/197386
+  it.skip('shows transaction name and transaction charts', () => {
     cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
       'transactionLatencyRequest'
     );
@@ -106,8 +107,8 @@ describe('Transaction details', () => {
     );
     cy.contains('Create SLO');
   });
-
-  it('shows top errors table', () => {
+  // skipping this as it´s been failing a lot lately, more information here https://github.com/elastic/kibana/issues/197386
+  it.skip('shows top errors table', () => {
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
