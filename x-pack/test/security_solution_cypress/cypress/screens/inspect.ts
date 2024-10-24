@@ -34,6 +34,8 @@ import { EVENTS_TAB } from './users/user_events';
 import { HTTP_TAB, HTTP_TABLE } from './network/http';
 import { TLS_TAB, TLS_TABLE } from './network/tls';
 import { getDataTestSubjectSelector } from '../helpers/common';
+import { HOST_BY_RISK_TABLE, RISK_DETAILS_NAV } from './hosts/host_risk';
+import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from './users/user_risk_score';
 
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
@@ -88,12 +90,12 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         altInspectId: '[data-test-subj="events-viewer-panel"]',
         id: EVENT_CONTAINER_TABLE_NOT_LOADING,
       },
-      // {
-      //   title: 'Host risk',
-      //   tab: RISK_DETAILS_NAV,
-      //   customIndexPattern: 'ml_host_risk_score_latest_default',
-      //   id: HOST_BY_RISK_TABLE,
-      // },
+      {
+        title: 'Host risk',
+        tab: RISK_DETAILS_NAV,
+        customIndexPattern: 'risk-score.risk-score-latest-default',
+        id: HOST_BY_RISK_TABLE,
+      },
     ],
     lensVisualizations: [
       {
@@ -284,12 +286,12 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         tab: EVENTS_TAB,
         id: EVENT_CONTAINER_TABLE_NOT_LOADING,
       },
-      // {
-      //   title: 'User risk',
-      //   tab: RISK_SCORE_TAB,
-      //   id: RISK_SCORE_TAB_CONTENT,
-      //   customIndexPattern: 'ml_user_risk_score_latest_default',
-      // },
+      {
+        title: 'User risk',
+        tab: RISK_SCORE_TAB,
+        id: RISK_SCORE_TAB_CONTENT,
+        customIndexPattern: 'risk-score.risk-score-latest-default',
+      },
     ],
   },
 ];
