@@ -8,7 +8,6 @@
 export type { TagsCapabilities } from './capabilities';
 export { getTagsCapabilities } from './capabilities';
 export { tagFeatureId, tagSavedObjectTypeName, tagManagementSectionId } from './constants';
-export type { TagWithRelations, TagSavedObject } from './types';
 export type { TagValidation } from './validation';
 export {
   validateTagColor,
