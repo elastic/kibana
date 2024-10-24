@@ -11,12 +11,12 @@ import type { SpaceHealthSnapshot } from './space_health';
 const getEmptySpaceHealthSnapshot = (): SpaceHealthSnapshot => {
   return {
     state_at_the_moment: healthStatsMock.getEmptyHealthOverviewState(),
-    stats_over_interval: healthStatsMock.getEmptyHealthOverviewStats(),
+    stats_over_interval: healthStatsMock.getEmptySpaceHealthOverviewStats(),
     history_over_interval: {
       buckets: [
         {
           timestamp: '2023-05-15T16:12:14.967Z',
-          stats: healthStatsMock.getEmptyHealthOverviewStats(),
+          stats: healthStatsMock.getEmptySpaceHealthOverviewStats(),
         },
       ],
     },
