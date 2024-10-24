@@ -616,8 +616,8 @@ describe('autocomplete', () => {
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
-      ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      ...getFieldNamesByType('any', { advanceCursor: true }),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true, advanceCursor: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [

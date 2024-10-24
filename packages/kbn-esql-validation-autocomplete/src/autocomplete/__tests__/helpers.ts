@@ -132,12 +132,14 @@ export function getFunctionSignaturesByReturnType(
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
+    advanceCursor,
   }: {
     agg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
     builtin?: boolean;
     skipAssign?: boolean;
+    advanceCursor?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
@@ -209,7 +211,7 @@ export function getFunctionSignaturesByReturnType(
       if (type === 'builtin') {
         return {
           text: signatures.some(({ params }) => params.length > 1)
-            ? `${name.toUpperCase()} $0`
+            ? `${name.toUpperCase()} $0${advanceCursor ? ' ' : ''}`
             : name.toUpperCase(),
           label: name.toUpperCase(),
         };
@@ -219,19 +221,20 @@ export function getFunctionSignaturesByReturnType(
         capitalize: true,
       });
       return {
-        text: `${name.toUpperCase()}($0)`,
+        text: `${name.toUpperCase()}($0)${advanceCursor ? ' ' : ''}`,
         label: printedSignatures[0].declaration,
       };
     });
 }
 
 export function getFieldNamesByType(
-  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
+  opts?: { advanceCursor: boolean }
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
-    .map(({ name, suggestedAs }) => suggestedAs || name);
+    .map(({ name, suggestedAs }) => (suggestedAs || name) + (opts?.advanceCursor ? ' ' : ''));
 }
 
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
