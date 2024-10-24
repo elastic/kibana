@@ -20,7 +20,7 @@ import {
 } from '../../../../../lib/telemetry/event_based/events';
 import { NotFoundError } from '../../../../errors';
 import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
-import { SimpleMemCache } from './simple_mem_cache';
+import { SimpleMemCache } from '../../../../lib/simple_mem_cache';
 import {
   fetchActionResponses,
   fetchEndpointActionResponses,
