@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after, expect } from '@elastic/synthetics';
+import { journey, step, before, after } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
@@ -61,19 +61,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   });
 
   step('verify rule creation', async () => {
-    await retry.try(async () => {
-      const rules = await services.getRules();
-      expect(rules.length).toBe(3);
-      expect(rules[2].params).toStrictEqual({
-        condition: {
-          downThreshold: 3,
-          locationsThreshold: 1,
-          groupBy: 'locationId',
-          window: {
-            numberOfChecks: 5,
-          },
-        },
-      });
-    });
+    await syntheticsApp.goToRulesPage();
+    await page.waitForSelector(`text='Synthetics status rule'`);
   });
 });

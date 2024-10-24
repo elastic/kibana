@@ -222,11 +222,12 @@ export class SyntheticsServices {
   }
 
   async getRules() {
-    const response = await axios.get(this.kibanaUrl + '/internal/alerting/rules/_find', {
-      auth: { username: 'elastic', password: 'changeme' },
-      headers: { 'kbn-xsrf': 'true' },
+    const response = await this.requester.request({
+      path: `/internal/alerting/rules/_find`,
+      method: 'GET',
     });
-    return response.data.data;
+
+    return response.data?.data;
   }
 
   async setupTestConnector() {
