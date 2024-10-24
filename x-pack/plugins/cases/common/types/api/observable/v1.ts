@@ -10,7 +10,7 @@ import { limitedArraySchema, NonEmptyString } from '../../../schema';
 import { CaseObservableRt, ObservablePatch } from '../../domain';
 
 /**
- * Files
+ * Observables
  */
 
 const MIN_DELETE_IDS = 1;
