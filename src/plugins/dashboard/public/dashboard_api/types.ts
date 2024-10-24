@@ -15,6 +15,7 @@ import {
   PresentationContainer,
   PublishesSettings,
   SerializedPanelState,
+  TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
@@ -143,6 +144,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
+  TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;

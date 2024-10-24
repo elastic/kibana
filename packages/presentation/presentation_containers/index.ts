@@ -27,6 +27,10 @@ export {
   type CanExpandPanels,
 } from './interfaces/panel_management';
 export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/performance_trackers';
+export {
   apiIsPresentationContainer,
   combineCompatibleChildrenApis,
   getContainerParentFromAPI,

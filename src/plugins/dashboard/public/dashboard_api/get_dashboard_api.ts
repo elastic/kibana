@@ -40,6 +40,7 @@ import { openSaveModal } from './open_save_modal';
 import { initializeSearchSessionManager } from './search_session_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { UnsavedPanelState } from '../dashboard_container/types';
+import { initializeTrackContentfulRender } from './track_contentful_render';
 
 export function getDashboardApi({
   creationOptions,
@@ -146,6 +147,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,
     ...trackOverlayApi,
+    ...initializeTrackContentfulRender(),
     controlGroupApi$,
     fullScreenMode$,
     getAppContext: () => {
