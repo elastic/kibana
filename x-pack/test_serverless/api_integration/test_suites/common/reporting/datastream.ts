@@ -6,8 +6,12 @@
  */
 
 import { expect } from 'expect';
+import {
+  CookieCredentials,
+  InternalRequestHeader,
+  RoleCredentials,
+} from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -16,7 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
+  const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
@@ -30,12 +36,13 @@ export default function ({ getService }: FtrProviderContext) {
     const generatedReports = new Set<string>();
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
-      const { job } = await reportingAPI.createReportJobInternal(
+      const { job, path } = await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
           browserTimezone: 'UTC',
@@ -48,16 +55,17 @@ export default function ({ getService }: FtrProviderContext) {
           title: 'Ecommerce Data',
           version: '8.15.0',
         },
-        roleAuthc,
+        cookieCredentials,
         internalReqHeader
       );
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
 
       generatedReports.add(job.id);
     });
 
     after(async () => {
       for (const reportId of generatedReports) {
-        await reportingAPI.deleteReport(reportId, roleAuthc, internalReqHeader);
+        await reportingAPI.deleteReport(reportId, cookieCredentials, internalReqHeader);
       }
 
       await esArchiver.unload(archives.ecommerce.data);
@@ -69,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader);
+        .set(roleAuthc.apiKeyHeader); // use API key since the datastream management API is a public endpoint
 
       svlCommonApi.assertResponseStatusCode(200, status, body);
 

@@ -18,9 +18,13 @@ export function parseOnboardingSolution(value?: string): OnBoardingDefaultSoluti
   if (!value) return;
 
   const solutions: Array<{
-    cloudValue: 'elasticsearch' | 'observability' | 'security';
+    cloudValue: 'search' | 'elasticsearch' | 'observability' | 'security';
     kibanaValue: OnBoardingDefaultSolution;
   }> = [
+    {
+      cloudValue: 'search',
+      kibanaValue: 'es',
+    },
     {
       cloudValue: 'elasticsearch',
       kibanaValue: 'es',

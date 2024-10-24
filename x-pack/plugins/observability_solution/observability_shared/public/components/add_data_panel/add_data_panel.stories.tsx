@@ -15,7 +15,7 @@ export default {
 };
 
 const defaultFunctions = {
-  onDissmiss: () => alert('Dismissed'),
+  onDismiss: () => alert('Dismissed'),
   onAddData: () => alert('Add Data'),
   onTryIt: () => alert('Try It'),
   onLearnMore: () => alert('Learn More'),
@@ -139,7 +139,7 @@ export function NotDismissable(props: ComponentProps<typeof AddDataPanel>) {
 NotDismissable.args = {
   ...defaultContent(),
   ...defaultFunctions,
-  onDissmiss: undefined,
+  onDismiss: undefined,
   actions: {
     primary: defaultPrimaryAction,
     secondary: {
