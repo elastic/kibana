@@ -293,14 +293,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (useSpaceAwareness) {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
-
-      if (useSpaceAwareness && enrichedPackagePolicy.policy_ids.length > 1) {
-        if (agentPolicy?.space_ids?.length ?? 0 > 1) {
-          throw new FleetError(
-            'Reusable integration policy could  not be used through multiple spaces.'
-          );
-        }
-      }
     }
 
     // trailing whitespace causes issues creating API keys
@@ -1060,12 +1052,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         };
       }
     }
-    // Validate agent policy restriction
-    // TODO
-    if (packagePolicyUpdate.policy_ids?.length ?? 0 > 1) {
+
+    if ((packagePolicyUpdate.policy_ids?.length ?? 0) > 1) {
       for (const policyId of packagePolicyUpdate.policy_ids) {
         const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
-        if (agentPolicy?.space_ids?.length ?? 0 > 1) {
+        if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
           throw new FleetError(
             'Reusable integration policy could  not be used through multiple spaces.'
           );
@@ -3106,15 +3097,15 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 
 function validateReusableIntegrationsAndSpaceAwareness(
   packagePolicy: Pick<NewPackagePolicy, 'policy_ids'>,
-  agentPolices: AgentPolicy[]
+  agentPolicies: AgentPolicy[]
 ) {
-  if (packagePolicy.policy_ids.length ?? 0 <= 1) {
+  if ((packagePolicy.policy_ids.length ?? 0) <= 1) {
     return;
   }
-  for (const agentPolicy of agentPolices) {
-    if (agentPolicy?.space_ids?.length ?? 0 > 1) {
+  for (const agentPolicy of agentPolicies) {
+    if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
       throw new FleetError(
-        'Reusable integration policy could  not be used through multiple spaces.'
+        'Reusable integration policy could not be used with agent policies belonging to multiple spaces.'
       );
     }
   }
