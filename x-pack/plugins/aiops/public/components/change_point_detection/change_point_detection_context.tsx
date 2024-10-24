@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
-import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -17,12 +17,10 @@ import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types
 import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
-import {
-  createMergedEsQuery,
-  getEsQueryFromSavedSearch,
-} from '../../application/utils/search_utils';
+import { getEsQueryFromSavedSearch } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 
@@ -261,7 +259,12 @@ export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>>
   );
 
   const combinedQuery = useMemo(() => {
-    const mergedQuery = createMergedEsQuery(resultQuery, resultFilters, dataView, uiSettings);
+    const mergedQuery = buildEsQuery(
+      dataView,
+      resultQuery,
+      resultFilters,
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    );
     const to = searchBounds.max?.valueOf();
     const from = searchBounds.min?.valueOf();
     const timeRange = to !== undefined && from !== undefined ? { from, to } : undefined;

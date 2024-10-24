@@ -43,6 +43,7 @@ export function registerEndpointSuggestionsRoutes(
       access: 'public',
       path: SUGGESTIONS_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(
