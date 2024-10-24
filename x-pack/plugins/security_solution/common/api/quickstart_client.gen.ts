@@ -361,6 +361,11 @@ import type {
   ResolveTimelineRequestQueryInput,
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
+import type {
+  CreateRuleMigrationRequestBodyInput,
+  CreateRuleMigrationResponse,
+  GetRuleMigrationResponse,
+} from '../siem_migrations/model/api/rules/rules_migration.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -649,6 +654,22 @@ If a record already exists for the specified entity, that record is overwritten 
         path: '/api/detection_engine/rules',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates a new SIEM rules migration using the original vendor rules provided
+   */
+  async createRuleMigration(props: CreateRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
+    return this.kbnClient
+      .request<CreateRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1397,6 +1418,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the rule migrations stored in the system
+   */
+  async getRuleMigration() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigration`);
+    return this.kbnClient
+      .request<GetRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the details of an existing saved Timeline or Timeline template.
    */
   async getTimeline(props: GetTimelineProps) {
@@ -2038,6 +2074,9 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;

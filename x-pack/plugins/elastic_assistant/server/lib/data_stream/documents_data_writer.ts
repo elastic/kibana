@@ -120,8 +120,13 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           {
             bool: {
               must_not: {
-                exists: {
-                  field: 'users',
+                nested: {
+                  path: 'users',
+                  query: {
+                    exists: {
+                      field: 'users',
+                    },
+                  },
                 },
               },
             },
