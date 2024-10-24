@@ -15,7 +15,7 @@ deploy_to_bump() {
       --doc $doc_name \
       --token $doc_token;
   else
-    echo "Bump.sh is up-to-date with $file_name, not deploying."
+    echo "Did not detect changes in $file_name; not deploying."
   fi
 }
 
