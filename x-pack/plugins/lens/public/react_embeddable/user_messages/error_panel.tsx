@@ -24,7 +24,7 @@ export function VisualizationErrorPanel({
   const showMore = errors.length > 1;
   const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
-    <div className="lnsEmbeddedError" data-test-subj="embeddableStackError">
+    <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
         iconType="warning"
         iconColor="danger"
