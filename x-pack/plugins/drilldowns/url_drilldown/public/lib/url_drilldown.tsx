@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  getInheritedViewMode,
+  apiCanAccessViewMode,
+} from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -59,6 +63,13 @@ export type ActionFactoryContext = Partial<EmbeddableApiContext> & BaseActionFac
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
+
+const getViewMode = (context: ChartActionContext) => {
+  if (apiCanAccessViewMode(context.embeddable)) {
+    return getInheritedViewMode(context.embeddable);
+  }
+  throw new Error('Cannot access view mode');
+};
 
 export class UrlDrilldown implements Drilldown<Config, ChartActionContext, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
@@ -161,9 +172,22 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
   };
 
   public readonly isCompatible = async (config: Config, context: ChartActionContext) => {
-    // check if context is compatible by building the scope
-    const scope = this.getRuntimeVariables(context);
-    return !!scope;
+    const viewMode = getViewMode(context);
+
+    if (viewMode === 'edit') {
+      // check if context is compatible by building the scope
+      const scope = this.getRuntimeVariables(context);
+      return !!scope;
+    }
+
+    try {
+      await this.buildUrl(config, context);
+      return true;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(e);
+      return false;
+    }
   };
 
   private async buildUrl(config: Config, context: ChartActionContext): Promise<string> {
@@ -214,7 +238,7 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
       return url;
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error(e);
+      console.warn(e);
       return undefined;
     }
   };

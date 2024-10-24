@@ -62,6 +62,7 @@ const mockEmbeddableApi = {
     filters$: new BehaviorSubject([]),
     query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    viewMode: new BehaviorSubject('edit'),
   },
 };
 
@@ -134,7 +135,7 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.isCompatible(config, context)).rejects.toThrowError();
     });
 
-    test('compatible if url is valid', async () => {
+    test('compatible in edit mode if url is valid', async () => {
       const config: Config = {
         url: {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
@@ -154,7 +155,7 @@ describe('UrlDrilldown', () => {
       await expect(result).resolves.toBe(true);
     });
 
-    test('compatible if url is invalid', async () => {
+    test('compatible in edit mode if url is invalid', async () => {
       const config: Config = {
         url: {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
@@ -173,7 +174,7 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(true);
     });
 
-    test('compatible if external URL is denied', async () => {
+    test('compatible in edit mode if external URL is denied', async () => {
       const drilldown1 = createDrilldown(true);
       const drilldown2 = createDrilldown(false);
       const config: Config = {
@@ -196,6 +197,74 @@ describe('UrlDrilldown', () => {
 
       expect(result1).toBe(true);
       expect(result2).toBe(true);
+    });
+
+    test('compatible in view mode if url is valid', async () => {
+      mockEmbeddableApi.parentApi.viewMode.next('view');
+
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+        encodeUrl: true,
+      };
+
+      const context: ValueClickContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddableApi,
+      };
+
+      const result = urlDrilldown.isCompatible(config, context);
+      await expect(result).resolves.toBe(true);
+    });
+
+    test('not compatible in view mode if url is invalid', async () => {
+      mockEmbeddableApi.parentApi.viewMode.next('view');
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
+        },
+        openInNewTab: false,
+        encodeUrl: true,
+      };
+
+      const context: ValueClickContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddableApi,
+      };
+
+      await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(false);
+    });
+
+    test('not compatible in view mode if external URL is denied', async () => {
+      mockEmbeddableApi.parentApi.viewMode.next('view');
+      const drilldown1 = createDrilldown(true);
+      const drilldown2 = createDrilldown(false);
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+        encodeUrl: true,
+      };
+
+      const context: ValueClickContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddableApi,
+      };
+
+      const result1 = await drilldown1.isCompatible(config, context);
+      const result2 = await drilldown2.isCompatible(config, context);
+
+      expect(result1).toBe(true);
+      expect(result2).toBe(false);
     });
   });
 
