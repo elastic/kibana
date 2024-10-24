@@ -234,9 +234,12 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           >
             {unsupportedReasonForQuery ? (
               <EuiFlexItem grow={true}>
-                <EuiCallOut size="s" iconType="warning" color="warning">
-                  {unsupportedReasonForQuery}
-                </EuiCallOut>
+                <EuiCallOut
+                  size="s"
+                  iconType="warning"
+                  color="warning"
+                  title={unsupportedReasonForQuery}
+                />
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>

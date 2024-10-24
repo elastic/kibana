@@ -31,7 +31,7 @@ export const getReasonIfFieldStatsUnavailableForQuery = (
       return i18n.translate(
         'unifiedFieldList.fieldStats.notAvailableForMatchESQLQueryDescription',
         {
-          defaultMessage: `{label} not supported when using 'MATCH' or 'QSTR' functions.`,
+          defaultMessage: `{label} not supported for ES|QL queries with 'MATCH' or 'QSTR' functions.`,
           values: { label },
         }
       );

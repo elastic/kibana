@@ -16,6 +16,7 @@ const FIELD_STATS_UNAVAILABLE_TITLE = i18n.translate(
     defaultMessage: 'Field statistics unavailable',
   }
 );
+
 export const FieldStatsUnavailableMessage = ({
   id,
   content,
