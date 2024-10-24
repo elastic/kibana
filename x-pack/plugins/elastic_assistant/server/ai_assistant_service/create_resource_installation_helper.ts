@@ -8,7 +8,7 @@
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { Logger } from '@kbn/core/server';
 
-export interface InitializationPromise {
+export interface InitializationState {
   result: boolean;
   error?: string;
 }
@@ -23,10 +23,10 @@ export interface ResourceInstallationHelper {
   add: (namespace?: string, timeoutMs?: number) => void;
   retry: (
     namespace?: string,
-    initPromise?: Promise<InitializationPromise>,
+    initPromise?: Promise<InitializationState>,
     timeoutMs?: number
   ) => void;
-  getInitializedResources: (namespace: string) => Promise<InitializationPromise>;
+  getInitializedResources: (namespace: string) => Promise<InitializationState>;
 }
 
 /**
@@ -42,30 +42,33 @@ export interface ResourceInstallationHelper {
  */
 export function createResourceInstallationHelper(
   logger: Logger,
-  commonResourcesInitPromise: Promise<InitializationPromise>,
+  commonResourcesInitPromise: Promise<InitializationState>,
   installFn: (namespace: string, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
-  let commonInitPromise: Promise<InitializationPromise> = commonResourcesInitPromise;
-  const initializedResources: Map<string, Promise<InitializationPromise>> = new Map();
+  let commonInitPromise: Promise<InitializationState> = commonResourcesInitPromise;
+  const initializedResources: Map<string, Promise<InitializationState>> = new Map();
   const lastRetry: Map<string, Retry> = new Map();
 
   const waitUntilResourcesInstalled = async (
     namespace: string = DEFAULT_NAMESPACE_STRING,
     timeoutMs?: number
-  ): Promise<InitializationPromise> => {
+  ): Promise<InitializationState> => {
     try {
       const { result: commonInitResult, error: commonInitError } = await commonInitPromise;
       if (commonInitResult) {
         await installFn(namespace, timeoutMs);
+        console.log('===> installer case 1');
         return successResult();
       } else {
         logger.warn(
           `Common resources were not initialized, cannot initialize resources for ${namespace}`
         );
+        console.log('===> installer case 2');
         return errorResult(commonInitError);
       }
     } catch (err) {
       logger.error(`Error initializing resources ${namespace} - ${err.message}`);
+      console.log('===> installer case 3');
       return errorResult(err.message);
     }
   };
@@ -81,7 +84,7 @@ export function createResourceInstallationHelper(
     },
     retry: (
       namespace: string = DEFAULT_NAMESPACE_STRING,
-      initPromise?: Promise<InitializationPromise>,
+      initPromise?: Promise<InitializationState>,
       timeoutMs?: number
     ) => {
       const key = namespace;
@@ -109,19 +112,24 @@ export function createResourceInstallationHelper(
         );
       }
     },
-    getInitializedResources: async (namespace: string): Promise<InitializationPromise> => {
-      const key = namespace;
-      return (
-        initializedResources.has(key)
-          ? initializedResources.get(key)
-          : errorResult(`Unrecognized spaceId ${key}`)
-      ) as InitializationPromise;
+    getInitializedResources: async (namespace: string): Promise<InitializationState> => {
+      try {
+        const key = namespace;
+        if (!initializedResources.has(key)) {
+          return errorResult(`Unrecognized spaceId ${key}`);
+        }
+        const initializationState = await initializedResources.get(key);
+        console.log('===> initializationState promise', initializationState);
+        return initializationState ?? errorResult(`Initialize state returned undefined`);
+      } catch (e) {
+        return errorResult(`Initialize resources encountered an error: ${e.message}`);
+      }
     },
   };
 }
 
 export const successResult = () => ({ result: true });
-export const errorResult = (error?: string) => ({ result: false, error });
+export const errorResult = (error?: string): InitializationState => ({ result: false, error });
 
 export const getShouldRetry = ({ time, attempts }: Retry) => {
   const now = new Date().valueOf();

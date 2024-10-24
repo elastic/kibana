@@ -594,6 +594,7 @@ export const performChecks = ({
   const assistantResponse = buildResponse(response);
 
   if (license) {
+    console.log('===> create license', context.licensing.license);
     if (!hasAIAssistantLicense(context.licensing.license)) {
       return response.forbidden({
         body: {
@@ -604,6 +605,7 @@ export const performChecks = ({
   }
 
   if (authenticatedUser) {
+    console.log('===> getCurrentUser', context.elasticAssistant.getCurrentUser());
     if (context.elasticAssistant.getCurrentUser() == null) {
       return assistantResponse.error({
         body: `Authenticated user not found`,

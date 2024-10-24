@@ -153,6 +153,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const hasEnterpriseLicence = licenseService.isEnterprise();
   useEffect(() => {
     const migrateConversationsFromLocalStorage = once(async () => {
+      console.log('conversations useEffect', {
+        hasEnterpriseLicence,
+        assistantAvailability,
+      });
       if (
         hasEnterpriseLicence &&
         assistantAvailability.isAssistantEnabled &&
@@ -178,6 +182,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
+      console.log('prompts useEffect', {
+        hasEnterpriseLicence,
+        assistantAvailability,
+      });
       if (
         hasEnterpriseLicence &&
         assistantAvailability.isAssistantEnabled &&

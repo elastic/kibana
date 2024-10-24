@@ -43,6 +43,7 @@ export const createConversation = async ({
       refresh: 'wait_for',
     });
 
+    console.log('===> response', response);
     const createdConversation = await getConversation({
       esClient,
       conversationIndex,
@@ -50,6 +51,7 @@ export const createConversation = async ({
       logger,
       user,
     });
+    console.log('===> getConversation', getConversation);
     return createdConversation;
   } catch (err) {
     logger.error(`Error creating conversation: ${err} with title: ${conversation.title}`);
