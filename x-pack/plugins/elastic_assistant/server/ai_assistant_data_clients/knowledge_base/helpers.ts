@@ -37,7 +37,6 @@ export const isModelAlreadyExistsError = (error: Error) => {
 export const getKBVectorSearchQuery = ({
   filter,
   kbResource,
-  modelId,
   query,
   required,
   user,
@@ -45,7 +44,6 @@ export const getKBVectorSearchQuery = ({
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
-  modelId: string;
   query: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;

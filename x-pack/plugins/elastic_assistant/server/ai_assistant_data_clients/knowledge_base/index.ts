@@ -224,7 +224,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
               adaptive_allocations: {
                 enabled: true,
                 min_number_of_allocations: 0,
-                max_number_of_allocations: 4,
+                max_number_of_allocations: 8,
               },
               num_threads: 1,
               model_id: elserId,
@@ -392,7 +392,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             user: authenticatedUser,
             entry: {
               type: DocumentEntryType.value,
-              name: 'unknown',
+              // TODO: parse title from document
+              name: '',
               text: doc.pageContent,
               kbResource: doc.metadata.kbResource ?? 'unknown',
               required: doc.metadata.required ?? false,
@@ -451,12 +452,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * Returns if Security Labs KB docs have been loaded
    */
   public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
-    const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
-      query: '',
-      kbResource: SECURITY_LABS_RESOURCE,
-      required: false,
-    });
-    return securityLabsDocs.length > 0;
+    try {
+      const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
+        query: '',
+        kbResource: SECURITY_LABS_RESOURCE,
+        required: false,
+      });
+      return !!securityLabsDocs.length;
+    } catch (e) {
+      return false;
+    }
   };
 
   /**
@@ -481,12 +486,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
 
     const vectorSearchQuery = getKBVectorSearchQuery({
       filter,
       kbResource,
-      modelId,
       query,
       required,
       user,
