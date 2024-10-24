@@ -9,6 +9,8 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
+      - linting_with_types
     timeout_in_minutes: 60
     soft_fail: true
     parallelism: 1
@@ -25,6 +27,8 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
+      - linting_with_types
     timeout_in_minutes: 60
     soft_fail: true
     parallelism: 1
@@ -39,6 +43,8 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
+      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -53,6 +59,8 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - linting
+      - linting_with_types
     timeout_in_minutes: 50
     soft_fail: true
     retry:
