@@ -12,8 +12,14 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { APP_ID, FEATURE_ID } from '../common/constants';
-import { createUICapabilities, getApiTags } from '../common';
+import { APP_ID, FEATURE_ID_V2 } from '../../common/constants';
+import { createUICapabilities, getApiTags } from '../../common';
+import {
+  CASES_DELETE_SUB_PRIVILEGE_ID,
+  CASES_SETTINGS_SUB_PRIVILEGE_ID,
+  CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
+  CASES_REOPEN_SUB_PRIVILEGE_ID,
+} from './constants';
 
 /**
  * The order of appearance in the feature privilege page
@@ -23,12 +29,12 @@ import { createUICapabilities, getApiTags } from '../common';
 
 const FEATURE_ORDER = 3100;
 
-export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
+export const getV2 = (): KibanaFeatureConfig => {
   const capabilities = createUICapabilities();
   const apiTags = getApiTags(APP_ID);
 
   return {
-    id: FEATURE_ID,
+    id: FEATURE_ID_V2,
     name: i18n.translate('xpack.cases.features.casesFeatureName', {
       defaultMessage: 'Cases',
     }),
@@ -84,7 +90,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             privileges: [
               {
                 api: apiTags.delete,
-                id: 'cases_delete',
+                id: CASES_DELETE_SUB_PRIVILEGE_ID,
                 name: i18n.translate('xpack.cases.features.deleteSubFeatureDetails', {
                   defaultMessage: 'Delete cases and comments',
                 }),
@@ -111,7 +117,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                id: 'cases_settings',
+                id: CASES_SETTINGS_SUB_PRIVILEGE_ID,
                 name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureDetails', {
                   defaultMessage: 'Edit case settings',
                 }),
@@ -124,6 +130,61 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                   settings: [APP_ID],
                 },
                 ui: capabilities.settings,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.addCommentsSubFeatureName', {
+          defaultMessage: 'Create comments & attachments',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: apiTags.all,
+                id: CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.addCommentsSubFeatureDetails', {
+                  defaultMessage: 'Add comments to cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
+                },
+                cases: {
+                  createComment: [APP_ID],
+                },
+                ui: capabilities.createComment,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.reopenCaseubFeatureName', {
+          defaultMessage: 'Re-open',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CASES_REOPEN_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.reopenCaseubFeatureDetails', {
+                  defaultMessage: 'Re-open closed cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  reopenCase: [APP_ID],
+                },
+                ui: capabilities.reopenCase,
               },
             ],
           },

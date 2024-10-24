@@ -45,7 +45,14 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            const { kibana, securitySolutionCases, ...navLinksWithoutDeprecated } =
+              uiCapabilities.value!.navLinks;
+            const {
+              kibana: _,
+              securitySolutionCases: __,
+              ...navLinksWithoutDeprecatedExpected
+            } = navLinksBuilder.only('management');
+            expect(navLinksWithoutDeprecated).to.eql(navLinksWithoutDeprecatedExpected);
             break;
           case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
