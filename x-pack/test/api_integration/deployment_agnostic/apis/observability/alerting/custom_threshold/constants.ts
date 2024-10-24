@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-/**
- * @internal
- */
-export type {
-  AnalysisResult,
-  FindFileStructureErrorResponse,
-  FindFileStructureResponse,
-  InputOverrides,
-  IngestPipeline,
-} from './types';
-
-export { TIKA_PREVIEW_CHARS } from './constants';
+export const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
