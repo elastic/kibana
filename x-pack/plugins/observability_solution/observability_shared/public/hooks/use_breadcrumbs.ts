@@ -21,8 +21,6 @@ const OBSERVABILITY_TEXT = i18n.translate(
   }
 );
 
-const noop = () => {};
-
 function addClickHandlers(
   breadcrumbs: ChromeBreadcrumb[],
   navigateToHref?: (url: string) => Promise<void>
@@ -97,22 +95,23 @@ export const useBreadcrumbs = (
   const chromeStyle = useObservable(getChromeStyle$());
 
   const setBreadcrumbs = useMemo(() => {
-    if (serverless?.setBreadcrumbs && !classicOnly)
+    if (!serverless?.setBreadcrumbs) {
+      return (breadcrumbs: ChromeBreadcrumb[]) =>
+        chromeSetBreadcrumbs(
+          breadcrumbs,
+          !classicOnly
+            ? {
+                project: {
+                  value: breadcrumbs,
+                  absolute,
+                },
+              }
+            : undefined
+        );
+    }
+    if (!classicOnly)
       return (breadcrumbs: ChromeBreadcrumb[]) =>
         serverless?.setBreadcrumbs(breadcrumbs, { absolute });
-    if (serverless?.setBreadcrumbs && classicOnly) return noop;
-    return (breadcrumbs: ChromeBreadcrumb[]) =>
-      chromeSetBreadcrumbs(
-        breadcrumbs,
-        !classicOnly
-          ? {
-              project: {
-                value: breadcrumbs,
-                absolute,
-              },
-            }
-          : undefined
-      );
   }, [serverless, classicOnly, absolute, chromeSetBreadcrumbs]);
 
   useEffect(() => {
