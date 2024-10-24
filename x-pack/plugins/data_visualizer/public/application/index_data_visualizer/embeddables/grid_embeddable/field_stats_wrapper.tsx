@@ -16,7 +16,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
+import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
   FieldStatisticTableEmbeddableProps,
@@ -42,7 +42,7 @@ function isFieldStatisticTableEmbeddableState(
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    const unsupportedReason = getReasonIfQueryUnsupportedByFieldStats(props.esqlQuery);
+    const unsupportedReason = getReasonIfFieldStatsUnavailableForQuery(props.esqlQuery);
     return unsupportedReason ? (
       <EuiCallOut size="m" iconType="warning" color="warning">
         {unsupportedReason}

@@ -12,8 +12,17 @@ import { parse } from '@kbn/esql-ast';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
-export const getReasonIfQueryUnsupportedByFieldStats = (
-  query?: AggregateQuery | Query | { [key: string]: any }
+const FIELD_STATISTICS_LABEL = i18n.translate('unifiedFieldList.fieldStats.fieldStatisticsLabel', {
+  defaultMessage: `Field statistics`,
+});
+
+export const FIELD_DATA_LABEL = i18n.translate('unifiedFieldList.fieldStats.fieldDataLabel', {
+  defaultMessage: `Field data`,
+});
+
+export const getReasonIfFieldStatsUnavailableForQuery = (
+  query?: AggregateQuery | Query | { [key: string]: any },
+  label: string = FIELD_STATISTICS_LABEL
 ): string | undefined => {
   if (isOfAggregateQueryType(query)) {
     const { root } = parse(query.esql);
@@ -22,8 +31,8 @@ export const getReasonIfQueryUnsupportedByFieldStats = (
       return i18n.translate(
         'unifiedFieldList.fieldStats.notAvailableForMatchESQLQueryDescription',
         {
-          defaultMessage:
-            'Field statistics is unavailable for ES|QL queries containing `MATCH` function',
+          defaultMessage: `{label} is unavailable for ES|QL queries containing 'MATCH' or 'QSTR' functions.`,
+          values: { label },
         }
       );
     }

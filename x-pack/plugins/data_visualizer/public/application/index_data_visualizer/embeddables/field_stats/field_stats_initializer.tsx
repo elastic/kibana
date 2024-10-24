@@ -29,7 +29,7 @@ import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
+import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -97,7 +97,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
 
   const unsupportedReason = useMemo(
-    () => getReasonIfQueryUnsupportedByFieldStats(esqlQuery),
+    () => getReasonIfFieldStatsUnavailableForQuery(esqlQuery),
     [esqlQuery]
   );
 

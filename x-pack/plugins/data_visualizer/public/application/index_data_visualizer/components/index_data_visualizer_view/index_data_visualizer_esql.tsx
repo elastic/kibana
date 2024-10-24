@@ -25,15 +25,12 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiCallOut,
-  EuiIconTip,
-  EuiIcon,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { getReasonIfQueryUnsupportedByFieldStats } from '@kbn/unified-field-list/src/utils/get_warning_message';
+import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
@@ -68,7 +65,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const [query, setQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
-  const unsupportedReasonForQuery = getReasonIfQueryUnsupportedByFieldStats(localQuery);
+  const unsupportedReasonForQuery = getReasonIfFieldStatsUnavailableForQuery(localQuery);
 
   const toggleShowEmptyFields = () => {
     setDataVisualizerListState({
@@ -208,7 +205,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const onTextLangQuerySubmit = useCallback(
     async (q: AggregateQuery | undefined) => {
       if (isESQLQuery(q)) {
-        const isUnsupported = getReasonIfQueryUnsupportedByFieldStats(q) !== undefined;
+        const isUnsupported = getReasonIfFieldStatsUnavailableForQuery(q) !== undefined;
         if (!isUnsupported) {
           resetData();
           setQuery(q);

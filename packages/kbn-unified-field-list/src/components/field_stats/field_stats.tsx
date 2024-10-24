@@ -19,7 +19,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
@@ -53,7 +60,10 @@ import {
 import { FieldSummaryMessage } from './field_summary_message';
 import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
 import { ErrorBoundary } from '../error_boundary';
-import { getReasonIfQueryUnsupportedByFieldStats } from '../../utils/get_warning_message';
+import {
+  FIELD_DATA_LABEL,
+  getReasonIfFieldStatsUnavailableForQuery,
+} from '../../utils/get_warning_message';
 
 export interface FieldStatsState {
   isLoading: boolean;
@@ -337,9 +347,16 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
-  const unsupportedReason = getReasonIfQueryUnsupportedByFieldStats(query);
-  if (unsupportedReason) {
-    const messageUnsupportedReason = <FieldSummaryMessage message={unsupportedReason} />;
+  const unsupportedReasonForQuery = getReasonIfFieldStatsUnavailableForQuery(
+    query,
+    FIELD_DATA_LABEL
+  );
+  if (unsupportedReasonForQuery) {
+    const messageUnsupportedReason = (
+      <EuiCallOut iconType="warning" color="warning">
+        {unsupportedReasonForQuery}
+      </EuiCallOut>
+    );
 
     return overrideMissingContent
       ? overrideMissingContent({
