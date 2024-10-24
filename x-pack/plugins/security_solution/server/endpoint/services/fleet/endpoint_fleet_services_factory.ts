@@ -39,7 +39,12 @@ export interface EndpointFleetServicesInterface {
    * Will check the data provided to ensure it is visible for the current space. Supports
    * several types of data (ex. integration policies, agent policies, etc)
    */
-  ensureInCurrentSpace(options: EnsureInCurrentSpaceOptions): Promise<void>;
+  ensureInCurrentSpace(
+    options: Pick<
+      CheckInCurrentSpaceOptions,
+      'agentIds' | 'integrationPolicyIds' | 'agentPolicyIds'
+    >
+  ): Promise<void>;
 
   /**
    * Retrieves the `namespace` assigned to Endpoint Integration Policies
@@ -49,12 +54,6 @@ export interface EndpointFleetServicesInterface {
     options: Pick<FetchEndpointPolicyNamespaceOptions, 'integrationPolicies'>
   ): Promise<FetchEndpointPolicyNamespaceResponse>;
 }
-
-type EnsureInCurrentSpaceOptions = Partial<{
-  agentIds: string[];
-  agentPolicyIds: string[];
-  integrationPolicyIds: string[];
-}>;
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
   savedObjects: SavedObjectsClientFactory;
@@ -96,31 +95,15 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       if (!soClient) {
         soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
       }
-
-      const handlePromiseErrors = (err: Error): never => {
-        // We wrap the error with our own Error class so that the API can property return a 404
-        if (
-          err instanceof AgentNotFoundError ||
-          err instanceof AgentPolicyNotFoundError ||
-          err instanceof PackagePolicyNotFoundError
-        ) {
-          throw new NotFoundError(err.message, err);
-        }
-
-        throw err;
-      };
-
-      await Promise.all([
-        agentIds.length ? agent.getByIds(agentIds).catch(handlePromiseErrors) : null,
-
-        agentPolicyIds.length
-          ? agentPolicy.getByIds(soClient, agentPolicyIds).catch(handlePromiseErrors)
-          : null,
-
-        integrationPolicyIds.length
-          ? packagePolicy.getByIDs(soClient, integrationPolicyIds).catch(handlePromiseErrors)
-          : null,
-      ]);
+      return checkInCurrentSpace({
+        soClient,
+        agentService: agent,
+        agentPolicyService: agentPolicy,
+        packagePolicyService: packagePolicy,
+        integrationPolicyIds,
+        agentPolicyIds,
+        agentIds,
+      });
     };
 
     const getPolicyNamespace: EndpointFleetServicesInterface['getPolicyNamespace'] = async (
@@ -154,6 +137,65 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     };
   }
 }
+
+interface CheckInCurrentSpaceOptions {
+  soClient: SavedObjectsClientContract;
+  agentService: AgentClient;
+  agentPolicyService: AgentPolicyServiceInterface;
+  packagePolicyService: PackagePolicyClient;
+  agentIds?: string[];
+  agentPolicyIds?: string[];
+  integrationPolicyIds?: string[];
+}
+
+/**
+ * Checks if data provided (integration policies, agent policies and/or agentIds) are visible in
+ * current space
+ *
+ * @param soClient
+ * @param agentService
+ * @param agentPolicyService
+ * @param packagePolicyService
+ * @param integrationPolicyIds
+ * @param agentPolicyIds
+ * @param agentIds
+ *
+ * @throws NotFoundError
+ */
+const checkInCurrentSpace = async ({
+  soClient,
+  agentService,
+  agentPolicyService,
+  packagePolicyService,
+  integrationPolicyIds = [],
+  agentPolicyIds = [],
+  agentIds = [],
+}: CheckInCurrentSpaceOptions): Promise<void> => {
+  const handlePromiseErrors = (err: Error): never => {
+    // We wrap the error with our own Error class so that the API can property return a 404
+    if (
+      err instanceof AgentNotFoundError ||
+      err instanceof AgentPolicyNotFoundError ||
+      err instanceof PackagePolicyNotFoundError
+    ) {
+      throw new NotFoundError(err.message, err);
+    }
+
+    throw err;
+  };
+
+  await Promise.all([
+    agentIds.length ? agentService.getByIds(agentIds).catch(handlePromiseErrors) : null,
+
+    agentPolicyIds.length
+      ? agentPolicyService.getByIds(soClient, agentPolicyIds).catch(handlePromiseErrors)
+      : null,
+
+    integrationPolicyIds.length
+      ? packagePolicyService.getByIDs(soClient, integrationPolicyIds).catch(handlePromiseErrors)
+      : null,
+  ]);
+};
 
 interface FetchEndpointPolicyNamespaceOptions {
   logger: Logger;

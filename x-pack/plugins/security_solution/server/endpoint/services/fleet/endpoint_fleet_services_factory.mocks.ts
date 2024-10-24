@@ -26,31 +26,35 @@ export interface EndpointFleetServicesFactoryInterfaceMocked
   asInternalUser: () => EndpointInternalFleetServicesInterfaceMocked;
 }
 
-interface CreateEndpointFleetServicesFactoryMockOptions {
+export interface CreateEndpointFleetServicesFactoryMockOptions {
   fleetDependencies: DeeplyMockedKeys<FleetStartContract>;
   savedObjects: SavedObjectsClientFactory;
   logger: MockedLogger;
 }
 
-export const createEndpointFleetServicesFactoryMock = (
-  dependencies: Partial<CreateEndpointFleetServicesFactoryMockOptions> = {}
-): {
+export interface CreateEndpointFleetServicesFactoryResponse {
   service: EndpointFleetServicesFactoryInterfaceMocked;
   dependencies: CreateEndpointFleetServicesFactoryMockOptions;
-} => {
+}
+
+export const createEndpointFleetServicesFactoryMock = (
+  dependencies: Partial<CreateEndpointFleetServicesFactoryMockOptions> = {}
+): CreateEndpointFleetServicesFactoryResponse => {
   const {
     fleetDependencies = createFleetStartContractMock(),
     savedObjects = createSavedObjectsClientFactoryMock().service,
-    logger = loggingSystemMock.create(),
+    logger = loggingSystemMock.createLogger(),
   } = dependencies;
 
   const serviceFactoryMock = new EndpointFleetServicesFactory(
     fleetDependencies,
-    savedObjects
+    savedObjects,
+    logger
   ) as unknown as EndpointFleetServicesFactoryInterfaceMocked;
 
   const fleetInternalServicesMocked = serviceFactoryMock.asInternalUser();
   jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
+  jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
 
   const asInternalUserSpy = jest.spyOn(serviceFactoryMock, 'asInternalUser');
   asInternalUserSpy.mockReturnValue(fleetInternalServicesMocked);
