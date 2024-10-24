@@ -212,18 +212,6 @@ export class SecurityUsageReportingTask {
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
         );
-        if (this.backfillConfig.enabled) {
-          backfillRecords = [...backfillRecords, ...usageRecords];
-
-          if (
-            this.backfillConfig.maxRecords &&
-            backfillRecords.length > this.backfillConfig.maxRecords
-          ) {
-            backfillRecords = backfillRecords.slice(
-              backfillRecords.length - this.backfillConfig.maxRecords
-            );
-          }
-        }
       }
     }
 
