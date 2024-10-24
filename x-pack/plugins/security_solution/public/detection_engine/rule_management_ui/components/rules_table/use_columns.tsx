@@ -248,13 +248,15 @@ const MODIFIED_COLUMN: TableColumn = {
     }
 
     return (
-      <EuiBadge
-        color="hollow"
-        data-test-subj="rulesTableModifiedColumnBadge"
-        aria-label={i18n.MODIFIED_LABEL}
-      >
-        {i18n.MODIFIED_LABEL}
-      </EuiBadge>
+      <EuiToolTip content={i18n.MODIFIED_TOOLTIP}>
+        <EuiBadge
+          color="hollow"
+          data-test-subj="rulesTableModifiedColumnBadge"
+          aria-label={i18n.MODIFIED_LABEL}
+        >
+          {i18n.MODIFIED_LABEL}
+        </EuiBadge>
+      </EuiToolTip>
     );
   },
   width: '90px',

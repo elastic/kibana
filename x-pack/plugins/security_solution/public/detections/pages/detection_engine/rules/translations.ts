@@ -851,6 +851,13 @@ export const UNMODIFIED_LABEL = i18n.translate(
   }
 );
 
+export const MODIFIED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.modifiedTooltipDescription',
+  {
+    defaultMessage: 'This Elastic rule has been modified.',
+  }
+);
+
 export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
