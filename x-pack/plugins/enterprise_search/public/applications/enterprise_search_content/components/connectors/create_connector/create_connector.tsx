@@ -245,7 +245,7 @@ export const CreateConnector: React.FC = () => {
                     ? i18n.translate(
                         'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
                         {
-                          defaultMessage: 'Self managed',
+                          defaultMessage: 'Self-managed',
                         }
                       )
                     : i18n.translate(

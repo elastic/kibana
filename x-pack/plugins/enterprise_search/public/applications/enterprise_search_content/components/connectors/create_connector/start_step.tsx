@@ -185,7 +185,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   id={selfManagedRadioButtonId}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.euiRadio.selfManagedLabel',
-                    { defaultMessage: 'Self managed' }
+                    { defaultMessage: 'Self-managed' }
                   )}
                   checked={selfManagePreference === 'selfManaged'}
                   onChange={() => onSelfManagePreferenceChange('selfManaged')}
