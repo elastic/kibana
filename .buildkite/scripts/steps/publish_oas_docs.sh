@@ -8,12 +8,14 @@ deploy_to_bump() {
   local file_path="${1:-}"
   local doc_name="${2:-}"
   local doc_token="${3:-}"
-  local change_count=$(bump diff $file_path --doc $doc_name --token $doc_token --format=json) | jq -R 'fromjson? | length')
-  if [[ $change_count -gt 0 ]]; then
+  local change_count=$(bump diff $file_path --doc $doc_name --token $doc_token --format=json | jq -R 'fromjson? | length')
+  if [[ ! -z $change_count && $change_count -gt 0 ]]; then
     echo "About to deploy $file_path to bump.sh..."
     bump deploy $file_path \
       --doc $doc_name \
       --token $doc_token;
+  else
+    echo "Bump.sh is up-to-date with $file_name, not deploying."
   fi
 }
 
