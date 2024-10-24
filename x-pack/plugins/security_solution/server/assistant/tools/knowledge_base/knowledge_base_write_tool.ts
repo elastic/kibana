@@ -28,8 +28,8 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseWriteToolParams => {
-    const { isEnabledKnowledgeBase, kbDataClient, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
+    const { isEnabledKnowledgeBase, kbDataClient } = params;
+    return isEnabledKnowledgeBase && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;

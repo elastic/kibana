@@ -28,6 +28,10 @@ import {
   GetFullAgentPolicyResponseSchema,
   DownloadFullAgentPolicyResponseSchema,
   GetK8sManifestResponseScheme,
+  GetAgentPolicyOutputsRequestSchema,
+  GetAgentPolicyOutputsResponseSchema,
+  GetListAgentPolicyOutputsResponseSchema,
+  GetListAgentPolicyOutputsRequestSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
@@ -47,6 +51,8 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
+  GetAgentPolicyOutputsHandler,
+  GetListAgentPolicyOutputsHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -60,7 +66,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List agent policies`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -91,7 +97,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Bulk get agent policies`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -122,7 +128,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -152,7 +158,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Create an agent policy`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -182,7 +188,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Update an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -212,7 +218,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Copy an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -242,7 +248,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Delete agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -272,7 +278,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get a full agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -303,7 +309,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       enableQueryVersion: true,
       description: `Download an agent policy by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -336,7 +342,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get full K8s agent manifest`,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -367,7 +373,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       enableQueryVersion: true,
       description: ``,
       options: {
-        tags: ['oas_tag:Elastic Agent policies'],
+        tags: ['oas-tag:Elastic Agent policies'],
       },
     })
     .addVersion(
@@ -389,5 +395,63 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       downloadK8sManifest
+    );
+
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.LIST_OUTPUTS_PATTERN,
+      fleetAuthz: (authz) => {
+        return authz.fleet.readAgentPolicies && authz.fleet.readSettings;
+      },
+      description: `Get list of outputs associated with agent policies`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetListAgentPolicyOutputsRequestSchema,
+          response: {
+            200: {
+              body: () => GetListAgentPolicyOutputsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      GetListAgentPolicyOutputsHandler
+    );
+
+  router.versioned
+    .get({
+      path: AGENT_POLICY_API_ROUTES.INFO_OUTPUTS_PATTERN,
+      fleetAuthz: (authz) => {
+        return authz.fleet.readAgentPolicies && authz.fleet.readSettings;
+      },
+      description: `Get list of outputs associated with agent policy by policy id`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetAgentPolicyOutputsRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentPolicyOutputsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      GetAgentPolicyOutputsHandler
     );
 };

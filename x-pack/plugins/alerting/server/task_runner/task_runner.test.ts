@@ -1420,7 +1420,7 @@ describe('Task Runner', () => {
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
         2,
-        generateActionOpts({ id: '2', alertId: '2', alertGroup: 'recovered' })
+        generateActionOpts({ id: '2', alertId: '2', alertGroup: 'recovered', uuid: '222-222' })
       );
 
       expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
@@ -1428,7 +1428,12 @@ describe('Task Runner', () => {
         isBulk
           ? [
               generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
-              generateEnqueueFunctionInput({ isBulk: false, id: '2', isResolved: true }),
+              generateEnqueueFunctionInput({
+                isBulk: false,
+                id: '2',
+                isResolved: true,
+                uuid: '222-222',
+              }),
             ]
           : generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true })
       );
@@ -1645,7 +1650,12 @@ describe('Task Runner', () => {
         isBulk
           ? [
               generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
-              generateEnqueueFunctionInput({ isBulk: false, id: '2', isResolved: true }),
+              generateEnqueueFunctionInput({
+                isBulk: false,
+                id: '2',
+                isResolved: true,
+                uuid: '222-222',
+              }),
             ]
           : generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true })
       );
@@ -1667,6 +1677,7 @@ describe('Task Runner', () => {
         return { state: {} };
       });
 
+      alertsClient.getProcessedAlerts.mockReturnValue({});
       alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 1,
@@ -1728,7 +1739,7 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(async () => {
         return { state: {} };
       });
-
+      alertsClient.getProcessedAlerts.mockReturnValue({});
       alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 1,
@@ -1737,6 +1748,7 @@ describe('Task Runner', () => {
         ongoing: { count: 0, data: [] },
         recovered: { count: 0, data: [] },
       });
+
       alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
@@ -2891,26 +2903,31 @@ describe('Task Runner', () => {
       {
         group: 'default',
         id: '1',
+        uuid: '111-111',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '2',
+        uuid: '222-222',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '3',
+        uuid: '333-333',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '4',
+        uuid: '444-444',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '5',
+        uuid: '555-555',
         actionTypeId: 'action',
       },
     ];
@@ -2975,7 +2992,7 @@ describe('Task Runner', () => {
       })
     );
 
-    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).toHaveBeenCalledTimes(8);
 
     expect(logger.debug).nthCalledWith(
       3,
@@ -3012,11 +3029,11 @@ describe('Task Runner', () => {
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
       2,
-      generateActionOpts({ id: '2' })
+      generateActionOpts({ id: '2', uuid: '222-222' })
     );
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
       3,
-      generateActionOpts({ id: '3' })
+      generateActionOpts({ id: '3', uuid: '333-333' })
     );
   });
 
@@ -3061,26 +3078,31 @@ describe('Task Runner', () => {
         {
           group: 'default',
           id: '1',
+          uuid: '111-111',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '2',
+          uuid: '222-222',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '3',
+          uuid: '333-333',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '4',
+          uuid: '444-444',
           actionTypeId: 'any-action',
         },
         {
           group: 'default',
           id: '5',
+          uuid: '555-555',
           actionTypeId: 'any-action',
         },
       ] as RuleAction[],
@@ -3176,7 +3198,7 @@ describe('Task Runner', () => {
       status: 'warning',
       errorReason: `maxExecutableActions`,
       logAlert: 4,
-      logAction: 3,
+      logAction: 5,
     });
   });
 

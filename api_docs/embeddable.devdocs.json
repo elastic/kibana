@@ -7999,20 +7999,20 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
           },
           {
             "plugin": "canvas",
@@ -14511,10 +14511,6 @@
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/plugin.tsx"
             }
           ],
           "children": [
@@ -14871,10 +14867,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-            },
-            {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
             },
@@ -14887,8 +14879,8 @@
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
             },
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
             },
             {
               "plugin": "investigateApp",
@@ -15024,7 +15016,15 @@
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/services/kibana/embeddables.ts"
+              "path": "x-pack/plugins/canvas/public/components/workpad_header/editor_menu/editor_menu.tsx"
+            },
+            {
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
+            },
+            {
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             }
           ],
           "children": [],

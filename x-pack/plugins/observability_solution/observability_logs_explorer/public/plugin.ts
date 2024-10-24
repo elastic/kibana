@@ -97,6 +97,22 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
+    // App used solely to redirect to either "/app/observability-logs-explorer" or "/app/discover"
+    // based on the last used app value in localStorage
+    core.application.register({
+      id: 'last-used-logs-viewer',
+      title: logsExplorerAppTitle,
+      visibleIn: [],
+      mount: async (appMountParams: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { renderLastUsedLogsViewerRedirect } = await import(
+          './applications/last_used_logs_viewer'
+        );
+
+        return renderLastUsedLogsViewerRedirect(coreStart, appMountParams);
+      },
+    });
+
     core.analytics.registerEventType(DATA_RECEIVED_TELEMETRY_EVENT);
 
     // Register Locators

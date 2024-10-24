@@ -12,8 +12,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
-  AssistantScope,
   KnowledgeBaseEntryRole,
   ObservabilityAIAssistantScreenContextRequest,
 } from '../../common/types';

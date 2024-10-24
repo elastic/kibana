@@ -6,5 +6,19 @@
  */
 
 export interface ApiActions {
-  get(operation: string): string;
+  get(operation: ApiOperation, subject: string): string;
+
+  /**
+   * @deprecated use `get(operation: ApiOperation, subject: string)` instead
+   */
+  get(subject: string): string;
+  actionFromRouteTag(routeTag: string): string;
+}
+
+export enum ApiOperation {
+  Read = 'read',
+  Create = 'create',
+  Update = 'update',
+  Delete = 'delete',
+  Manage = 'manage',
 }

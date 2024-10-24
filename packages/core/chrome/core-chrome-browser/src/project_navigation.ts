@@ -39,7 +39,6 @@ import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deep
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 
-import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
@@ -261,9 +260,6 @@ export interface SideNavCompProps {
 
 /** @public */
 export type SideNavComponent = ComponentType<SideNavCompProps>;
-
-/** @public */
-export type ChromeProjectBreadcrumb = ChromeBreadcrumb;
 
 /** @public */
 export interface ChromeSetProjectBreadcrumbsParams {

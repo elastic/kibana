@@ -9,10 +9,10 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import type { History } from 'history';
 import React from 'react';
 import type { Observable } from 'rxjs';
-import { observabilityAIAssistantRouter } from './routes/config';
-import type { ObservabilityAIAssistantAppService } from './service/create_app_service';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from './types';
 import { SharedProviders } from './utils/shared_providers';
+import { observabilityAIAssistantRouter } from './routes/config';
 
 // This is the Conversation application.
 
@@ -26,7 +26,7 @@ export function Application({
   coreStart: CoreStart;
   history: History;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
-  service: ObservabilityAIAssistantAppService;
+  service: AIAssistantAppService;
   theme$: Observable<CoreTheme>;
 }) {
   return (
@@ -36,7 +36,7 @@ export function Application({
       service={service}
       theme$={theme$}
     >
-      <RouterProvider history={history} router={observabilityAIAssistantRouter as any}>
+      <RouterProvider history={history} router={observabilityAIAssistantRouter}>
         <RouteRenderer />
       </RouterProvider>
     </SharedProviders>

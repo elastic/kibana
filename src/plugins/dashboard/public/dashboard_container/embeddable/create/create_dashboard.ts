@@ -44,7 +44,7 @@ import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
-import { DashboardCreationOptions } from '../dashboard_container_factory';
+import type { DashboardCreationOptions } from '../../..';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';

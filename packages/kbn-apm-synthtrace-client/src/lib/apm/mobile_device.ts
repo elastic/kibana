@@ -230,7 +230,7 @@ export class MobileDevice extends Entity<ApmFields> {
       spanSubtype: 'http',
       'http.request.method': httpMethod,
       'url.original': httpUrl,
-      'transaction.type': 'mobile',
+      'processor.event': 'span',
     };
 
     if (this.networkConnection) {

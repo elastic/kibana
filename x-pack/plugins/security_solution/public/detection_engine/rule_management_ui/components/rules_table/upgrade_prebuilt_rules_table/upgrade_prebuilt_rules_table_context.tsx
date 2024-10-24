@@ -8,6 +8,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import type { RulesUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
@@ -33,7 +34,6 @@ import { RuleDiffTab } from '../../../../rule_management/components/rule_details
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
-import type { RulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 

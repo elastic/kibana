@@ -14,6 +14,11 @@ components:
 
     EngineDescriptor:
       type: object
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
       properties:
         type:
           $ref: '#/components/schemas/EntityType'
@@ -23,6 +28,8 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         filter:
           type: string
+        fieldHistoryLength:
+          type: integer
 
     EngineStatus:
       type: string
@@ -30,6 +37,8 @@ components:
         - installing
         - started
         - stopped
+        - updating
+        - error
 
     IndexPattern:
       type: string

@@ -643,6 +643,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
@@ -975,9 +976,16 @@ module.exports = {
       },
     },
     {
+      files: ['x-pack/plugins/search*/**/*.tsx', 'x-pack/packages/search/**/*.tsx'],
+      rules: {
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
+      },
+    },
+    {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1007,6 +1015,7 @@ module.exports = {
           'error',
           {
             patterns: ['**/legacy_uptime/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1048,6 +1057,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1106,6 +1116,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1177,13 +1188,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
-            paths: [
-              {
-                name: 'react-router-dom',
-                importNames: ['Route'],
-                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1341,6 +1346,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1518,6 +1524,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
             patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1814,9 +1821,23 @@ module.exports = {
       files: [
         'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
+        'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
+
+        'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
+
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
+
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 1,

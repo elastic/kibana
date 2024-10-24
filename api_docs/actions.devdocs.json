@@ -3051,6 +3051,111 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.preSaveHook",
+            "type": "Function",
+            "tags": [],
+            "label": "preSaveHook",
+            "description": [],
+            "signature": [
+              "((params: ",
+              "PreSaveConnectorHookParams",
+              "<Config, Secrets>) => Promise<void>) | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionType.preSaveHook.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "PreSaveConnectorHookParams",
+                  "<Config, Secrets>"
+                ],
+                "path": "x-pack/plugins/actions/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.postSaveHook",
+            "type": "Function",
+            "tags": [],
+            "label": "postSaveHook",
+            "description": [],
+            "signature": [
+              "((params: ",
+              "PostSaveConnectorHookParams",
+              "<Config, Secrets>) => Promise<void>) | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionType.postSaveHook.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "PostSaveConnectorHookParams",
+                  "<Config, Secrets>"
+                ],
+                "path": "x-pack/plugins/actions/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.postDeleteHook",
+            "type": "Function",
+            "tags": [],
+            "label": "postDeleteHook",
+            "description": [],
+            "signature": [
+              "((params: ",
+              "PostDeleteConnectorHookParams",
+              "<Config, Secrets>) => Promise<void>) | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionType.postDeleteHook.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "PostDeleteConnectorHookParams",
+                  "<Config, Secrets>"
+                ],
+                "path": "x-pack/plugins/actions/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3689,9 +3794,9 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
-          "ExecuteOptions",
-          "<unknown>, \"actionExecutionId\" | \"request\">) => Promise<",
+          "{ execute: (connectorExecuteParams: ",
+          "ConnectorExecuteParams",
+          ") => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -3703,9 +3808,9 @@
           "CreateOptions",
           ") => Promise<",
           "Connector",
-          ">; update: ({ id, action }: ",
-          "UpdateOptions",
-          ") => Promise<",
+          ">; update: ({ id, action, }: Pick<",
+          "ConnectorUpdateParams",
+          ", \"id\" | \"action\">) => Promise<",
           "Connector",
           ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           "Connector",

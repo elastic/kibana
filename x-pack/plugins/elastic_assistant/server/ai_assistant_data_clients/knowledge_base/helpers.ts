@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { get } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -189,7 +190,7 @@ export const getStructuredToolForIndexEntry = ({
           standard: {
             query: {
               nested: {
-                path: 'semantic_text.inference.chunks',
+                path: `${indexEntry.field}.inference.chunks`,
                 query: {
                   sparse_vector: {
                     inference_id: elserId,
@@ -220,7 +221,7 @@ export const getStructuredToolForIndexEntry = ({
             }, {});
           }
           return {
-            text: (hit._source as { text: string }).text,
+            text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
           };
         });
 

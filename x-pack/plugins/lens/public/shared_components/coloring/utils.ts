@@ -95,12 +95,12 @@ export const findMinMaxByColumnId = (
   table: Datatable | undefined,
   getOriginalId: (id: string) => string = (id: string) => id
 ) => {
-  const minMax: Record<string, DataBounds> = {};
+  const minMaxMap = new Map<string, DataBounds>();
 
   if (table != null) {
     for (const columnId of columnIds) {
       const originalId = getOriginalId(columnId);
-      minMax[originalId] = minMax[originalId] || {
+      const minMax = minMaxMap.get(originalId) ?? {
         max: Number.NEGATIVE_INFINITY,
         min: Number.POSITIVE_INFINITY,
       };
@@ -108,19 +108,22 @@ export const findMinMaxByColumnId = (
         const rowValue = row[columnId];
         const numericValue = getNumericValue(rowValue);
         if (numericValue != null) {
-          if (minMax[originalId].min > numericValue) {
-            minMax[originalId].min = numericValue;
+          if (minMax.min > numericValue) {
+            minMax.min = numericValue;
           }
-          if (minMax[originalId].max < numericValue) {
-            minMax[originalId].max = numericValue;
+          if (minMax.max < numericValue) {
+            minMax.max = numericValue;
           }
         }
       });
+
       // what happens when there's no data in the table? Fallback to a percent range
-      if (minMax[originalId].max === Number.NEGATIVE_INFINITY) {
-        minMax[originalId] = getFallbackDataBounds();
+      if (minMax.max === Number.NEGATIVE_INFINITY) {
+        minMaxMap.set(originalId, getFallbackDataBounds());
+      } else {
+        minMaxMap.set(originalId, minMax);
       }
     }
   }
-  return minMax;
+  return minMaxMap;
 };

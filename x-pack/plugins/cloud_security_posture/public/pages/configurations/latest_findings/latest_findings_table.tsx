@@ -18,7 +18,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -68,11 +68,13 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
 
     return <CspEvaluationBadge type={finding?.result?.evaluation} />;
   },
-  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
-    const source = getDatasetDisplayName(finding?.data_stream?.dataset);
+    if (!finding) return <>{''}</>;
 
-    return <>{source || finding?.data_stream?.dataset || ''}</>;
+    const vendor = getVendorName(finding);
+
+    return <>{vendor || ''}</>;
   },
   '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);

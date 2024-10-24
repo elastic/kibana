@@ -15,13 +15,21 @@ import type {
   MappingProperty,
   MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
+  startAppId: string;
+  startRoute: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchIndicesPluginStart {}
+
+export interface SearchIndicesPluginStart {
+  enabled: boolean;
+  startAppId: AppDeepLinkId;
+  startRoute: string;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -32,6 +40,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   cloud?: CloudStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  indexManagement: IndexManagementPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
@@ -42,6 +51,7 @@ export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
     indexManagement: IndexManagementPluginStart;
+    serverless: ServerlessPluginStart;
   };
 
 export interface AppUsageTracker {
@@ -78,6 +88,10 @@ export interface CreateIndexCodeDefinition {
 
 export interface CreateIndexCodeExamples {
   exampleType: string;
+  installTitle: string;
+  installDescription: string;
+  createIndexTitle: string;
+  createIndexDescription: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
@@ -86,7 +100,7 @@ export interface CreateIndexCodeExamples {
 
 export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
   indexName: string;
-  sampleDocument: object;
+  sampleDocuments: object[];
   mappingProperties: Record<string, MappingProperty>;
 }
 
@@ -99,9 +113,10 @@ export interface IngestDataCodeDefinition {
 }
 
 export interface IngestDataCodeExamples {
-  title: string;
-  ingestTitle: string;
-  description: string;
+  addMappingsTitle: string;
+  addMappingsDescription: string;
+  installTitle: string;
+  installDescription: string;
   defaultMapping: Record<string, MappingProperty>;
   sense: IngestDataCodeDefinition;
   curl: IngestDataCodeDefinition;

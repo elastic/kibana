@@ -30,6 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
+    // see details: https://github.com/elastic/kibana/issues/195100
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.loginAsAdmin();

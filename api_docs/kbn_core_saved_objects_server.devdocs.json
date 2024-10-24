@@ -5822,10 +5822,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -5836,6 +5832,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -6118,44 +6118,8 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
@@ -6212,6 +6176,54 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "alerting",
@@ -10598,6 +10610,10 @@
                 "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
               },
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
@@ -10612,18 +10628,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
               },
               {
                 "plugin": "data",
@@ -10640,6 +10648,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "lens",
@@ -11457,16 +11469,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "data",

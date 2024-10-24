@@ -25,11 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import {
-  LazyLabsFlyout,
-  getContextProvider as getPresentationUtilContextProvider,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -88,7 +84,6 @@ export function InternalDashboardTopNav({
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
-  const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const [
     allDataViews,
@@ -194,7 +189,10 @@ export function InternalDashboardTopNav({
             },
           },
           ...dashboardTitleBreadcrumbs,
-        ])
+        ]),
+        {
+          project: { value: dashboardTitleBreadcrumbs },
+        }
       );
     }
   }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
@@ -405,9 +403,7 @@ export function InternalDashboardTopNav({
         onSavedQueryIdChange={setSavedQueryId}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <PresentationUtilContextProvider>
-          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-        </PresentationUtilContextProvider>
+        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}

@@ -33,7 +33,6 @@
       "kibanaReact",
       "kibanaUtils",
       "maps",
-      "esUiShared",
       "fieldFormats",
       "uiActions",
       "lens",

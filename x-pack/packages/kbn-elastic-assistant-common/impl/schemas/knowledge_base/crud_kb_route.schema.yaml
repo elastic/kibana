@@ -68,8 +68,6 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  esql_exists:
-                    type: boolean
                   index_exists:
                     type: boolean
                   is_setup_available:

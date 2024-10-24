@@ -10,9 +10,11 @@ import { EuiSpacer } from '@elastic/eui';
 import type {
   RuleUpgradeState,
   SetRuleFieldResolvedValueFn,
-} from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+} from '../../../model/prebuilt_rule_upgrade';
 import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
 import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
+import { DiffableRuleContextProvider } from './diffable_rule_context';
+import { RuleUpgradeCallout } from './components/rule_upgrade_callout';
 
 interface RuleUpgradeConflictsResolverTabProps {
   ruleUpgradeState: RuleUpgradeState;
@@ -24,14 +26,16 @@ export function RuleUpgradeConflictsResolverTab({
   setRuleFieldResolvedValue,
 }: RuleUpgradeConflictsResolverTabProps): JSX.Element {
   return (
-    <>
+    <DiffableRuleContextProvider
+      finalDiffableRule={ruleUpgradeState.finalRule}
+      setRuleFieldResolvedValue={setRuleFieldResolvedValue}
+    >
       <EuiSpacer size="s" />
       <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
-      <RuleUpgradeConflictsResolver
-        ruleUpgradeState={ruleUpgradeState}
-        setRuleFieldResolvedValue={setRuleFieldResolvedValue}
-      />
-    </>
+      <RuleUpgradeCallout ruleUpgradeState={ruleUpgradeState} />
+      <EuiSpacer size="s" />
+      <RuleUpgradeConflictsResolver ruleUpgradeState={ruleUpgradeState} />
+    </DiffableRuleContextProvider>
   );
 }

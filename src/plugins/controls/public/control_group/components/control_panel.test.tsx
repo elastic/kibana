@@ -10,12 +10,13 @@
 import React, { useImperativeHandle } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { pluginServices as presentationUtilPluginServices } from '@kbn/presentation-util-plugin/public/services';
-import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
+import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { uiActionsService } from '@kbn/presentation-util-plugin/public/services/kibana_services';
 import { render, waitFor } from '@testing-library/react';
 
 import type { ControlLabelPosition, ControlWidth } from '../../../common';
 import { ControlPanel } from './control_panel';
+import { Action } from '@kbn/ui-actions-plugin/public';
 
 describe('render', () => {
   let mockApi = {};
@@ -27,19 +28,14 @@ describe('render', () => {
   }) as any;
 
   beforeAll(() => {
-    presentationUtilServicesRegistry.start({});
-    presentationUtilPluginServices.setRegistry(presentationUtilServicesRegistry);
-    presentationUtilPluginServices.getServices().uiActions.getTriggerCompatibleActions = jest
-      .fn()
-      .mockImplementation(() => {
-        return [
-          {
-            isCompatible: jest.fn().mockResolvedValue(true),
-            id: 'testAction',
-            MenuItem: () => <div>test1</div>,
-          },
-        ];
-      });
+    setMockedPresentationUtilServices();
+    jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([
+      {
+        isCompatible: jest.fn().mockResolvedValue(true),
+        id: 'testAction',
+        MenuItem: () => <div>test1</div>,
+      },
+    ] as unknown as Action[]);
   });
 
   beforeEach(() => {

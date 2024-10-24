@@ -30,11 +30,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show preview for fields in _source', async function () {
-        await PageObjects.settings.changeAndValidateFieldFormat('extension', 'text');
+        await PageObjects.settings.changeAndValidateFieldFormat({
+          name: 'extension',
+          fieldType: 'text',
+          expectedPreviewText: 'css',
+        });
       });
 
       it('should show preview for fields not in _source', async function () {
-        await PageObjects.settings.changeAndValidateFieldFormat('extension.raw', 'keyword');
+        await PageObjects.settings.changeAndValidateFieldFormat({
+          name: 'extension.raw',
+          fieldType: 'keyword',
+          expectedPreviewText: 'css',
+        });
       });
     });
   });

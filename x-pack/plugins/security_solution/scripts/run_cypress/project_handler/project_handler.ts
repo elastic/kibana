@@ -75,7 +75,7 @@ export class ProjectHandler {
     throw new Error(this.DEFAULT_ERROR_MSG);
   }
 
-  resetCredentials(projectId: string, runnerId: string): Promise<Credentials | undefined> {
+  resetCredentials(projectId: string): Promise<Credentials | undefined> {
     throw new Error(this.DEFAULT_ERROR_MSG);
   }
 

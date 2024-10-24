@@ -371,6 +371,7 @@ export function initRoutes(
         do {
           const { docs: tasks } = await taskManager.fetch({
             query: taskManagerQuery,
+            size: 1000,
           });
           tasksFound = tasks.length;
           await Promise.all(tasks.map((task) => taskManager.remove(task.id)));

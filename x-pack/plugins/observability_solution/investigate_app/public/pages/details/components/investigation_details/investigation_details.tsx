@@ -16,7 +16,7 @@ import { useInvestigation } from '../../contexts/investigation_context';
 import { InvestigationHeader } from '../investigation_header/investigation_header';
 import { InvestigationItems } from '../investigation_items/investigation_items';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
-import { useScreenContext } from '../../hooks/use_screen_context';
+import { useScreenContext } from '../../../../hooks/use_screen_context';
 
 interface Props {
   user: AuthenticatedUser;

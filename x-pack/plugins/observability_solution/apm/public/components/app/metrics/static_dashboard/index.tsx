@@ -82,7 +82,6 @@ async function getCreationOptions(
     }
 
     return {
-      useControlGroupIntegration: true,
       getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,

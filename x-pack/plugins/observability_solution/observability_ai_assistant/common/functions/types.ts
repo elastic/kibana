@@ -6,9 +6,9 @@
  */
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 import { FunctionVisibility } from './function_visibility';
-import { AssistantScope } from '../types';
 export { FunctionVisibility };
 
 type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;

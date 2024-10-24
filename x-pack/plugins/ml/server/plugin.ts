@@ -17,6 +17,7 @@ import type {
   IClusterClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  CoreAuditService,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -94,6 +95,7 @@ export class MlServerPlugin
   private home: HomeServerPluginSetup | null = null;
   private cases: CasesServerSetup | null | undefined = null;
   private dataViews: DataViewsPluginStart | null = null;
+  private auditService: CoreAuditService | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private savedObjectsSyncService: SavedObjectsSyncService;
@@ -218,6 +220,7 @@ export class MlServerPlugin
       () => this.uiSettings,
       () => this.fieldsFormat,
       getDataViews,
+      () => this.auditService,
       () => this.isMlReady,
       this.compatibleModuleType
     );
@@ -313,6 +316,7 @@ export class MlServerPlugin
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
+    this.auditService = coreStart.security.audit;
     this.dataViews = plugins.dataViews;
 
     this.mlLicense.setup(plugins.licensing.license$, async (mlLicense: MlLicense) => {
