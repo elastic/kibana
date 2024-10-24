@@ -255,7 +255,6 @@ export interface ITelemetryReceiver {
 
   setNumDocsToSample(n: number): void;
 
-  // ---------- TODO: POC ----------  //
   getClusterStats(): Promise<ClusterStats>;
   getIndices(): Promise<string[]>;
   getDataStreams(): Promise<DataStream[]>;
@@ -1353,7 +1352,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this._esClient;
   }
 
-  // ---------- TODO: POC ----------  //
   public async getClusterStats(): Promise<ClusterStats> {
     const es = this.esClient();
 
