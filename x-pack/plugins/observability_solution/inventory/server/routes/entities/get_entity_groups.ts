@@ -10,8 +10,8 @@ import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
 import {
   ENTITIES_LATEST_ALIAS,
-  EntityGroup,
-  EntityType,
+  type EntityGroup,
+  type EntityType,
   MAX_NUMBER_OF_ENTITIES,
   defaultEntityTypes,
 } from '../../../common/entities';

@@ -7,6 +7,7 @@
 import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   type EntityColumnIds,
   type EntityType,
@@ -19,7 +20,8 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { InventorySummary } from './inventory_summary';
-import { extractPaginationParameter } from '../../utils/extract_pagination_parameter';
+
+const paginationDecoder = decodeOrThrow(entityPaginationRt);
 
 export function UnifiedInventory() {
   const {
@@ -29,7 +31,7 @@ export function UnifiedInventory() {
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, kuery, entityTypes, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
-  const pagination = extractPaginationParameter(paginationQuery);
+  const pagination = paginationDecoder(paginationQuery);
   const pageIndex = pagination?.unified ?? 0;
 
   const {
@@ -54,7 +56,7 @@ export function UnifiedInventory() {
   );
 
   useEffectOnce(() => {
-    const refreshSubscription = refreshSubject$.subscribe(() => refresh());
+    const refreshSubscription = refreshSubject$.subscribe(refresh);
 
     return () => refreshSubscription.unsubscribe();
   });

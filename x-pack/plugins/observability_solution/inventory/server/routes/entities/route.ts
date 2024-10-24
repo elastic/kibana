@@ -140,7 +140,9 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
       entityTypes,
     });
 
-    return { groupBy: field, groups };
+    const entitiesCount = groups.reduce((acc, group) => acc + group.count, 0);
+
+    return { groupBy: field, groups, entitiesCount };
   },
 });
 

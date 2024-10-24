@@ -29,30 +29,38 @@ export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
 export const entityViewRt = t.union([t.literal('unified'), t.literal('grouped')]);
 
 const paginationRt = t.record(t.string, t.number);
-export const entityPaginationRt = new t.Type<Record<string, number>, string, unknown>(
+export const entityPaginationRt = new t.Type<Record<string, number> | undefined, string, unknown>(
   'entityPaginationRt',
   paginationRt.is,
   (input, context) => {
-    if (typeof input === 'string') {
-      try {
-        const decoded = decode(input);
-        const validation = paginationRt.decode(decoded);
+    switch (typeof input) {
+      case 'string': {
+        try {
+          const decoded = decode(input);
+          const validation = paginationRt.decode(decoded);
+          if (isRight(validation)) {
+            return t.success(validation.right);
+          }
+
+          return t.failure(input, context);
+        } catch (e) {
+          return t.failure(input, context);
+        }
+      }
+
+      case 'undefined':
+        return t.success(input);
+
+      default: {
+        const validation = paginationRt.decode(input);
+
         if (isRight(validation)) {
           return t.success(validation.right);
         }
 
         return t.failure(input, context);
-      } catch (e) {
-        return t.failure(input, context);
       }
     }
-
-    const validation = paginationRt.decode(input);
-    if (isRight(validation)) {
-      return t.success(validation.right);
-    }
-
-    return t.failure(input, context);
   },
   (o) => encode(o)
 );

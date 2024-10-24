@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { GroupedEntitiesGrid } from './grouped_entities_grid';
-import { EntityGroup } from '../../../common/entities';
+import type { EntityGroup } from '../../../common/entities';
 import { InventoryPanelBadge } from './inventory_panel_badge';
 
 const ENTITIES_COUNT_BADGE = i18n.translate(

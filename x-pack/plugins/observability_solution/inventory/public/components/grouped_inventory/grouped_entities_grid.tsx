@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiDataGridSorting } from '@elastic/eui';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
@@ -18,29 +19,24 @@ import {
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { extractPaginationParameter } from '../../utils/extract_pagination_parameter';
 
 interface Props {
   field: string;
 }
 
+const paginationDecoder = decodeOrThrow(entityPaginationRt);
+
 export function GroupedEntitiesGrid({ field }: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
-  const pagination = extractPaginationParameter(paginationQuery);
+  const pagination = paginationDecoder(paginationQuery);
   const pageIndex = pagination?.[field] ?? 0;
 
   const { refreshSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-
-  useEffectOnce(() => {
-    const refreshSubscription = refreshSubject$.subscribe(() => refresh());
-
-    return () => refreshSubscription.unsubscribe();
-  });
 
   const {
     value = { entities: [] },
@@ -62,6 +58,12 @@ export function GroupedEntitiesGrid({ field }: Props) {
     },
     [field, inventoryAPIClient, kuery, sortDirection, sortField]
   );
+
+  useEffectOnce(() => {
+    const refreshSubscription = refreshSubject$.subscribe(refresh);
+
+    return () => refreshSubscription.unsubscribe();
+  });
 
   function handlePageChange(nextPage: number) {
     inventoryRoute.push('/', {
