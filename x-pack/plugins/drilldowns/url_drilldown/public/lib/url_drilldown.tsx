@@ -196,7 +196,7 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
         defaultMessage:
           'Error building URL: external URL was denied. Administrator can configure external URL policies using "externalUrl.policy" setting in kibana.yml. Invalid URL: {invalidUrl}',
         values: {
-          invalidUrl,
+          invalidUrl: url,
         },
       });
       throw new Error(errorMessage);

@@ -109,7 +109,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         label={txtUrlTemplateLabel}
         helpText={
           <>
-            {txtUrlTemplateSyntaxTestingHelpText} <br />
+            {txtUrlTemplateSyntaxTestingHelpText}{' '}
             {syntaxHelpDocsLink ? (
               <EuiLink external target={'_blank'} href={syntaxHelpDocsLink}>
                 {txtUrlTemplateSyntaxHelpLinkText}

@@ -45,7 +45,7 @@ export const txtUrlTemplateSyntaxTestingHelpText = i18n.translate(
   'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxTestingHelpText',
   {
     defaultMessage:
-      'To validate and test the URL template, save the configuration and try to use the drilldown from the panel.',
+      'To validate and test the URL template, save the configuration and use this drilldown from the panel.',
   }
 );
 
