@@ -1,0 +1,22 @@
+{
+  "name": "@kbn/ui-shared-deps-src",
+  "targets": {
+    "build": {
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "@kbn/ui-shared-deps-npm"
+        }
+      ],
+      "inputs": [
+        "{projectRoot}/src/**",
+        "{projectRoot}/index.ts",
+        "{projectRoot}/webpack.config.js"
+      ],
+      "outputs": [
+        "{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-src",
+        "{projectRoot}/target"
+      ]
+    }
+  }
+}

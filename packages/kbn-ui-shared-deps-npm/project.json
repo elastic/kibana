@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/nx/schemas/nx-schema.json",
+  "name": "@kbn/ui-shared-deps-npm",
+  "targets": {
+    "build": {
+      "inputs": [
+        "{projectRoot}/src/**",
+        "{projectRoot}/index.js",
+        "{projectRoot}/webpack.config.js"
+      ],
+      "outputs": [
+        "{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-npm",
+        "{projectRoot}/target"
+      ]
+    }
+  }
+}
