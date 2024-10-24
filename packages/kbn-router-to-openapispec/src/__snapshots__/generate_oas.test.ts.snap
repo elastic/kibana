@@ -572,6 +572,7 @@ OK response oas-test-version-2",
     },
     "/no-xsrf/{id}/{path*}": Object {
       "post": Object {
+        "deprecated": true,
         "operationId": "%2Fno-xsrf%2F%7Bid%7D%2F%7Bpath*%7D#1",
         "parameters": Array [
           Object {
