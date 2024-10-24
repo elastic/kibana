@@ -4,24 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
-export default function ({ getService }: FtrProviderContext) {
+import expect from '@kbn/expect';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
-  const supertest = getService('supertest');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const alertingApi = getService('alertingApi');
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  let roleAuthc: RoleCredentials;
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'logs';
+
+  let adminRoleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   describe('ElasticSearch query rule', () => {
@@ -31,13 +29,19 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
-      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
+      await supertestWithoutAuth
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
+      await supertestWithoutAuth
+        .delete(`/api/actions/connector/${actionId}`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
 
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
@@ -45,20 +49,20 @@ export default function ({ getService }: FtrProviderContext) {
         conflicts: 'proceed',
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
+          roleAuthc: adminRoleAuthc,
           name: 'Index Connector: Alerting API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
         const createdRule = await alertingApi.helpers.createEsQueryRule({
-          roleAuthc,
-          consumer: 'observability',
+          roleAuthc: adminRoleAuthc,
+          consumer: expectedConsumer,
           name: 'always fire',
           ruleTypeId: RULE_TYPE_ID,
           params: {
@@ -104,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc,
+          roleAuthc: adminRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -112,9 +116,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(roleAuthc, ruleId);
+        const match = await alertingApi.findInRules(adminRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be('observability');
+        expect(match.consumer).to.be(expectedConsumer);
       });
     });
   });
