@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type OperatorFunction, map, startWith, pairwise } from 'rxjs';
+import { type OperatorFunction, map, tap } from 'rxjs';
 
 /**
  * An RxJS operator implementing the exponential moving average function.
@@ -23,12 +23,14 @@ export function exponentialMovingAverage(
 ): OperatorFunction<number, number> {
   const alpha = 1 - Math.exp(-interval / period);
 
-  return (inner) =>
-    inner.pipe(
-      startWith(undefined),
-      pairwise(),
-      map(([previous, current]) =>
-        previous == null ? current! : alpha * current! + (1 - alpha) * previous
-      )
+  return (inner) => {
+    let previous: number | undefined;
+
+    return inner.pipe(
+      map((current) => (previous == null ? current : alpha * current + (1 - alpha) * previous)),
+      tap((current) => {
+        previous = current;
+      })
     );
+  };
 }

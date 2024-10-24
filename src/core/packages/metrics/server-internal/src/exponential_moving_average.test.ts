@@ -51,12 +51,12 @@ describe('exponentialMovingAverage', () => {
       }).pipe(exponentialMovingAverage(15, 5));
 
       expectObservable(observable).toBe('abcdef|', {
-        a: 1,
+        a: 1, // https://en.wikipedia.org/wiki/Exponential_smoothing#Choosing_the_initial_smoothed_value
         b: 1,
         c: expect.closeTo(1.3, 1),
-        d: expect.closeTo(2.0, 1),
-        e: expect.closeTo(1.7, 1),
-        f: 1,
+        d: expect.closeTo(1.5, 1),
+        e: expect.closeTo(1.3, 1),
+        f: expect.closeTo(1.2, 1),
       });
     });
   });
