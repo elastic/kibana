@@ -1,0 +1,11 @@
+For example:
+
+[source,yaml]
+----------------------------------------
+xpack.actions.preconfigured:
+  my-server-log:
+    name: preconfigured-server-log-connector-type
+    actionTypeId: .server-log
+----------------------------------------
+
+For more examples, go to <<pre-configured-connectors>>.
