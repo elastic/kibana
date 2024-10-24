@@ -16,6 +16,10 @@ export interface ThreatReadOnlyProps {
 }
 
 export const ThreatReadOnly = ({ threat }: ThreatReadOnlyProps) => {
+  if (threat.length === 0) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

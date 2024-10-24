@@ -18,7 +18,6 @@ import type { FieldValueQueryBar } from '../../../../../../rule_creation_ui/comp
 import * as stepDefineRuleI18n from '../../../../../../rule_creation_ui/components/step_define_rule/translations';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import {
-  DataSourceType as DataSourceTypeSnakeCase,
   KqlQueryLanguage,
   KqlQueryType,
   RuleQuery,
@@ -32,11 +31,11 @@ import type {
   SavedKqlQuery,
 } from '../../../../../../../../common/api/detection_engine';
 import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
-import { DataSourceType } from '../../../../../../../detections/pages/detection_engine/rules/types';
 import { isFilters } from '../../../helpers';
 import type { SetRuleQuery } from '../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useGetSavedQuery } from '../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { getUseRuleIndexPatternParameters } from '../utils';
 
 export const kqlQuerySchema = {
   ruleType: schema.ruleType,
@@ -197,37 +196,6 @@ export function kqlQueryDeserializer(
   };
 
   return returnValue;
-}
-
-interface UseRuleIndexPatternParameters {
-  dataSourceType: DataSourceType;
-  index: string[];
-  dataViewId: string | undefined;
-}
-
-function getUseRuleIndexPatternParameters(
-  finalDiffableRule: DiffableRule,
-  defaultIndexPattern: string[]
-): UseRuleIndexPatternParameters {
-  if (!('data_source' in finalDiffableRule) || !finalDiffableRule.data_source) {
-    return {
-      dataSourceType: DataSourceType.IndexPatterns,
-      index: defaultIndexPattern,
-      dataViewId: undefined,
-    };
-  }
-  if (finalDiffableRule.data_source.type === DataSourceTypeSnakeCase.data_view) {
-    return {
-      dataSourceType: DataSourceType.DataView,
-      index: [],
-      dataViewId: finalDiffableRule.data_source.data_view_id,
-    };
-  }
-  return {
-    dataSourceType: DataSourceType.IndexPatterns,
-    index: finalDiffableRule.data_source.index_patterns,
-    dataViewId: undefined,
-  };
 }
 
 function getSavedQueryId(diffableRule: DiffableRule): string | undefined {
