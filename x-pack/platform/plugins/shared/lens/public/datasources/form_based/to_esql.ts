@@ -20,7 +20,6 @@ import type {
   ValueFormatConfig,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
@@ -37,8 +36,7 @@ export function getESQLForLayer(
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
-  nowInstant: Date,
-  data: DataPublicPluginStart
+  nowInstant: Date
 ) {
   // esql mode variables
   const partialRows = true;
@@ -150,8 +148,7 @@ export function getESQLForLayer(
       indexPattern,
       layer,
       uiSettings,
-      dateRange,
-      data
+      dateRange
     );
 
     if (!metricESQL) return undefined;
@@ -276,8 +273,7 @@ export function getESQLForLayer(
         indexPattern,
         layer,
         uiSettings,
-        dateRange,
-        data
+        dateRange
       )
     );
   });
