@@ -260,7 +260,6 @@ export interface FleetServerPolicy {
 
 export interface AgentlessApiResponse {
   id: string;
-  region_id: string;
 }
 
 // Definitions for agent policy outputs endpoints

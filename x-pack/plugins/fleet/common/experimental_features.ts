@@ -21,7 +21,6 @@ const _allowedExperimentalValues = {
   kafkaOutput: true,
   outputSecretsStorage: true,
   remoteESOutput: true,
-  agentless: false,
   enableStrictKQLValidation: true,
   subfeaturePrivileges: false,
   advancedPolicySettings: true,
