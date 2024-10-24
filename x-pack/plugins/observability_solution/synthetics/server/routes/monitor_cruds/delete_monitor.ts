@@ -54,7 +54,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
     try {
-      const { errors, result } = await deleteMonitorAPI.execute({
+      const { errors } = await deleteMonitorAPI.execute({
         monitorIds: idsToDelete,
       });
 

@@ -6,11 +6,12 @@
  */
 
 import pMap from 'p-map';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { deleteMonitorBulk } from '../bulk_cruds/delete_monitor_bulk';
 import { validatePermissions } from '../edit_monitor';
 import {
   EncryptedSyntheticsMonitorAttributes,
+  SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
@@ -26,15 +27,20 @@ export class DeleteMonitorAPI {
   }
 
   async getMonitorsToDelete(monitorIds: string[]) {
-    return await pMap(
+    const result: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>> = [];
+    await pMap(
       monitorIds,
       async (monitorId) => {
-        return this.getMonitorToDelete(monitorId);
+        const monitor = await this.getMonitorToDelete(monitorId);
+        if (monitor) {
+          result.push(monitor);
+        }
       },
       {
         stopOnError: false,
       }
     );
+    return result;
   }
 
   async getMonitorToDelete(monitorId: string) {
@@ -79,7 +85,7 @@ export class DeleteMonitorAPI {
   async execute({ monitorIds }: { monitorIds: string[] }) {
     const { response, server } = this.routeContext;
 
-    const monitors = (await this.getMonitorsToDelete(monitorIds)).filter(Boolean);
+    const monitors = await this.getMonitorsToDelete(monitorIds);
     for (const monitor of monitors) {
       const err = await validatePermissions(this.routeContext, monitor.attributes.locations);
       if (err) {
@@ -106,7 +112,7 @@ export class DeleteMonitorAPI {
         });
       });
 
-      return { errors, result: this.result };
+      return { errors };
     } catch (e) {
       server.logger.error(`Unable to delete Synthetics monitor with error ${e.message}`);
       server.logger.error(e);
