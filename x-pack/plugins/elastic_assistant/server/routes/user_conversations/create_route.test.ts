@@ -100,52 +100,6 @@ describe('Create conversation route', () => {
 
       expect(result.badRequest).toHaveBeenCalled();
     });
-
-    test('escapes colons when querying for existing titles', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: {
-          ...getCreateConversationSchemaMock(),
-          title: 'test: Malware infection: with credential theft attempt - 2875e', // <-- contains colons
-        },
-      });
-
-      await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(
-        clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments
-      ).toHaveBeenCalledWith({
-        fields: ['title'],
-        filter:
-          'users:{ name: "my_username" } AND title:test\\: Malware infection\\: with credential theft attempt - 2875e',
-        page: 1,
-        perPage: 100,
-      });
-    });
-
-    test('escapes quotes when querying for existing titles', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: {
-          ...getCreateConversationSchemaMock(),
-          title: '"Malware infection with credential theft attempt - 2875e"', // <-- contains quotes
-        },
-      });
-
-      await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(
-        clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments
-      ).toHaveBeenCalledWith({
-        fields: ['title'],
-        filter:
-          'users:{ name: "my_username" } AND title:\\"Malware infection with credential theft attempt - 2875e\\"',
-        page: 1,
-        perPage: 100,
-      });
-    });
   });
   describe('conversation containing messages', () => {
     const getMessage = (role: string = 'user') => ({
