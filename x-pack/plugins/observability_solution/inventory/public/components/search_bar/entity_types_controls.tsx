@@ -16,7 +16,7 @@ interface Props {
   onChange: (entityTypes: string[]) => void;
 }
 
-const toComboBoxOption = (entityType: string): EuiComboBoxOptionOption<string> => ({
+const toComboBoxOption = (entityType: string): EuiComboBoxOptionOption => ({
   key: entityType,
   label: entityType,
   'data-test-subj': `entityTypesFilter${entityType}Option`,
@@ -42,7 +42,7 @@ export function EntityTypesControls({ onChange }: Props) {
   const selectedOptions = entityTypes.map(toComboBoxOption);
 
   return (
-    <EuiComboBox<string>
+    <EuiComboBox
       data-test-subj="entityTypesFilterComboBox"
       isLoading={loading}
       css={css`
@@ -59,7 +59,7 @@ export function EntityTypesControls({ onChange }: Props) {
       options={options}
       selectedOptions={selectedOptions}
       onChange={(newOptions) => {
-        onChange(newOptions.map((option) => option.key!));
+        onChange(newOptions.map((option) => option.key).filter((key): key is string => !!key));
       }}
       isClearable
     />

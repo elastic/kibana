@@ -58,5 +58,6 @@ export function EntityIcon({ entity }: EntityIconProps) {
     return <EuiIcon type="logoKubernetes" size="l" />;
   }
 
+  // Return an empty EuiIcon instead of null to maintain UI alignment across all EntityIcon usages
   return <EuiIcon type="" size="l" />;
 }
