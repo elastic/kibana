@@ -17,30 +17,31 @@ import {
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
+
 import { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { RenderMessageWithIcon } from './render_message_with_icon';
-
 import * as i18n from '../delete/confirm_delete_endpoint/translations';
 import { ListUsageResults } from './list_usage_results';
 
 interface ScanUsageResultsProps {
   list: InferenceUsageInfo[];
   ignoreWarningCheckbox: boolean;
-  onCheckboxChange: (state: boolean) => void;
+  onIgnoreWarningCheckboxChange: (state: boolean) => void;
 }
 
 export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
   list,
   ignoreWarningCheckbox,
-  onCheckboxChange,
+  onIgnoreWarningCheckboxChange,
 }) => {
   const {
     services: { application },
   } = useKibana();
-  const handleNavigateToIndex = () => {
-    application?.navigateToApp('enterprise_search', {
-      path: 'content/search_indices',
+  const handleNavigateToIndexManagement = () => {
+    application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
+      path: 'search_indices',
       openInNewTab: true,
     });
   };
@@ -59,7 +60,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup gutterSize="m" direction="column">
             <EuiFlexItem>
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiText
                     size="xs"
@@ -72,7 +73,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    onClick={handleNavigateToIndex}
+                    onClick={handleNavigateToIndexManagement}
                     iconType="popout"
                     iconSide="right"
                     iconSize="s"
@@ -102,7 +103,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
             id={'ignoreWarningCheckbox'}
             label={i18n.IGNORE_POTENTIAL_ERRORS_LABEL}
             checked={ignoreWarningCheckbox}
-            onChange={(e) => onCheckboxChange(e.target.checked)}
+            onChange={(e) => onIgnoreWarningCheckboxChange(e.target.checked)}
           />
         </EuiPanel>
       </EuiFlexItem>
