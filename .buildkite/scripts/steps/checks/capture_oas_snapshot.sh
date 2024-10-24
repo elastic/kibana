@@ -2,9 +2,10 @@
 
 set -euo pipefail
 
-.buildkite/scripts/bootstrap.sh
-
 source .buildkite/scripts/common/util.sh
+
+.buildkite/scripts/bootstrap.sh
+.buildkite/scripts/copy_es_snapshot_cache.sh
 
 echo --- Capture OAS snapshot
 cmd="node scripts/capture_oas_snapshot --include-path /api/status --include-path /api/alerting/rule/ --include-path /api/alerting/rules --include-path /api/actions --include-path /api/security/role --include-path /api/spaces --include-path /api/fleet"
