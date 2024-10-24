@@ -555,7 +555,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Expect the pipeline link to point to the pipeline page with empty pipeline value
           expect(pipelineLinkURL).to.be(
-            `/app/management/ingest/ingest_pipelines/?pipeline=${nonIntegrationCustomName}`
+            `/app/management/ingest/ingest_pipelines/?pipeline=${encodeURIComponent(
+              nonIntegrationCustomName
+            )}`
           );
         });
 
@@ -594,7 +596,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Should point to component template with @custom as value
           expect(componentTemplateUrl).to.be(
-            `/app/management/data/index_management/component_templates/${integrationSpecificCustomName}`
+            `/data/index_management/component_templates/${encodeURIComponent(
+              integrationSpecificCustomName
+            )}`
           );
 
           const pipelineInputBox = await testSubjects.find(
@@ -613,7 +617,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Expect the pipeline link to point to the pipeline page with empty pipeline value
           expect(pipelineLinkURL).to.be(
-            `/app/management/ingest/ingest_pipelines/?pipeline=${integrationSpecificCustomName}`
+            `/app/management/ingest/ingest_pipelines/?pipeline=${encodeURIComponent(
+              integrationSpecificCustomName
+            )}`
           );
         });
       });
@@ -832,10 +838,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             );
             const ctLinkURL = await ctLink.getAttribute('href');
 
+            const componentTemplateName = `${type}-${nginxAccessDatasetName}@custom`;
+
             // Should point to the component template page
             expect(
               ctLinkURL.endsWith(
-                `/app/management/data/index_management/component_templates/${type}-${nginxAccessDatasetName}@custom`
+                `/data/index_management/component_templates/${encodeURIComponent(
+                  componentTemplateName
+                )}`
               )
             ).to.be(true);
           });
