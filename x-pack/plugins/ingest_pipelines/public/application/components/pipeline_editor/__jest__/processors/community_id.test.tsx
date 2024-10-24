@@ -107,4 +107,52 @@ describe('Processor: Community id', () => {
       seed: 10,
     });
   });
+
+  test('should not add a processor if the seedField is smaller than min_value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    form.setInputValue('seedField.input', '-1');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+
+    expect(processors).toHaveLength(0);
+  });
+
+  test('should not add a processor if the seedField is bigger than max_value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    form.setInputValue('seedField.input', '65536');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+
+    expect(processors).toHaveLength(0);
+  });
+
+  test('should not add a processor if the seedField is not an integer', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    form.setInputValue('seedField.input', '10.2');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+
+    expect(processors).toHaveLength(0);
+  });
 });
