@@ -11,10 +11,21 @@ import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import type { PlaygroundPageMode } from '@kbn/search-playground/public';
+
 import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 
-export const Playground: React.FC = () => {
+interface PlaygroundProps {
+  pageMode?: PageMode;
+}
+
+export enum PageMode {
+  chat = 'chat',
+  search = 'search',
+}
+
+export const Playground: React.FC<PlaygroundProps> = ({ pageMode = PageMode.chat }) => {
   const { searchPlayground } = useValues(KibanaLogic);
 
   if (!searchPlayground) {
@@ -35,7 +46,7 @@ export const Playground: React.FC = () => {
         bottomBorder="extended"
         docLink="playground"
       >
-        <searchPlayground.Playground />
+        <searchPlayground.Playground pageMode={pageMode as unknown as PlaygroundPageMode} />
       </EnterpriseSearchApplicationsPageTemplate>
     </searchPlayground.PlaygroundProvider>
   );

@@ -44,7 +44,7 @@ export const App: React.FC<AppProps> = ({
   );
   const handleModeChange = (id: ViewMode) => setSelectedMode(id);
   const handlePageModeChange = (mode: PlaygroundPageMode) => {
-    services.application?.navigateToUrl(mode);
+    services.application?.navigateToUrl(`./${mode}`);
     setSelectedPageMode(mode);
   };
   const {
