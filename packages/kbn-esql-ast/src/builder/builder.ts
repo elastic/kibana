@@ -11,6 +11,8 @@
 
 import {
   ESQLAstComment,
+  ESQLAstCommentMultiLine,
+  ESQLAstCommentSingleLine,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -64,17 +66,17 @@ export namespace Builder {
     };
   };
 
-  export const comment = (
-    subtype: ESQLAstComment['subtype'],
+  export const comment = <S extends ESQLAstComment['subtype']>(
+    subtype: S,
     text: string,
-    location: ESQLLocation
-  ): ESQLAstComment => {
+    location?: ESQLLocation
+  ): S extends 'multi-line' ? ESQLAstCommentMultiLine : ESQLAstCommentSingleLine => {
     return {
       type: 'comment',
       subtype,
       text,
       location,
-    };
+    } as S extends 'multi-line' ? ESQLAstCommentMultiLine : ESQLAstCommentSingleLine;
   };
 
   export namespace expression {

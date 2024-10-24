@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// import { Builder } from '../../../builder';
+import { Builder } from '../../../builder';
 import {
   ESQLAstQueryExpression,
   ESQLColumn,
@@ -20,6 +20,57 @@ import * as util from '../../util';
 import * as generic from '../../generic';
 
 export type SortExpression = ESQLOrderExpression | ESQLColumn;
+
+/**
+ * This "template" allows the developer to easily specify a new sort expression
+ * AST node, for example:
+ *
+ * ```ts
+ * // as a simple string
+ * 'column_name'
+ *
+ * // column with nested fields
+ * ['column_name', 'nested_field']
+ *
+ * // as an object with additional options
+ * { parts: 'column_name', order: 'ASC', nulls: 'NULLS FIRST' }
+ * { parts: ['column_name', 'nested_field'], order: 'DESC', nulls: 'NULLS LAST' }
+ * ```
+ */
+export type NewSortExpressionTemplate =
+  | string
+  | string[]
+  | {
+      parts: string | string[];
+      order?: ESQLOrderExpression['order'];
+      nulls?: ESQLOrderExpression['nulls'];
+    };
+
+const createSortExpression = (
+  template: string | string[] | NewSortExpressionTemplate
+): SortExpression => {
+  const column = Builder.expression.column({
+    parts:
+      typeof template === 'string'
+        ? [template]
+        : Array.isArray(template)
+        ? template
+        : typeof template.parts === 'string'
+        ? [template.parts]
+        : template.parts,
+  });
+
+  if (typeof template === 'string' || Array.isArray(template)) {
+    return column;
+  }
+
+  const order = Builder.expression.order(column, {
+    order: template.order ?? '',
+    nulls: template.nulls ?? '',
+  });
+
+  return order;
+};
 
 /**
  * Iterates through all sort commands starting from the beginning of the query.
@@ -50,6 +101,31 @@ export const listCommands = (
     .visitQuery(ast);
 };
 
+/**
+ * Returns the Nth SORT command found in the query.
+ *
+ * @param ast The root of the AST.
+ * @param index The index (N) of the sort command to return.
+ * @returns The sort command found in the AST, if any.
+ */
+export const getCommand = (
+  ast: ESQLAstQueryExpression,
+  index: number = 0
+): ESQLCommand | undefined => {
+  for (const command of listCommands(ast, index)) {
+    return command;
+  }
+};
+
+/**
+ * Returns an iterator for all sort expressions (columns and order expressions)
+ * in the query. You can specify the `skip` parameter to skip a given number of
+ * expressions.
+ *
+ * @param ast The root of the AST.
+ * @param skip Number of sort expressions to skip.
+ * @returns Iterator through sort expressions (columns and order expressions).
+ */
 export const list = (
   ast: ESQLAstQueryExpression,
   skip: number = 0
@@ -75,6 +151,17 @@ export const list = (
     .visitQuery(ast);
 };
 
+/**
+ * Finds the Nts sort expression that matches the predicate.
+ *
+ * @param ast The root of the AST.
+ * @param predicate A function that returns true if the sort expression matches
+ *     the predicate.
+ * @param index The index of the sort expression to return. If not specified,
+ *     the first sort expression that matches the predicate will be returned.
+ * @returns The sort expressions and sort command 2-tuple that matches the
+ *     predicate, if any.
+ */
 export const findByPredicate = (
   ast: ESQLAstQueryExpression,
   predicate: Predicate<[sortExpression: SortExpression, sortCommand: ESQLCommand]>,
@@ -83,6 +170,15 @@ export const findByPredicate = (
   return util.findByPredicate(list(ast, index), predicate);
 };
 
+/**
+ * Finds the Nth sort expression that matches the sort expression by column
+ * name. The `parts` argument allows to specify an array of nested field names.
+ *
+ * @param ast The root of the AST.
+ * @param parts A string or an array of strings representing the column name.
+ * @returns The sort expressions and sort command 2-tuple that matches the
+ *     predicate, if any.
+ */
 export const find = (
   ast: ESQLAstQueryExpression,
   parts: string | string[],
@@ -113,6 +209,15 @@ export const find = (
   });
 };
 
+/**
+ * Removes the Nth sort expression that matches the sort expression by column
+ * name. The `parts` argument allows to specify an array of nested field names.
+ *
+ * @param ast The root of the AST.
+ * @param parts A string or an array of strings representing the column name.
+ * @param index The index of the sort expression to remove.
+ * @returns The sort expressions and sort command 2-tuple that was removed, if any.
+ */
 export const remove = (
   ast: ESQLAstQueryExpression,
   parts: string | string[],
@@ -125,46 +230,84 @@ export const remove = (
   }
 
   const [node] = tuple;
-  const cmd = generic.removeCommandArgument(ast, node);
+  const cmd = generic.commands.args.remove(ast, node);
 
   if (cmd) {
     if (!cmd.args.length) {
-      generic.removeCommand(ast, cmd);
+      generic.commands.remove(ast, cmd);
     }
   }
 
   return cmd ? tuple : undefined;
 };
 
-// /**
-//  *
-//  * ```
-//  * FROM index | SORT a, b | LIMIT 10 | SORT c, d
-//  * ```
-//  *
-//  * @param ast
-//  * @param parts
-//  * @param index
-//  * @returns
-//  */
-// export const insert = (
-//   ast: ESQLAstQueryExpression,
-//   parts: string | string[],
-//   index?: number
-// ): ESQLSource | undefined => {
-//   const command = generic.findCommandByName(ast, 'from');
+/**
+ * Inserts a new sort expression into the specified SORT command at the
+ * specified argument position.
+ *
+ * @param sortCommand The SORT command to insert the new sort expression into.
+ * @param template The sort expression template.
+ * @param index Argument position in the command argument list.
+ * @returns The inserted sort expression.
+ */
+export const insertIntoCommand = (
+  sortCommand: ESQLCommand,
+  template: NewSortExpressionTemplate,
+  index?: number
+): SortExpression => {
+  const expression = createSortExpression(template);
 
-//   if (!command) {
-//     return;
-//   }
+  generic.commands.args.insert(sortCommand, expression, index);
 
-//   const source = Builder.expression.indexSource(indexName, clusterName);
+  return expression;
+};
 
-//   if (index === -1) {
-//     generic.appendCommandArgument(command, source);
-//   } else {
-//     command.args.splice(index, 0, source);
-//   }
+/**
+ * Creates a new sort expression node and inserts it into the specified SORT
+ * command at the specified argument position. If not sort command is found, a
+ * new one is created and appended to the end of the query.
+ *
+ * @param ast The root AST node.
+ * @param parts ES|QL column name parts.
+ * @param index The new column name position in command argument list.
+ * @param sortCommandIndex The index of the SORT command in the AST. E.g. 0 is the
+ *     first SORT command in the AST.
+ * @returns The inserted column AST node.
+ */
+export const insertExpression = (
+  ast: ESQLAstQueryExpression,
+  template: NewSortExpressionTemplate,
+  index: number = -1,
+  sortCommandIndex: number = 0
+): SortExpression => {
+  let command: ESQLCommand | undefined = getCommand(ast, sortCommandIndex);
 
-//   return source;
-// };
+  if (!command) {
+    command = Builder.command({ name: 'sort' });
+    generic.commands.append(ast, command);
+  }
+
+  return insertIntoCommand(command, template, index);
+};
+
+/**
+ * Inserts a new SORT command with a single sort expression as its sole argument.
+ * You can specify the position to insert the command at.
+ *
+ * @param ast The root of the AST.
+ * @param template The sort expression template.
+ * @param index The position to insert the sort expression at.
+ * @returns The inserted sort expression and the command it was inserted into.
+ */
+export const insertCommand = (
+  ast: ESQLAstQueryExpression,
+  template: NewSortExpressionTemplate,
+  index: number = -1
+): [ESQLCommand, SortExpression] => {
+  const expression = createSortExpression(template);
+  const command = Builder.command({ name: 'sort', args: [expression] });
+
+  generic.commands.insert(ast, command, index);
+
+  return [command, expression];
+};

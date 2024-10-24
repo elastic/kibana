@@ -10,6 +10,7 @@
 import { parse } from '../../../parser';
 import * as commands from '..';
 import { BasicPrettyPrinter } from '../../../pretty_print';
+import { Builder } from '../../../builder';
 
 describe('commands.sort', () => {
   describe('.listCommands()', () => {
@@ -363,6 +364,164 @@ describe('commands.sort', () => {
       const src4 = BasicPrettyPrinter.print(root);
 
       expect(src4).toBe('FROM a, b, c | SORT a, e');
+    });
+  });
+
+  describe('.insertIntoCommand()', () => {
+    it('can insert a sorting condition into the first existing SORT command', () => {
+      const src1 = 'FROM a, b, c | SORT s1, s2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT s1, s2');
+
+      const command = commands.sort.getCommand(root)!;
+      commands.sort.insertIntoCommand(command, 's3');
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT s1, s2, s3');
+    });
+
+    it('can prepend a sorting condition with options into the first existing SORT command', () => {
+      const src1 = 'FROM a, b, c | SORT s1, s2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT s1, s2');
+
+      const command = commands.sort.getCommand(root)!;
+      commands.sort.insertIntoCommand(
+        command,
+        { parts: ['address', 'street🙃'], order: 'ASC', nulls: 'NULLS FIRST' },
+        0
+      );
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT address.`street🙃` ASC NULLS FIRST, s1, s2');
+    });
+
+    it('can insert a sorting condition into specific sorting command into specific position', () => {
+      const src1 = 'FROM a, b, c | SORT a1, a2 | SORT b1,  /* HERE */  b3 | SORT c1, c2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT a1, a2 | SORT b1, b3 | SORT c1, c2');
+
+      const command = commands.sort.getCommand(root, 1)!;
+      commands.sort.insertIntoCommand(command, 'b2', 1);
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT a1, a2 | SORT b1, b2, b3 | SORT c1, c2');
+    });
+  });
+
+  describe('.insertExpression()', () => {
+    it('can insert a sorting condition into the first existing SORT command', () => {
+      const src1 = 'FROM a, b, c | SORT s1, s2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT s1, s2');
+
+      commands.sort.insertExpression(root, 's3');
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT s1, s2, s3');
+    });
+
+    it('can insert a sorting condition into specific sorting command into specific position', () => {
+      const src1 = 'FROM a, b, c | SORT a1, a2 | SORT b1,  /* HERE */  b3 | SORT c1, c2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT a1, a2 | SORT b1, b3 | SORT c1, c2');
+
+      commands.sort.insertExpression(root, 'b2', 1, 1);
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT a1, a2 | SORT b1, b2, b3 | SORT c1, c2');
+    });
+
+    it('when no positional arguments are provided append the column to the first SORT command', () => {
+      const src1 = 'FROM a, b, c | SORT a1, a2 | SORT b1, b2 | SORT c1, c2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT a1, a2 | SORT b1, b2 | SORT c1, c2');
+
+      commands.sort.insertExpression(root, 'a3');
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT a1, a2, a3 | SORT b1, b2 | SORT c1, c2');
+    });
+
+    it('when no SORT command found, inserts a new SORT command', () => {
+      const src1 = 'FROM a, b, c | LIMIT 10';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | LIMIT 10');
+
+      commands.sort.insertExpression(root, ['i18n', 'language', 'locale']);
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | LIMIT 10 | SORT i18n.language.locale');
+    });
+
+    it('can change the sorting order', () => {
+      const src1 = 'FROM a, b, c | SORT a ASC';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT a ASC');
+
+      commands.sort.insertExpression(root, { parts: 'a', order: 'DESC' });
+      commands.sort.remove(root, 'a', 0);
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT a DESC');
+    });
+  });
+
+  describe('.insertCommand()', () => {
+    it('can append a new SORT command', () => {
+      const src1 = 'FROM a, b, c | SORT s1, s2';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | SORT s1, s2');
+
+      commands.sort.insertCommand(root, 's3');
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT s1, s2 | SORT s3');
+    });
+
+    it('can insert a SORT command before a LIMIT command (and add a comment)', () => {
+      const src1 = 'FROM a, b, c | LIMIT 10';
+      const { root } = parse(src1);
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, b, c | LIMIT 10');
+
+      const [_, column] = commands.sort.insertCommand(root, 'b', 1);
+
+      column.formatting = {
+        right: [Builder.comment('multi-line', ' we sort by "b" ')],
+      };
+
+      const src3 = BasicPrettyPrinter.print(root);
+
+      expect(src3).toBe('FROM a, b, c | SORT b /* we sort by "b" */ | LIMIT 10');
     });
   });
 });
