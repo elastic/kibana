@@ -110,7 +110,8 @@ export function getDashboardApi({
   async function getState() {
     const { panels, references: panelReferences } = await panelsManager.internalApi.getState();
     const dashboardState: DashboardState = {
-      ...settingsManager.api.getSettings(),
+      executionContext: initialState.executionContext,
+      ...settingsManager.internalApi.getState(),
       ...unifiedSearchManager.internalApi.getState(),
       panels,
       viewMode: viewModeManager.api.viewMode.value,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   BehaviorSubject,
   Observable,
@@ -43,17 +43,17 @@ export function initializeUnifiedSearchManager(
   const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-  function setQuery(query: Query | AggregateQuery) {
+  const query$ = new BehaviorSubject<Query | undefined>(undefined);
+  function setQuery(query: Query) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
     }
   }
-  function setAndSyncQuery(query: Query | AggregateQuery | undefined) {
+  function setAndSyncQuery(query: Query | undefined) {
     const queryOrDefault = query ?? queryString.getDefaultQuery();
     setQuery(queryOrDefault);
     if (creationOptions?.useUnifiedSearchIntegration) {
-      queryString.setQuery(query ?? queryString.getDefaultQuery());
+      queryString.setQuery(queryOrDefault);
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(undefined);
@@ -161,7 +161,7 @@ export function initializeUnifiedSearchManager(
     );
     unifiedSearchSubscriptions.add(
       queryString.getUpdates$().subscribe(() => {
-        setQuery(queryString.getQuery());
+        setQuery(queryString.getQuery() as Query);
       })
     );
     unifiedSearchSubscriptions.add(
@@ -238,12 +238,15 @@ export function initializeUnifiedSearchManager(
           setAndSyncTimeRange(lastSavedState.timeRange);
         }
       },
-      getState: () => ({
-        filters: unifiedSearchFilters$.value,
-        query: query$.value,
+      getState: (): Pick<
+        DashboardState,
+        'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+      > => ({
+        filters: unifiedSearchFilters$.value ?? DEFAULT_DASHBOARD_INPUT.filters,
+        query: query$.value ?? DEFAULT_DASHBOARD_INPUT.query,
         refreshInterval: refreshInterval$.value,
         timeRange: timeRange$.value,
-        timeRestore: timeRestore$.value,
+        timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
       }),
       setTimeRestore,
       timeRestore$,

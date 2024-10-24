@@ -57,6 +57,18 @@ export function initializeSettingsManager({
     if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
   }
 
+  function getSettings() {
+    return {
+      ...titleManager.serializeTitles(),
+      syncColors: syncColors$.value,
+      syncCursor: syncCursor$.value,
+      syncTooltips: syncTooltips$.value,
+      tags: tags$.value,
+      timeRestore: timeRestore$.value,
+      useMargins: useMargins$.value,
+    };
+  }
+
   function setSettings(settings: DashboardStateFromSettingsFlyout) {
     setSyncColors(settings.syncColors);
     setSyncCursor(settings.syncCursor);
@@ -72,15 +84,7 @@ export function initializeSettingsManager({
   return {
     api: {
       ...titleManager.titlesApi,
-      getSettings: () => ({
-        ...titleManager.serializeTitles(),
-        syncColors: syncColors$.value,
-        syncCursor: syncCursor$.value,
-        syncTooltips: syncTooltips$.value,
-        tags: tags$.value,
-        timeRestore: timeRestore$.value,
-        useMargins: useMargins$.value,
-      }),
+      getSettings,
       settings: {
         syncColors$,
         syncCursor$,
@@ -110,6 +114,24 @@ export function initializeSettingsManager({
       >
     >,
     internalApi: {
+      getState: (): Pick<
+        DashboardState,
+        | 'description'
+        | 'hidePanelTitles'
+        | 'syncColors'
+        | 'syncCursor'
+        | 'syncTooltips'
+        | 'tags'
+        | 'title'
+        | 'useMargins'
+      > => {
+        const settings = getSettings();
+        return {
+          ...settings,
+          title: settings.title ?? '',
+          hidePanelTitles: settings.hidePanelTitles ?? DEFAULT_DASHBOARD_INPUT.hidePanelTitles,
+        };
+      },
       reset: (lastSavedState: DashboardState) => {
         setSettings(lastSavedState);
       },
