@@ -44,8 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless change alert status endpoints', () => {
-    // Flakey: See https://github.com/elastic/kibana/issues/179704
-    describe.skip('validation checks', () => {
+    describe('validation checks', () => {
       describe('update by ids', () => {
         it('should not give errors when querying and the alerts index does not exist yet', async () => {
           const { body } = await supertest
