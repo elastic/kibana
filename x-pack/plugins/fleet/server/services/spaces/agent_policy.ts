@@ -54,6 +54,11 @@ export async function updateAgentPolicySpaces({
     return;
   }
 
+  if (existingPackagePolicies.some((packagePolicy) => packagePolicy.policy_ids.length > 1)) {
+    throw new FleetError(
+      'Agent policies using reusable integration policies cannot be moved to a different space.'
+    );
+  }
   const spacesToAdd = newSpaceIds.filter(
     (spaceId) => !existingPolicy?.space_ids?.includes(spaceId) ?? true
   );
@@ -63,13 +68,13 @@ export async function updateAgentPolicySpaces({
   // Privileges check
   for (const spaceId of spacesToAdd) {
     if (!authorizedSpaces.includes(spaceId)) {
-      throw new FleetError(`No enough permissions to create policies in space ${spaceId}`);
+      throw new FleetError(`Not enough permissions to create policies in space ${spaceId}`);
     }
   }
 
   for (const spaceId of spacesToRemove) {
     if (!authorizedSpaces.includes(spaceId)) {
-      throw new FleetError(`No enough permissions to remove policies from space ${spaceId}`);
+      throw new FleetError(`Not enough permissions to remove policies from space ${spaceId}`);
     }
   }
 

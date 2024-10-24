@@ -113,6 +113,7 @@ export const createAppContextStartContractMock = (
     experimentalFeatures: {
       agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,
+      enableReusableIntegrationPolicies: true,
     } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
