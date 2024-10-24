@@ -123,7 +123,7 @@ export function ShowShareModal({
   const allUnsavedPanels = (() => {
     if (
       Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
-      Object.keys(panelModifications ?? {}).length === 0
+      Object.keys(omit(panelModifications ?? {}, PANELS_CONTROL_GROUP_KEY)).length === 0
     ) {
       // if this dashboard has no modifications or unsaved panels return early. No overrides needed.
       return;
@@ -212,7 +212,7 @@ export function ShowShareModal({
       }),
       config: {
         link: {
-          draftModeCallOut: allowShortUrl ? (
+          draftModeCallOut: (
             <EuiCallOut
               color="warning"
               data-test-subj="DashboardDraftModeCopyLinkCallOut"
@@ -223,9 +223,11 @@ export function ShowShareModal({
                 />
               }
             >
-              {shareModalStrings.getDraftShareWarning()}
+              {Boolean(unsavedDashboardState?.panels)
+                ? shareModalStrings.getDraftSharePanelChangesWarning()
+                : shareModalStrings.getDraftShareWarning()}
             </EuiCallOut>
-          ) : null,
+          ),
         },
       },
     },

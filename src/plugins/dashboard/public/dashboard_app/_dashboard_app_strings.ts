@@ -139,10 +139,15 @@ export const shareModalStrings = {
       defaultMessage:
         'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
     }),
+  getDraftSharePanelChangesWarning: () =>
+    i18n.translate('dashboard.snapshotShare.panelChangesWarning', {
+      defaultMessage:
+        'One or more panels on this dashboard have changed. Before generating a link, save the dashboard.',
+    }),
   getDraftShareWarning: () =>
     i18n.translate('dashboard.snapshotShare.draftWarning', {
       defaultMessage:
-        'One or more panels on this dashboard have changed, save the dashboard to create a permanent link.',
+        'This dashboard has unsaved changes. Consider saving your dashboard before generating the link.',
     }),
 };
 
