@@ -23,7 +23,6 @@ import {
 import {
   AggFunctionsMapping,
   AggParamOption,
-  DataPublicPluginStart,
   IndexPatternAggRestrictions,
   search,
   UI_SETTINGS,
@@ -105,15 +104,7 @@ function getTimeZoneAndInterval(
   return { usedField, timeZone, interval };
 }
 
-function mapToEsqlInterval(data: DataPublicPluginStart, dateRange: DateRange, _interval: string) {
-  if (_interval === 'auto') {
-    return (
-      data.search.aggs.calculateAutoTimeExpression({
-        from: dateRange.fromDate,
-        to: dateRange.toDate,
-      }) || '1h'
-    );
-  }
+function mapToEsqlInterval(dateRange: DateRange, _interval: string) {
   if (_interval !== 'm' && _interval.endsWith('m')) {
     return _interval.replace('m', ' minutes');
   }
@@ -197,13 +188,15 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange, data) => {
+  toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
     const { timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
 
     if (timeZone || column.params?.includeEmptyRows) return;
 
+    if (interval === 'auto') {
+      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, 50, ?_tstart, ?_tend)`;
+    }
     return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-      data,
       dateRange,
       interval
     )})`;

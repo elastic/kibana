@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
@@ -28,8 +28,7 @@ export function getESQLForLayer(
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
-  nowInstant: Date,
-  data: DataPublicPluginStart
+  nowInstant: Date
 ) {
   // esql mode variables
   let partialRows = true;
@@ -95,8 +94,7 @@ export function getESQLForLayer(
           indexPattern,
           layer,
           uiSettings,
-          dateRange,
-          data
+          dateRange
         );
 
       if (wrapInFilter || wrapInTimeFilter) {
@@ -185,8 +183,7 @@ export function getESQLForLayer(
           indexPattern,
           layer,
           uiSettings,
-          dateRange,
-          data
+          dateRange
         )
       );
     });
@@ -194,7 +191,7 @@ export function getESQLForLayer(
   if (buckets.length > 0) {
     esql += ` BY ${buckets.join(', ')}`;
 
-    if (buckets.some((b) => b.includes('undefined'))) return;
+    if (buckets.some((b) => !b || b.includes('undefined'))) return;
 
     const sorts = esAggEntries
       .filter(([id, col]) => col.isBucketed)
