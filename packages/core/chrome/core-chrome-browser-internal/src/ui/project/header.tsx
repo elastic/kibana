@@ -12,10 +12,10 @@ import {
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiLoadingSpinner,
   useEuiTheme,
   EuiThemeComputed,
   EuiImage,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -207,8 +207,10 @@ const Logo = ({
         renderLogo()
       ) : (
         <a onClick={navigateHome} href={fullHref} css={logoCss.spinner}>
-          <EuiLoadingSpinner
-            size="l"
+          <EuiSkeletonRectangle
+            height={24}
+            width={24}
+            borderRadius="s"
             aria-hidden={false}
             onClick={navigateHome}
             data-test-subj="globalLoadingIndicator"
