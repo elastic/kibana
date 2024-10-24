@@ -3,17 +3,19 @@ steps:
     label: Grammar Sync
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
   - command: .buildkite/scripts/steps/esql_generate_function_metadata.sh
     label: Generate Function Metadata
     timeout_in_minutes: 15
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75

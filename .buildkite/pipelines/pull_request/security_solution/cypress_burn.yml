@@ -36,6 +36,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
       - quick_checks
@@ -50,6 +51,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
       - quick_checks

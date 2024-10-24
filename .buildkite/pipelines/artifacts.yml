@@ -2,8 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/build.sh
     label: Build Kibana Artifacts
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: c2-standard-16
     timeout_in_minutes: 120
@@ -17,8 +17,8 @@ steps:
   - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
@@ -33,8 +33,8 @@ steps:
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
@@ -49,8 +49,8 @@ steps:
   - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
@@ -65,8 +65,8 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -80,8 +80,8 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -95,8 +95,8 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=wolfi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30
@@ -108,8 +108,8 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=ironbank .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -126,8 +126,8 @@ steps:
       - exit_status: 255
       - exit_status: -1
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -153,8 +153,8 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/publish.sh
     label: 'Publish Kibana Artifacts'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme

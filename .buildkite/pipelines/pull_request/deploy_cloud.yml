@@ -4,6 +4,7 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
       - quick_checks

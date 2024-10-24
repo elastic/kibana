@@ -3,8 +3,8 @@ env:
   # This is what will switch the FTRs/cypress pipeline to use Chrome Beta
   USE_CHROME_BETA: 'true'
 agents:
-  image: family/kibana-ubuntu-2004
-  imageProject: elastic-images-prod
+  image: kibana-ubuntu-2004-1729722506
+  imageProject: elastic-images-qa
   provider: gcp
 
 steps:
@@ -24,6 +24,7 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: build
     timeout_in_minutes: 60
     retry:
@@ -66,6 +67,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -80,6 +82,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -94,6 +97,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -108,6 +112,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -122,6 +127,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -136,6 +142,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -150,6 +157,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -164,6 +172,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -178,6 +187,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -192,6 +202,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -206,6 +217,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -220,6 +232,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -234,6 +247,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -248,6 +262,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -262,6 +277,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -276,6 +292,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -290,6 +307,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -304,6 +322,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60

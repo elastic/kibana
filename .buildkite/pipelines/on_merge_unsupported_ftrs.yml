@@ -3,8 +3,8 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     retry:
@@ -15,11 +15,12 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -31,11 +32,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -48,11 +50,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
     label: 'Profiling Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -65,11 +68,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on: build
     timeout_in_minutes: 120
     artifact_paths:
@@ -84,11 +88,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/inventory_cypress.sh
     label: 'Inventory Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: kibana-ubuntu-2004-1729722506
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on: build
     timeout_in_minutes: 120
     retry:

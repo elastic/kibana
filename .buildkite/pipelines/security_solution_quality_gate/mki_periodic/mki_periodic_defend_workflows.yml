@@ -6,14 +6,15 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
         key: test_defend_workflows
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2004-1729722506
+          imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+          diskSizeGb: 75
         timeout_in_minutes: 300
         parallelism: 5
         retry:
@@ -28,8 +29,8 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:artifacts:qa:serverless
 #        key: edr_workflows:artifacts:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-prod
+#          image: kibana-ubuntu-2004-1729722506
+#          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -45,8 +46,8 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:authentication:qa:serverless
 #        key: edr_workflows:authentication:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-prod
+#          image: kibana-ubuntu-2004-1729722506
+#          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -62,8 +63,8 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:metadata:qa:serverless
 #        key: edr_workflows:metadata:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-prod
+#          image: kibana-ubuntu-2004-1729722506
+#          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -79,8 +80,8 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:package:qa:serverless
 #        key: edr_workflows:package:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-prod
+#          image: kibana-ubuntu-2004-1729722506
+#          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -96,14 +97,15 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy_response:qa:serverless
         key: edr_workflows:policy_response:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2004-1729722506
+          imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -114,14 +116,15 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:qa:serverless
         key: edr_workflows:resolver:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2004-1729722506
+          imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -132,14 +135,15 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
         key: edr_workflows:response_actions:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2004-1729722506
+          imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -153,14 +157,15 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows_osquery.sh cypress:qa:serverless:run
         key: test_osquery_defend_workflows
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2004-1729722506
+          imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+          diskSizeGb: 75
         timeout_in_minutes: 300
         parallelism: 3
         retry:
