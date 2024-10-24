@@ -151,13 +151,13 @@ export const CreateConnector: React.FC = () => {
     cancelButtonText: i18n.translate(
       'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
       {
-        defaultMessage: 'Keep ',
+        defaultMessage: 'Keep creating',
       }
     ),
     confirmButtonText: i18n.translate(
       'xpack.enterpriseSearch.createConnector.unsavedPrompt.confirm',
       {
-        defaultMessage: 'Leave ',
+        defaultMessage: 'Leave the page',
       }
     ),
     hasUnsavedChanges: true,
@@ -165,12 +165,12 @@ export const CreateConnector: React.FC = () => {
     http,
     messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
       defaultMessage:
-        'The connector was created, but there are still some data that needs to be provided.',
+        'Your connector is created but missing some details. You can complete setup later in the management area, but the guided flow offers more help.',
     }),
     navigateToUrl: application.navigateToUrl,
     openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
     titleText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
-      defaultMessage: 'Leaving the connector creation flow?',
+      defaultMessage: 'Your connector is not fully configured',
     }),
   });
 
