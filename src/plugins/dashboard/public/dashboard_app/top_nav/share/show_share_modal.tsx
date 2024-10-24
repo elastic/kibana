@@ -212,20 +212,21 @@ export function ShowShareModal({
       }),
       config: {
         link: {
-          draftModeCallOut: allowShortUrl ? (
-            <EuiCallOut
-              color="warning"
-              data-test-subj="DashboardDraftModeCopyLinkCallOut"
-              title={
-                <FormattedMessage
-                  id="dashboard.share.shareModal.draftModeCallout.title"
-                  defaultMessage="Unsaved changes"
-                />
-              }
-            >
-              {shareModalStrings.getDraftShareWarning()}
-            </EuiCallOut>
-          ) : null,
+          draftModeCallOut:
+            allowShortUrl && Boolean(unsavedDashboardState?.panels) ? (
+              <EuiCallOut
+                color="warning"
+                data-test-subj="DashboardDraftModeCopyLinkCallOut"
+                title={
+                  <FormattedMessage
+                    id="dashboard.share.shareModal.draftModeCallout.title"
+                    defaultMessage="Unsaved changes"
+                  />
+                }
+              >
+                {shareModalStrings.getDraftShareWarning()}
+              </EuiCallOut>
+            ) : null,
         },
       },
     },
