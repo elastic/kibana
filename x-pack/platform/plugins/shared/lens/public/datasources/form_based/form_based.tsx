@@ -494,7 +494,6 @@ export function getFormBasedDatasource({
         featureFlags,
         dateRange,
         nowInstant,
-        data,
         searchSessionId,
         forceDSL
       ),

@@ -24,7 +24,6 @@ import {
 import type {
   AggFunctionsMapping,
   AggParamOption,
-  DataPublicPluginStart,
   IndexPatternAggRestrictions,
 } from '@kbn/data-plugin/public';
 import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
