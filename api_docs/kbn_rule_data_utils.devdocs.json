@@ -1984,6 +1984,36 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SYNTHETICS_STATUS_RULE",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_STATUS_RULE",
+        "description": [],
+        "signature": [
+          "\"xpack.synthetics.alerts.monitorStatus\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SYNTHETICS_TLS_RULE",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_TLS_RULE",
+        "description": [],
+        "signature": [
+          "\"xpack.synthetics.alerts.tls\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.TAGS",
         "type": "string",
         "tags": [],
