@@ -21,12 +21,14 @@ import {
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
+import userEvent from '@testing-library/user-event';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   let appMockRender: AppMockRenderer;
   const onChangeConnector = jest.fn();
   const handleShowEditFlyout = jest.fn();
+  const onAddNewConnector = jest.fn();
 
   const props: Props = {
     actionTypes,
@@ -38,6 +40,7 @@ describe('Connectors', () => {
     onChangeConnector,
     selectedConnector: { id: 'none', type: ConnectorTypes.none },
     updateConnectorDisabled: false,
+    onAddNewConnector,
   };
 
   beforeAll(() => {
@@ -104,12 +107,16 @@ describe('Connectors', () => {
   });
 
   it('shows the add connector button', () => {
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.update();
+    appMockRender.render(<Connectors {...props} />);
 
-    expect(
-      wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId('add-new-connector')).toBeInTheDocument();
+  });
+
+  it('shows the add connector flyout when the button is clicked', async () => {
+    appMockRender.render(<Connectors {...props} />);
+
+    await userEvent.click(screen.getByTestId('add-new-connector'));
+    expect(onAddNewConnector).toHaveBeenCalled();
   });
 
   it('the text of the update button is shown correctly', () => {

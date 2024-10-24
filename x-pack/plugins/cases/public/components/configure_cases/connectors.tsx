@@ -99,7 +99,11 @@ const ConnectorsComponent: React.FC<Props> = ({
           label={dropDownLabel}
           data-test-subj="case-connectors-form-row"
           labelAppend={
-            <EuiButtonEmpty size="xs" onClick={onAddNewConnector}>
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="add-new-connector"
+              onClick={onAddNewConnector}
+            >
               {i18n.ADD_CONNECTOR}
             </EuiButtonEmpty>
           }
