@@ -25,11 +25,11 @@ export type IndexManagementLocatorParams = SerializableRecord &
       }
     | {
         page: 'index_template';
-        indexTemplate?: string;
+        indexTemplate: string;
       }
     | {
         page: 'component_template';
-        componentTemplate?: string;
+        componentTemplate: string;
       }
   );
 

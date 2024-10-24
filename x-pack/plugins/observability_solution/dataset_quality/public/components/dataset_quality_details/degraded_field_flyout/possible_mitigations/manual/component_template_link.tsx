@@ -54,7 +54,7 @@ export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegrati
     name,
   ]);
 
-  const templateUrl = isIntegration ? componentTemplatePath : indexTemplatePath;
+  const templateUrl = (isIntegration ? componentTemplatePath : indexTemplatePath) ?? null;
 
   const onClickHandler = useCallback(async () => {
     await application.navigateToApp(MANAGEMENT_APP_ID, {
