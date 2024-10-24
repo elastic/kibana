@@ -28,7 +28,11 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { Repository } from '../../../../../common/types';
 import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';
-import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
+import {
+  DEFAULT_POLICY_SCHEDULE,
+  DEFAULT_POLICY_FREQUENCY,
+  MANAGED_POLICY_TOOLTIP_MESSAGE,
+} from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { InlineLoading } from '../..';
@@ -78,13 +82,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     Boolean(policy.schedule && policy.schedule !== DEFAULT_POLICY_SCHEDULE)
   );
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState<any>({});
-
-  const managedPolicyTooltipMessage = i18n.translate(
-    'xpack.snapshotRestore.policyForm.disableToolTip',
-    {
-      defaultMessage: 'This field is disabled because you are editing a managed policy.',
-    }
-  );
 
   const renderNameField = () => (
     <EuiDescribedFormGroup
@@ -268,7 +265,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     return (
       <DisableToolTip
         isManaged={policy?.isManagedPolicy}
-        tooltipMessage={managedPolicyTooltipMessage}
+        tooltipMessage={MANAGED_POLICY_TOOLTIP_MESSAGE}
         component={
           <EuiSelect
             options={repositories.map(({ name }: Repository) => ({
@@ -341,7 +338,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       >
         <DisableToolTip
           isManaged={policy?.isManagedPolicy}
-          tooltipMessage={managedPolicyTooltipMessage}
+          tooltipMessage={MANAGED_POLICY_TOOLTIP_MESSAGE}
           component={
             <EuiFieldText
               defaultValue={policy.snapshotName}

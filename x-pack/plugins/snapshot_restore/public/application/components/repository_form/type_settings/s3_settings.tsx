@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCode,
@@ -22,6 +21,7 @@ import { Repository, S3Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip } from '../../disable_tooltip';
+import { MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../../constants';
 
 interface Props {
   repository: S3Repository;
@@ -75,13 +75,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     });
   };
 
-  const managedRepositoryTooltipMessage = i18n.translate(
-    'xpack.snapshotRestore.repositoryForm.disableToolTip',
-    {
-      defaultMessage: 'This field is disabled because you are editing a managed repository.',
-    }
-  );
-
   const storageClassOptions = [
     'standard',
     'reduced_redundancy',
@@ -128,7 +121,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         >
           <DisableToolTip
             isManaged={isManagedRepository}
-            tooltipMessage={managedRepositoryTooltipMessage}
+            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
             component={
               <EuiFieldText
                 defaultValue={client || ''}
@@ -179,7 +172,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         >
           <DisableToolTip
             isManaged={isManagedRepository}
-            tooltipMessage={managedRepositoryTooltipMessage}
+            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
             component={
               <EuiFieldText
                 defaultValue={bucket || ''}
@@ -230,7 +223,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         >
           <DisableToolTip
             isManaged={isManagedRepository}
-            tooltipMessage={managedRepositoryTooltipMessage}
+            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
             component={
               <EuiFieldText
                 defaultValue={basePath || ''}
