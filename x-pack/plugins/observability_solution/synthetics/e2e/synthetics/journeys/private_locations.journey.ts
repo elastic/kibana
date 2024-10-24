@@ -7,17 +7,14 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { SyntheticsServices } from './services/synthetics_services';
 import { byTestId } from '../../helpers/utils';
-import {
-  addTestMonitor,
-  cleanPrivateLocations,
-  cleanTestMonitors,
-  getPrivateLocations,
-} from './services/add_monitor';
+import { addTestMonitor, cleanPrivateLocations, cleanTestMonitors } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
+  const services = new SyntheticsServices(params);
 
   page.setDefaultTimeout(2 * 30000);
 
@@ -78,16 +75,14 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('text=Private Locations');
     await page.click('h1:has-text("Settings")');
 
-    const privateLocations = await getPrivateLocations(params);
+    const privateLocations = await services.getPrivateLocations();
 
-    const locations = privateLocations.attributes.locations;
+    expect(privateLocations.length).toBe(1);
 
-    expect(locations.length).toBe(1);
-
-    locationId = locations[0].id;
+    locationId = privateLocations[0].id;
 
     await addTestMonitor(params.kibanaUrl, 'test-monitor', {
-      locations: [locations[0]],
+      locations: [privateLocations[0]],
       type: 'browser',
     });
   });
