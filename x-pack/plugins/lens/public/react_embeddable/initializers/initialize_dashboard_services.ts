@@ -60,11 +60,11 @@ export function initializeDashboardServices(
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
-    initialState.title || initialState.attributes.title
+    initialState.title || internalApi.attributes$.getValue().title
   );
   const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
     initialState.savedObjectId
-      ? initialState.attributes.description || initialState.description
+      ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
   );
   // The observable references here are the same to the internalApi,

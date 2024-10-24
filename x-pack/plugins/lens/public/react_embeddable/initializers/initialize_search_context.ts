@@ -18,10 +18,11 @@ import {
   apiPublishesSearchSession,
 } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { buildObservableVariable } from '../helper';
-import { LensRuntimeState, LensUnifiedSearchContext } from '../types';
+import { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '../types';
 
 export function initializeSearchContext(
   initialState: LensRuntimeState,
+  internalApi: LensInternalApi,
   parentApi: unknown
 ): {
   api: PublishesUnifiedSearch & PublishesSearchSession;
@@ -33,14 +34,14 @@ export function initializeSearchContext(
     apiPublishesSearchSession(parentApi) ? parentApi.searchSessionId$ : undefined
   );
 
+  const attributes = internalApi.attributes$.getValue();
+
   const [lastReloadRequestTime] = buildObservableVariable<number | undefined>(undefined);
 
-  const [filters$] = buildObservableVariable<Filter[] | undefined>(
-    initialState.attributes.state.filters
-  );
+  const [filters$] = buildObservableVariable<Filter[] | undefined>(attributes.state.filters);
 
   const [query$] = buildObservableVariable<Query | AggregateQuery | undefined>(
-    initialState.attributes.state.query
+    attributes.state.query
   );
 
   const [timeslice$] = buildObservableVariable<[number, number] | undefined>(undefined);

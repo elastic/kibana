@@ -62,7 +62,7 @@ export const createLensEmbeddableFactory = (
        */
       const internalApi = initializeInternalApi(initialState, parentApi);
 
-      const visualizationContextHelper = initializeVisualizationContext();
+      const visualizationContextHelper = initializeVisualizationContext(internalApi);
 
       /**
        * Initialize various configurations required to build all the required
@@ -100,7 +100,7 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const searchContextConfig = initializeSearchContext(initialState, parentApi);
+      const searchContextConfig = initializeSearchContext(initialState, internalApi, parentApi);
       const integrationsConfig = initializeIntegrations(getState);
       const actionsConfig = initializeActionApi(
         uuid,

@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildObservableVariable } from '../helper';
+import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
   LensInternalApi,
@@ -29,17 +29,20 @@ export function initializeInternalApi(
   }
   const [renderCount$] = buildObservableVariable<number>(0);
 
-  const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(initialState.attributes);
+  const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
+    initialState.attributes || createEmptyLensState().attributes
+  );
   const overrides$ = new BehaviorSubject(initialState.overrides);
   const disableTriggers$ = new BehaviorSubject(initialState.disableTriggers);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   // This is an internal error state, not to be confused with the runtime error state thrown by the expression pipeline
-  // In both cases a blocking error can happen, but in this internal case we want to handle it with a custom renderer (badges).
-  // messages can be instead anything like non-blocking errors, warnings or info messages
+  // In both cases a blocking error can happen, but for Lens validation errors we want to have full control over the UI
+  // while for runtime errors the error will bubble up to the embeddable presentation layer
+  const validationMessages$ = new BehaviorSubject<UserMessage[]>([]);
+  // This other set of messages is for non-blocking messages that can be displayed in the UI
   const messages$ = new BehaviorSubject<UserMessage[]>([]);
-  const blockingMessages$ = new BehaviorSubject<UserMessage[]>([]);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
@@ -72,10 +75,11 @@ export function initializeInternalApi(
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     messages$,
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
-    blockingMessages$,
-    updateBlockingMessages: (newMessages: UserMessage[]) => blockingMessages$.next(newMessages),
+    validationMessages$,
+    updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
     resetAllMessages: () => {
       messages$.next([]);
+      validationMessages$.next([]);
     },
   };
 }

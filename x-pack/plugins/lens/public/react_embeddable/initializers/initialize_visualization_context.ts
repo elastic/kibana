@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { VisualizationContext, VisualizationContextHelper } from '../types';
+import type { LensInternalApi, VisualizationContext, VisualizationContextHelper } from '../types';
 
-export function initializeVisualizationContext(): VisualizationContextHelper {
+export function initializeVisualizationContext(
+  internalApi: LensInternalApi
+): VisualizationContextHelper {
   // TODO: this will likely be merged together with the state$ observable
   let visualizationContext: VisualizationContext = {
-    doc: undefined,
+    doc: internalApi.attributes$.getValue(),
     mergedSearchContext: {},
     indexPatterns: {},
     indexPatternRefs: [],

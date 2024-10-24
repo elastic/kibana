@@ -6,14 +6,14 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useRef } from 'react';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
+import React, { useEffect } from 'react';
 import { LensApi } from '../..';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi } from '../types';
 import { UserMessages } from '../user_messages/container';
-import { useMessages } from '../user_messages/use_messages';
+import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
+import { addLog } from '../logger';
 
 export function LensEmbeddableComponent({
   internalApi,
@@ -31,7 +31,7 @@ export function LensEmbeddableComponent({
     renderCount,
     // has the render completed?
     hasRendered,
-    // these are blockign errors that can be shown in a badge
+    // these are blocking errors that can be shown in a badge
     // without replacing the entire panel
     blockingErrors,
     // has view mode changed?
@@ -40,30 +40,21 @@ export function LensEmbeddableComponent({
     internalApi.expressionParams$,
     internalApi.renderCount$,
     internalApi.hasRenderCompleted$,
-    internalApi.blockingMessages$,
+    internalApi.validationMessages$,
     api.viewMode
   );
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
-  const rootRef = useRef<HTMLDivElement | null>(null);
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
   // On unmount call all the cleanups
   useEffect(() => {
+    addLog(`Mounting Lens Embeddable component: ${api.defaultPanelTitle?.getValue()}`);
     return onUnmount;
-  }, [onUnmount]);
+  }, [api, onUnmount]);
 
   // take care of dispatching the event from the DOM node
-  useEffect(() => {
-    if (!rootRef.current || api.blockingError?.getValue()) {
-      return;
-    }
-    if (hasRendered) {
-      dispatchRenderComplete(rootRef.current);
-    } else {
-      dispatchRenderStart(rootRef.current);
-    }
-  }, [renderCount, hasRendered, api.blockingError]);
+  const rootRef = useDispatcher(hasRendered, api);
 
   // Publish the data attributes only if avaialble/visible
   const title = api.hidePanelTitle?.getValue()

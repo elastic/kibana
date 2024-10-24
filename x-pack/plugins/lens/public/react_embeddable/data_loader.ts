@@ -59,6 +59,7 @@ export function loadEmbeddableData(
     getUserMessages,
     addUserMessages,
     updateBlockingErrors,
+    updateValidationErrors,
     updateWarnings,
     resetMessages,
     updateMessages,
@@ -72,15 +73,22 @@ export function loadEmbeddableData(
     metaInfo
   );
 
-  const onRenderComplete = () => {
-    updateMessages(getUserMessages('embeddableBadge'));
+  const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
       severity: 'error',
     });
+    updateValidationErrors(blockingErrors);
     updateBlockingErrors(blockingErrors);
     if (blockingErrors.length > 0) {
       internalApi.dispatchError();
-    } else {
+    }
+    return blockingErrors.length > 0;
+  };
+
+  const onRenderComplete = () => {
+    updateMessages(getUserMessages('embeddableBadge'));
+    // No issues so far, blocking errors are handled directly by Lens from this point on
+    if (!dispatchBlockingErrorIfAny()) {
       internalApi.dispatchRenderComplete();
     }
   };
@@ -142,7 +150,6 @@ export function loadEmbeddableData(
     };
 
     const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
-      resetMessages();
       updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
@@ -153,11 +160,8 @@ export function loadEmbeddableData(
       onLoad?.(false, adapters, api.dataLoading);
 
       updateWarnings();
-      // updateBlockingErrors(
-      //   getUserMessages(blockingMessageDisplayLocations, {
-      //     severity: 'error',
-      //   })
-      // );
+      // Render can still go wrong, so perfor a new check
+      dispatchBlockingErrorIfAny();
     };
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
@@ -213,7 +217,7 @@ export function loadEmbeddableData(
     // Publish the used dataViews on the Lens API
     internalApi.updateDataViews(dataViews);
 
-    if (params?.expression != null) {
+    if (params?.expression != null && !dispatchBlockingErrorIfAny()) {
       internalApi.updateExpressionParams(params);
     }
 
@@ -257,6 +261,13 @@ export function loadEmbeddableData(
       .pipe(waitUntilChanged())
       .subscribe(() => reload('disableTriggers')),
   ];
+  // There are few key moments when errors are checked and displayed:
+  // * at setup time (here) before the first expression evaluation
+  // * at runtime => when the expression is running and ES/Kibana server could emit errors)
+  // * at data time => data has arrived but for something goes wrong
+  // * at render time => rendering happened but somethign went wrong
+  // Bubble the error up to the embeddable system if any
+  dispatchBlockingErrorIfAny();
 
   return {
     cleanup: () => {
