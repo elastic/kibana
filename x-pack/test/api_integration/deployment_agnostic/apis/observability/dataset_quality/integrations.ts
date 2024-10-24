@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/dataset-quality-plugin/common/rest';
 import { CustomIntegration } from '../../../services/package_api';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../../services';
+import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');

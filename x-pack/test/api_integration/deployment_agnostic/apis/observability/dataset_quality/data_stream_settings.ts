@@ -14,7 +14,7 @@ import {
   rolloverDataStream,
 } from './utils/es_utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../../services';
+import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');

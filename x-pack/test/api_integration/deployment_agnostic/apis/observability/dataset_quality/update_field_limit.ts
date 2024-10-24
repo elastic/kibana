@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../../services';
+import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 import { createBackingIndexNameWithoutVersion, rolloverDataStream } from './utils/es_utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
