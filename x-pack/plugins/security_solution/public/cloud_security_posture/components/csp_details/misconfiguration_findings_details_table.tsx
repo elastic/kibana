@@ -207,6 +207,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
+            data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
           />
         </EuiPanel>
       </>

@@ -276,6 +276,14 @@ you make the necessary updates after you upgrade to 8.15.0.
 The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, and will be completely removed in early 2026. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
 ====
 
+[discrete]
+.<<search-sessions,Search sessions>> are deprecated in 8.15.0 and will be removed in a future version.
+[%collapsible]
+====
+*Details* +
+Search sessions are now deprecated and will be removed in a future version. By default, queries that take longer than 10 minutes (the default for the advanced setting `search:timeout`) will be canceled. To allow queries to run longer, consider increasing `search:timeout` or setting it to `0` which will allow queries to continue running as long as a user is waiting on-screen for results.
+====
+
 [float]
 [[breaking-changes-8.15.0]]
 === Breaking changes
