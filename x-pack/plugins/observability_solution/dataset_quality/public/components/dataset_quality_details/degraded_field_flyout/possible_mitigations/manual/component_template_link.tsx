@@ -54,13 +54,15 @@ export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegrati
     name,
   ]);
 
-  const templateUrl = (isIntegration ? componentTemplatePath : indexTemplatePath) ?? null;
+  const templateUrl = isIntegration ? componentTemplatePath : indexTemplatePath;
 
   const onClickHandler = useCallback(async () => {
-    await application.navigateToApp(MANAGEMENT_APP_ID, {
-      path: templateUrl,
+    const options = {
       openInNewTab: true,
-    });
+      ...(templateUrl && { path: templateUrl }),
+    };
+
+    await application.navigateToApp(MANAGEMENT_APP_ID, options);
   }, [application, templateUrl]);
 
   return (
