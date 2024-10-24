@@ -49,8 +49,7 @@ describe.skip('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, 
     cleanupRule(ruleId);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/197151
-  describe.skip('Case creation', () => {
+  describe('Case creation', () => {
     let caseId: string;
 
     before(() => {
@@ -86,8 +85,7 @@ describe.skip('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, 
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176783
-  describe.skip('Case', () => {
+  describe('Case', () => {
     let caseId: string;
 
     beforeEach(() => {
