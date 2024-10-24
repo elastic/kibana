@@ -23,24 +23,27 @@ export function GroupedInventory() {
   const { kuery, entityTypes } = query;
   const { refreshSubject$ } = useInventorySearchBarContext();
 
-  const { value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 }, refresh } =
-    useInventoryAbortableAsync(
-      ({ signal }) => {
-        return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
-          params: {
-            path: {
-              field: ENTITY_TYPE,
-            },
-            query: {
-              kuery,
-              entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
-            },
+  const {
+    value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 },
+    refresh,
+    loading,
+  } = useInventoryAbortableAsync(
+    ({ signal }) => {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
+        params: {
+          path: {
+            field: ENTITY_TYPE,
           },
-          signal,
-        });
-      },
-      [entityTypes, inventoryAPIClient, kuery]
-    );
+          query: {
+            kuery,
+            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
+          },
+        },
+        signal,
+      });
+    },
+    [entityTypes, inventoryAPIClient, kuery]
+  );
 
   useEffectOnce(() => {
     const refreshSubscription = refreshSubject$.subscribe(refresh);
@@ -57,6 +60,7 @@ export function GroupedInventory() {
           key={`${value.groupBy}-${group[value.groupBy]}`}
           group={group}
           groupBy={value.groupBy}
+          isLoading={loading}
         />
       ))}
     </>

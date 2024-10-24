@@ -34,10 +34,12 @@ export function GroupSelector() {
   const groupBy = query.view ?? 'grouped';
 
   const onGroupChange = (selected: EntityView) => {
+    const { pagination: _, ...rest } = query;
+
     inventoryRoute.push('/', {
       path: {},
       query: {
-        ...query,
+        ...rest,
         view: groupBy === selected ? 'unified' : selected,
       },
     });

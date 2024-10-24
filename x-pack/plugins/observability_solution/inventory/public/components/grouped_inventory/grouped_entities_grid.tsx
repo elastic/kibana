@@ -90,10 +90,11 @@ export function GroupedEntitiesGrid({ field }: Props) {
   }
 
   function handleTypeFilter(type: EntityType) {
+    const { pagination: _, ...rest } = query;
     inventoryRoute.push('/', {
       path: {},
       query: {
-        ...query,
+        ...rest,
         // Override the current entity types
         entityTypes: [type],
       },

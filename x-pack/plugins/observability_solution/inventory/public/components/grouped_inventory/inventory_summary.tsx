@@ -18,25 +18,27 @@ export function InventorySummary({
   totalGroups?: number;
 }) {
   const { euiTheme } = useEuiTheme();
-  const groupCountCss = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-    border-right: ${euiTheme.border.thin};
-    margin-right: ${euiTheme.size.base};
-    padding-right: ${euiTheme.size.base};
-  `;
 
   const isGrouped = totalGroups !== undefined;
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            font-weight: ${euiTheme.font.weight.semiBold};
+          `}
+        >
           {totalEntities !== undefined && (
             <EuiFlexItem grow={false}>
               <span
                 data-test-subj="inventorySummaryEntitiesTotal"
-                css={groupCountCss}
-                style={{ borderRight: !isGrouped ? 'none' : undefined }}
+                css={css`
+                  border-right: ${isGrouped ? euiTheme.border.thin : 'none'};
+                  margin-right: ${euiTheme.size.base};
+                  padding-right: ${euiTheme.size.base};
+                `}
               >
                 <FormattedMessage
                   id="xpack.inventory.groupedInventoryPage.entitiesTotalLabel"
@@ -48,11 +50,7 @@ export function InventorySummary({
           )}
           {isGrouped ? (
             <EuiFlexItem grow={false}>
-              <span
-                data-test-subj="inventorySummaryGroupsTotal"
-                css={groupCountCss}
-                style={{ borderRight: 'none' }}
-              >
+              <span data-test-subj="inventorySummaryGroupsTotal">
                 <FormattedMessage
                   id="xpack.inventory.groupedInventoryPage.groupsTotalLabel"
                   defaultMessage="{total} Groups"
