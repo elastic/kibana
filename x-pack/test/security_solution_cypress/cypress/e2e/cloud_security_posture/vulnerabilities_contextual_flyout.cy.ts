@@ -6,16 +6,16 @@
  */
 
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
-import { getDataTestSubjectSelector } from '../../../../helpers/common';
+import { createRule } from '../../tasks/api_calls/rules';
+import { getNewRule } from '../../objects/rule';
+import { getDataTestSubjectSelector } from '../../helpers/common';
 
-import { rootRequest, deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { expandFirstAlertHostFlyout } from '../../../../tasks/asset_criticality/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login } from '../../../../tasks/login';
-import { ALERTS_URL } from '../../../../urls/navigation';
-import { visit } from '../../../../tasks/navigation';
+import { rootRequest, deleteAlertsAndRules } from '../../tasks/api_calls/common';
+import { expandFirstAlertHostFlyout } from '../../tasks/asset_criticality/common';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { login } from '../../tasks/login';
+import { ALERTS_URL } from '../../urls/navigation';
+import { visit } from '../../tasks/navigation';
 
 const CSP_INSIGHT_VULNERABILITIES_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsVulnerabilitiesTitleLink'
@@ -27,10 +27,8 @@ const CSP_INSIGHT_VULNERABILITIES_TABLE = getDataTestSubjectSelector(
 
 const timestamp = Date.now();
 
-// Create a Date object using the timestamp
 const date = new Date(timestamp);
 
-// Convert the Date object to ISO 8601 format
 const iso8601String = date.toISOString();
 
 const getMockVulnerability = (isNameMatchesAlert: boolean) => {
@@ -138,8 +136,7 @@ const deleteDataStream = () => {
   });
 };
 
-// skipping because failure on MKI environment (https://buildkite.com/elastic/kibana-serverless-security-solution-quality-gate-investigations/builds/1390#01927579-caed-41bc-9440-3cf29629a263)
-describe.skip('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
@@ -167,6 +164,7 @@ describe.skip('Alert Host details expandable flyout', { tags: ['@ess', '@serverl
       });
 
       afterEach(() => {
+        /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
         deleteDataStream();
       });
 
