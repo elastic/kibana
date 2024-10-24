@@ -9,9 +9,26 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CatIndicesIndicesRecord } from '@elastic/elasticsearch/lib/api/types';
 import dateMath from '@kbn/datemath';
 
+import { getRequestBody } from '../helpers/get_available_indices';
+
 export type FetchAvailableCatIndicesResponseRequired = Array<
   Required<Pick<CatIndicesIndicesRecord, 'index' | 'creation.date'>>
 >;
+
+type AggregateName = 'index';
+export interface IndexSearchAggregationResponse {
+  index: {
+    buckets: Array<{ key: string; doc_count: number }>;
+  };
+}
+
+const getParsedDateMs = (dateStr: string, roundUp = false) => {
+  const date = dateMath.parse(dateStr, roundUp ? { roundUp: true } : undefined);
+  if (!date?.isValid()) {
+    throw new Error(`Invalid date format: ${dateStr}`);
+  }
+  return date.valueOf();
+};
 
 export const fetchAvailableIndices = async (
   esClient: ElasticsearchClient,
@@ -19,37 +36,40 @@ export const fetchAvailableIndices = async (
 ): Promise<string[]> => {
   const { indexPattern, startDate, endDate } = params;
 
-  const startDateMoment = dateMath.parse(startDate);
-  const endDateMoment = dateMath.parse(endDate, { roundUp: true });
+  const startDateMs = getParsedDateMs(startDate);
+  const endDateMs = getParsedDateMs(endDate, true);
 
-  if (
-    !startDateMoment ||
-    !endDateMoment ||
-    !startDateMoment.isValid() ||
-    !endDateMoment.isValid()
-  ) {
-    throw new Error('Invalid date format in startDate or endDate');
-  }
-
-  const startDateMillis = startDateMoment.valueOf();
-  const endDateMillis = endDateMoment.valueOf();
-
-  const indices = (await esClient.cat.indices({
+  const indicesCats = (await esClient.cat.indices({
     index: indexPattern,
     format: 'json',
     h: 'index,creation.date',
   })) as FetchAvailableCatIndicesResponseRequired;
 
-  const filteredIndices = indices.filter((indexInfo) => {
-    const creationDate: string = indexInfo['creation.date'] ?? '';
-    const creationDateMillis = parseInt(creationDate, 10);
-
-    if (isNaN(creationDateMillis)) {
-      return false;
-    }
-
-    return creationDateMillis >= startDateMillis && creationDateMillis <= endDateMillis;
+  const indicesCatsInRange = indicesCats.filter((indexInfo) => {
+    const creationDateMs = parseInt(indexInfo['creation.date'], 10);
+    return creationDateMs >= startDateMs && creationDateMs <= endDateMs;
   });
 
-  return filteredIndices.map((indexInfo) => indexInfo.index);
+  const timeSeriesIndicesWithDataInRangeSearchResult = await esClient.search<
+    AggregateName,
+    IndexSearchAggregationResponse
+  >(getRequestBody(params));
+
+  const timeSeriesIndicesWithDataInRange =
+    timeSeriesIndicesWithDataInRangeSearchResult.aggregations?.index.buckets.map(
+      (bucket) => bucket.key
+    ) || [];
+
+  // Combine indices from both sources removing duplicates
+  const resultingIndices = new Set<string>();
+
+  for (const indicesCat of indicesCatsInRange) {
+    resultingIndices.add(indicesCat.index);
+  }
+
+  for (const timeSeriesIndex of timeSeriesIndicesWithDataInRange) {
+    resultingIndices.add(timeSeriesIndex);
+  }
+
+  return Array.from(resultingIndices);
 };
