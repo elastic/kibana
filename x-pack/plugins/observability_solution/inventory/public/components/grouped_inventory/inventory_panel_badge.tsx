@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
 export function InventoryPanelBadge({
@@ -17,25 +16,11 @@ export function InventoryPanelBadge({
   'data-test-subj'?: string;
   value: string | number;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   return (
-    <EuiFlexGroup
-      data-test-subj={dataTestSubj}
-      gutterSize="s"
-      alignItems="center"
-      css={css`
-        padding: ${euiTheme.size.base};
-      `}
-    >
+    <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize="s" alignItems="center">
       <EuiFlexItem>
-        <EuiText
-          size="xs"
-          css={css`
-            font-weight: ${euiTheme.font.weight.bold};
-          `}
-        >
-          {name}:
+        <EuiText size="xs">
+          <strong>{name}:</strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>

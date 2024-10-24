@@ -19,9 +19,11 @@ export function InventoryPage() {
   useEffect(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
       ({ ...queryParams }) => {
+        const { pagination: _, ...rest } = query;
+
         inventoryRoute.push('/', {
           path: {},
-          query: { ...query, ...queryParams },
+          query: { ...rest, ...queryParams },
         });
       }
     );

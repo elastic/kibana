@@ -20,9 +20,14 @@ const ENTITIES_COUNT_BADGE = i18n.translate(
 export interface InventoryGroupAccordionProps {
   group: EntityGroup;
   groupBy: string;
+  isLoading: boolean;
 }
 
-export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccordionProps) {
+export function InventoryGroupAccordion({
+  group,
+  groupBy,
+  isLoading,
+}: InventoryGroupAccordionProps) {
   const { euiTheme } = useEuiTheme();
   const field = group[groupBy];
   const [open, setOpen] = useState(false);
@@ -33,7 +38,13 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
 
   return (
     <>
-      <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        css={css`
+          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+        `}
+      >
         <EuiAccordion
           data-test-subj={`inventoryGroup_${groupBy}_${field}`}
           id={`inventory-group-${groupBy}-${field}`}
@@ -53,6 +64,7 @@ export function InventoryGroupAccordion({ group, groupBy }: InventoryGroupAccord
           buttonProps={{ paddingSize: 'm' }}
           paddingSize="none"
           onToggle={onToggle}
+          isLoading={isLoading}
         />
       </EuiPanel>
       {open && (

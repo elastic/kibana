@@ -45,6 +45,7 @@ const inventoryRoutes = {
       query: {
         sortField: defaultEntitySortField,
         sortDirection: 'desc',
+        view: 'grouped',
       },
     },
     children: {
