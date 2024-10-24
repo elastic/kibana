@@ -16,7 +16,7 @@ import {
   BooleanDefaultContext,
   type BooleanExpressionContext,
   BooleanLiteralContext,
-  InputParamsContext,
+  InputParameterContext,
   BooleanValueContext,
   type CommandOptionsContext,
   ComparisonContext,
@@ -30,6 +30,7 @@ import {
   type EnrichCommandContext,
   type FieldContext,
   type FieldsContext,
+  type AggFieldsContext,
   type FromCommandContext,
   FunctionContext,
   type GrokCommandContext,
@@ -346,7 +347,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
 
   // Decimal type covers multiple ES|QL types: long, double, etc.
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue(), 'decimal');
+    return createNumericLiteral(ctx.decimalValue(), 'double');
   }
 
   // Integer type encompasses integer
@@ -358,7 +359,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
   }
   if (ctx instanceof StringLiteralContext) {
     // String literal covers multiple ES|QL types: text and keyword types
-    return createLiteral('string', ctx.string_().QUOTED_STRING());
+    return createLiteral('keyword', ctx.string_().QUOTED_STRING());
   }
   if (
     ctx instanceof NumericArrayLiteralContext ||
@@ -371,21 +372,21 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
       const isDecimal =
         numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
+      values.push(createNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
       // String literal covers multiple ES|QL types: text and keyword types
-      const literal = createLiteral('string', string.QUOTED_STRING());
+      const literal = createLiteral('keyword', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);
       }
     }
     return createList(ctx, values);
   }
-  if (ctx instanceof InputParamsContext && ctx.children) {
+  if (ctx instanceof InputParameterContext && ctx.children) {
     const values: ESQLLiteral[] = [];
 
     for (const child of ctx.children) {
@@ -477,8 +478,11 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
   }
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
+    const functionNameContext = functionExpressionCtx.functionName().MATCH()
+      ? functionExpressionCtx.functionName().MATCH()
+      : functionExpressionCtx.functionName().identifierOrParameter();
     const fn = createFunction(
-      functionExpressionCtx.identifier().getText().toLowerCase(),
+      functionNameContext.getText().toLowerCase(),
       ctx,
       undefined,
       'variadic-call'
@@ -534,7 +538,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
         fn.args.push(arg);
-        const literal = createLiteral('string', regex._pattern.QUOTED_STRING());
+        const literal = createLiteral('keyword', regex._pattern.QUOTED_STRING());
         if (literal) {
           fn.args.push(literal);
         }
@@ -594,6 +598,21 @@ export function visitField(ctx: FieldContext) {
     return [fn];
   }
   return collectBooleanExpression(ctx.booleanExpression());
+}
+
+export function collectAllAggFields(ctx: AggFieldsContext | undefined): ESQLAstField[] {
+  const ast: ESQLAstField[] = [];
+  if (!ctx) {
+    return ast;
+  }
+  try {
+    for (const aggField of ctx.aggField_list()) {
+      ast.push(...(visitField(aggField.field()) as ESQLAstField[]));
+    }
+  } catch (e) {
+    // do nothing
+  }
+  return ast;
 }
 
 export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[] {
@@ -672,7 +691,7 @@ export function visitDissect(ctx: DissectCommandContext) {
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
     ...(pattern && textExistsAndIsValid(pattern.getText())
-      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      ? [createLiteral('keyword', pattern), ...visitDissectOptions(ctx.commandOptions())]
       : []),
   ].filter(nonNullable);
 }
@@ -682,7 +701,7 @@ export function visitGrok(ctx: GrokCommandContext) {
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
     ...(pattern && textExistsAndIsValid(pattern.getText())
-      ? [createLiteral('string', pattern)]
+      ? [createLiteral('keyword', pattern)]
       : []),
   ].filter(nonNullable);
 }

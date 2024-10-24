@@ -6,6 +6,7 @@
  */
 
 import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/public';
+import { getMinimalPrivilegeId } from '@kbn/security-authorization-core-common';
 
 import { KibanaPrivilege } from './kibana_privilege';
 
@@ -18,15 +19,8 @@ export class PrimaryFeaturePrivilege extends KibanaPrivilege {
     super(id, actions);
   }
 
-  public isMinimalFeaturePrivilege() {
-    return this.id.startsWith('minimal_');
-  }
-
   public getMinimalPrivilegeId() {
-    if (this.isMinimalFeaturePrivilege()) {
-      return this.id;
-    }
-    return `minimal_${this.id}`;
+    return getMinimalPrivilegeId(this.id);
   }
 
   public get requireAllSpaces() {

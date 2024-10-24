@@ -41,6 +41,7 @@ import type {
   FunctionSubtype,
   ESQLNumericLiteral,
   ESQLOrderExpression,
+  InlineCastingType,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -72,7 +73,7 @@ export const createCommand = (name: string, ctx: ParserRuleContext) =>
 
 export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
   Builder.expression.inlineCast(
-    { castType: ctx.dataType().getText(), value },
+    { castType: ctx.dataType().getText().toLowerCase() as InlineCastingType, value },
     createParserFields(ctx)
   );
 
@@ -107,7 +108,7 @@ export function createLiteralString(token: Token): ESQLLiteral {
   const text = token.text!;
   return {
     type: 'literal',
-    literalType: 'string',
+    literalType: 'keyword',
     text,
     name: text,
     value: text,
@@ -149,13 +150,13 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (type === 'decimal' || type === 'integer') {
+  if (type === 'double' || type === 'integer') {
     return {
       ...partialLiteral,
       literalType: type,
       value: Number(text),
       paramType: 'number',
-    } as ESQLNumericLiteral<'decimal'> | ESQLNumericLiteral<'integer'>;
+    } as ESQLNumericLiteral<'double'> | ESQLNumericLiteral<'integer'>;
   } else if (type === 'param') {
     throw new Error('Should never happen');
   }
@@ -430,7 +431,9 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
       ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
     );
   } else if (ctx instanceof QualifiedNameContext) {
-    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+    parts.push(
+      ...ctx.identifierOrParameter_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
   } else {
     parts.push(sanitizeIdentifierString(ctx));
   }

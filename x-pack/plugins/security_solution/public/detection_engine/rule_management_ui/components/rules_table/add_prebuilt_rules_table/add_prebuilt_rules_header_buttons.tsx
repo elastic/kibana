@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useBoolean } from 'react-use';
+import useBoolean from 'react-use/lib/useBoolean';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';

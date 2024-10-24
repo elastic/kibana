@@ -133,7 +133,6 @@ steps:
       env:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-serverless-test-alerts'
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
         GPCTL_PROMOTE_DRY_RUN: ${DRY_RUN:-false}
 EOF

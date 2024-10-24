@@ -133,6 +133,51 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     },
   },
 
+  [TelemetryEventType.IntegrationAssistantCelGenerationComplete]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events the same session',
+        optional: false,
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: {
+        description: 'Time spent in the generation process',
+        optional: false,
+      },
+    },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The connector action type ID',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The model used to generate the integration',
+        optional: false,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'The provider of the LLM',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'text',
+      _meta: {
+        description: 'The error message if the generation failed',
+        optional: true,
+      },
+    },
+  },
+
   [TelemetryEventType.IntegrationAssistantComplete]: {
     sessionId: {
       type: 'keyword',

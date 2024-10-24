@@ -101,8 +101,8 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
       await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
     },
 
-    async expectNoPermissionsMessage() {
-      await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
+    async expectAPIKeyNotAvailable() {
+      await testSubjects.missingOrFail('apiKeyFormAPIKey');
     },
   };
 }

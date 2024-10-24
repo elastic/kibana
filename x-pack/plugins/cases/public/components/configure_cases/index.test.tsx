@@ -902,6 +902,10 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.EDIT_CUSTOM_FIELD
+      );
+
       await userEvent.click(screen.getByTestId('custom-field-label-input'));
       await userEvent.paste('!!');
       await userEvent.click(screen.getByTestId('text-custom-field-required'));
@@ -941,6 +945,10 @@ describe('ConfigureCases', () => {
       await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.ADD_CUSTOM_FIELD
+      );
     });
 
     it('closes fly out for when click on cancel', async () => {
@@ -1176,6 +1184,10 @@ describe('ConfigureCases', () => {
       );
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.EDIT_TEMPLATE
+      );
 
       await userEvent.clear(await screen.findByTestId('template-name-input'));
       await userEvent.click(await screen.findByTestId('template-name-input'));

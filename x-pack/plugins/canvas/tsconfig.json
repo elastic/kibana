@@ -12,6 +12,7 @@
     "allowJs": false
   },
   "include": [
+    "*.ts",
     "../../../typings/**/*",
     "__fixtures__/**/*",
     "canvas_plugin_src/**/*",
@@ -88,9 +89,7 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types",
+    "@kbn/search-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

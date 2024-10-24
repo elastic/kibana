@@ -57,6 +57,8 @@ const getColumnConfigs = ({
   filterChanged,
   extensionsService,
   location,
+  application,
+  http,
 }) => {
   const columns = [
     {
@@ -65,17 +67,26 @@ const getColumnConfigs = ({
         defaultMessage: 'Name',
       }),
       order: 10,
-      render: (index) => (
-        <>
-          <EuiLink
-            data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(index.name, location.search || ''))}
-          >
-            {index.name}
-          </EuiLink>
-          {renderBadges(index, extensionsService, filterChanged)}
-        </>
-      ),
+      render: (index) => {
+        return (
+          <>
+            <EuiLink
+              data-test-subj="indexTableIndexNameLink"
+              onClick={() => {
+                if (!extensionsService.indexDetailsPageRoute) {
+                  history.push(getIndexDetailsLink(index.name, location.search || ''));
+                } else {
+                  const route = extensionsService.indexDetailsPageRoute.renderRoute(index.name);
+                  application.navigateToUrl(http.basePath.prepend(route));
+                }
+              }}
+            >
+              {index.name}
+            </EuiLink>
+            {renderBadges(index, extensionsService, filterChanged)}
+          </>
+        );
+      },
     },
     {
       fieldName: 'data_stream',
@@ -533,8 +544,9 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config }) => {
+        {({ services, config, core }) => {
           const { extensionsService } = services;
+          const { application, http } = core;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -542,6 +554,8 @@ export class IndexTable extends Component {
             filterChanged,
             history,
             location,
+            application,
+            http,
           });
           const columnsCount = columnConfigs.length + 1;
           return (

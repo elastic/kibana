@@ -243,6 +243,7 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
@@ -394,6 +395,18 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         },
         method: 'DELETE',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async applyEntityEngineDataviewIndices() {
+    this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
+    return this.kbnClient
+      .request<ApplyEntityEngineDataviewIndicesResponse>({
+        path: '/api/entity_store/engines/apply_dataview_indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -554,7 +567,7 @@ If asset criticality records already exist for the specified entities, those rec
       .request<CleanUpRiskEngineResponse>({
         path: '/api/risk_score/engine/dangerously_delete_data',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
       })

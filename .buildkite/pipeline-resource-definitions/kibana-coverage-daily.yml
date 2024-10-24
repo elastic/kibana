@@ -48,3 +48,5 @@ spec:
           cronline: 0 5 * * *
           message: Daily 6 am UTC
           branch: main
+      tags:
+        - kibana

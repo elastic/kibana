@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
 import { getDateISORange } from '@kbn/timerange';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import {
@@ -21,6 +21,7 @@ import {
   Dashboard,
   DataStreamDetails,
   DataStreamSettings,
+  DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
   NonAggregatableDatasets,
@@ -47,13 +48,8 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
       id: 'DatasetQualityDetailsController',
       context: initialContext,
       predictableActionArguments: true,
-      initial: 'uninitialized',
+      initial: 'initializing',
       states: {
-        uninitialized: {
-          always: {
-            target: 'initializing',
-          },
-        },
         initializing: {
           type: 'parallel',
           states: {
@@ -145,58 +141,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 done: {},
               },
             },
-            dataStreamDegradedFields: {
-              initial: 'fetching',
-              states: {
-                fetching: {
-                  invoke: {
-                    src: 'loadDegradedFields',
-                    onDone: {
-                      target: 'done',
-                      actions: ['storeDegradedFields'],
-                    },
-                    onError: [
-                      {
-                        target: '#DatasetQualityDetailsController.indexNotFound',
-                        cond: 'isIndexNotFoundError',
-                      },
-                      {
-                        target: 'done',
-                      },
-                    ],
-                  },
-                },
-                done: {
-                  on: {
-                    UPDATE_TIME_RANGE: {
-                      target: 'fetching',
-                      actions: ['resetDegradedFieldPageAndRowsPerPage'],
-                    },
-                    UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
-                      target: 'done',
-                      actions: ['storeDegradedFieldTableOptions'],
-                    },
-                    OPEN_DEGRADED_FIELD_FLYOUT: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.initializeFixItFlow.ignoredValues',
-                      actions: ['storeExpandedDegradedField'],
-                    },
-                    CLOSE_DEGRADED_FIELD_FLYOUT: {
-                      target: 'done',
-                      actions: ['storeExpandedDegradedField'],
-                    },
-                  },
-                },
-              },
-            },
             dataStreamSettings: {
-              initial: 'fetching',
+              initial: 'fetchingDataStreamSettings',
               states: {
-                fetching: {
+                fetchingDataStreamSettings: {
                   invoke: {
                     src: 'loadDataStreamSettings',
                     onDone: {
-                      target: 'initializeIntegrations',
+                      target: 'loadingIntegrationsAndDegradedFields',
                       actions: ['storeDataStreamSettings'],
                     },
                     onError: [
@@ -211,9 +163,53 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     ],
                   },
                 },
-                initializeIntegrations: {
+                loadingIntegrationsAndDegradedFields: {
                   type: 'parallel',
                   states: {
+                    dataStreamDegradedFields: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'loadDegradedFields',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
+                            },
+                            onError: [
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'done',
+                              },
+                            ],
+                          },
+                        },
+                        done: {
+                          on: {
+                            UPDATE_TIME_RANGE: {
+                              target: 'fetching',
+                              actions: ['resetDegradedFieldPageAndRowsPerPage'],
+                            },
+                            UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                              target: 'done',
+                              actions: ['storeDegradedFieldTableOptions'],
+                            },
+                            OPEN_DEGRADED_FIELD_FLYOUT: {
+                              target:
+                                '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                              actions: ['storeExpandedDegradedField'],
+                            },
+                            TOGGLE_CURRENT_QUALITY_ISSUES: {
+                              target: 'fetching',
+                              actions: ['toggleCurrentQualityIssues'],
+                            },
+                          },
+                        },
+                      },
+                    },
                     integrationDetails: {
                       initial: 'fetching',
                       states: {
@@ -230,9 +226,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                           },
                         },
-                        done: {
-                          type: 'final',
-                        },
+                        done: {},
                       },
                     },
                     integrationDashboards: {
@@ -257,60 +251,114 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             ],
                           },
                         },
-                        done: {
-                          type: 'final',
-                        },
+                        done: {},
                         unauthorized: {
                           type: 'final',
                         },
                       },
                     },
                   },
+                  onDone: {
+                    target: 'done',
+                  },
                 },
-                done: {
+                done: {},
+              },
+              on: {
+                UPDATE_TIME_RANGE: {
+                  target: '.fetchingDataStreamSettings',
+                },
+              },
+            },
+            degradedFieldFlyout: {
+              initial: 'pending',
+              states: {
+                pending: {
+                  always: [
+                    {
+                      target: 'closed',
+                      cond: 'hasNoDegradedFieldsSelected',
+                    },
+                  ],
+                },
+                open: {
+                  type: 'parallel',
+                  states: {
+                    ignoredValues: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'loadDegradedFieldValues',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeDegradedFieldValues'],
+                            },
+                            onError: [
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'done',
+                              },
+                            ],
+                          },
+                        },
+                        done: {},
+                      },
+                    },
+                    analyze: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'analyzeDegradedField',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeDegradedFieldAnalysis'],
+                            },
+                            onError: {
+                              target: 'done',
+                            },
+                          },
+                        },
+                        done: {},
+                      },
+                    },
+                  },
                   on: {
+                    CLOSE_DEGRADED_FIELD_FLYOUT: {
+                      target: 'closed',
+                      actions: ['storeExpandedDegradedField'],
+                    },
                     UPDATE_TIME_RANGE: {
-                      target: 'fetching',
-                      actions: ['resetDegradedFieldPageAndRowsPerPage'],
+                      target:
+                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                    },
+                  },
+                },
+                closed: {
+                  on: {
+                    OPEN_DEGRADED_FIELD_FLYOUT: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                      actions: ['storeExpandedDegradedField'],
                     },
                   },
                 },
               },
-            },
-            initializeFixItFlow: {
-              initial: 'closed',
-              type: 'parallel',
-              states: {
-                ignoredValues: {
-                  initial: 'fetching',
-                  states: {
-                    fetching: {
-                      invoke: {
-                        src: 'loadDegradedFieldValues',
-                        onDone: {
-                          target: 'done',
-                          actions: ['storeDegradedFieldValues'],
-                        },
-                        onError: [
-                          {
-                            target: '#DatasetQualityDetailsController.indexNotFound',
-                            cond: 'isIndexNotFoundError',
-                          },
-                          {
-                            target: 'done',
-                          },
-                        ],
-                      },
-                    },
-                    done: {
-                      on: {
-                        UPDATE_TIME_RANGE: {
-                          target: 'fetching',
-                        },
-                      },
-                    },
+              on: {
+                DEGRADED_FIELDS_LOADED: [
+                  {
+                    target: '.open',
+                    cond: 'shouldOpenFlyout',
                   },
-                },
+                  {
+                    target: '.closed',
+                    actions: ['storeExpandedDegradedField'],
+                  },
+                ],
               },
             },
           },
@@ -370,6 +418,13 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
+        storeDegradedFieldAnalysis: assign((_, event: DoneInvokeEvent<DegradedFieldAnalysis>) => {
+          return 'data' in event
+            ? {
+                degradedFieldAnalysis: event.data,
+              }
+            : {};
+        }),
         storeDegradedFieldTableOptions: assign((context, event) => {
           return 'degraded_field_criteria' in event
             ? {
@@ -380,11 +435,17 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
-        storeExpandedDegradedField: assign((context, event) => {
+        storeExpandedDegradedField: assign((_, event) => {
           return {
             expandedDegradedField: 'fieldName' in event ? event.fieldName : undefined,
           };
         }),
+        toggleCurrentQualityIssues: assign((context) => {
+          return {
+            showCurrentQualityIssues: !context.showCurrentQualityIssues,
+          };
+        }),
+        raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
         resetDegradedFieldPageAndRowsPerPage: assign((context, _event) => ({
           degradedFields: {
             ...context.degradedFields,
@@ -441,6 +502,19 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               (event.data.originalMessage as string)?.includes('index_not_found_exception')) ??
             false
           );
+        },
+        shouldOpenFlyout: (context) => {
+          return (
+            Boolean(context.expandedDegradedField) &&
+            Boolean(
+              context.degradedFields.data?.some(
+                (field) => field.name === context.expandedDegradedField
+              )
+            )
+          );
+        },
+        hasNoDegradedFieldsSelected: (context) => {
+          return !Boolean(context.expandedDegradedField);
         },
       },
     }
@@ -524,18 +598,46 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       loadDegradedFields: (context) => {
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
-        return dataStreamDetailsClient.getDataStreamDegradedFields({
-          dataStream: context.dataStream,
-          start,
-          end,
-        });
+        if (!context?.isNonAggregatable) {
+          return dataStreamDetailsClient.getDataStreamDegradedFields({
+            dataStream:
+              context.showCurrentQualityIssues &&
+              'dataStreamSettings' in context &&
+              context.dataStreamSettings
+                ? context.dataStreamSettings.lastBackingIndexName
+                : context.dataStream,
+            start,
+            end,
+          });
+        }
+
+        return Promise.resolve();
       },
 
       loadDegradedFieldValues: (context) => {
-        return dataStreamDetailsClient.getDataStreamDegradedFieldValues({
-          dataStream: context.dataStream,
-          degradedField: context.expandedDegradedField!,
-        });
+        if ('expandedDegradedField' in context && context.expandedDegradedField) {
+          return dataStreamDetailsClient.getDataStreamDegradedFieldValues({
+            dataStream: context.dataStream,
+            degradedField: context.expandedDegradedField,
+          });
+        }
+        return Promise.resolve();
+      },
+      analyzeDegradedField: (context) => {
+        if (context?.degradedFields?.data?.length) {
+          const selectedDegradedField = context.degradedFields.data.find(
+            (field) => field.name === context.expandedDegradedField
+          );
+
+          if (selectedDegradedField) {
+            return dataStreamDetailsClient.analyzeDegradedField({
+              dataStream: context.dataStream,
+              degradedField: context.expandedDegradedField!,
+              lastBackingIndex: selectedDegradedField.indexFieldWasLastPresentIn,
+            });
+          }
+        }
+        return Promise.resolve();
       },
       loadDataStreamSettings: (context) => {
         return dataStreamDetailsClient.getDataStreamSettings({

@@ -166,3 +166,21 @@ export const auditbeatWithAllResults: PatternRollup = {
     },
   },
 };
+
+export const emptyAuditbeatPatternRollup: PatternRollup = {
+  docsCount: 0,
+  error: null,
+  ilmExplain: {},
+  ilmExplainPhaseCounts: {
+    hot: 0,
+    warm: 0,
+    cold: 0,
+    frozen: 0,
+    unmanaged: 0,
+  },
+  indices: 0,
+  pattern: 'auditbeat-*',
+  results: {},
+  sizeInBytes: 0,
+  stats: {},
+};

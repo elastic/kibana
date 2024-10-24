@@ -101,7 +101,10 @@
           "id": "kibBuildingBlocks"
         },
         {
-          "id": "kibDevDocsSecurityIntro"
+          "id": "kibDevDocsSecurityAPIAuthorization"
+        },
+        {
+          "id": "kibDevDocsSecurityKibanaSystemUser"
         },
         {
           "id": "kibDevFeaturePrivileges",
@@ -278,6 +281,10 @@
         {
           "id": "kibDevReactKibanaContext",
           "label": "Kibana React Contexts"
+        },
+        {
+          "id": "kibDevDocsChromeRecentlyAccessed",
+          "label": "Recently Viewed"
         }
       ]
     },

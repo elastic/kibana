@@ -85,8 +85,8 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     },
     async expectO11yTrialLink() {
       await testSubjects.existOrFail('startO11yTrialBtn');
-      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).equal(
-        'https://fake-cloud.elastic.co/projects/create/observability/start'
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).match(
+        /^https?\:\/\/.*\/projects\/create\/observability\/start/
       );
       expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
     },
@@ -95,6 +95,19 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       await retry.try(async () => {
         expect(await testSubjects.getVisibleText('createIndex-code-block')).to.contain(apiKey);
       });
+    },
+
+    async expectAPIKeyPreGenerated() {
+      await testSubjects.existOrFail('apiKeyHasBeenGenerated');
+    },
+
+    async expectAPIKeyNotPreGenerated() {
+      await testSubjects.existOrFail('apiKeyHasNotBeenGenerated');
+    },
+
+    async expectAPIKeyFormNotAvailable() {
+      await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
+      await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
     },
   };
 }

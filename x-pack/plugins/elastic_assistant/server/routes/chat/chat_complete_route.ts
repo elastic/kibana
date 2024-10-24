@@ -30,6 +30,7 @@ import {
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { isOpenSourceModel } from '../utils';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -99,7 +100,9 @@ export const chatCompleteRoute = (
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
+          const connector = connectors.length > 0 ? connectors[0] : undefined;
+          actionTypeId = connector?.actionTypeId ?? '.gen-ai';
+          const isOssModel = isOpenSourceModel(connector);
 
           // replacements
           const anonymizationFieldsRes =
@@ -192,6 +195,7 @@ export const chatCompleteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            isOssModel,
             conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,

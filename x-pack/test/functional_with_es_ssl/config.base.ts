@@ -85,6 +85,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
+          'isUsingRuleCreateFlyout',
         ])}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
@@ -126,6 +127,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['.alerts-*'],
+                privileges: ['read'],
+              },
+            ],
+          },
         },
         only_actions_role: {
           kibana: [

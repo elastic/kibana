@@ -261,6 +261,7 @@ export const groupAndBulkCreate = async ({
         buildReasonMessage,
         alertTimestampOverride: runOpts.alertTimestampOverride,
         ruleExecutionLogger: runOpts.ruleExecutionLogger,
+        intendedTimestamp: runOpts.intendedTimestamp,
       });
 
       const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;

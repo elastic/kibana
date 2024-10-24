@@ -23,8 +23,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
@@ -37,7 +36,7 @@ import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 import {
-  buildColumns,
+  columnsArray,
   getEntityData,
   getItems,
   isUserRiskData,
@@ -81,18 +80,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
-
-  const columns = useMemo(
-    () => buildColumns(isAssetCriticalityEnabled),
-    [isAssetCriticalityEnabled]
-  );
-
-  const rows = useMemo(
-    () => getItems(entityData, isAssetCriticalityEnabled),
-    [entityData, isAssetCriticalityEnabled]
-  );
+  const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
     (isOpen: boolean) => {
@@ -272,7 +260,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
-                  columns={columns}
+                  columns={columnsArray}
                   items={rows}
                   compressed
                   loading={riskScoreData.loading || recalculatingScore}

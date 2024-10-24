@@ -47,3 +47,5 @@ spec:
           cronline: 0 6 * * * Europe/Berlin
           message: Scalability daily benchmarking
           branch: main
+      tags:
+        - kibana

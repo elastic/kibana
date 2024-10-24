@@ -89,7 +89,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * This string should not include the base path from HTTP.
    *
    * @deprecated Use {@link AppMountParameters.history} instead.
-   * @removeBy 8.8.0
+   * remove after https://github.com/elastic/kibana/issues/132600 is done
    *
    * @example
    *

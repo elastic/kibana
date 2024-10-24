@@ -35,7 +35,9 @@ export const ElasticsearchGuide = () => {
   const { data } = useValues(FetchApiKeysAPILogic);
   const apiKeys = data?.api_keys || [];
 
-  useEffect(() => makeRequest({}), []);
+  useEffect(() => {
+    makeRequest({});
+  }, []);
 
   return (
     <EnterpriseSearchElasticsearchPageTemplate>

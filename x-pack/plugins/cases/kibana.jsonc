@@ -30,6 +30,7 @@
       "uiActions",
     ],
     "optionalPlugins": [
+      "cloud",
       "home",
       "taskManager",
       "usageCollection",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface EcsFields {
+export interface EcsFields {
   [key: string]: string;
 }
 

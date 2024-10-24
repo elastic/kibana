@@ -13,6 +13,8 @@ import { css } from '@emotion/react';
 export interface DistributionBarProps {
   /** distribution data points */
   stats: Array<{ key: string; count: number; color: string; label?: React.ReactNode }>;
+  /** hide the label above the bar at first render */
+  hideLastTooltip?: boolean;
   /** data-test-subj used for querying the component in tests */
   ['data-test-subj']?: string;
 }
@@ -55,7 +57,6 @@ const useStyles = () => {
         &:hover {
           height: 7px;
           border-radius: 3px;
-          cursor: pointer;
 
           .euiBadge {
             cursor: unset;
@@ -136,18 +137,21 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
   props
 ) {
   const styles = useStyles();
-  const { stats, 'data-test-subj': dataTestSubj } = props;
+  const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
   const parts = stats.map((stat) => {
     const partStyle = [
       styles.part.base,
       styles.part.tick,
       styles.part.hover,
-      styles.part.lastTooltip,
       css`
         background-color: ${stat.color};
         flex: ${stat.count};
       `,
     ];
+    if (!hideLastTooltip) {
+      partStyle.push(styles.part.lastTooltip);
+    }
+
     const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (

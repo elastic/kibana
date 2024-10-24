@@ -27,13 +27,6 @@ describe.skip(
   'Event log',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
-        ],
-      },
-    },
   },
   function () {
     before(() => {

@@ -37,7 +37,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const { getHref } = useLink();
   const authz = useAuthz();
 
-  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
+  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined;
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
 
@@ -122,6 +122,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+        data-test-subj="UpgradeIntegrationPolicy"
         defaultMessage="Upgrade integration policy"
       />
     </EuiContextMenuItem>,
@@ -168,7 +169,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       {isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicy}
+            agentPolicy={agentPolicies.length === 1 ? agentPolicies[0] : undefined} // in case of multiple policies, show the selector in the flyout
+            selectedAgentPolicies={agentPolicies}
             onClose={onEnrollmentFlyoutClose}
             isIntegrationFlow={true}
             installedPackagePolicy={{

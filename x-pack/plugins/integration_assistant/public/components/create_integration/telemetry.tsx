@@ -35,6 +35,12 @@ type ReportGenerationComplete = (params: {
   durationMs: number;
   error?: string;
 }) => void;
+type ReportCelGenerationComplete = (params: {
+  connector: AIConnector;
+  integrationSettings: IntegrationSettings;
+  durationMs: number;
+  error?: string;
+}) => void;
 type ReportAssistantComplete = (params: {
   integrationName: string;
   integrationSettings: IntegrationSettings;
@@ -47,6 +53,7 @@ interface TelemetryContextProps {
   reportAssistantOpen: ReportAssistantOpen;
   reportAssistantStepComplete: ReportAssistantStepComplete;
   reportGenerationComplete: ReportGenerationComplete;
+  reportCelGenerationComplete: ReportCelGenerationComplete;
   reportAssistantComplete: ReportAssistantComplete;
 }
 
@@ -113,6 +120,20 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     [telemetry]
   );
 
+  const reportCelGenerationComplete = useCallback<ReportGenerationComplete>(
+    ({ connector, integrationSettings, durationMs, error }) => {
+      telemetry.reportEvent(TelemetryEventType.IntegrationAssistantCelGenerationComplete, {
+        sessionId: sessionData.current.sessionId,
+        actionTypeId: connector.actionTypeId,
+        model: getConnectorModel(connector),
+        provider: connector.apiProvider ?? 'unknown',
+        durationMs,
+        errorMessage: error,
+      });
+    },
+    [telemetry]
+  );
+
   const reportAssistantComplete = useCallback<ReportAssistantComplete>(
     ({ integrationName, integrationSettings, connector, error }) => {
       telemetry.reportEvent(TelemetryEventType.IntegrationAssistantComplete, {
@@ -137,6 +158,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportAssistantOpen,
       reportAssistantStepComplete,
       reportGenerationComplete,
+      reportCelGenerationComplete,
       reportAssistantComplete,
     }),
     [
@@ -144,6 +166,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportAssistantOpen,
       reportAssistantStepComplete,
       reportGenerationComplete,
+      reportCelGenerationComplete,
       reportAssistantComplete,
     ]
   );

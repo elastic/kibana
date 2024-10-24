@@ -24,9 +24,9 @@ import {
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
 } from './columns';
-import { CHECK_INDEX, VIEW_CHECK_DETAILS } from '../translations';
+import { VIEW_HISTORY } from '../translations';
 import { IndexSummaryTableItem } from '../../../../../types';
-import { getCheckState } from '../../../../../stub/get_check_state';
+import { CHECK_NOW } from '../../translations';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -64,8 +64,7 @@ describe('helpers', () => {
         isILMAvailable,
         pattern: 'auditbeat-*',
         onCheckNowAction: jest.fn(),
-        onExpandAction: jest.fn(),
-        checkState: getCheckState(indexName),
+        onViewHistoryAction: jest.fn(),
       }).map((x) => omit('render', x));
 
       expect(columns).toEqual([
@@ -75,11 +74,11 @@ describe('helpers', () => {
           width: '65px',
           actions: [
             {
-              name: 'View check details',
+              name: 'Check now',
               render: expect.any(Function),
             },
             {
-              name: 'Check index',
+              name: 'View history',
               render: expect.any(Function),
             },
           ],
@@ -119,19 +118,18 @@ describe('helpers', () => {
     });
 
     describe('action columns render()', () => {
-      test('it renders check index button', () => {
+      test('it renders check now button', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const checkNowRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+            .actions[0] as CustomItemAction<IndexSummaryTableItem>
         ).render;
 
         render(
@@ -140,10 +138,10 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(CHECK_INDEX)).toBeInTheDocument();
+        expect(screen.getByLabelText(CHECK_NOW)).toBeInTheDocument();
       });
 
-      test('it invokes the `onCheckNowAction` with the index name when the check index button is clicked', async () => {
+      test('it invokes the `onCheckNowAction` with the index name when the check now button is clicked', async () => {
         const onCheckNowAction = jest.fn();
 
         const columns = getSummaryTableColumns({
@@ -152,12 +150,11 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction,
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const checkNowRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+            .actions[0] as CustomItemAction<IndexSummaryTableItem>
         ).render;
 
         render(
@@ -166,40 +163,14 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(CHECK_INDEX);
+        const button = screen.getByLabelText(CHECK_NOW);
         await userEvent.click(button);
 
         expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
       });
 
-      test('it renders disabled check index with loading indicator when check state is loading', () => {
-        const columns = getSummaryTableColumns({
-          formatBytes,
-          formatNumber,
-          isILMAvailable,
-          pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName, { isChecking: true }),
-        });
-
-        const checkNowRender = (
-          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
-        ).render;
-
-        render(
-          <TestExternalProviders>
-            {checkNowRender != null && checkNowRender(indexSummaryTableItem, true)}
-          </TestExternalProviders>
-        );
-
-        expect(screen.getByLabelText(CHECK_INDEX)).toBeDisabled();
-        expect(screen.getByLabelText('Loading')).toBeInTheDocument();
-      });
-
-      test('it invokes the `onExpandAction` with the index name when the view check details button is clicked', async () => {
-        const onExpandAction = jest.fn();
+      test('it invokes the `onViewHistoryAction` with the index name when the view history button is clicked', async () => {
+        const onViewHistoryAction = jest.fn();
 
         const columns = getSummaryTableColumns({
           formatBytes,
@@ -207,13 +178,12 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction,
-          checkState: getCheckState(indexName),
+          onViewHistoryAction,
         });
 
         const expandActionRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[0] as CustomItemAction<IndexSummaryTableItem>
+            .actions[1] as CustomItemAction<IndexSummaryTableItem>
         ).render;
 
         render(
@@ -222,10 +192,64 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(VIEW_CHECK_DETAILS);
+        const button = screen.getByLabelText(VIEW_HISTORY);
         await userEvent.click(button);
 
-        expect(onExpandAction).toBeCalledWith(indexSummaryTableItem.indexName);
+        expect(onViewHistoryAction).toBeCalledWith(indexSummaryTableItem.indexName);
+      });
+
+      test('adds data-tour-element attribute to the first view history button', () => {
+        const pattern = 'auditbeat-*';
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          isILMAvailable,
+          pattern,
+          onCheckNowAction: jest.fn(),
+          onViewHistoryAction: jest.fn(),
+          firstIndexName: indexName,
+        });
+
+        const expandActionRender = (
+          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
+            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+        ).render;
+
+        render(
+          <TestExternalProviders>
+            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
+          </TestExternalProviders>
+        );
+
+        const button = screen.getByLabelText(VIEW_HISTORY);
+        expect(button).toHaveAttribute('data-tour-element', pattern);
+      });
+
+      test('doesn`t add data-tour-element attribute to non-first view history buttons', () => {
+        const pattern = 'auditbeat-*';
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          isILMAvailable,
+          pattern,
+          onCheckNowAction: jest.fn(),
+          onViewHistoryAction: jest.fn(),
+          firstIndexName: 'another-index',
+        });
+
+        const expandActionRender = (
+          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
+            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+        ).render;
+
+        render(
+          <TestExternalProviders>
+            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
+          </TestExternalProviders>
+        );
+
+        const button = screen.getByLabelText(VIEW_HISTORY);
+        expect(button).not.toHaveAttribute('data-tour-element');
       });
     });
 
@@ -242,8 +266,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -266,8 +289,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -294,8 +316,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -319,8 +340,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const indexNameRender = (columns[2] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -344,8 +364,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const docsCountRender = (columns[3] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -380,8 +399,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -403,8 +421,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -461,8 +478,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -488,8 +504,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -514,8 +529,7 @@ describe('helpers', () => {
           isILMAvailable: false,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -538,8 +552,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -563,8 +576,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
-          onExpandAction: jest.fn(),
-          checkState: getCheckState(indexName),
+          onViewHistoryAction: jest.fn(),
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)

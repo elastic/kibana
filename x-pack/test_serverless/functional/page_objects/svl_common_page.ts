@@ -141,6 +141,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
     },
 
+    /**
+     *
+     * Login to Kibana using SAML authentication with custom role
+     */
+    async loginWithCustomRole() {
+      await this.loginWithRole(svlUserManager.CUSTOM_ROLE);
+    },
+
     async navigateToLoginForm() {
       const url = deployment.getHostPort() + '/login';
       await browser.get(url);

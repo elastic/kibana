@@ -20,13 +20,13 @@ Add the sample web logs data, and create and set up the dashboard.
 
 . On the home page, click *Try sample data*.
 
-. Click *Other sample data sets*. 
+. Expand *Other sample data sets*. 
 
 . On the *Sample web logs* card, click *Add data*.
 
 Create the dashboard where you'll display the visualization panels.
 
-. Open the main menu, then click *Dashboard*.
+. Open the main menu, then click *Dashboards*.
 
 . Click *Create dashboard*.
 
@@ -57,7 +57,10 @@ To create the visualizations in this tutorial, you'll use the following fields:
 
 * *referer.keyword*
 
-To see the most frequent values in a field, hover over the field name, then click *i*.
+Click a field name to view more details, such as its top values and distribution.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltff29bc11413cc5d8/66fdc386762d3a15135abec4/tutorial-field-top-values-distribution.gif[Clicking a field name to view more details]
 
 [discrete]
 [[view-the-number-of-website-visitors]]
@@ -141,9 +144,9 @@ image::images/lens_lineChartMetricOverTimeBottomAxis_8.7.png[Bottom axis menu]
 
 Since you removed the axis labels, add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Median of bytes`, then click *Save*.
+. In the *Title* field, enter `Median of bytes`, then click *Apply*.
 +
 [role="screenshot"]
 image::images/lens_lineChartMetricOverTime_8.4.0.png[Line chart that displays metric data over time]
@@ -167,7 +170,7 @@ The visualization editor automatically applies the *Unique count* function. If y
 . Drag *request.keyword* to the workspace.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_2_1_1.png[Vertical bar chart with top values of request.keyword by most unique visitors]
+image::images/tutorial-top-values-of-field-8.16.0.png[Vertical bar chart with top values of request.keyword by most unique visitors]
 +
 When you drag a text or IP address field to the workspace,
 the editor adds the *Top values* function ranked by *Count of records* to show the most frequent values.
@@ -208,7 +211,7 @@ Create a proportional visualization that helps you determine if your users trans
 
 . Click the *Sum* quick function, then click *Close*.
 
-. From the *Available fields* list, drag *bytes* to the *Break down by* field in the layer pane.
+. From the *Available fields* list, drag *bytes* to the *Breakdown* field in the layer pane.
 
 To select documents based on the number range of a field, use the *Intervals* function.
 When the ranges are non numeric, or the query requires multiple clauses, you could use the *Filters* function.
@@ -245,9 +248,9 @@ image::images/lens_pieChartCompareSubsetOfDocs_7.16.png[Pie chart that compares 
 
 Add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Sum of bytes from large requests`, then click *Save*.
+. In the *Title* field, enter `Sum of bytes from large requests`, then click *Apply*.
 
 [discrete]
 [[histogram]]
@@ -278,9 +281,9 @@ image::images/lens_barChartDistributionOfNumberField_7.16.png[Bar chart that dis
 
 Add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Website traffic`, then click *Save*.
+. In the *Title* field, enter `Website traffic`, then click *Apply*.
 
 [discrete]
 [[treemap]]
@@ -342,9 +345,9 @@ image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
 
 Add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Page views by location and referrer`, then click *Save*.
+. In the *Title* field, enter `Page views by location and referrer`, then click *Apply*.
 
 [float]
 [[arrange-the-lens-panels]]

@@ -12,10 +12,14 @@ import type {
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
+import {
+  getMinimalPrivilegeId,
+  isMinimalPrivilegeId,
+} from '@kbn/security-authorization-core-common';
+import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
+import { ApiOperation } from '@kbn/security-plugin-types-server';
 
-import type { SecurityLicense } from '@kbn/security-plugin-types-common';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
-import type { RawKibanaPrivileges } from './raw_kibana_privileges';
 import type { Actions } from '../actions';
 
 export interface PrivilegesService {
@@ -63,24 +67,44 @@ export function privilegesFactory(
 
       // Remember privilege as composable to update it later, once actions for all referenced privileges are also
       // calculated and registered.
-      const composableFeaturePrivileges: Array<{
+      const composablePrivileges: Array<{
         featureId: string;
         privilegeId: string;
+        references: readonly FeatureKibanaPrivilegesReference[];
         excludeFromBasePrivileges?: boolean;
-        composedOf: readonly FeatureKibanaPrivilegesReference[];
+        actionsFilter?: (action: string) => boolean;
       }> = [];
-      const tryStoreComposableFeature = (
+      const tryStoreComposablePrivilege = (
         feature: KibanaFeature,
         privilegeId: string,
         privilege: FeatureKibanaPrivileges
       ) => {
+        // If privilege is configured with `composedOf` it should be complemented with **all**
+        // actions from referenced privileges.
         if (privilege.composedOf) {
-          composableFeaturePrivileges.push({
+          composablePrivileges.push({
             featureId: feature.id,
             privilegeId,
-            composedOf: privilege.composedOf,
+            references: privilege.composedOf,
             excludeFromBasePrivileges:
               feature.excludeFromBasePrivileges || privilege.excludeFromBasePrivileges,
+          });
+        }
+
+        // If a privilege is configured with `replacedBy`, it's part of the deprecated feature and
+        // should be complemented with the subset of actions from the referenced privileges to
+        // maintain backward compatibility. Namely, deprecated privileges should grant the same UI
+        // capabilities and alerting actions as the privileges that replace them, so that the
+        // client-side code can safely use only non-deprecated UI capabilities and users can still
+        // access previously created alerting rules and alerts.
+        const replacedBy = getReplacedByForPrivilege(privilegeId, privilege);
+        if (replacedBy) {
+          composablePrivileges.push({
+            featureId: feature.id,
+            privilegeId,
+            references: replacedBy,
+            actionsFilter: (action) =>
+              actions.ui.isValid(action) || actions.alerting.isValid(action),
           });
         }
       };
@@ -99,20 +123,20 @@ export function privilegesFactory(
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
 
-          tryStoreComposableFeature(feature, fullPrivilegeId, featurePrivilege.privilege);
+          tryStoreComposablePrivilege(feature, fullPrivilegeId, featurePrivilege.privilege);
         }
 
         for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: false,
           licenseHasAtLeast,
         })) {
-          const minimalPrivilegeId = `minimal_${featurePrivilege.privilegeId}`;
+          const minimalPrivilegeId = getMinimalPrivilegeId(featurePrivilege.privilegeId);
           featurePrivileges[feature.id][minimalPrivilegeId] = [
             actions.login,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
 
-          tryStoreComposableFeature(feature, minimalPrivilegeId, featurePrivilege.privilege);
+          tryStoreComposablePrivilege(feature, minimalPrivilegeId, featurePrivilege.privilege);
         }
 
         if (
@@ -127,6 +151,8 @@ export function privilegesFactory(
               actions.login,
               ...uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature)),
             ];
+
+            tryStoreComposablePrivilege(feature, subFeaturePrivilege.id, subFeaturePrivilege);
           }
         }
 
@@ -141,11 +167,14 @@ export function privilegesFactory(
       // another feature. This could potentially enable functionality in a license lower than originally intended. It
       // might or might not be desired, but we're accepting this for now, as every attempt to compose a feature
       // undergoes a stringent review process.
-      for (const composableFeature of composableFeaturePrivileges) {
-        const composedActions = composableFeature.composedOf.flatMap((privilegeReference) =>
-          privilegeReference.privileges.flatMap(
-            (privilege) => featurePrivileges[privilegeReference.feature][privilege]
-          )
+      for (const composableFeature of composablePrivileges) {
+        const composedActions = composableFeature.references.flatMap((privilegeReference) =>
+          privilegeReference.privileges.flatMap((privilege) => {
+            const privilegeActions = featurePrivileges[privilegeReference.feature][privilege] ?? [];
+            return composableFeature.actionsFilter
+              ? privilegeActions.filter(composableFeature.actionsFilter)
+              : privilegeActions;
+          })
         );
         featurePrivileges[composableFeature.featureId][composableFeature.privilegeId] = [
           ...new Set(
@@ -182,10 +211,10 @@ export function privilegesFactory(
         global: {
           all: [
             actions.login,
-            actions.api.get('decryptedTelemetry'),
-            actions.api.get('features'),
-            actions.api.get('taskManager'),
-            actions.api.get('manageSpaces'),
+            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+            actions.api.get(ApiOperation.Read, 'features'),
+            actions.api.get(ApiOperation.Manage, 'taskManager'),
+            actions.api.get(ApiOperation.Manage, 'spaces'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
@@ -197,7 +226,7 @@ export function privilegesFactory(
           ],
           read: [
             actions.login,
-            actions.api.get('decryptedTelemetry'),
+            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
             actions.ui.get('globalSettings', 'show'),
             ...readActions,
           ],
@@ -219,4 +248,28 @@ export function privilegesFactory(
       };
     },
   };
+}
+
+/**
+ * Returns a list of privileges that replace the given privilege, if any. Works for both top-level
+ * and sub-feature privileges.
+ * @param privilegeId The ID of the privilege to get replacements for.
+ * @param privilege The privilege definition to get replacements for.
+ */
+export function getReplacedByForPrivilege(
+  privilegeId: string,
+  privilege: FeatureKibanaPrivileges
+): readonly FeatureKibanaPrivilegesReference[] | undefined {
+  const replacedBy = privilege.replacedBy;
+  if (!replacedBy) {
+    return;
+  }
+
+  // If a privilege of the deprecated feature explicitly defines a replacement for minimal privileges, use it.
+  // Otherwise, use the default replacement for all cases.
+  return 'minimal' in replacedBy
+    ? isMinimalPrivilegeId(privilegeId)
+      ? replacedBy.minimal
+      : replacedBy.default
+    : replacedBy;
 }

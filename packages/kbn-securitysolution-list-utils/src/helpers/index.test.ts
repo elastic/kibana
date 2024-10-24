@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMappingConflictsInfo, fieldSupportsMatches, hasWrongOperatorWithWildcard } from '.';
+import {
+  getMappingConflictsInfo,
+  fieldSupportsMatches,
+  hasWrongOperatorWithWildcard,
+  hasPartialCodeSignatureEntry,
+} from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -259,6 +264,114 @@ describe('Helpers', () => {
           },
         ])
       ).toBeTruthy();
+    });
+  });
+
+  describe('hasPartialCodeSignatureEntry', () => {
+    it('returns false if the entry has neither code signature subject name nor trusted field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [{ type: 'match', value: 'asdf', field: 'someField', operator: 'excluded' }],
+          },
+        ])
+      ).toBeFalsy();
+    });
+    it('returns true if the entry has code signature subject name but not trusted field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.subject_name',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
+    });
+    it('returns true if the entry has code signature trusted but not the subject name field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.trusted',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
+    });
+    it('returns false if the entry has both code signature subject name and trusted field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.subject_name',
+                operator: 'excluded',
+              },
+              {
+                type: 'match',
+                value: 'true',
+                field: 'process.code_signature.trusted',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeFalsy();
+    });
+    it('returns false if the entry has both code signature team_id and trusted fields for mac os', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['macos'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.team_id',
+                operator: 'excluded',
+              },
+              {
+                type: 'match',
+                value: 'true',
+                field: 'process.code_signature.trusted',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeFalsy();
     });
   });
 });
