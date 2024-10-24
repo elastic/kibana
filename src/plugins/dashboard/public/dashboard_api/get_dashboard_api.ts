@@ -19,6 +19,7 @@ export interface InitialComponentState {
   lastSavedInput: DashboardContainerInput;
   lastSavedId: string | undefined;
   managed: boolean;
+  fullScreenMode: boolean;
 }
 
 export function getDashboardApi(
@@ -26,7 +27,7 @@ export function getDashboardApi(
   untilEmbeddableLoaded: (id: string) => Promise<unknown>
 ) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
-  const fullScreenMode$ = new BehaviorSubject(false);
+  const fullScreenMode$ = new BehaviorSubject(initialComponentState.fullScreenMode);
   const managed$ = new BehaviorSubject(initialComponentState.managed);
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialComponentState.lastSavedId);
 
