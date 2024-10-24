@@ -43,7 +43,7 @@ export const deleteMonitorBulk = async ({
       monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
     );
 
-    const [errors] = await Promise.all([deleteSyncPromise, deletePromises]);
+    const [errors, result] = await Promise.all([deleteSyncPromise, deletePromises]);
 
     monitors.forEach((monitor) => {
       sendTelemetryEvents(
@@ -59,7 +59,7 @@ export const deleteMonitorBulk = async ({
       );
     });
 
-    return errors;
+    return { errors, result };
   } catch (e) {
     throw e;
   }

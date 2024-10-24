@@ -52,10 +52,9 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
       });
     }
 
-    const result: Array<{ id: string; deleted: boolean; error?: string }> = [];
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
     try {
-      const { errors } = await deleteMonitorAPI.execute({
+      const { errors, result } = await deleteMonitorAPI.execute({
         monitorIds: idsToDelete,
       });
 
@@ -64,14 +63,10 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
           body: { message: 'error pushing monitor to the service', attributes: { errors } },
         });
       }
-
-      idsToDelete.forEach((id) => {
-        result.push({ id, deleted: true });
-      });
     } catch (getErr) {
       throw getErr;
     }
 
-    return [...result, ...deleteMonitorAPI.result];
+    return deleteMonitorAPI.result;
   },
 });

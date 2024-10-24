@@ -58,28 +58,28 @@ export class DeleteMonitorAPI {
           deleted: false,
           error: `Monitor id ${monitorId} not found!`,
         });
+      } else {
+        server.logger.error(`Failed to decrypt monitor to delete ${monitorId}${e}`);
+        sendErrorTelemetryEvents(server.logger, server.telemetry, {
+          reason: `Failed to decrypt monitor to delete ${monitorId}`,
+          message: e?.message,
+          type: 'deletionError',
+          code: e?.code,
+          status: e.status,
+          stackVersion: server.stackVersion,
+        });
+        return await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+          syntheticsMonitorType,
+          monitorId
+        );
       }
-      server.logger.error(`Failed to decrypt monitor to delete ${monitorId}${e}`);
-      sendErrorTelemetryEvents(server.logger, server.telemetry, {
-        reason: `Failed to decrypt monitor to delete ${monitorId}`,
-        message: e?.message,
-        type: 'deletionError',
-        code: e?.code,
-        status: e.status,
-        stackVersion: server.stackVersion,
-      });
     }
-
-    return await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorType,
-      monitorId
-    );
   }
 
   async execute({ monitorIds }: { monitorIds: string[] }) {
     const { response, server } = this.routeContext;
 
-    const monitors = await this.getMonitorsToDelete(monitorIds);
+    const monitors = (await this.getMonitorsToDelete(monitorIds)).filter(Boolean);
     for (const monitor of monitors) {
       const err = await validatePermissions(this.routeContext, monitor.attributes.locations);
       if (err) {
@@ -94,12 +94,19 @@ export class DeleteMonitorAPI {
     }
 
     try {
-      const errors = await deleteMonitorBulk({
+      const { errors, result } = await deleteMonitorBulk({
         monitors,
         routeContext: this.routeContext,
       });
 
-      return { errors };
+      result.statuses?.forEach((res) => {
+        this.result.push({
+          id: res.id,
+          deleted: res.success,
+        });
+      });
+
+      return { errors, result: this.result };
     } catch (e) {
       server.logger.error(`Unable to delete Synthetics monitor with error ${e.message}`);
       server.logger.error(e);
