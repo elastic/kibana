@@ -30,8 +30,6 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
 
   const bucketedColumns = table.columns.filter(({ operation }) => operation.isBucketed);
 
-  const hasInterval = bucketedColumns.some(({ operation }) => operation.scale === 'interval');
-
   const unsupportedColumns = table.columns.filter(
     ({ operation }) => !supportedDataTypes.has(operation.dataType) && !operation.isBucketed
   );
@@ -64,7 +62,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
     title: metricColumns[0]?.operation.label || metricLabel,
     previewIcon: IconChartMetric,
     score: 0.5,
-    hide: hasInterval,
+    hide: !!bucketedColumns.length,
   };
 
   const accessorMappings: Pick<MetricVisualizationState, 'metricAccessor' | 'breakdownByAccessor'> =
