@@ -94,9 +94,9 @@ export const allowedExperimentalValues = Object.freeze({
   endpointManagementSpaceAwarenessEnabled: false,
 
   /**
-   * Enables new notes
+   * Disables new notes
    */
-  securitySolutionNotesEnabled: false,
+  securitySolutionNotesDisabled: false,
 
   /**
    * Disables entity and alert previews

@@ -882,12 +882,12 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - notes', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    describe('securitySolutionNotesDisabled = false', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return true;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return false;
             }
             return allowedExperimentalValues[feature];
           })
@@ -937,12 +937,12 @@ describe('query tab with unified timeline', () => {
       );
     });
 
-    describe('securitySolutionNotesEnabled = false', () => {
+    describe('securitySolutionNotesDisabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return false;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return true;
             }
             return allowedExperimentalValues[feature];
           })
@@ -1071,12 +1071,12 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - pin', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    describe('securitySolutionNotesDisabled = false', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return true;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return false;
             }
             return allowedExperimentalValues[feature];
           })
@@ -1155,12 +1155,12 @@ describe('query tab with unified timeline', () => {
       );
     });
 
-    describe('securitySolutionNotesEnabled = false', () => {
+    describe('securitySolutionNotesDisabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return false;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return true;
             }
             return allowedExperimentalValues[feature];
           })

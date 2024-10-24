@@ -90,7 +90,7 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   it('should be able to delete a note', () => {
     const deleteNoteContent = 'delete me';
     addNotesToTimeline(deleteNoteContent);
-    cy.get(DELETE_NOTE).last().click();
+    cy.get(DELETE_NOTE(0)).click();
     cy.get(MODAL_CONFIRMATION_BTN).click();
     cy.get(NOTE_DESCRIPTION).last().should('not.have.text', deleteNoteContent);
   });

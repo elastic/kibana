@@ -229,7 +229,7 @@ export const links: LinkItem = {
       path: NOTES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'securitySolutionNotesEnabled',
+      hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
     },
   ],
 };
