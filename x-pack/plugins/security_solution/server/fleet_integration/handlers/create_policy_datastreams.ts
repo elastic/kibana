@@ -8,11 +8,11 @@
 import pMap from 'p-map';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { catchAndWrapError } from '../../endpoint/utils';
-import type { SimpleMemCacheInterface } from '../../endpoint/services/actions/clients/lib/simple_mem_cache';
-import { SimpleMemCache } from '../../endpoint/services/actions/clients/lib/simple_mem_cache';
+import type { SimpleMemCacheInterface } from '../../endpoint/lib/simple_mem_cache';
+import { SimpleMemCache } from '../../endpoint/lib/simple_mem_cache';
 import {
   ENDPOINT_ACTION_RESPONSES_DS,
-  ENDPOINT_HEARTBEAT_INDEX,
+  ENDPOINT_HEARTBEAT_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
 import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import { stringify } from '../../endpoint/utils/stringify';
@@ -43,8 +43,6 @@ const cache = new SimpleMemCache({
 interface PolicyDataStreamsCreator {
   (options: CreatePolicyDataStreamsOptions): Promise<void>;
   cache: SimpleMemCacheInterface;
-
-  // FIXME:PT move SimpleMemCache to top-level lib
 }
 
 export interface CreatePolicyDataStreamsOptions {
@@ -90,8 +88,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
       );
 
       if (endpointServices.isServerless()) {
-        // FIXME:PT DO NOT COMMIT until variable below is updated from PR https://github.com/elastic/kibana/pull/197291
-        acc.push(ENDPOINT_HEARTBEAT_INDEX);
+        acc.push(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
       }
     }
 
@@ -124,6 +121,8 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
             )}`
           );
         });
+    } else {
+      cache.set(datastreamIndexName, true);
     }
   };
 

@@ -367,11 +367,11 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy post create callback', () => {
-    let soClient: ReturnType<savedObjectsClientMock.create>;
+    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
     let esClient: ElasticsearchClientMock;
     let callback: PostPackagePolicyPostCreateCallback;
     let policyConfig: PackagePolicy;
-    let endpointAppContextServiceMock: ReturnType<createMockEndpointAppContextService>;
+    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
 
     beforeEach(() => {
       soClient = savedObjectsClientMock.create();

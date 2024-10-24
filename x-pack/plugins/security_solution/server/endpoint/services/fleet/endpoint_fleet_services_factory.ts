@@ -206,7 +206,7 @@ interface FetchEndpointPolicyNamespaceOptions {
   integrationPolicies: string[];
 }
 
-interface FetchEndpointPolicyNamespaceResponse {
+export interface FetchEndpointPolicyNamespaceResponse {
   integrationPolicy: Record<string, string[]>;
 }
 

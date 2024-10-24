@@ -12,7 +12,7 @@ import type {
 import { createEndpointFleetServicesFactoryMock } from './endpoint_fleet_services_factory.mocks';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { NotFoundError } from '../../errors';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
@@ -121,8 +121,8 @@ describe('EndpointServiceFactory', () => {
 
   describe('#getPolicyNamespace()', () => {
     let integrationPolicy: PackagePolicy;
-    let agentPolicy1: AgentPolicies;
-    let agentPolicy2: AgentPolicies;
+    let agentPolicy1: AgentPolicy;
+    let agentPolicy2: AgentPolicy;
 
     beforeEach(() => {
       const agentPolicyGenerator = new FleetAgentPolicyGenerator('seed');
