@@ -54,6 +54,7 @@ interface CreatePipelineParams {
   esClient: ElasticsearchClient;
   id: string;
   modelId: string;
+  v2KnowledgeBaseEnabled: boolean;
 }
 
 /**
@@ -70,12 +71,14 @@ export const createPipeline = async ({
   esClient,
   id,
   modelId,
+  v2KnowledgeBaseEnabled,
 }: CreatePipelineParams): Promise<boolean> => {
   try {
     const response = await esClient.ingest.putPipeline(
       knowledgeBaseIngestPipeline({
         id,
         modelId,
+        v2KnowledgeBaseEnabled,
       })
     );
 

@@ -25,6 +25,8 @@ import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { AssistantToolParams, GetElser } from '../../types';
 import {
@@ -46,6 +48,7 @@ import {
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
 import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
+import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -193,6 +196,47 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
+  public isInferenceEndpointExists = async () => {
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+
+      return await esClient.inference.get({
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        task_type: 'sparse_embedding',
+      });
+    } catch (error) {
+      return false;
+    }
+  };
+
+  public createInferenceEndpoint = async () => {
+    const elserId = await this.options.getElserId();
+    this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      if (this.isV2KnowledgeBaseEnabled) {
+        await esClient.inference.put({
+          task_type: 'sparse_embedding',
+          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+          inference_config: {
+            service: 'elasticsearch',
+            service_settings: {
+              num_allocations: 1,
+              num_threads: 1,
+              model_id: elserId,
+            },
+            task_settings: {},
+          },
+        });
+      }
+    } catch (error) {
+      this.options.logger.error(
+        `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
+      );
+      throw new Error(`Error creating inference endpoint for ELSER model '${elserId}':\n${error}`);
+    }
+  };
+
   /**
    * Downloads and deploys recommended ELSER (if not already), then loads ES|QL docs
    *
@@ -259,19 +303,34 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
       }
 
-      const isDeployed = await this.isModelDeployed();
-      if (!isDeployed) {
-        await this.deployModel();
-        await pRetry(
-          async () =>
-            (await this.isModelDeployed())
-              ? Promise.resolve()
-              : Promise.reject(new Error('Model not deployed')),
-          { minTimeout: 2000, retries: 10 }
-        );
-        this.options.logger.debug(`ELSER model '${elserId}' successfully deployed!`);
+      if (!this.isV2KnowledgeBaseEnabled) {
+        const isDeployed = await this.isModelDeployed();
+        if (!isDeployed) {
+          await this.deployModel();
+          await pRetry(
+            async () =>
+              (await this.isModelDeployed())
+                ? Promise.resolve()
+                : Promise.reject(new Error('Model not deployed')),
+            { minTimeout: 2000, retries: 10 }
+          );
+          this.options.logger.debug(`ELSER model '${elserId}' successfully deployed!`);
+        } else {
+          this.options.logger.debug(`ELSER model '${elserId}' is already deployed`);
+        }
       } else {
-        this.options.logger.debug(`ELSER model '${elserId}' is already deployed`);
+        const inferenceExists = await this.isInferenceEndpointExists();
+        if (!inferenceExists) {
+          await this.createInferenceEndpoint();
+
+          this.options.logger.debug(
+            `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
+          );
+        } else {
+          this.options.logger.debug(
+            `Inference endpoint for ELSER model '${elserId}' is already deployed`
+          );
+        }
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
@@ -595,14 +654,21 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       if (results) {
         const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
-        return entries.map((indexEntry) => {
-          return getStructuredToolForIndexEntry({
-            indexEntry,
-            esClient,
-            logger: this.options.logger,
-            elserId,
-          });
-        });
+        const indexPatternFetcher = new IndexPatternsFetcher(esClient);
+        const existingIndices = await indexPatternFetcher.getExistingIndices(map(entries, 'index'));
+        return (
+          entries
+            // Filter out any IndexEntries that don't have an existing index
+            .filter((entry) => existingIndices.includes(entry.index))
+            .map((indexEntry) => {
+              return getStructuredToolForIndexEntry({
+                indexEntry,
+                esClient,
+                logger: this.options.logger,
+                elserId,
+              });
+            })
+        );
       }
     } catch (e) {
       this.options.logger.error(`kbDataClient.getAssistantTools() - Failed to fetch IndexEntries`);

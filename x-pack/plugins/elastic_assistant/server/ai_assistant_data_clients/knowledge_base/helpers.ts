@@ -118,11 +118,9 @@ export const getKBVectorSearchQuery = ({
     bool: {
       must: [
         {
-          text_expansion: {
-            'vector.tokens': {
-              model_id: modelId,
-              model_text: query,
-            },
+          semantic: {
+            field: 'semantic_text',
+            query,
           },
         },
         ...requiredFilter,
