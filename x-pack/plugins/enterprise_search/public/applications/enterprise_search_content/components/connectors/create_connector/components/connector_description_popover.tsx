@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import connectorLogo from '../../../../../../assets/images/connector_logo_network_drive_version.svg';
+import connectorLogo from '../../../../../../assets/images/connector.svg';
 
 const nativePopoverPanels = [
   {
@@ -27,7 +27,7 @@ const nativePopoverPanels = [
       'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
-    icons: [<EuiIcon type="documents" />],
+    icons: [<EuiIcon size="l" type="documents" />],
     id: 'native-choose-source',
   },
   {
@@ -35,7 +35,7 @@ const nativePopoverPanels = [
       'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
-    icons: [<EuiIcon type={connectorLogo} />, <EuiIcon type="logoElastic" />],
+    icons: [<EuiIcon size="l" type={connectorLogo} />, <EuiIcon size="l" type="logoElastic" />],
     id: 'native-configure-connector',
   },
 ];
@@ -46,7 +46,7 @@ const connectorClientPopoverPanels = [
       'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
-    icons: [<EuiIcon type="documents" />],
+    icons: [<EuiIcon size="l" type="documents" />],
     id: 'client-choose-source',
   },
   {
@@ -58,9 +58,9 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon type={connectorLogo} />,
-      <EuiIcon type="sortRight" />,
-      <EuiIcon type="launch" />,
+      <EuiIcon size="l" type={connectorLogo} />,
+      <EuiIcon size="l" type="sortRight" />,
+      <EuiIcon size="l" type="launch" />,
     ],
     id: 'client-deploy',
   },
@@ -72,11 +72,11 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon type="documents" />,
-      <EuiIcon type="sortRight" />,
-      <EuiIcon type={connectorLogo} />,
-      <EuiIcon type="sortRight" />,
-      <EuiIcon type="logoElastic" />,
+      <EuiIcon size="l" type="documents" />,
+      <EuiIcon size="l" type="sortRight" />,
+      <EuiIcon size="l" type={connectorLogo} />,
+      <EuiIcon size="l" type="sortRight" />,
+      <EuiIcon size="l" type="logoElastic" />,
     ],
     id: 'client-configure-connector',
   },

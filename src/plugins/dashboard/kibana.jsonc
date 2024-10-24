@@ -24,7 +24,7 @@
       "urlForwarding",
       "presentationUtil",
       "visualizations",
-      "unifiedSearch"
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "home",
@@ -35,7 +35,8 @@
       "taskManager",
       "serverless",
       "noDataPage",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "lens"
     ],
     "requiredBundles": [
       "kibanaReact",
