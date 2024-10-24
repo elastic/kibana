@@ -29,7 +29,6 @@ export interface Props {
   isLoading: boolean;
   onChange: (id: string) => void;
   selectedConnector: string;
-  appendAddConnectorButton?: boolean;
 }
 
 const suspendedComponentWithProps = (ComponentToSuspend: React.ComponentType) => {
@@ -91,11 +90,8 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   isLoading,
   onChange,
   selectedConnector,
-  appendAddConnectorButton = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
-  const { actions } = useApplicationCapabilities();
-  const canSave = actions.crud;
   const { euiTheme } = useEuiTheme();
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
@@ -151,10 +147,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       },
       [noConnectorOption]
     );
-
-    if (appendAddConnectorButton && canSave) {
-      return [...connectorsFormatted, addNewConnector(euiTheme)];
-    }
 
     return connectorsFormatted;
     // eslint-disable-next-line react-hooks/exhaustive-deps

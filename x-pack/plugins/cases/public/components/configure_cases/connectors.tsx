@@ -53,6 +53,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   onAddNewConnector,
 }) => {
   const { actions } = useApplicationCapabilities();
+  const canSave = actions.crud;
   const connector = useMemo(
     () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
@@ -99,13 +100,15 @@ const ConnectorsComponent: React.FC<Props> = ({
           label={dropDownLabel}
           data-test-subj="case-connectors-form-row"
           labelAppend={
-            <EuiButtonEmpty
-              size="xs"
-              data-test-subj="add-new-connector"
-              onClick={onAddNewConnector}
-            >
-              {i18n.ADD_CONNECTOR}
-            </EuiButtonEmpty>
+            canSave ? (
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="add-new-connector"
+                onClick={onAddNewConnector}
+              >
+                {i18n.ADD_CONNECTOR}
+              </EuiButtonEmpty>
+            ) : null
           }
         >
           <EuiFlexGroup direction="column">

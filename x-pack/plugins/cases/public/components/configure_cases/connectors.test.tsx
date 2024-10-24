@@ -22,7 +22,12 @@ import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
 import userEvent from '@testing-library/user-event';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
 
+const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
+  typeof useApplicationCapabilities
+>;
+jest.mock('../../common/lib/kibana');
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   let appMockRender: AppMockRenderer;
@@ -183,5 +188,12 @@ describe('Connectors', () => {
       result.getByTestId('configure-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
     expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+  });
+
+  it('it should hide the "Add Connector" button when the user lacks the capability to add a new connector', async () => {
+    useApplicationCapabilitiesMock().actions = { crud: false, read: true };
+    appMockRender.render(<Connectors {...props} />);
+
+    expect(screen.queryByTestId('add-new-connector')).not.toBeInTheDocument();
   });
 });
