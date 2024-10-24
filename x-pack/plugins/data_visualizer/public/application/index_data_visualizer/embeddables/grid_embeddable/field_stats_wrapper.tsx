@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -22,6 +22,7 @@ import type {
   FieldStatisticTableEmbeddableProps,
   ESQLDataVisualizerGridEmbeddableState,
 } from './types';
+import { FieldStatsUnavailableMessage } from './embeddable_error_msg';
 
 const EmbeddableESQLFieldStatsTableWrapper = dynamic(
   () => import('./embeddable_esql_field_stats_table')
@@ -44,7 +45,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
     const unsupportedReason = getReasonIfFieldStatsUnavailableForQuery(props.esqlQuery);
     return unsupportedReason ? (
-      <EuiCallOut title={unsupportedReason} size="s" iconType="warning" color="warning" />
+      <FieldStatsUnavailableMessage id={props.id} content={unsupportedReason} />
     ) : (
       <EmbeddableESQLFieldStatsTableWrapper
         id={props.id}

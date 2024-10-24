@@ -13,11 +13,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 const FIELD_STATISTICS_LABEL = i18n.translate('unifiedFieldList.fieldStats.fieldStatisticsLabel', {
-  defaultMessage: `Field statistics`,
+  defaultMessage: `Field statistics are`,
 });
 
 export const FIELD_DATA_LABEL = i18n.translate('unifiedFieldList.fieldStats.fieldDataLabel', {
-  defaultMessage: `Field data`,
+  defaultMessage: `Field data is`,
 });
 
 export const getReasonIfFieldStatsUnavailableForQuery = (
@@ -31,7 +31,7 @@ export const getReasonIfFieldStatsUnavailableForQuery = (
       return i18n.translate(
         'unifiedFieldList.fieldStats.notAvailableForMatchESQLQueryDescription',
         {
-          defaultMessage: `{label} is unavailable for ES|QL queries containing 'MATCH' or 'QSTR' functions.`,
+          defaultMessage: `{label} not supported when using 'MATCH' or 'QSTR' functions.`,
           values: { label },
         }
       );

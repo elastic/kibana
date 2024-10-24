@@ -19,14 +19,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import {
-  EuiButtonGroup,
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
@@ -352,9 +345,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     FIELD_DATA_LABEL
   );
   if (unsupportedReasonForQuery) {
-    const messageUnsupportedReason = (
-      <EuiCallOut size="s" iconType="warning" color="warning" title={unsupportedReasonForQuery} />
-    );
+    const messageUnsupportedReason = <FieldSummaryMessage message={unsupportedReasonForQuery} />;
 
     return overrideMissingContent
       ? overrideMissingContent({
