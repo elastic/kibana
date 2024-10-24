@@ -7,6 +7,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
+import { indexBy } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -288,7 +289,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
 
-      await validateIsNotHostedPolicy(soClient, agentPolicy, options?.force);
+      validateIsNotHostedPolicy(agentPolicy, options?.force);
+      if (useSpaceAwareness) {
+        validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
+      }
 
       if (useSpaceAwareness && enrichedPackagePolicy.policy_ids.length > 1) {
         if (agentPolicy?.space_ids?.length ?? 0 > 1) {
@@ -486,6 +490,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const savedObjectType = await getPackagePolicySavedObjectType();
     for (const packagePolicy of packagePolicies) {
       const basePkgInfo = packagePolicy.package
@@ -513,8 +518,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
     const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
+    const agentPoliciesIndexById = indexBy('id', agentPolicies);
     for (const agentPolicy of agentPolicies) {
-      await validateIsNotHostedPolicy(soClient, agentPolicy, options?.force);
+      validateIsNotHostedPolicy(agentPolicy, options?.force);
+    }
+    if (useSpaceAwareness) {
+      for (const packagePolicy of packagePolicies) {
+        validateReusableIntegrationsAndSpaceAwareness(
+          packagePolicy,
+          packagePolicy.policy_ids
+            .map((policyId) => agentPoliciesIndexById[policyId])
+            .filter((policy) => policy !== undefined)
+        );
+      }
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
@@ -630,6 +646,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
     });
+
+    if (useSpaceAwareness) {
+      for (const newSo of newSos) {
+        // Do not support multpile spaces for reusable integrations
+        if (newSo.attributes.policy_ids.length > 1) {
+          continue;
+        }
+        const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
+        if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
+          await updatePackagePolicySpaces({
+            packagePolicyId: newSo.id,
+            currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+            newSpaceIds: agentPolicy.space_ids,
+          });
+        }
+      }
+    }
 
     // Assign it to the given agent policy
 
@@ -1428,8 +1461,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new AgentPolicyNotFoundError('Agent policy not found');
         }
 
-        await validateIsNotHostedPolicy(
-          soClient,
+        validateIsNotHostedPolicy(
           agentPolicy,
           options?.force,
           'Cannot remove integrations of hosted agent policy'
@@ -3072,12 +3104,23 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
   }
 }
 
-async function validateIsNotHostedPolicy(
-  soClient: SavedObjectsClientContract,
-  agentPolicy: AgentPolicy,
-  force = false,
-  errorMessage?: string
-): Promise<AgentPolicy> {
+function validateReusableIntegrationsAndSpaceAwareness(
+  packagePolicy: Pick<NewPackagePolicy, 'policy_ids'>,
+  agentPolices: AgentPolicy[]
+) {
+  if (packagePolicy.policy_ids.length ?? 0 <= 1) {
+    return;
+  }
+  for (const agentPolicy of agentPolices) {
+    if (agentPolicy?.space_ids?.length ?? 0 > 1) {
+      throw new FleetError(
+        'Reusable integration policy could  not be used through multiple spaces.'
+      );
+    }
+  }
+}
+
+function validateIsNotHostedPolicy(agentPolicy: AgentPolicy, force = false, errorMessage?: string) {
   const isManagedPolicyWithoutServerlessSupport = agentPolicy.is_managed && !force;
 
   if (isManagedPolicyWithoutServerlessSupport) {
@@ -3085,8 +3128,6 @@ async function validateIsNotHostedPolicy(
       errorMessage ?? `Cannot update integrations of hosted agent policy ${agentPolicy.id}`
     );
   }
-
-  return agentPolicy;
 }
 
 export function sendUpdatePackagePolicyTelemetryEvent(
