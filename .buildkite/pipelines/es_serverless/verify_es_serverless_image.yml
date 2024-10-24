@@ -26,6 +26,7 @@ steps:
         key: pre-build
         timeout_in_minutes: 10
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -34,6 +35,7 @@ steps:
       - label: "Build Kibana Distribution and Plugins"
         command: .buildkite/scripts/steps/build_kibana.sh
         agents:
+          diskSizeGb: 125
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -66,6 +68,7 @@ steps:
         label: "Serverless Entity Analytics - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -83,6 +86,7 @@ steps:
         label: "Serverless Explore - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -100,6 +104,7 @@ steps:
         label: "Serverless Investigations - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -117,6 +122,7 @@ steps:
         label: "Serverless Rule Management - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -134,6 +140,7 @@ steps:
         label: "Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -151,6 +158,7 @@ steps:
         label: "Serverless Detection Engine - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -168,6 +176,7 @@ steps:
         label: "Serverless Detection Engine - Exceptions - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -185,6 +194,7 @@ steps:
         label: "Serverless AI Assistant - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -202,6 +212,7 @@ steps:
         label: "Defend Workflows Cypress Tests on Serverless"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -221,6 +232,7 @@ steps:
         label: "Osquery Cypress Tests on Serverless"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp

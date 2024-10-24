@@ -5,6 +5,7 @@ steps:
     label: 'Check types'
     key: check_types
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -15,6 +16,7 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -32,6 +34,7 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/publish_api_docs.sh
     label: 'Publish API Docs'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

@@ -8,6 +8,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -23,6 +24,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -39,6 +41,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items:qa:serverless
         key: exception_lists_items:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -54,6 +57,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh lists_items:qa:serverless
         key: lists_items:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -69,6 +73,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh user_roles:qa:serverless
         key: user_roles:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -84,6 +89,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh telemetry:qa:serverless
         key: telemetry:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -99,6 +105,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless
         key: exception_workflows:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -114,6 +121,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_numeric_types:essentials:qa:serverless
         key: exception_operators_date_numeric_types:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -129,6 +137,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_keyword:essentials:qa:serverless
         key: exception_operators_keyword:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -144,6 +153,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_ips:essentials:qa:serverless
         key: exception_operators_ips:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -159,6 +169,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:essentials:qa:serverless
         key: exception_operators_long:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -174,6 +185,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_text:essentials:qa:serverless
         key: exception_operators_text:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -189,6 +201,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh actions:qa:serverless
         key: actions:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -204,6 +217,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:qa:serverless
         key: alerts:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -219,6 +233,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:essentials:qa:serverless
         key: alerts:essentials:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -234,6 +249,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:qa:serverless
         key: rule_execution_logic:qa:serverless
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp

@@ -3,6 +3,7 @@ steps:
     label: 'Cypress MKI - Defend Workflows'
     key: test_defend_workflows
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

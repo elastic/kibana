@@ -11,6 +11,7 @@ steps:
   - label: Promote Snapshot
     command: .buildkite/scripts/steps/es_snapshots/promote.sh
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

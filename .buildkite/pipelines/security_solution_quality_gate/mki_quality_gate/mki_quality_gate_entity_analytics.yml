@@ -5,6 +5,7 @@ steps:
     env:
       BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -20,6 +21,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:qa:serverless:release
         key: entity_analytics:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -34,6 +36,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless:release
         key: entity_analytics:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp

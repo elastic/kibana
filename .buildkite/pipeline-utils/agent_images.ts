@@ -16,6 +16,7 @@ const DEFAULT_AGENT_IMAGE_CONFIG: AgentImageConfig = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2004',
   imageProject: 'elastic-images-prod',
+  diskSizeGb: 75,
 };
 
 const FIPS_AGENT_IMAGE_CONFIG: AgentImageConfig = {

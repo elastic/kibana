@@ -3,6 +3,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -15,6 +16,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
+      diskSizeGb: 125
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -31,6 +33,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -48,6 +51,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
     label: 'Profiling Cypress Tests'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -65,6 +69,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -84,6 +89,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/inventory_cypress.sh
     label: 'Inventory Cypress Tests'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

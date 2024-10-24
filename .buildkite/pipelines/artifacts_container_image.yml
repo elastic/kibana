@@ -2,6 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: Build serverless container images
     agents:
+      diskSizeGb: 125
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

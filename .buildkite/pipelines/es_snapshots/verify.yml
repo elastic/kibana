@@ -15,6 +15,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -25,6 +26,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
+      diskSizeGb: 125
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -41,6 +43,7 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -60,6 +63,7 @@ steps:
     label: Trigger promotion
     timeout_in_minutes: 10
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -75,6 +79,7 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

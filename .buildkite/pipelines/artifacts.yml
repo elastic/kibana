@@ -2,6 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/build.sh
     label: Build Kibana Artifacts
     agents:
+      diskSizeGb: 125
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -17,6 +18,7 @@ steps:
   - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -33,6 +35,7 @@ steps:
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -49,6 +52,7 @@ steps:
   - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -65,6 +69,7 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -80,6 +85,7 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -95,6 +101,7 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=wolfi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -108,6 +115,7 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=ironbank .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -126,6 +134,7 @@ steps:
       - exit_status: 255
       - exit_status: -1
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
@@ -153,6 +162,7 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/publish.sh
     label: 'Publish Kibana Artifacts'
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

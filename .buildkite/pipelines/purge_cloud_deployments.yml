@@ -3,6 +3,7 @@ steps:
     label: Purge old cloud deployments
     timeout_in_minutes: 10
     agents:
+      diskSizeGb: 75
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp

@@ -8,6 +8,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -22,6 +23,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -37,6 +39,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:qa:serverless:release
         key: rule_creation:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -51,6 +54,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless:release
         key: rule_creation:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -65,6 +69,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless:release
         key: rule_update:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -79,6 +84,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless:release
         key: rule_update:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -93,6 +99,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless:release
         key: rule_patch:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -107,6 +114,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless:release
         key: rule_patch:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -121,6 +129,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:qa:serverless:release
         key: prebuilt_rules_management:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -135,6 +144,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
         key: prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -149,6 +159,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
         key: prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -163,6 +174,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
         key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -177,6 +189,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless:release
         key: rule_delete:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -191,6 +204,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless:release
         key: rule_delete:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -205,6 +219,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless:release
         key: rule_import_export:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -219,6 +234,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless:release
         key: rule_import_export:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -233,6 +249,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless:release
         key: rule_management:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -247,6 +264,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless:release
         key: rule_bulk_actions:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -261,6 +279,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless:release
         key: rule_read:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -275,6 +294,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless:release
         key: rule_read:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
@@ -289,6 +309,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless:release
         key: rules_management:essentials:qa:serverless:release
         agents:
+          diskSizeGb: 75
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp

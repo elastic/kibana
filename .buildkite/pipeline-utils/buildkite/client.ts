@@ -56,6 +56,7 @@ export interface BuildkiteCommandStep {
         machineType?: string;
         minCpuPlatform?: string;
         preemptible?: boolean;
+        diskSizeGb?: number;
       };
   timeout_in_minutes?: number;
   key?: string;
