@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, Logger, SavedObjectsFindResult } from '@kbn/core/server';
-import type { TagWithOptionalId } from '@kbn/saved-objects-tagging-plugin/common';
+import type { TagWithOptionalId } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { SECURITY_TAG_NAME } from '../../../common/constants';
 
 interface GetDashboardMetricsOptions {

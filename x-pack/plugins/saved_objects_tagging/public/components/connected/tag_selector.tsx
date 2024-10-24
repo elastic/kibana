@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { TagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { TagsCapabilities } from '../../../common';
+import type { TagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { TagsCapabilities } from '../../../common';
 import { TagSelector } from '../base';
-import { ITagsCache } from '../../services';
-import { CreateModalOpener } from '../edition_modal';
+import type { ITagsCache } from '../../services';
+import type { CreateModalOpener } from '../edition_modal';
 
 interface GetConnectedTagSelectorOptions {
   cache: ITagsCache;

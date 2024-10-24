@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { TagAttributes } from '../../../common/types';
 import {
   validateTagColorMock,
   validateTagNameMock,
   validateTagDescriptionMock,
 } from './validate_tag.test.mocks';
 
-import { TagAttributes } from '../../../common/types';
 import { validateTag } from './validate_tag';
 
 const createAttributes = (parts: Partial<TagAttributes> = {}): TagAttributes => ({

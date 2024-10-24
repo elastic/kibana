@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { EuiBadgeGroup } from '@elastic/eui';
-import { TagWithOptionalId } from '../../../common/types';
+import type { TagWithOptionalId } from '../../../common/types';
 import { TagBadge } from './tag_badge';
 
 export interface TagListProps {

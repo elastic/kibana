@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Duration } from 'moment';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import type { Duration } from 'moment';
+import { type Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, first, mergeMap } from 'rxjs';
-import { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { Tag, TagAttributes } from '../../../common/types';
+import type { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { Tag, TagAttributes } from '../../../common/types';
 
 export type { ITagsCache };
 
