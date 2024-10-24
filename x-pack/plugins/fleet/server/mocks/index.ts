@@ -186,7 +186,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
-    getByIDs: jest.fn(async () => {}),
+    getByIDs: jest.fn().mockResolvedValue(Promise.resolve([])),
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
@@ -223,15 +223,14 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  * Create mock AgentPolicyService
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
-  const fakeHandler = async () => {};
   return {
-    get: jest.fn(fakeHandler),
-    list: jest.fn(fakeHandler),
-    getFullAgentPolicy: jest.fn(fakeHandler),
-    getByIds: jest.fn(fakeHandler),
-    turnOffAgentTamperProtections: jest.fn(fakeHandler),
-    fetchAllAgentPolicies: jest.fn(fakeHandler),
-    fetchAllAgentPolicyIds: jest.fn(fakeHandler),
+    get: jest.fn().mockReturnValue(Promise.resolve()),
+    list: jest.fn().mockReturnValue(Promise.resolve()),
+    getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getByIds: jest.fn().mockReturnValue(Promise.resolve()),
+    turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
