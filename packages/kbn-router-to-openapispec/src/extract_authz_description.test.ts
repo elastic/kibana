@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { extractAuthzDescription } from './extract_authz_description';
 import { InternalRouterRoute } from './type';
+import { RouteSecurity } from '@kbn/core-http-server';
 
 describe('extractAuthzDescription', () => {
   it('should return empty if route does not require privileges', () => {
@@ -45,44 +46,41 @@ describe('extractAuthzDescription', () => {
 
   it('should return route authz description for privilege groups', () => {
     {
-      const route: InternalRouterRoute = {
-        path: '/foo',
-        options: { access: 'public' },
-        handler: jest.fn(),
-        validationSchemas: { request: { body: schema.object({}) } },
-        method: 'get',
-        isVersioned: false,
-        security: {
-          authz: {
-            requiredPrivileges: [{ allRequired: ['console'], anyRequired: ['manage_spaces'] }],
-          },
+      const routeSecurity: RouteSecurity = {
+        authz: {
+          requiredPrivileges: [{ allRequired: ['console'] }],
         },
       };
-      const description = extractAuthzDescription(route.security);
+      const description = extractAuthzDescription(routeSecurity);
+      expect(description).toBe('[Authz] Route required privileges: ALL of [console].');
+    }
+    {
+      const routeSecurity: RouteSecurity = {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['manage_spaces', 'taskmanager'],
+            },
+          ],
+        },
+      };
+      const description = extractAuthzDescription(routeSecurity);
       expect(description).toBe(
-        '[Authz] Route required privileges: ALL of [console] AND ANY of [manage_spaces].'
+        '[Authz] Route required privileges: ANY of [manage_spaces OR taskmanager].'
       );
     }
     {
-      const route: InternalRouterRoute = {
-        path: '/foo',
-        options: { access: 'public' },
-        handler: jest.fn(),
-        validationSchemas: { request: { body: schema.object({}) } },
-        method: 'get',
-        isVersioned: false,
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                allRequired: ['console', 'filesManagement'],
-                anyRequired: ['manage_spaces', 'taskmanager'],
-              },
-            ],
-          },
+      const routeSecurity: RouteSecurity = {
+        authz: {
+          requiredPrivileges: [
+            {
+              allRequired: ['console', 'filesManagement'],
+              anyRequired: ['manage_spaces', 'taskmanager'],
+            },
+          ],
         },
       };
-      const description = extractAuthzDescription(route.security);
+      const description = extractAuthzDescription(routeSecurity);
       expect(description).toBe(
         '[Authz] Route required privileges: ALL of [console, filesManagement] AND ANY of [manage_spaces OR taskmanager].'
       );

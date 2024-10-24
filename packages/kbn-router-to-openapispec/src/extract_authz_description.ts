@@ -21,41 +21,40 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
   if (!('authz' in routeSecurity) || (routeSecurity.authz as AuthzDisabled).enabled === false) {
     return '';
   }
-  if ('authz' in routeSecurity) {
-    const privileges = (routeSecurity.authz as AuthzEnabled).requiredPrivileges;
 
-    const groupedPrivileges = privileges.reduce<PrivilegeGroupValue>(
-      (groups, privilege) => {
-        if (typeof privilege === 'string') {
-          groups.allRequired.push(privilege);
+  const privileges = (routeSecurity.authz as AuthzEnabled).requiredPrivileges;
 
-          return groups;
-        }
-        groups.allRequired.push(...(privilege.allRequired ?? []));
-        groups.anyRequired.push(...(privilege.anyRequired ?? []));
+  const groupedPrivileges = privileges.reduce<PrivilegeGroupValue>(
+    (groups, privilege) => {
+      if (typeof privilege === 'string') {
+        groups.allRequired.push(privilege);
 
         return groups;
-      },
-      {
-        anyRequired: [],
-        allRequired: [],
       }
-    );
+      groups.allRequired.push(...(privilege.allRequired ?? []));
+      groups.anyRequired.push(...(privilege.anyRequired ?? []));
 
-    const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
-      const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
-      const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+      return groups;
+    },
+    {
+      anyRequired: [],
+      allRequired: [],
+    }
+  );
 
-      return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
-    };
+  const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
+    const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
+    const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
 
-    const getDescriptionForRoute = () => {
-      const allRequired = [...groupedPrivileges.allRequired];
-      const anyRequired = [...groupedPrivileges.anyRequired];
+    return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
+  };
 
-      return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
-    };
+  const getDescriptionForRoute = () => {
+    const allRequired = [...groupedPrivileges.allRequired];
+    const anyRequired = [...groupedPrivileges.anyRequired];
 
-    return `[Authz] ${getDescriptionForRoute()}`;
-  }
+    return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
+  };
+
+  return `[Authz] ${getDescriptionForRoute()}`;
 };
