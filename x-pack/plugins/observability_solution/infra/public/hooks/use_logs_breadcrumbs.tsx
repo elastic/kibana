@@ -6,10 +6,18 @@
  */
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
-import { useBreadcrumbs } from './use_breadcrumbs';
+import { useBreadcrumbs, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { LOGS_APP } from '../../common/constants';
 import { logsTitle } from '../translations';
 
 export const useLogsBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
-  useBreadcrumbs(LOGS_APP, logsTitle, extraCrumbs);
+  const appLinkProps = useLinkProps({ app: LOGS_APP });
+  const breadcrumbs = [
+    {
+      ...appLinkProps,
+      text: logsTitle,
+    },
+    ...extraCrumbs,
+  ];
+  useBreadcrumbs(breadcrumbs, { classicOnly: true });
 };

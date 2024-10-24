@@ -76,7 +76,7 @@ export function BreadcrumbsContextProvider({ children }: { children: React.React
       };
     });
 
-  useBreadcrumbs(formattedBreadcrumbs, { serverless });
+  useBreadcrumbs(formattedBreadcrumbs, { serverless, absoluteProjectStyleBreadcrumbs: false });
 
   return <BreadcrumbsContext.Provider value={api}>{children}</BreadcrumbsContext.Provider>;
 }

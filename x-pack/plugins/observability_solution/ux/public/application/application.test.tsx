@@ -17,6 +17,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { merge } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
@@ -121,6 +123,10 @@ const mockCore = merge({}, coreStart, {
       };
       return uiSettings[key];
     },
+  },
+  chrome: {
+    ...coreStart.chrome,
+    getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
   },
 });
 
