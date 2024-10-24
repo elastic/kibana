@@ -21,7 +21,7 @@ interface SuggestionsApiProps {
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
-
+// ToDo: Move to a new file
 function mergeSuggestionWithVisContext({
   suggestion,
   visAttributes,
@@ -55,7 +55,6 @@ function mergeSuggestionWithVisContext({
     !datasourceState?.layers ||
     Object.values(datasourceState?.layers).some((layer) =>
       layer.columns?.some(
-        // unknown column
         (c: { fieldName: string }) =>
           !context?.textBasedColumns?.find((col) => col.name === c.fieldName)
       )
@@ -124,6 +123,7 @@ export const suggestionsApi = ({
     dataViews,
   });
   if (!suggestions.length) return [];
+
   const activeVisualization = suggestions[0];
   if (
     activeVisualization.incomplete ||
@@ -158,25 +158,17 @@ export const suggestionsApi = ({
       XYSuggestion.visualizationId
     ]?.switchVisualizationType?.(chartType, XYSuggestion?.visualizationState);
 
-    const updatedSuggestion = {
-      ...XYSuggestion,
-      visualizationState,
-    };
-
     return [
-      preferredVisAttributes
-        ? mergeSuggestionWithVisContext({
-            suggestion: updatedSuggestion,
-            visAttributes: preferredVisAttributes,
-            context,
-          })
-        : updatedSuggestion,
+      {
+        ...XYSuggestion,
+        visualizationState,
+      },
     ];
   }
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  if (suggestions.length > 1 && preferredChartType && !preferredVisAttributes) {
-    const suggestionFromModel = suggestions.find(
+  if (newSuggestions.length > 1 && preferredChartType && !preferredVisAttributes) {
+    const suggestionFromModel = newSuggestions.find(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
     if (suggestionFromModel) {
@@ -184,8 +176,8 @@ export const suggestionsApi = ({
     }
   }
 
-  if (suggestions.length > 1 && preferredChartType && preferredVisAttributes) {
-    const suggestionFromModel = suggestions.find(
+  if (newSuggestions.length > 1 && preferredChartType && preferredVisAttributes) {
+    const suggestionFromModel = newSuggestions.find(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
     if (suggestionFromModel) {

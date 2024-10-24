@@ -27,7 +27,7 @@ import type {
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, type ChartType } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -42,14 +42,15 @@ import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
   type QueryParams,
+  assingQueryToLensLayers,
 } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
-import { getPreferredChartType } from '../utils/get_preferred_chart_type';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
+const LENS_PREFIX = 'lns';
 
 const stateSelectorFactory =
   <S>(state$: Observable<S>) =>
@@ -517,8 +518,20 @@ export class LensVisService {
       if (breakdownColumn) {
         context.textBasedColumns.push(breakdownColumn);
       }
-      const preferredChartType = preferredVisAttributes
-        ? getPreferredChartType(preferredVisAttributes)
+      // const preferredChartType = preferredVisAttributes
+      //   ? getPreferredChartType(preferredVisAttributes)
+      //   : undefined;
+
+      const preferredChartType = preferredVisAttributes?.visualizationType.replace(
+        LENS_PREFIX,
+        ''
+      ) as ChartType;
+
+      // here the attributes contain the main query and not the histogram one
+      const updatedAttributesWithQuery = preferredVisAttributes
+        ? assingQueryToLensLayers(preferredVisAttributes, {
+            esql: esqlQuery,
+          })
         : undefined;
 
       const suggestions =
@@ -527,7 +540,7 @@ export class LensVisService {
           dataView,
           ['lnsDatatable'],
           preferredChartType,
-          preferredVisAttributes
+          updatedAttributesWithQuery
         ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
@@ -601,9 +614,14 @@ export class LensVisService {
   }): Suggestion[] => {
     const { dataView, columns, query, isPlainRecord } = queryParams;
 
-    const preferredChartType = preferredVisAttributes
-      ? getPreferredChartType(preferredVisAttributes)
-      : undefined;
+    // const preferredChartType = preferredVisAttributes
+    //   ? getPreferredChartType(preferredVisAttributes)
+    //   : undefined;
+
+    const preferredChartType = preferredVisAttributes?.visualizationType.replace(
+      LENS_PREFIX,
+      ''
+    ) as ChartType;
 
     const context = {
       dataViewSpec: dataView?.toSpec(),

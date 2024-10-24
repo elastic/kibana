@@ -54,5 +54,7 @@ export enum ChartType {
   Treemap = 'Treemap',
   Tagcloud = 'Tag cloud',
   Waffle = 'Waffle',
+  Pie = 'Pie',
+  Mosaic = 'Mosaic',
   Table = 'Table',
 }
