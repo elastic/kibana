@@ -84,7 +84,7 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities/types').as('getEntities');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('Group entities by: Type').click();
@@ -135,7 +135,7 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
@@ -157,7 +157,7 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
@@ -179,7 +179,7 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
-        cy.intercept('GET', '/internal/inventory/entities').as('getEntities');
+        cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
