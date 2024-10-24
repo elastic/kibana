@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
       await updateKibanaNodes();
       await setTimeoutAsync(10000);
 
-      const tasksToSchedule = [];
+      const tasksToSchedule: Array<Promise<SerializedConcreteTaskInstance>> = [];
       for (let i = 0; i < 3; i++) {
         tasksToSchedule.push(
           scheduleTask({

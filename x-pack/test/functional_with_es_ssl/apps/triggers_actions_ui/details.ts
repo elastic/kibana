@@ -108,7 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return await createAlwaysFiringRule({
       name: `test-rule-${testRunUuid}`,
       schedule: {
-        interval: '1s',
+        interval: '3s',
       },
       actions: connectors.map((connector) => ({
         id: connector.id,
@@ -615,7 +615,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const rule = await createAlwaysFiringRule({
           name: `test-rule-${testRunUuid}`,
           schedule: {
-            interval: '1s',
+            interval: '3s',
           },
           notify_when: RuleNotifyWhen.THROTTLE,
           throttle: '2d',
