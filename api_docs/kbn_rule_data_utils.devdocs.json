@@ -21,6 +21,72 @@
     "functions": [
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.getCreateRuleRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "getCreateRuleRoute",
+        "description": [],
+        "signature": [
+          "(ruleTypeId: string) => string"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.getCreateRuleRoute.$1",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.getEditRuleRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "getEditRuleRoute",
+        "description": [],
+        "signature": [
+          "(ruleId: string) => string"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.getEditRuleRoute.$1",
+            "type": "string",
+            "tags": [],
+            "label": "ruleId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.getEsQueryConfig",
         "type": "Function",
         "tags": [],
@@ -665,6 +731,21 @@
         "description": [],
         "signature": [
           "\"kibana.alert.rule.execution.timestamp\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_RULE_EXECUTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_RULE_EXECUTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.rule.execution.type\""
         ],
         "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
         "deprecated": false,
@@ -1573,13 +1654,28 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.createRuleRoute",
+        "type": "string",
+        "tags": [],
+        "label": "createRuleRoute",
+        "description": [],
+        "signature": [
+          "\"/rules/create/:ruleTypeId\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.DefaultAlertFieldName",
         "type": "Type",
         "tags": [],
         "label": "DefaultAlertFieldName",
         "description": [],
         "signature": [
-          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.consecutive_matches\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.intended_timestamp\" | \"kibana.alert.last_detected\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.previous_action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.execution.timestamp\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.severity_improving\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.url\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert\" | \"kibana.alert.rule\""
+          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert.instance.id\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.status\" | \"kibana.alert.uuid\" | \"kibana.space_ids\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.consecutive_matches\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.intended_timestamp\" | \"kibana.alert.last_detected\" | \"kibana.alert.maintenance_window_ids\" | \"kibana.alert.previous_action_group\" | \"kibana.alert.reason\" | \"kibana.alert.rule.execution.timestamp\" | \"kibana.alert.rule.execution.type\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.tags\" | \"kibana.alert.severity_improving\" | \"kibana.alert.start\" | \"kibana.alert.time_range\" | \"kibana.alert.url\" | \"kibana.alert.workflow_assignee_ids\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_tags\" | \"kibana.version\" | \"kibana.alert\" | \"kibana.alert.rule\""
         ],
         "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
         "deprecated": false,
@@ -1597,6 +1693,21 @@
           "\"ecs.version\""
         ],
         "path": "packages/kbn-rule-data-utils/src/legacy_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.editRuleRoute",
+        "type": "string",
+        "tags": [],
+        "label": "editRuleRoute",
+        "description": [],
+        "signature": [
+          "\"/rules/edit/:id\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1867,6 +1978,36 @@
           "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SYNTHETICS_STATUS_RULE",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_STATUS_RULE",
+        "description": [],
+        "signature": [
+          "\"xpack.synthetics.alerts.monitorStatus\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SYNTHETICS_TLS_RULE",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_TLS_RULE",
+        "description": [],
+        "signature": [
+          "\"xpack.synthetics.alerts.tls\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -11,8 +11,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless search UI', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./getting_started'));
     loadTestFile(require.resolve('./navigation'));
+    loadTestFile(require.resolve('./elasticsearch_start.ts'));
+    loadTestFile(require.resolve('./search_index_detail.ts'));
+    loadTestFile(require.resolve('./getting_started'));
     loadTestFile(require.resolve('./connectors/connectors_overview'));
     loadTestFile(require.resolve('./default_dataview'));
     loadTestFile(require.resolve('./pipelines'));

@@ -31,6 +31,10 @@ jest.mock('../../services', () => ({
       has_seen_add_data_notice: true,
       fleet_server_hosts: ['http://localhost:8220'],
       prerelease_integrations_enabled: true,
+      delete_unenrolled_agents: {
+        enabled: true,
+        is_preconfigured: false,
+      },
     }),
   },
   appContextService: {
@@ -74,6 +78,10 @@ describe('SettingsHandler', () => {
         has_seen_add_data_notice: true,
         fleet_server_hosts: ['http://localhost:8220'],
         prerelease_integrations_enabled: true,
+        delete_unenrolled_agents: {
+          enabled: true,
+          is_preconfigured: false,
+        },
       },
     };
     expect(response.ok).toHaveBeenCalledWith({

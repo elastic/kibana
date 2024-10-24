@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { normalizeRuleSource } from './normalize_rule_params';
+import { normalizeRuleSource, normalizeRuleParams } from './normalize_rule_params';
 import type { BaseRuleParams } from '../../../../rule_schema';
 
 describe('normalizeRuleSource', () => {
@@ -51,5 +51,16 @@ describe('normalizeRuleSource', () => {
     expect(internalResult).toEqual({
       type: internalRuleSource.type,
     });
+  });
+});
+
+describe('normalizeRuleParams', () => {
+  it('migrates legacy investigation fields', () => {
+    const params = {
+      investigationFields: ['field_1', 'field_2'],
+    } as BaseRuleParams;
+    const result = normalizeRuleParams(params);
+
+    expect(result.investigationFields).toMatchObject({ field_names: ['field_1', 'field_2'] });
   });
 });

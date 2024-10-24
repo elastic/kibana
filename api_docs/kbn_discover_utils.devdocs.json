@@ -2813,20 +2813,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.RowControlProps.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.RowControlProps.color",
             "type": "CompoundType",
             "tags": [],
@@ -2834,6 +2820,43 @@
             "description": [],
             "signature": [
               "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.css",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "css",
+            "description": [],
+            "signature": [
+              "InterpolationPrimitive",
+              " | ",
+              "ArrayInterpolation",
+              "<",
+              "Theme",
+              "> | ",
+              "FunctionInterpolation",
+              "<",
+              "Theme",
+              ">"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
@@ -2855,17 +2878,6 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.RowControlProps.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.RowControlProps.iconType",
             "type": "CompoundType",
             "tags": [],
@@ -2874,6 +2886,17 @@
             "signature": [
               "string | React.ComponentType<{}>"
             ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -22,11 +22,17 @@ paths:
                 - connectorId
                 - packageName
                 - dataStreamName
+                - packageTitle
+                - dataStreamTitle
               properties:
                 packageName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
                 dataStreamName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
+                packageTitle:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageTitle"
+                dataStreamTitle:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamTitle"
                 logSamples:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/LogSamples"
                 connectorId:

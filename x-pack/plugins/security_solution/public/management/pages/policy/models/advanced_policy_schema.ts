@@ -1582,6 +1582,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.dev_drives.harden',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',
+      {
+        defaultMessage:
+          'Controls whether malware protection is applied to dev drives. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.malware.networkshare',
     first_supported_version: '8.9',
     documentation: i18n.translate(
@@ -1802,6 +1813,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.flags',
+    first_supported_version: '8.16.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.flags',
+    first_supported_version: '8.16.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.artifacts.global.ca_cert',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1971,6 +2004,237 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           "Attempt to include file.hash.sha256 in file events.  Hashing is asynchronous, best-effort, and is not guaranteed to succeed, especially on network drives.  WARNING: File hashing is a very CPU- and I/O-intensive process.  WARNING: This feature will increase Endpoint's CPU and I/O, and may adversely affect system responsiveness, especially during I/O-intensive activity such as directory copies and compilation.  WARNING: Event processing will be delayed due to the time spent hashing, causing Endpoint's Behavioral and Ransomware protections to fire later than normal, potentially allowing threats to inflect additional damage.  Set to 'off' to disable this feature.  Set to '0' to hash all files up to 1 GiB.  Otherwise, this sets the maximum to-be-hashed file size in MiB.  Default: off",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.aggregate_process',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
+      {
+        defaultMessage:
+          'Reduce event volume by merging related process events into fewer aggregate events. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.hash.sha256',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha256',
+      {
+        defaultMessage:
+          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.hash.sha256',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha256',
+      {
+        defaultMessage:
+          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.hash.md5',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.md5',
+      {
+        defaultMessage:
+          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.hash.sha1',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha1',
+      {
+        defaultMessage:
+          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.hash.sha256',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha256',
+      {
+        defaultMessage:
+          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.set_extended_host_information',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.set_extended_host_information',
+      {
+        defaultMessage:
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.set_extended_host_information',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.set_extended_host_information',
+      {
+        defaultMessage:
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.set_extended_host_information',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.set_extended_host_information',
+      {
+        defaultMessage:
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: true',
       }
     ),
   },
