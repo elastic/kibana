@@ -7,52 +7,104 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import { v4 as uuidv4 } from 'uuid';
+
+import { GridLayout, type GridLayoutApi } from '@kbn/grid-layout';
 import { AppMountParameters } from '@kbn/core-application-browser';
-import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPageTemplate,
+  EuiProvider,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_HEIGHT,
+  DASHBOARD_MARGIN_SIZE,
+} from '@kbn/grid-layout/grid/constants';
+import {
+  clearSerializedGridLayout,
+  getSerializedGridLayout,
+  setSerializedGridLayout,
+} from './serialized_grid_layout';
 
 export const GridExample = () => {
+  const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
+  const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
+
   return (
     <EuiProvider>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
         <EuiPageTemplate.Section color="subdued">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  gridLayoutApi?.addNewPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
+                }}
+              >
+                Add a panel
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      clearSerializedGridLayout();
+                      setLayoutKey(uuidv4()); // force remount of grid
+                    }}
+                  >
+                    Reset
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      if (gridLayoutApi) {
+                        setSerializedGridLayout(gridLayoutApi.serializeState());
+                      }
+                    }}
+                  >
+                    Save
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
           <GridLayout
+            // onLayoutChange
+            key={layoutKey}
+            ref={setGridLayoutApi}
             renderPanelContents={(id) => {
-              return <div style={{ padding: 8 }}>{id}</div>;
+              return (
+                <>
+                  <div style={{ padding: 8 }}>{id}</div>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      gridLayoutApi?.removePanel(id);
+                    }}
+                  >
+                    Delete this panel
+                  </EuiButtonEmpty>
+                </>
+              );
             }}
             getCreationOptions={() => {
-              const initialLayout: GridLayoutData = [
-                {
-                  title: 'Large section',
-                  isCollapsed: false,
-                  panels: {
-                    panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
-                    panel2: { column: 0, row: 6, width: 8, height: 4, id: 'panel2' },
-                    panel3: { column: 8, row: 6, width: 12, height: 4, id: 'panel3' },
-                    panel4: { column: 0, row: 10, width: 48, height: 4, id: 'panel4' },
-                    panel5: { column: 12, row: 0, width: 36, height: 6, id: 'panel5' },
-                    panel6: { column: 24, row: 6, width: 24, height: 4, id: 'panel6' },
-                    panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
-                    panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
-                  },
-                },
-                {
-                  title: 'Small section',
-                  isCollapsed: false,
-                  panels: { panel9: { column: 0, row: 0, width: 12, height: 16, id: 'panel9' } },
-                },
-                {
-                  title: 'Another small section',
-                  isCollapsed: false,
-                  panels: { panel10: { column: 24, row: 0, width: 12, height: 6, id: 'panel10' } },
-                },
-              ];
-
+              const initialLayout = getSerializedGridLayout();
               return {
-                gridSettings: { gutterSize: 8, rowHeight: 26, columnCount: 48 },
+                gridSettings: {
+                  gutterSize: DASHBOARD_MARGIN_SIZE,
+                  rowHeight: DASHBOARD_GRID_HEIGHT,
+                  columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+                },
                 initialLayout,
               };
             }}
