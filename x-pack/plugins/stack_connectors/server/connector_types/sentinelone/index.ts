@@ -11,6 +11,7 @@ import {
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import { CONNECTORS_EDR_EXECUTE_PRIVILEGE } from '@kbn/actions-plugin/server/feature';
 import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
 import {
   SentinelOneConfigSchema,
@@ -35,4 +36,6 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
+  isEdrActionType: true,
+  getKibanaPrivileges: () => [CONNECTORS_EDR_EXECUTE_PRIVILEGE],
 });

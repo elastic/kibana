@@ -113,15 +113,15 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
-   * Returns the kibana privileges of a system action type
+   * Returns the kibana privileges
    */
-  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
+  public getActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
     params?: Params
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
-    if (!actionType?.isSystemActionType) {
+    if (!actionType?.isSystemActionType && !actionType?.isEdrActionType) {
       return [];
     }
 
@@ -175,11 +175,15 @@ export class ActionTypeRegistry {
       );
     }
 
-    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+    if (
+      !actionType.isSystemActionType &&
+      !actionType.isEdrActionType &&
+      actionType.getKibanaPrivileges
+    ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
           defaultMessage:
-            'Kibana privilege authorization is only supported for system action types',
+            'Kibana privilege authorization is only supported for system and EDR action types',
         })
       );
     }
@@ -251,6 +255,7 @@ export class ActionTypeRegistry {
           enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
           supportedFeatureIds: actionType.supportedFeatureIds,
           isSystemActionType: !!actionType.isSystemActionType,
+          isEdrActionType: !!actionType.isEdrActionType,
         }))
     );
   }
