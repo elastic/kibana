@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { combineLatest, debounceTime, map, pairwise, skip } from 'rxjs';
+import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';

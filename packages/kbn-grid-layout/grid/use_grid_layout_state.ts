@@ -16,7 +16,6 @@ import {
   ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
-  GridRowData,
   GridSettings,
   PanelInteractionEvent,
   RuntimeGridSettings,
