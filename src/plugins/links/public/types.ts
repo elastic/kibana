@@ -22,7 +22,7 @@ import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/p
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';
 import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
@@ -73,5 +73,5 @@ export type ResolvedLink = Link & {
 
 export interface DashboardItem {
   id: string;
-  attributes: DashboardAttributes;
+  attributes: Pick<DashboardAttributes, 'title' | 'description' | 'timeRestore'>;
 }

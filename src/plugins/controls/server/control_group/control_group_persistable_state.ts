@@ -20,7 +20,7 @@ import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
 } from './control_group_migrations';
-import type { SerializableControlGroupState } from './control_group_persistence';
+import { SerializableControlGroupState } from './types';
 
 const getPanelStatePrefix = (state: SerializedControlState) => `${state.explicitInput.id}:`;
 

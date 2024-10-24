@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Latest version is 2
-export * from './v2';
+export { serviceDefinition } from './cm_services';

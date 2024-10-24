@@ -10,14 +10,12 @@
 import type { Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/server';
 
-import type {
-  GridData,
-  DashboardAttributes as CurrentDashboardAttributes, // Dashboard attributes from common are the source of truth for the current version.
-} from '../../../../common/content_management';
+import type { GridData } from '../../../content_management';
+import type { DashboardSavedObjectAttributes } from '../../schema';
 
 interface KibanaAttributes {
   kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
+    searchSourceJSON?: string;
   };
 }
 
@@ -42,10 +40,10 @@ interface DashboardAttributesTo720 extends KibanaAttributes {
   timeRestore: boolean;
   useMargins?: boolean;
   title: string;
-  optionsJSON?: string;
+  optionsJSON: string;
 }
 
-export type DashboardDoc730ToLatest = Doc<CurrentDashboardAttributes>;
+export type DashboardDoc730ToLatest = Doc<DashboardSavedObjectAttributes>;
 
 export type DashboardDoc700To720 = Doc<DashboardAttributesTo720>;
 

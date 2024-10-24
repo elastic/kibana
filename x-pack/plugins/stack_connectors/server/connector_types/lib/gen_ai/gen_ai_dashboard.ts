@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/constants';
@@ -21,7 +21,7 @@ export const getDashboardTitle = (title: string) => `${title} Token Usage`;
 export const getDashboard = (
   genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini' | 'Inference',
   dashboardId: string
-): SavedObject<DashboardAttributes> => {
+): SavedObject<DashboardSavedObjectAttributes> => {
   let attributes = {
     provider: OPENAI_TITLE,
     dashboardTitle: getDashboardTitle(OPENAI_TITLE),

@@ -7,4 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type {
+  ControlGroupAttributes,
+  GridData,
+  DashboardPanel,
+  DashboardAttributes,
+  DashboardItem,
+  DashboardGetIn,
+  DashboardGetOut,
+  DashboardCreateIn,
+  DashboardCreateOut,
+  DashboardCreateOptions,
+  DashboardSearchIn,
+  DashboardSearchOut,
+  DashboardSearchOptions,
+  DashboardUpdateIn,
+  DashboardUpdateOut,
+  DashboardUpdateOptions,
+  DashboardOptions,
+} from './latest';
+
 export { DashboardStorage } from './dashboard_storage';

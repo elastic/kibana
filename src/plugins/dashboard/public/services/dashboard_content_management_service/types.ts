@@ -12,7 +12,7 @@ import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';
-import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
+import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
@@ -38,7 +38,7 @@ export interface LoadDashboardFromSavedObjectProps {
   id?: string;
 }
 
-type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
+type DashboardResolveMeta = DashboardGetOut['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
   /**

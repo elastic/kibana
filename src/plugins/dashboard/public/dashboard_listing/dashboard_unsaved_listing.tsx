@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardAttributes } from '../../common/content_management';
+import type { DashboardAttributes } from '../../server/content_management';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,

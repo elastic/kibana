@@ -49,7 +49,7 @@ export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMig
   }
 
   try {
-    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON!);
     doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
       moveFiltersToQuery(searchSource)
     );

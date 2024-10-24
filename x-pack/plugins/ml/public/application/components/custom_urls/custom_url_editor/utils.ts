@@ -285,13 +285,12 @@ async function buildDashboardUrlFromSettings(
   let query;
 
   // Override with filters and queries from saved dashboard if they are available.
-  const searchSourceJSON = dashboard.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-  if (searchSourceJSON !== undefined) {
-    const searchSourceData = JSON.parse(searchSourceJSON);
-    if (Array.isArray(searchSourceData.filter) && searchSourceData.filter.length > 0) {
-      filters = searchSourceData.filter;
+  const { searchSource } = dashboard.attributes.kibanaSavedObjectMeta;
+  if (searchSource !== undefined) {
+    if (Array.isArray(searchSource.filter) && searchSource.filter.length > 0) {
+      filters = searchSource.filter;
     }
-    query = searchSourceData.query;
+    query = searchSource.query;
   }
 
   const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);

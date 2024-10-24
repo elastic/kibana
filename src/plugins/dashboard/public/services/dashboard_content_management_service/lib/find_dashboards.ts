@@ -10,17 +10,20 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
-import { getDashboardContentManagementCache } from '..';
-import {
+import type {
   DashboardAttributes,
-  DashboardCrudTypes,
-  DashboardItem,
-} from '../../../../common/content_management';
+  DashboardGetIn,
+  DashboardGetOut,
+  DashboardSearchIn,
+  DashboardSearchOut,
+  DashboardSearchOptions,
+} from '../../../../server/content_management';
+import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { contentManagementService } from '../../kibana_services';
 
 export interface SearchDashboardsArgs {
-  options?: DashboardCrudTypes['SearchIn']['options'];
+  options?: DashboardSearchOptions;
   hasNoReference?: SavedObjectsFindOptionsReference[];
   hasReference?: SavedObjectsFindOptionsReference[];
   search: string;
@@ -29,7 +32,7 @@ export interface SearchDashboardsArgs {
 
 export interface SearchDashboardsResponse {
   total: number;
-  hits: DashboardItem[];
+  hits: DashboardSearchOut['hits'];
 }
 
 export async function searchDashboards({
@@ -42,10 +45,7 @@ export async function searchDashboards({
   const {
     hits,
     pagination: { total },
-  } = await contentManagementService.client.search<
-    DashboardCrudTypes['SearchIn'],
-    DashboardCrudTypes['SearchOut']
-  >({
+  } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
       text: search ? `${search}*` : undefined,
@@ -84,10 +84,7 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
 
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    const response = await contentManagementService.client.get<
-      DashboardCrudTypes['GetIn'],
-      DashboardCrudTypes['GetOut']
-    >({
+    const response = await contentManagementService.client.get<DashboardGetIn, DashboardGetOut>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
@@ -119,8 +116,8 @@ export async function findDashboardsByIds(ids: string[]): Promise<FindDashboards
 
 export async function findDashboardIdByTitle(title: string): Promise<{ id: string } | undefined> {
   const { hits } = await contentManagementService.client.search<
-    DashboardCrudTypes['SearchIn'],
-    DashboardCrudTypes['SearchOut']
+    DashboardSearchIn,
+    DashboardSearchOut
   >({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {

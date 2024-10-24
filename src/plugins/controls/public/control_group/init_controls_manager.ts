@@ -147,9 +147,8 @@ export function initControlsManager(
     },
     serializeControls: () => {
       const references: Reference[] = [];
-      const explicitInputPanels: {
-        [panelId: string]: ControlPanelState & { explicitInput: object };
-      } = {};
+
+      const controls: Array<ControlPanelState & { controlConfig: object }> = [];
 
       controlsInOrder$.getValue().forEach(({ id }, index) => {
         const controlApi = getControlApi(id);
@@ -166,18 +165,18 @@ export function initControlsManager(
           references.push(...controlReferences);
         }
 
-        explicitInputPanels[id] = {
+        controls.push({
           grow,
           order: index,
           type: controlApi.type,
           width,
-          /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
-          explicitInput: { id, ...rest },
-        };
+          /** Re-add the `controlConfig` layer on serialize so control group saved object retains shape */
+          controlConfig: { id, ...rest },
+        });
       });
 
       return {
-        panelsJSON: JSON.stringify(explicitInputPanels),
+        controls,
         references,
       };
     },
