@@ -572,7 +572,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Inference',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.inference', {
-      defaultMessage: 'Uses a inference endpoint or a trained model to infer against incoming data.',
+      defaultMessage: 'Uses an inference endpoint or a trained model to infer against incoming data.',
     }),
     getDefaultDescription: ({
       model_id: modelId,
