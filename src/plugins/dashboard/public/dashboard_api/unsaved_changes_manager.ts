@@ -20,6 +20,7 @@ import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
+import { initializeViewModeManager } from './view_mode_manager';
 
 export function initializeUnsavedChangesManager({
   anyMigrationRun,
@@ -29,6 +30,7 @@ export function initializeUnsavedChangesManager({
   panelsManager,
   savedObjectId$,
   settingsManager,
+  viewModeManager,
   unifiedSearchManager,
 }: {
   anyMigrationRun: boolean;
@@ -38,6 +40,7 @@ export function initializeUnsavedChangesManager({
   panelsManager: ReturnType<typeof initializePanelsManager>;
   savedObjectId$: PublishesSavedObjectId['savedObjectId'];
   settingsManager: ReturnType<typeof initializeSettingsManager>;
+  viewModeManager: ReturnType<typeof initializeViewModeManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }) {
   const hasRunMigrations$ = new BehaviorSubject(anyMigrationRun);
@@ -48,12 +51,7 @@ export function initializeUnsavedChangesManager({
   const dashboardUnsavedChanges = initializeUnsavedChanges<
     Omit<
       DashboardState,
-      | 'controlGroupInput'
-      | 'controlGroupState'
-      | 'executionContext'
-      | 'timeslice'
-      | 'tags'
-      | 'viewMode'
+      'controlGroupInput' | 'controlGroupState' | 'executionContext' | 'timeslice' | 'tags'
     >
   >(
     lastSavedState,
@@ -61,6 +59,7 @@ export function initializeUnsavedChangesManager({
     {
       ...panelsManager.comparators,
       ...settingsManager.comparators,
+      ...viewModeManager.comparators,
       ...unifiedSearchManager.comparators,
     }
   );
@@ -75,10 +74,13 @@ export function initializeUnsavedChangesManager({
       })
     ),
   ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
+    // viewMode needs to be stored in session state because
+    // its used to exclude 'view' dashboards on the listing page
+    // However, viewMode should not trigger unsaved changes notification
+    // otherwise, opening a dashboard in edit mode will always show unsaved changes
+    const hasDashboardChanges = Object.keys(omit(dashboardChanges ?? {}, ['viewMode'])).length > 0;
     const hasUnsavedChanges =
-      dashboardChanges !== undefined ||
-      unsavedPanelState !== undefined ||
-      controlGroupChanges !== undefined;
+      hasDashboardChanges || unsavedPanelState !== undefined || controlGroupChanges !== undefined;
     if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
       hasUnsavedChanges$.next(hasUnsavedChanges);
     }

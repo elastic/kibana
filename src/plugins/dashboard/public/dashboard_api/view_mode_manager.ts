@@ -8,13 +8,14 @@
  */
 
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { StateComparators, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { DashboardState } from './types';
 
-export function initializeViewModeApi(
+export function initializeViewModeManager(
   incomingEmbeddable?: EmbeddablePackageState,
   savedObjectResult?: LoadDashboardReturn
 ) {
@@ -36,14 +37,21 @@ export function initializeViewModeApi(
 
   const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
 
+  function setViewMode(viewMode: ViewMode) {
+    // block the Dashboard from entering edit mode if this Dashboard is managed.
+    if (savedObjectResult?.managed && viewMode?.toLowerCase() === 'edit') {
+      return;
+    }
+    viewMode$.next(viewMode);
+  }
+
   return {
-    viewMode: viewMode$,
-    setViewMode: (viewMode: ViewMode) => {
-      // block the Dashboard from entering edit mode if this Dashboard is managed.
-      if (savedObjectResult?.managed && viewMode?.toLowerCase() === 'edit') {
-        return;
-      }
-      viewMode$.next(viewMode);
+    api: {
+      viewMode: viewMode$,
+      setViewMode,
     },
+    comparators: {
+      viewMode: [viewMode$, setViewMode],
+    } as StateComparators<Pick<DashboardState, 'viewMode'>>,
   };
 }

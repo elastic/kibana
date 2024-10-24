@@ -38,7 +38,7 @@ import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { openSaveModal } from './open_save_modal';
 import { initializeSearchSessionManager } from './search_session_manager';
-import { initializeViewModeApi } from './view_mode_api';
+import { initializeViewModeManager } from './view_mode_manager';
 import { UnsavedPanelState } from '../dashboard_container/types';
 
 export function getDashboardApi({
@@ -66,7 +66,7 @@ export function getDashboardApi({
   let untilEmbeddableLoadedBreakCircularDep: (id: string) => Promise<undefined> = async (
     id: string
   ) => undefined;
-  const viewModeApi = initializeViewModeApi(incomingEmbeddable, savedObjectResult);
+  const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
   const trackPanel = initializeTrackPanel(untilEmbeddableLoadedBreakCircularDep);
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
@@ -103,6 +103,7 @@ export function getDashboardApi({
     panelsManager,
     savedObjectId$,
     settingsManager,
+    viewModeManager,
     unifiedSearchManager,
   });
   async function getState() {
@@ -111,7 +112,7 @@ export function getDashboardApi({
       ...settingsManager.api.getSettings(),
       ...unifiedSearchManager.internalApi.getState(),
       panels,
-      viewMode: viewModeApi.viewMode.value,
+      viewMode: viewModeManager.api.viewMode.value,
     };
 
     const controlGroupApi = controlGroupApi$.value;
@@ -136,7 +137,7 @@ export function getDashboardApi({
   setTimeout(() => animatePanelTransforms$.next(true), 500);
 
   const dashboardApi = {
-    ...viewModeApi,
+    ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
     ...panelsManager.api,
@@ -165,7 +166,7 @@ export function getDashboardApi({
       const saveResult = await openSaveModal({
         isManaged,
         lastSavedId: savedObjectId$.value,
-        viewMode: viewModeApi.viewMode.value,
+        viewMode: viewModeManager.api.viewMode.value,
         ...(await getState()),
       });
 
