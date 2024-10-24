@@ -177,6 +177,8 @@ export const getNotesRoute = (
                 );
               }
               filterKueryNodeArray.push(nodeBuilder.or(createdByNodeArray));
+            } else {
+              throw new Error(`User with uid ${createdByFilter} not found`);
             }
           }
 
