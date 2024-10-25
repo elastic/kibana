@@ -16,7 +16,7 @@ import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
-  InitializationPromise,
+  InitializationState,
   ResourceInstallationHelper,
   createResourceInstallationHelper,
   errorResult,
@@ -80,7 +80,7 @@ export class AIAssistantService {
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private attackDiscoveryDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
-  private initPromise: Promise<InitializationPromise>;
+  private initPromise: Promise<InitializationState>;
   private isKBSetupInProgress: boolean = false;
   // Temporary 'feature flag' to determine if we should initialize the new kb mappings, toggled when accessing kbDataClient
   private v2KnowledgeBaseEnabled: boolean = false;
@@ -168,7 +168,7 @@ export class AIAssistantService {
     return newDataStream;
   };
 
-  private async initializeResources(): Promise<InitializationPromise> {
+  private async initializeResources(): Promise<InitializationState> {
     this.isInitializing = true;
     try {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
@@ -283,13 +283,13 @@ export class AIAssistantService {
 
   private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
     // Check if resources installation has succeeded
-    const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
+    const { result: initialized, error } = await this.getSpaceResourcesInitializationState(
       opts.spaceId
     );
 
     // If space level resources initialization failed, retry
     if (!initialized && error) {
-      let initRetryPromise: Promise<InitializationPromise> | undefined;
+      let initRetryPromise: Promise<InitializationState> | undefined;
 
       // If !this.initialized, we know that resource initialization failed
       // and we need to retry this before retrying the spaceId specific resources
@@ -453,9 +453,9 @@ export class AIAssistantService {
     });
   }
 
-  public async getSpaceResourcesInitializationPromise(
+  public async getSpaceResourcesInitializationState(
     spaceId: string | undefined = DEFAULT_NAMESPACE_STRING
-  ): Promise<InitializationPromise> {
+  ): Promise<InitializationState> {
     const result = await this.resourceInitializationHelper.getInitializedResources(spaceId);
     // If the spaceId is unrecognized and spaceId is not the default, we
     // need to kick off resource installation and return the promise
