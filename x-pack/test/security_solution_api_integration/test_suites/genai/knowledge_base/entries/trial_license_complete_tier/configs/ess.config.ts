@@ -48,6 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
       ssl: false,
+      esJavaOpts: '-Xms4g -Xmx4g',
     },
     mochaOpts: {
       ...functionalConfig.get('mochaOpts'),
