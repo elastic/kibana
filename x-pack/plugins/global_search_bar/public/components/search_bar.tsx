@@ -148,77 +148,79 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   useDebounce(
     () => {
-      if (initialLoad) {
-        // cancel pending search if not completed yet
-        if (searchSubscription.current) {
-          searchSubscription.current.unsubscribe();
-          searchSubscription.current = null;
-        }
-
-        if (searchValue.length > globalSearch.searchCharLimit) {
-          // setting this will display an error message to the user
-          setSearchCharLimitExceeded(true);
-          return;
-        } else {
-          setSearchCharLimitExceeded(false);
-        }
-
-        setIsLoading(true);
-        const suggestions = loadSuggestions(searchValue.toLowerCase());
-        setIsLoading(false);
-
-        let aggregatedResults: GlobalSearchResult[] = [];
-
-        if (searchValue.length !== 0) {
-          reportEvent.searchRequest();
-        }
-
-        const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
-        let tagIds: string[] | undefined;
-        if (taggingApi && rawParams.filters.tags) {
-          tagIds = rawParams.filters.tags.map(
-            (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
-          );
-        } else {
-          tagIds = undefined;
-        }
-        const searchParams: GlobalSearchFindParams = {
-          term: rawParams.term,
-          types: rawParams.filters.types,
-          tags: tagIds,
-        };
-        // TODO technically a subtle bug here
-        // this term won't be set until the next time the debounce is fired
-        // so the SearchOption won't highlight anything if only one call is fired
-        // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
-        setSearchTerm(rawParams.term ?? '');
-        setIsLoading(true);
-        searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
-          next: ({ results }) => {
-            if (searchValue.length > 0) {
-              aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
-              setOptions(aggregatedResults, suggestions, searchParams.tags);
-              return;
-            }
-
-            // if searchbar is empty, filter to only applications and sort alphabetically
-            results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-
-            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
-
-            setOptions(aggregatedResults, suggestions, searchParams.tags);
-          },
-          error: (err) => {
-            setIsLoading(false);
-            // Not doing anything on error right now because it'll either just show the previous
-            // results or empty results which is basically what we want anyways
-            reportEvent.error({ message: err, searchValue });
-          },
-          complete: () => {
-            setIsLoading(false);
-          },
-        });
+      if (!initialLoad) {
+        return;
       }
+
+      // cancel pending search if not completed yet
+      if (searchSubscription.current) {
+        searchSubscription.current.unsubscribe();
+        searchSubscription.current = null;
+      }
+
+      if (searchValue.length > globalSearch.searchCharLimit) {
+        // setting this will display an error message to the user
+        setSearchCharLimitExceeded(true);
+        return;
+      } else {
+        setSearchCharLimitExceeded(false);
+      }
+
+      setIsLoading(true);
+      const suggestions = loadSuggestions(searchValue.toLowerCase());
+      setIsLoading(false);
+
+      let aggregatedResults: GlobalSearchResult[] = [];
+
+      if (searchValue.length !== 0) {
+        reportEvent.searchRequest();
+      }
+
+      const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
+      let tagIds: string[] | undefined;
+      if (taggingApi && rawParams.filters.tags) {
+        tagIds = rawParams.filters.tags.map(
+          (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
+        );
+      } else {
+        tagIds = undefined;
+      }
+      const searchParams: GlobalSearchFindParams = {
+        term: rawParams.term,
+        types: rawParams.filters.types,
+        tags: tagIds,
+      };
+      // TODO technically a subtle bug here
+      // this term won't be set until the next time the debounce is fired
+      // so the SearchOption won't highlight anything if only one call is fired
+      // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
+      setSearchTerm(rawParams.term ?? '');
+      setIsLoading(true);
+      searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
+        next: ({ results }) => {
+          if (searchValue.length > 0) {
+            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
+            setOptions(aggregatedResults, suggestions, searchParams.tags);
+            return;
+          }
+
+          // if searchbar is empty, filter to only applications and sort alphabetically
+          results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
+
+          aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
+
+          setOptions(aggregatedResults, suggestions, searchParams.tags);
+        },
+        error: (err) => {
+          setIsLoading(false);
+          // Not doing anything on error right now because it'll either just show the previous
+          // results or empty results which is basically what we want anyways
+          reportEvent.error({ message: err, searchValue });
+        },
+        complete: () => {
+          setIsLoading(false);
+        },
+      });
     },
     25,
     [searchValue, loadSuggestions, searchableTypes, initialLoad]
