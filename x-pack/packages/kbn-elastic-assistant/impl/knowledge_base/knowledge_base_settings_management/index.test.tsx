@@ -55,6 +55,7 @@ const mockDataViews = {
     { name: 'field-2', esTypes: ['text'] },
     { name: 'field-3', esTypes: ['semantic_text'] },
   ]),
+  getExistingIndices: jest.fn().mockResolvedValue(['index-2']),
 } as unknown as DataViewsContract;
 const queryClient = new QueryClient();
 const wrapper = (props: { children: React.ReactNode }) => (
@@ -65,7 +66,22 @@ const wrapper = (props: { children: React.ReactNode }) => (
 describe('KnowledgeBaseSettingsManagement', () => {
   const mockData = [
     { id: '1', name: 'Test Entry 1', type: 'document', kbResource: 'user', users: [{ id: 'hi' }] },
-    { id: '2', name: 'Test Entry 2', type: 'index', kbResource: 'global', users: [] },
+    {
+      id: '2',
+      name: 'Test Entry 2',
+      type: 'index',
+      kbResource: 'global',
+      users: [],
+      index: 'missing-index',
+    },
+    {
+      id: '3',
+      name: 'Test Entry 3',
+      type: 'index',
+      kbResource: 'private',
+      users: [{ id: 'fake-user' }],
+      index: 'index-2',
+    },
   ];
 
   beforeEach(() => {
@@ -240,5 +256,25 @@ describe('KnowledgeBaseSettingsManagement', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     });
     expect(screen.queryByTestId('delete-entry-confirmation')).not.toBeInTheDocument();
+  });
+
+  it('shows warning icon for index entries with missing indices', async () => {
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => expect(screen.getByTestId('missing-index-icon')).toBeInTheDocument());
+
+    expect(screen.getAllByTestId('missing-index-icon').length).toEqual(1);
+
+    fireEvent.mouseOver(screen.getByTestId('missing-index-icon'));
+
+    await waitFor(() => screen.getByTestId('missing-index-tooltip'));
+
+    expect(
+      screen.getByText(
+        'The index assigned to this knowledge base entry is unavailable. Check the permissions on the configured index, or that the index has not been deleted. You can update the index to be used for this knowledge entry, or delete the entry entirely.'
+      )
+    ).toBeInTheDocument();
   });
 });

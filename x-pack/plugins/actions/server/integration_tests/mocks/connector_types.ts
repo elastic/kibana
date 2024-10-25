@@ -32,7 +32,6 @@ export const connectorTypes: string[] = [
   '.thehive',
   '.sentinelone',
   '.crowdstrike',
-  '.inference',
   '.cases',
   '.observability-ai-assistant',
 ];
