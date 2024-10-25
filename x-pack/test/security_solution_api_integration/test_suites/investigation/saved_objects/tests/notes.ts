@@ -423,7 +423,8 @@ export default function ({ getService }: FtrProviderContext) {
             .set('elastic-api-version', '2023-10-31');
           const { totalCount } = response.body as GetNotesResult;
 
-        expect(totalCount).to.be(2);
+          expect(totalCount).to.be(2);
+        });
       });
 
       // TODO we need to figure out how to create another user in the test environment
