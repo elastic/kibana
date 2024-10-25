@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       await new Promise(async (resolve, reject) => {
         try {
           setTimeout(() => {
-            resolve();
+            resolve(undefined);
           }, 5000);
         } catch (error) {
           reject(error);
