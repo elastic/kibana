@@ -139,12 +139,18 @@ export class TaskRunnerFactory {
             ...getSource(references, source),
           });
         } catch (e) {
-          logger.error(`Action '${actionId}' failed: ${e.message}`);
+          const errorSource =
+            e instanceof ActionTypeDisabledError
+              ? TaskErrorSource.USER
+              : getErrorSource(e) || TaskErrorSource.FRAMEWORK;
+          logger.error(`Action '${actionId}' failed: ${e.message}`, {
+            tags: ['connector-run-failed', `${errorSource}-error`],
+          });
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(createTaskRunError(e, TaskErrorSource.USER));
+            throwUnrecoverableError(createTaskRunError(e, errorSource));
           }
-          throw createTaskRunError(e, getErrorSource(e) || TaskErrorSource.FRAMEWORK);
+          throw createTaskRunError(e, errorSource);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -155,7 +161,9 @@ export class TaskRunnerFactory {
           if (executorResult.serviceMessage) {
             message = `${message}: ${executorResult.serviceMessage}`;
           }
-          logger.error(`Action '${actionId}' failed: ${message}`);
+          logger.error(`Action '${actionId}' failed: ${message}`, {
+            tags: ['connector-run-failed', `${executorResult.errorSource}-error`],
+          });
 
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
