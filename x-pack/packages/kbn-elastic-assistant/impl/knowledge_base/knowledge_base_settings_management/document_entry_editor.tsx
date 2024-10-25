@@ -54,6 +54,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
     );
     const sharingOptions = [
       {
+        'data-test-subj': 'sharing-private-option',
         value: i18n.SHARING_PRIVATE_OPTION_LABEL,
         inputDisplay: (
           <EuiText size={'s'}>
@@ -67,6 +68,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         ),
       },
       {
+        'data-test-subj': 'sharing-global-option',
         value: i18n.SHARING_GLOBAL_OPTION_LABEL,
         inputDisplay: (
           <EuiText size={'s'}>
@@ -121,6 +123,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
           fullWidth
         >
           <EuiSuperSelect
+            data-test-subj="sharing-select"
             options={sharingOptions}
             valueOfSelected={selectedSharingOption}
             onChange={setSharingOptions}

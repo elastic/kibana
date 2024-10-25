@@ -173,9 +173,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       }
       await createEntry(selectedEntry);
       closeFlyout();
-    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
-      createEntry(selectedEntry);
-      closeFlyout();
     }
   }, [selectedEntry, originalEntry, updateEntries, closeFlyout, createEntry]);
 
