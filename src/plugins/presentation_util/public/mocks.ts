@@ -8,7 +8,7 @@
  */
 
 import { PresentationUtilPluginStart } from './types';
-import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
+import { registerExpressionsLanguage } from '.';
 import { setStubKibanaServices } from './services/mocks';
 
 const createStartContract = (): PresentationUtilPluginStart => {
