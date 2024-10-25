@@ -101,7 +101,6 @@ export interface ExternalService {
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   getFields: () => Promise<GetCommonFieldsResponse>;
-  getCapabilities: () => Promise<ExternalServiceParams>;
   getFieldsByIssueType: (issueTypeId: string) => Promise<GetFieldsByIssueTypeResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   getIssue: (id: string) => Promise<GetIssueResponse>;
