@@ -43,7 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body).toEqual({
             privileges: {
               canCreateApiKeys: true,
-              canCreateIndex: true,
+              canDeleteDocuments: true,
+              canManageIndex: true
             },
           });
         });
@@ -65,7 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body).toEqual({
             privileges: {
               canCreateApiKeys: false,
-              canCreateIndex: false,
+              canDeleteDocuments: false,
+              canManageIndex: false
             },
           });
         });

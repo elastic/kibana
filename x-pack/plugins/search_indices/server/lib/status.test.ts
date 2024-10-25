@@ -134,7 +134,7 @@ describe('status api lib', function () {
 
       await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
         privileges: {
-          canCreateIndex: true,
+          canManageIndex: true,
           canCreateApiKeys: true,
         },
       });
@@ -168,7 +168,7 @@ describe('status api lib', function () {
 
       await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
         privileges: {
-          canCreateIndex: false,
+          canManageIndex: false,
           canCreateApiKeys: false,
         },
       });
@@ -191,7 +191,7 @@ describe('status api lib', function () {
 
       await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
         privileges: {
-          canCreateIndex: true,
+          canManageIndex: true,
           canCreateApiKeys: false,
         },
       });
@@ -212,7 +212,7 @@ describe('status api lib', function () {
 
       await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
         privileges: {
-          canCreateIndex: true,
+          canManageIndex: true,
           canCreateApiKeys: false,
         },
       });
@@ -222,7 +222,7 @@ describe('status api lib', function () {
 
       await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
         privileges: {
-          canCreateIndex: false,
+          canManageIndex: false,
           canCreateApiKeys: false,
         },
       });
