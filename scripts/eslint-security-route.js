@@ -212,7 +212,7 @@ function processChangesByOwners(ownerFilesMap) {
     console.log(`Current branch (PR branch): ${currentBranch}`);
 
     console.log(`Fetching the latest changes from 'main'`);
-    runCommand('git fetch origin main');
+    // runCommand('git fetch origin main');
 
     for (const [owner, files] of Object.entries(ownerFilesMap)) {
       const rawOwner = owner.replace('@elastic/', '');
