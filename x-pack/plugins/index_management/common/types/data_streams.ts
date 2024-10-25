@@ -45,6 +45,7 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
     delete_index: boolean;
     manage_data_stream_lifecycle: boolean;
   };
+  index_mode?: string | null;
 }
 
 export interface DataStream {
@@ -71,6 +72,7 @@ export interface DataStream {
     retention_determined_by?: string;
     globalMaxRetention?: string;
   };
+  indexMode: string;
 }
 
 export interface DataStreamIndex {

@@ -84,6 +84,8 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     includeStats: isIncludeStatsChecked,
   });
 
+  console.log(dataStreams);
+
   const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] =
     useStateWithLocalStorage<boolean>(SHOW_PROJECT_LEVEL_RETENTION, true);
 

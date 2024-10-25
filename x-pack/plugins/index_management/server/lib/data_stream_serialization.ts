@@ -28,6 +28,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     lifecycle,
     global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
+    index_mode: indexMode,
   } = dataStreamFromEs;
   const meteringStorageSize =
     meteringStorageSizeBytes !== undefined
@@ -73,6 +74,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
       globalMaxRetention,
     },
     nextGenerationManagedBy,
+    indexMode: indexMode ?? 'standard',
   };
 }
 

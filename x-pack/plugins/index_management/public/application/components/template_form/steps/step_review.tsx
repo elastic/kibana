@@ -268,6 +268,17 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 {getDescriptionText(serializedSettings)}
               </EuiDescriptionListDescription>
 
+              {/* Index settings */}
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexModeLabel"
+                  defaultMessage="Index mode"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {serializedSettings?.index?.mode ?? 'standard'}
+              </EuiDescriptionListDescription>
+
               {/* Mappings */}
               <EuiDescriptionListTitle>
                 <FormattedMessage

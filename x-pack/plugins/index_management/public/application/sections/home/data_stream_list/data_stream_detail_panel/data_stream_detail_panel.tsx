@@ -166,6 +166,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       meteringStorageSize,
       meteringDocsCount,
       lifecycle,
+      indexMode,
     } = dataStream;
 
     const getManagementDetails = () => {
@@ -344,6 +345,17 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           </EuiLink>
         ),
         dataTestSubj: 'indexTemplateDetail',
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeTitle', {
+          defaultMessage: 'Index mode',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeToolTip', {
+          defaultMessage:
+            'The index mode setting of the index template that configured this data stream.',
+        }),
+        content: indexMode ?? 'standard',
+        dataTestSubj: 'indexModeDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {

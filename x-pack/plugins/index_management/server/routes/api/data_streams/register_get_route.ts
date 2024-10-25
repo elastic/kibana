@@ -18,7 +18,7 @@ import {
   deserializeDataStream,
   deserializeDataStreamList,
 } from '../../../lib/data_stream_serialization';
-import { EnhancedDataStreamFromEs } from '../../../../common/types';
+import { EnhancedDataStreamFromEs, TemplateSerialized } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
@@ -31,12 +31,14 @@ const enhanceDataStreams = ({
   meteringStats,
   dataStreamsPrivileges,
   globalMaxRetention,
+  indexTemplates,
 }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
   meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
   globalMaxRetention?: string;
+  indexTemplates?: Array<{ name: string; index_template: TemplateSerialized }>;
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
     const enhancedDataStream: EnhancedDataStreamFromEs = {
@@ -69,6 +71,11 @@ const enhanceDataStreams = ({
         enhancedDataStream.metering_size_in_bytes = datastreamMeteringStats.size_in_bytes;
         enhancedDataStream.metering_doc_count = datastreamMeteringStats.num_docs;
       }
+    }
+
+    const indexTemplate = indexTemplates.find((template) => template.name === dataStream.template);
+    if (indexTemplate) {
+      enhancedDataStream.index_mode = indexTemplate.index_template?.template?.settings?.index?.mode;
     }
 
     return enhancedDataStream;
@@ -152,11 +159,15 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           );
         }
 
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
+
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
           meteringStats,
           dataStreamsPrivileges,
+          indexTemplates,
         });
 
         return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
@@ -199,9 +210,21 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
+          let indexTemplates;
 
           if (config.isSecurityEnabled()) {
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
+          }
+
+          if (dataStreams[0].template) {
+            const { index_templates: templates } =
+              await client.asCurrentUser.indices.getIndexTemplate({
+                name: dataStreams[0].template,
+              });
+
+            if (templates) {
+              indexTemplates = templates;
+            }
           }
 
           const enhancedDataStreams = enhanceDataStreams({
@@ -210,6 +233,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             meteringStats,
             dataStreamsPrivileges,
             globalMaxRetention,
+            indexTemplates,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
           return response.ok({ body });
