@@ -66,11 +66,11 @@ describe('Home page', () => {
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('server1');
-        cy.contains('Host');
+        cy.contains('host');
         cy.contains('synth-node-trace-logs');
-        cy.contains('Service');
+        cy.contains('service');
         cy.contains('foo');
-        cy.contains('Container');
+        cy.contains('container');
       });
 
       it('Navigates to apm when clicking on a service type entity', () => {

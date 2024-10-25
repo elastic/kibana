@@ -63,11 +63,12 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
+      const hasDeprecations = !!route.options.deprecated;
       const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
         ...(route.options.description ? { description: route.options.description } : {}),
-        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: !!validationSchemas?.body
           ? {

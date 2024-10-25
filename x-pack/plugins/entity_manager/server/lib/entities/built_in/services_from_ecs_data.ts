@@ -29,7 +29,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     identityFields: ['service.name'],
     displayNameTemplate: '{{service.name}}',
     metadata: [
-      { source: '_index', destination: 'sourceIndex' },
+      { source: '_index', destination: 'source_index' },
       {
         source: 'data_stream.type',
         destination: 'source_data_stream.type',
@@ -38,7 +38,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
+      'agent.name',
       'service.environment',
       'service.name',
       'service.namespace',

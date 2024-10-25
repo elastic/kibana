@@ -30,7 +30,7 @@ export function createCounterFetcher<T>(
   filter: string,
   transform: (counters: CounterEvent[]) => T
 ) {
-  return async ({ soClient }: CollectorFetchContext) => {
+  return async ({ soClient }: Pick<CollectorFetchContext, 'soClient'>) => {
     const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
       type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
