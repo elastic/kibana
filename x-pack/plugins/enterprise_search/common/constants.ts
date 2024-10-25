@@ -218,8 +218,12 @@ export const CREATE_CONNECTOR_PLUGIN = {
   --index-language en
   --from-file config.yml
   `,
-  CONSOLE_SNIPPET: dedent`# Create an index
-PUT /my-index-000001
+  CONSOLE_SNIPPET: dedent` # This is an example of how to create a PostgreSQL connector using the 
+# API and its related resources like an index and an API key. This
+# process is an alternative to use the current UI guided creation flow.
+
+# 1. Create an index
+PUT /connector-postgresql
 {
   "settings": {
     "index": {
@@ -229,39 +233,76 @@ PUT /my-index-000001
   }
 }
 
-# Create an API key
+# 2. Create a connector
+PUT _connector/postgresql-id
+{
+  "name": "My PostgreSQL connector",
+  "index_name":  "connector-postgresql",
+  "service_type": "postgresql"
+}
+
+# 3. Create an API key
 POST /_security/api_key
 {
-  "name": "my-api-key",
-  "expiration": "1d",
-  "role_descriptors":
-    {
-       "role-a": {
-          "cluster": ["all"],
-            "indices": [
-                          {
-                            "names": ["index-a*"],
-                             "privileges": ["read"]
-                          }
-                        ]
-                          },
-                            "role-b": {
-                            "cluster": ["all"],
-                            "indices": [
-                              {
-                                "names": ["index-b*"],
-                                  "privileges": ["all"]
-                              }]
-                            }
-                          }, "metadata":
-                          {  "application": "my-application",
-                             "environment": {
-                              "level": 1,
-                              "trusted": true,
-                              "tags": ["dev", "staging"]
-                          }
-      }
-  }`,
+  "name": "postgresql-api-key",
+  "role_descriptors": {
+    "postgresql-api-key-role": {
+      "cluster": [
+        "monitor",
+        "manage_connector"
+      ],
+      "indices": [
+        {
+          "names": [
+            "connector-postgresql",
+            ".search-acl-filter-connector-postgresql",
+            ".elastic-connectors*"
+          ],
+          "privileges": [
+            "all"
+          ],
+          "allow_restricted_indices": false
+        }
+      ]
+    }
+  }
+}
+
+# Configure your connector 🔧
+# NOTE: Configuration keys differ per service type.
+PUT _connector/postgresql-id/_configuration
+{
+  "values": {
+    "host": "",
+    "port": 400,
+    "username": "",
+    "password": "",
+    "database": "",
+    "schema": "",
+    "tables": ""
+  }
+}
+  
+# Verify your connector is connected 🔌
+GET _connector/postgresql-id
+
+# Sync data 🔄
+POST _connector/_sync_job
+{
+  "id": "postgresql-id",
+  "job_type": "full"
+}
+
+# Check sync status ⏳
+GET _connector/_sync_job?connector_id=postgresql-id&size=1
+
+# Once the job completes, the status should be completed and indexed_document_count should be 622
+# Verify that data is present in the music index with the following API call 🎉
+GET connector-postgresql/_count
+
+# Elasticsearch stores data in documents, which are JSON objects. List the individual documents with the following API call 🔎
+GET connector-postgresql/_search
+`,
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
