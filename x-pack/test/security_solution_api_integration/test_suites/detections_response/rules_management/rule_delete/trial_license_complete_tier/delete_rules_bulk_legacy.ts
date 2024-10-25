@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the legacy action in the response body when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getSlackAction())
           .expect(200);
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body[0].actions).to.eql([
           {
             id: hookAction.id,
-            action_type_id: hookAction.actionTypeId,
+            action_type_id: hookAction.connector_type_id,
             group: 'default',
             params: {
               message:
@@ -88,12 +88,12 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return 2 legacy actions in the response body when it deletes 2 rules', async () => {
         // create two different actions
         const { body: hookAction1 } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getSlackAction())
           .expect(200);
         const { body: hookAction2 } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getSlackAction())
           .expect(200);
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body[0].actions).to.eql([
           {
             id: hookAction1.id,
-            action_type_id: hookAction1.actionTypeId,
+            action_type_id: hookAction1.connector_type_id,
             group: 'default',
             params: {
               message:
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body[1].actions).to.eql([
           {
             id: hookAction2.id,
-            action_type_id: hookAction2.actionTypeId,
+            action_type_id: hookAction2.connector_type_id,
             group: 'default',
             params: {
               message:
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should delete a legacy action when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);

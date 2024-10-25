@@ -75,7 +75,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -126,7 +126,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector1.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector1.id, 'connector', 'actions');
 
       const { body: createdConnector2 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -138,7 +138,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector2.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector2.id, 'connector', 'actions');
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
