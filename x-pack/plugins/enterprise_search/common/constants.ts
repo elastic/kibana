@@ -269,7 +269,7 @@ POST /_security/api_key
   }
 }
 
-# Configure your connector 🔧
+# 🔧 Configure your connector
 # NOTE: Configuration keys differ per service type.
 PUT _connector/my-connector-id/_configuration
 {
@@ -284,24 +284,24 @@ PUT _connector/my-connector-id/_configuration
   }
 }
   
-# Verify your connector is connected 🔌
+# 🔌 Verify your connector is connected
 GET _connector/my-connector-id
 
-# Sync data 🔄
+# 🔄 Sync data
 POST _connector/_sync_job
 {
   "id": "my-connector-id",
   "job_type": "full"
 }
 
-# Check sync status ⏳
+# ⏳ Check sync status
 GET _connector/_sync_job?connector_id=my-connector-id&size=1
 
 # Once the job completes, the status should return completed
-# Verify that data is present in the index with the following API call 🎉
+# 🎉 Verify that data is present in the index with the following API call 
 GET my-connector-index/_count
 
-# Elasticsearch stores data in documents, which are JSON objects. List the individual documents with the following API call 🔎
+# 🔎 Elasticsearch stores data in documents, which are JSON objects. List the individual documents with the following API call
 GET my-connector-index/_search
 `,
 };
