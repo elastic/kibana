@@ -36,7 +36,7 @@ import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 import {
-  buildColumns,
+  columnsArray,
   getEntityData,
   getItems,
   isUserRiskData,
@@ -80,9 +80,6 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-  const columns = useMemo(() => buildColumns(), []);
-
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
@@ -263,7 +260,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
-                  columns={columns}
+                  columns={columnsArray}
                   items={rows}
                   compressed
                   loading={riskScoreData.loading || recalculatingScore}

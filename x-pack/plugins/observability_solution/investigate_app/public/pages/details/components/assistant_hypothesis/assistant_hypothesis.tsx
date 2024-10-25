@@ -71,7 +71,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
             connectorId,
             context: `The user is investigating an alert for the ${serviceName} service,
             and wants to find the root cause. Here is the alert:
-            
+
             ${JSON.stringify(alert)}`,
             rangeFrom,
             rangeTo,
