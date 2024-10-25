@@ -16,7 +16,24 @@
 
 import { z } from '@kbn/zod';
 
-import { OriginalRule, RuleMigration } from '../../rule_migration.gen';
+import { OriginalRule, RuleMigration, RuleMigrationTaskStats } from '../../rule_migration.gen';
+import { ConnectorId, LangSmithOptions } from '../common.gen';
+
+export type CancelRuleMigrationRequestParams = z.infer<typeof CancelRuleMigrationRequestParams>;
+export const CancelRuleMigrationRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type CancelRuleMigrationRequestParamsInput = z.input<
+  typeof CancelRuleMigrationRequestParams
+>;
+
+export type CancelRuleMigrationResponse = z.infer<typeof CancelRuleMigrationResponse>;
+export const CancelRuleMigrationResponse = z.object({
+  /**
+   * Indicates the migration has been cancelled.
+   */
+  cancelled: z.boolean(),
+});
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.array(OriginalRule);
@@ -32,3 +49,35 @@ export const CreateRuleMigrationResponse = z.object({
 
 export type GetRuleMigrationResponse = z.infer<typeof GetRuleMigrationResponse>;
 export const GetRuleMigrationResponse = z.array(RuleMigration);
+
+export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
+export const GetRuleMigrationStatsRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type GetRuleMigrationStatsRequestParamsInput = z.input<
+  typeof GetRuleMigrationStatsRequestParams
+>;
+
+export type GetRuleMigrationStatsResponse = z.infer<typeof GetRuleMigrationStatsResponse>;
+export const GetRuleMigrationStatsResponse = RuleMigrationTaskStats;
+
+export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;
+export const StartRuleMigrationRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type StartRuleMigrationRequestParamsInput = z.input<typeof StartRuleMigrationRequestParams>;
+
+export type StartRuleMigrationRequestBody = z.infer<typeof StartRuleMigrationRequestBody>;
+export const StartRuleMigrationRequestBody = z.object({
+  connectorId: ConnectorId,
+  langSmithOptions: LangSmithOptions.optional(),
+});
+export type StartRuleMigrationRequestBodyInput = z.input<typeof StartRuleMigrationRequestBody>;
+
+export type StartRuleMigrationResponse = z.infer<typeof StartRuleMigrationResponse>;
+export const StartRuleMigrationResponse = z.object({
+  /**
+   * Indicates the migration has been started. `false` means the migration does not need to be started.
+   */
+  started: z.boolean(),
+});

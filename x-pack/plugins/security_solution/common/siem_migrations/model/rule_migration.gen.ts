@@ -99,6 +99,10 @@ export const RuleMigration = z.object({
    * The migration id.
    */
   migration_id: z.string(),
+  /**
+   * The username of the user who created the migration.
+   */
+  created_by: z.string(),
   original_rule: OriginalRule,
   elastic_rule: ElasticRule.optional(),
   /**
@@ -121,4 +125,39 @@ export const RuleMigration = z.object({
    * The user who last updated the migration
    */
   updated_by: z.string().optional(),
+});
+
+/**
+ * The rule migration task stats object.
+ */
+export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
+export const RuleMigrationTaskStats = z.object({
+  /**
+   * Indicates if the migration task status.
+   */
+  status: z.enum(['not_started', 'processing', 'done', 'cancelled']),
+  /**
+   * The total number of rules to migrate.
+   */
+  total: z.number().int().optional(),
+  /**
+   * The number of rules that have been migrated.
+   */
+  finished: z.number().int(),
+  /**
+   * The number of rules that are being migrated.
+   */
+  processing: z.number().int(),
+  /**
+   * The number of rules that are pending migration.
+   */
+  pending: z.number().int(),
+  /**
+   * The number of rules that have failed migration.
+   */
+  failed: z.number().int(),
+  /**
+   * The moment of the last execution.
+   */
+  last_iteration_at: z.string().optional(),
 });

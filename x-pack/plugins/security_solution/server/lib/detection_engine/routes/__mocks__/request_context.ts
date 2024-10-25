@@ -79,7 +79,7 @@ export const createMockClients = () => {
     internalFleetServices: {
       packages: packageServiceMock.createClient(),
     },
-    siemMigrationsClient: siemMigrationsServiceMock.createClient(),
+    siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
   };
 };
 
@@ -165,7 +165,7 @@ const createSecuritySolutionRequestContextMock = (
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
-    getSiemMigrationsClient: jest.fn(() => clients.siemMigrationsClient),
+    getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
   };
 };
 

@@ -10,8 +10,7 @@ paths:
       x-codegen-enabled: true
       description: Creates a new SIEM rules migration using the original vendor rules provided
       tags:
-        - SIEM Migrations
-        - Rule Migrations
+        - SIEM Rule Migrations
       requestBody:
         required: true
         content:
@@ -39,8 +38,7 @@ paths:
       x-codegen-enabled: true
       description: Retrieves the rule migrations stored in the system
       tags:
-        - SIEM Migrations
-        - Rule Migrations
+        - SIEM Rule Migrations
       responses:
         200:
           description: Indicates rule migrations have been retrieved correctly.
@@ -50,3 +48,103 @@ paths:
                 type: array
                 items:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigration'
+
+  /internal/siem_migrations/rules/{migration_id}/start:
+    put:
+      summary: Starts a rule migration
+      operationId: StartRuleMigration
+      x-codegen-enabled: true
+      description: Starts a SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The migration id to start
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connectorId
+              properties:
+                connectorId:
+                  $ref: '../common.schema.yaml#/components/schemas/ConnectorId'
+                langSmithOptions:
+                  $ref: '../common.schema.yaml#/components/schemas/LangSmithOptions'
+      responses:
+        200:
+          description: Indicates the migration start request has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - started
+                properties:
+                  started:
+                    type: boolean
+                    description: Indicates the migration has been started. `false` means the migration does not need to be started.
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/rules/{migration_id}/stats:
+    get:
+      summary: Gets a rule migration task stats
+      operationId: GetRuleMigrationStats
+      x-codegen-enabled: true
+      description: Retrieves the stats of a SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The migration id to start
+      responses:
+        200:
+          description: Indicates the migration stats has been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskStats'
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/rules/{migration_id}/cancel:
+    put:
+      summary: Cancels an existing rule migration
+      operationId: CancelRuleMigration
+      x-codegen-enabled: true
+      description: Cancels a running SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The migration id to cancel
+      responses:
+        200:
+          description: Indicates migration task cancellation has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - cancelled
+                properties:
+                  cancelled:
+                    type: boolean
+                    description: Indicates the migration has been cancelled.
+        204:
+          description: Indicates the migration id was not found running.

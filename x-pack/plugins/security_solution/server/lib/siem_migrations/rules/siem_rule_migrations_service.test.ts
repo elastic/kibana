@@ -22,6 +22,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 jest.mock('./data_stream/rule_migrations_data_stream');
 
+const migrationId = 'dummy_migration_id';
+
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
   const kibanaVersion = '8.16.0';
@@ -51,7 +53,7 @@ describe('SiemRuleMigrationsService', () => {
     });
   });
 
-  describe('when getClient is called', () => {
+  describe('when createClient is called', () => {
     let request: KibanaRequest;
     beforeEach(() => {
       request = httpServerMock.createKibanaRequest();
@@ -60,7 +62,7 @@ describe('SiemRuleMigrationsService', () => {
     describe('without setup', () => {
       it('should throw an error', () => {
         expect(() => {
-          ruleMigrationsService.getClient({ spaceId: 'default', request });
+          ruleMigrationsService.createClient({ spaceId: 'default', request });
         }).toThrowError('ES client not available, please call setup first');
       });
     });
@@ -71,42 +73,42 @@ describe('SiemRuleMigrationsService', () => {
       });
 
       it('should call installSpace', () => {
-        ruleMigrationsService.getClient({ spaceId: 'default', request });
+        ruleMigrationsService.createClient({ spaceId: 'default', request });
 
         expect(mockInstallSpace).toHaveBeenCalledWith('default');
       });
 
       it('should return a client with create and search methods after setup', () => {
-        const client = ruleMigrationsService.getClient({ spaceId: 'default', request });
+        const client = ruleMigrationsService.createClient({ spaceId: 'default', request });
 
         expect(client).toHaveProperty('create');
         expect(client).toHaveProperty('search');
       });
 
       it('should call ES bulk create API with the correct parameters with create is called', async () => {
-        const client = ruleMigrationsService.getClient({ spaceId: 'default', request });
+        const client = ruleMigrationsService.createClient({ spaceId: 'default', request });
 
-        const ruleMigrations = [{ migration_id: 'dummy_migration_id' } as RuleMigration];
+        const ruleMigrations = [{ migration_id: migrationId } as RuleMigration];
         await client.create(ruleMigrations);
 
         expect(esClusterClient.asScoped().asCurrentUser.bulk).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: [{ create: { _index: mockIndexName } }, { migration_id: 'dummy_migration_id' }],
+            body: [{ create: { _index: mockIndexName } }, { migration_id: migrationId }],
             refresh: 'wait_for',
           })
         );
       });
 
       it('should call ES search API with the correct parameters with search is called', async () => {
-        const client = ruleMigrationsService.getClient({ spaceId: 'default', request });
+        const client = ruleMigrationsService.createClient({ spaceId: 'default', request });
 
-        const term = { migration_id: 'dummy_migration_id' };
-        await client.search(term);
+        const searchParams = { query: { term: { migration_id: migrationId } } };
+        await client.takePending(migrationId);
 
         expect(esClusterClient.asScoped().asCurrentUser.search).toHaveBeenCalledWith(
           expect.objectContaining({
             index: mockIndexName,
-            body: { query: { term } },
+            ...searchParams,
           })
         );
       });
