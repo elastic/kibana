@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverCustomizationContext } from './types';
+import { createContext, useContext } from 'react';
 
-export const defaultCustomizationContext: DiscoverCustomizationContext = {
-  displayMode: 'standalone',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
-};
+const exampleContext = createContext<{
+  currentMessage: string | undefined;
+  setCurrentMessage: (message: string | undefined) => void;
+}>({
+  currentMessage: undefined,
+  setCurrentMessage: () => {},
+});
+
+export const ExampleContextProvider = exampleContext.Provider;
+
+export const useExampleContext = () => useContext(exampleContext);

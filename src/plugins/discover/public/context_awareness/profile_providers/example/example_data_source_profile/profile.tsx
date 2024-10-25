@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import { getFieldValue, RowControlColumn } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -16,6 +16,7 @@ import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { useExampleContext } from '../example_context';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider => ({
   profileId: 'example-data-source-profile',
@@ -51,6 +52,20 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           >
             {capitalize(level)}
           </EuiBadge>
+        );
+      },
+      message: function Message(props) {
+        const { currentMessage, setCurrentMessage } = useExampleContext();
+        const message = getFieldValue(props.row, 'message') as string;
+
+        return (
+          <EuiLink
+            onClick={() => setCurrentMessage(message)}
+            css={{ fontWeight: currentMessage === message ? 'bold' : undefined }}
+            data-test-subj="exampleDataSourceProfileMessage"
+          >
+            {message}
+          </EuiLink>
         );
       },
     }),

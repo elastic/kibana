@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 /**
@@ -15,25 +16,26 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
  * @param options Options object
  * @returns If the root profile is loading
  */
-export const useRootProfile = ({ solutionNavId }: { solutionNavId: string | null }) => {
-  const { profilesManager } = useDiscoverServices();
+export const useRootProfile = () => {
+  const { profilesManager, core } = useDiscoverServices();
   const [rootProfileLoading, setRootProfileLoading] = useState(true);
 
   useEffect(() => {
-    let aborted = false;
-
-    setRootProfileLoading(true);
-
-    profilesManager.resolveRootProfile({ solutionNavId }).then(() => {
-      if (!aborted) {
-        setRootProfileLoading(false);
-      }
-    });
+    const subscription = core.chrome
+      .getActiveSolutionNavId$()
+      .pipe(
+        distinctUntilChanged(),
+        filter((id) => id !== undefined),
+        tap(() => setRootProfileLoading(true)),
+        switchMap((id) => profilesManager.resolveRootProfile({ solutionNavId: id })),
+        tap(() => setRootProfileLoading(false))
+      )
+      .subscribe();
 
     return () => {
-      aborted = true;
+      subscription.unsubscribe();
     };
-  }, [profilesManager, solutionNavId]);
+  }, [core.chrome, profilesManager]);
 
   return { rootProfileLoading };
 };
