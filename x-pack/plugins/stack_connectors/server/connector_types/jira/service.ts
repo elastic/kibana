@@ -363,7 +363,6 @@ export const createExternalService = (
       });
 
       // Cloud returns issueTypes and Data Center returns values
-      // TODO: test
       const { issueTypes, values } = res.data;
       return normalizeIssueTypes(issueTypes || values);
     } catch (error) {
@@ -393,7 +392,6 @@ export const createExternalService = (
       });
 
       // Cloud returns fields and Data Center returns values
-      // TODO: test
       const { fields: rawFields, values } = res.data;
       const fields = (rawFields || values).reduce(
         (acc: { [x: string]: {} }, value: { fieldId: string }) => ({

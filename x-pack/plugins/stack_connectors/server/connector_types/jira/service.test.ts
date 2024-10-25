@@ -762,6 +762,27 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to get issue types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
+
+    test('it should work with data center response - issueTypes returned in data.values', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            values: issueTypesResponse.data.issueTypes,
+          },
+        })
+      );
+
+      await service.getIssueTypes();
+
+      expect(requestMock).toHaveBeenLastCalledWith({
+        axios,
+        logger,
+        method: 'get',
+        configurationUtilities,
+        url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
+        connectorUsageCollector,
+      });
+    });
   });
 
   describe('getFieldsByIssueType', () => {
@@ -866,6 +887,50 @@ describe('Jira service', () => {
       await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
         '[Action][Jira]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
+    });
+
+    test('it should work with data center response - issueTypes returned in data.values', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            values: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              {
+                required: false,
+                schema: { type: 'string' },
+                fieldId: 'priority',
+                allowedValues: [
+                  {
+                    name: 'Medium',
+                    id: '3',
+                  },
+                ],
+                defaultValue: {
+                  name: 'Medium',
+                  id: '3',
+                },
+              },
+            ],
+          },
+        })
+      );
+
+      const res = await service.getFieldsByIssueType('10006');
+
+      expect(res).toEqual({
+        priority: {
+          required: false,
+          schema: { type: 'string' },
+          allowedValues: [{ id: '3', name: 'Medium' }],
+          defaultValue: { id: '3', name: 'Medium' },
+        },
+        summary: {
+          required: true,
+          schema: { type: 'string' },
+          allowedValues: [],
+          defaultValue: {},
+        },
+      });
     });
   });
 
