@@ -11,13 +11,21 @@
 import { EuiButton, EuiButtonSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import {
+  ApmOnboardingLocatorCategory,
+  ApmOnboardingLocatorParams,
+} from '../../../locator/onboarding_locator';
 
-export const addApmData = {
-  name: i18n.translate('xpack.apm.add.apm.agent.button.', {
-    defaultMessage: 'Add APM',
-  }),
-  link: '/app/observabilityOnboarding/?category=apm',
+export const addApmData = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
+  return {
+    name: i18n.translate('xpack.apm.add.apm.agent.button.', {
+      defaultMessage: 'Add APM',
+    }),
+    link: locator?.getRedirectUrl({ category: ApmOnboardingLocatorCategory.Apm }),
+  };
 };
 
 export const associateServiceLogs = {
@@ -42,19 +50,32 @@ interface AddApmDataProps {
 }
 
 export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataProps) {
-  const { core } = useApmPluginContext();
-  const { basePath } = core.http;
+  const {
+    share: {
+      url: { locators },
+    },
+  } = useApmPluginContext();
+
+  const onboardingLocator = locators.get<ApmOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+
+  const addApmButtonData = addApmData(onboardingLocator);
 
   return (
-    <EuiButton
-      data-test-subj={props['data-test-subj']}
-      size={size}
-      onClick={props.onClick}
-      href={basePath.prepend(addApmData.link)}
-      fill={fill}
-    >
-      {addApmData.name}
-    </EuiButton>
+    <>
+      {addApmButtonData.link && (
+        <EuiButton
+          data-test-subj={props['data-test-subj']}
+          size={size}
+          onClick={props.onClick}
+          href={addApmButtonData?.link}
+          fill={fill}
+        >
+          {addApmButtonData.name}
+        </EuiButton>
+      )}
+    </>
   );
 }
 
