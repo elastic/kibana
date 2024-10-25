@@ -14,97 +14,117 @@ import {
 import { ruleLastRunOutcomeValues } from '../../../application/rule/constants';
 
 export * from './v2';
-import {
-  rRuleSchema as rRuleSchemaV2,
-  rawRuleAlertsFilterSchema as rawRuleAlertsFilterSchemaV2,
-  rawRuleSchema as rawRuleSchemaV2,
-  rawRuleActionSchema as rawRuleActionSchemaV2,
-  rawRuleExecutionStatusSchema as rawRuleExecutionStatusSchemaV2,
-  rawRuleLastRunSchema as rawRuleLastRunSchemaV2,
-} from './v2';
 
 export const executionStatusWarningReason = schema.oneOf([
-  schema.literal(RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS),
-  schema.literal(RuleExecutionStatusWarningReasons.MAX_ALERTS),
-  schema.literal(RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS),
-  schema.literal(RuleExecutionStatusWarningReasons.EXECUTION),
+  schema.literal(RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS), // change
+  schema.literal(RuleExecutionStatusWarningReasons.MAX_ALERTS), // change
+  schema.literal(RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS), // change
+  schema.literal(RuleExecutionStatusWarningReasons.EXECUTION), // change
 ]);
 
 export const executionStatusErrorReason = schema.oneOf([
-  schema.literal(RuleExecutionStatusErrorReasons.Read),
-  schema.literal(RuleExecutionStatusErrorReasons.Decrypt),
-  schema.literal(RuleExecutionStatusErrorReasons.Execute),
-  schema.literal(RuleExecutionStatusErrorReasons.Unknown),
-  schema.literal(RuleExecutionStatusErrorReasons.License),
-  schema.literal(RuleExecutionStatusErrorReasons.Timeout),
-  schema.literal(RuleExecutionStatusErrorReasons.Disabled),
-  schema.literal(RuleExecutionStatusErrorReasons.Validate),
+  schema.literal(RuleExecutionStatusErrorReasons.Read), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Decrypt), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Execute), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Unknown), // change
+  schema.literal(RuleExecutionStatusErrorReasons.License), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Timeout), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Disabled), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Validate), // change
 ]);
 
-export const outcome = schema.oneOf([
-  schema.literal(ruleLastRunOutcomeValues.SUCCEEDED),
-  schema.literal(ruleLastRunOutcomeValues.WARNING),
-  schema.literal(ruleLastRunOutcomeValues.FAILED),
-]);
-
-export const rRuleSchema = rRuleSchemaV2.extends({
-  byweekday: schema.maybe(
-    schema.nullable(schema.arrayOf(schema.oneOf([schema.string(), schema.number()])))
-  ),
-  bymonth: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  bysetpos: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  bymonthday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byyearday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byweekno: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byhour: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  byminute: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-  bysecond: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
-});
-
-export const rawRuleAlertsFilterSchema = rawRuleAlertsFilterSchemaV2.extends({
-  query: schema.maybe(
+export const rawRuleExecutionStatusSchema = schema.object({
+  status: schema.oneOf([
+    schema.literal('ok'),
+    schema.literal('active'),
+    schema.literal('error'),
+    schema.literal('pending'),
+    schema.literal('unknown'),
+    schema.literal('warning'),
+  ]),
+  lastExecutionDate: schema.string(),
+  lastDuration: schema.maybe(schema.number()),
+  error: schema.nullable(
     schema.object({
-      kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.object({
-            alias: schema.maybe(schema.nullable(schema.string())),
-            disabled: schema.maybe(schema.boolean()),
-            negate: schema.maybe(schema.boolean()),
-            controlledBy: schema.maybe(schema.string()),
-            group: schema.maybe(schema.string()),
-            index: schema.maybe(schema.string()),
-            isMultiIndex: schema.maybe(schema.boolean()),
-            type: schema.maybe(schema.string()),
-            key: schema.maybe(schema.string()),
-            params: schema.maybe(schema.any()),
-            value: schema.maybe(schema.string()),
-            field: schema.maybe(schema.string()),
-            relation: schema.maybe(schema.oneOf([schema.literal('OR'), schema.literal('AND')])),
-          }),
-          $state: schema.maybe(
-            schema.object({
-              store: schema.oneOf([
-                schema.literal(FilterStateStore.APP_STATE),
-                schema.literal(FilterStateStore.GLOBAL_STATE),
-              ]),
-            })
-          ),
-        })
-      ),
-      dsl: schema.string(),
+      reason: executionStatusErrorReason,
+      message: schema.string(),
+    })
+  ),
+  warning: schema.nullable(
+    schema.object({
+      reason: executionStatusWarningReason,
+      message: schema.string(),
     })
   ),
 });
 
-export const rawRuleActionSchema = rawRuleActionSchemaV2.extends({
-  uuid: schema.string(),
-  alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
+export const ISOWeekdaysSchema = schema.oneOf([
+  schema.literal(1),
+  schema.literal(2),
+  schema.literal(3),
+  schema.literal(4),
+  schema.literal(5),
+  schema.literal(6),
+  schema.literal(7),
+]);
+
+export const rRuleSchema = schema.object({
+  dtstart: schema.string(),
+  tzid: schema.string(),
+  freq: schema.maybe(
+    schema.oneOf([
+      schema.literal(0),
+      schema.literal(1),
+      schema.literal(2),
+      schema.literal(3),
+      schema.literal(4),
+      schema.literal(5),
+      schema.literal(6),
+    ])
+  ),
+  until: schema.maybe(schema.string()),
+  count: schema.maybe(schema.number()),
+  interval: schema.maybe(schema.number()),
+  wkst: schema.maybe(
+    schema.oneOf([
+      schema.literal('MO'),
+      schema.literal('TU'),
+      schema.literal('WE'),
+      schema.literal('TH'),
+      schema.literal('FR'),
+      schema.literal('SA'),
+      schema.literal('SU'),
+    ])
+  ),
+  byweekday: schema.maybe(
+    schema.nullable(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))) // change
+  ),
+  bymonth: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  bysetpos: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  bymonthday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  byyearday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  byweekno: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  byhour: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  byminute: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
+  bysecond: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))), // change
 });
 
-export const rawRuleLastRunSchema = rawRuleLastRunSchemaV2.extends({
+export const outcome = schema.oneOf([
+  schema.literal(ruleLastRunOutcomeValues.SUCCEEDED), // change
+  schema.literal(ruleLastRunOutcomeValues.WARNING), // change
+  schema.literal(ruleLastRunOutcomeValues.FAILED), // change
+]);
+
+export const rawRuleLastRunSchema = schema.object({
   outcome,
+  outcomeOrder: schema.maybe(schema.number()),
+  alertsCount: schema.object({
+    new: schema.maybe(schema.nullable(schema.number())),
+    active: schema.maybe(schema.nullable(schema.number())),
+    recovered: schema.maybe(schema.nullable(schema.number())),
+    ignored: schema.maybe(schema.nullable(schema.number())),
+  }),
+  outcomeMsg: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
   warning: schema.maybe(
     schema.nullable(schema.oneOf([executionStatusErrorReason, executionStatusWarningReason]))
   ),
@@ -140,26 +160,107 @@ export const rawRuleMonitoringSchema = schema.object({
   }),
 });
 
-export const rawRuleExecutionStatusSchema = rawRuleExecutionStatusSchemaV2.extends({
-  error: schema.nullable(
+export const rawRuleAlertsFilterSchema = schema.object({
+  query: schema.maybe(
     schema.object({
-      reason: executionStatusErrorReason,
-      message: schema.string(),
+      kql: schema.string(),
+      filters: schema.arrayOf(
+        schema.object({
+          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          meta: schema.object({
+            alias: schema.maybe(schema.nullable(schema.string())),
+            disabled: schema.maybe(schema.boolean()),
+            negate: schema.maybe(schema.boolean()),
+            controlledBy: schema.maybe(schema.string()),
+            group: schema.maybe(schema.string()),
+            index: schema.maybe(schema.string()),
+            isMultiIndex: schema.maybe(schema.boolean()),
+            type: schema.maybe(schema.string()),
+            key: schema.maybe(schema.string()),
+            params: schema.maybe(schema.any()),
+            value: schema.maybe(schema.string()),
+            field: schema.maybe(schema.string()),
+            relation: schema.maybe(schema.oneOf([schema.literal('OR'), schema.literal('AND')])),
+          }),
+          $state: schema.maybe(
+            schema.object({
+              store: schema.oneOf([
+                schema.literal(FilterStateStore.APP_STATE), // change
+                schema.literal(FilterStateStore.GLOBAL_STATE), // change
+              ]),
+            })
+          ),
+        })
+      ),
+      dsl: schema.string(), // change
     })
   ),
-  warning: schema.nullable(
+  timeframe: schema.maybe(
     schema.object({
-      reason: executionStatusWarningReason,
-      message: schema.string(),
+      days: schema.arrayOf(ISOWeekdaysSchema),
+      hours: schema.object({
+        start: schema.string(),
+        end: schema.string(),
+      }),
+      timezone: schema.string(),
     })
   ),
 });
 
-export const rawRuleSchema = rawRuleSchemaV2.extends({
-  executionStatus: rawRuleExecutionStatusSchema,
-  actions: schema.arrayOf(rawRuleActionSchema),
-  lastRun: schema.maybe(schema.nullable(rawRuleLastRunSchema)),
-  monitoring: schema.maybe(rawRuleMonitoringSchema),
+export const rawRuleActionSchema = schema.object({
+  uuid: schema.string(), // change
+  group: schema.maybe(schema.string()),
+  actionRef: schema.string(),
+  actionTypeId: schema.string(),
+  params: schema.recordOf(schema.string(), schema.any()),
+  frequency: schema.maybe(
+    schema.object({
+      summary: schema.boolean(),
+      notifyWhen: schema.oneOf([
+        schema.literal('onActionGroupChange'),
+        schema.literal('onActiveAlert'),
+        schema.literal('onThrottleInterval'),
+      ]),
+      throttle: schema.nullable(schema.string()),
+    })
+  ),
+  alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
+});
+
+export const alertDelaySchema = schema.object({
+  active: schema.number(),
+});
+
+export const flappingSchema = schema.object({
+  lookBackWindow: schema.number(),
+  statusChangeThreshold: schema.number(),
+});
+
+export const rawRuleSchema = schema.object({
+  name: schema.string(),
+  enabled: schema.boolean(),
+  consumer: schema.string(),
+  tags: schema.arrayOf(schema.string()),
+  alertTypeId: schema.string(),
+  apiKeyOwner: schema.nullable(schema.string()),
+  apiKey: schema.nullable(schema.string()),
+  apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  createdBy: schema.nullable(schema.string()),
+  updatedBy: schema.nullable(schema.string()),
+  updatedAt: schema.string(),
+  createdAt: schema.string(),
+  muteAll: schema.boolean(),
+  mutedInstanceIds: schema.arrayOf(schema.string()),
+  throttle: schema.maybe(schema.nullable(schema.string())),
+  revision: schema.number(),
+  running: schema.maybe(schema.nullable(schema.boolean())),
+  schedule: schema.object({
+    interval: schema.string(),
+  }),
+  legacyId: schema.nullable(schema.string()),
+  scheduledTaskId: schema.maybe(schema.nullable(schema.string())),
+  isSnoozedUntil: schema.maybe(schema.nullable(schema.string())),
   snoozeSchedule: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -170,4 +271,29 @@ export const rawRuleSchema = rawRuleSchemaV2.extends({
       })
     )
   ),
+  meta: schema.maybe(schema.object({ versionApiKeyLastmodified: schema.maybe(schema.string()) })),
+  actions: schema.arrayOf(rawRuleActionSchema),
+  executionStatus: rawRuleExecutionStatusSchema,
+  notifyWhen: schema.maybe(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal('onActionGroupChange'),
+        schema.literal('onActiveAlert'),
+        schema.literal('onThrottleInterval'),
+      ])
+    )
+  ),
+  monitoring: schema.maybe(rawRuleMonitoringSchema),
+  lastRun: schema.maybe(schema.nullable(rawRuleLastRunSchema)),
+  nextRun: schema.maybe(schema.nullable(schema.string())),
+  mapped_params: schema.maybe(
+    schema.object({
+      risk_score: schema.maybe(schema.number()),
+      severity: schema.maybe(schema.string()),
+    })
+  ),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
+  typeVersion: schema.maybe(schema.number()),
+  alertDelay: schema.maybe(alertDelaySchema),
+  flapping: schema.maybe(schema.nullable(flappingSchema)), // carry over from v2
 });
