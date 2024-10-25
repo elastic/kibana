@@ -1,0 +1,9 @@
+// v9dark global scope
+//
+// prepended to all .scss imports (from JS, when v8light theme selected)
+
+@import '@elastic/eui-theme-borealis/src/theme_dark.scss';
+
+@import './mixins';
+
+$kbnThemeVersion: 'borealisdark';

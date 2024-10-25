@@ -8,11 +8,11 @@
  */
 
 export { getColorMode } from './color_mode';
-export type { KibanaTheme, ThemeServiceStart } from './types';
-export { getKibanaThemeByName, getKibanaDefaultTheme } from './theme';
 
+export type { KibanaTheme, ThemeServiceStart } from './types';
+
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { KibanaTheme } from './types';
-import { DEFAULT_KIBANA_THEME_NAME } from './theme';
 
 /**
  * The default `KibanaTheme` for use in Storybook, Jest, or initialization.  At
@@ -20,5 +20,5 @@ import { DEFAULT_KIBANA_THEME_NAME } from './theme';
  */
 export const defaultTheme: KibanaTheme = {
   darkMode: false,
-  name: DEFAULT_KIBANA_THEME_NAME,
+  version: DEFAULT_THEME_VERSION,
 };

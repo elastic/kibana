@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ThemeNameValue } from '@kbn/core-ui-settings-common';
 import { type EuiThemeSystem } from '@elastic/eui';
 import { EuiThemeAmsterdam } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
+import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 export interface ThemeDescriptor {
   euiTheme: EuiThemeSystem;
 }
 
-export const KIBANA_THEMES: Record<ThemeNameValue, ThemeDescriptor> = {
-  amsterdam: {
+export const KIBANA_THEMES: Record<ThemeVersion, ThemeDescriptor> = {
+  v8: {
     euiTheme: EuiThemeAmsterdam,
   },
   borealis: {
@@ -25,8 +25,4 @@ export const KIBANA_THEMES: Record<ThemeNameValue, ThemeDescriptor> = {
   },
 };
 
-export const DEFAULT_KIBANA_THEME_NAME: ThemeNameValue = 'amsterdam';
-
-export const getKibanaDefaultTheme = () => KIBANA_THEMES[DEFAULT_KIBANA_THEME_NAME];
-
-export const getKibanaThemeByName = (name: ThemeNameValue) => KIBANA_THEMES[name];
+export const getKibanaThemeByVersion = (version: ThemeVersion) => KIBANA_THEMES[version];
