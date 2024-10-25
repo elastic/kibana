@@ -13,6 +13,12 @@ import {
   FLEET_ENDPOINT_PACKAGE,
 } from '../constants';
 
+export function getDefaultFleetServerpolicyId(spaceId?: string) {
+  return !spaceId || spaceId === '' || spaceId === 'default'
+    ? 'fleet-server-policy'
+    : `${spaceId}-fleet-server-policy`;
+}
+
 export function policyHasFleetServer(
   agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>
 ) {
