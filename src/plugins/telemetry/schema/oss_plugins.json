@@ -9948,12 +9948,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:colorMapping": {
-          "type": "text",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:useLegacyTimeAxis": {
           "type": "boolean",
           "_meta": {
