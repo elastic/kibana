@@ -32,21 +32,6 @@ import { Root } from '@kbn/core-root-server-internal';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
-interface XPackSettings {
-  xpack?: {
-    reporting?: {
-      enabled?: boolean;
-    };
-    security?: {
-      experimental?: {
-        fipsMode?: {
-          enabled?: boolean;
-        };
-      };
-    };
-  };
-}
-
 const DEFAULTS_SETTINGS = {
   server: {
     autoListen: true,
