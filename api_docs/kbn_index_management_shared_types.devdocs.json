@@ -523,7 +523,7 @@
                 "section": "def-common.IndexDetailsPageRoute",
                 "text": "IndexDetailsPageRoute"
               },
-              ") => void"
+              ", detailsTabId?: string | undefined) => void"
             ],
             "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
@@ -549,6 +549,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute.$2",
+                "type": "string",
+                "tags": [],
+                "label": "detailsTabId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1034,7 +1049,7 @@
             "label": "renderRoute",
             "description": [],
             "signature": [
-              "(indexName: string) => string"
+              "(indexName: string, detailsTabId?: string | undefined) => string"
             ],
             "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
@@ -1054,6 +1069,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexDetailsPageRoute.renderRoute.$2",
+                "type": "string",
+                "tags": [],
+                "label": "detailsTabId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
