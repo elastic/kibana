@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import type {
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_TERMS,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+} from '@kbn/rule-data-utils';
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 import { intersection as lodashIntersection, isArray } from 'lodash';
 
@@ -32,6 +39,14 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SuppressionTerm } from '../utils';
 
+export interface ExtraFieldsForShellAlert {
+  [ALERT_INSTANCE_ID]: string;
+  [ALERT_SUPPRESSION_TERMS]: SuppressionTerm[];
+  [ALERT_SUPPRESSION_START]: Date;
+  [ALERT_SUPPRESSION_END]: Date;
+  [ALERT_SUPPRESSION_DOCS_COUNT]: number;
+}
+
 export interface BuildAlertGroupFromSequence {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   sequence: EqlSequence<SignalSource>;
@@ -42,13 +57,6 @@ export interface BuildAlertGroupFromSequence {
   indicesToQuery: string[];
   alertTimestampOverride: Date | undefined;
   applyOverrides?: boolean;
-  extraFieldsForShellAlert?: {
-    'kibana.alert.instance.id': string;
-    'kibana.alert.suppression.terms': SuppressionTerm[];
-    'kibana.alert.suppression.start': Date;
-    'kibana.alert.suppression.end': Date;
-    'kibana.alert.suppression.docs_count': number;
-  };
   publicBaseUrl?: string;
   intendedTimestamp?: Date;
 }
@@ -69,8 +77,6 @@ export const buildAlertGroupFromSequence = ({
   buildReasonMessage,
   indicesToQuery,
   alertTimestampOverride,
-  applyOverrides = false,
-  extraFieldsForShellAlert,
   publicBaseUrl,
   intendedTimestamp,
 }: BuildAlertGroupFromSequence): Array<
@@ -95,7 +101,7 @@ export const buildAlertGroupFromSequence = ({
         mergeStrategy,
         ignoreFields: {},
         ignoreFieldsRegexes: [],
-        applyOverrides,
+        applyOverrides: false,
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
@@ -127,23 +133,20 @@ export const buildAlertGroupFromSequence = ({
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const shellAlert = buildAlertRoot(
-    wrappedBaseFields,
+  const shellAlert = buildAlertRoot({
+    wrappedBuildingBlocks: wrappedBaseFields,
     completeRule,
     spaceId,
     buildReasonMessage,
     indicesToQuery,
     alertTimestampOverride,
     publicBaseUrl,
-    intendedTimestamp
-  );
+    intendedTimestamp,
+  });
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
-    _source: {
-      ...shellAlert,
-      ...(extraFieldsForShellAlert ?? {}),
-    },
+    _source: shellAlert,
   };
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
@@ -173,16 +176,27 @@ export const buildAlertGroupFromSequence = ({
   return [...wrappedBuildingBlocks, sequenceAlert];
 };
 
-export const buildAlertRoot = (
-  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>,
-  completeRule: CompleteRule<RuleParams>,
-  spaceId: string | null | undefined,
-  buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined,
-  publicBaseUrl?: string,
-  intendedTimestamp?: Date
-): EqlShellFieldsLatest => {
+export interface BuildAlertRootParams {
+  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  completeRule: CompleteRule<RuleParams>;
+  spaceId: string | null | undefined;
+  buildReasonMessage: BuildReasonMessage;
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  publicBaseUrl?: string;
+  intendedTimestamp?: Date;
+}
+
+export const buildAlertRoot = ({
+  wrappedBuildingBlocks,
+  completeRule,
+  spaceId,
+  buildReasonMessage,
+  indicesToQuery,
+  alertTimestampOverride,
+  publicBaseUrl,
+  intendedTimestamp,
+}: BuildAlertRootParams): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,

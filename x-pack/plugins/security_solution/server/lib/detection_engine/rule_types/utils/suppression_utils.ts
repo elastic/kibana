@@ -17,6 +17,7 @@ import {
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { ExtraFieldsForShellAlert } from '../eql/build_alert_group_from_sequence';
 
 export interface SuppressionTerm {
   field: string;
@@ -47,7 +48,7 @@ export const getSuppressionAlertFields = ({
       fallbackTimestamp
   );
 
-  const suppressionFields = {
+  const suppressionFields: ExtraFieldsForShellAlert = {
     [ALERT_INSTANCE_ID]: instanceId,
     [ALERT_SUPPRESSION_TERMS]: suppressionTerms,
     [ALERT_SUPPRESSION_START]: suppressionTime,

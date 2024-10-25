@@ -8,7 +8,6 @@ import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
-import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import partition from 'lodash/partition';
 
 import type {
@@ -21,7 +20,7 @@ import type {
   WrapSuppressedSequences,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
-import { addToSearchAfterReturn } from './utils';
+import { addToSearchAfterReturn, isEqlBuildingBlockAlert } from './utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
@@ -206,9 +205,8 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   );
 
   // partition sequence alert from building block alerts
-  const [sequenceAlerts, buildingBlockAlerts] = partition(
-    suppressibleWrappedDocs,
-    (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
+  const [buildingBlockAlerts, sequenceAlerts] = partition(suppressibleWrappedDocs, (signal) =>
+    isEqlBuildingBlockAlert(signal._source)
   );
 
   return executeBulkCreateAlerts({

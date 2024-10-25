@@ -590,7 +590,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         options,
                         kibanaVersion: ruleDataClient.kibanaVersion,
                         currentTimeOverride,
-                        intendedTimestamp,
                       })
                     : [];
 

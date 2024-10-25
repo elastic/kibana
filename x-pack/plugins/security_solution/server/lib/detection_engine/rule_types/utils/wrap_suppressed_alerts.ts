@@ -11,6 +11,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
+import partition from 'lodash/partition';
 import type { SignalSource, SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
@@ -26,9 +27,10 @@ import type {
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
-import { generateId } from './utils';
+import { generateId, isEqlBuildingBlockAlert } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
+import type { ExtraFieldsForShellAlert } from '../eql/build_alert_group_from_sequence';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 
 type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
@@ -148,16 +150,6 @@ export const wrapSuppressedSequenceAlerts = ({
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return sequences.reduce(
     (acc: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>, sequence) => {
-      const fields = sequence.events?.reduce(
-        (seqAcc, event) => ({ ...seqAcc, ...event.fields }),
-        {}
-      );
-      const suppressionTerms = getSuppressionTerms({
-        alertSuppression: completeRule?.ruleParams?.alertSuppression,
-        fields,
-      });
-      const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
-
       const alertGroupFromSequence = buildAlertGroupFromSequence({
         ruleExecutionLogger,
         sequence,
@@ -168,18 +160,37 @@ export const wrapSuppressedSequenceAlerts = ({
         indicesToQuery,
         alertTimestampOverride,
         applyOverrides: true,
-        extraFieldsForShellAlert: getSuppressionAlertFields({
-          primaryTimestamp,
-          secondaryTimestamp,
-          fields,
-          suppressionTerms,
-          fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
-          instanceId,
-        }),
         publicBaseUrl,
       });
 
-      return [...acc, ...alertGroupFromSequence] as Array<
+      // find shell alert
+      const [buildingBlocks, shellAlert] = partition(alertGroupFromSequence, (alert) =>
+        isEqlBuildingBlockAlert(alert._source)
+      );
+
+      console.error('BUILDING BLOCKS LENGTH', buildingBlocks.length);
+      console.error('SHELL ALLERT LENGTH', shellAlert.length);
+
+      const suppressionTerms = getSuppressionTerms({
+        alertSuppression: completeRule?.ruleParams?.alertSuppression,
+        fields: shellAlert[0]?._source,
+      });
+      const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
+
+      const suppressionFields = getSuppressionAlertFields({
+        primaryTimestamp,
+        secondaryTimestamp,
+        // as casting should work because the alert fields are flattened (hopefully?)
+        fields: shellAlert[0]._source as Record<string, string | number | null> | undefined,
+        suppressionTerms,
+        fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
+        instanceId,
+      });
+      const theFields = Object.keys(suppressionFields) as Array<keyof ExtraFieldsForShellAlert>;
+      // mutates shell alert to contain values from suppression fields
+      theFields.forEach((field) => (shellAlert[0]._source[field] = suppressionFields[field]));
+
+      return [...acc, ...buildingBlocks, ...shellAlert] as Array<
         WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>
       >;
     },
