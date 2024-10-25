@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
-import { DataViewSelector } from './data_view_selector';
+import { DataViewSelectorField } from './data_view_selector_field';
 import { useDataViews } from './use_data_views';
 
 jest.mock('../../../../common/lib/kibana');
@@ -16,10 +16,10 @@ jest.mock('./use_data_views');
 
 describe('data_view_selector', () => {
   it('renders correctly', () => {
-    (useDataViews as jest.Mock).mockReturnValue([]);
+    (useDataViews as jest.Mock).mockReturnValue({ data: [], isFetching: false });
 
     render(
-      <DataViewSelector
+      <DataViewSelectorField
         field={useFormFieldMock<string | undefined>({
           value: undefined,
         })}
@@ -28,6 +28,21 @@ describe('data_view_selector', () => {
     );
 
     expect(screen.queryByTestId('pick-rule-data-source')).toBeInTheDocument();
+  });
+
+  it('disables the combobox while data views are fetching', () => {
+    (useDataViews as jest.Mock).mockReturnValue({ data: [], isFetching: true });
+
+    render(
+      <DataViewSelectorField
+        field={useFormFieldMock<string | undefined>({
+          value: undefined,
+        })}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
   it('displays alerts on alerts warning when default security view selected', () => {
@@ -42,10 +57,10 @@ describe('data_view_selector', () => {
         title: 'logs-*',
       },
     ];
-    (useDataViews as jest.Mock).mockReturnValue(dataViews);
+    (useDataViews as jest.Mock).mockReturnValue({ data: dataViews, isFetching: false });
 
     render(
-      <DataViewSelector
+      <DataViewSelectorField
         field={useFormFieldMock<string | undefined>({
           value: 'security-solution-default',
         })}
@@ -68,10 +83,10 @@ describe('data_view_selector', () => {
         title: 'logs-*',
       },
     ];
-    (useDataViews as jest.Mock).mockReturnValue(dataViews);
+    (useDataViews as jest.Mock).mockReturnValue({ data: dataViews, isFetching: false });
 
     render(
-      <DataViewSelector
+      <DataViewSelectorField
         field={useFormFieldMock<string | undefined>({
           value: '1234',
         })}
@@ -80,5 +95,20 @@ describe('data_view_selector', () => {
     );
 
     expect(screen.queryByTestId('defaultSecurityDataViewWarning')).not.toBeInTheDocument();
+  });
+
+  it('displays warning on missing data view', () => {
+    (useDataViews as jest.Mock).mockReturnValue({ data: [], isFetching: false });
+
+    render(
+      <DataViewSelectorField
+        field={useFormFieldMock<string | undefined>({
+          value: 'non-existent-id',
+        })}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByTestId('missingDataViewWarning')).toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { DataViewSelector } from '../../../../../../../rule_creation_ui/components/data_view_selector';
+import { DataViewSelectorField } from '../../../../../../../rule_creation_ui/components/data_view_selector_field';
 import type { FieldHook } from '../../../../../../../../shared_imports';
 
 interface DataViewFieldProps {
@@ -14,5 +14,5 @@ interface DataViewFieldProps {
 }
 
 export function DataViewField({ field }: DataViewFieldProps): JSX.Element {
-  return <DataViewSelector field={field} />;
+  return <DataViewSelectorField field={field} />;
 }

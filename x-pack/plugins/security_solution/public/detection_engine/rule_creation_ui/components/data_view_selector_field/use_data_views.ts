@@ -11,28 +11,35 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
+interface UseDataViewsResult {
+  data: DataViewListItem[];
+  isFetching: boolean;
+}
+
 /**
  * Fetches known Kibana data views from the Data View Service.
- *
- * `undefined` return value means data views are loading or an error happened.
  */
-export function useDataViews(): DataViewListItem[] | undefined {
+export function useDataViews(): UseDataViewsResult {
   const {
     data: { dataViews: dataViewsService },
   } = useKibana().services;
   const { addError } = useAppToasts();
 
-  const [dataViews, setDataViews] = useState<DataViewListItem[] | undefined>();
+  const [isFetching, setIsFetching] = useState(false);
+  const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
 
   useEffect(() => {
+    setIsFetching(true);
     (async () => {
       try {
-        setDataViews(await dataViewsService.getIdsWithTitle());
+        setDataViews(await dataViewsService.getIdsWithTitle(true));
       } catch (e) {
         addError(e, { title: i18n.DATA_VIEWS_FETCH_ERROR });
+      } finally {
+        setIsFetching(false);
       }
     })();
   }, [dataViewsService, addError]);
 
-  return dataViews;
+  return { data: dataViews, isFetching };
 }

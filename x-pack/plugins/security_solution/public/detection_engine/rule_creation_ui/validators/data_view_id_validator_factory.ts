@@ -27,5 +27,5 @@ export function dataViewIdValidatorFactory(): ValidationFunc<FormData, string, u
 }
 
 export function isDataViewIdValid(dataViewId: unknown): dataViewId is string {
-  return dataViewId != null && dataViewId !== '';
+  return typeof dataViewId === 'string' && dataViewId !== '';
 }

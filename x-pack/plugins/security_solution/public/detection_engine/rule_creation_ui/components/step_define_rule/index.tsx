@@ -81,7 +81,7 @@ import {
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
-import { DataViewSelector } from '../data_view_selector';
+import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
@@ -697,7 +697,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiFlexItem>
             <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.DataView}>
-              <UseField key="DataViewSelector" path="dataViewId" component={DataViewSelector} />
+              <UseField
+                key="DataViewSelector"
+                path="dataViewId"
+                component={DataViewSelectorField}
+              />
             </StyledVisibleContainer>
             <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.IndexPatterns}>
               <CommonUseField

@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './data_view_selector';
+export const useDataViews = jest.fn().mockReturnValue({
+  data: [],
+  isFetching: false,
+});
