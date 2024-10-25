@@ -41,7 +41,8 @@
     "@kbn/spaces-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/custom-integrations-plugin",
-    "@kbn/server-route-repository-utils"
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-application-browser"
   ],
   "exclude": [
     "target/**/*"
