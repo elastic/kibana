@@ -25,7 +25,7 @@ describe('useGetIlmPolicies', () => {
 
   it('returns the correct data', async () => {
     const { result } = renderHook(() => useGetIlmPolicies());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.data).toEqual([
       {
         currentSize: '434 MB',

@@ -42,7 +42,7 @@ describe('useIntegrations', () => {
 
     render();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchAllIntegrations).toHaveBeenCalledTimes(1);
   });
@@ -113,7 +113,7 @@ describe('useIntegrations', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     // It switches to an error state
     expect(result.current.isLoading).toEqual(false);

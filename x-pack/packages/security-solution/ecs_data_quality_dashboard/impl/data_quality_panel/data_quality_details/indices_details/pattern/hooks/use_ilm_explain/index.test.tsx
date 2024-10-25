@@ -95,7 +95,7 @@ describe('useIlmExplain', () => {
       const { result } = renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       ilmExplainResult = await result.current;
     });
 
@@ -169,7 +169,7 @@ describe('useIlmExplain', () => {
           </DataQualityProvider>
         ),
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       ilmExplainResult = await result.current;
     });
 
@@ -192,7 +192,7 @@ describe('useIlmExplain', () => {
       const { result } = renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       ilmExplainResult = await result.current;
     });
 

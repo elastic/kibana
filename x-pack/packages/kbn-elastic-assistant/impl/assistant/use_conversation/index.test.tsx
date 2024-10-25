@@ -61,7 +61,7 @@ describe('useConversation', () => {
       ),
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     createConversation.mockResolvedValue(mockConvo);
 
@@ -86,7 +86,7 @@ describe('useConversation', () => {
       ),
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await act(async () => {
       await result.current.deleteConversation('new-convo');
@@ -104,7 +104,7 @@ describe('useConversation', () => {
         <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await act(async () => {
       await result.current.setApiConfig({
@@ -125,7 +125,7 @@ describe('useConversation', () => {
         <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     getConversationById.mockResolvedValue(mockConvo);
 

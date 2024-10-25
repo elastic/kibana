@@ -52,7 +52,7 @@ describe('useDockerContainerCharts', () => {
         const { result } = renderHook(() =>
           useDockerContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         const { charts } = result.current;
 
@@ -72,7 +72,7 @@ describe('useDockerKPIMetricsCharts', () => {
     const { result } = renderHook(() =>
       useDockerContainerKpiCharts({ dataViewId: metricsDataViewId })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toHaveLength(expectedOrder.length);
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);
@@ -90,7 +90,7 @@ describe('useK8sContainerCharts', () => {
         const { result } = renderHook(() =>
           useK8sContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         const { charts } = result.current;
 
@@ -110,7 +110,7 @@ describe('useK8sContainerKPIMetricsCharts', () => {
     const { result } = renderHook(() =>
       useK8sContainerKpiCharts({ dataViewId: metricsDataViewId })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toHaveLength(expectedOrder.length);
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);

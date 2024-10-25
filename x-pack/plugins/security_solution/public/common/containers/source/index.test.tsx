@@ -91,7 +91,7 @@ describe('source/index.tsx', () => {
         wrapper: TestProviders,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await act(async () => {
         await result.current.indexFieldsSearch({ dataViewId: 'neato' });
@@ -115,7 +115,7 @@ describe('source/index.tsx', () => {
         wrapper: TestProviders,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await act(async () => {
         indexFieldsSearch = result.current.indexFieldsSearch;
@@ -145,7 +145,7 @@ describe('source/index.tsx', () => {
       >(() => useDataView(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       await act(async () => {
         indexFieldsSearch = result.current.indexFieldsSearch;
       });

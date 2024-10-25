@@ -101,7 +101,7 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = result.current.getCellActions('host.name', 0)[0];
 
@@ -128,7 +128,7 @@ describe('getUseCellActionsHook', () => {
 
     const cellAction = result.current.getCellActions('host.name', 0);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(cellAction).toHaveLength(0);
   });

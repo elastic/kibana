@@ -61,7 +61,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     expect(fieldListGroupedProps.fieldGroups).toMatchSnapshot();
@@ -106,7 +106,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -168,7 +168,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -240,7 +240,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -297,7 +297,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     let fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -378,7 +378,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const scrollToTopResetCounter1 = result.current.fieldListGroupedProps.scrollToTopResetCounter;
 
@@ -402,7 +402,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -433,7 +433,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -541,7 +541,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -576,7 +576,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -605,7 +605,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: anotherDataView.fields,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     fieldListGroupedProps = result.current.fieldListGroupedProps;
     fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -644,7 +644,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -678,7 +678,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
     expect(fieldGroups).toMatchSnapshot();
@@ -693,7 +693,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -728,7 +728,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -759,7 +759,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { fieldListFiltersProps, fieldListGroupedProps } = result.current;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -816,7 +816,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
     expect(fieldGroups.SmartFields?.fields?.length).toBe(1);

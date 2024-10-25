@@ -116,7 +116,7 @@ describe.skip('useStream', () => {
     );
     expect(result.current.error).toBeUndefined();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.error).toBe(errorMessage);
     expect(result.current.isLoading).toBe(false);

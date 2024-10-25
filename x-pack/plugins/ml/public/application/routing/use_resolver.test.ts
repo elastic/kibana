@@ -65,7 +65,7 @@ describe('useResolver', () => {
     (usePermissionCheck as jest.Mock<boolean[]>).mockReturnValueOnce([false]);
 
     renderHook(() => useRouteResolver('full', ['canGetCalendars']));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(useMlKibana().services.application.navigateToUrl).toHaveBeenCalled();
   });
 });

@@ -35,7 +35,7 @@ describe('useLoadActionTypes', () => {
   it('should call api to load action types', async () => {
     await act(async () => {
       renderHook(() => useLoadActionTypes(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.get).toHaveBeenCalledWith('/api/actions/connector_types', {
         query: { feature_id: 'generativeAIForSecurity' },
@@ -47,7 +47,7 @@ describe('useLoadActionTypes', () => {
   it('should return sorted action types', async () => {
     await act(async () => {
       const { result } = renderHook(() => useLoadActionTypes(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await expect(result.current).resolves.toStrictEqual(
         mockActionTypes.sort((a, b) => a.name.localeCompare(b.name))
@@ -60,7 +60,7 @@ describe('useLoadActionTypes', () => {
         get: jest.fn().mockRejectedValue(new Error('this is an error')),
       } as unknown as Props['http'];
       renderHook(() => useLoadActionTypes({ ...defaultProps, http: mockHttp }));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(toasts.addError).toHaveBeenCalled();
     });

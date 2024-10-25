@@ -39,7 +39,7 @@ const renderUseSecurityDashboardsTableItems = async () => {
     wrapper: DashboardContextProvider,
   });
   // needed to let dashboard items to be updated from saved objects response
-  await waitFor(() => null);
+  await waitFor(() => new Promise((resolve) => resolve(null)));
 
   return renderedHook;
 };

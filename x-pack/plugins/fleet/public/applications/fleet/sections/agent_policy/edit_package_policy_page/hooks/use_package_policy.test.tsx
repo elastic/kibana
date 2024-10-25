@@ -278,7 +278,7 @@ describe('usePackagePolicy', () => {
     const { result } = renderer.renderHook(() =>
       usePackagePolicyWithRelatedData('package-policy-1', {})
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.packagePolicy).toEqual(omit(mockPackagePolicy, 'id'));
   });
@@ -290,7 +290,7 @@ describe('usePackagePolicy', () => {
         forceUpgrade: true,
       })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.packagePolicy).toMatchInlineSnapshot(`
       Object {
         "description": "Nginx description",
@@ -520,7 +520,7 @@ describe('usePackagePolicy', () => {
         forceUpgrade: true,
       })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.packagePolicy).toMatchInlineSnapshot(`
       Object {
         "description": "Nginx description",

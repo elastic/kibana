@@ -157,7 +157,7 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     ['all', 'read', 'custom'].forEach((privilege) => {
       expect(screen.queryByTestId(`${privilege}-privilege-button`)).not.toBeInTheDocument();
@@ -174,7 +174,7 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
   });
@@ -208,7 +208,7 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -234,7 +234,7 @@ describe('PrivilegesRolesForm', () => {
       ],
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_ALL}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -256,7 +256,7 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -290,7 +290,7 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument();
     });
@@ -312,7 +312,7 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(screen.queryByTestId('privilege-conflict-callout')).not.toBeInTheDocument();
     });
@@ -348,7 +348,7 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 

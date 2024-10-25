@@ -81,7 +81,7 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
       defaultIndex: [],
       details: {},
@@ -102,7 +102,7 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current[1].lastSeen).toEqual('1 minute ago');
   });
 });

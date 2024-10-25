@@ -36,7 +36,7 @@ describe('useHostIpToName Hook', () => {
     const { result } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.name).toBe('example-01');
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(null);
@@ -48,7 +48,7 @@ describe('useHostIpToName Hook', () => {
     const { result } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(error);
@@ -60,13 +60,13 @@ describe('useHostIpToName Hook', () => {
     const { result, rerender } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(error);
     mockedFetch.mockResolvedValue({ host: 'example-01' } as any);
     rerender({ ipAddress: '192.168.1.2', indexPattern: 'metricbeat-*' });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.name).toBe('example-01');
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(null);

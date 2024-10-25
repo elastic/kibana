@@ -67,7 +67,7 @@ describe('use chat send', () => {
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.handleOnChatCleared();
     });
@@ -107,7 +107,7 @@ describe('use chat send', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.handleRegenerateResponse();
     });
@@ -124,7 +124,7 @@ describe('use chat send', () => {
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.handleChatSend(promptText);
     });

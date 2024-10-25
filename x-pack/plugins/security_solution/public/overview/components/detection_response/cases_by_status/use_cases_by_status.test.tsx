@@ -116,7 +116,7 @@ describe('useCasesByStatus', () => {
     >(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     unmount();
 
@@ -133,7 +133,7 @@ describe('useCasesByStatus', () => {
     >(() => useCasesByStatus(localProps), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     localProps.skip = true;
     act(() => rerender());

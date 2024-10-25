@@ -52,7 +52,7 @@ describe('useKnowledgeBaseStatus', () => {
   it('should call api to get knowledge base status without resource arg', async () => {
     await act(async () => {
       renderHook(() => useKnowledgeBaseStatus(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
@@ -68,7 +68,7 @@ describe('useKnowledgeBaseStatus', () => {
   it('should call api to get knowledge base status with resource arg', async () => {
     await act(async () => {
       renderHook(() => useKnowledgeBaseStatus({ ...defaultProps, resource: 'something' }));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
@@ -84,7 +84,7 @@ describe('useKnowledgeBaseStatus', () => {
   it('should return status response', async () => {
     await act(async () => {
       const { result } = renderHook(() => useKnowledgeBaseStatus(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
     });
@@ -94,7 +94,7 @@ describe('useKnowledgeBaseStatus', () => {
     getKnowledgeBaseStatusMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
       renderHook(() => useKnowledgeBaseStatus(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(toasts.addError).toHaveBeenCalled();
     });

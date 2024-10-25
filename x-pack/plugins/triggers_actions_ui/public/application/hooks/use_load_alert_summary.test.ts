@@ -50,7 +50,7 @@ describe('useLoadAlertSummary', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
@@ -79,7 +79,7 @@ describe('useLoadAlertSummary', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const body = JSON.stringify({
       fixed_interval: fixedInterval,
@@ -107,7 +107,7 @@ describe('useLoadAlertSummary', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.error).toMatch(error.message);
   });

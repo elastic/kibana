@@ -77,7 +77,7 @@ describe('useTimelineTypes', () => {
       >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       render(result.current.timelineTabs);
       expect(screen.getByTestId('timeline-tab-default')).toHaveTextContent('Timelines');
@@ -116,7 +116,7 @@ describe('useTimelineTypes', () => {
       >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       render(result.current.timelineTabs);
 
@@ -128,7 +128,7 @@ describe('useTimelineTypes', () => {
         })
       );
 
-      waitFor(() => null);
+      waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toEqual({
         timelineType: 'default',
@@ -146,7 +146,7 @@ describe('useTimelineTypes', () => {
       >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       const { container } = render(<>{result.current.timelineFilters}</>);
 
@@ -170,7 +170,7 @@ describe('useTimelineTypes', () => {
 
       render(<>{result.current.timelineFilters}</>);
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       fireEvent.click(screen.getByTestId('open-timeline-modal-body-filter-template'));
 
@@ -192,7 +192,7 @@ describe('useTimelineTypes', () => {
         wrapper: TestProviders,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       const { container } = render(<>{result.current.timelineFilters}</>);
 
@@ -206,7 +206,7 @@ describe('useTimelineTypes', () => {
         );
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toEqual({
         timelineType: 'default',

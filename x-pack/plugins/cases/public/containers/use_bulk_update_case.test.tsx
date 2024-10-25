@@ -41,7 +41,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith({ cases: allCases.cases });
   });
@@ -56,7 +56,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -72,7 +72,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Success title',
@@ -91,7 +91,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

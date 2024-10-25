@@ -92,7 +92,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current(defaultArgs);
 
       expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
@@ -107,7 +107,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current(defaultArgs);
 
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
@@ -128,7 +128,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current(defaultArgs);
 
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
@@ -140,7 +140,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current(defaultArgs);
 
       expect(dispatchAddNotes).not.toHaveBeenCalled();
@@ -152,7 +152,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const mockTimeline = {
         ...mockTimelineModel,
         kqlQuery: {
@@ -176,7 +176,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const mockTimeline = {
         ...mockTimelineModel,
         kqlQuery: {
@@ -209,7 +209,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current({
         ...defaultArgs,
         duplicate: false,
@@ -250,7 +250,7 @@ describe('dispatchUpdateTimeline', () => {
       const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current({
         ...defaultArgs,
         ruleNote: '# this would be some markdown',

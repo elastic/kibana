@@ -174,7 +174,7 @@ describe('createConversations', () => {
         mockStorage as unknown as Storage
       )
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(http.fetch.mock.calls[0][0]).toBe(
       '/internal/elastic_assistant/current_user/conversations/_bulk_action'
     );
@@ -194,7 +194,7 @@ describe('createConversations', () => {
         mockStorage as unknown as Storage
       )
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(http.fetch.mock.calls[0][0]).toBe(
       '/internal/elastic_assistant/current_user/conversations/_bulk_action'
     );

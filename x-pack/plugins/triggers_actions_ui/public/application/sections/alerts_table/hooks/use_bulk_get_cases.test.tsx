@@ -39,7 +39,7 @@ describe('useBulkGetCases', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith(
       expect.anything(),
@@ -68,7 +68,7 @@ describe('useBulkGetCases', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(

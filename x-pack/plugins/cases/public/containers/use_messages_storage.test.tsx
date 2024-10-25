@@ -20,7 +20,7 @@ describe('useMessagesStorage', () => {
 
   it('should return an empty array when there is no messages', async () => {
     const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages } = result.current;
     await act(async () => {
       expect(getMessages('case')).toEqual([]);
@@ -29,7 +29,7 @@ describe('useMessagesStorage', () => {
 
   it('should add a message', async () => {
     const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage } = result.current;
     await act(async () => {
       addMessage('case', 'id-1');
@@ -39,7 +39,7 @@ describe('useMessagesStorage', () => {
 
   it('should add multiple messages', async () => {
     const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage } = result.current;
     await act(async () => {
       addMessage('case', 'id-1');
@@ -50,7 +50,7 @@ describe('useMessagesStorage', () => {
 
   it('should remove a message', async () => {
     const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage, removeMessage } = result.current;
     await act(async () => {
       addMessage('case', 'id-1');
@@ -62,7 +62,7 @@ describe('useMessagesStorage', () => {
 
   it('should return presence of a message', async () => {
     const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const { hasMessage, addMessage, removeMessage } = result.current;
     await act(async () => {
       addMessage('case', 'id-1');
@@ -75,7 +75,7 @@ describe('useMessagesStorage', () => {
 
   it('should clear all messages', async () => {
     const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage, clearAllMessages } = result.current;
     await act(async () => {
       addMessage('case', 'id-1');

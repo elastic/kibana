@@ -194,7 +194,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

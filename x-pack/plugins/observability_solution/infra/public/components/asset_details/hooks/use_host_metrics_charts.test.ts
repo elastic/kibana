@@ -42,7 +42,7 @@ describe('useHostCharts', () => {
           const expectedOrder = getHostChartsExpectedOrder(metric, false);
 
           const { result } = renderHook(() => useHostCharts({ dataViewId, metric }));
-          await waitFor(() => null);
+          await waitFor(() => new Promise((resolve) => resolve(null)));
 
           const { charts } = result.current;
 
@@ -62,7 +62,7 @@ describe('useHostCharts', () => {
           const { result } = renderHook(() =>
             useHostCharts({ dataViewId, metric, overview: true })
           );
-          await waitFor(() => null);
+          await waitFor(() => new Promise((resolve) => resolve(null)));
 
           const { charts } = result.current;
 
@@ -80,7 +80,7 @@ describe('useHostCharts', () => {
 describe('useKubernetesCharts', () => {
   it('should return an array of charts with correct order - overview', async () => {
     const { result } = renderHook(() => useKubernetesCharts({ dataViewId, overview: true }));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = ['nodeCpuCapacity', 'nodeMemoryCapacity'];
 
@@ -95,7 +95,7 @@ describe('useKubernetesCharts', () => {
 
   it('should return an array of charts with correct order', async () => {
     const { result } = renderHook(() => useKubernetesCharts({ dataViewId }));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = [
       'nodeCpuCapacity',
@@ -117,7 +117,7 @@ describe('useKubernetesCharts', () => {
 describe('useHostKpiCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const { result } = renderHook(() => useHostKpiCharts({ dataViewId }));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
 
@@ -138,7 +138,7 @@ describe('useHostKpiCharts', () => {
     };
 
     const { result } = renderHook(() => useHostKpiCharts({ dataViewId, ...options }));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toHaveLength(4);
 

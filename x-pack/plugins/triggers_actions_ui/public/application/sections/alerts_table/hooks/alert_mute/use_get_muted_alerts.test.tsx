@@ -35,7 +35,7 @@ describe('useGetMutedAlerts', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(muteAlertInstanceSpy).toHaveBeenCalledWith(
@@ -63,7 +63,7 @@ describe('useGetMutedAlerts', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();

@@ -76,7 +76,7 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current.refetch();
@@ -94,7 +94,7 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.data).toEqual(
       expect.arrayContaining([
@@ -146,7 +146,7 @@ describe('useAggregatedAnomaliesByJob', () => {
     const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const names = result.current.data.map(({ name }) => name);
 
@@ -160,7 +160,7 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockAddToastError).not.toBeCalled();
   });

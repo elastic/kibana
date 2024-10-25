@@ -115,7 +115,7 @@ describe('useSettingsUpdater', () => {
           anonymizationFields
         )
       );
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const {
         setConversationSettings,
         setConversationsSettingsBulkActions,
@@ -172,7 +172,7 @@ describe('useSettingsUpdater', () => {
           anonymizationFields
         )
       );
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const {
         setConversationSettings,
         setConversationsSettingsBulkActions,
@@ -220,7 +220,7 @@ describe('useSettingsUpdater', () => {
           anonymizationFields
         )
       );
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
       setUpdatedKnowledgeBaseSettings({
@@ -246,7 +246,7 @@ describe('useSettingsUpdater', () => {
           anonymizationFields
         )
       );
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const { setUpdatedAssistantStreamingEnabled } = result.current;
 
       setUpdatedAssistantStreamingEnabled(false);
@@ -272,7 +272,7 @@ describe('useSettingsUpdater', () => {
           anonymizationFields
         )
       );
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
       setUpdatedKnowledgeBaseSettings(mockValues.knowledgeBase);

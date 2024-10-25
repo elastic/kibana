@@ -58,7 +58,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith({ newCase: samplePost });
   });
@@ -73,7 +73,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -89,7 +89,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addSuccess).not.toHaveBeenCalled();
   });
@@ -105,7 +105,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

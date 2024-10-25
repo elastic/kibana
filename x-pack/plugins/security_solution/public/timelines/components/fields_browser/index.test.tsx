@@ -76,7 +76,7 @@ const renderUpdatedUseFieldBrowserOptions = async (
   > | null = null;
   await act(async () => {
     renderHookResult = renderUseFieldBrowserOptions(props);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
   });
   return renderHookResult!;
 };

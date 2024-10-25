@@ -27,7 +27,7 @@ describe('useCasesFromAlerts hook', () => {
   it('returns an array of caseIds', async () => {
     const spyOnCases = jest.spyOn(api, 'getCaseIdsFromAlertId');
     const { result } = renderHook(() => useCasesFromAlerts({ alertId: 'anAlertId' }));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(spyOnCases).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual({
       loading: false,

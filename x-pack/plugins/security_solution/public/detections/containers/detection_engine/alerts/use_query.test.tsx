@@ -46,7 +46,7 @@ describe('useQueryAlerts', () => {
     const { result } = renderHook<[object, string], ReturnQueryAlerts<unknown, unknown>>(() =>
       useQueryAlerts<unknown, unknown>(defaultProps)
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       loading: false,
       data: alertsMock,
@@ -77,7 +77,7 @@ describe('useQueryAlerts', () => {
         initialProps: [mockAlertsQuery, indexName],
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender([mockAlertsQuery, 'new-mock-index-name']);
     await waitFor(() => expect(spyOnfetchRules).toHaveBeenCalledTimes(2));
   });
@@ -124,7 +124,7 @@ describe('useQueryAlerts', () => {
       useQueryAlerts<unknown, unknown>(localProps)
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     localProps.skip = true;
     rerender();

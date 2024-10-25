@@ -119,7 +119,7 @@ describe('useFetchAgentsData', () => {
   it('should fetch agents and agent policies data', async () => {
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() => useFetchAgentsData());
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result?.current.selectedStatus).toEqual(['healthy', 'unhealthy', 'updating', 'offline']);
     expect(result?.current.allAgentPolicies).toEqual([

@@ -136,7 +136,7 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
@@ -172,7 +172,7 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe('useSavedVisInstance', () => {
 
       result.current.visEditorRef.current = document.createElement('div');
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       unmount();
 
       expect(mockDefaultEditorControllerDestroy.mock.calls.length).toBe(1);
@@ -227,7 +227,7 @@ describe('useSavedVisInstance', () => {
         type: 'area',
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(getCreateBreadcrumbs).toHaveBeenCalled();
       expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
@@ -274,7 +274,7 @@ describe('useSavedVisInstance', () => {
 
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(mockEmbeddableHandlerRender).toHaveBeenCalled();
       expect(result.current.visEditorController).toBeUndefined();

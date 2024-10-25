@@ -89,7 +89,7 @@ describe('useDataGridColumnsCellActions', () => {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     renderCellAction(result.current[0][0], { rowIndex: 0 });
     renderCellAction(result.current[0][1], { rowIndex: 1 });
@@ -108,7 +108,7 @@ describe('useDataGridColumnsCellActions', () => {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction1 = renderCellAction(result.current[0][0]);
 
@@ -125,7 +125,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = renderCellAction(result.current[0][0]);
 
@@ -140,7 +140,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction1 = renderCellAction(result.current[0][0], { rowIndex: 1 });
 
@@ -197,7 +197,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
 
@@ -228,7 +228,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
 
@@ -247,7 +247,7 @@ describe('useDataGridColumnsCellActions', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toBeInstanceOf(Array);
     expect(result.current.length).toBe(0);
@@ -261,7 +261,7 @@ describe('useDataGridColumnsCellActions', () => {
       },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toBeInstanceOf(Array);
     expect(result.current.length).toBe(0);

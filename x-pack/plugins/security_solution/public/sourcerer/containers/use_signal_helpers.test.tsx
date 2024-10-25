@@ -45,7 +45,7 @@ describe('useSignalHelpers', () => {
     const { result } = renderHook(() => useSignalHelpers(), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.signalIndexNeedsInit).toEqual(false);
     expect(result.current.pollForSignalIndex).toEqual(undefined);
   });
@@ -74,7 +74,7 @@ describe('useSignalHelpers', () => {
         <TestProviders store={store}>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.signalIndexNeedsInit).toEqual(true);
     expect(result.current.pollForSignalIndex).toEqual(undefined);
   });
@@ -103,7 +103,7 @@ describe('useSignalHelpers', () => {
         <TestProviders store={store}>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.signalIndexNeedsInit).toEqual(false);
     expect(result.current.pollForSignalIndex).not.toEqual(undefined);
   });
@@ -134,7 +134,7 @@ describe('useSignalHelpers', () => {
         <TestProviders store={store}>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.signalIndexNeedsInit).toEqual(false);
     expect(result.current.pollForSignalIndex).not.toEqual(undefined);
     expect(mockAddError).not.toHaveBeenCalled();
@@ -168,7 +168,7 @@ describe('useSignalHelpers', () => {
         <TestProviders store={store}>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.signalIndexNeedsInit).toEqual(false);
     expect(result.current.pollForSignalIndex).not.toEqual(undefined);
     result.current.pollForSignalIndex?.();

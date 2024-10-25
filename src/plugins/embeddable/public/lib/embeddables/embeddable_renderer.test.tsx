@@ -36,7 +36,7 @@ describe('useEmbeddableFactory', () => {
 
     expect(loading).toBe(true);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const [embeddable] = result.current;
     expect(embeddable).toBeDefined();

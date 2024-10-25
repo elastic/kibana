@@ -151,7 +151,7 @@ describe('useRuleFromTimeline', () => {
     it('if timeline id in URL, set active timeline data view to from timeline data view', async () => {
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(setRuleQuery).toHaveBeenCalled();
 
       expect(mockDispatch).toHaveBeenCalledTimes(2);
@@ -171,7 +171,7 @@ describe('useRuleFromTimeline', () => {
         .mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current.loading).toEqual(false);
       expect(setRuleQuery).toHaveBeenCalledWith({
         index: ['awesome-*'],
@@ -240,7 +240,7 @@ describe('useRuleFromTimeline', () => {
         .mockReturnValue(() => timelineId);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current.loading).toEqual(false);
       expect(setRuleQuery).toHaveBeenCalledWith({
         index: ['awesome-*'],
@@ -331,7 +331,7 @@ describe('useRuleFromTimeline', () => {
 
     it('resets timeline sourcerer if it originally had different data view from the timeline used in the rule', async () => {
       renderHook(() => useRuleFromTimeline(setRuleQuery));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(setRuleQuery).toHaveBeenCalled();
       expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',

@@ -30,7 +30,7 @@ describe('useGetActionLicense', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal);
   });
 

@@ -35,7 +35,7 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(Api.createListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
   });
@@ -51,7 +51,7 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(onError).toHaveBeenCalledWith(new Error('Mocked error'), undefined, undefined);
   });
@@ -67,7 +67,7 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
@@ -81,7 +81,7 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith(['detectionEngine', 'listIndex']);
   });

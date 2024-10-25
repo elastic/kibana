@@ -51,7 +51,7 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -67,7 +67,7 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id });
   });
@@ -81,7 +81,7 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Successfully sent to My connector',
@@ -100,7 +100,7 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

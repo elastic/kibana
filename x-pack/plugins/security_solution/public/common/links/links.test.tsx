@@ -185,7 +185,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toStrictEqual([networkLinkItem]);
     });
@@ -253,7 +253,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
     });
@@ -283,7 +283,7 @@ describe('Security links', () => {
         });
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
 
@@ -317,7 +317,7 @@ describe('Security links', () => {
         });
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current).toStrictEqual([]);
 
       // cleanup
@@ -358,7 +358,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current).toBe(false);
     });
 
@@ -391,7 +391,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current).toBe(true);
     });
   });

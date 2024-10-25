@@ -108,7 +108,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     const hookReader = renderHook(useExistingFieldsReader);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -168,7 +168,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     const hookReader1 = renderHook(useExistingFieldsReader);
     const hookReader2 = renderHook(useExistingFieldsReader);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalled();
 
@@ -213,7 +213,7 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     const hookReader = renderHook(useExistingFieldsReader);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalled();
 
@@ -245,7 +245,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const currentResult = hookReader.result.current;
 
@@ -346,7 +346,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -370,7 +370,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       dataViews: [dataView, anotherDataView],
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
@@ -424,7 +424,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -447,7 +447,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       query: { query: 'test', language: 'kuery' },
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
@@ -497,7 +497,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -522,7 +522,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       toDate: '2022-01-01',
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
@@ -563,7 +563,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     });
 
     const hookReader = renderHook(useExistingFieldsReader);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({

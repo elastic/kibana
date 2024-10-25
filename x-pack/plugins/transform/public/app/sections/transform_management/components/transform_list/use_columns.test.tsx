@@ -24,7 +24,7 @@ describe('Transform: Job List Columns', () => {
       wrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 

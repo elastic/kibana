@@ -63,7 +63,7 @@ describe('useGetApplication', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current.getApplication({
@@ -73,7 +73,7 @@ describe('useGetApplication', () => {
       });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(getApplicationMock).toBeCalledWith({
       signal: abortCtrl.signal,
       appId: action.config.appId,
@@ -89,7 +89,7 @@ describe('useGetApplication', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.getApplication({
         appId: action.config.appId,
@@ -97,7 +97,7 @@ describe('useGetApplication', () => {
         apiUrl: action.config.apiUrl,
       });
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -112,7 +112,7 @@ describe('useGetApplication', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current.getApplication({
@@ -135,7 +135,7 @@ describe('useGetApplication', () => {
         toastNotifications: services.notifications.toasts,
       })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.getApplication({
         appId: action.config.appId,
@@ -163,7 +163,7 @@ describe('useGetApplication', () => {
         toastNotifications: services.notifications.toasts,
       })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.getApplication({
         appId: action.config.appId,
@@ -171,7 +171,7 @@ describe('useGetApplication', () => {
         apiUrl: action.config.apiUrl,
       });
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       title: 'Unable to get application with id bcq16kdTbz5jlwM6h',

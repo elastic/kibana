@@ -38,7 +38,7 @@ const renderUseCreateSecurityDashboardLink = () =>
 const asyncRenderUseCreateSecurityDashboard = async () => {
   const renderedHook = renderUseCreateSecurityDashboardLink();
 
-  waitFor(() => null);
+  await waitFor(() => new Promise((resolve) => resolve(null)));
 
   return renderedHook;
 };
@@ -89,7 +89,7 @@ describe('useCreateSecurityDashboardLink', () => {
       expect(result.current.isLoading).toEqual(true);
       expect(result.current.url).toEqual('/app/security/dashboards/create');
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current.isLoading).toEqual(false);
       expect(result.current.url).toEqual('/app/security/dashboards/create');

@@ -154,7 +154,7 @@ describe('useStats', () => {
       renderHook(() => useStats({ pattern, startDate, endDate }), {
         wrapper: ContextWrapperILMNotAvailable,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
     });
     test(`it calls the stats api with the expected params`, async () => {
       expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
@@ -170,7 +170,7 @@ describe('useStats', () => {
       const { result } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       statsResult = await result.current;
     });
 
@@ -201,7 +201,7 @@ describe('useStats', () => {
       const { result } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       statsResult = await result.current;
     });
 
