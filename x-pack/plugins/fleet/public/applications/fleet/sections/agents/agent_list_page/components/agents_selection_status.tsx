@@ -73,11 +73,28 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                 }}
               />
             ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.totalAgents"
-                defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
-                values={{ count: totalAgents }}
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.agentBulkActions.totalAgents"
+                  defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
+                  values={{ count: totalAgents }}
+                />{' '}
+                <EuiIconTip
+                  type="iInCircle"
+                  content={
+                    <FormattedMessage
+                      data-test-subj="selectedAgentCountTooltip"
+                      id="xpack.fleet.agentBulkActions.agentsBreakDownTooltip"
+                      defaultMessage=" {totalAgents} total agents: {totalSelected} user-managed agents, {totalManagedAgents} on hosted policies"
+                      values={{
+                        totalAgents,
+                        totalManagedAgents,
+                        totalSelected: totalAgents - totalManagedAgents,
+                      }}
+                    />
+                  }
+                />
+              </>
             )}
           </EuiText>
         </EuiFlexItem>
@@ -106,7 +123,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                       <FormattedMessage
                         data-test-subj="selectedAgentCountTooltip"
                         id="xpack.fleet.agentBulkActions.agentsSelectedTooltip"
-                        defaultMessage="{totalSelected} agents selected: {totalAgents} user managed agents, {totalManagedAgents} on hosted policies. Most actions are only available to user managed agents."
+                        defaultMessage="{totalSelected} user-managed agents selected: {totalAgents} total agents, {totalManagedAgents} on hosted policies. Most actions are only available to user-managed agents."
                         values={{
                           totalAgents,
                           totalManagedAgents,
