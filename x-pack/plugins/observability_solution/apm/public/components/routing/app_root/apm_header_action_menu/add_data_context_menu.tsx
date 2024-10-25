@@ -20,9 +20,9 @@ import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { EntityInventoryAddDataParams } from '../../../../services/telemetry';
 import {
-  associateServiceLogs,
-  collectServiceLogs,
-  addApmData,
+  associateServiceLogsProps,
+  collectServiceLogsProps,
+  addApmDataProps,
 } from '../../../shared/add_data_buttons/buttons';
 
 const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
@@ -45,7 +45,7 @@ export function AddDataContextMenu() {
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
 
-  const addApmButtonData = addApmData(onboardingLocator);
+  const addApmButtonData = addApmDataProps(onboardingLocator);
 
   const button = (
     <EuiHeaderLink
@@ -72,8 +72,8 @@ export function AddDataContextMenu() {
       title: addData,
       items: [
         {
-          name: associateServiceLogs.name,
-          href: associateServiceLogs.link,
+          name: associateServiceLogsProps.name,
+          href: associateServiceLogsProps.link,
           'data-test-subj': 'apmAddDataAssociateServiceLogs',
           target: '_blank',
           onClick: () => {
@@ -81,8 +81,8 @@ export function AddDataContextMenu() {
           },
         },
         {
-          name: collectServiceLogs.name,
-          href: basePath.prepend(collectServiceLogs.link),
+          name: collectServiceLogsProps.name,
+          href: basePath.prepend(collectServiceLogsProps.link),
           'data-test-subj': 'apmAddDataCollectServiceLogs',
           onClick: () => {
             reportButtonClick('collect_new_service_logs');

@@ -19,7 +19,7 @@ import {
   ApmOnboardingLocatorParams,
 } from '../../../locator/onboarding_locator';
 
-export const addApmData = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
+export const addApmDataProps = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
   return {
     name: i18n.translate('xpack.apm.add.apm.agent.button.', {
       defaultMessage: 'Add APM',
@@ -28,14 +28,14 @@ export const addApmData = (locator: LocatorPublic<ApmOnboardingLocatorParams> | 
   };
 };
 
-export const associateServiceLogs = {
+export const associateServiceLogsProps = {
   name: i18n.translate('xpack.apm.associate.service.logs.button', {
     defaultMessage: 'Associate existing service logs',
   }),
   link: 'https://ela.st/new-experience-associate-service-logs',
 };
 
-export const collectServiceLogs = {
+export const collectServiceLogsProps = {
   name: i18n.translate('xpack.apm.collect.service.logs.button', {
     defaultMessage: 'Collect new service logs',
   }),
@@ -60,9 +60,9 @@ export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataPro
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
 
-  const addApmButtonData = addApmData(onboardingLocator);
+  const addApmDataButtonProps = addApmDataProps(onboardingLocator);
 
-  if (!addApmButtonData.link) {
+  if (!addApmDataButtonProps.link) {
     return;
   }
 
@@ -71,10 +71,10 @@ export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataPro
       data-test-subj={props['data-test-subj']}
       size={size}
       onClick={props.onClick}
-      href={addApmButtonData?.link}
+      href={addApmDataButtonProps?.link}
       fill={fill}
     >
-      {addApmButtonData.name}
+      {addApmDataButtonProps.name}
     </EuiButton>
   );
 }
@@ -82,15 +82,15 @@ export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataPro
 export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
   return (
     <EuiButton
-      data-test-subj="associateServiceLogsButton"
+      data-test-subj="associateServiceLogsPropsButton"
       size="s"
       onClick={onClick}
-      href={associateServiceLogs.link}
+      href={associateServiceLogsProps.link}
       target="_blank"
       iconType="popout"
       iconSide="right"
     >
-      {associateServiceLogs.name}
+      {associateServiceLogsProps.name}
     </EuiButton>
   );
 }
@@ -101,12 +101,12 @@ export function CollectServiceLogs({ onClick }: { onClick?: () => void }) {
 
   return (
     <EuiButton
-      data-test-subj="collectServiceLogsButton"
+      data-test-subj="collectServiceLogsPropsButton"
       size="s"
       onClick={onClick}
-      href={basePath.prepend(collectServiceLogs.link)}
+      href={basePath.prepend(collectServiceLogsProps.link)}
     >
-      {collectServiceLogs.name}
+      {collectServiceLogsProps.name}
     </EuiButton>
   );
 }
