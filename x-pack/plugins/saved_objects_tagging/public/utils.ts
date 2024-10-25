@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from '@kbn/core/types';
-import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { Tag, tagSavedObjectTypeName } from '../common';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { Tag } from '../common/types';
+import { tagSavedObjectTypeName } from '../common';
 
 type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
 
