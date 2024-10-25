@@ -9,16 +9,18 @@
 
 import React, { FC } from 'react';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
+import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 interface Props {
   darkMode: DarkModeValue;
+  themeVersion: ThemeVersion;
   stylesheetPaths: string[];
 }
 
-export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
+export const Styles: FC<Props> = ({ darkMode, themeVersion, stylesheetPaths }) => {
   return (
     <>
-      {darkMode !== 'system' && <InlineStyles darkMode={darkMode} />}
+      {darkMode !== 'system' && <InlineStyles darkMode={darkMode} themeVersion={themeVersion} />}
       {stylesheetPaths.map((path) => (
         <link key={path} rel="stylesheet" type="text/css" href={path} />
       ))}
@@ -26,7 +28,24 @@ export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
   );
 };
 
-const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
+const InlineStyles: FC<{ darkMode: boolean; themeVersion: ThemeVersion }> = ({
+  darkMode,
+  themeVersion,
+}) => {
+  const themeStyles = {
+    v8: {
+      pageBackground: darkMode ? '#141519' : '#F8FAFD',
+      welcomeText: darkMode ? '#98A2B3' : '#69707D',
+      progress: darkMode ? '#25262E' : '#F5F7FA',
+      progressBefore: darkMode ? '#1BA9F5' : '#006DE4',
+    },
+    borealis: {
+      pageBackground: darkMode ? '#050F21' : '#F6F9FC',
+      welcomeText: darkMode ? '#546D95' : '#89A0C4',
+      progress: darkMode ? '#152640' : '#E0E6F1',
+      progressBefore: darkMode ? '#599DFF' : '#0B64DD',
+    },
+  };
   // must be kept in sync with
   // packages/core/apps/core-apps-server-internal/assets/legacy_theme.js
   /* eslint-disable react/no-danger */
@@ -36,19 +55,19 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
         __html: `
 
           html {
-            background-color: ${darkMode ? '#141519' : '#F8FAFD'}
+            background-color: ${themeStyles[themeVersion].pageBackground}
           }
 
           .kbnWelcomeText {
-            color: ${darkMode ? '#98A2B3' : '#69707D'};
+            color: ${themeStyles[themeVersion].welcomeText};
           }
 
           .kbnProgress {
-            background-color: ${darkMode ? '#25262E' : '#F5F7FA'};
+            background-color: ${themeStyles[themeVersion].progress};
           }
 
           .kbnProgress:before {
-            background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
+            background-color: ${themeStyles[themeVersion].progressBefore};
           }
 
         `,
