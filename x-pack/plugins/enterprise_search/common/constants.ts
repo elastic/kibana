@@ -234,6 +234,7 @@ PUT /connector-postgresql
 }
 
 # 2. Create a connector
+# NOTE: Change these values if you want to use another connector type
 PUT _connector/postgresql-id
 {
   "name": "My PostgreSQL connector",
