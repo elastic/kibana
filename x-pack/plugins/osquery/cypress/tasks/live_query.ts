@@ -147,6 +147,7 @@ export const viewRecentCaseAndCheckResults = () => {
   checkResults();
 };
 
+//
 export const checkActionItemsInResults = ({
   lens,
   discover,
@@ -158,6 +159,7 @@ export const checkActionItemsInResults = ({
   cases: boolean;
   timeline: boolean;
 }) => {
+  checkResults();
   cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
   cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
