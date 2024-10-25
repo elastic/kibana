@@ -8,5 +8,4 @@
 export { DragAndDropTextList } from './drag_and_drop_text_list';
 export { XJsonEditor } from './xjson_editor';
 export { TextEditor } from './text_editor';
-export { UnexpandedJsonEditor } from './unexpanded_json_editor';
 export { InputList } from './input_list';
