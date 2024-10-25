@@ -201,9 +201,9 @@ export const suggestionsApi = ({
   }
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-
-  if (newSuggestions.length > 1 && preferredChartType) {
-    const compatibleSuggestion = newSuggestions.find(
+  const suggestionsList = [activeVisualization, ...newSuggestions];
+  if (suggestionsList.length > 1 && preferredChartType) {
+    const compatibleSuggestion = suggestionsList.find(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
 
@@ -245,8 +245,6 @@ export const suggestionsApi = ({
     //   }
     // }
   }
-
-  const suggestionsList = [activeVisualization, ...newSuggestions];
 
   // if there is no preference from the user, send everything
   // until we separate the text based suggestions logic from the dataview one,
