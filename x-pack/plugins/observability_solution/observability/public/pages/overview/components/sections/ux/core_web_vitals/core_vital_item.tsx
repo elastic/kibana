@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiIconTip,
-  euiPaletteForStatus,
-  EuiSpacer,
-  EuiStat,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiIconTip, EuiSpacer, EuiStat } from '@elastic/eui';
+import { euiPaletteForStatus } from '@kbn/palettes';
+
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './palette_legends';

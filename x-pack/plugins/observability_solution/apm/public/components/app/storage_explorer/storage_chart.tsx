@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import {
   AreaSeries,
   Axis,

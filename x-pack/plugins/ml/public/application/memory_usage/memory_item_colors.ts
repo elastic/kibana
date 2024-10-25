@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { euiPaletteWarm } from '@elastic/eui';
 import {
   euiPaletteComplementary,
   euiPaletteForTemperature,
   euiPaletteGray,
   euiPaletteGreen,
-  euiPaletteWarm,
-} from '@elastic/eui';
+} from '@kbn/palettes';
 import type { MlSavedObjectType } from '../../../common/types/saved_objects';
 
 type MemoryItem = MlSavedObjectType | 'jvm-heap-size' | 'estimated-available-memory';

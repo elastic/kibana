@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DEFAULT_MAX_PALETTE_COLORS } from '@kbn/coloring';
 import type { AccessorConfig } from './types';
 
 export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorConfig }) {
@@ -36,7 +37,7 @@ export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorC
           }
         `}
         size="xs"
-        palette={accessorConfig.palette}
+        palette={accessorConfig.palette.slice(0, DEFAULT_MAX_PALETTE_COLORS)}
       />
     </div>
   );

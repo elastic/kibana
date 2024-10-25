@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  euiPaletteComplementary,
   EuiFormRow,
   EuiTitle,
   EuiText,
@@ -26,6 +25,8 @@ import {
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
+import { euiPaletteComplementary } from '@kbn/palettes';
+
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {

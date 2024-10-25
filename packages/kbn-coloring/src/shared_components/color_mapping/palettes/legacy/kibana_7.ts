@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorMapping } from '../config';
+import { i18n } from '@kbn/i18n';
+import { ColorMapping } from '../../config';
 
-export const EUI_AMSTERDAM_PALETTE_COLORS = [
+export const KIBANA_7_PALETTE_COLORS = [
   '#54b399',
   '#6092c0',
   '#d36086',
@@ -22,14 +23,16 @@ export const EUI_AMSTERDAM_PALETTE_COLORS = [
   '#e7664c',
 ];
 
-export const EUIAmsterdamColorBlindPalette: ColorMapping.CategoricalPalette = {
-  id: 'eui_amsterdam_color_blind',
-  name: 'Default',
-  colorCount: EUI_AMSTERDAM_PALETTE_COLORS.length,
+export const Kibana7Palette: ColorMapping.CategoricalPalette = {
+  id: 'eui_amsterdam_color_blind', // original id
+  name: i18n.translate('coloring.colorMapping.palettes.kibana7.name', {
+    defaultMessage: 'Kibana 7',
+  }),
+  colorCount: KIBANA_7_PALETTE_COLORS.length,
   type: 'categorical',
   getColor(indexInRange, isDarkMode, loop) {
-    return EUI_AMSTERDAM_PALETTE_COLORS[
-      loop ? indexInRange % EUI_AMSTERDAM_PALETTE_COLORS.length : indexInRange
+    return KIBANA_7_PALETTE_COLORS[
+      loop ? indexInRange % KIBANA_7_PALETTE_COLORS.length : indexInRange
     ];
   },
 };

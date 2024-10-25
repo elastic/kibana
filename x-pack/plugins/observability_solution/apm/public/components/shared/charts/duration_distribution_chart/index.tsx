@@ -25,7 +25,7 @@ import {
   TickFormatter,
 } from '@elastic/charts';
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 import { i18n } from '@kbn/i18n';
 

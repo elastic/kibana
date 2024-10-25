@@ -14,7 +14,17 @@ import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
-import { NeutralPalette } from '../../palettes/neutral';
+import { NeutralPalette } from '../../palettes';
+
+interface ColorPickerProps {
+  color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
+  getPaletteFn: ReturnType<typeof getPalette>;
+  palette: ColorMapping.CategoricalPalette;
+  isDarkMode: boolean;
+  close: () => void;
+  selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
+  deleteStep?: () => void;
+}
 
 export function ColorPicker({
   palette,
@@ -24,15 +34,7 @@ export function ColorPicker({
   selectColor,
   isDarkMode,
   deleteStep,
-}: {
-  color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  getPaletteFn: ReturnType<typeof getPalette>;
-  palette: ColorMapping.CategoricalPalette;
-  isDarkMode: boolean;
-  close: () => void;
-  selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
-  deleteStep?: () => void;
-}) {
+}: ColorPickerProps) {
   const [tab, setTab] = useState(
     color.type === 'categorical' &&
       (color.paletteId === palette.id || color.paletteId === NeutralPalette.id)

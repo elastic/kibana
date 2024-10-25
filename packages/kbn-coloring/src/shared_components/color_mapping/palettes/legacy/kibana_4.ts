@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorMapping } from '../config';
+import { i18n } from '@kbn/i18n';
+import { ColorMapping } from '../../config';
 
-export const KIBANA_V7_LEGACY_PALETTE_COLORS = [
+export const KIBANA_4_PALETTE_COLORS = [
   '#00a69b',
   '#57c17b',
   '#6f87d8',
@@ -19,14 +20,16 @@ export const KIBANA_V7_LEGACY_PALETTE_COLORS = [
   '#daa05d',
 ];
 
-export const KibanaV7LegacyPalette: ColorMapping.CategoricalPalette = {
-  id: 'kibana_v7_legacy',
-  name: 'Kibana Legacy',
-  colorCount: KIBANA_V7_LEGACY_PALETTE_COLORS.length,
+export const Kibana4Palette: ColorMapping.CategoricalPalette = {
+  id: 'kibana_v7_legacy', // original id
+  name: i18n.translate('coloring.colorMapping.palettes.kibana4.name', {
+    defaultMessage: 'Kibana 4',
+  }),
+  colorCount: KIBANA_4_PALETTE_COLORS.length,
   type: 'categorical',
   getColor(indexInRange, isDarkMode, loop) {
-    return KIBANA_V7_LEGACY_PALETTE_COLORS[
-      loop ? indexInRange % KIBANA_V7_LEGACY_PALETTE_COLORS.length : indexInRange
+    return KIBANA_4_PALETTE_COLORS[
+      loop ? indexInRange % KIBANA_4_PALETTE_COLORS.length : indexInRange
     ];
   },
 };

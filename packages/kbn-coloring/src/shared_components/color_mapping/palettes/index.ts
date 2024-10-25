@@ -8,21 +8,39 @@
  */
 
 import { ColorMapping } from '../config';
-import { ElasticBrandPalette } from './elastic_brand';
-import { EUIAmsterdamColorBlindPalette } from './eui_amsterdam';
-import { KibanaV7LegacyPalette } from './kibana_legacy';
-import { NeutralPalette } from './neutral';
+import { NeutralPalette, ElasticPalette } from './categorical';
+import {
+  CoolPalette,
+  GrayPalette,
+  RedPalette,
+  GreenPalette,
+  TemperaturePalette,
+  ComplementaryPalette,
+} from './gradient';
+import { ElasticClassicPalette, Kibana7Palette, Kibana4Palette } from './legacy';
 
-export const AVAILABLE_PALETTES = new Map<string, ColorMapping.CategoricalPalette>([
-  [EUIAmsterdamColorBlindPalette.id, EUIAmsterdamColorBlindPalette],
-  [ElasticBrandPalette.id, ElasticBrandPalette],
-  [KibanaV7LegacyPalette.id, KibanaV7LegacyPalette],
-  [NeutralPalette.id, NeutralPalette],
-]);
+export const CATEGORICAL_PALETTES = [ElasticPalette, NeutralPalette];
+export const GRADIENT_PALETTES = [
+  CoolPalette,
+  GrayPalette,
+  RedPalette,
+  GreenPalette,
+  TemperaturePalette,
+  ComplementaryPalette,
+];
+export const LEGACY_PALETTES = [Kibana7Palette, Kibana4Palette, ElasticClassicPalette];
+
+export const AVAILABLE_PALETTES = new Map<string, ColorMapping.CategoricalPalette>(
+  [
+    ...CATEGORICAL_PALETTES,
+    // ...GRADIENT_PALETTES, // exclude for now
+    ...LEGACY_PALETTES,
+  ].map((p) => [p.id, p])
+);
 
 /**
- * This function should be instanciated once at the root of the component with the available palettes and
- * a choosed default one and shared across components to keep a single point of truth of the available palettes and the default
+ * This function should be instantiated once at the root of the component with the available palettes and
+ * a choose default one and shared across components to keep a single point of truth of the available palettes and the default
  * one.
  */
 export function getPalette(
@@ -32,7 +50,6 @@ export function getPalette(
   return (paletteId) => palettes.get(paletteId) ?? defaultPalette;
 }
 
-export * from './eui_amsterdam';
-export * from './elastic_brand';
-export * from './kibana_legacy';
-export * from './neutral';
+export * from './categorical';
+export * from './gradient';
+export * from './legacy';

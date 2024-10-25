@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  euiPaletteForStatus,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText, EuiToolTip } from '@elastic/eui';
+import { euiPaletteForStatus } from '@kbn/palettes';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';

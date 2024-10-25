@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 const thresholdLineDefaults = {
   show: false,

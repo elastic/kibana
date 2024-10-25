@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { EsqlQuery, Walker } from '@kbn/esql-ast';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { Annotation } from '../annotations';
 
 const palette = euiPaletteColorBlind();

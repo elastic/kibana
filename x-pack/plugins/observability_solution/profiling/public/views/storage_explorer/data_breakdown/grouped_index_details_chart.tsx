@@ -6,7 +6,8 @@
  */
 
 import { Chart, Datum, Partition, Position, Settings } from '@elastic/charts';
-import { euiPaletteColorBlind, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';

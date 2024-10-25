@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorMapping } from '../config';
+import { i18n } from '@kbn/i18n';
+import { ColorMapping } from '../../config';
 
-export const ELASTIC_BRAND_PALETTE_COLORS = [
+export const ELASTIC_CLASSIC_PALETTE_COLORS = [
   '#20377d',
   '#7de2d1',
   '#ff957d',
@@ -18,14 +19,16 @@ export const ELASTIC_BRAND_PALETTE_COLORS = [
   '#fec514',
 ];
 
-export const ElasticBrandPalette: ColorMapping.CategoricalPalette = {
-  id: 'elastic_brand_2023',
-  name: 'Elastic Brand',
-  colorCount: ELASTIC_BRAND_PALETTE_COLORS.length,
+export const ElasticClassicPalette: ColorMapping.CategoricalPalette = {
+  id: 'elastic_brand_2023', // original id
+  name: i18n.translate('coloring.colorMapping.palettes.classic.name', {
+    defaultMessage: 'Elastic classic',
+  }),
+  colorCount: ELASTIC_CLASSIC_PALETTE_COLORS.length,
   type: 'categorical',
   getColor(indexInRange, isDarkMode, loop) {
-    return ELASTIC_BRAND_PALETTE_COLORS[
-      loop ? indexInRange % ELASTIC_BRAND_PALETTE_COLORS.length : indexInRange
+    return ELASTIC_CLASSIC_PALETTE_COLORS[
+      loop ? indexInRange % ELASTIC_CLASSIC_PALETTE_COLORS.length : indexInRange
     ];
   },
 };

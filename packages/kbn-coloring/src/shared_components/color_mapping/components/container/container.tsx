@@ -20,7 +20,7 @@ import { getPalette } from '../../palettes';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
-import { NeutralPalette } from '../../palettes/neutral';
+import { NeutralPalette } from '../../palettes';
 import { ScaleMode } from '../palette_selector/scale';
 import { UnassignedTermsConfig } from './unassigned_terms_config';
 import { AssignmentsConfig } from './assigments';
@@ -57,6 +57,9 @@ export function Container({
           <EuiFlexItem>
             <PaletteSelector
               palettes={palettes}
+              // Show all palettes on gradient mode for now
+              // paletteType={colorMode.type === 'categorical' ? 'categorical' : undefined}
+              paletteType="categorical"
               getPaletteFn={getPaletteFn}
               isDarkMode={isDarkMode}
             />

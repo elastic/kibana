@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, euiPaletteColorBlind, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
 import { css } from '@emotion/react';

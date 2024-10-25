@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LegacyMetricState } from '@kbn/lens-plugin/common';
-import { euiPaletteForStatus } from '@elastic/eui';
+import { euiPaletteForStatus } from '@kbn/palettes';
 import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,

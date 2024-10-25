@@ -14,7 +14,7 @@
  * @param {Integer} index: index of the chart series, 0-3
  * @returns {String} Hex color to use for chart series at the given index
  */
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 export function getColor(app, index) {
   let seriesColors;

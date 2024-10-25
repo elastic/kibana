@@ -13,7 +13,7 @@ import {
   ColorStaticStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { COLOR_MAP_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../../../common/constants';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 const blue = '#0000ff';
 const yellow = '#ffff00';

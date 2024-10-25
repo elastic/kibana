@@ -40,6 +40,7 @@ interface ColorPickerSwatchProps {
   isDarkMode: boolean;
   forType: 'assignment' | 'specialAssignment' | 'gradient';
 }
+
 export const ColorSwatch = ({
   colorMode,
   assignmentColor,
@@ -151,7 +152,6 @@ export const ColorSwatch = ({
         close={() => dispatch(hideColorPickerVisibility())}
         isDarkMode={isDarkMode}
         selectColor={(color) => {
-          // dispatch update
           onColorChange(color);
         }}
         deleteStep={

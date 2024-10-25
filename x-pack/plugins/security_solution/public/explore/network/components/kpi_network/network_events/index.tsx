@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 import type { StatItems } from '../../../../components/stat_items';
 import type { NetworkKpiProps } from '../types';

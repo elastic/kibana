@@ -11,11 +11,11 @@ import {
   EuiFieldNumber,
   htmlIdGenerator,
   EuiColorPicker,
-  euiPaletteColorBlind,
   EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';

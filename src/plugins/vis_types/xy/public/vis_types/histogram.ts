@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';

@@ -93,7 +93,7 @@ export const getThemeSettings = (
       name: i18n.translate('core.ui_settings.params.themeNameTitle', {
         defaultMessage: 'Theme name',
       }),
-      value: 'amsterdam',
+      value: 'borealis',
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),

@@ -13,11 +13,12 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
   EuiIcon,
-  euiPaletteColorBlind,
   EuiScreenReaderOnly,
   EuiFlexGroup,
   useEuiTheme,
 } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lightenColor } from '../../services/palettes/lighten_color';
 

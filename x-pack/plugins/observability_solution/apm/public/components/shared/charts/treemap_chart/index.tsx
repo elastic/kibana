@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { Chart, Datum, Partition, PartitionLayout } from '@elastic/charts';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';

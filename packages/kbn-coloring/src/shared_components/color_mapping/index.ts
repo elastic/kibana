@@ -19,6 +19,7 @@ export * from './palettes';
 export * from './color/color_handling';
 export { SPECIAL_TOKENS_STRING_CONVERSION, getSpecialString } from './color/rule_matching';
 export {
+  DEFAULT_MAX_PALETTE_COLORS,
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
   getPaletteColors,

@@ -21,8 +21,8 @@ import {
   EuiIconTip,
   RIGHT_ALIGNMENT,
   useEuiTheme,
-  euiPaletteColorBlind,
 } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';

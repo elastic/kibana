@@ -22,7 +22,8 @@ import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, euiPaletteColorBlind, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 const HIGHLIGHTED_FIELD_PROPS = {

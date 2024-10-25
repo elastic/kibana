@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import moment from 'moment';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];

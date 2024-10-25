@@ -13,7 +13,7 @@ import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunctio
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { i18n } from '@kbn/i18n';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';

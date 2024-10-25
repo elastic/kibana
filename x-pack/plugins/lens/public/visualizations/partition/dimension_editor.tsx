@@ -184,6 +184,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                       onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
                       palettes={AVAILABLE_PALETTES}
+                      paletteType="categorical"
                       data={{
                         type: 'categories',
                         categories: splitCategories,

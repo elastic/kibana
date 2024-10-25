@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { MutableRefObject } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
-import { FIXED_PROGRESSION } from '@kbn/coloring';
+import { DEFAULT_MAX_PALETTE_COLORS, FIXED_PROGRESSION } from '@kbn/coloring';
 
 import { css } from '@emotion/react';
 import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
@@ -28,7 +28,7 @@ export function PalettePanelContainer(props: {
           <EuiFlexItem>
             <EuiColorPaletteDisplay
               data-test-subj="lns_dynamicColoring_edit"
-              palette={props.palette}
+              palette={props.palette.slice(0, DEFAULT_MAX_PALETTE_COLORS)}
               type={FIXED_PROGRESSION}
               onClick={onClick}
               css={css`

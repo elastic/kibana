@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiPaletteForStatus } from '@elastic/eui';
+import { euiPaletteForStatus } from '@kbn/palettes';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,

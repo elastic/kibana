@@ -6,7 +6,7 @@
  */
 
 import type { Feature, Point } from 'geojson';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { LAYER_TYPE, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import { DEFAULT_GEO_REGEX } from './geo_point_content';
 

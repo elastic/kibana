@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type {

@@ -15,6 +15,7 @@ import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
 import { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
+import { PaletteType } from './config/types';
 
 export interface ColorMappingInputCategoricalData {
   type: 'categories';
@@ -45,6 +46,10 @@ export interface ColorMappingProps {
   model: ColorMapping.Config;
   /** A map of paletteId and palette configuration */
   palettes: Map<string, ColorMapping.CategoricalPalette>;
+  /**
+   * specifies palette types to pick from palettes
+   */
+  paletteType?: PaletteType;
   /** A data description of what needs to be colored */
   data: ColorMappingInputData;
   /** Theme dark mode */

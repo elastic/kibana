@@ -10,14 +10,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import {
-  EuiFormRow,
-  EuiColorPicker,
-  EuiColorPickerProps,
-  EuiToolTip,
-  EuiIcon,
-  euiPaletteColorBlind,
-} from '@elastic/eui';
+import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
+
 import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
 
 const tooltipContent = {

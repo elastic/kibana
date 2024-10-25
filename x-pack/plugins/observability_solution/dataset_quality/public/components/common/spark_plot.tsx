@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingChart,
-  euiPaletteColorBlind,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../common/types';

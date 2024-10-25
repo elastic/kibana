@@ -29,7 +29,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  euiPaletteCool,
   EuiPanel,
   EuiRange,
   EuiSelect,
@@ -41,6 +40,7 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { dictionaryValidator } from '@kbn/ml-validators';
+import { euiPaletteCool } from '@kbn/palettes';
 import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';

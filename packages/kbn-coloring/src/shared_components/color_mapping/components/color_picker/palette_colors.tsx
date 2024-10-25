@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palettes';
+import { getPalette, NeutralPalette } from '../../palettes';
 import { isSameColor } from '../../color/color_math';
-import { NeutralPalette } from '../../palettes/neutral';
+import { DEFAULT_MAX_PALETTE_COLORS } from '../../config/default_color_mapping';
 
 export function PaletteColors({
   palette,
@@ -37,9 +37,12 @@ export function PaletteColors({
   getPaletteFn: ReturnType<typeof getPalette>;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
 }) {
-  const colors = Array.from({ length: palette.colorCount }, (d, i) => {
-    return palette.getColor(i, isDarkMode, false);
-  });
+  const colors = Array.from(
+    { length: Math.min(palette.colorCount, DEFAULT_MAX_PALETTE_COLORS) },
+    (d, i) => {
+      return palette.getColor(i, isDarkMode, false);
+    }
+  );
   const neutralColors = Array.from({ length: NeutralPalette.colorCount }, (d, i) => {
     return NeutralPalette.getColor(i, isDarkMode, false);
   });

@@ -11,7 +11,8 @@ import type { PaletteDefinition } from '@kbn/coloring';
 import { createColorPalette as createLegacyColorPalette } from '../..';
 import { buildPalettes } from './palettes';
 import { colorsServiceMock } from '../legacy_colors/mock';
-import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
+import { euiPaletteColorBlindBehindText } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 describe('palettes', () => {
   const palettes: Record<string, PaletteDefinition> = buildPalettes(colorsServiceMock);

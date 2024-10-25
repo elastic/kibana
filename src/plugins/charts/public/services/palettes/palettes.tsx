@@ -10,17 +10,28 @@
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 import {
-  euiPaletteColorBlind,
+  // euiPaletteCool,
+  // euiPaletteGray,
+  // euiPaletteRed,
+  // euiPaletteGreen,
+  // euiPaletteWarm,
+  // euiPaletteForStatus,
+  // euiPaletteForTemperature,
+  // euiPaletteComplementary,
+  // euiPaletteColorBlind,
+  euiPaletteColorBlindBehindText,
+} from '@elastic/eui';
+import {
   euiPaletteCool,
   euiPaletteGray,
   euiPaletteRed,
   euiPaletteGreen,
-  euiPaletteWarm,
+  // euiPaletteWarm,
   euiPaletteForStatus,
   euiPaletteForTemperature,
   euiPaletteComplementary,
-  euiPaletteColorBlindBehindText,
-} from '@elastic/eui';
+  euiPaletteColorBlind,
+} from '@kbn/palettes';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
 import { ChartsPluginSetup, createColorPalette as createLegacyColorPalette } from '../..';
@@ -292,10 +303,10 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),
       ...buildGradient('cool', euiPaletteCool),
     },
-    warm: {
-      title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'Warm' }),
-      ...buildGradient('warm', euiPaletteWarm),
-    },
+    // warm: {
+    //   title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'Warm' }),
+    //   ...buildGradient('warm', euiPaletteWarm),
+    // },
     gray: {
       title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'Gray' }),
       ...buildGradient('gray', euiPaletteGray),

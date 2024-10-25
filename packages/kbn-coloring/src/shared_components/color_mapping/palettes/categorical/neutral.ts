@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorMapping } from '../config';
+import { ColorMapping } from '../../config';
 
-const schemeGreys = ['#f2f4fb', '#d4d9e5', '#98a2b3', '#696f7d', '#353642'];
+// const schemeGreys = ['#F5F9FE', '#CED4DE', '#959FAF', '#626D7E', '#303845'];
+const schemeGreys = ['#F6F9FC', '#D0D4DA', '#989FAA', '#666D78', '#373D45'];
 export const NEUTRAL_COLOR_LIGHT = schemeGreys.slice();
 export const NEUTRAL_COLOR_DARK = schemeGreys.slice().reverse();
 

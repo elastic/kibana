@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import React from 'react';
 import type { StatItems } from '../../../../components/stat_items';
 import { KpiBaseComponent } from '../../../../components/kpi';

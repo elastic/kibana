@@ -8,11 +8,13 @@
  */
 
 import { ColorMapping } from '.';
-import { AVAILABLE_PALETTES, getPalette } from '../palettes';
-import { EUIAmsterdamColorBlindPalette } from '../palettes/eui_amsterdam';
-import { NeutralPalette } from '../palettes/neutral';
+import { AVAILABLE_PALETTES, NeutralPalette, ElasticPalette, getPalette } from '../palettes';
 import { getColor, getGradientColorScale } from '../color/color_handling';
 
+/**
+ * Max colors to display in palette strips
+ */
+export const DEFAULT_MAX_PALETTE_COLORS = 10;
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
 
@@ -32,7 +34,7 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       touched: false,
     },
   ],
-  paletteId: EUIAmsterdamColorBlindPalette.id,
+  paletteId: ElasticPalette.id,
   colorMode: {
     type: 'categorical',
   },

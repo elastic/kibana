@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import moment from 'moment';
 
 import {

@@ -12,7 +12,7 @@ import schemaParser from 'vega-schema-url-parser';
 import semVerCompare from 'semver/functions/compare';
 import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 

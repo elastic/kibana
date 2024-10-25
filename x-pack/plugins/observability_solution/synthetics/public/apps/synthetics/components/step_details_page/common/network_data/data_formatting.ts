@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@kbn/palettes';
 
 import { MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';

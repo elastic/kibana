@@ -120,6 +120,7 @@ export function ColorMappingByTerms({
                   onModelUpdate={setColorMapping}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   palettes={AVAILABLE_PALETTES}
+                  paletteType="categorical"
                   data={{
                     type: 'categories',
                     categories,

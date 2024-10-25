@@ -16,16 +16,22 @@ import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
 import { getPalette } from '../../palettes';
+import { DEFAULT_MAX_PALETTE_COLORS } from '../../config/default_color_mapping';
+import { PaletteType } from '../../config/types';
+
+interface PaletteSelectorProps {
+  getPaletteFn: ReturnType<typeof getPalette>;
+  palettes: Map<string, ColorMapping.CategoricalPalette>;
+  isDarkMode: boolean;
+  paletteType?: PaletteType;
+}
 
 export function PaletteSelector({
   palettes,
   getPaletteFn,
   isDarkMode,
-}: {
-  getPaletteFn: ReturnType<typeof getPalette>;
-  palettes: Map<string, ColorMapping.CategoricalPalette>;
-  isDarkMode: boolean;
-}) {
+  paletteType,
+}: PaletteSelectorProps) {
   const dispatch = useDispatch();
   const model = useSelector((state: RootState) => state.colorMapping);
 
@@ -98,14 +104,18 @@ export function PaletteSelector({
           data-test-subj="kbnColoring_ColorMapping_PalettePicker"
           fullWidth
           palettes={[...palettes.values()]
-            .filter((d) => d.name !== 'Neutral')
+            .filter((p) => p.name !== 'Neutral')
+            .filter(paletteType ? (p) => p.type === paletteType : () => true)
             .map((palette) => ({
               'data-test-subj': `kbnColoring_ColorMapping_Palette-${palette.id}`,
               value: palette.id,
               title: palette.name,
-              palette: Array.from({ length: palette.colorCount }, (_, i) => {
-                return palette.getColor(i, isDarkMode, false);
-              }),
+              palette: Array.from(
+                { length: Math.min(palette.colorCount, DEFAULT_MAX_PALETTE_COLORS) },
+                (_, i) => {
+                  return palette.getColor(i, isDarkMode, false);
+                }
+              ),
               type: 'fixed',
             }))}
           onChange={(selectedPaletteId) => {

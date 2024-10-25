@@ -6,13 +6,20 @@
  */
 
 import {
-  euiPaletteCool,
+  // euiPaletteCool,
+  // euiPaletteForStatus,
+  // euiPaletteForTemperature,
+  // euiPaletteRed,
+  // euiPaletteGreen,
+  euiPaletteWarm,
+} from '@elastic/eui';
+import {
   euiPaletteForStatus,
   euiPaletteForTemperature,
   euiPaletteRed,
   euiPaletteGreen,
-  euiPaletteWarm,
-} from '@elastic/eui';
+  euiPaletteCool,
+} from '@kbn/palettes';
 import { InventoryColorPalette } from '../../../../common/inventory/types';
 
 const createColorPalette = (name: InventoryColorPalette = 'cool', steps: number = 10) => {

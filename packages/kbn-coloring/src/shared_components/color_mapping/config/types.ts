@@ -139,6 +139,8 @@ export interface GradientColorMode {
   sort: 'asc' | 'desc';
 }
 
+export type PaletteType = 'categorical' | 'gradient';
+
 export interface Config {
   paletteId: string;
   colorMode: CategoricalColorMode | GradientColorMode;
@@ -154,7 +156,7 @@ export interface Config {
 export interface CategoricalPalette {
   id: string;
   name: string;
-  type: 'categorical';
+  type: PaletteType;
   colorCount: number;
   getColor: (valueInRange: number, isDarkMode: boolean, loop: boolean) => string;
 }
