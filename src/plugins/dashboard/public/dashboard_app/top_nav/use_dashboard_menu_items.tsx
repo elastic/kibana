@@ -8,7 +8,6 @@
  */
 
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
-import { batch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -42,9 +41,6 @@ export const useDashboardMenuItems = ({
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
-  /**
-   * Unpack dashboard state from redux
-   */
   const dashboardApi = useDashboardApi();
 
   const [dashboardTitle, hasOverlays, hasRunMigrations, hasUnsavedChanges, lastSavedId, viewMode] =
@@ -110,15 +106,13 @@ export const useDashboardMenuItems = ({
         switchModes?.();
         return;
       }
-      confirmDiscardUnsavedChanges(() => {
-        batch(async () => {
-          setIsResetting(true);
-          await dashboardApi.asyncResetToLastSavedState();
-          if (isMounted()) {
-            setIsResetting(false);
-            switchModes?.();
-          }
-        });
+      confirmDiscardUnsavedChanges(async () => {
+        setIsResetting(true);
+        await dashboardApi.asyncResetToLastSavedState();
+        if (isMounted()) {
+          setIsResetting(false);
+          switchModes?.();
+        }
       }, viewMode as ViewMode);
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
