@@ -1741,17 +1741,17 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_126_010.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_126_panels_01.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_theme_borealis_0.0.1_126_010.tgz#0a1216118c989bcb58447133028b7de81f78c06c"
+  resolved "file:./elastic_eui_theme_borealis_0.0.1_126_panels_01.tgz#f024a262e867f01ecc8e7393e795ee6add098142"
 
-"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_126_007.tgz":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_126_panels_01.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_theme_common_0.0.1_126_007.tgz#8131ec79992530787346857411739fb69b32d979"
+  resolved "file:./elastic_eui_theme_common_0.0.1_126_panels_01.tgz#8bcc5b1ea8846425641bf4b7c5060514fbe91711"
 
-"@elastic/eui@file:./elastic_eui_97.0.0_126_007.tgz":
+"@elastic/eui@file:./elastic_eui_97.0.0_126_panels_01.tgz":
   version "97.0.0"
-  resolved "file:./elastic_eui_97.0.0_126_007.tgz#8ba96701607ec69f6b95ecd87991c1d96388a1c9"
+  resolved "file:./elastic_eui_97.0.0_126_panels_01.tgz#c8744e73129d39c0d8ef4f47b4c9641aa710e39b"
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
