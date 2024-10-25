@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ProjectAnnotations, Renderer } from '@storybook/types';
+import type { ProjectAnnotations } from '@storybook/types';
+import type { ReactRenderer } from '@storybook/react';
 
 import { decorators } from './decorators';
 
-const preview: ProjectAnnotations<Renderer> = {
+const preview: ProjectAnnotations<ReactRenderer> = {
   decorators,
   initialGlobals: { euiTheme: 'v8.light' },
 };
