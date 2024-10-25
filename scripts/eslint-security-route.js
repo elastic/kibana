@@ -67,7 +67,7 @@ const PR_DESCRIPTION_TEXT_AUTHORIZED = `
 This PR migrates \`access:<privilege>\` tags used in route definitions to new security configuration.
 Please refer to the documentation for more information: [Authorization API](https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-api-authorization)
 
-### **Before Migration:**
+### **Before migration:**
 Access control tags were defined in the \`options\` object of the route:
 
 \`\`\`ts
@@ -80,7 +80,7 @@ router.get({
 }, handler);
 \`\`\`
 
-### **After Migration:**
+### **After migration:**
 Tags have been replaced with the more robust \`security.authz.requiredPrivileges\` field under \`security\`:
 
 \`\`\`ts
@@ -112,7 +112,7 @@ const PR_DESCRIPTION_TEXT_UNAUTHORIZED = `
 This PR migrates unauthorized routes owned by your team to a new security configuration.
 Please refer to the documentation for more information: [Authorization API](https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-api-authorization)
 
-### **Before Migration:**
+### **Before migration:**
 \`\`\`ts
 router.get({
   path: '/api/path',
@@ -120,7 +120,7 @@ router.get({
 }, handler);
 \`\`\`
 
-### **After Migration:**
+### **After migration:**
 \`\`\`ts
 router.get({
   path: '/api/path',
@@ -318,6 +318,7 @@ function processChangesByOwners(ownerFilesMap) {
     }
   } catch (error) {
     console.error('Error processing changes:', error);
+  } finally {
     console.log('Deleting any created branches:');
     runCommand(
       "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
