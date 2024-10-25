@@ -29,11 +29,7 @@ describe('editor menu', () => {
     const { api } = buildMockDashboardApi();
     render(<EditorMenu createNewVisType={jest.fn()} />, {
       wrapper: ({ children }) => {
-        return (
-          <DashboardContext.Provider value={api}>
-            {children}
-          </DashboardContext.Provider>
-        );
+        return <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>;
       },
     });
   });

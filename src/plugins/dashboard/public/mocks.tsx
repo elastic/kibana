@@ -9,11 +9,11 @@
 
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardStart } from './plugin';
 import { DashboardState } from './dashboard_api/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { DashboardPanelState } from '../common';
-import { DEFAULT_DASHBOARD_INPUT } from './dashboard_constants';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -93,19 +93,20 @@ export function buildMockDashboardApi({
       newDashboardCreated: savedObjectId === undefined,
       dashboardId: savedObjectId,
       managed: false,
-      dashboardInput: initialState,
+      dashboardInput: {
+        ...initialState,
+        viewMode: initialState.viewMode as ViewMode,
+        id: savedObjectId ?? '123',
+      },
       anyMigrationRun: false,
       references: [],
-      fullScreenMode: false,
-    }
+    },
   });
   results.internalApi.setControlGroupApi(mockControlGroupApi);
   return results;
 }
 
-export function getSampleDashboardState(
-  overrides?: Partial<DashboardState>
-): DashboardState {
+export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {
   return {
     // options
     useMargins: true,
