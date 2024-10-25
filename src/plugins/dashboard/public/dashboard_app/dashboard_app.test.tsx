@@ -18,7 +18,6 @@ import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
-import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../dashboard_container/external_api/lazy_dashboard_renderer');
 jest.mock('../dashboard_top_nav');
