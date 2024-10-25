@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createResourceInstallationHelper,
   errorResult,
-  InitializationPromise,
+  InitializationState,
   ResourceInstallationHelper,
   successResult,
   calculateDelay,
@@ -54,7 +54,7 @@ const getCommonInitPromise = async (
   resolution: boolean,
   timeoutMs: number = 1,
   customLogString: string = ''
-): Promise<InitializationPromise> => {
+): Promise<InitializationState> => {
   if (timeoutMs < 0) {
     throw new Error('fail');
   }

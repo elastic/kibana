@@ -50,7 +50,6 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             request,
             response,
           });
-
           if (checkResponse) {
             return checkResponse;
           }
