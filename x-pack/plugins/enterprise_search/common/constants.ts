@@ -218,9 +218,9 @@ export const CREATE_CONNECTOR_PLUGIN = {
   --index-language en
   --from-file config.yml
   `,
-  CONSOLE_SNIPPET: dedent` # This is an example of how to create a PostgreSQL connector using the 
-# API and its related resources like an index and an API key. This
-# process is an alternative to use the current UI guided creation flow.
+  CONSOLE_SNIPPET: dedent` # Example of how to create a PostgreSQL connector using the API
+# This also creates related resources like an index and an API key.
+# This is an alternative to using the UI creation flow.
 
 # 1. Create an index
 PUT /connector-postgresql
