@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(resp.body).to.eql({
             elasticsearchIndicesCreated: { kibana_sample_data_flights: 13014 },
-            kibanaSavedObjectsLoaded: 8,
+            kibanaSavedObjectsLoaded: 7,
           });
         });
 
