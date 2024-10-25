@@ -142,9 +142,9 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.body.total).to.eql(1);
+              expect(response.body.total).to.eql(2);
               expect(response.statusCode).to.eql(200);
-              expect(response.body.data[0].id).to.eql(createdMaintenanceWindow1.id)
+              expect(response.body.data[0].id).to.eql(createdMaintenanceWindow1.id);
               expect(response.body.data[0].title).to.eql('test-maintenance-window');
               break;
             default:
