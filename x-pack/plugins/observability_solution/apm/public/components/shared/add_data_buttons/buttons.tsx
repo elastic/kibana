@@ -62,20 +62,20 @@ export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataPro
 
   const addApmButtonData = addApmData(onboardingLocator);
 
+  if (!addApmButtonData.link) {
+    return;
+  }
+
   return (
-    <>
-      {addApmButtonData.link && (
-        <EuiButton
-          data-test-subj={props['data-test-subj']}
-          size={size}
-          onClick={props.onClick}
-          href={addApmButtonData?.link}
-          fill={fill}
-        >
-          {addApmButtonData.name}
-        </EuiButton>
-      )}
-    </>
+    <EuiButton
+      data-test-subj={props['data-test-subj']}
+      size={size}
+      onClick={props.onClick}
+      href={addApmButtonData?.link}
+      fill={fill}
+    >
+      {addApmButtonData.name}
+    </EuiButton>
   );
 }
 
