@@ -94,7 +94,7 @@ describe(
       closeAllToasts();
 
       changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
-      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
       cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
