@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { getDefaultFleetServerpolicyId } from '../../../../../../common/services/agent_policies_helpers';
 import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
-import { sendCreateAgentPolicy, sendGetOneAgentPolicy, useStartServices } from '../../../hooks';
+import {
+  sendCreateAgentPolicy,
+  sendGetOneAgentPolicy,
+  useFleetStatus,
+  useStartServices,
+} from '../../../hooks';
 import type { NewAgentPolicy } from '../../../types';
 import type { FleetServerHost } from '../../../types';
 import { useServiceToken } from '../../../hooks/use_service_token';
@@ -69,6 +74,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     setFleetServerHost,
     inputs,
   } = useFleetServerHost();
+  const { spaceId } = useFleetStatus();
 
   // When a validation error is surfaced from the Fleet Server host form, we want to treat it
   // the same way we do errors from the service token or policy creation steps
@@ -81,10 +87,9 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   const { fleetServerPolicyId, setFleetServerPolicyId } = useSelectFleetServerPolicy();
   const { serviceToken, generateServiceToken } = useServiceToken();
 
-  // TODO pass spaceID
   const quickStartFleetServerPolicyFields = useMemo(
-    () => getQuickStartFleetServerPolicyFields(),
-    []
+    () => getQuickStartFleetServerPolicyFields(spaceId),
+    [spaceId]
   );
 
   const submit = useCallback(async () => {
