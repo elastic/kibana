@@ -60,6 +60,10 @@ info:
 
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0
     International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+
+    This documentation contains work-in-progress information for future Elastic
+    Stack releases.
   title: Kibana APIs
   version: 1.0.2
   x-doc-license:
@@ -57266,9 +57270,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -57420,9 +57422,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
