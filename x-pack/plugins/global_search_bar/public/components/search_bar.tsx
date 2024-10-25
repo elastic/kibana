@@ -220,7 +220,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         });
       }
     },
-    350,
+    25,
     [searchValue, loadSuggestions, searchableTypes, initialLoad]
   );
 
