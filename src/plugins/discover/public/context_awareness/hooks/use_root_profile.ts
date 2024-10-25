@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 /**
@@ -18,24 +18,24 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
  */
 export const useRootProfile = () => {
   const { profilesManager, core } = useDiscoverServices();
-  const solutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
   const [rootProfileLoading, setRootProfileLoading] = useState(true);
 
   useEffect(() => {
-    let aborted = false;
-
-    setRootProfileLoading(true);
-
-    profilesManager.resolveRootProfile({ solutionNavId }).then(() => {
-      if (!aborted) {
-        setRootProfileLoading(false);
-      }
-    });
+    const subscription = core.chrome
+      .getActiveSolutionNavId$()
+      .pipe(
+        distinctUntilChanged(),
+        filter((id) => id !== undefined),
+        tap(() => setRootProfileLoading(true)),
+        switchMap((id) => profilesManager.resolveRootProfile({ solutionNavId: id })),
+        tap(() => setRootProfileLoading(false))
+      )
+      .subscribe();
 
     return () => {
-      aborted = true;
+      subscription.unsubscribe();
     };
-  }, [profilesManager, solutionNavId]);
+  }, [core.chrome, profilesManager]);
 
   return { rootProfileLoading };
 };
