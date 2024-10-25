@@ -293,7 +293,6 @@ export class ConnectorUsageReportingTask {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
         ca: this.caCertificate,
       }),
     });
