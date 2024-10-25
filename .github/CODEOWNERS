@@ -1142,10 +1142,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
 
-# Observability
+# Observability UI
+/x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/observability-ui @elastic/appex-qa
+/x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 
 ### Observability Plugins
-
 
 # Observability AI Assistant
 x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
