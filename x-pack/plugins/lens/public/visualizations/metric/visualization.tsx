@@ -13,7 +13,6 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { isEqual } from 'lodash';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
@@ -584,11 +583,6 @@ export const getMetricVisualization = ({
       noPanelTitle: false,
       noPadding: true,
     };
-  },
-
-  areLayersEqual(state1, state2) {
-    state1 = { ...state1, layerId: state2.layerId };
-    return isEqual(state1, state2);
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {

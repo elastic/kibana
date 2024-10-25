@@ -21,7 +21,6 @@ import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/con
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
-import { isEqual } from 'lodash';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -533,13 +532,6 @@ export const getPieVisualization = ({
 
   LayerSettingsComponent(props) {
     return <LayerSettings {...props} />;
-  },
-
-  areLayersEqual(state1, state2) {
-    state1.layers = state1.layers.map((layer, index) => {
-      return { ...layer, layerId: state2.layers[index].layerId };
-    });
-    return isEqual(state1.layers, state2.layers);
   },
 
   getSuggestionFromConvertToLensContext(props) {

@@ -11,7 +11,7 @@ import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_h
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from './types';
 import type { DataViewsState } from './state_management';
 import type { TypedLensByValueInput } from './embeddable/embeddable_component';
-import type { XYState, PieVisualizationState } from '.';
+// import type { XYState, PieVisualizationState } from '.';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -23,35 +23,35 @@ interface SuggestionsApiProps {
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
 
-const findPreferredSuggestion = ({
-  suggestionsList,
-  visAttributes,
-}: {
-  suggestionsList: Suggestion[];
-  visAttributes: TypedLensByValueInput['attributes'];
-}): Suggestion | undefined => {
-  const preferredChartType = visAttributes?.visualizationType;
-  if (suggestionsList.length === 1) {
-    return suggestionsList[0];
-  }
+// const findPreferredSuggestion = ({
+//   suggestionsList,
+//   visAttributes,
+// }: {
+//   suggestionsList: Suggestion[];
+//   visAttributes: TypedLensByValueInput['attributes'];
+// }): Suggestion | undefined => {
+//   const preferredChartType = visAttributes?.visualizationType;
+//   if (suggestionsList.length === 1) {
+//     return suggestionsList[0];
+//   }
 
-  if (preferredChartType === 'lnsXY') {
-    const seriesType = (visAttributes?.state?.visualization as XYState)?.preferredSeriesType;
-    const suggestion = suggestionsList.find(
-      (s) => (s.visualizationState as XYState).preferredSeriesType === seriesType
-    );
-    if (suggestion) return suggestion;
-  }
-  if (preferredChartType === 'lnsPie') {
-    const shape = (visAttributes?.state?.visualization as PieVisualizationState)?.shape;
-    const suggestion = suggestionsList.find(
-      (s) => (s.visualizationState as PieVisualizationState).shape === shape
-    );
-    if (suggestion) return suggestion;
-  }
+//   if (preferredChartType === 'lnsXY') {
+//     const seriesType = (visAttributes?.state?.visualization as XYState)?.preferredSeriesType;
+//     const suggestion = suggestionsList.find(
+//       (s) => (s.visualizationState as XYState).preferredSeriesType === seriesType
+//     );
+//     if (suggestion) return suggestion;
+//   }
+//   if (preferredChartType === 'lnsPie') {
+//     const shape = (visAttributes?.state?.visualization as PieVisualizationState)?.shape;
+//     const suggestion = suggestionsList.find(
+//       (s) => (s.visualizationState as PieVisualizationState).shape === shape
+//     );
+//     if (suggestion) return suggestion;
+//   }
 
-  return undefined;
-};
+//   return undefined;
+// };
 
 // ToDo: Move to a new file
 function mergeSuggestionWithVisContext({
@@ -94,14 +94,16 @@ function mergeSuggestionWithVisContext({
   ) {
     return suggestion;
   }
-
+  const layerIds = Object.keys(datasourceState.layers);
   try {
     return {
-      ...suggestion,
-      datasourceState,
+      title: visAttributes.title,
+      visualizationId: visAttributes.visualizationType,
       visualizationState: visAttributes.state.visualization,
+      keptLayerIds: layerIds,
+      datasourceState,
       datasourceId,
-    };
+    } as Suggestion;
   } catch {
     return suggestion;
   }
@@ -199,36 +201,49 @@ export const suggestionsApi = ({
   }
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
+
   if (newSuggestions.length > 1 && preferredChartType) {
-    const compatibleSuggestions = newSuggestions.filter(
+    const compatibleSuggestion = newSuggestions.find(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
 
-    if (compatibleSuggestions.length && !preferredVisAttributes) {
-      return compatibleSuggestions[0];
-    }
-    if (compatibleSuggestions.length && preferredVisAttributes) {
-      const preferredSuggestion = findPreferredSuggestion({
-        visAttributes: preferredVisAttributes,
-        suggestionsList: compatibleSuggestions,
-      });
+    if (compatibleSuggestion) {
+      const suggestion = preferredVisAttributes
+        ? mergeSuggestionWithVisContext({
+            suggestion: compatibleSuggestion,
+            visAttributes: preferredVisAttributes,
+            context,
+          })
+        : compatibleSuggestion;
 
-      const layersAreEqual = visualizationMap[
-        preferredVisAttributes.visualizationType
-      ]?.areLayersEqual(
-        preferredSuggestion?.visualizationState,
-        preferredVisAttributes.state.visualization
-      );
-      if (preferredSuggestion && !layersAreEqual) {
-        const suggestion = mergeSuggestionWithVisContext({
-          suggestion: preferredSuggestion,
-          visAttributes: preferredVisAttributes,
-          context,
-        });
-
-        return [suggestion];
-      }
+      return [suggestion];
     }
+
+    // if (compatibleSuggestions.length && !preferredVisAttributes) {
+    //   return compatibleSuggestions[0];
+    // }
+    // if (compatibleSuggestions.length && preferredVisAttributes) {
+    //   const preferredSuggestion = findPreferredSuggestion({
+    //     visAttributes: preferredVisAttributes,
+    //     suggestionsList: compatibleSuggestions,
+    //   });
+
+    //   const layersAreEqual = visualizationMap[
+    //     preferredVisAttributes.visualizationType
+    //   ]?.areLayersEqual(
+    //     preferredSuggestion?.visualizationState,
+    //     preferredVisAttributes.state.visualization
+    //   );
+    //   if (preferredSuggestion) {
+    //     const suggestion = mergeSuggestionWithVisContext({
+    //       suggestion: preferredSuggestion,
+    //       visAttributes: preferredVisAttributes,
+    //       context,
+    //     });
+
+    //     return [suggestion];
+    //   }
+    // }
   }
 
   const suggestionsList = [activeVisualization, ...newSuggestions];
