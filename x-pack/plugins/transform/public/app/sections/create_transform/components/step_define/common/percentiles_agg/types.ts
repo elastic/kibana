@@ -11,7 +11,14 @@ export interface PercentilesAggConfig {
   /** Comma separated list */
   percents: string;
 }
+
+export type ValidationResultErrorType =
+  | 'INVALID_FORMAT'
+  | 'NEGATIVE_NUMBER'
+  | 'PERCENTILE_OUT_OF_RANGE';
+
 export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
   PercentilesAggConfig,
-  { field: string; percents: number[] }
+  { field: string; percents: number[] },
+  ValidationResultErrorType
 >;

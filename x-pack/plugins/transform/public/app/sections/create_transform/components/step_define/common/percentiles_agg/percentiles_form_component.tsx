@@ -8,12 +8,28 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import type { IPivotAggsConfigPercentiles } from './types';
+import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './types';
+
+const errorMessages: Record<ValidationResultErrorType, string> = {
+  INVALID_FORMAT: i18n.translate('xpack.transform.agg.popoverForm.invalidFormatError', {
+    defaultMessage: 'Enter a comma-separated list of percentile',
+  }),
+  NEGATIVE_NUMBER: i18n.translate('xpack.transform.agg.popoverForm.negativeNumberError', {
+    defaultMessage: 'Percentiles must be positive numbers',
+  }),
+  PERCENTILE_OUT_OF_RANGE: i18n.translate(
+    'xpack.transform.agg.popoverForm.percentileOutOfRangeError',
+    {
+      defaultMessage: 'Percentiles must be between 0 and 100',
+    }
+  ),
+};
 
 export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent'] = ({
   aggConfig,
   onChange,
   isValid,
+  errorMessageType,
 }) => {
   return (
     <>
@@ -21,13 +37,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
         label={i18n.translate('xpack.transform.agg.popoverForm.percentsLabel', {
           defaultMessage: 'Percents',
         })}
-        error={
-          !isValid && [
-            i18n.translate('xpack.transform.groupBy.popoverForm.intervalPercents', {
-              defaultMessage: 'Enter a comma-separated list of percentiles',
-            }),
-          ]
-        }
+        error={!isValid && [errorMessages[errorMessageType as ValidationResultErrorType]]}
         isInvalid={!isValid}
       >
         <EuiFieldText

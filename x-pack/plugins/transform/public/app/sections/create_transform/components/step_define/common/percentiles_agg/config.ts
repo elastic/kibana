@@ -6,7 +6,7 @@
  */
 
 import { PercentilesAggForm } from './percentiles_form_component';
-import type { IPivotAggsConfigPercentiles } from './types';
+import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './types';
 import type { PivotAggsConfigBase } from '../../../../../../common';
 import {
   isPivotAggsConfigWithUiBase,
@@ -40,8 +40,36 @@ function parsePercentsInput(inputValue: string | undefined) {
 }
 
 // Input string should only include comma separated numbers
-function isValidPercentsInput(inputValue: string) {
-  return /^[0-9]+(,[0-9]+)*$/.test(inputValue);
+function validatePercentsInput(inputValue: unknown): {
+  isValid: boolean;
+  errorType?: ValidationResultErrorType;
+} {
+  if (typeof inputValue !== 'string') {
+    return { isValid: false, errorType: 'INVALID_FORMAT' };
+  }
+
+  // Remove all whitespace
+  const testInputValue = inputValue.split(' ').join('');
+
+  // Explicitly check for -0 to keep consistency with negative numbers
+  if (testInputValue.includes('-0')) {
+    return { isValid: false, errorType: 'NEGATIVE_NUMBER' };
+  }
+
+  // Check if it is a valid comma-separated list of numbers (including negative numbers)
+  if (/^-?\d+(?:,-?\d+)*$/.test(testInputValue)) {
+    const numbers = testInputValue.split(',').map(Number);
+    // Check for negative numbers
+    if (numbers.some((num) => num < 0)) {
+      return { isValid: false, errorType: 'NEGATIVE_NUMBER' };
+    }
+    // Check for numbers greater than 100
+    if (numbers.some((num) => num > 100)) {
+      return { isValid: false, errorType: 'PERCENTILE_OUT_OF_RANGE' };
+    }
+    return { isValid: true };
+  }
+  return { isValid: false, errorType: 'INVALID_FORMAT' };
 }
 
 export function getPercentilesAggConfig(
@@ -75,9 +103,10 @@ export function getPercentilesAggConfig(
       };
     },
     isValid() {
-      return (
-        typeof this.aggConfig.percents === 'string' && isValidPercentsInput(this.aggConfig.percents)
-      );
+      return validatePercentsInput(this.aggConfig.percents).isValid;
+    },
+    getErrorMessageType() {
+      return validatePercentsInput(this.aggConfig.percents).errorType;
     },
   };
 }
