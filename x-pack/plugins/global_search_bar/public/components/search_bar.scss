@@ -14,6 +14,10 @@
   border-right: $euiBorderThin; // Adds divider between the tag list and 'Go to' badge
 }
 
+.euiSelectableTemplateSitewide .euiPopover:not(.euiPopover-isOpen) .euiFieldSearch-isClearable {
+  border: 1px solid rgba($euiColorGhost, .3);
+}
+
 @include euiBreakpoint('xs', 's') {
   .kbnSearchOption__tagsList {
     display: none;
