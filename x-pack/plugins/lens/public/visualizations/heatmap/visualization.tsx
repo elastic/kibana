@@ -22,6 +22,7 @@ import {
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { isEqual } from 'lodash';
 import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -475,6 +476,11 @@ export const getHeatmapVisualization = ({
     }
 
     return [...errors, ...warnings];
+  },
+
+  areLayersEqual(state1, state2) {
+    state1 = { ...state1, layerId: state2.layerId };
+    return isEqual(state1, state2);
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {

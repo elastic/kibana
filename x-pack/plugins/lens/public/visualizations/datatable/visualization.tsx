@@ -8,6 +8,7 @@
 import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -711,6 +712,10 @@ export const getDatatableVisualization = ({
       default:
         return state;
     }
+  },
+  areLayersEqual(state1, state2) {
+    state1 = { ...state1, layerId: state2.layerId };
+    return isEqual(state1, state2);
   },
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as Array<

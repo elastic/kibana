@@ -1067,6 +1067,13 @@ export const getXyVisualization = ({
     return null;
   },
 
+  areLayersEqual(state1, state2) {
+    state1.layers = state1.layers.map((layer, index) => {
+      return { ...layer, layerId: state2.layers[index].layerId };
+    });
+    return isEqual(state1.layers, state2.layers);
+  },
+
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
     const suggestion: Suggestion<XYState, FormBasedPersistedState> = {

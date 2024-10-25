@@ -519,10 +519,9 @@ export class LensVisService {
         context.textBasedColumns.push(breakdownColumn);
       }
 
-      const preferredChartType = preferredVisAttributes?.visualizationType.replace(
-        LENS_PREFIX,
-        ''
-      ) as ChartType;
+      const preferredChartType = preferredVisAttributes
+        ? (preferredVisAttributes?.visualizationType.replace(LENS_PREFIX, '') as ChartType)
+        : undefined;
 
       // here the attributes contain the main query and not the histogram one
       const updatedAttributesWithQuery = preferredVisAttributes
@@ -611,10 +610,9 @@ export class LensVisService {
   }): Suggestion[] => {
     const { dataView, columns, query, isPlainRecord } = queryParams;
 
-    const preferredChartType = preferredVisAttributes?.visualizationType.replace(
-      LENS_PREFIX,
-      ''
-    ) as ChartType;
+    const preferredChartType = preferredVisAttributes
+      ? (preferredVisAttributes?.visualizationType.replace(LENS_PREFIX, '') as ChartType)
+      : undefined;
 
     const context = {
       dataViewSpec: dataView?.toSpec(),

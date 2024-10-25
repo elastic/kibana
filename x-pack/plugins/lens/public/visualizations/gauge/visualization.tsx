@@ -25,6 +25,7 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { isEqual } from 'lodash';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   DatasourceLayers,
@@ -557,6 +558,11 @@ export const getGaugeVisualization = ({
     }
 
     return warnings;
+  },
+
+  areLayersEqual(state1, state2) {
+    state1 = { ...state1, layerId: state2.layerId };
+    return isEqual(state1, state2);
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {

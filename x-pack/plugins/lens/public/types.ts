@@ -1338,6 +1338,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
 
+  areLayersEqual: (state1: P, state2: P) => boolean;
+
   isEqual?: (
     state1: P,
     references1: SavedObjectReference[],

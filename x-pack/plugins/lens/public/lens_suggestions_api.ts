@@ -11,6 +11,7 @@ import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_h
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from './types';
 import type { DataViewsState } from './state_management';
 import type { TypedLensByValueInput } from './embeddable/embeddable_component';
+import type { XYState, PieVisualizationState } from '.';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -21,6 +22,37 @@ interface SuggestionsApiProps {
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
+
+const findPreferredSuggestion = ({
+  suggestionsList,
+  visAttributes,
+}: {
+  suggestionsList: Suggestion[];
+  visAttributes: TypedLensByValueInput['attributes'];
+}): Suggestion | undefined => {
+  const preferredChartType = visAttributes?.visualizationType;
+  if (suggestionsList.length === 1) {
+    return suggestionsList[0];
+  }
+
+  if (preferredChartType === 'lnsXY') {
+    const seriesType = (visAttributes?.state?.visualization as XYState)?.preferredSeriesType;
+    const suggestion = suggestionsList.find(
+      (s) => (s.visualizationState as XYState).preferredSeriesType === seriesType
+    );
+    if (suggestion) return suggestion;
+  }
+  if (preferredChartType === 'lnsPie') {
+    const shape = (visAttributes?.state?.visualization as PieVisualizationState)?.shape;
+    const suggestion = suggestionsList.find(
+      (s) => (s.visualizationState as PieVisualizationState).shape === shape
+    );
+    if (suggestion) return suggestion;
+  }
+
+  return undefined;
+};
+
 // ToDo: Move to a new file
 function mergeSuggestionWithVisContext({
   suggestion,
@@ -168,19 +200,34 @@ export const suggestionsApi = ({
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
   if (newSuggestions.length > 1 && preferredChartType) {
-    const suggestionFromModel = newSuggestions.find(
+    const compatibleSuggestions = newSuggestions.filter(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
-    if (suggestionFromModel) {
-      const suggestion = preferredVisAttributes
-        ? mergeSuggestionWithVisContext({
-            suggestion: suggestionFromModel,
-            visAttributes: preferredVisAttributes,
-            context,
-          })
-        : suggestionFromModel;
 
-      return [suggestion];
+    if (compatibleSuggestions.length && !preferredVisAttributes) {
+      return compatibleSuggestions[0];
+    }
+    if (compatibleSuggestions.length && preferredVisAttributes) {
+      const preferredSuggestion = findPreferredSuggestion({
+        visAttributes: preferredVisAttributes,
+        suggestionsList: compatibleSuggestions,
+      });
+
+      const layersAreEqual = visualizationMap[
+        preferredVisAttributes.visualizationType
+      ]?.areLayersEqual(
+        preferredSuggestion?.visualizationState,
+        preferredVisAttributes.state.visualization
+      );
+      if (preferredSuggestion && !layersAreEqual) {
+        const suggestion = mergeSuggestionWithVisContext({
+          suggestion: preferredSuggestion,
+          visAttributes: preferredVisAttributes,
+          context,
+        });
+
+        return [suggestion];
+      }
     }
   }
 

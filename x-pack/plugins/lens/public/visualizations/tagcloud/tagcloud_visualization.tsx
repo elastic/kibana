@@ -16,6 +16,7 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
+import { isEqual } from 'lodash';
 import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
@@ -69,6 +70,11 @@ export const getTagcloudVisualization = ({
 
   getLayerIds(state) {
     return [state.layerId];
+  },
+
+  areLayersEqual(state1, state2) {
+    state1 = { ...state1, layerId: state2.layerId };
+    return isEqual(state1, state2);
   },
 
   getDescription() {
