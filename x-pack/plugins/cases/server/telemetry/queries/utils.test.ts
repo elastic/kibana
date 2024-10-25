@@ -1215,7 +1215,6 @@ describe('utils', () => {
 
       const res = await getCountsAndMaxAlertsData({
         savedObjectsClient: telemetrySavedObjectsClient,
-        savedObjectType: 'test',
       });
       expect(res).toEqual({
         all: {
@@ -1239,7 +1238,6 @@ describe('utils', () => {
 
       const res = await getCountsAndMaxAlertsData({
         savedObjectsClient: telemetrySavedObjectsClient,
-        savedObjectType: 'test',
       });
       expect(res).toEqual({
         all: {
@@ -1257,14 +1255,13 @@ describe('utils', () => {
 
       await getCountsAndMaxAlertsData({
         savedObjectsClient: telemetrySavedObjectsClient,
-        savedObjectType: 'test',
       });
 
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           counts: {
             date_range: {
-              field: 'test.attributes.created_at',
+              field: 'cases-comments.attributes.created_at',
               format: 'dd/MM/YYYY',
               ranges: [
                 {
@@ -1284,7 +1281,7 @@ describe('utils', () => {
             aggregations: {
               topAlertsPerBucket: {
                 cardinality: {
-                  field: 'test.attributes.alertId',
+                  field: 'cases-comments.attributes.alertId',
                 },
               },
             },
@@ -1295,7 +1292,7 @@ describe('utils', () => {
                 aggregations: {
                   ids: {
                     terms: {
-                      field: 'test.references.id',
+                      field: 'cases-comments.references.id',
                     },
                     aggregations: {
                       reverse: {
@@ -1303,7 +1300,7 @@ describe('utils', () => {
                         aggregations: {
                           topAlerts: {
                             cardinality: {
-                              field: 'test.attributes.alertId',
+                              field: 'cases-comments.attributes.alertId',
                             },
                           },
                         },
@@ -1318,25 +1315,40 @@ describe('utils', () => {
                 },
                 filter: {
                   term: {
-                    'test.references.type': 'cases',
+                    'cases-comments.references.type': 'cases',
                   },
                 },
               },
             },
             nested: {
-              path: 'test.references',
+              path: 'cases-comments.references',
             },
           },
           uniqueAlertCommentsCount: {
             cardinality: {
-              field: 'test.attributes.alertId',
+              field: 'cases-comments.attributes.alertId',
             },
           },
         },
-        filter: undefined,
+        filter: {
+          arguments: [
+            {
+              isQuoted: false,
+              type: 'literal',
+              value: 'cases-comments.attributes.type',
+            },
+            {
+              isQuoted: false,
+              type: 'literal',
+              value: 'alert',
+            },
+          ],
+          function: 'is',
+          type: 'function',
+        },
         page: 0,
         perPage: 0,
-        type: 'test',
+        type: 'cases-comments',
         namespaces: ['*'],
       });
     });
