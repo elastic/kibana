@@ -17,7 +17,7 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { defaultEntityDefinitions, EntityColumnIds } from '../../../common/entities';
+import { ENTITIES_LATEST_ALIAS, EntityColumnIds } from '../../../common/entities';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -43,7 +43,7 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
   if (entityDefinitionField) {
     const entityDefinitionFilter = buildPhrasesFilter(
       entityDefinitionField!,
-      defaultEntityDefinitions,
+      [ENTITIES_LATEST_ALIAS],
       dataView
     );
     filters.push(entityDefinitionFilter);
