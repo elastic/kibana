@@ -218,12 +218,12 @@ export const CREATE_CONNECTOR_PLUGIN = {
   --index-language en
   --from-file config.yml
   `,
-  CONSOLE_SNIPPET: dedent` # Example of how to create a PostgreSQL connector using the API
+  CONSOLE_SNIPPET: dedent` # Example of how to create a connector using the API
 # This also creates related resources like an index and an API key.
 # This is an alternative to using the UI creation flow.
 
 # 1. Create an index
-PUT /connector-postgresql
+PUT /my-connector-index
 {
   "settings": {
     "index": {
@@ -235,19 +235,19 @@ PUT /connector-postgresql
 
 # 2. Create a connector
 # NOTE: Change these values if you want to use another connector type
-PUT _connector/postgresql-id
+PUT _connector/my-connector-id
 {
-  "name": "My PostgreSQL connector",
-  "index_name":  "connector-postgresql",
+  "name": "My connector",
+  "index_name":  "my-connector-index",
   "service_type": "postgresql"
 }
 
 # 3. Create an API key
 POST /_security/api_key
 {
-  "name": "postgresql-api-key",
+  "name": "connector-api-key",
   "role_descriptors": {
-    "postgresql-api-key-role": {
+    "connector-api-key-role": {
       "cluster": [
         "monitor",
         "manage_connector"
@@ -255,8 +255,8 @@ POST /_security/api_key
       "indices": [
         {
           "names": [
-            "connector-postgresql",
-            ".search-acl-filter-connector-postgresql",
+            "my-connector-index",
+            ".search-acl-filter-my-connector-index",
             ".elastic-connectors*"
           ],
           "privileges": [
@@ -271,7 +271,7 @@ POST /_security/api_key
 
 # Configure your connector 🔧
 # NOTE: Configuration keys differ per service type.
-PUT _connector/postgresql-id/_configuration
+PUT _connector/my-connector-id/_configuration
 {
   "values": {
     "host": "",
@@ -285,24 +285,24 @@ PUT _connector/postgresql-id/_configuration
 }
   
 # Verify your connector is connected 🔌
-GET _connector/postgresql-id
+GET _connector/my-connector-id
 
 # Sync data 🔄
 POST _connector/_sync_job
 {
-  "id": "postgresql-id",
+  "id": "my-connector-id",
   "job_type": "full"
 }
 
 # Check sync status ⏳
-GET _connector/_sync_job?connector_id=postgresql-id&size=1
+GET _connector/_sync_job?connector_id=my-connector-id&size=1
 
 # Once the job completes, the status should return completed
 # Verify that data is present in the index with the following API call 🎉
-GET connector-postgresql/_count
+GET my-connector-index/_count
 
 # Elasticsearch stores data in documents, which are JSON objects. List the individual documents with the following API call 🔎
-GET connector-postgresql/_search
+GET my-connector-index/_search
 `,
 };
 
