@@ -108,18 +108,20 @@ export class Authorization {
     operation,
   }: {
     entities: OwnerEntity[];
-    operation: OperationDetails;
+    operation: OperationDetails | OperationDetails[];
   }) {
-    try {
-      const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+    const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+    const operations = Array.isArray(operation) ? operation : [operation];
 
-      await this._ensureAuthorized(uniqueOwners, operation);
-    } catch (error) {
-      this.logSavedObjects({ entities, operation, error });
-      throw error;
+    for (const op of operations) {
+      try {
+        await this._ensureAuthorized(uniqueOwners, op);
+      } catch (error) {
+        this.logSavedObjects({ entities, operation: op, error });
+        throw error;
+      }
+      this.logSavedObjects({ entities, operation: op });
     }
-
-    this.logSavedObjects({ entities, operation });
   }
 
   /**

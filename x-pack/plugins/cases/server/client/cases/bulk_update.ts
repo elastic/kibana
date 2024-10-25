@@ -362,14 +362,10 @@ export const bulkUpdate = async (
         ? [Operations.reopenCase, Operations.updateCase]
         : [Operations.updateCase];
 
-    await Promise.all(
-      operationsToAuthorize.map(async (operationToAuthorize) =>
-        authorization.ensureAuthorized({
-          entities: casesToAuthorize,
-          operation: operationToAuthorize,
-        })
-      )
-    );
+    await authorization.ensureAuthorized({
+      entities: casesToAuthorize,
+      operation: operationsToAuthorize,
+    });
 
     if (nonExistingCases.length > 0) {
       throw Boom.notFound(
