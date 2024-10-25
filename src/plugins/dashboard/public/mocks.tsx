@@ -95,7 +95,8 @@ export function buildMockDashboardApi({
       managed: false,
       dashboardInput: initialState,
       anyMigrationRun: false,
-      references: []
+      references: [],
+      fullScreenMode: false,
     }
   });
   results.internalApi.setControlGroupApi(mockControlGroupApi);

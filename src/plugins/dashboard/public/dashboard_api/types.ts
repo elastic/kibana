@@ -82,6 +82,7 @@ export interface DashboardCreationOptions {
 
   validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
+  fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
 
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;

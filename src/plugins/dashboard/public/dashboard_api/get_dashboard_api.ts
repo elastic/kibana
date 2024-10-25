@@ -59,7 +59,7 @@ export function getDashboardApi({
 }) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
-  const fullScreenMode$ = new BehaviorSubject(false);
+  const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
   let references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);

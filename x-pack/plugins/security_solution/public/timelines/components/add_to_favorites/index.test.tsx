@@ -30,10 +30,10 @@ jest.mock('react-redux', () => {
   };
 });
 
-const renderAddFavoritesButton = (isPartOfGuidedTour = false) =>
+const renderAddFavoritesButton = () =>
   render(
     <TestProviders>
-      <AddToFavoritesButton timelineId="timeline-1" isPartOfGuidedTour={isPartOfGuidedTour} />
+      <AddToFavoritesButton timelineId="timeline-1" />
     </TestProviders>
   );
 
@@ -86,18 +86,5 @@ describe('AddToFavoritesButton', () => {
 
     expect(getByTestId('timeline-favorite-filled-star')).toBeInTheDocument();
     expect(queryByTestId('timeline-favorite-empty-star')).not.toBeInTheDocument();
-  });
-
-  it('should use id for guided tour if prop is true', () => {
-    mockGetState.mockReturnValue({
-      ...mockTimelineModel,
-      status: TimelineStatusEnum.active,
-    });
-
-    const { getByTestId } = renderAddFavoritesButton(true);
-
-    const button = getByTestId('timeline-favorite-empty-star');
-
-    expect(button).toHaveProperty('id', 'add-to-favorites');
   });
 });
