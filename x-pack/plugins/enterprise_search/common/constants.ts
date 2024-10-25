@@ -297,8 +297,8 @@ POST _connector/_sync_job
 # Check sync status ⏳
 GET _connector/_sync_job?connector_id=postgresql-id&size=1
 
-# Once the job completes, the status should be completed and indexed_document_count should be 622
-# Verify that data is present in the music index with the following API call 🎉
+# Once the job completes, the status should return completed
+# Verify that data is present in the index with the following API call 🎉
 GET connector-postgresql/_count
 
 # Elasticsearch stores data in documents, which are JSON objects. List the individual documents with the following API call 🔎
