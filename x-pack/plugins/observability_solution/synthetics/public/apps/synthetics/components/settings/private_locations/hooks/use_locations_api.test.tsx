@@ -69,7 +69,7 @@ describe('usePrivateLocationsAPI', () => {
       wrapper: WrappedHelper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current.onSubmit({
@@ -101,7 +101,7 @@ describe('usePrivateLocationsAPI', () => {
       wrapper: WrappedHelper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current.onDelete('Test');

@@ -31,7 +31,7 @@ describe('useGetCaseUsers', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
   });

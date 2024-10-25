@@ -117,13 +117,13 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     // Should set isLoading to true while fetching
     expect(result.current).toEqual([true, null]);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual([false, detectionExceptionList]);
   });
 
   it('fetches the rule with the given ruleId', async () => {
     render();
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(fetchRuleById).toHaveBeenCalledTimes(1);
     expect(fetchRuleById).toHaveBeenCalledWith({
       id: ruleId,
@@ -140,23 +140,23 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('does not fetch the exceptions lists', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(fetchExceptionListById).not.toHaveBeenCalled();
     });
 
     it('should create a new exception list', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(addExceptionList).toHaveBeenCalledTimes(1);
     });
     it('should update the rule', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(patchRule).toHaveBeenCalledTimes(1);
     });
     it('invokes onSuccess', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(onSuccess).toHaveBeenCalledWith(false);
     });
   });
@@ -164,31 +164,31 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   describe("when the rule has exception list references and 'detection' is passed in", () => {
     it('fetches the exceptions lists', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
     });
 
     it('does not create a new exception list', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(addExceptionList).not.toHaveBeenCalled();
     });
 
     it('does not update the rule', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(patchRule).not.toHaveBeenCalled();
     });
 
     it('should set the exception list to be the fetched list', async () => {
       const { result } = render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current[1]).toEqual(detectionExceptionList);
     });
 
     it('invokes onSuccess indicating', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(onSuccess).toHaveBeenCalledWith(false);
     });
 
@@ -201,17 +201,17 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
       it('should create a new exception list', async () => {
         render();
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
         expect(addExceptionList).toHaveBeenCalledTimes(1);
       });
       it('should update the rule', async () => {
         render();
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
         expect(patchRule).toHaveBeenCalledTimes(1);
       });
       it('should set the exception list to be the newly created list', async () => {
         const { result } = render();
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
         expect(result.current[1]).toEqual(newDetectionExceptionList);
       });
     });
@@ -230,22 +230,22 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('fetches the exceptions lists', async () => {
       render(endpointListType);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
     });
     it('does not create a new exception list', async () => {
       render(endpointListType);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(addExceptionList).not.toHaveBeenCalled();
     });
     it('does not update the rule', async () => {
       render(endpointListType);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(patchRule).not.toHaveBeenCalled();
     });
     it('should set the exception list to be the fetched list', async () => {
       const { result } = render(endpointListType);
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current[1]).toEqual(endpointExceptionList);
     });
 
@@ -258,17 +258,17 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
       it('should create a new exception list', async () => {
         render(endpointListType);
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
         expect(addEndpointExceptionList).toHaveBeenCalledTimes(1);
       });
       it('should update the rule', async () => {
         render(endpointListType);
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
         expect(patchRule).toHaveBeenCalledTimes(1);
       });
       it('should set the exception list to be the newly created list', async () => {
         const { result } = render(endpointListType);
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
         expect(result.current[1]).toEqual(newEndpointExceptionList);
       });
     });
@@ -281,26 +281,26 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('exception list should be null', async () => {
       const { result } = render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current[1]).toBeNull();
     });
 
     it('isLoading should be false', async () => {
       const { result } = render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current[0]).toEqual(false);
     });
 
     it('should call error callback', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(onError).toHaveBeenCalledTimes(1);
       expect(onError).toHaveBeenCalledWith(error, null, null);
     });
 
     it('does not call onSuccess', async () => {
       render();
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(onSuccess).not.toHaveBeenCalled();
     });
   });

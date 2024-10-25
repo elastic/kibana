@@ -48,7 +48,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -64,7 +64,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
       caseId: sampleData.caseId,
@@ -92,7 +92,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(newData);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
       caseId: newData.caseId,
@@ -120,7 +120,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(newData);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
       caseId: newData.caseId,
@@ -145,7 +145,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

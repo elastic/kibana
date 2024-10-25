@@ -44,7 +44,7 @@ describe('useFetchAnonymizationFields', () => {
 
     await act(async () => {
       renderHook(() => useFetchAnonymizationFields());
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(http.fetch).toHaveBeenCalledWith(
         '/api/security_ai_assistant/anonymization_fields/_find',
         {

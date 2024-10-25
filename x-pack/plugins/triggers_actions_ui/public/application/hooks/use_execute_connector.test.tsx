@@ -36,7 +36,7 @@ describe('useExecuteConnector', () => {
       result.current.executeConnector({ connectorId: 'test-id', params: {} });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/api/actions/connector/test-id/_execute',

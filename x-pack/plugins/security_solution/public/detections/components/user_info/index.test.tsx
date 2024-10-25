@@ -42,7 +42,7 @@ describe('useUserInfo', () => {
     const { result } = renderHook(() => useUserInfo(), {
       wrapper: TestProviders,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       canUserCRUD: null,

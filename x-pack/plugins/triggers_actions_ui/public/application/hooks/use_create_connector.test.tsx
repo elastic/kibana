@@ -41,7 +41,7 @@ describe('useCreateConnector', () => {
       });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith('/api/actions/connector', {
       body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',

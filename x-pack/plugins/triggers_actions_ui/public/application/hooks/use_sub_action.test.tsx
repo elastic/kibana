@@ -32,7 +32,7 @@ describe('useSubAction', () => {
 
   it('init', async () => {
     const { result } = renderHook(() => useSubAction(params));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -43,7 +43,7 @@ describe('useSubAction', () => {
 
   it('executes the sub action correctly', async () => {
     renderHook(() => useSubAction(params));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockHttpPost).toHaveBeenCalledWith('/api/actions/connector/test-id/_execute', {
       body: '{"params":{"subAction":"test","subActionParams":{"foo":"bar"}}}',
@@ -53,13 +53,13 @@ describe('useSubAction', () => {
 
   it('executes sub action if subAction parameter changes', async () => {
     const { rerender } = renderHook(useSubAction, { initialProps: params });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       rerender({ ...params, subAction: 'test-2' });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
     });
 
     expect(mockHttpPost).toHaveBeenCalledTimes(2);
@@ -67,13 +67,13 @@ describe('useSubAction', () => {
 
   it('executes sub action if connectorId parameter changes', async () => {
     const { rerender } = renderHook(useSubAction, { initialProps: params });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       rerender({ ...params, connectorId: 'test-id-2' });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
     });
 
     expect(mockHttpPost).toHaveBeenCalledTimes(2);
@@ -83,14 +83,14 @@ describe('useSubAction', () => {
     const { result, rerender } = renderHook(useSubAction, {
       initialProps: { ...params, subActionParams: { foo: 'bar' } },
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     const previous = result.current;
 
     await act(async () => {
       rerender({ ...params, subActionParams: { foo: 'bar' } });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
     });
 
     expect(result.current.response).toBe(previous.response);
@@ -101,14 +101,14 @@ describe('useSubAction', () => {
     const { result, rerender } = renderHook(useSubAction, {
       initialProps: { ...params, subActionParams: { foo: 'bar' } },
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     const previous = result.current;
 
     await act(async () => {
       rerender({ ...params, subActionParams: { foo: 'baz' } });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
     });
 
     expect(result.current.response).not.toBe(previous.response);
@@ -120,7 +120,7 @@ describe('useSubAction', () => {
     mockHttpPost.mockRejectedValueOnce(error);
 
     const { result } = renderHook(() => useSubAction(params));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       isLoading: false,

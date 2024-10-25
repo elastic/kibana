@@ -114,7 +114,7 @@ describe('EditSpaceContentTab', () => {
       </TestComponent>
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(getSpaceContentSpy).toHaveBeenCalledTimes(1);
     expect(getSpaceContentSpy).toHaveBeenCalledWith(space.id);

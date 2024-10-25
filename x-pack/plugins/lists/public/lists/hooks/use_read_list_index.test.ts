@@ -35,7 +35,7 @@ describe.skip('useReadListIndex', () => {
       wrapper: queryWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(Api.readListIndex).toHaveBeenCalled();
   });
@@ -56,7 +56,7 @@ describe.skip('useReadListIndex', () => {
       wrapper: queryWrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(onError).toHaveBeenCalledWith(new Error('Mocked error'));
   });

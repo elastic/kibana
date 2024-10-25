@@ -72,7 +72,7 @@ describe('useAlertsCount', () => {
     expect(result.current.loading).toBe(true);
     expect(result.current.alertsCount).toEqual(undefined);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { alertsCount, loading, error } = result.current;
     expect(alertsCount).toEqual(expectedResult);
@@ -96,7 +96,7 @@ describe('useAlertsCount', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const body = JSON.stringify({
       aggs: {
@@ -121,7 +121,7 @@ describe('useAlertsCount', () => {
 
     const { result } = renderHook(() => useAlertsCount({ featureIds }));
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.error?.message).toMatch(error.message);
   });

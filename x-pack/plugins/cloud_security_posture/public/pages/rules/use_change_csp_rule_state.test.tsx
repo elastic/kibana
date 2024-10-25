@@ -108,7 +108,7 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(httpPostSpy).toHaveBeenCalledWith(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
       version: '1',
@@ -152,7 +152,7 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedMutatedRules = {
       ...initialRules,
@@ -189,7 +189,7 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
     expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
@@ -222,7 +222,7 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockSetQueryDataSpy).toHaveBeenCalled();
     expect(mockSetQueryDataSpy).toHaveReturnedWith(initialRules);

@@ -46,7 +46,7 @@ describe('useDeleteFileAttachment', () => {
       });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,

@@ -67,7 +67,7 @@ describe('useCaseItems', () => {
   it('should return default values', async () => {
     const { result } = renderUseCaseItems();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       items: [],
@@ -90,7 +90,7 @@ describe('useCaseItems', () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
     const { result } = renderUseCaseItems();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       items: parsedCasesItems,
@@ -103,7 +103,7 @@ describe('useCaseItems', () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
     renderUseCaseItems();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockSetQuery).toHaveBeenCalled();
   });
@@ -111,7 +111,7 @@ describe('useCaseItems', () => {
   test('it should call deleteQuery when unmounting', async () => {
     const { unmount } = renderUseCaseItems();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       unmount();
@@ -128,7 +128,7 @@ describe('useCaseItems', () => {
 
     const { result } = renderUseCaseItems();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockDateNow).toHaveBeenCalled();
     expect(result.current).toEqual({

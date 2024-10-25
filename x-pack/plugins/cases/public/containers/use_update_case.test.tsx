@@ -50,7 +50,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -66,7 +66,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(patchCaseSpy).toHaveBeenCalledWith({
       caseId: basicCase.id,
@@ -84,7 +84,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Updated "Another horrible breach!!"',
@@ -103,7 +103,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

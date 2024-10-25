@@ -43,7 +43,7 @@ describe('useManagementLink Hook', () => {
     mockGetUrl.mockResolvedValue(expectedUrl);
     const connectorId = 'test-connector-id';
     const { result } = renderHook(() => useManagementLink(connectorId));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toBe(expectedUrl);
     expect(mockGetUrl).toHaveBeenCalledWith({

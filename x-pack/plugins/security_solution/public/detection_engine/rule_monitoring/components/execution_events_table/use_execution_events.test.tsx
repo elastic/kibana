@@ -42,7 +42,7 @@ describe('useExecutionEvents', () => {
 
     render();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchRuleExecutionEvents).toHaveBeenCalledTimes(1);
     expect(fetchRuleExecutionEvents).toHaveBeenLastCalledWith(

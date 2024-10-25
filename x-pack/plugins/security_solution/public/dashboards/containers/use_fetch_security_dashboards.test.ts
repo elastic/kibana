@@ -30,7 +30,7 @@ const renderUseFetchSecurityDashboards = () =>
 const asyncRenderUseFetchSecurityDashboards = async () => {
   const renderedHook = renderUseFetchSecurityDashboards();
 
-  await waitFor(() => null);
+  await waitFor(() => new Promise((resolve) => resolve(null)));
 
   return renderedHook;
 };

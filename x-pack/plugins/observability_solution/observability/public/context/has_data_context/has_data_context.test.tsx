@@ -67,7 +67,7 @@ describe('HasDataContextProvider', () => {
         onRefreshTimeRange: expect.any(Function),
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toEqual({
         hasDataMap: {
@@ -123,7 +123,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -184,7 +184,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -247,7 +247,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -301,7 +301,7 @@ describe('HasDataContextProvider', () => {
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await waitFor(() => null);
+          await waitFor(() => new Promise((resolve) => resolve(null)));
 
           expect(result.current).toEqual({
             hasDataMap: {
@@ -345,7 +345,7 @@ describe('HasDataContextProvider', () => {
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await waitFor(() => null);
+          await waitFor(() => new Promise((resolve) => resolve(null)));
 
           expect(result.current).toEqual({
             hasDataMap: {
@@ -410,7 +410,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -487,7 +487,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => null);
+        await waitFor(() => new Promise((resolve) => resolve(null)));
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -532,7 +532,7 @@ describe('HasDataContextProvider', () => {
         onRefreshTimeRange: expect.any(Function),
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toEqual({
         hasDataMap: {

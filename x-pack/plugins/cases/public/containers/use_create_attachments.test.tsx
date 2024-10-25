@@ -67,7 +67,7 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith({ attachments: attachmentsWithOwner, caseId: request.caseId });
   });
@@ -81,7 +81,7 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addSuccess).not.toHaveBeenCalled();
   });
@@ -99,7 +99,7 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

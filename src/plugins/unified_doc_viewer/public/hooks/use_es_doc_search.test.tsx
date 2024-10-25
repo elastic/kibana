@@ -284,7 +284,7 @@ describe('Test of <Doc /> helper / hook', () => {
       mockSearchResult.complete();
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(hook.result.current.slice(0, 2)).toEqual([
       ElasticRequestState.Found,

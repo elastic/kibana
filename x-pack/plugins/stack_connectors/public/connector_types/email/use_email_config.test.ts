@@ -93,7 +93,7 @@ describe('useEmailConfig', () => {
       result.current.getEmailServiceConfig('foo');
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(toasts.addDanger).toHaveBeenCalled();
   });
 

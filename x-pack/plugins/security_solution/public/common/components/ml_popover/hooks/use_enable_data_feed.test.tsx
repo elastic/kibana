@@ -90,7 +90,7 @@ describe('useSecurityJobsHelpers', () => {
         await enableDataFeedPromise;
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current.isLoading).toBe(false);
     });
 

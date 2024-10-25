@@ -107,7 +107,7 @@ describe('usePersistExceptionItem', () => {
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await act(async () => {
       // NOTE: Take note here passing in an exception item where it's
@@ -134,7 +134,7 @@ describe('usePersistExceptionItem', () => {
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     await act(async () => {
       // NOTE: Take note here passing in an exception item where it's
       // entries have been enriched with ids to ensure that they get stripped
@@ -159,7 +159,7 @@ describe('usePersistExceptionItem', () => {
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     await act(async () => {
       result.current[1](getCreateExceptionListItemSchemaMock());
     });

@@ -44,7 +44,7 @@ describe('useFetchPrompts', () => {
 
     await act(async () => {
       renderHook(() => useFetchPrompts());
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
         method: 'GET',
         query: {

@@ -52,7 +52,7 @@ describe('useFieldsMetadata', () => {
     expect(result.current.loading).toBe(true);
     expect(result.current.fieldsMetadata).toEqual(undefined);
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { fieldsMetadata, loading, error } = result.current;
     expect(fieldsMetadata).toEqual(fields);
@@ -71,7 +71,7 @@ describe('useFieldsMetadata', () => {
 
     renderHook(() => useFieldsMetadata(params));
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fieldsMetadataClient.find).toHaveBeenCalledWith(params);
   });
@@ -82,7 +82,7 @@ describe('useFieldsMetadata', () => {
 
     const { result } = renderHook(() => useFieldsMetadata());
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.error?.message).toMatch(error.message);
   });

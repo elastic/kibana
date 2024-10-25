@@ -83,7 +83,7 @@ describe('useSecurityJobs', () => {
       const { result } = renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current.isMlAdmin).toEqual(true);
       expect(result.current.isLicensed).toEqual(true);

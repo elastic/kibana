@@ -83,7 +83,7 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual(useChoicesResponse);
   });
@@ -98,7 +98,7 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -137,7 +137,7 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',

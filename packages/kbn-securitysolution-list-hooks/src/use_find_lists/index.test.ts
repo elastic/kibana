@@ -31,7 +31,7 @@ describe('useFindLists', () => {
     act(() => {
       result.current.start({ http: httpMock, pageIndex: 1, pageSize: 10 });
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(Api.findLists).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, pageIndex: 1, pageSize: 10 })

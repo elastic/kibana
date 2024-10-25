@@ -46,7 +46,7 @@ describe('useDisassociateExceptionList', () => {
         })
       );
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(result.current).toEqual([false, null]);
     });

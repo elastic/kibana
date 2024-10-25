@@ -168,7 +168,7 @@ describe('Sourcerer Hooks', () => {
         <Provider store={store}>{children}</Provider>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender();
     expect(mockDispatch.mock.calls[0][0]).toEqual({
       type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
@@ -210,7 +210,7 @@ describe('Sourcerer Hooks', () => {
     const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender();
     await waitFor(() => {
       expect(mockDispatch.mock.calls[3][0]).toEqual({
@@ -337,11 +337,11 @@ describe('Sourcerer Hooks', () => {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     rerender();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockCreateSourcererDataView).toHaveBeenCalled();
     expect(mockAddError).not.toHaveBeenCalled();
@@ -375,7 +375,7 @@ describe('Sourcerer Hooks', () => {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender();
 
     await waitFor(() => {
@@ -395,7 +395,7 @@ describe('Sourcerer Hooks', () => {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender();
     expect(mockDispatch.mock.calls[3][0]).toEqual({
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
@@ -410,7 +410,7 @@ describe('Sourcerer Hooks', () => {
     const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender();
     await waitFor(() => {
       expect(mockSearch).toHaveBeenCalledTimes(1);
@@ -433,7 +433,7 @@ describe('Sourcerer Hooks', () => {
     const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender();
     await waitFor(() => {
       expect(mockSearch).toHaveBeenCalledTimes(2);
@@ -453,7 +453,7 @@ describe('Sourcerer Hooks', () => {
       const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
@@ -482,7 +482,7 @@ describe('Sourcerer Hooks', () => {
       const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
@@ -516,7 +516,7 @@ describe('Sourcerer Hooks', () => {
       const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
@@ -551,7 +551,7 @@ describe('Sourcerer Hooks', () => {
       const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
@@ -590,7 +590,7 @@ describe('Sourcerer Hooks', () => {
       const { rerender } = renderHook<React.PropsWithChildren<{}>, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
@@ -633,7 +633,7 @@ describe('Sourcerer Hooks', () => {
       >(() => useSourcererDataView(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       expect(result.current.selectedPatterns).toEqual([
         'apm-*-transaction*',

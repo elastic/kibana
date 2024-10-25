@@ -49,7 +49,7 @@ describe('usePersistExceptionList', () => {
     const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     result.current[1](getCreateExceptionListSchemaMock());
     rerender();
 
@@ -61,7 +61,7 @@ describe('usePersistExceptionList', () => {
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current[1](getCreateExceptionListSchemaMock());
@@ -79,7 +79,7 @@ describe('usePersistExceptionList', () => {
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     act(() => {
       result.current[1](getUpdateExceptionListSchemaMock());
@@ -99,7 +99,7 @@ describe('usePersistExceptionList', () => {
     const { result } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current[1](getCreateExceptionListSchemaMock());
     });

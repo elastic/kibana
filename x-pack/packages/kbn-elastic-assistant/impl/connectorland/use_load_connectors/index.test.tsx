@@ -71,7 +71,7 @@ describe('useLoadConnectors', () => {
   it('should call api to load action types', async () => {
     await act(async () => {
       renderHook(() => useLoadConnectors(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.get).toHaveBeenCalledWith('/api/actions/connectors');
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -81,7 +81,7 @@ describe('useLoadConnectors', () => {
   it('should return sorted action types, removing isMissingSecrets and wrong action type ids', async () => {
     await act(async () => {
       const { result } = renderHook(() => useLoadConnectors(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await expect(result.current).resolves.toStrictEqual(
         // @ts-ignore ts does not like config, but we define it in the mock data
@@ -95,7 +95,7 @@ describe('useLoadConnectors', () => {
         get: jest.fn().mockRejectedValue(new Error('this is an error')),
       } as unknown as Props['http'];
       renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(toasts.addError).toHaveBeenCalled();
     });

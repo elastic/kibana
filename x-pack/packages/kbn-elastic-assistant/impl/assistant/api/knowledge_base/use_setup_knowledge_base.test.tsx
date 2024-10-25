@@ -53,7 +53,7 @@ describe('useSetupKnowledgeBase', () => {
   it('should call api to post knowledge base setup', async () => {
     await act(async () => {
       renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
@@ -76,7 +76,7 @@ describe('useSetupKnowledgeBase', () => {
     });
     await act(async () => {
       renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
@@ -91,7 +91,7 @@ describe('useSetupKnowledgeBase', () => {
   it('should return setup response', async () => {
     await act(async () => {
       const { result } = renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
     });
@@ -101,7 +101,7 @@ describe('useSetupKnowledgeBase', () => {
     postKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
       renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(toasts.addError).toHaveBeenCalled();
     });

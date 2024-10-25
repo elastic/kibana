@@ -64,7 +64,7 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -76,7 +76,7 @@ describe('useLogSummary hook', () => {
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ logViewReference: CHANGED_LOG_VIEW_REFERENCE });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -110,7 +110,7 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -122,7 +122,7 @@ describe('useLogSummary hook', () => {
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -148,7 +148,7 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -161,7 +161,7 @@ describe('useLogSummary hook', () => {
     const secondRange = createMockDateRange('now-20s', 'now');
 
     rerender(secondRange);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -189,7 +189,7 @@ describe('useLogSummary hook', () => {
 
     // intentionally don't wait for an update to test the throttling
     rerender(secondRange);
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(

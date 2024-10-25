@@ -44,7 +44,7 @@ describe('useFetchCurrentUserConversations', () => {
 
     await act(async () => {
       renderHook(() => useFetchCurrentUserConversations(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/api/security_ai_assistant/current_user/conversations/_find',
         {

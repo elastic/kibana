@@ -53,7 +53,7 @@ describe('usePerformEvaluation', () => {
   it('should call api with undefined evalParams', async () => {
     await act(async () => {
       renderHook(() => usePerformEvaluation(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
         body: undefined,
@@ -83,7 +83,7 @@ describe('usePerformEvaluation', () => {
     });
     await act(async () => {
       renderHook(() => usePerformEvaluation(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
         body: '{"graphs":["d","c"],"datasetName":"kewl","connectorIds":["h","g"],"runName":"test run"}',
@@ -99,7 +99,7 @@ describe('usePerformEvaluation', () => {
   it('should return evaluation response', async () => {
     await act(async () => {
       const { result } = renderHook(() => usePerformEvaluation(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
     });
@@ -109,7 +109,7 @@ describe('usePerformEvaluation', () => {
     postEvaluationMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
       renderHook(() => usePerformEvaluation(defaultProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(toasts.addError).toHaveBeenCalled();
     });

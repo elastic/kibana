@@ -43,7 +43,7 @@ describe('useImportList', () => {
         type: 'keyword',
       });
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(Api.importList).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -67,7 +67,7 @@ describe('useImportList', () => {
         type: 'keyword',
       });
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.result).toEqual(getListResponseMock());
   });
@@ -86,7 +86,7 @@ describe('useImportList', () => {
       });
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.result).toBeUndefined();
     expect(result.current.error).toEqual(new Error('whoops'));

@@ -34,7 +34,7 @@ describe('conversations api', () => {
       const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
       renderHook(() => deleteConversation(deleteProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(deleteProps.http.fetch).toHaveBeenCalledWith(
         '/api/security_ai_assistant/current_user/conversations/test',
@@ -60,7 +60,7 @@ describe('conversations api', () => {
     await act(async () => {
       const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
       renderHook(() => getConversationById(getProps));
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(getProps.http.fetch).toHaveBeenCalledWith(
         '/api/security_ai_assistant/current_user/conversations/test',

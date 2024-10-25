@@ -24,7 +24,7 @@ describe('Transform: Transform List Actions', () => {
       wrapper,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const actions = result.current.actions;
 

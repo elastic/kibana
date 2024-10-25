@@ -108,7 +108,7 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(IndexObj.errorMessage).toBe('');
     expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);

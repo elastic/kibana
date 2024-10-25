@@ -70,7 +70,7 @@ describe('useTourContext', () => {
       const { result } = renderHook(() => useTourContext(), {
         wrapper: TourContextProvider,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       act(() => {
         result.current.endTourStep(tourId);
       });
@@ -86,7 +86,7 @@ describe('useTourContext', () => {
       const { result } = renderHook(() => useTourContext(), {
         wrapper: TourContextProvider,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const stepCount = securityTourConfig[tourId].length;
       act(() => {
         for (let i = 0; i < stepCount - 1; i++) {
@@ -105,7 +105,7 @@ describe('useTourContext', () => {
       const { result } = renderHook(() => useTourContext(), {
         wrapper: TourContextProvider,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       act(() => {
         result.current.setStep(tourId, 6);
       });
@@ -116,7 +116,7 @@ describe('useTourContext', () => {
       const { result } = renderHook(() => useTourContext(), {
         wrapper: TourContextProvider,
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       act(() => {
         // @ts-expect-error testing invalid step

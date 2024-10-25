@@ -48,7 +48,7 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -64,7 +64,7 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(patchCommentSpy).toHaveBeenCalledWith({
       ...sampleUpdate,
@@ -83,7 +83,7 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(addError).toHaveBeenCalled();
   });

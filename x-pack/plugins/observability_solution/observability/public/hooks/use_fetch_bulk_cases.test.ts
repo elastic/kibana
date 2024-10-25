@@ -21,7 +21,7 @@ describe('Bulk Get Cases API hook', () => {
   it('initially is not loading and does not have data', async () => {
     const { result } = renderHook(() => useFetchBulkCases({ ids: [] }));
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.cases).toEqual([]);
     expect(result.current.error).toEqual(undefined);

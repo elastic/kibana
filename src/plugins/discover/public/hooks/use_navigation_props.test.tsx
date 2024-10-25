@@ -66,7 +66,7 @@ const render = async () => {
       ),
     }
   );
-  await waitFor(() => null);
+  await waitFor(() => new Promise((resolve) => resolve(null)));
   return renderResult;
 };
 

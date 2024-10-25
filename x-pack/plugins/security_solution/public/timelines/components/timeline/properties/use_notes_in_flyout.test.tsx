@@ -226,7 +226,7 @@ describe('useNotesInFlyout', () => {
       rerender({ activeTab: TimelineTabs.eql });
     });
 
-    waitFor(() => null);
+    waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current.isNotesFlyoutVisible).toBe(false);
   });

@@ -170,7 +170,7 @@ describe('useTimelineEvents', () => {
     });
 
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender({ ...props, startDate, endDate });
     // useEffect on params request
     await waitFor(() => {
@@ -200,10 +200,10 @@ describe('useTimelineEvents', () => {
     });
 
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender({ ...props, startDate, endDate });
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     mockUseRouteSpy.mockReturnValue([
       {
@@ -251,7 +251,7 @@ describe('useTimelineEvents', () => {
     });
 
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender({
       ...props,
       startDate,
@@ -266,7 +266,7 @@ describe('useTimelineEvents', () => {
       },
     });
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     mockSearch.mockReset();
     act(() => {
       result.current[1].loadPage(4);
@@ -283,10 +283,10 @@ describe('useTimelineEvents', () => {
     );
 
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender({ ...props, startDate, endDate });
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockSearch).toHaveBeenCalledTimes(2);
     mockSearch.mockClear();
@@ -310,10 +310,10 @@ describe('useTimelineEvents', () => {
     );
 
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender({ ...props, startDate, endDate });
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockSearch).toHaveBeenCalledTimes(2);
     mockSearch.mockClear();
@@ -331,10 +331,10 @@ describe('useTimelineEvents', () => {
     );
 
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     rerender({ ...props, startDate, endDate });
     // useEffect on params request
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockSearch).toHaveBeenCalledTimes(2);
     mockSearch.mockClear();
@@ -342,7 +342,7 @@ describe('useTimelineEvents', () => {
     // remove `event.kind` from default fields
     rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockSearch).toHaveBeenCalledTimes(0);
 

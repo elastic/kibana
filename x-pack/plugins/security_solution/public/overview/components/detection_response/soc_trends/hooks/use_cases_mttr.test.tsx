@@ -79,7 +79,7 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '2h',
       isLoading: false,
@@ -103,7 +103,7 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '1h',
       isLoading: false,
@@ -127,7 +127,7 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '2h',
       isLoading: false,
@@ -146,7 +146,7 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '-',
       isLoading: false,
@@ -165,7 +165,7 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '2h',
       isLoading: false,
@@ -188,7 +188,7 @@ describe('useCasesMttr', () => {
     const { result, rerender } = renderHook(() => useCasesMttr(ourProps), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '2h',
       isLoading: false,
@@ -205,7 +205,7 @@ describe('useCasesMttr', () => {
       to: '2020-07-09T08:20:18.966Z',
     };
     rerender();
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '-',
       isLoading: false,
@@ -229,7 +229,7 @@ describe('useCasesMttr', () => {
       wrapper: wrapperContainer,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       stat: '2h',
@@ -253,7 +253,7 @@ describe('useCasesMttr', () => {
       rerender();
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current).toEqual({
       stat: '-',
       isLoading: false,

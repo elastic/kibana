@@ -164,7 +164,7 @@ describe('useVisualizeAppState', () => {
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {
@@ -188,7 +188,7 @@ describe('useVisualizeAppState', () => {
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {

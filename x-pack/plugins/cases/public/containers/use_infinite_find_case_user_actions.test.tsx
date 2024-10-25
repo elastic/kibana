@@ -88,7 +88,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,

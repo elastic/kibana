@@ -33,7 +33,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual(mockKibanaVersion);
   });
@@ -51,7 +51,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual('8.8.2');
   });
@@ -69,7 +69,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual('8.9.2');
   });
@@ -87,7 +87,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual('8.8.2');
   });
@@ -105,7 +105,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual('8.9.2');
   });
@@ -123,7 +123,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual('8.11.0');
   });
@@ -137,7 +137,7 @@ describe('useAgentVersion', () => {
     const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual(mockKibanaVersion);
   });
@@ -162,7 +162,7 @@ describe('useAgentVersion', () => {
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual('8.11.1+build123456789');
   });

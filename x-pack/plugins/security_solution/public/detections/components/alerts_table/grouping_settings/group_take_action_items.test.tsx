@@ -30,7 +30,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current(getActionItemsParams).length).toEqual(3);
   });
 
@@ -45,7 +45,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current(getActionItemsParams).length).toEqual(3);
   });
 
@@ -60,7 +60,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current(getActionItemsParams).length).toEqual(3);
   });
 
@@ -75,7 +75,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const currentParams = result.current(getActionItemsParams);
     expect(currentParams.length).toEqual(2);
     expect(currentParams[0].key).toEqual('acknowledge');
@@ -93,7 +93,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     const currentParams = result.current(getActionItemsParams);
     expect(currentParams.length).toEqual(2);
     expect(currentParams[0].key).toEqual('open');
@@ -111,7 +111,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const currentParams = result.current(getActionItemsParams);
     expect(currentParams.length).toEqual(2);
@@ -129,7 +129,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current(getActionItemsParams).length).toEqual(0);
   });
 
@@ -143,7 +143,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current(getActionItemsParams).length).toEqual(3);
   });
 });

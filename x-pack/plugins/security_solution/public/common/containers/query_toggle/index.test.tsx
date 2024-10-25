@@ -45,7 +45,7 @@ describe('useQueryToggle', () => {
   });
   it('Toggles local storage', async () => {
     ({ result } = renderHook(() => useQueryToggle('queryId')));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.toggleStatus).toEqual(true);
     act(() => {
       result.current.setToggleStatus(false);
@@ -56,7 +56,7 @@ describe('useQueryToggle', () => {
   });
   it('null storage key, do not set', async () => {
     ({ result } = renderHook(() => useQueryToggle()));
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.toggleStatus).toEqual(true);
     act(() => {
       result.current.setToggleStatus(false);

@@ -79,7 +79,7 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedListItemsResult: ExceptionListSchema[] = getFoundExceptionListSchemaMock().data;
 
@@ -117,7 +117,7 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
       filters:
@@ -152,7 +152,7 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
       filters:
@@ -196,7 +196,7 @@ describe('useExceptionLists', () => {
       }
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     rerender({
       errorMessage: 'Uh oh',
@@ -211,7 +211,7 @@ describe('useExceptionLists', () => {
       notifications: mockKibanaNotificationsService,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
   });
@@ -233,7 +233,7 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(typeof result.current[3]).toEqual('function');
 
@@ -241,7 +241,7 @@ describe('useExceptionLists', () => {
       result.current[4]();
     }
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
   });
@@ -266,7 +266,7 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(mockKibanaNotificationsService.toasts.addError).toHaveBeenCalledWith(mockError, {
       title: 'Uh oh',

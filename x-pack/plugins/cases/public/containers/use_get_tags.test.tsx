@@ -30,7 +30,7 @@ describe('useGetTags', () => {
         <TestProviders>{children}</TestProviders>
       ),
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(spyOnGetTags).toBeCalledWith({
       owner: [SECURITY_SOLUTION_OWNER],
       signal: abortCtrl.signal,

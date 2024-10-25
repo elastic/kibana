@@ -43,7 +43,7 @@ const render = async ({ dataViewId }: { dataViewId: string }) => {
       <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
     ),
   });
-  await waitFor(() => null);
+  await waitFor(() => new Promise((resolve) => resolve(null)));
 
   return hookResult;
 };

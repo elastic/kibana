@@ -28,7 +28,7 @@ describe('useExportList', () => {
     act(() => {
       result.current.start({ http: httpMock, listId: 'list' });
     });
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(Api.exportList).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, listId: 'list' })

@@ -185,7 +185,7 @@ describe('useFetcher', () => {
         jest.advanceTimersByTime(100);
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       // assert: while loading new data the previous data should still be rendered
       expect(hook.result.current).toEqual({
@@ -239,7 +239,7 @@ describe('useFetcher', () => {
         },
         args: ['b'],
       });
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       const thirdResult = hook.result.current;
 
       // assert: rerender with different data returns a new object

@@ -80,7 +80,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -116,7 +116,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse);
   });
@@ -137,7 +137,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
