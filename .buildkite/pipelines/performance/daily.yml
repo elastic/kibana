@@ -3,7 +3,7 @@ steps:
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -13,7 +13,7 @@ steps:
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: c2-standard-16
     key: build
@@ -33,7 +33,7 @@ steps:
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -47,6 +47,6 @@ steps:
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2

@@ -1,7 +1,7 @@
 agents:
   provider: gcp
   image: family/kibana-ubuntu-2004
-  imageProject: elastic-images-prod
+  imageProject: elastic-images-qa
 
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
