@@ -32,7 +32,7 @@ import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { emptySerializer } from '../helper';
+import { buildObservableVariable, emptySerializer } from '../helper';
 import type {
   GetStateType,
   LensEmbeddableStartServices,
@@ -123,7 +123,7 @@ function getViewUnderlyingDataArgs({
   };
 }
 
-function computeViewUnderlyingDataArgs(
+function loadViewUnderlyingDataArgs(
   state: LensRuntimeState,
   { getVisualizationContext }: VisualizationContextHelper,
   parentApi: unknown,
@@ -210,15 +210,18 @@ function createViewUnderlyingDataApis(
 ): ViewInDiscoverCallbacks {
   let viewUnderlyingDataArgs: undefined | ViewUnderlyingDataArgs;
 
+  const [canViewUnderlyingData$] = buildObservableVariable<boolean>(false);
+
   return {
-    canViewUnderlyingData: async () => {
-      viewUnderlyingDataArgs = computeViewUnderlyingDataArgs(
+    canViewUnderlyingData$,
+    loadViewUnderlyingData: () => {
+      viewUnderlyingDataArgs = loadViewUnderlyingDataArgs(
         getState(),
         visualizationContextHelper,
         parentApi,
         services
       );
-      return Boolean(viewUnderlyingDataArgs);
+      canViewUnderlyingData$.next(viewUnderlyingDataArgs != null);
     },
     getViewUnderlyingDataArgs: () => {
       return viewUnderlyingDataArgs;

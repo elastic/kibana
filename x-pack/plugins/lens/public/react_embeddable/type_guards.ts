@@ -21,7 +21,6 @@ import {
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
     'getSavedVis',
-    'canViewUnderlyingData',
     'getViewUnderlyingDataArgs',
     'isTextBasedLanguage',
     'getTextBasedLanguage',
@@ -33,6 +32,7 @@ export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(
     api &&
       apiIsOfType(api, 'lens') &&
+      'canViewUnderlyingData$' in api &&
       apiHasLensCallbacks(api) &&
       apiPublishesPanelTitle(api) &&
       apiPublishesUnifiedSearch(api)

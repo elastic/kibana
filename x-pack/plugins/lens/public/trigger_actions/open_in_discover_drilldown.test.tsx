@@ -20,7 +20,7 @@ import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { getLensApiMock } from '../react_embeddable/mocks';
 
 jest.mock('./open_in_discover_helpers', () => ({
-  isCompatible: jest.fn(() => true),
+  isCompatible: jest.fn().mockReturnValue(true),
   getHref: jest.fn(),
 }));
 

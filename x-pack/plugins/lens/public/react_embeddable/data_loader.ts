@@ -159,6 +159,8 @@ export function loadEmbeddableData(
       // consumer to be notified on data change
       onLoad?.(false, adapters, api.dataLoading);
 
+      api.loadViewUnderlyingData();
+
       updateWarnings();
       // Render can still go wrong, so perfor a new check
       dispatchBlockingErrorIfAny();

@@ -60,7 +60,8 @@ const LensApiMock: LensApi = {
   // Methods
   getSavedVis: jest.fn(),
   getFullAttributes: jest.fn(),
-  canViewUnderlyingData: jest.fn(async () => true),
+  canViewUnderlyingData$: new BehaviorSubject<boolean>(false),
+  loadViewUnderlyingData: jest.fn(),
   getViewUnderlyingDataArgs: jest.fn(() => ({
     dataViewSpec: { id: 'index-pattern-id' },
     timeRange: { from: 'now-7d', to: 'now' },

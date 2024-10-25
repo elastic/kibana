@@ -172,7 +172,8 @@ export interface LensByReference {
 export type LensPropsVariants = LensByValue & LensByReference;
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
-  canViewUnderlyingData: () => Promise<boolean>;
+  canViewUnderlyingData$: PublishingSubject<boolean>;
+  loadViewUnderlyingData: () => void;
   getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs | undefined;
 }
 
