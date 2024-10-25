@@ -1141,6 +1141,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
+
+# Observability
+/x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/response-ops @elastic/appex-qa
+/x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/response-ops
+
 ### Observability Plugins
 
 
@@ -1492,8 +1497,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 # Response Ops team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/test/functional/es_archives/cases/default @elastic/response-ops
-/x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/response-ops
-/x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_oblt_overview_page.ts @elastic/response-ops
