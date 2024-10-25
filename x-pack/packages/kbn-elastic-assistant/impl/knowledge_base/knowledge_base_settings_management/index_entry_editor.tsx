@@ -96,6 +96,12 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       }));
     }, [dataViews]);
 
+    const { value: isMissingIndex } = useAsync(async () => {
+      if (!entry?.index?.length) return false;
+
+      return !(await dataViews.getExistingIndices([entry.index])).length;
+    }, [entry?.index]);
+
     const indexFields = useAsync(
       async () =>
         dataViews.getFieldsForWildcard({
@@ -251,11 +257,17 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             fullWidth
           />
         </EuiFormRow>
-        <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
+        <EuiFormRow
+          label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
+          fullWidth
+          isInvalid={isMissingIndex}
+          error={isMissingIndex && <>{i18n.MISSING_INDEX_ERROR}</>}
+        >
           <EuiComboBox
             data-test-subj="index-combobox"
             aria-label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
             isClearable={true}
+            isInvalid={isMissingIndex}
             singleSelection={{ asPlainText: true }}
             onCreateOption={onCreateIndexOption}
             fullWidth
