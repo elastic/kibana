@@ -19,6 +19,7 @@ export { isOutputCompleteEvent } from './output/is_output_complete_event';
 export { isOutputEvent } from './output/is_output_event';
 
 export type { ToolSchema } from './chat_complete/tool_schema';
+export type { ToolOptions, ToolDefinition } from './chat_complete/tools';
 
 export {
   type Message,
@@ -26,6 +27,7 @@ export {
   type ToolMessage,
   type AssistantMessage,
   type UserMessage,
+  type ChatCompletionResponse,
 } from './chat_complete';
 
 export { generateFakeToolCallId } from './chat_complete/generate_fake_tool_call_id';

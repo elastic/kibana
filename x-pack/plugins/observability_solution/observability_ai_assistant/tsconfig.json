@@ -47,6 +47,7 @@
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-common",
+    "@kbn/observability-utils-server"
   ],
   "exclude": ["target/**/*"]
 }

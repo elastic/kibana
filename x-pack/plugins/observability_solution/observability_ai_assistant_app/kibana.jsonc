@@ -25,7 +25,9 @@
       "alerting",
       "features",
       "inference",
-      "logsDataAccess"
+      "logsDataAccess",
+      "spaces",
+      "slo"
     ],
     "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "optionalPlugins": ["cloud"],

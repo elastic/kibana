@@ -17,7 +17,9 @@ type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'
   function: infer TToolName;
 }
   ? TToolName extends keyof TToolOptions['tools']
-    ? Pick<TToolOptions['tools'], TToolName>
+    ? TToolName extends string
+      ? Pick<TToolOptions['tools'], TToolName>
+      : TToolOptions['tools']
     : TToolOptions['tools']
   : TToolOptions['tools'];
 
