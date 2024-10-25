@@ -66,7 +66,7 @@ export function containerStyle(): ExpressionFunctionDefinition<
         types: ['string'],
         help: argHelp.overflow,
         options: Object.values(Overflow),
-        default: 'hidden',
+        default: 'visible',
       },
       padding: {
         types: ['string'],

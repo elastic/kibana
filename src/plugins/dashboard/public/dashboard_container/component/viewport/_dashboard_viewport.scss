@@ -23,3 +23,9 @@
 .dashboardViewport--screenshotMode  .controlsWrapper--empty {
   display:none
 }
+
+.dshDashboardViewportWrapper--isFullscreen {
+  .dshDashboardGrid__item--expanded {
+    padding: $euiSizeS;
+  }
+}

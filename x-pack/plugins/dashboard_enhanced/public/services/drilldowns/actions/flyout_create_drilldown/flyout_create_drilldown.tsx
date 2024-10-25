@@ -36,6 +36,7 @@ import React from 'react';
 import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
+  DRILLDOWN_ACTION_GROUP,
   DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
@@ -62,6 +63,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
+  public grouping = [DRILLDOWN_ACTION_GROUP];
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
