@@ -9,6 +9,7 @@ import {
   AssetDetailsLocatorParams,
   ENTITY_IDENTITY_FIELDS,
   ENTITY_TYPE,
+  MANAGED_ENTITY_TYPE,
   SERVICE_ENVIRONMENT,
   SERVICE_OVERVIEW_LOCATOR_ID,
   ServiceOverviewParams,
@@ -23,14 +24,16 @@ import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
-  kubernetes_cluster_ecs: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-  kubernetes_cron_job_ecs: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-  kubernetes_daemon_set_ecs: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-  kubernetes_deployment_ecs: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-  kubernetes_job_ecs: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-  kubernetes_node_ecs: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-  kubernetes_pod_ecs: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-  kubernetes_stateful_set_ecs: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.CLUSTER.ECS]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.CRONJOB.ECS]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.DAEMONSET.ECS]: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.DEPLOYMENT.ECS]:
+    'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.JOB.ECS]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.NODE.ECS]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.POD.ECS]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+  [MANAGED_ENTITY_TYPE.KUBERNETES.STATEFULSET.ECS]:
+    'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
 };
 
 export const useDetailViewRedirect = () => {
@@ -66,8 +69,8 @@ export const useDetailViewRedirect = () => {
       const identityValue = getSingleIdentityFieldValue(entity);
 
       switch (type) {
-        case 'host':
-        case 'container':
+        case MANAGED_ENTITY_TYPE.HOST:
+        case MANAGED_ENTITY_TYPE.CONTAINER:
           return assetDetailsLocator?.getRedirectUrl({
             assetId: identityValue,
             assetType: type,

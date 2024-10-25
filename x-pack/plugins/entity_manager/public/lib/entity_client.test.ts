@@ -10,10 +10,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 const commonEntityFields: EntityLatest = {
   entity: {
-    lastSeenTimestamp: '2023-10-09T00:00:00Z',
+    last_seen_timestamp: '2023-10-09T00:00:00Z',
     id: '1',
-    displayName: 'entity_name',
-    definitionId: 'entity_definition_id',
+    display_name: 'entity_name',
+    definition_id: 'entity_definition_id',
   } as EntityLatest['entity'],
 };
 
@@ -25,11 +25,11 @@ describe('EntityClient', () => {
   });
 
   describe('asKqlFilter', () => {
-    it('should return the value when identityFields is a single string', () => {
+    it('should return the value when indentity_fields is a single string', () => {
       const entityLatest: EntityLatest = {
         entity: {
           ...commonEntityFields.entity,
-          identityFields: ['service.name', 'service.environment'],
+          identity_fields: ['service.name', 'service.environment'],
           type: 'service',
         },
         service: {
@@ -41,11 +41,11 @@ describe('EntityClient', () => {
       expect(result).toEqual('service.name: my-service');
     });
 
-    it('should return values when identityFields is an array of strings', () => {
+    it('should return values when indentity_fields is composed by multiple fields', () => {
       const entityLatest: EntityLatest = {
         entity: {
           ...commonEntityFields.entity,
-          identityFields: ['service.name', 'service.environment'],
+          identity_fields: ['service.name', 'service.environment'],
           type: 'service',
         },
         service: {
@@ -56,6 +56,25 @@ describe('EntityClient', () => {
 
       const result = entityClient.asKqlFilter(entityLatest);
       expect(result).toEqual('(service.name: my-service AND service.environment: staging)');
+    });
+
+    it('should return identity fields values when an indentity field value is an array', () => {
+      const entityLatest: EntityLatest = {
+        entity: {
+          ...commonEntityFields.entity,
+          identity_fields: ['service.name', 'service.environment'],
+          type: 'service',
+        },
+        service: {
+          name: 'my-service',
+          environment: ['prod', 'staging', 'dev'],
+        },
+      };
+
+      const result = entityClient.asKqlFilter(entityLatest);
+      expect(result).toEqual(
+        '(service.name: my-service AND (service.environment: prod OR service.environment: staging OR service.environment: dev))'
+      );
     });
 
     it('should throw an error when identity fields are missing', () => {
@@ -70,7 +89,7 @@ describe('EntityClient', () => {
       const entityLatest: EntityLatest = {
         entity: {
           ...commonEntityFields.entity,
-          identityFields: ['host.name', 'foo.bar'],
+          identity_fields: ['host.name', 'foo.bar'],
         },
         host: {
           name: 'my-host',
@@ -84,10 +103,10 @@ describe('EntityClient', () => {
 
   describe('getIdentityFieldsValue', () => {
     it('should return identity fields values', () => {
-      const serviceEntity: EntityLatest = {
+      const entityLatest: EntityLatest = {
         entity: {
           ...commonEntityFields.entity,
-          identityFields: ['service.name', 'service.environment'],
+          identity_fields: ['service.name', 'service.environment'],
           type: 'service',
         },
         service: {
@@ -95,16 +114,16 @@ describe('EntityClient', () => {
         },
       };
 
-      expect(entityClient.getIdentityFieldsValue(serviceEntity)).toEqual({
+      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
         'service.name': 'my-service',
       });
     });
 
-    it('should return identity fields values when indentity field is an array of string', () => {
-      const serviceEntity: EntityLatest = {
+    it('should return identity fields values when indentity_fields is composed by multiple fields', () => {
+      const entityLatest: EntityLatest = {
         entity: {
           ...commonEntityFields.entity,
-          identityFields: ['service.name', 'service.environment'],
+          identity_fields: ['service.name', 'service.environment'],
           type: 'service',
         },
         service: {
@@ -113,23 +132,42 @@ describe('EntityClient', () => {
         },
       };
 
-      expect(entityClient.getIdentityFieldsValue(serviceEntity)).toEqual({
+      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
         'service.name': 'my-service',
         'service.environment': 'staging',
       });
     });
 
-    it('should return identity fields when field is in the root', () => {
-      const serviceEntity: EntityLatest = {
+    it('should return identity fields values when an indentity field value is an array', () => {
+      const entityLatest: EntityLatest = {
         entity: {
           ...commonEntityFields.entity,
-          identityFields: ['name'],
+          identity_fields: ['service.name', 'service.environment'],
+          type: 'service',
+        },
+        service: {
+          name: 'my-service',
+          environment: ['prod', 'staging', 'dev'],
+        },
+      };
+
+      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
+        'service.name': 'my-service',
+        'service.environment': ['prod', 'staging', 'dev'],
+      });
+    });
+
+    it('should return identity fields when field is in the root', () => {
+      const entityLatest: EntityLatest = {
+        entity: {
+          ...commonEntityFields.entity,
+          identity_fields: ['name'],
           type: 'service',
         },
         name: 'foo',
       };
 
-      expect(entityClient.getIdentityFieldsValue(serviceEntity)).toEqual({
+      expect(entityClient.getIdentityFieldsValue(entityLatest)).toEqual({
         name: 'foo',
       });
     });

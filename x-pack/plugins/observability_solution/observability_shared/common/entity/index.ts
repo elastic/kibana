@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { EntityType } from './entity_types';
+export { MANAGED_ENTITY_TYPE } from './entity_types';
 export { EntityDataStreamType } from './entity_data_stream_types';

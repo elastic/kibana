@@ -5,7 +5,25 @@
  * 2.0.
  */
 
-export enum EntityType {
-  HOST = 'host',
-  CONTAINER = 'container',
-}
+const createKubernetesEntity = <T extends string>(base: T) => ({
+  ECS: `kubernetes_${base}_ecs` as const,
+  SEMCONV: `kubernetes_${base}_semconv` as const,
+});
+
+export const MANAGED_ENTITY_TYPE = {
+  HOST: 'host',
+  CONTAINER: 'container',
+  SERVICE: 'service',
+  KUBERNETES: {
+    CLUSTER: createKubernetesEntity('cluster'),
+    CONTAINER: createKubernetesEntity('container'),
+    CRONJOB: createKubernetesEntity('cron_job'),
+    DAEMONSET: createKubernetesEntity('daemon_set'),
+    DEPLOYMENT: createKubernetesEntity('deployment'),
+    JOB: createKubernetesEntity('job'),
+    NAMESPACE: createKubernetesEntity('namespace'),
+    NODE: createKubernetesEntity('node'),
+    POD: createKubernetesEntity('pod'),
+    STATEFULSET: createKubernetesEntity('stateful_set'),
+  },
+} as const;
