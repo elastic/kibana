@@ -18,6 +18,7 @@ import {
   HandleStyleOverride,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
+import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
 
 const NODE_WIDTH = 90;
 const NODE_HEIGHT = 90;
@@ -37,14 +38,7 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <circle
-              opacity="0.5"
-              cx="45"
-              cy="45"
-              r="44.5"
-              stroke={euiTheme.colors[color ?? 'primary']}
-              strokeDasharray="2 2"
-            />
+            <EllipseHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
           </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
@@ -54,10 +48,7 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle
-            cx="36"
-            cy="36"
-            r="35.5"
+          <EllipseShape
             fill={useEuiBackgroundColor(color ?? 'primary')}
             stroke={euiTheme.colors[color ?? 'primary']}
           />

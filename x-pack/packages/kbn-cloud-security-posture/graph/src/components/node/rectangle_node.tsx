@@ -18,6 +18,7 @@ import {
   HandleStyleOverride,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
+import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
 
 const NODE_WIDTH = 81;
 const NODE_HEIGHT = 80;
@@ -37,16 +38,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <rect
-              opacity="0.5"
-              x="1"
-              y="0.5"
-              width="79"
-              height="79"
-              rx="7.5"
-              stroke={euiTheme.colors[color ?? 'primary']}
-              strokeDasharray="2 2"
-            />
+            <RectangleHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
           </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
@@ -56,12 +48,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect
-            x="1"
-            y="0.5"
-            width="63"
-            height="63"
-            rx="7.5"
+          <RectangleShape
             fill={useEuiBackgroundColor(color ?? 'primary')}
             stroke={euiTheme.colors[color ?? 'primary']}
           />
