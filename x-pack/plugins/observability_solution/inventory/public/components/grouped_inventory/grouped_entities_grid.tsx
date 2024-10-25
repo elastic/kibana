@@ -26,7 +26,21 @@ export function GroupedEntitiesGrid({ field }: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
-  const pagination = paginationDecoder(paginationQuery);
+  let pagination: Record<string, number> | undefined = {};
+  try {
+    pagination = paginationDecoder(paginationQuery);
+  } catch (error) {
+    inventoryRoute.push('/', {
+      path: {},
+      query: {
+        sortField,
+        sortDirection,
+        kuery,
+        pagination: undefined,
+      },
+    });
+    window.location.reload();
+  }
   const pageIndex = pagination?.[field] ?? 0;
 
   const { refreshSubject$ } = useInventorySearchBarContext();

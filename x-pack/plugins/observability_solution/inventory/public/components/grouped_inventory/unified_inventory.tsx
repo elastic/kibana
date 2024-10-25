@@ -26,8 +26,23 @@ export function UnifiedInventory() {
   const { refreshSubject$ } = useInventorySearchBarContext();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, kuery, entityTypes, pagination: paginationQuery } = query;
+  let pagination: Record<string, number> | undefined = {};
   const inventoryRoute = useInventoryRouter();
-  const pagination = paginationDecoder(paginationQuery);
+  try {
+    pagination = paginationDecoder(paginationQuery);
+  } catch (error) {
+    inventoryRoute.push('/', {
+      path: {},
+      query: {
+        sortField,
+        sortDirection,
+        kuery,
+        pagination: undefined,
+      },
+    });
+    window.location.reload();
+  }
+
   const pageIndex = pagination?.unified ?? 0;
 
   const {
