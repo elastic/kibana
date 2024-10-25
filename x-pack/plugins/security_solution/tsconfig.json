@@ -220,6 +220,7 @@
     "@kbn/cloud-security-posture",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
+    "@kbn/cloud-security-posture-graph",
     "@kbn/presentation-publishing",
     "@kbn/inference-plugin",
     "@kbn/entityManager-plugin",
