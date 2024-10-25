@@ -392,6 +392,10 @@ describe('useActions', () => {
           update: false,
           delete: false,
           reopenCase: true,
+          push: false,
+          connectors: true,
+          settings: false,
+          createComment: false,
         },
       });
 
@@ -423,6 +427,10 @@ describe('useActions', () => {
           update: false,
           delete: true,
           reopenCase: true,
+          push: false,
+          connectors: true,
+          settings: false,
+          createComment: false,
         },
       });
 
@@ -453,6 +461,10 @@ describe('useActions', () => {
           update: false,
           delete: false,
           reopenCase: false,
+          push: false,
+          connectors: true,
+          settings: false,
+          createComment: false,
         },
       });
 

@@ -25,6 +25,13 @@ describe('useUserPermissions', () => {
           update: true,
           reopenCase: false,
           createComment: false,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
@@ -38,6 +45,13 @@ describe('useUserPermissions', () => {
           update: false,
           reopenCase: true,
           createComment: true,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
@@ -53,6 +67,13 @@ describe('useUserPermissions', () => {
           update: false,
           reopenCase: true,
           createComment: false,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
@@ -66,6 +87,13 @@ describe('useUserPermissions', () => {
           update: true,
           reopenCase: false,
           createComment: true,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
@@ -81,11 +109,21 @@ describe('useUserPermissions', () => {
           update: false,
           reopenCase: false,
           createComment: true,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
       const { result } = renderHook(() => useUserPermissions());
       const userActivityParams: UserActivityParams = {
+        page: 1,
+        perPage: 10,
+        sortOrder: 'asc',
         type: 'action',
       };
 
@@ -98,12 +136,22 @@ describe('useUserPermissions', () => {
           update: false,
           reopenCase: false,
           createComment: true,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
       const { result } = renderHook(() => useUserPermissions());
       const userActivityParams: UserActivityParams = {
-        type: 'comment',
+        page: 1,
+        perPage: 10,
+        sortOrder: 'asc',
+        type: 'user',
       };
 
       expect(result.current.getCanAddUserComments(userActivityParams)).toBe(true);
@@ -115,12 +163,22 @@ describe('useUserPermissions', () => {
           update: true,
           reopenCase: true,
           createComment: false,
+          all: false,
+          read: true,
+          create: false,
+          delete: false,
+          push: false,
+          connectors: true,
+          settings: false,
         },
       });
 
       const { result } = renderHook(() => useUserPermissions());
       const userActivityParams: UserActivityParams = {
-        type: 'comment',
+        page: 1,
+        perPage: 10,
+        sortOrder: 'asc',
+        type: 'user',
       };
 
       expect(result.current.getCanAddUserComments(userActivityParams)).toBe(false);
@@ -132,6 +190,13 @@ describe('useUserPermissions', () => {
       update: true,
       reopenCase: true,
       createComment: true,
+      all: false,
+      read: true,
+      create: false,
+      delete: false,
+      push: false,
+      connectors: true,
+      settings: false,
     };
 
     mockUseCasesContext.mockReturnValue({ permissions });
@@ -154,6 +219,13 @@ describe('useUserPermissions', () => {
       update: true,
       reopenCase: true,
       createComment: true,
+      all: false,
+      read: true,
+      create: false,
+      delete: false,
+      push: false,
+      connectors: true,
+      settings: false,
     };
 
     mockUseCasesContext.mockReturnValue({ permissions: initialPermissions });
@@ -168,6 +240,13 @@ describe('useUserPermissions', () => {
       update: false,
       reopenCase: false,
       createComment: true,
+      all: false,
+      read: true,
+      create: false,
+      delete: false,
+      push: false,
+      connectors: true,
+      settings: false,
     };
 
     mockUseCasesContext.mockReturnValue({ permissions: newPermissions });

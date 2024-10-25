@@ -76,7 +76,7 @@ describe('StatusContextMenu', () => {
   });
 
   it('does not render the button at all if the status cannot change', async () => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue((cases, status) => true);
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
     const wrapper = mount(
       <TestProviders>
         <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
@@ -125,7 +125,7 @@ describe('StatusContextMenu', () => {
   it('correctly evaluates each status option', async () => {
     const mockShouldDisableStatus = jest
       .fn()
-      .mockImplementation((cases, status) => status === CaseStatuses.closed);
+      .mockImplementation((_, status: CaseStatuses) => status === CaseStatuses.closed);
     (useShouldDisableStatus as jest.Mock).mockReturnValue(mockShouldDisableStatus);
 
     const wrapper = mount(
