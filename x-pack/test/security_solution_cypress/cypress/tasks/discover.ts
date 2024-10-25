@@ -103,7 +103,7 @@ export const openAddDiscoverFilterPopover = () => {
 };
 
 export const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).should('be.visible').type(fieldId);
+  cy.get(`${DISCOVER_CONTAINER} ${DISCOVER_FIELD_SEARCH}`).should('be.visible').type(fieldId);
 };
 
 export const clearFieldSearch = () => {
