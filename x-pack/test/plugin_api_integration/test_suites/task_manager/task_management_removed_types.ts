@@ -56,6 +56,11 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
+    afterEach(async () => {
+      // clean up after each test
+      return await request.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+    });
+
     function scheduleTask(
       task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
     ): Promise<SerializedConcreteTaskInstance> {
