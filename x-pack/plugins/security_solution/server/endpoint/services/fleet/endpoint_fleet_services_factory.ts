@@ -249,7 +249,7 @@ const fetchEndpointPolicyNamespace = async ({
   if (agentPolicyIdsToRetrieve.size > 0) {
     const ids = Array.from(agentPolicyIdsToRetrieve);
 
-    logger.debug(() => `Retrieving agent policies from fleeet for:\n${stringify(ids)}`);
+    logger.debug(() => `Retrieving agent policies from fleet for:\n${stringify(ids)}`);
 
     const agentPolicies = await agentPolicyService.getByIds(soClient, ids);
 

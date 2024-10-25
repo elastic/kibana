@@ -100,30 +100,35 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
       return;
     }
 
-    if (!(await esClient.indices.exists({ index: datastreamIndexName }).catch(catchAndWrapError))) {
-      await esClient.indices
-        .createDataStream({ name: datastreamIndexName })
-        .then(() => {
-          indexesCreated.push(datastreamIndexName);
-          cache.set(datastreamIndexName, true);
-        })
-        .catch((err) => {
-          // It's possible that between the `.exists()` check and this `.createDataStream()` that
-          // the index could have been created. If that's the case, then just ignore the error.
-          if (err.body?.error?.type === 'resource_already_exists_exception') {
-            cache.set(datastreamIndexName, true);
-            return;
-          }
+    const doesDataStreamAlreadyExist = await esClient.indices
+      .exists({ index: datastreamIndexName })
+      .catch(catchAndWrapError);
 
-          createErrors.push(
-            `Attempt to create datastream [${datastreamIndexName}] failed:\n${stringify(
-              err.body?.error ?? err
-            )}`
-          );
-        });
-    } else {
+    if (doesDataStreamAlreadyExist) {
       cache.set(datastreamIndexName, true);
+      return;
     }
+
+    await esClient.indices
+      .createDataStream({ name: datastreamIndexName })
+      .then(() => {
+        indexesCreated.push(datastreamIndexName);
+        cache.set(datastreamIndexName, true);
+      })
+      .catch((err) => {
+        // It's possible that between the `.exists()` check and this `.createDataStream()` that
+        // the index could have been created. If that's the case, then just ignore the error.
+        if (err.body?.error?.type === 'resource_already_exists_exception') {
+          cache.set(datastreamIndexName, true);
+          return;
+        }
+
+        createErrors.push(
+          `Attempt to create datastream [${datastreamIndexName}] failed:\n${stringify(
+            err.body?.error ?? err
+          )}`
+        );
+      });
   };
 
   logger.debug(

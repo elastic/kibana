@@ -583,7 +583,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     // FIXME:PT need to ensure we use a index below that has the proper `namespace` when agent type is Endpoint
     //        Background: Endpoint responses require that the document be written to an index that has the
-    //        correct `namespace` as defined by the Integration/Agent policy adn that logic is not currently implemented.
+    //        correct `namespace` as defined by the Integration/Agent policy and that logic is not currently implemented.
 
     const doc = this.buildActionResponseEsDoc(options);
 
