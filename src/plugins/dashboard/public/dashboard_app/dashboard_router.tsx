@@ -28,12 +28,7 @@ import {
   VIEW_DASHBOARD_URL,
 } from '../dashboard_constants';
 import { RedirectToProps } from '../dashboard_container/types';
-import {
-  coreServices,
-  dataService,
-  embeddableService,
-  spacesService,
-} from '../services/kibana_services';
+import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
 import { DashboardApp } from './dashboard_app';
@@ -63,7 +58,6 @@ export async function mountApp({
   mountContext,
 }: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
-  const spaceId = (await spacesService?.getActiveSpace())?.id;
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
@@ -129,7 +123,6 @@ export async function mountApp({
         title={title}
         kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
         redirectTo={redirect}
-        spaceId={spaceId}
       />
     );
   };

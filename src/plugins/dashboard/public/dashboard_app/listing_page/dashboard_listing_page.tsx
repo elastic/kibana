@@ -29,7 +29,6 @@ export interface DashboardListingPageProps {
   redirectTo: DashboardRedirect;
   initialFilter?: string;
   title?: string;
-  spaceId?: string;
 }
 
 export const DashboardListingPage = ({
@@ -37,7 +36,6 @@ export const DashboardListingPage = ({
   redirectTo,
   initialFilter,
   kbnUrlStateStorage,
-  spaceId,
 }: DashboardListingPageProps) => {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
@@ -107,8 +105,8 @@ export const DashboardListingPage = ({
           goToDashboard={(id, viewMode) => {
             redirectTo({ destination: 'dashboard', id, editMode: viewMode === ViewMode.EDIT });
           }}
-          getDashboardUrl={(id, timeRestore) => {
-            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore, spaceId);
+          getDashboardUrl={(id) => {
+            return getDashboardListItemLink(id);
           }}
         />
       )}

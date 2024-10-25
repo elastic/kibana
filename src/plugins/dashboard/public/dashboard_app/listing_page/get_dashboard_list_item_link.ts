@@ -7,53 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryState } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-
+import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { QueryState } from '@kbn/data-plugin/common';
+import { DashboardPanelMap, convertPanelMapToSavedPanels } from '../../../common';
 import {
-  DASHBOARD_APP_ID,
-  DASHBOARD_STATE_STORAGE_KEY,
-  GLOBAL_STATE_STORAGE_KEY,
-  createDashboardEditUrl,
-} from '../../dashboard_constants';
+  DASHBOARD_STATE_SESSION_KEY,
+  PANELS_CONTROL_GROUP_KEY,
+  getDashboardBackupService,
+} from '../../services/dashboard_backup_service';
+import { DashboardLocatorParams } from '../../dashboard_container';
+import { DASHBOARD_APP_ID, createDashboardEditUrl } from '../../dashboard_constants';
 import { coreServices } from '../../services/kibana_services';
-import { DASHBOARD_STATE_SESSION_KEY } from '../../services/dashboard_backup_service';
 
-export const getDashboardListItemLink = (
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  id: string,
-  timeRestore: boolean,
-  spaceId?: string
-) => {
-  const useHash = coreServices.uiSettings.get('state:storeInSessionStorage'); // use hash
+export const getDashboardListItemLink = (id: string) => {
+  let unsavedStateForLocator: DashboardLocatorParams = {};
 
-  let url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
+  const { dashboardState: unsavedDashboardState, panels: panelModifications } =
+    getDashboardBackupService().getState(id) ?? {};
+  const allUnsavedPanels = (() => {
+    if (
+      Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
+      Object.keys(panelModifications ?? {}).length === 0
+    ) {
+      // if this dashboard has no modifications or unsaved panels return early. No overrides needed.
+      return;
+    }
+
+    const latestPanels = JSON.parse(sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) || '{}');
+    const modifiedPanels = panelModifications
+      ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
+          if (unsavedPanel && latestPanels?.[panelId]) {
+            acc[panelId] = {
+              ...latestPanels[panelId],
+              explicitInput: {
+                ...latestPanels?.[panelId].explicitInput,
+                ...unsavedPanel,
+                id: panelId,
+              },
+            };
+          }
+          return acc;
+        }, {} as DashboardPanelMap)
+      : {};
+
+    const allUnsavedPanelsMap = {
+      ...latestPanels,
+      ...modifiedPanels,
+    };
+    return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
+  })();
+
+  if (unsavedDashboardState) {
+    unsavedStateForLocator = {
+      query: unsavedDashboardState.query,
+      filters: unsavedDashboardState.filters,
+      controlGroupState: panelModifications?.[
+        PANELS_CONTROL_GROUP_KEY
+      ] as DashboardLocatorParams['controlGroupState'],
+      panels: allUnsavedPanels as DashboardLocatorParams['panels'],
+
+      // options
+      useMargins: unsavedDashboardState?.useMargins,
+      syncColors: unsavedDashboardState?.syncColors,
+      syncCursor: unsavedDashboardState?.syncCursor,
+      syncTooltips: unsavedDashboardState?.syncTooltips,
+      hidePanelTitles: unsavedDashboardState?.hidePanelTitles,
+    };
+  }
+  const url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
     path: `#${createDashboardEditUrl(id)}`,
   });
+  const _g = getStateFromKbnUrl<QueryState>('_g', url);
+  const baseUrl = setStateToKbnUrl('_g', _g, undefined, url);
 
-  const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
-
-  if (timeRestore) {
-    delete globalStateInUrl.time;
-    delete globalStateInUrl.refreshInterval;
-  }
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
-  // pull the filters off the session storage and put in the url if they exist
-  const unsavedFiltersToUrl = JSON.parse(
-    sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) ?? '[]'
+  const shareableUrl = setStateToKbnUrl(
+    '_a',
+    unsavedStateForLocator,
+    { useHash: false, storeInHashQuery: true },
+    unhashUrl(baseUrl)
   );
-
-  const unsavedFilters = spaceId && unsavedFiltersToUrl ? unsavedFiltersToUrl[spaceId] : undefined;
-  if (unsavedFilters && unsavedFilters[id] && unsavedFilters[id].filters) {
-    const appStateInUrl = kbnUrlStateStorage.get<QueryState>(DASHBOARD_STATE_STORAGE_KEY) || {};
-    appStateInUrl.filters = unsavedFilters[id].filters;
-
-    url = setStateToKbnUrl<QueryState>(
-      DASHBOARD_STATE_STORAGE_KEY,
-      appStateInUrl,
-      { useHash },
-      url
-    );
-  }
-  return url;
+  return shareableUrl;
 };
