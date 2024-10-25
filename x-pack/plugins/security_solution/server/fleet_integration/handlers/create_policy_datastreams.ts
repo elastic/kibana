@@ -6,6 +6,7 @@
  */
 
 import pMap from 'p-map';
+import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { catchAndWrapError } from '../../endpoint/utils';
 import type { SimpleMemCacheInterface } from '../../endpoint/lib/simple_mem_cache';
@@ -16,22 +17,6 @@ import {
 } from '../../../common/endpoint/constants';
 import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import { stringify } from '../../endpoint/utils/stringify';
-
-const buildIndexNameWithNamespace = (
-  indexNamePrefixOrPattern: string,
-  namespace: string
-): string => {
-  if (indexNamePrefixOrPattern.endsWith('*')) {
-    const hasDash = indexNamePrefixOrPattern.endsWith('-*');
-    return `${indexNamePrefixOrPattern.substring(0, indexNamePrefixOrPattern.length - 1)}${
-      hasDash ? '' : '-'
-    }${namespace}`;
-  }
-
-  return `${indexNamePrefixOrPattern}${
-    indexNamePrefixOrPattern.endsWith('-') ? '' : '-'
-  }${namespace}`;
-};
 
 const cache = new SimpleMemCache({
   // Cache of created Datastreams last for 12h, at which point it is checked again.
