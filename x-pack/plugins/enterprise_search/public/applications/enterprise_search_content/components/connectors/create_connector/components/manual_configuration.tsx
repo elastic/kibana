@@ -77,6 +77,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       css={css`
         .euiLink {
           color: ${euiTheme.colors.text};
+          font-weight: ${euiTheme.font.weight.regular};
         }
       `}
     >
