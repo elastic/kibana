@@ -98,6 +98,14 @@ export interface AlertsGroupingProps<
     dataViews: DataViewsServicePublic;
     http: HttpSetup;
   };
+  /**
+   * Initial groupings configuration
+   */
+  initialGroupings?: GroupModel;
+  /**
+   * Callback for when the groupings change
+   */
+  onGroupingsChange?: (groupings: GroupModel) => void;
 }
 
 export interface AlertsGroupAggregationBucket {

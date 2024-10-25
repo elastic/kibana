@@ -38,6 +38,7 @@ export const alertSearchBarState = t.partial({
     t.literal(ALERT_STATUS_RECOVERED),
     t.literal(ALERT_STATUS_ALL),
   ]),
+  groupings: t.array(t.string),
 });
 
 export function useAlertSearchBarStateContainer(
@@ -52,10 +53,8 @@ export function useAlertSearchBarStateContainer(
 
   const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
     stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId, groupings } =
+    useContainerSelector(stateContainer, (state) => state);
 
   useEffect(() => {
     if (!savedQuery) {
@@ -94,12 +93,14 @@ export function useAlertSearchBarStateContainer(
     onRangeToChange: setRangeTo,
     onStatusChange: setStatus,
     onFiltersChange: setFilters,
+    onGroupingsChange: stateContainer.transitions.setGroupings,
     filters,
     rangeFrom,
     rangeTo,
     status,
     savedQuery,
     setSavedQuery,
+    groupings,
   };
 }
 

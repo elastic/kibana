@@ -74,9 +74,11 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
     renderGroupPanel,
     getGroupStats,
     children,
+    initialGroupings,
+    onGroupingsChange,
   } = props;
   const { dataViews, notifications, http } = services;
-  const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
+  const { grouping, updateGrouping } = useAlertsGroupingState(groupingId, initialGroupings);
 
   const { dataView } = useAlertsDataView({
     featureIds,
@@ -117,6 +119,18 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onOptionsChange,
   });
+
+  useEffect(() => {
+    if (initialGroupings) {
+      updateGrouping(initialGroupings);
+    }
+  }, [initialGroupings, updateGrouping]);
+
+  useEffect(() => {
+    onGroupingsChange?.({
+      activeGroups: selectedGroups,
+    });
+  }, [selectedGroups, onGroupingsChange]);
 
   useEffect(() => {
     // The `none` grouping is managed from the internal selector state
