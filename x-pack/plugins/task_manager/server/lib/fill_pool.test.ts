@@ -20,7 +20,7 @@ describe('fillPool', () => {
   function mockFetchAvailableTasks(
     tasksToMock: number[]
   ): () => Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
-    const tasks: ConcreteTaskInstance[] = tasksToMock.map((id) => mockTaskInstances(id));
+    const tasks: ConcreteTaskInstance[] = tasksToMock.map((id) => mockTaskInstance(id));
     return () =>
       Promise.resolve(
         asOk({
@@ -34,7 +34,7 @@ describe('fillPool', () => {
       );
   }
 
-  const mockTaskInstances = (id: number): ConcreteTaskInstance => ({
+  const mockTaskInstance = (id: number): ConcreteTaskInstance => ({
     id: `${id}`,
     attempts: 0,
     status: TaskStatus.Running,
@@ -59,7 +59,7 @@ describe('fillPool', () => {
 
     await fillPool(fetchAvailableTasks, converter, run);
 
-    expect(_.flattenDeep(run.args)).toEqual(tasks.map((id) => mockTaskInstances(id)));
+    expect(_.flattenDeep(run.args)).toEqual(tasks.map((id) => mockTaskInstance(id)));
   });
 
   test('calls the converter on the records prior to running', async () => {

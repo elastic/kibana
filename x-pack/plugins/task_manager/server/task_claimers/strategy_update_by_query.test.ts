@@ -478,22 +478,24 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
-      expect(store.updateByQuery.mock.calls[0][1]?.max_docs).toEqual(10);
-      expect(store.updateByQuery.mock.calls[0][0]?.script).toMatchObject({
+      expect(store.updateByQuery.mock.calls[1][1]?.max_docs).toEqual(1);
+      expect(store.updateByQuery.mock.calls[1][0]?.script).toMatchObject({
         source: expect.any(String),
         lang: 'painless',
         params: {
           fieldUpdates,
-          claimableTaskTypes: ['unlimited', 'anotherUnlimited', 'finalUnlimited'],
+          claimableTaskTypes: ['limitedToOne'],
           skippedTaskTypes: [
+            'unlimited',
             'limitedToZero',
-            'limitedToOne',
+            'anotherUnlimited',
+            'finalUnlimited',
             'anotherLimitedToOne',
             'limitedToTwo',
           ],
           unusedTaskTypes: [],
           taskMaxAttempts: {
-            unlimited: maxAttempts,
+            limitedToOne: maxAttempts,
           },
         },
       });
@@ -815,25 +817,21 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
+      interface UBQParams {
+        script: {
+          params: {
+            [claimableTaskTypes: string]: string[];
+          };
+        };
+      }
+
       // first cycle
       await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
         claimOwnershipUntil: new Date(),
       });
       expect(store.updateByQuery).toHaveBeenCalledTimes(4);
       const firstCycle = store.updateByQuery.mock.calls.map(
-        (call) =>
-          (
-            call[0] as {
-              query: MustNotCondition;
-              size: number;
-              sort: string | string[];
-              script: {
-                params: {
-                  [claimableTaskTypes: string]: string[];
-                };
-              };
-            }
-          ).script.params.claimableTaskTypes
+        (call) => (call[0] as UBQParams).script.params.claimableTaskTypes
       );
 
       store.updateByQuery.mockClear();
@@ -844,19 +842,7 @@ if (doc['task.runAt'].size()!=0) {
       });
       expect(store.updateByQuery).toHaveBeenCalledTimes(4);
       const secondCycle = store.updateByQuery.mock.calls.map(
-        (call) =>
-          (
-            call[0] as {
-              query: MustNotCondition;
-              size: number;
-              sort: string | string[];
-              script: {
-                params: {
-                  [claimableTaskTypes: string]: string[];
-                };
-              };
-            }
-          ).script.params.claimableTaskTypes
+        (call) => (call[0] as UBQParams).script.params.claimableTaskTypes
       );
 
       expect(firstCycle).not.toMatchObject(secondCycle);
