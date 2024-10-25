@@ -19,5 +19,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create_with_spaces'));
     loadTestFile(require.resolve('./forecast_with_spaces'));
     loadTestFile(require.resolve('./create_with_datafeed'));
+    loadTestFile(require.resolve('./get_buckets'));
+    loadTestFile(require.resolve('./get_overall_buckets'));
   });
 }

@@ -13862,7 +13862,7 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
+              "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
