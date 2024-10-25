@@ -73,7 +73,8 @@
     "@kbn/core-security-server",
     "@kbn/core-http-server",
     "@kbn/zod",
-    "@kbn/core-saved-objects-base-server-internal"
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": [
     "target/**/*"
