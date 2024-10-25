@@ -15,6 +15,7 @@ import {
 import { logsAllLayer } from './component_templates/logs_all_layer';
 import { logsAllDefaultPipeline } from './ingest_pipelines/logs_all_default_pipeline';
 import { logsAllIndexTemplate } from './index_templates/logs_all';
+import { logsAllJsonPipeline } from './ingest_pipelines/logs_all_json_pipeline';
 
 interface BootstrapRootEntityParams {
   esClient: ElasticsearchClient;
@@ -23,6 +24,7 @@ interface BootstrapRootEntityParams {
 
 export async function bootstrapRootEntity({ esClient, logger }: BootstrapRootEntityParams) {
   await upsertComponent({ esClient, logger, component: logsAllLayer });
+  await upsertIngestPipeline({ esClient, logger, pipeline: logsAllJsonPipeline });
   await upsertIngestPipeline({ esClient, logger, pipeline: logsAllDefaultPipeline });
   await upsertTemplate({ esClient, logger, template: logsAllIndexTemplate });
 }

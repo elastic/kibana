@@ -32,6 +32,12 @@ export const logsAllDefaultPipeline = {
     },
     {
       pipeline: {
+        name: 'logs-all@json-pipeline',
+        ignore_missing_pipeline: true,
+      },
+    },
+    {
+      pipeline: {
         name: 'logs-all@reroutes',
         ignore_missing_pipeline: true,
       },

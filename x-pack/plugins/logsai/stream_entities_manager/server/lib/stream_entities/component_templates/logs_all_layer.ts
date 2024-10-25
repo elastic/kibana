@@ -63,6 +63,569 @@ export const logsAllLayer: ClusterPutComponentTemplateRequest = {
           },
         },
 
+        // file
+        file: {
+          properties: {
+            accessed: {
+              type: 'date',
+            },
+            attributes: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            code_signature: {
+              properties: {
+                digest_algorithm: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                exists: {
+                  type: 'boolean',
+                },
+                signing_id: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                status: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                subject_name: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                team_id: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                timestamp: {
+                  type: 'date',
+                },
+                trusted: {
+                  type: 'boolean',
+                },
+                valid: {
+                  type: 'boolean',
+                },
+              },
+            },
+            created: {
+              type: 'date',
+            },
+            ctime: {
+              type: 'date',
+            },
+            device: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            directory: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            drive_letter: {
+              ignore_above: 1,
+              type: 'keyword',
+            },
+            elf: {
+              properties: {
+                architecture: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                byte_order: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                cpu_type: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                creation_date: {
+                  type: 'date',
+                },
+                exports: {
+                  type: 'flattened',
+                },
+                go_import_hash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                go_imports: {
+                  type: 'flattened',
+                },
+                go_imports_names_entropy: {
+                  type: 'long',
+                },
+                go_imports_names_var_entropy: {
+                  type: 'long',
+                },
+                go_stripped: {
+                  type: 'boolean',
+                },
+                header: {
+                  properties: {
+                    abi_version: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    class: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    data: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    entrypoint: {
+                      type: 'long',
+                    },
+                    object_version: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    os_abi: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    type: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    version: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                  },
+                },
+                import_hash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                imports: {
+                  type: 'flattened',
+                },
+                imports_names_entropy: {
+                  type: 'long',
+                },
+                imports_names_var_entropy: {
+                  type: 'long',
+                },
+                sections: {
+                  properties: {
+                    chi2: {
+                      type: 'long',
+                    },
+                    entropy: {
+                      type: 'long',
+                    },
+                    flags: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    physical_offset: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    physical_size: {
+                      type: 'long',
+                    },
+                    type: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    var_entropy: {
+                      type: 'long',
+                    },
+                    virtual_address: {
+                      type: 'long',
+                    },
+                    virtual_size: {
+                      type: 'long',
+                    },
+                  },
+                  type: 'nested',
+                },
+                segments: {
+                  properties: {
+                    sections: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    type: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                  },
+                  type: 'nested',
+                },
+                shared_libraries: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                telfhash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+            extension: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            fork_name: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            gid: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            group: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            hash: {
+              properties: {
+                md5: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                sha1: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                sha256: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                sha384: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                sha512: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                ssdeep: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                tlsh: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+            inode: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            macho: {
+              properties: {
+                go_import_hash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                go_imports: {
+                  type: 'flattened',
+                },
+                go_imports_names_entropy: {
+                  type: 'long',
+                },
+                go_imports_names_var_entropy: {
+                  type: 'long',
+                },
+                go_stripped: {
+                  type: 'boolean',
+                },
+                import_hash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                imports: {
+                  type: 'flattened',
+                },
+                imports_names_entropy: {
+                  type: 'long',
+                },
+                imports_names_var_entropy: {
+                  type: 'long',
+                },
+                sections: {
+                  properties: {
+                    entropy: {
+                      type: 'long',
+                    },
+                    name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    physical_size: {
+                      type: 'long',
+                    },
+                    var_entropy: {
+                      type: 'long',
+                    },
+                    virtual_size: {
+                      type: 'long',
+                    },
+                  },
+                  type: 'nested',
+                },
+                symhash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+            mime_type: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            mode: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            mtime: {
+              type: 'date',
+            },
+            name: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            owner: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            path: {
+              fields: {
+                text: {
+                  type: 'match_only_text',
+                },
+              },
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            pe: {
+              properties: {
+                architecture: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                company: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                description: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                file_version: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                go_import_hash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                go_imports: {
+                  type: 'flattened',
+                },
+                go_imports_names_entropy: {
+                  type: 'long',
+                },
+                go_imports_names_var_entropy: {
+                  type: 'long',
+                },
+                go_stripped: {
+                  type: 'boolean',
+                },
+                imphash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                import_hash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                imports: {
+                  type: 'flattened',
+                },
+                imports_names_entropy: {
+                  type: 'long',
+                },
+                imports_names_var_entropy: {
+                  type: 'long',
+                },
+                original_file_name: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                pehash: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                product: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                sections: {
+                  properties: {
+                    entropy: {
+                      type: 'long',
+                    },
+                    name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    physical_size: {
+                      type: 'long',
+                    },
+                    var_entropy: {
+                      type: 'long',
+                    },
+                    virtual_size: {
+                      type: 'long',
+                    },
+                  },
+                  type: 'nested',
+                },
+              },
+            },
+            size: {
+              type: 'long',
+            },
+            target_path: {
+              fields: {
+                text: {
+                  type: 'match_only_text',
+                },
+              },
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            type: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            uid: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            x509: {
+              properties: {
+                alternative_names: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                issuer: {
+                  properties: {
+                    common_name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    country: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    distinguished_name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    locality: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    organization: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    organizational_unit: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    state_or_province: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                  },
+                },
+                not_after: {
+                  type: 'date',
+                },
+                not_before: {
+                  type: 'date',
+                },
+                public_key_algorithm: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                public_key_curve: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                public_key_exponent: {
+                  doc_values: false,
+                  index: false,
+                  type: 'long',
+                },
+                public_key_size: {
+                  type: 'long',
+                },
+                serial_number: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                signature_algorithm: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+                subject: {
+                  properties: {
+                    common_name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    country: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    distinguished_name: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    locality: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    organization: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    organizational_unit: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                    state_or_province: {
+                      ignore_above: 1024,
+                      type: 'keyword',
+                    },
+                  },
+                },
+                version_number: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+
         // Host
         host: {
           properties: {
