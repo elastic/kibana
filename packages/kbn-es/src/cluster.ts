@@ -20,7 +20,6 @@ import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
-import { getFips } from 'crypto';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import {
@@ -535,9 +534,6 @@ export class Cluster {
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
 
-    if (getFips() === 1) {
-      esJavaOpts += ' -Dcrytpo.policy=unlimited';
-    }
     return esJavaOpts.trim();
   }
 

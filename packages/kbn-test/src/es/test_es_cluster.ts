@@ -21,6 +21,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
 import type { ServerlessOptions } from '@kbn/es/src/utils';
+import { getFips } from 'crypto';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -205,7 +206,7 @@ export function createTestEsCluster<
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     password,
-    license,
+    ...(getFips() === 1 ? { license: 'trial' } : license ? { license } : { license: 'basic' }),
     basePath,
     esArgs,
     resources: files,
