@@ -6,7 +6,6 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -63,26 +62,6 @@ const noConnectorOption = {
   ),
   'data-test-subj': 'dropdown-connector-no-connector',
 };
-
-const addNewConnector = (euiTheme: EuiThemeComputed<{}>) => ({
-  value: 'add-connector',
-  inputDisplay: (
-    <span
-      css={css`
-        font-size: ${euiTheme.font.scale.xs};
-        font-weight: ${euiTheme.font.weight.medium};
-        line-height: ${euiTheme.size.l};
-
-        &:hover {
-          text-decoration: underline;
-        }
-      `}
-    >
-      {i18n.ADD_NEW_CONNECTOR}
-    </span>
-  ),
-  'data-test-subj': 'dropdown-connector-add-connector',
-});
 
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
