@@ -12,10 +12,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
-import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
@@ -73,10 +71,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
-  );
-
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const selectedPatternsSourcerer = useSelector((state: State) => {
@@ -120,13 +114,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+          columns: defaultUdtHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
-          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
         })
       );
     }
