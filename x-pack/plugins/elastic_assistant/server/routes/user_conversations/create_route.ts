@@ -50,12 +50,11 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             request,
             response,
           });
-          console.log('===> checkResponse', checkResponse);
+
           if (checkResponse) {
             return checkResponse;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          console.log('===> create dataClient', dataClient);
 
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,

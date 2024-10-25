@@ -171,7 +171,6 @@ export class AIAssistantService {
   private async initializeResources(): Promise<InitializationPromise> {
     this.isInitializing = true;
     try {
-      console.trace('===> initializeResources');
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
@@ -287,7 +286,6 @@ export class AIAssistantService {
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
       opts.spaceId
     );
-    console.log('===> checkResourcesInstallation', { initialized, error });
 
     // If space level resources initialization failed, retry
     if (!initialized && error) {
@@ -333,7 +331,6 @@ export class AIAssistantService {
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantConversationsDataClient | null> {
     const res = await this.checkResourcesInstallation(opts);
-    console.log('===> conversations data client resources check', res);
 
     if (res === null) {
       return null;
@@ -422,7 +419,6 @@ export class AIAssistantService {
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantDataClient | null> {
     const res = await this.checkResourcesInstallation(opts);
-    console.log('===> res createAIAssistantPromptsDataClient', res);
 
     if (res === null) {
       return null;
@@ -463,7 +459,6 @@ export class AIAssistantService {
     const result = await this.resourceInitializationHelper.getInitializedResources(spaceId);
     // If the spaceId is unrecognized and spaceId is not the default, we
     // need to kick off resource installation and return the promise
-    console.log('===> getSpaceResourcesInitializationPromise', result);
     if (
       result.error &&
       result.error.includes(`Unrecognized spaceId`) &&

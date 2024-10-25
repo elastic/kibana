@@ -57,18 +57,15 @@ export function createResourceInstallationHelper(
       const { result: commonInitResult, error: commonInitError } = await commonInitPromise;
       if (commonInitResult) {
         await installFn(namespace, timeoutMs);
-        console.log('===> installer case 1');
         return successResult();
       } else {
         logger.warn(
           `Common resources were not initialized, cannot initialize resources for ${namespace}`
         );
-        console.log('===> installer case 2');
         return errorResult(commonInitError);
       }
     } catch (err) {
       logger.error(`Error initializing resources ${namespace} - ${err.message}`);
-      console.log('===> installer case 3');
       return errorResult(err.message);
     }
   };
@@ -119,7 +116,6 @@ export function createResourceInstallationHelper(
           return errorResult(`Unrecognized spaceId ${key}`);
         }
         const initializationState = await initializedResources.get(key);
-        console.log('===> initializationState promise', initializationState);
         return initializationState ?? errorResult(`Initialize state returned undefined`);
       } catch (e) {
         return errorResult(`Initialize resources encountered an error: ${e.message}`);

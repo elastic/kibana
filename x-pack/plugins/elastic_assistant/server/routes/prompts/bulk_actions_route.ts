@@ -157,7 +157,6 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           const license = ctx.licensing.license;
-          console.log('===> bulk license', license);
           if (!hasAIAssistantLicense(license)) {
             return response.forbidden({
               body: {
@@ -174,7 +173,6 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             });
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
-          console.log('===> bulk dataClient', dataClient);
 
           if (body.create && body.create.length > 0) {
             const result = await dataClient?.findDocuments<EsPromptsSchema>({
@@ -196,7 +194,6 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           }
 
           const writer = await dataClient?.getWriter();
-          console.log('===> writer', writer);
           const changedAt = new Date().toISOString();
           const {
             errors,
