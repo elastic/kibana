@@ -108,7 +108,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 name: 'lnsXY',
                 id: 'unifiedHistogramLensComponent',
                 description: 'Edit visualization',
-                url: '/app/lens#/edit_by_value',
+                // @TODO: ask @kibana/core about the URL
+                url: '#/edit_by_value',
               },
             }),
           });
