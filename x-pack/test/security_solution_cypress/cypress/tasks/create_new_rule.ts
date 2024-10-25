@@ -884,7 +884,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
         return alertCount >= alertCountThreshold;
       });
     },
-    { interval: 1000, timeout: 300000 } // Increased timeout and interval for stability
+    { interval: 500, timeout: 30000 }
   );
   waitForAlerts();
 };
