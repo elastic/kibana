@@ -6,16 +6,23 @@
  */
 import React, { useState } from 'react';
 
+import { css } from '@emotion/react';
+
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { CREATE_CONNECTOR_PLUGIN } from '../../../../../../../common/constants';
+import { KibanaDeps } from '../../../../../../../common/types';
 import { SelfManagePreference } from '../create_connector';
 
 import { ManualConfigurationFlyout } from './manual_configuration_flyout';
@@ -29,6 +36,8 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   isDisabled,
   selfManagePreference,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<KibanaDeps>();
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
@@ -58,6 +67,32 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
         'xpack.enterpriseSearch.createConnector.finishUpStep.manageAttachedIndexContextMenuItemLabel',
         { defaultMessage: 'Manual configuration' }
       )}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="edit"
+      icon="console"
+      onClick={() => {
+        closePopover();
+      }}
+      css={css`
+        .euiLink {
+          color: ${euiTheme.colors.text};
+        }
+      `}
+    >
+      <TryInConsoleButton
+        application={services.application}
+        sharePlugin={services.share}
+        consolePlugin={services.console}
+        content={i18n.translate(
+          'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel',
+          {
+            defaultMessage: 'Try in Console',
+          }
+        )}
+        type="link"
+        request={CREATE_CONNECTOR_PLUGIN.CONSOLE_SNIPPET}
+      />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="share"
