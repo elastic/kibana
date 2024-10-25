@@ -17,7 +17,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { action } from '@storybook/addon-actions';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
-import { TelemetryClient } from '../public/services/telemetry/telemetry_client';
+import { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const coreStart = coreMock.createStart();
@@ -42,7 +42,7 @@ export function getMockInventoryContext(): InventoryKibanaContext {
         },
       },
     } as unknown as SharePluginStart,
-    telemetry: {} as unknown as TelemetryClient,
+    telemetry: {} as unknown as ITelemetryClient,
     unifiedSearch: {} as unknown as UnifiedSearchPublicPluginStart,
     dataViews: {} as unknown as DataViewsPublicPluginStart,
     data: {} as unknown as DataPublicPluginStart,
