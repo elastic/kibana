@@ -24,6 +24,7 @@ import {
   EuiTextColor,
   EuiTitle,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -60,6 +61,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   onDocumentDelete,
   score,
   showScore = false,
+  hasDeleteDocumentsPrivilege = false,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
@@ -118,22 +120,37 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       </EuiFlexGroup>
       {onDocumentDelete && (
         <EuiPopoverFooter>
-          <EuiButton
-            iconType="trash"
-            color="danger"
-            size="s"
-            data-test-subj="deleteDocumentButton"
-            onClick={(e: React.MouseEvent<HTMLElement>) => {
-              e.stopPropagation();
-              onDocumentDelete();
-              closePopover();
-            }}
-            fullWidth
+          <EuiToolTip
+            content={
+              !hasDeleteDocumentsPrivilege
+                ? i18n.translate(
+                    'searchIndexDocuments.result.header.metadata.deleteDocumentToolTip',
+                    {
+                      defaultMessage: 'You do not have permision to delete documents',
+                    }
+                  )
+                : undefined
+            }
+            position="bottom"
           >
-            {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
-              defaultMessage: 'Delete document',
-            })}
-          </EuiButton>
+            <EuiButton
+              iconType="trash"
+              color="danger"
+              size="s"
+              isDisabled={!hasDeleteDocumentsPrivilege}
+              data-test-subj="deleteDocumentButton"
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                e.stopPropagation();
+                onDocumentDelete();
+                closePopover();
+              }}
+              fullWidth
+            >
+              {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
+                defaultMessage: 'Delete document',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiPopoverFooter>
       )}
     </EuiPopover>

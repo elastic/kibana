@@ -14,9 +14,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 interface SearchIndexDetailsPageMenuItemPopoverProps {
   handleDeleteIndexModal: () => void;
@@ -29,6 +30,10 @@ export const SearchIndexDetailsPageMenuItemPopover = ({
 }: SearchIndexDetailsPageMenuItemPopoverProps) => {
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const { docLinks } = useKibana().services;
+  const { data: userPrivileges } = useUserPrivilegesQuery();
+  const canManageIndex = useMemo(() => {
+    return userPrivileges?.privileges.canManageIndex === true;
+  }, [userPrivileges]);
   const contextMenuItems = [
     showApiReference && (
       <EuiContextMenuItem
@@ -49,13 +54,20 @@ export const SearchIndexDetailsPageMenuItemPopover = ({
     ),
     <EuiContextMenuItem
       key="deleteIndex"
-      icon={<EuiIcon color="danger" type="trash" />}
+      icon={<EuiIcon color={canManageIndex ? 'danger' : undefined} type="trash" />}
       size="s"
       onClick={handleDeleteIndexModal}
       data-test-subj="moreOptionsDeleteIndex"
-      color="danger"
+      toolTipContent={
+        !canManageIndex
+          ? i18n.translate('xpack.searchIndices.moreOptions.deleteIndex.permissionToolTip', {
+              defaultMessage: 'You do not have permission to delete an index',
+            })
+          : undefined
+      }
+      disabled={!canManageIndex}
     >
-      <EuiText size="s" color="danger">
+      <EuiText size="s" color={canManageIndex ? 'danger' : undefined}>
         <FormattedMessage
           id="xpack.searchIndices.moreOptions.deleteIndexLabel"
           defaultMessage="Delete Index"

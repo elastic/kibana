@@ -57,7 +57,7 @@ export interface ElasticsearchStartProps {
 export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
   const { cloud, http } = useKibana().services;
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
-    userPrivileges?.privileges.canCreateIndex === false ? CreateIndexView.Code : CreateIndexView.UI
+    userPrivileges?.privileges.canManageIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );
   const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
   const usageTracker = useUsageTracker();
@@ -67,7 +67,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   }, [usageTracker]);
   useEffect(() => {
     if (userPrivileges === undefined) return;
-    if (userPrivileges.privileges.canCreateIndex === false) {
+    if (userPrivileges.privileges.canManageIndex === false) {
       setCreateIndexView(CreateIndexView.Code);
     }
   }, [userPrivileges]);

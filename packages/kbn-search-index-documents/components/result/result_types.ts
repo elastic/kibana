@@ -23,6 +23,7 @@ export interface MetaDataProps {
   title?: string;
   score?: SearchHit['_score'];
   showScore?: boolean;
+  hasDeleteDocumentsPrivilege?: boolean;
 }
 
 export interface FieldProps {

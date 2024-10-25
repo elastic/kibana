@@ -9,12 +9,18 @@ import React from 'react';
 import { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 interface SearchIndexDetailsSettingsProps {
   indexName: string;
 }
 export const SearchIndexDetailsSettings = ({ indexName }: SearchIndexDetailsSettingsProps) => {
   const { indexManagement, history } = useKibana().services;
+
+  const { data: userPrivileges } = useUserPrivilegesQuery();
+  const hasUpdateSettingsPrivilege = useMemo(() => {
+    return userPrivileges?.privileges.canManageIndex === true;
+  }, [userPrivileges]);
 
   const IndexSettingsComponent = useMemo(
     () => indexManagement.getIndexSettingsComponent({ history }),
@@ -24,7 +30,10 @@ export const SearchIndexDetailsSettings = ({ indexName }: SearchIndexDetailsSett
   return (
     <>
       <EuiSpacer />
-      <IndexSettingsComponent indexName={indexName} />
+      <IndexSettingsComponent
+        indexName={indexName}
+        hasUpdateSettingsPrivilege={hasUpdateSettingsPrivilege}
+      />
     </>
   );
 };

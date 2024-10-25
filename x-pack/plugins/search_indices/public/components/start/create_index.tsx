@@ -111,7 +111,7 @@ export const CreateIndexForm = ({
             name="indexName"
             value={formState.indexName}
             isInvalid={indexNameHasError}
-            disabled={userPrivileges?.privileges?.canCreateIndex === false}
+            disabled={userPrivileges?.privileges?.canManageIndex === false}
             onChange={onIndexNameChange}
             placeholder={i18n.translate(
               'xpack.searchIndices.startPage.createIndex.name.placeholder',
@@ -124,7 +124,7 @@ export const CreateIndexForm = ({
         <EuiSpacer />
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            {userPrivileges?.privileges?.canCreateIndex === false ? (
+            {userPrivileges?.privileges?.canManageIndex === false ? (
               <EuiToolTip
                 content={
                   <p>
