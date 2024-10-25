@@ -72,7 +72,7 @@
           },
           "<\"GET /internal/inventory/entities/types\", undefined, ",
           "InventoryRouteHandlerResources",
-          ", { entityTypes: (\"service\" | \"host\" | \"container\")[]; }, ",
+          ", { entityTypes: string[]; }, ",
           "InventoryRouteCreateOptions",
           ">; \"GET /internal/inventory/entities\": ",
           {
@@ -108,7 +108,7 @@
           "PartialC",
           "<{ entityTypes: ",
           "Type",
-          "<(\"service\" | \"host\" | \"container\")[], string, unknown>; kuery: ",
+          "<string[], string, unknown>; kuery: ",
           "StringC",
           "; }>]>; }>, ",
           "InventoryRouteHandlerResources",
