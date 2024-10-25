@@ -7,8 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisForServiceEvent } from '@kbn/observability-utils-server/llm/service_rca';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import { ALERT_START } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import moment from 'moment';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
@@ -20,7 +18,10 @@ export interface InvestigationContextualInsight {
 }
 
 export function AssistantHypothesis({ investigationId }: { investigationId: string }) {
-  const { alert } = useInvestigation();
+  const {
+    alert,
+    globalParams: { timeRange },
+  } = useInvestigation();
   const {
     core: { notifications },
     services: { investigateAppRepositoryClient },
@@ -40,7 +41,6 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
   const [loading, setLoading] = useState(false);
 
   const runRootCauseAnalysis = ({
-    alert: nonNullishAlert,
     connectorId,
     serviceName: nonNullishServiceName,
   }: {
@@ -48,17 +48,9 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
     connectorId: string;
     serviceName: string;
   }) => {
-    const start = moment(nonNullishAlert[ALERT_START]);
+    const rangeFrom = timeRange.from;
 
-    const minutesSinceStart = Math.abs(moment().diff(start)) / 1000 / 60;
-
-    const minutesBeforeAlertStart = Math.min(30, Math.max(5, Math.ceil(minutesSinceStart)));
-
-    const rangeFrom = moment(nonNullishAlert[ALERT_START])
-      .subtract(minutesBeforeAlertStart, 'minute')
-      .toISOString();
-
-    const rangeTo = new Date().toISOString();
+    const rangeTo = timeRange.to;
 
     const signal = new AbortController().signal;
 
