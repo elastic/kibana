@@ -38,7 +38,6 @@ export function ThemeSwitcher() {
     <WithTooltip
       placement="top"
       trigger="click"
-      closeOnClick
       tooltip={({ onHide }) => (
         <ThemeSwitcherTooltip
           onHide={onHide}

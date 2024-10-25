@@ -13,6 +13,7 @@ import { decorators } from './decorators';
 
 const preview: ProjectAnnotations<Renderer> = {
   decorators,
+  initialGlobals: { euiTheme: 'v8.light' },
 };
 
 // eslint-disable-next-line import/no-default-export
