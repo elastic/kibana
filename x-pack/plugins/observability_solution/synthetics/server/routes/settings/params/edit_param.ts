@@ -31,8 +31,16 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       params: RequestParamsSchema,
       body: schema.object({
-        key: schema.maybe(schema.string()),
-        value: schema.maybe(schema.string()),
+        key: schema.maybe(
+          schema.string({
+            minLength: 1,
+          })
+        ),
+        value: schema.maybe(
+          schema.string({
+            minLength: 1,
+          })
+        ),
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
       }),
