@@ -9,9 +9,11 @@
 
 import { join } from 'path';
 import { build } from '@storybook/core-server';
+import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
 import { Flags, run } from '@kbn/dev-cli-runner';
-import type { StorybookConfig } from '@storybook/react-webpack5';
 import * as constants from './constants';
+
+type StorybookCliOptions = CLIOptions & BuilderOptions & LoadOptions & { mode: 'dev' | 'static' };
 
 // Convert the flags to a Storybook loglevel
 function getLogLevelFromFlags(flags: Flags) {
@@ -35,11 +37,11 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     async ({ flags, log }) => {
       log.debug('Global config:\n', constants);
 
-      const config: StorybookConfig = {
+      const config: StorybookCliOptions = {
         configDir,
         mode: flags.site ? 'static' : 'dev',
         port: 9001,
-        logLevel: getLogLevelFromFlags(flags),
+        loglevel: getLogLevelFromFlags(flags),
       };
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
