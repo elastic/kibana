@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDataStreamType } from '../../common/entities/types';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 
 export function isApmSignal(dataStreamTypes: EntityDataStreamType[]) {
   return (

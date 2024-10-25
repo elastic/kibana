@@ -7,25 +7,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EntityStoreUtils, elasticAssetCheckerFactory } from '../../utils';
+import { EntityStoreUtils } from '../../utils';
+import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
-  const {
-    expectTransformExists,
-    expectTransformNotFound,
-    expectEnrichPolicyExists,
-    expectEnrichPolicyNotFound,
-    expectComponentTemplateExists,
-    expectComponentTemplateNotFound,
-    expectIngestPipelineExists,
-    expectIngestPipelineNotFound,
-  } = elasticAssetCheckerFactory(getService);
+  const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  // TODO: unskip once permissions issue is resolved
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
+    const dataView = dataViewRouteHelpersFactory(supertest);
+
     before(async () => {
       await utils.cleanEngines();
+      await dataView.create('security-solution');
+    });
+
+    after(async () => {
+      await dataView.delete('security-solution');
     });
 
     describe('init', () => {
@@ -34,30 +32,19 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have installed the expected user resources', async () => {
-        await utils.initEntityEngineForEntityType('user');
-
-        await expectTransformExists('entities-v1-latest-ea_default_user_entity_store');
-        await expectEnrichPolicyExists('entity_store_field_retention_user_default_v1');
-        await expectComponentTemplateExists(`ea_default_user_entity_store-latest@platform`);
-        await expectIngestPipelineExists(`ea_default_user_entity_store-latest@platform`);
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
+        await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
-        await utils.initEntityEngineForEntityType('host');
-
-        await expectTransformExists('entities-v1-latest-ea_default_host_entity_store');
-        await expectEnrichPolicyExists('entity_store_field_retention_host_default_v1');
-        await expectComponentTemplateExists(`ea_default_host_entity_store-latest@platform`);
-        await expectIngestPipelineExists(`ea_default_host_entity_store-latest@platform`);
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
+        await utils.expectEngineAssetsExist('host');
       });
     });
 
     describe('get and list', () => {
       before(async () => {
-        await Promise.all([
-          utils.initEntityEngineForEntityType('host'),
-          utils.initEntityEngineForEntityType('user'),
-        ]);
+        await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });
 
       after(async () => {
@@ -75,9 +62,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'host',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+            indexPattern: '',
             filter: '',
+            fieldHistoryLength: 10,
           });
         });
 
@@ -91,9 +78,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(getResponse.body).to.eql({
             status: 'started',
             type: 'user',
-            indexPattern:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+            indexPattern: '',
             filter: '',
+            fieldHistoryLength: 10,
           });
         });
       });
@@ -109,16 +96,16 @@ export default ({ getService }: FtrProviderContext) => {
             {
               status: 'started',
               type: 'host',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+              indexPattern: '',
               filter: '',
+              fieldHistoryLength: 10,
             },
             {
               status: 'started',
               type: 'user',
-              indexPattern:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+              indexPattern: '',
               filter: '',
+              fieldHistoryLength: 10,
             },
           ]);
         });
@@ -127,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('start and stop', () => {
       before(async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
 
       after(async () => {
@@ -169,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should delete the host entity engine', async () => {
-        await utils.initEntityEngineForEntityType('host');
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
         await api
           .deleteEntityEngine({
@@ -178,14 +165,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-latest-ea_default_host_entity_store');
-        await expectEnrichPolicyNotFound('entity_store_field_retention_host_default_v1');
-        await expectComponentTemplateNotFound(`ea_default_host_entity_store-latest@platform`);
-        await expectIngestPipelineNotFound(`ea_default_host_entity_store-latest@platform`);
+        await utils.expectEngineAssetsDoNotExist('host');
       });
 
       it('should delete the user entity engine', async () => {
-        await utils.initEntityEngineForEntityType('user');
+        await utils.initEntityEngineForEntityTypesAndWait(['user']);
 
         await api
           .deleteEntityEngine({
@@ -194,10 +178,49 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await expectTransformNotFound('entities-v1-latest-ea_default_user_entity_store');
-        await expectEnrichPolicyNotFound('entity_store_field_retention_user_default_v1');
-        await expectComponentTemplateNotFound(`ea_default_user_entity_store-latest@platform`);
-        await expectIngestPipelineNotFound(`ea_default_user_entity_store-latest@platform`);
+        await utils.expectEngineAssetsDoNotExist('user');
+      });
+    });
+
+    describe('apply_dataview_indices', () => {
+      before(async () => {
+        await utils.initEntityEngineForEntityTypesAndWait(['host']);
+      });
+
+      after(async () => {
+        await utils.cleanEngines();
+      });
+
+      afterEach(async () => {
+        await dataView.delete('security-solution');
+        await dataView.create('security-solution');
+      });
+
+      it("should not update the index patten when it didn't change", async () => {
+        const response = await api.applyEntityEngineDataviewIndices();
+
+        expect(response.body).to.eql({ success: true, result: [{ type: 'host', changes: {} }] });
+      });
+
+      it('should update the index pattern when the data view changes', async () => {
+        await dataView.updateIndexPattern('security-solution', 'test-*');
+        const response = await api.applyEntityEngineDataviewIndices();
+
+        expect(response.body).to.eql({
+          success: true,
+          result: [
+            {
+              type: 'host',
+              changes: {
+                indexPatterns: [
+                  'test-*',
+                  '.asset-criticality.asset-criticality-default',
+                  'risk-score.risk-score-latest-default',
+                ],
+              },
+            },
+          ],
+        });
       });
     });
   });

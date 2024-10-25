@@ -81,11 +81,13 @@ export class SummaryActionScheduler<
   }
 
   public async getActionsToSchedule({
-    alerts,
+    activeCurrentAlerts,
+    recoveredCurrentAlerts,
     throttledSummaryActions,
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
+    const alerts = { ...activeCurrentAlerts, ...recoveredCurrentAlerts };
     const executables: Array<{
       action: RuleAction;
       summarizedAlerts: CombinedSummarizedAlerts;

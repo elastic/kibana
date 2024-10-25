@@ -24,7 +24,6 @@
     "@kbn/logging",
     "@kbn/deeplinks-observability",
     "@kbn/unified-search-plugin",
-    "@kbn/i18n-react",
     "@kbn/core-http-browser",
     "@kbn/core-chrome-browser",
     "@kbn/features-plugin",

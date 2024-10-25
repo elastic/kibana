@@ -48,6 +48,7 @@ export const useInlineActions = <T extends { isDefault?: boolean | undefined }>(
           },
           {
             name: i18n.DELETE_BUTTON,
+            'data-test-subj': 'delete-button',
             description: i18n.DELETE_BUTTON,
             icon: 'trash',
             type: 'icon',

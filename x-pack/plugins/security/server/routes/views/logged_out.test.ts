@@ -35,7 +35,7 @@ describe('LoggedOut view routes', () => {
   });
 
   it('correctly defines route.', () => {
-    expect(routeConfig.options).toEqual({ authRequired: false });
+    expect(routeConfig.options).toEqual({ authRequired: false, excludeFromOAS: true });
     expect(routeConfig.validate).toBe(false);
   });
 

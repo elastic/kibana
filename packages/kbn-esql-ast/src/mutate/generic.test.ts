@@ -97,6 +97,46 @@ describe('generic', () => {
     });
   });
 
+  describe('.removeCommand()', () => {
+    it('can remove the last command', () => {
+      const src = 'FROM index | LIMIT 10';
+      const { root } = parse(src);
+      const command = generic.findCommandByName(root, 'limit', 0);
+
+      generic.removeCommand(root, command!);
+
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM index');
+    });
+
+    it('can remove the second command out of 3 with the same name', () => {
+      const src = 'FROM index | LIMIT 1 | LIMIT 2 | LIMIT 3';
+      const { root } = parse(src);
+      const command = generic.findCommandByName(root, 'limit', 1);
+
+      generic.removeCommand(root, command!);
+
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM index | LIMIT 1 | LIMIT 3');
+    });
+
+    it('can remove all commands', () => {
+      const src = 'FROM index | WHERE a == b | LIMIT 123';
+      const { root } = parse(src);
+      const cmd1 = generic.findCommandByName(root, 'where');
+      const cmd2 = generic.findCommandByName(root, 'limit');
+      const cmd3 = generic.findCommandByName(root, 'from');
+
+      generic.removeCommand(root, cmd1!);
+      generic.removeCommand(root, cmd2!);
+      generic.removeCommand(root, cmd3!);
+
+      expect(root.commands.length).toBe(0);
+    });
+  });
+
   describe('.removeCommandOption()', () => {
     it('can remove existing command option', () => {
       const src = 'FROM index METADATA _score';

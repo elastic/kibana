@@ -13,9 +13,9 @@ import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
-import { createActionRoute } from './create';
+import { createConnectorRoute } from './connector/create';
 import { deleteConnectorRoute } from './connector/delete';
-import { executeActionRoute } from './execute';
+import { executeConnectorRoute } from './connector/execute';
 import { getConnectorRoute } from './connector/get';
 import { updateConnectorRoute } from './connector/update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
@@ -36,13 +36,13 @@ export function defineRoutes(opts: RouteOptions) {
 
   defineLegacyRoutes(router, licenseState, usageCounter);
 
-  createActionRoute(router, licenseState);
+  createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
   getConnectorRoute(router, licenseState);
   getAllConnectorsRoute(router, licenseState);
   updateConnectorRoute(router, licenseState);
   listTypesRoute(router, licenseState);
-  executeActionRoute(router, licenseState);
+  executeConnectorRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getGlobalExecutionKPIRoute(router, licenseState);
 

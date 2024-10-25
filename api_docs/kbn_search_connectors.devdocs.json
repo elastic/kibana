@@ -214,7 +214,7 @@
         "label": "ConnectorConfigurationComponent",
         "description": [],
         "signature": [
-          "({ children, connector, hasPlatinumLicense, isLoading, saveConfig, subscriptionLink, stackManagementLink, }: React.PropsWithChildren<ConnectorConfigurationProps>) => React.JSX.Element"
+          "({ children, connector, hasPlatinumLicense, isDisabled, isLoading, saveConfig, saveAndSync, subscriptionLink, stackManagementLink, }: React.PropsWithChildren<ConnectorConfigurationProps>) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-connectors/components/configuration/connector_configuration.tsx",
         "deprecated": false,
@@ -225,7 +225,7 @@
             "id": "def-common.ConnectorConfigurationComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  connector,\n  hasPlatinumLicense,\n  isLoading,\n  saveConfig,\n  subscriptionLink,\n  stackManagementLink,\n}",
+            "label": "{\n  children,\n  connector,\n  hasPlatinumLicense,\n  isDisabled,\n  isLoading,\n  saveConfig,\n  saveAndSync,\n  subscriptionLink,\n  stackManagementLink,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<ConnectorConfigurationProps>"

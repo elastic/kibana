@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { OnboardingCardId } from '../constants';
 import type { IntegrationTabId } from '../components/onboarding_body/cards/integrations/types';
 

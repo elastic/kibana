@@ -95,7 +95,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/saved-objects-tagging-plugin",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",
     "@kbn/safer-lodash-set",
@@ -205,7 +204,6 @@
     "@kbn/search-types",
     "@kbn/field-utils",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/langchain",
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
@@ -229,5 +227,8 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-security-server-mocks",
+    "@kbn/serverless",
+    "@kbn/core-user-profile-browser",
+    "@kbn/data-stream-adapter",
   ]
 }

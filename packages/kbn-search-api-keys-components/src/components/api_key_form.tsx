@@ -47,7 +47,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         actions={[
           <EuiButtonIcon
             iconType={apiKeyIsVisible ? 'eyeClosed' : 'eye'}
-            color="success"
+            color="text"
             onClick={toggleApiKeyVisibility}
             data-test-subj="showAPIKeyButton"
             aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {

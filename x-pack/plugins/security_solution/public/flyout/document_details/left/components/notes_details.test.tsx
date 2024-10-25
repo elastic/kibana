@@ -24,6 +24,8 @@ import { Flyouts } from '../../shared/constants/flyouts';
 import { TimelineId } from '../../../../../common/types';
 import { ReqStatus } from '../../../../notes';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import type { State } from '../../../../common/store';
 
 jest.mock('../../shared/hooks/use_which_flyout');
 jest.mock('../../shared/hooks/use_basic_data_from_details_data');
@@ -52,7 +54,7 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: [],
 } as unknown as DocumentDetailsContext;
 
-const mockGlobalStateWithSavedTimeline = {
+const mockGlobalStateWithSavedTimeline: State = {
   ...mockGlobalState,
   timeline: {
     ...mockGlobalState.timeline,
@@ -61,6 +63,7 @@ const mockGlobalStateWithSavedTimeline = {
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.test],
         savedObjectId: 'savedObjectId',
+        status: TimelineStatusEnum.active,
         pinnedEventIds: {},
       },
     },

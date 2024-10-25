@@ -19,9 +19,11 @@ export async function handleValidatePipeline({
 }: HandleValidateNodeParams): Promise<Partial<CategorizationState> | Partial<RelatedState>> {
   const previousError = JSON.stringify(state.errors, null, 2);
   const results = await testPipeline(state.rawSamples, state.currentPipeline, client);
+
   return {
     errors: results.errors,
     previousError,
+    previousPipelineResults: state.pipelineResults,
     pipelineResults: results.pipelineResults,
     lastExecutedChain: 'validate_pipeline',
   };
