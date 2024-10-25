@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { BurnRatesClient } from '..';
 import { ResourceInstaller } from '../resource_installer';
-import { BurnRatesClient } from '../burn_rates_client';
 import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
 import { SummarySearchClient } from '../summary_search_client';
@@ -70,6 +74,23 @@ const createBurnRatesClientMock = (): jest.Mocked<BurnRatesClient> => {
   };
 };
 
+const createSloContextMock = () => {
+  return {
+    soClient: {} as any,
+    basePath: httpServiceMock.createStartContract().basePath,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    logger: loggerMock.create(),
+    spaceId: 'some-space',
+    rulesClient: rulesClientMock.create(),
+    repository: createSLORepositoryMock(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    dataViewsService: {} as any,
+    burnRatesClient: createBurnRatesClientMock(),
+  };
+};
+
+export type SLOContextMock = ReturnType<typeof createSloContextMock>;
+
 export {
   createResourceInstallerMock,
   createTransformManagerMock,
@@ -78,4 +99,5 @@ export {
   createSummaryClientMock,
   createSummarySearchClientMock,
   createBurnRatesClientMock,
+  createSloContextMock,
 };

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import { createSLO } from './fixtures/slo';
 import {
@@ -15,6 +14,7 @@ import {
   aSummaryDocument,
 } from './fixtures/summary_search_document';
 import { DefaultSummarySearchClient, Sort, SummarySearchClient } from './summary_search_client';
+import { createSloContextMock } from './mocks';
 
 const defaultSort: Sort = {
   field: 'sli_value',
@@ -30,7 +30,6 @@ describe('Summary Search Client', () => {
   let service: SummarySearchClient;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const soClientMock = {
       getCurrentNamespace: jest.fn().mockReturnValue('default'),
       get: jest.fn().mockResolvedValue({
@@ -40,12 +39,12 @@ describe('Summary Search Client', () => {
         },
       }),
     } as any;
-    service = new DefaultSummarySearchClient(
-      esClientMock,
-      soClientMock,
-      loggerMock.create(),
-      'default'
-    );
+    const contextMock = createSloContextMock();
+    esClientMock = contextMock.esClient as ElasticsearchClientMock;
+    service = new DefaultSummarySearchClient({
+      ...contextMock,
+      soClient: soClientMock,
+    });
   });
 
   it('returns an empty response on error', async () => {

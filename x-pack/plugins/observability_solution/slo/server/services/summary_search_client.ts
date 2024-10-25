@@ -6,11 +6,11 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SloRouteContext } from '../types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
@@ -58,12 +58,7 @@ export interface SummarySearchClient {
 }
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private soClient: SavedObjectsClientContract,
-    private logger: Logger,
-    private spaceId: string
-  ) {}
+  constructor(private context: SloRouteContext) {}
 
   async search(
     kqlQuery: string,
@@ -72,16 +67,16 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     pagination: Pagination,
     hideStale?: boolean
   ): Promise<Paginated<SummaryResult>> {
-    const parsedFilters = parseStringFilters(filters, this.logger);
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const parsedFilters = parseStringFilters(filters, this.context.logger);
+    const settings = await getSloSettings(this.context.soClient);
+    const { indices } = await getListOfSummaryIndices(this.context.esClient, settings);
     const esParams = createEsParams({
       index: indices,
       track_total_hits: true,
       query: {
         bool: {
           filter: [
-            { term: { spaceId: this.spaceId } },
+            { term: { spaceId: this.context.spaceId } },
             ...excludeStaleSummaryFilter(settings, kqlQuery, hideStale),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
@@ -104,7 +99,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
     try {
       const summarySearch = await typedSearch<EsSummaryDocument, typeof esParams>(
-        this.esClient,
+        this.context.esClient,
         esParams
       );
 
@@ -141,7 +136,10 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           const isRemote = !!remoteName;
           let remoteSloDefinition;
           if (isRemote) {
-            remoteSloDefinition = fromRemoteSummaryDocumentToSloDefinition(summaryDoc, this.logger);
+            remoteSloDefinition = fromRemoteSummaryDocumentToSloDefinition(
+              summaryDoc,
+              this.context.logger
+            );
           }
 
           return {
@@ -177,7 +175,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
+      this.context.logger.error(
+        new Error(`Summary search query error, ${err.message}`, { cause: err })
+      );
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
     }
   }
@@ -186,7 +186,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     // Always attempt to delete temporary summary documents with an existing non-temp summary document
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 
-    await this.esClient.deleteByQuery({
+    await this.context.esClient.deleteByQuery({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {

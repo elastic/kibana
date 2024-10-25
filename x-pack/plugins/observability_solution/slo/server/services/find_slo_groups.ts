@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   FindSLOGroupsParams,
   FindSLOGroupsResponse,
@@ -12,6 +11,7 @@ import {
   Pagination,
   sloGroupWithSummaryResponseSchema,
 } from '@kbn/slo-schema';
+import { SloRouteContext } from '../types';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
@@ -37,12 +37,7 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
 }
 
 export class FindSLOGroups {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private soClient: SavedObjectsClientContract,
-    private logger: Logger,
-    private spaceId: string
-  ) {}
+  constructor(private context: SloRouteContext) {}
 
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
@@ -50,20 +45,20 @@ export class FindSLOGroups {
     const groupsFilter = [params.groupsFilter ?? []].flat();
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
-    const parsedFilters = parseStringFilters(filters, this.logger);
+    const parsedFilters = parseStringFilters(filters, this.context.logger);
 
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const settings = await getSloSettings(this.context.soClient);
+    const { indices } = await getListOfSummaryIndices(this.context.esClient, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
-    const response = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.context.esClient, {
       index: indices,
       size: 0,
       query: {
         bool: {
           filter: [
-            { term: { spaceId: this.spaceId } },
+            { term: { spaceId: this.context.spaceId } },
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
