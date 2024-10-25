@@ -292,7 +292,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const requestHash = createRequestHash(searchRequest.params);
 
-    this.logger.log(
+    this.logger.error(
       `SearchSessionService: trackId | sessionId: "${sessionId}" | searchId:"${searchId}" | requestHash: "${requestHash} | ${JSON.stringify(
         searchRequest.params
       )}"`
