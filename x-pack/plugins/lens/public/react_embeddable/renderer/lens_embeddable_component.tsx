@@ -59,9 +59,12 @@ export function LensEmbeddableComponent({
   // Publish the data attributes only if avaialble/visible
   const title = api.hidePanelTitle?.getValue()
     ? undefined
-    : { 'data-title': api.panelTitle?.getValue() };
+    : { 'data-title': api.panelTitle?.getValue() ?? api.defaultPanelTitle?.getValue() };
   const description = api.panelDescription?.getValue()
-    ? { 'data-description': api.panelDescription?.getValue() }
+    ? {
+        'data-description':
+          api.panelDescription?.getValue() ?? api.defaultPanelDescription?.getValue(),
+      }
     : undefined;
 
   return (
