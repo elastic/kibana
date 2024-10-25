@@ -1,0 +1,468 @@
+{
+  "id": "@kbn/item-buffer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/item-buffer",
+        "id": "def-common.ItemBuffer",
+        "type": "Class",
+        "tags": [],
+        "label": "ItemBuffer",
+        "description": [
+          "\nA simple buffer that collects items. Can be cleared or flushed; and can\nautomatically flush when specified number of items is reached."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/item-buffer",
+            "scope": "common",
+            "docId": "kibKbnItemBufferPluginApi",
+            "section": "def-common.ItemBuffer",
+            "text": "ItemBuffer"
+          },
+          "<Item>"
+        ],
+        "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBuffer.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/item-buffer",
+                "id": "def-common.ItemBuffer.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/item-buffer",
+                    "scope": "common",
+                    "docId": "kibKbnItemBufferPluginApi",
+                    "section": "def-common.ItemBufferParams",
+                    "text": "ItemBufferParams"
+                  },
+                  "<Item>"
+                ],
+                "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBuffer.length",
+            "type": "number",
+            "tags": [],
+            "label": "length",
+            "description": [
+              "\nGet current buffer size."
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBuffer.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [
+              "\nAdd item to the buffer."
+            ],
+            "signature": [
+              "(item: Item) => void"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/item-buffer",
+                "id": "def-common.ItemBuffer.write.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  "Item"
+                ],
+                "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBuffer.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [
+              "\nRemove all items from the buffer."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBuffer.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nCall `.onFlush` method and clear buffer."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBuffer.flushAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "flushAsync",
+            "description": [
+              "\nSame as `.flush()` but asynchronous, and returns a promise, which\nrejects if `.onFlush` throws."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/item-buffer",
+        "id": "def-common.TimedItemBuffer",
+        "type": "Class",
+        "tags": [],
+        "label": "TimedItemBuffer",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/item-buffer",
+            "scope": "common",
+            "docId": "kibKbnItemBufferPluginApi",
+            "section": "def-common.TimedItemBuffer",
+            "text": "TimedItemBuffer"
+          },
+          "<Item> extends ",
+          {
+            "pluginId": "@kbn/item-buffer",
+            "scope": "common",
+            "docId": "kibKbnItemBufferPluginApi",
+            "section": "def-common.ItemBuffer",
+            "text": "ItemBuffer"
+          },
+          "<Item>"
+        ],
+        "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.TimedItemBuffer.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/item-buffer",
+                "id": "def-common.TimedItemBuffer.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/item-buffer",
+                    "scope": "common",
+                    "docId": "kibKbnItemBufferPluginApi",
+                    "section": "def-common.TimedItemBufferParams",
+                    "text": "TimedItemBufferParams"
+                  },
+                  "<Item>"
+                ],
+                "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.TimedItemBuffer.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [],
+            "signature": [
+              "(item: Item) => void"
+            ],
+            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/item-buffer",
+                "id": "def-common.TimedItemBuffer.write.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  "Item"
+                ],
+                "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.TimedItemBuffer.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.TimedItemBuffer.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.TimedItemBuffer.flushAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "flushAsync",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/item-buffer",
+        "id": "def-common.ItemBufferParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ItemBufferParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/item-buffer",
+            "scope": "common",
+            "docId": "kibKbnItemBufferPluginApi",
+            "section": "def-common.ItemBufferParams",
+            "text": "ItemBufferParams"
+          },
+          "<Item>"
+        ],
+        "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBufferParams.flushOnMaxItems",
+            "type": "number",
+            "tags": [],
+            "label": "flushOnMaxItems",
+            "description": [
+              "\nFlushes buffer automatically if number of items in the buffer reaches\nthis number. Omit it or set to `Infinity` to never flush on max buffer\nsize automatically."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.ItemBufferParams.onFlush",
+            "type": "Function",
+            "tags": [],
+            "label": "onFlush",
+            "description": [
+              "\nCallback that is called every time buffer is flushed. It receives a single\nargument which is a list of all buffered items. If `.flush()` is called\nwhen buffer is empty, `.onflush` is called with empty array."
+            ],
+            "signature": [
+              "(items: Item[]) => void | Promise<void>"
+            ],
+            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/item-buffer",
+                "id": "def-common.ItemBufferParams.onFlush.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [],
+                "signature": [
+                  "Item[]"
+                ],
+                "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/item-buffer",
+        "id": "def-common.TimedItemBufferParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimedItemBufferParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/item-buffer",
+            "scope": "common",
+            "docId": "kibKbnItemBufferPluginApi",
+            "section": "def-common.TimedItemBufferParams",
+            "text": "TimedItemBufferParams"
+          },
+          "<Item> extends ",
+          {
+            "pluginId": "@kbn/item-buffer",
+            "scope": "common",
+            "docId": "kibKbnItemBufferPluginApi",
+            "section": "def-common.ItemBufferParams",
+            "text": "ItemBufferParams"
+          },
+          "<Item>"
+        ],
+        "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/item-buffer",
+            "id": "def-common.TimedItemBufferParams.maxItemAge",
+            "type": "number",
+            "tags": [],
+            "label": "maxItemAge",
+            "description": [
+              "\nFlushes buffer when oldest item reaches age specified by this parameter,\nin milliseconds."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
