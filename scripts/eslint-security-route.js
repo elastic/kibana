@@ -264,8 +264,8 @@ function processChangesByOwners(ownerFilesMap) {
       if (!DRY_RUN) {
         const title =
           process.env.ROUTE_TYPE === 'authorized'
-            ? `Authorized Route Migration for Routes Owned by ${owner}`
-            : `Unauthorized Route Migration for Routes Owned by ${owner}`;
+            ? `Authorized route migration for routes owned by ${owner}`
+            : `Unauthorized route migration for routes owned by ${owner}`;
         const routeLabel =
           process.env.ROUTE_TYPE === 'authorized'
             ? '[Authz API migration] authorized'
