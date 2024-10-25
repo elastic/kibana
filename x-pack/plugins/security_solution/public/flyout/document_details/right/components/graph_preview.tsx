@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -66,6 +66,9 @@ const LoadingComponent = () => (
  */
 export const GraphPreview: React.FC<GraphPreviewProps> = memo(
   ({ isLoading, isError, data }: GraphPreviewProps) => {
+    const memoizedNodes = useMemo(() => data?.nodes ?? [], [data?.nodes]);
+    const memoizedEdges = useMemo(() => data?.edges ?? [], [data?.edges]);
+
     return isLoading ? (
       <LoadingComponent />
     ) : isError ? (
@@ -80,8 +83,8 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
             height: 300px;
             width: 100%;
           `}
-          nodes={data?.nodes ?? []}
-          edges={data?.edges ?? []}
+          nodes={memoizedNodes}
+          edges={memoizedEdges}
           interactive={false}
           aria-label={i18n.translate(
             'xpack.securitySolution.flyout.right.visualizations.graphPreview.graphAriaLabel',
