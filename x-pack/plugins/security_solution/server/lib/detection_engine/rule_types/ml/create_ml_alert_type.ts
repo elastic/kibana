@@ -65,6 +65,7 @@ export const createMlAlertType = (
           alertWithSuppression,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         },
         services,
         spaceId,
@@ -89,6 +90,7 @@ export const createMlAlertType = (
           publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
 
       const result = await mlExecutor({

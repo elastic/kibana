@@ -15,7 +15,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -77,7 +77,7 @@ export const getFindingsQuery = (
           {
             range: {
               '@timestamp': {
-                gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+                gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
                 lte: 'now',
               },
             },

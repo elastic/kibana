@@ -28,7 +28,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { AdHocInstruction, AssistantScope, Instruction } from '../../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
@@ -184,7 +184,6 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
-  scope,
   useSimulatedFunctionCalling,
 }: {
   messages: Message[];
@@ -202,7 +201,6 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
-  scope: AssistantScope;
   useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
@@ -217,7 +215,7 @@ export function continueConversation({
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(scope),
+      applicationInstructions: functionClient.getInstructions(),
       userInstructions,
       adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
@@ -346,7 +344,6 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
-              scope,
               useSimulatedFunctionCalling,
             });
           })

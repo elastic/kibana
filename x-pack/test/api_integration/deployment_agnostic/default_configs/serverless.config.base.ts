@@ -30,11 +30,7 @@ const esServerArgsFromController = {
     // for ML, data frame analytics are not part of this project type
     'xpack.ml.dfa.enabled=false',
   ],
-  security: [
-    'xpack.security.authc.api_key.cache.max_keys=70000',
-    'data_streams.lifecycle.retention.factory_default=365d',
-    'data_streams.lifecycle.retention.factory_max=365d',
-  ],
+  security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
 };
 
 // include settings from kibana controller
@@ -104,6 +100,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...esServerArgsFromController[options.serverlessProject],
         ],
       },

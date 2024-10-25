@@ -98,3 +98,55 @@ export const connectorTypesResponseSchema = schema.object({
     meta: { description: 'Indicates whether the action is a system action.' },
   }),
 });
+
+export const connectorExecuteResponseSchema = schema.object({
+  connector_id: schema.string({
+    meta: {
+      description: 'The identifier for the connector.',
+    },
+  }),
+  status: schema.oneOf([schema.literal('ok'), schema.literal('error')], {
+    meta: {
+      description: 'The outcome of the connector execution.',
+    },
+  }),
+  message: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The connector execution error message.',
+      },
+    })
+  ),
+  service_message: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'An error message that contains additional details.',
+      },
+    })
+  ),
+  data: schema.maybe(
+    schema.any({
+      meta: {
+        description: 'The connector execution data.',
+      },
+    })
+  ),
+  retry: schema.maybe(
+    schema.nullable(
+      schema.oneOf([schema.boolean(), schema.string()], {
+        meta: {
+          description:
+            'When the status is error, identifies whether the connector execution will retry .',
+        },
+      })
+    )
+  ),
+  errorSource: schema.maybe(
+    schema.oneOf([schema.literal('user'), schema.literal('framework')], {
+      meta: {
+        description:
+          'When the status is error, identifies whether the error is a framework error or a user error.',
+      },
+    })
+  ),
+});

@@ -24,6 +24,8 @@ const projectDefaultRoles = new Map<string, Role>([
   ['oblt', 'editor'],
 ]);
 
+const projectTypesWithCustomRolesEnabled = ['es', 'security'];
+
 const getDefaultServerlessRole = (projectType: string) => {
   if (projectDefaultRoles.has(projectType)) {
     return projectDefaultRoles.get(projectType)!;
@@ -32,8 +34,18 @@ const getDefaultServerlessRole = (projectType: string) => {
   }
 };
 
+const isRoleManagementExplicitlyEnabled = (args: string[]): boolean => {
+  const roleManagementArg = args.find((arg) =>
+    arg.startsWith('--xpack.security.roleManagementEnabled=')
+  );
+
+  // Return true if the value is explicitly set to 'true', otherwise false
+  return roleManagementArg?.split('=')[1] === 'true' || false;
+};
+
 export class ServerlessAuthProvider implements AuthProvider {
   private readonly projectType: string;
+  private readonly roleManagementEnabled: boolean;
   private readonly rolesDefinitionPath: string;
 
   constructor(config: Config) {
@@ -43,6 +55,10 @@ export class ServerlessAuthProvider implements AuthProvider {
       return acc + (match ? match[1] : '');
     }, '') as ServerlessProjectType;
 
+    // Indicates whether role management was explicitly enabled using
+    // the `--xpack.security.roleManagementEnabled=true` flag.
+    this.roleManagementEnabled = isRoleManagementExplicitlyEnabled(kbnServerArgs);
+
     if (!isServerlessProjectType(this.projectType)) {
       throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
     }
@@ -50,18 +66,41 @@ export class ServerlessAuthProvider implements AuthProvider {
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
-  getSupportedRoleDescriptors(): Record<string, unknown> {
-    return readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>;
+  getSupportedRoleDescriptors() {
+    const roleDescriptors = new Map<string, any>(
+      Object.entries(
+        readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
+      )
+    );
+    // Adding custom role to the map without privileges, so it can be later updated and used in the tests
+    if (this.isCustomRoleEnabled()) {
+      roleDescriptors.set(this.getCustomRole(), null);
+    }
+    return roleDescriptors;
   }
+
   getDefaultRole(): string {
     return getDefaultServerlessRole(this.projectType);
   }
+
+  isCustomRoleEnabled() {
+    return (
+      projectTypesWithCustomRolesEnabled.includes(this.projectType) || this.roleManagementEnabled
+    );
+  }
+
+  getCustomRole() {
+    return 'customRole';
+  }
+
   getRolesDefinitionPath(): string {
     return this.rolesDefinitionPath;
   }
+
   getCommonRequestHeader() {
     return COMMON_REQUEST_HEADERS;
   }
+
   getInternalRequestHeader() {
     return getServerlessInternalRequestHeaders();
   }

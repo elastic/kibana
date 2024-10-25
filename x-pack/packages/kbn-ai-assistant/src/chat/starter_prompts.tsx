@@ -31,7 +31,6 @@ const starterPromptInnerClassName = css`
 
 export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const service = useAIAssistantAppService();
-
   const { connectors } = useGenAIConnectors();
 
   if (!connectors || connectors.length === 0) {

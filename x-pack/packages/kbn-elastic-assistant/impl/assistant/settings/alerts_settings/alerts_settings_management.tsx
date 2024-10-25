@@ -40,6 +40,7 @@ export const AlertsSettingsManagement: React.FC<Props> = React.memo(
           knowledgeBase={knowledgeBase}
           setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
           compressed={false}
+          value={knowledgeBase.latestAlerts}
         />
       </EuiPanel>
     );

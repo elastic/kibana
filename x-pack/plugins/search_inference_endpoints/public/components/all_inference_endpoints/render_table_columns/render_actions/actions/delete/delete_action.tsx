@@ -8,12 +8,13 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 import { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {
-  selectedEndpoint?: InferenceEndpointUI;
+  selectedEndpoint: InferenceEndpointUI;
 }
 
 export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) => {
@@ -37,8 +38,10 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
       <EuiButtonIcon
         aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
           defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
-          values: { selectedEndpointName: selectedEndpoint?.endpoint },
+          values: { selectedEndpointName: selectedEndpoint.endpoint },
         })}
+        data-test-subj="inferenceUIDeleteAction"
+        disabled={isEndpointPreconfigured(selectedEndpoint.endpoint)}
         key="delete"
         iconType="trash"
         color="danger"
@@ -48,6 +51,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
         <ConfirmDeleteEndpointModal
           onCancel={() => setIsModalVisible(false)}
           onConfirm={onConfirmDeletion}
+          inferenceEndpoint={selectedEndpoint}
         />
       )}
     </>

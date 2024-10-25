@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -52,7 +53,6 @@ import {
   type KnowledgeBaseEntry,
   type Message,
   type AdHocInstruction,
-  AssistantScope,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -101,7 +101,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
-      scope: AssistantScope;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -217,11 +217,11 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(this.dependencies.scope),
+                applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
                 adHocInstructions,
                 availableFunctionNames: functionClient
-                  .getFunctions({ scope: this.dependencies.scope })
+                  .getFunctions()
                   .map((fn) => fn.definition.name),
               }),
               initialMessages
@@ -301,7 +301,6 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                scope: this.dependencies.scope,
                 useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
@@ -708,14 +707,16 @@ export class ObservabilityAIAssistantClient {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
-    return this.dependencies.knowledgeBaseService.recall({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      queries,
-      categories,
-      esClient: this.dependencies.esClient,
-      uiSettingsClient: this.dependencies.uiSettingsClient,
-    });
+    return (
+      this.dependencies.knowledgeBaseService?.recall({
+        namespace: this.dependencies.namespace,
+        user: this.dependencies.user,
+        queries,
+        categories,
+        esClient: this.dependencies.esClient,
+        uiSettingsClient: this.dependencies.uiSettingsClient,
+      }) || { entries: [] }
+    );
   };
 
   getKnowledgeBaseStatus = () => {

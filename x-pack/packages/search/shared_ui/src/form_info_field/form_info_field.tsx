@@ -23,6 +23,7 @@ interface FormInfoFieldProps {
   value: string;
   copyValue?: string;
   dataTestSubj?: string;
+  copyValueDataTestSubj?: string;
 }
 
 export const FormInfoField: React.FC<FormInfoFieldProps> = ({
@@ -31,6 +32,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
   value,
   copyValue,
   dataTestSubj,
+  copyValueDataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -71,6 +73,8 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
             <EuiButtonIcon
               onClick={copy}
               iconType="copy"
+              color="text"
+              data-test-subj={copyValueDataTestSubj}
               aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
                 defaultMessage: 'Copy to clipboard',
               })}

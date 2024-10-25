@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
+import type { Agent as SuperTestAgent } from 'supertest';
+
 import { AUTHENTICATION } from './authentication';
 
 export const createUsersAndRoles = async (es: Client, supertest: SuperTestAgent) => {

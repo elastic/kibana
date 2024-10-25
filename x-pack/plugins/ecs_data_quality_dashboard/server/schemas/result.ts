@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 
 import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+import { StringToNonNegativeNumber } from './utils/string_to_non_negative_number';
 
 const ResultDocumentInterface = t.interface({
   batchId: t.string,
@@ -74,7 +75,7 @@ export const GetIndexResultsParams = t.type({
 
 export const GetIndexResultsQuery = t.partial({
   size: StringToPositiveNumber,
-  from: StringToPositiveNumber,
+  from: StringToNonNegativeNumber,
   startDate: t.string,
   endDate: t.string,
   outcome: t.union([t.literal('pass'), t.literal('fail')]),

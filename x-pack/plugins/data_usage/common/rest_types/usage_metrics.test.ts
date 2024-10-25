@@ -41,7 +41,7 @@ describe('usage_metrics schemas', () => {
     ).not.toThrow();
   });
 
-  it('should error if `dataStream` list is empty', () => {
+  it('should not error if `dataStream` list is empty', () => {
     expect(() =>
       UsageMetricsRequestSchema.validate({
         from: new Date().toISOString(),
@@ -49,7 +49,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: [],
       })
-    ).toThrowError('[dataStreams]: array size is [0], but cannot be smaller than [1]');
+    ).not.toThrow();
   });
 
   it('should error if `dataStream` is given type not array', () => {
@@ -71,7 +71,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained'],
         dataStreams: ['ds_1', '  '],
       })
-    ).toThrow('[dataStreams]: [dataStreams] list cannot contain empty values');
+    ).toThrow('[dataStreams]: list cannot contain empty values');
   });
 
   it('should error if `metricTypes` is empty string', () => {
@@ -82,7 +82,7 @@ describe('usage_metrics schemas', () => {
         dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: ' ',
       })
-    ).toThrow();
+    ).toThrow('[metricTypes]: could not parse array value from json input');
   });
 
   it('should error if `metricTypes` contains an empty item', () => {
@@ -93,7 +93,7 @@ describe('usage_metrics schemas', () => {
         dataStreams: ['data_stream_1', 'data_stream_2', 'data_stream_3'],
         metricTypes: [' ', 'storage_retained'], // First item is invalid
       })
-    ).toThrowError(/list cannot contain empty values/);
+    ).toThrow('list cannot contain empty values');
   });
 
   it('should error if `metricTypes` is not a valid type', () => {
@@ -116,7 +116,7 @@ describe('usage_metrics schemas', () => {
         metricTypes: ['storage_retained', 'foo'],
       })
     ).toThrow(
-      '[metricTypes] must be one of storage_retained, ingest_rate, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
+      '[metricTypes]: must be one of ingest_rate, storage_retained, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
     );
   });
 

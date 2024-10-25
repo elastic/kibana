@@ -8,6 +8,7 @@
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+
 import type { UserProfileAvatarData, UserProfileData } from './types';
 
 /**

@@ -23,6 +23,7 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -133,6 +134,10 @@ export interface RowControlsExtensionParams {
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The current query
+   */
+  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
   /**
    * The current query
    */

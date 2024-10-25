@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiEmptyPrompt,
-  EuiComboBox,
-  EuiInlineEditTitle,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiInlineEditTitle,
+  EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
-import { FormikProvider, useFormik, Field, Form } from 'formik';
+import { Field, Form, FormikProvider, useFormik } from 'formik';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+
 import { useAuthenticator } from './role_switcher';
 
 export const LoginPage = () => {

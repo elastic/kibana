@@ -13,7 +13,7 @@ import {
 } from '@testing-library/react-hooks';
 import { merge } from 'lodash';
 import React, { PropsWithChildren } from 'react';
-import { Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,
   StreamingChatResponseEventType,
@@ -31,6 +31,7 @@ import { createMockChatService } from '../utils/create_mock_chat_service';
 import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 
@@ -54,7 +55,9 @@ const mockService: MockedService = {
     predefinedConversation$: new Observable(),
   },
   navigate: jest.fn().mockReturnValue(of()),
-  scope: 'all',
+  scope$: new BehaviorSubject<AssistantScope[]>(['all']) as MockedService['scope$'],
+  setScopes: jest.fn(),
+  getScopes: jest.fn(),
 };
 
 const mockChatService = createMockChatService();

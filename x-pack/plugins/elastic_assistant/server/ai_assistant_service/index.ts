@@ -11,7 +11,7 @@ import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/s
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
-import { attackDiscoveryFieldMap } from '../ai_assistant_data_clients/attack_discovery/field_maps_configuration';
+import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -34,7 +34,7 @@ import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
-import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
+import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -392,6 +392,7 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled ?? false,
+      manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
     });
   }
 
