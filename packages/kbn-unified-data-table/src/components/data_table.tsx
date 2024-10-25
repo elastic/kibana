@@ -870,6 +870,7 @@ export const UnifiedDataTable = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
+      canDragAndDropColumns: true,
       visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
