@@ -475,7 +475,7 @@ async function getSuggestionsWithinCommand(
       Boolean(getColumnByName(col, references))
     );
   } else {
-    // The deprectated path.
+    // The deprecated path.
     return getExpressionSuggestionsByType(
       innerText,
       commands,

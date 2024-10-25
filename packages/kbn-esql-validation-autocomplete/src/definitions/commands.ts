@@ -16,6 +16,7 @@ import type {
   ESQLFunction,
 } from '@kbn/esql-ast';
 import {
+  findPreviousWord,
   getFunctionDefinition,
   isAssignment,
   isColumnItem,
@@ -321,6 +322,47 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
+    suggest: async (innerText, getFieldsByType, getColumnByName) => {
+      if (
+        /\s/.test(innerText[innerText.length - 1]) &&
+        !noCaseCompare(findPreviousWord(innerText), 'keep')
+      ) {
+        return [pipeCompleteItem, commaCompleteItem];
+      }
+
+      const fieldSuggestions = await getFieldsByType('any', [], {});
+      return handleFragment(
+        innerText,
+        (fragment) => Boolean(getColumnByName(fragment)),
+        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          // KEEP fie<suggest>
+          return fieldSuggestions.map((suggestion) => ({
+            ...suggestion,
+            text: suggestion.text,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          }));
+        },
+        (fragment: string, rangeToReplace: { start: number; end: number }) => {
+          // KEEP field<suggest>
+          const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
+          if (fieldSuggestions.length > 1)
+            // when we fix the editor marker, this should probably be checked against 0 instead of 1
+            // this is because the last field in the AST is currently getting removed (because it contains
+            // the editor marker) so it is not included in the ignored list which is used to filter out
+            // existing fields above.
+            finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+
+          return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
+            ...s,
+            filterText: fragment,
+            text: fragment + s.text,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          }));
+        }
+      );
+    },
     options: [],
     modes: [],
     signature: {

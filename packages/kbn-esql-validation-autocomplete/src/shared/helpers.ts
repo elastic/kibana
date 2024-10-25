@@ -132,7 +132,7 @@ export function isSourceCommand({ label }: { label: string }) {
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
-// let commandLookups: Map<string, CommandDefinition> | undefined;
+let commandLookups: Map<string, CommandDefinition> | undefined;
 
 function buildFunctionLookup() {
   // we always refresh if we have test functions
@@ -198,14 +198,15 @@ export function getFunctionDefinition(name: string) {
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
 function buildCommandLookup() {
-  // if (!commandLookups) {
-  const commandLookups = commandDefinitions.reduce((memo, def) => {
-    memo.set(def.name, def);
-    if (def.alias) {
-      memo.set(def.alias, def);
-    }
-    return memo;
-  }, new Map<string, CommandDefinition>());
+  if (!commandLookups) {
+    commandLookups = commandDefinitions.reduce((memo, def) => {
+      memo.set(def.name, def);
+      if (def.alias) {
+        memo.set(def.alias, def);
+      }
+      return memo;
+    }, new Map<string, CommandDefinition>());
+  }
   return commandLookups;
 }
 
