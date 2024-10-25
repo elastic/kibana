@@ -183,7 +183,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     closeFlyout();
   }, [closeFlyout]);
 
-
   const { value: existingIndices } = useAsync(() => {
     const indices: string[] = [];
     entries.data.forEach((entry) => {
