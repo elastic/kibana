@@ -10,23 +10,25 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
-import { Subscription, firstValueFrom, Observable } from 'rxjs';
-import { Config, type IConfigService } from '@kbn/config';
+import { Observable, Subscription } from 'rxjs';
+import { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import { getDefaultSecurityImplementation, convertSecurityApi, PKCS12ConfigType } from './utils';
-import { config as SecurityConfigDef, SecurityConfigType } from './security_config';
+import {
+  getDefaultSecurityImplementation,
+  convertSecurityApi,
+  SecurityServiceConfigType,
+  PKCS12ConfigType,
+} from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
-  private readonly configService: IConfigService;
-
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -39,19 +41,16 @@ export class SecurityService
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('security-service');
-    this.configService = coreContext.configService;
+
     this.config$ = coreContext.configService.getConfig$();
     this.configSubscription = this.config$.subscribe((config) => {
       this.config = config;
     });
   }
 
-  public async setup(): Promise<InternalSecurityServiceSetup> {
-    const securityConfig = await firstValueFrom(
-      this.configService.atPath<SecurityConfigType>(SecurityConfigDef.path)
-    );
+  public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
-    // const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
     const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
     const serverConfig: PKCS12ConfigType = config.get(['server']);
 
