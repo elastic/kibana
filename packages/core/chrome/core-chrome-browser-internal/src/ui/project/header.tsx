@@ -70,6 +70,10 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
     // needed to enable breadcrumbs truncation
     min-width: 0;
     flex-shrink: 1;
+    // prevents loading spinner from jumping
+    .eui-textTruncate {
+      display: flex;
+    }
   `,
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation

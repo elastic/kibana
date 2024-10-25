@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSkeletonRectangle } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -40,7 +40,15 @@ export function initSpacesNavControl(
 
       ReactDOM.render(
         <KibanaRenderContextProvider {...core}>
-          <Suspense fallback={<EuiLoadingSpinner />}>
+          <Suspense
+            fallback={
+              <EuiSkeletonRectangle
+                css={{ marginInline: 8 }}
+                borderRadius="m"
+                contentAriaLabel="Loading navigation"
+              />
+            }
+          >
             <LazyNavControlPopover
               spacesManager={spacesManager}
               serverBasePath={core.http.basePath.serverBasePath}
