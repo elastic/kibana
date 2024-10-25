@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -54,7 +54,7 @@ type TrustedAppConditionEntry<
       operator: 'included';
       value: string;
     }
-  | TypeOf<typeof WindowsSignerEntrySchema>;
+  | TypeOf<typeof SignerEntrySchema>;
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
@@ -85,9 +85,9 @@ const CommonEntrySchema = {
   ),
 };
 
-// Windows Signer entries use a Nested field that checks to ensure
+// Windows/MacOS Signer entries use a Nested field that checks to ensure
 // that the certificate is trusted
-const WindowsSignerEntrySchema = schema.object({
+const SignerEntrySchema = schema.object({
   type: schema.literal('nested'),
   field: ProcessCodeSigner,
   entries: schema.arrayOf(
@@ -110,7 +110,15 @@ const WindowsSignerEntrySchema = schema.object({
 });
 
 const WindowsEntrySchema = schema.oneOf([
-  WindowsSignerEntrySchema,
+  SignerEntrySchema,
+  schema.object({
+    ...CommonEntrySchema,
+    field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+  }),
+]);
+
+const MacEntrySchema = schema.oneOf([
+  SignerEntrySchema,
   schema.object({
     ...CommonEntrySchema,
     field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
@@ -118,10 +126,6 @@ const WindowsEntrySchema = schema.oneOf([
 ]);
 
 const LinuxEntrySchema = schema.object({
-  ...CommonEntrySchema,
-});
-
-const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
@@ -172,7 +176,7 @@ const TrustedAppDataSchema = schema.object(
 
 export class TrustedAppValidator extends BaseValidator {
   static isTrustedApp(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_TRUSTED_APPS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {

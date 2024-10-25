@@ -131,7 +131,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.PATH]}`
           ),
         },
-        ...(os === OperatingSystem.WINDOWS
+        ...(os !== OperatingSystem.LINUX
           ? [
               {
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
@@ -224,7 +224,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="remove">
-          {/* Unicode `nbsp` is used below so that Remove button is property displayed */}
+          {/* Unicode `nbsp` is used below so that Remove button is properly displayed */}
           <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
             <EuiButtonIcon
               color="danger"

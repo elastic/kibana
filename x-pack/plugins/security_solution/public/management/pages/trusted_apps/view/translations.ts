@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
-  MacosLinuxConditionEntry,
-  WindowsConditionEntry,
+  LinuxConditionEntry,
+  WindowsMacosConditionEntry,
   OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
@@ -95,7 +95,7 @@ export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
 };
 
 export const ENTRY_PROPERTY_TITLES: Readonly<{
-  [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string;
+  [K in keyof Omit<LinuxConditionEntry | WindowsMacosConditionEntry, 'type'>]: string;
 }> = {
   field: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.entry.field', {
     defaultMessage: 'Field',
