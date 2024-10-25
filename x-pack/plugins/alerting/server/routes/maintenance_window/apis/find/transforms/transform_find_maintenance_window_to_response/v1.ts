@@ -17,7 +17,7 @@ export const transformFindMaintenanceWindowResponse = (
     body: {
       page: result.page,
       per_page: result.perPage,
-      total: result.data.length,
+      total: result.total,
       data: result.data.map((maintenanceWindow: MaintenanceWindow) =>
         transformMaintenanceWindowToResponseV1(maintenanceWindow)
       ),

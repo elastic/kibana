@@ -24,6 +24,7 @@ jest.mock('../../../../lib/license_api_access', () => ({
 const mockMaintenanceWindows = {
   page: 1,
   perPage: 3,
+  total: 2,
   data: [
     {
       ...getMockMaintenanceWindow(),
