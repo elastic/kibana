@@ -66,7 +66,7 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
     const result = await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(template), {
       logger,
     });
-    logger.debug(() => `Installed entity manager index template: ${JSON.stringify(template)}`);
+    logger.debug(() => `Installed entity manager index template: REDACTED `);
     return result;
   } catch (error: any) {
     logger.error(`Error updating entity manager index template: ${error.message}`);

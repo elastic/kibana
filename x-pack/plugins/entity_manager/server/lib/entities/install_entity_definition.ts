@@ -154,7 +154,7 @@ async function install({
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   logger.info(`Installing definition [${definition.id}] v${definition.version}`);
-  logger.debug(() => JSON.stringify(definition, null, 2));
+  logger.debug(() => 'REDACTED'); // JSON.stringify(definition, null, 2));
 
   logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);

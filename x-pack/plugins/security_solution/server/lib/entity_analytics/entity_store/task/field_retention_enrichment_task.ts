@@ -29,12 +29,12 @@ import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
 const logFactory =
   (logger: Logger, taskId: string) =>
   (message: string): void =>
-    logger.info(`[task ${taskId}]: ${message}`);
+    logger.info(`[Entity Store] [task ${taskId}]: ${message}`);
 
 const debugLogFactory =
   (logger: Logger, taskId: string) =>
   (message: string): void =>
-    logger.debug(`[task ${taskId}]: ${message}`);
+    logger.debug(`[Entity Store] [task ${taskId}]: ${message}`);
 
 const getTaskName = (): string => TYPE;
 
@@ -55,7 +55,9 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
   taskManager: TaskManagerSetupContract | undefined;
 }): void => {
   if (!taskManager) {
-    logger.info('Task Manager is unavailable; skipping entity store enrich policy registration.');
+    logger.info(
+      '[Entity Store]  Task Manager is unavailable; skipping entity store enrich policy registration.'
+    );
     return;
   }
 
@@ -114,7 +116,7 @@ export const startEntityStoreFieldRetentionEnrichTask = async ({
       params: { version: VERSION },
     });
   } catch (e) {
-    logger.warn(`[task ${taskId}]: error scheduling task, received ${e.message}`);
+    logger.warn(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
     throw e;
   }
 };
@@ -130,9 +132,14 @@ export const removeEntityStoreFieldRetentionEnrichTask = async ({
 }) => {
   try {
     await taskManager.remove(getTaskId(namespace));
+    logger.info(
+      `[Entity Store]  Removed entity store enrich policy task for namespace ${namespace}`
+    );
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(`Failed to remove  entity store enrich policy task: ${err.message}`);
+      logger.error(
+        `[Entity Store]  Failed to remove  entity store enrich policy task: ${err.message}`
+      );
       throw err;
     }
   }
@@ -196,7 +203,7 @@ export const runTask = async ({
       state: updatedState,
     };
   } catch (e) {
-    logger.error(`[task ${taskId}]: error running task, received ${e.message}`);
+    logger.error(`[Entity Store] [task ${taskId}]: error running task, received ${e.message}`);
     throw e;
   }
 };

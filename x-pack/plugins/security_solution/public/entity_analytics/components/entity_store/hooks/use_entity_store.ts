@@ -41,7 +41,20 @@ export const useEntityStoreEnablement = () => {
   const { initEntityStore } = useEntityStoreRoutes();
   const { refetch: initialize } = useQuery({
     queryKey: [ENTITY_STORE_ENABLEMENT_INIT],
-    queryFn: () => initEntityStore('user').then(() => initEntityStore('host')),
+    queryFn: async () => {
+      const start = Date.now();
+      console.log('initEntityStore');
+      console.log('user');
+      const usr = await initEntityStore('user');
+
+      console.log('user took', (Date.now() - start) / 1000);
+      console.log('host');
+      const host = await initEntityStore('host');
+      console.log('host took', (Date.now() - start) / 1000);
+
+      console.log('done', (Date.now() - start) / 1000);
+      return [usr, host];
+    },
     enabled: false,
   });
 
@@ -68,7 +81,8 @@ export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { initEntityStore } = useEntityStoreRoutes();
   return useMutation<InitEntityEngineResponse[]>(
-    () => initEntityStore('user').then(() => initEntityStore('host')),
+    () =>
+      initEntityStore('user').then((usr) => initEntityStore('host').then((host) => [usr, host])),
     {
       ...options,
       mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
@@ -89,7 +103,8 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { stopEntityStore } = useEntityStoreRoutes();
   return useMutation<StopEntityEngineResponse[]>(
-    () => stopEntityStore('user').then(() => stopEntityStore('host')),
+    () =>
+      stopEntityStore('user').then((usr) => stopEntityStore('host').then((host) => [usr, host])),
     {
       ...options,
       mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
@@ -110,7 +125,10 @@ export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) 
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { deleteEntityEngine } = useEntityStoreRoutes();
   return useMutation<DeleteEntityEngineResponse[]>(
-    () => deleteEntityEngine('user').then(() => deleteEntityEngine('host')),
+    () =>
+      deleteEntityEngine('user').then((usr) =>
+        deleteEntityEngine('host').then((host) => [usr, host])
+      ),
     {
       ...options,
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
