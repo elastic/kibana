@@ -46,7 +46,7 @@ const inferenceEndpoints = [
     task_settings: {},
   },
   {
-    inference_id: '.elser-2',
+    inference_id: '.elser-2-elasticsearch',
     task_type: 'sparse_embedding',
     service: 'elasticsearch',
     service_settings: {
@@ -57,7 +57,7 @@ const inferenceEndpoints = [
     task_settings: {},
   },
   {
-    inference_id: '.multi-e5-small',
+    inference_id: '.multilingual-e5-small-elasticsearch',
     task_type: 'text_embedding',
     service: 'elasticsearch',
     service_settings: {
@@ -80,8 +80,8 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('.elser-2');
-    expect(rows[2]).toHaveTextContent('.multi-e5-small');
+    expect(rows[1]).toHaveTextContent('.elser-2-elasticsearch');
+    expect(rows[2]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
     expect(rows[3]).toHaveTextContent('local-model');
     expect(rows[4]).toHaveTextContent('my-elser-model-05');
     expect(rows[5]).toHaveTextContent('third-party-model');
