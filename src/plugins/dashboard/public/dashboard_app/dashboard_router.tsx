@@ -65,7 +65,6 @@ export async function mountApp({
       useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(coreServices.notifications.toasts),
     });
-
   const redirect = (redirectTo: RedirectToProps) => {
     let path;
     let state;

@@ -11,7 +11,7 @@ import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { createHashHistory } from 'history';
 import { FilterStateStore } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { GLOBAL_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import { DASHBOARD_STATE_STORAGE_KEY, GLOBAL_STATE_STORAGE_KEY } from '../../dashboard_constants';
 
 const DASHBOARD_ID = '13823000-99b9-11ea-9eb6-d9e8adceb647';
 
@@ -99,6 +99,48 @@ describe('when global filters change', () => {
     const url = getDashboardListItemLink(kbnUrlStateStorage, DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
       `"http://localhost/#/?_g=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1)),('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))))"`
+    );
+  });
+});
+
+describe('when the dashboard has unsaved filters', () => {
+  beforeEach(() => {
+    kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+      undefined,
+    });
+
+    const filters = [
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: { query: 'q1' },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      },
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: { query: 'q1' },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      },
+    ];
+    kbnUrlStateStorage.set(DASHBOARD_STATE_STORAGE_KEY, {
+      filters,
+    });
+  });
+  test('propagates the unsaved filters on the query', async () => {
+    const url = getDashboardListItemLink(kbnUrlStateStorage, DASHBOARD_ID, false, 'default');
+    expect(url).toMatchInlineSnapshot(
+      `"http://localhost/#/?_g=()&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1)),('$state':(store:appState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))))"`
     );
   });
 });
