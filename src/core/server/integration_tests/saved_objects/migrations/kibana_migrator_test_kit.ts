@@ -94,7 +94,7 @@ export const startElasticsearch = async ({
   esVersion,
   basePath,
   dataArchive,
-  timeout,
+  timeout = 60000,
 }: {
   esVersion?: string;
   basePath?: string;
