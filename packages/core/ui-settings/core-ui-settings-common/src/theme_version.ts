@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type ThemeNameValue = 'amsterdam' | 'borealis' | string;
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-export const parseThemeNameValue = (rawValue: unknown): ThemeNameValue => {
-  if (rawValue === 'amsterdam' || rawValue === 'borealis') {
-    return rawValue;
-  }
+export const DEFAULT_THEME_VERSION: ThemeVersion = 'v8';
+export const AVAILABLE_THEME_VERSIONS: string[] = ['v8', 'borealis'];
 
-  return 'amsterdam';
-};
+export const ThemeAmsterdamTags = ['v8light', 'v8dark'] as const;
+export const ThemeBorealisTags = ['borealislight', 'borealisdark'] as const;
+export const AVAILABLE_THEME_TAGS = [...ThemeAmsterdamTags, ...ThemeBorealisTags];

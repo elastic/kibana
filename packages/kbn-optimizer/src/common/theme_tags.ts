@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  AVAILABLE_THEME_TAGS,
+  ThemeAmsterdamTags,
+  ThemeBorealisTags,
+} from '@kbn/core-ui-settings-common';
+
 import { ascending } from './array_helpers';
 
 const tags = (...themeTags: string[]) =>
@@ -17,9 +23,9 @@ const isArrayOfStrings = (input: unknown): input is string[] =>
   Array.isArray(input) && input.every((v) => typeof v === 'string');
 
 export type ThemeTags = readonly ThemeTag[];
-export type ThemeTag = 'v8light' | 'v8dark';
-export const DEFAULT_THEMES = tags('v8light', 'v8dark');
-export const ALL_THEMES = tags('v8light', 'v8dark');
+export type ThemeTag = (typeof ThemeAmsterdamTags)[number] | (typeof ThemeBorealisTags)[number];
+export const DEFAULT_THEMES = tags(...ThemeAmsterdamTags, ...ThemeBorealisTags);
+export const ALL_THEMES = tags(...AVAILABLE_THEME_TAGS);
 
 export function parseThemeTags(input?: any): ThemeTags {
   if (!input) {

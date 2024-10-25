@@ -8,7 +8,7 @@
  */
 
 /**
- * @typedef {'v8'} ThemeVersion
+ * @typedef {'v8' | 'borealis'} ThemeVersion
  */
 
 const Fs = require('fs');

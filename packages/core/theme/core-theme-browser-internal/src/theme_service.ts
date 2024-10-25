@@ -12,6 +12,7 @@ import { _setDarkMode } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
 import { createStyleSheet } from './utils';
 
@@ -39,7 +40,7 @@ export class ThemeService {
 
     const theme: CoreTheme = {
       darkMode,
-      name: themeMetadata.name,
+      version: themeMetadata.version,
     };
 
     this.applyTheme(theme);
@@ -77,11 +78,13 @@ export class ThemeService {
     });
 
     _setDarkMode(darkMode);
-    updateKbnThemeTag(darkMode);
+    updateKbnThemeTag(darkMode, this.themeMetadata?.version);
   }
 }
 
-const updateKbnThemeTag = (darkMode: boolean) => {
+const updateKbnThemeTag = (darkMode: boolean, themeVersion?: string) => {
   const globals: any = typeof window === 'undefined' ? {} : window;
-  globals.__kbnThemeTag__ = darkMode ? 'v8dark' : 'v8light';
+  const version = themeVersion ?? DEFAULT_THEME_VERSION;
+
+  globals.__kbnThemeTag__ = darkMode ? `${version}dark` : `${version}light`;
 };

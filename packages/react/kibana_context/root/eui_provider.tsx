@@ -13,8 +13,9 @@ import createCache from '@emotion/cache';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
-import { getColorMode, defaultTheme, getKibanaThemeByName } from '@kbn/react-kibana-context-common';
+import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import { getKibanaThemeByVersion } from '@kbn/react-kibana-context-common/theme';
 
 /**
  * Props for the KibanaEuiProvider.
@@ -67,7 +68,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const kibanaTheme = useObservable(theme$, defaultTheme);
   const themeColorMode = useMemo(() => getColorMode(kibanaTheme), [kibanaTheme]);
   const euiTheme = useMemo(() => {
-    const theme = getKibanaThemeByName(kibanaTheme.name);
+    const theme = getKibanaThemeByVersion(kibanaTheme.version);
     if (!theme) {
       return undefined;
     }
