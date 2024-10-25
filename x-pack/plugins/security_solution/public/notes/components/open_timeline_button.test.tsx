@@ -10,7 +10,6 @@ import React from 'react';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import type { Note } from '../../../common/api/timeline';
 import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 
 jest.mock('../../common/hooks/use_experimental_features');
@@ -40,11 +39,6 @@ describe('OpenTimelineButtonIcon', () => {
     const openTimeline = jest.fn();
     (useQueryTimelineById as jest.Mock).mockReturnValue(openTimeline);
 
-    const unifiedComponentsInTimelineDisabled = false;
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(
-      unifiedComponentsInTimelineDisabled
-    );
-
     const { getByTestId } = render(<OpenTimelineButtonIcon note={note} index={index} />);
 
     const button = getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-${index}`);
@@ -55,7 +49,6 @@ describe('OpenTimelineButtonIcon', () => {
       onOpenTimeline: undefined,
       timelineId: note.timelineId,
       timelineType: undefined,
-      unifiedComponentsInTimelineDisabled,
     });
   });
 });

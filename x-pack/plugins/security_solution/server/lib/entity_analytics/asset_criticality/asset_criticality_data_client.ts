@@ -342,6 +342,7 @@ export class AssetCriticalityDataClient {
           asset: {
             criticality: CRITICALITY_VALUES.DELETED,
           },
+          '@timestamp': new Date().toISOString(),
           ...getImplicitEntityFields({
             ...idParts,
             criticalityLevel: CRITICALITY_VALUES.DELETED,

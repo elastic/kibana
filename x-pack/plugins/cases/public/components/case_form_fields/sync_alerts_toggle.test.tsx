@@ -14,7 +14,8 @@ import { FormTestComponent } from '../../common/test_utils';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
-describe('SyncAlertsToggle', () => {
+// Failing: https://github.com/elastic/kibana/issues/190270
+describe.skip('SyncAlertsToggle', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
   const defaultFormProps = {

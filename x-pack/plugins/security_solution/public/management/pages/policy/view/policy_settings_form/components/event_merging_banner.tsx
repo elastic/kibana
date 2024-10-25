@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ENDPOINT_VERSION_SUPPORTING_EVENT_MERGING_BY_DEFAULT } from '../constants';
 
 export interface EventMergingBannerProps {
   onDismiss: () => void;
@@ -29,7 +30,7 @@ export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) 
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.eventMergingBanner.body"
-          defaultMessage="Elastic Agent 8.16+ produces less telemetry without reducing system visibility, which may impact existing event filters. For more about these changes and how to adjust your settings, visit our {documentation}."
+          defaultMessage="Elastic Agent {minVersion}+ produces less telemetry without reducing system visibility, which may impact existing event filters. For more about these changes and how to adjust your settings, visit our {documentation}."
           values={{
             documentation: (
               <EuiLink
@@ -43,6 +44,7 @@ export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) 
                 />
               </EuiLink>
             ),
+            minVersion: ENDPOINT_VERSION_SUPPORTING_EVENT_MERGING_BY_DEFAULT,
           }}
         />
       </EuiText>
