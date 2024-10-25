@@ -443,7 +443,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           onConfirm={handleDuplicateEntry}
           cancelButtonText={CANCEL_BUTTON_TEXT}
           confirmButtonText={i18n.SAVE_BUTTON_TEXT}
-          buttonColor="warning"
           defaultFocusedButton="confirm"
           data-test-subj="create-duplicate-entry-modal"
         >
