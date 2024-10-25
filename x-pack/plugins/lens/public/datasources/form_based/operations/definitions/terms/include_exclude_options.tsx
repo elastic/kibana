@@ -99,19 +99,41 @@ export const IncludeExcludeRow = ({
     selectedOptions: IncludeExcludeOptions[],
     operation: 'include' | 'exclude'
   ) => {
+    const otherOperation = operation === 'include' ? 'exclude' : 'include';
+    const otherSelectedOptions = includeExcludeSelectedOptions[otherOperation] ?? [];
+    const hasIdenticalOptions = selectedOptions.some((option) => {
+      return otherSelectedOptions.some((otherOption) => otherOption.label === option.label);
+    });
+
+    const otherSelectedNonIdenticalOptions = hasIdenticalOptions
+      ? otherSelectedOptions.filter(
+          (otherOption) => !selectedOptions.some((option) => option.label === otherOption.label)
+        )
+      : otherSelectedOptions;
+
     const options = {
-      ...includeExcludeSelectedOptions,
+      [otherOperation]: otherSelectedNonIdenticalOptions,
       [operation]: selectedOptions,
     };
     setIncludeExcludeSelectedOptions(options);
-    const terms = selectedOptions.map((option) => {
-      if (!Number.isNaN(Number(option.label))) {
-        return Number(option.label);
-      }
-      return option.label;
-    });
+
+    const getTerms = (updatedSelectedOptions: IncludeExcludeOptions[]) =>
+      updatedSelectedOptions.map((option) => {
+        if (!Number.isNaN(Number(option.label))) {
+          return Number(option.label);
+        }
+        return option.label;
+      });
+
+    const terms = getTerms(selectedOptions);
     const param = `${operation}IsRegex`;
     updateParams(operation, terms, param, false);
+
+    if (hasIdenticalOptions) {
+      const otherTerms = getTerms(otherSelectedNonIdenticalOptions);
+      const otherParam = `${otherOperation}IsRegex`;
+      updateParams(otherOperation, otherTerms, otherParam, false);
+    }
   };
 
   const onCreateOption = (
@@ -127,40 +149,69 @@ export const IncludeExcludeRow = ({
 
     const includeORExcludeSelectedOptions = includeExcludeSelectedOptions[operation] ?? [];
     includeExcludeOptions = [...includeORExcludeSelectedOptions, newOption];
+
+    const otherOperation = operation === 'include' ? 'exclude' : 'include';
+    const otherOptions = includeExcludeSelectedOptions[otherOperation] ?? [];
+    const hasIdenticalOption = otherOptions.some((option) => option.label === newOption.label);
+
+    const otherOptionsWithoutNewOption = hasIdenticalOption
+      ? otherOptions.filter((option) => option.label !== newOption.label)
+      : otherOptions;
+
     const options = {
-      ...includeExcludeSelectedOptions,
+      [otherOperation]: otherOptionsWithoutNewOption,
       [operation]: includeExcludeOptions,
     };
     setIncludeExcludeSelectedOptions(options);
 
-    const terms = includeExcludeOptions.map((option) => {
-      if (!Number.isNaN(Number(option.label))) {
-        return Number(option.label);
-      }
-      return option.label;
-    });
+    const getTerms = (updatedOptions: IncludeExcludeOptions[]) => {
+      return updatedOptions.map((option) => {
+        if (!Number.isNaN(Number(option.label))) {
+          return Number(option.label);
+        }
+        return option.label;
+      });
+    };
+
+    const terms = getTerms(includeExcludeOptions);
     const param = `${operation}IsRegex`;
     updateParams(operation, terms, param, false);
+
+    if (hasIdenticalOption) {
+      const otherTerms = getTerms(otherOptionsWithoutNewOption);
+      const otherParam = `${otherOperation}IsRegex`;
+      updateParams(otherOperation, otherTerms, otherParam, false);
+    }
   };
 
   const onIncludeRegexChangeToDebounce = useCallback(
     (newIncludeValue: string | number | undefined) => {
+      const isEqualToExcludeValue = newIncludeValue === regex.exclude;
+      const excludeValue = isEqualToExcludeValue ? '' : regex.exclude;
       setRegex({
-        ...regex,
+        exclude: excludeValue,
         include: newIncludeValue,
       });
       updateParams('include', [newIncludeValue ?? ''], 'includeIsRegex', true);
+      if (isEqualToExcludeValue) {
+        updateParams('exclude', [''], 'excludeIsRegex', true);
+      }
     },
     [regex, updateParams]
   );
 
   const onExcludeRegexChangeToDebounce = useCallback(
     (newExcludeValue: string | number | undefined) => {
+      const isEqualToIncludeValue = newExcludeValue === regex.include;
+      const includeValue = isEqualToIncludeValue ? '' : regex.include;
       setRegex({
-        ...regex,
+        include: includeValue,
         exclude: newExcludeValue,
       });
       updateParams('exclude', [newExcludeValue ?? ''], 'excludeIsRegex', true);
+      if (isEqualToIncludeValue) {
+        updateParams('include', [''], 'includeIsRegex', true);
+      }
     },
     [regex, updateParams]
   );
@@ -300,6 +351,7 @@ export const IncludeExcludeRow = ({
                 defaultMessage: 'Enter a regex to filter values',
               }
             )}
+            data-test-subj="lens-exclude-terms-regex-input"
             value={excludeRegexValue}
             onChange={(e) => {
               onExcludeRegexValueChange(e.target.value);
