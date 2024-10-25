@@ -8,7 +8,12 @@
  */
 
 import type { ESQLCommand } from '@kbn/esql-ast';
-import { findPreviousWord, isColumnItem, noCaseCompare } from '../../../shared/helpers';
+import {
+  findPreviousWord,
+  getLastCharFromTrimmed,
+  isColumnItem,
+  noCaseCompare,
+} from '../../../shared/helpers';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { handleFragment } from '../../helper';
@@ -22,6 +27,7 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   if (
     /\s/.test(innerText[innerText.length - 1]) &&
+    getLastCharFromTrimmed(innerText) !== ',' &&
     !noCaseCompare(findPreviousWord(innerText), 'keep')
   ) {
     return [pipeCompleteItem, commaCompleteItem];
