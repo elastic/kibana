@@ -96,6 +96,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
+  // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
       const fetch = async () => {
