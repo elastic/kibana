@@ -20,12 +20,11 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds, EntityType } from '../../../common/entities';
+import { EntityColumnIds } from '../../../common/entities';
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
-import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { EntityName } from './entity_name';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
@@ -39,7 +38,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
-  onFilterByType: (entityType: EntityType) => void;
+  onFilterByType: (entityType: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -96,7 +95,7 @@ export function EntitiesGrid({
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
               value={entityType}
-              label={getEntityTypeLabel(entityType)}
+              label={entityType}
               onFilter={() => onFilterByType(entityType)}
             />
           );
