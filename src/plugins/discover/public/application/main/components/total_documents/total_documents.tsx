@@ -33,7 +33,7 @@ export const TotalDocuments = ({
     >
       {isEsqlMode ? (
         <FormattedMessage
-          id="discover.docTable.totalResults"
+          id="discover.embeddable.totalResults"
           defaultMessage="{totalDocuments} {totalHitCount, plural, one {result} other {results}}"
           values={{
             totalDocuments,
@@ -42,7 +42,7 @@ export const TotalDocuments = ({
         />
       ) : (
         <FormattedMessage
-          id="discover.docTable.totalDocuments"
+          id="discover.embeddable.totalDocuments"
           defaultMessage="{totalDocuments} {totalHitCount, plural, one {document} other {documents}}"
           values={{
             totalDocuments,
