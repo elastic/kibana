@@ -11,8 +11,10 @@ import {
   ENTITY_TYPE,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
+  AGENT_NAME,
+  CLOUD_PROVIDER,
 } from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityType } from '../../../../common/entities';
+import { Entity } from '../../../../common/entities';
 
 const idGenerator = () => {
   let id = 0;
@@ -31,11 +33,12 @@ function generateRandomTimestamp() {
   return randomDate.toISOString();
 }
 
-const getEntity = (entityType: EntityType) => ({
+const getEntity = (entityType: string, customFields: Record<string, any> = {}) => ({
   [ENTITY_LAST_SEEN]: generateRandomTimestamp(),
   [ENTITY_TYPE]: entityType,
   [ENTITY_DISPLAY_NAME]: faker.person.fullName(),
   [ENTITY_ID]: generateId(),
+  ...customFields,
 });
 
 const alertsMock = [
@@ -58,9 +61,11 @@ const alertsMock = [
   },
 ];
 
-const hostsMock = Array.from({ length: 20 }, () => getEntity('host'));
+const hostsMock = Array.from({ length: 20 }, () => getEntity('host', { [CLOUD_PROVIDER]: 'gcp' }));
 const containersMock = Array.from({ length: 20 }, () => getEntity('container'));
-const servicesMock = Array.from({ length: 20 }, () => getEntity('service'));
+const servicesMock = Array.from({ length: 20 }, () =>
+  getEntity('service', { [AGENT_NAME]: 'java' })
+);
 
 export const entitiesMock = [
   ...alertsMock,
