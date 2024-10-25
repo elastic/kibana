@@ -27,10 +27,10 @@ export const DELETED_AGENTLESS_POLICIES_TASK_TYPE =
   'cloud-security:deleted-orphan-agentless-policies-task';
 export const DELETE_AGENTLESS_POLICIES_TASK_VERSION = '1.0.0';
 const TITLE = 'Cloud Security Delete Orphan Agentless Policies Task';
-const TIMEOUT = '1m';
+const TIMEOUT = '2m';
 const INTERVAL = '1d';
 const LOGGER_SUBJECT = '[DeletedOrphanAgentlessPoliciesTask]';
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 5;
 
 interface DeleteOrphanAgentlessPoliciesTaskSetupContract {
   core: CoreSetup;
@@ -215,8 +215,8 @@ export class DeleteOrphanAgentlessPoliciesTask {
       agentPolicy.id
     );
 
-    // Delete Orphan Package Policies
-    if (packagePolicies.length === 1) {
+    // Delete Orphan Package Policies with system integration or no integrations policies installed
+    if (packagePolicies.length <= 1) {
       try {
         this.logger.info(
           `${LOGGER_SUBJECT} deleting package policy for agentless policy ${agentPolicy.id}`
@@ -239,7 +239,7 @@ export class DeleteOrphanAgentlessPoliciesTask {
         );
       }
 
-      // Delete Agentless Policy
+      // Delete Agentless Policy from the Saved Object and .fleet-policies index
       try {
         this.logger.info(`${LOGGER_SUBJECT} deleting agentless policy save object and docs`);
         await soClient.delete(`${saveObjectType}`, agentPolicy.id, {

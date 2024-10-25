@@ -16,6 +16,12 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
+import {
+  MAXIMUM_RETRIES,
+  RETRYABLE_HTTP_STATUSES,
+  RETRYABLE_SERVER_CODES,
+} from '../../../common/constants/agentless';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
 import type { AgentlessApiResponse } from '../../../common/types';
@@ -128,13 +134,14 @@ class AgentlessAgentService {
     );
 
     const response = await axios<AgentlessApiResponse>(requestConfig).catch(
-      (error: Error | AxiosError) => {
-        this.catchAgentlessApiError(
-          'create',
+      async (error: AxiosError) => {
+        await this.handleErrorsWithRetries(
           error,
-          logger,
-          agentlessAgentPolicy.id,
           requestConfig,
+          'create',
+          logger,
+          MAXIMUM_RETRIES,
+          agentlessAgentPolicy.id,
           requestConfigDebugStatus,
           errorMetadata,
           traceId
@@ -195,13 +202,14 @@ class AgentlessAgentService {
       `[Agentless API] Deleting agentless deployment with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios(requestConfig).catch((error: AxiosError) => {
-      this.catchAgentlessApiError(
-        'delete',
+    const response = await axios(requestConfig).catch(async (error: AxiosError) => {
+      await this.handleErrorsWithRetries(
         error,
-        logger,
-        agentlessPolicyId,
         requestConfig,
+        'delete',
+        logger,
+        MAXIMUM_RETRIES,
+        agentlessPolicyId,
         requestConfigDebugStatus,
         errorMetadata,
         traceId
@@ -210,6 +218,53 @@ class AgentlessAgentService {
 
     return response;
   }
+
+  private handleErrorsWithRetries = async (
+    error: AxiosError,
+    requestConfig: AxiosRequestConfig,
+    action: 'create' | 'delete',
+    logger: Logger,
+    retries: number,
+    id: string,
+    requestConfigDebugStatus: string,
+    errorMetadata: any,
+    traceId?: string
+  ) => {
+    const hasRetryableStatusError = this.hasRetryableStatusError(error, RETRYABLE_HTTP_STATUSES);
+    const hasRetryableCodeError = this.hasRetryableCodeError(error, RETRYABLE_SERVER_CODES);
+
+    if (hasRetryableStatusError || hasRetryableCodeError) {
+      await this.retry(
+        async () => await axios(requestConfig),
+        action,
+        requestConfigDebugStatus,
+        logger,
+        retries,
+        () =>
+          this.catchAgentlessApiError(
+            action,
+            error,
+            logger,
+            id,
+            requestConfig,
+            requestConfigDebugStatus,
+            errorMetadata,
+            traceId
+          )
+      );
+    } else {
+      this.catchAgentlessApiError(
+        action,
+        error,
+        logger,
+        id,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    }
+  };
 
   private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {
     if (!agentlessAgentPolicy.global_data_tags) {
@@ -410,6 +465,44 @@ class AgentlessAgentService {
 
     throw this.getAgentlessAgentError(action, userMessage, traceId);
   }
+
+  private retry = async <T>(
+    fn: () => Promise<unknown>,
+    action: 'create' | 'delete',
+    requestConfigDebugStatus: string,
+    logger: Logger,
+    retries = MAXIMUM_RETRIES,
+    throwAgentlessError: () => void
+  ) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        await fn();
+      } catch (e) {
+        logger.warn(
+          `[Agentless API] Attempt ${i + 1} failed to ${action} agentless deployment, retrying...`
+        );
+        if (i === retries - 1) {
+          logger.error(
+            `[Agentless API] Reached maximum ${retries} attempts. Failed to ${action} agentless deployment with [REQUEST]: ${requestConfigDebugStatus}`
+          );
+          throwAgentlessError();
+        }
+      }
+    }
+  };
+
+  private hasRetryableStatusError = (
+    error: AxiosError,
+    retryableStatusErrors: number[]
+  ): boolean => {
+    const status = error?.response?.status;
+    return !!status && retryableStatusErrors.some((errorStatus) => errorStatus === status);
+  };
+
+  private hasRetryableCodeError = (error: AxiosError, retryableCodeErrors: string[]): boolean => {
+    const code = error?.code;
+    return !!code && retryableCodeErrors.includes(code);
+  };
 
   private convertCauseErrorsToString = (error: AxiosError) => {
     if (error.cause instanceof AggregateError) {
