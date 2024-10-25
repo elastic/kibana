@@ -9,8 +9,6 @@
 
 import _ from 'lodash';
 
-import { CoreSetup } from '@kbn/core/public';
-
 import { MappedColors } from '../mapped_colors';
 import { seedColors } from '../../static/colors';
 
@@ -33,8 +31,8 @@ export class LegacyColorsService {
     return this._mappedColors;
   }
 
-  init(uiSettings: CoreSetup['uiSettings']) {
-    this._mappedColors = new MappedColors(uiSettings);
+  init() {
+    this._mappedColors = new MappedColors();
   }
 
   createColorLookupFunction(

@@ -10,7 +10,6 @@
 import _ from 'lodash';
 import Color from 'color';
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { seedColors } from '../../static/colors';
 import { MappedColors } from './mapped_colors';
@@ -19,11 +18,7 @@ import { MappedColors } from './mapped_colors';
 const config = new Map<string, any>();
 
 describe('Mapped Colors', () => {
-  const mockUiSettings = coreMock.createSetup().uiSettings;
-  mockUiSettings.get.mockImplementation((a) => config.get(a));
-  mockUiSettings.set.mockImplementation((...a) => config.set(...a) as any);
-
-  const mappedColors = new MappedColors(mockUiSettings);
+  const mappedColors = new MappedColors();
   let previousConfig: any;
 
   beforeEach(() => {

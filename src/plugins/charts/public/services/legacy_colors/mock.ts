@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { LegacyColorsService } from './colors';
 
 const colors = new LegacyColorsService();
-colors.init(coreMock.createSetup().uiSettings);
+colors.init();
 
 export const colorsServiceMock: LegacyColorsService = {
   createColorLookupFunction: jest.fn(colors.createColorLookupFunction.bind(colors)),

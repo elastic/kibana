@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { seedColors } from '../../static/colors';
 import { LegacyColorsService } from './colors';
@@ -17,10 +16,7 @@ const config = new Map<string, any>();
 
 describe('Vislib Color Service', () => {
   const colors = new LegacyColorsService();
-  const mockUiSettings = coreMock.createSetup().uiSettings;
-  mockUiSettings.get.mockImplementation((a) => config.get(a));
-  mockUiSettings.set.mockImplementation((...a) => config.set(...a) as any);
-  colors.init(mockUiSettings);
+  colors.init();
 
   let color: any;
   let previousConfig: any;
