@@ -35,6 +35,8 @@ export const getUsageMetricsHandler = (
       logger.debug(`Retrieving usage metrics`);
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
 
+      // redundant check as we don't allow making requests via UI without data streams,
+      // but it's here to make sure the request body is validated before requesting metrics from auto-ops
       if (!requestDsNames?.length) {
         return errorHandler(
           logger,

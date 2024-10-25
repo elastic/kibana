@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Query, Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
@@ -68,8 +68,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onAddColumn={props.onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
-        query={query}
-        filters={filters}
+        query={props.query}
+        filters={props.filters}
       />
     ),
     [
@@ -77,8 +77,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onAddColumn,
       props.onFilter,
       props.onRemoveColumn,
-      query,
-      filters,
+      props.query,
+      props.filters,
       props.savedSearchId,
     ]
   );

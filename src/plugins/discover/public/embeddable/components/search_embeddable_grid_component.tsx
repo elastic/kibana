@@ -88,6 +88,9 @@ export function SearchEmbeddableGridComponent({
     stateManager.grid
   );
 
+  // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
+  // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
+
   const savedSearchQuery = apiQuery;
   const savedSearchFilters = apiFilters;
 

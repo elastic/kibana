@@ -22,7 +22,7 @@ export const RetryForConflictsAttempts = 2;
 // note: we considered making this random, to help avoid a stampede, but
 // with 1 retry it probably doesn't matter, and adding randomness could
 // make it harder to diagnose issues
-const RetryForConflictsDelay = 250;
+const RetryForConflictsDelay = 100;
 
 // retry an operation if it runs into 409 Conflict's, up to a limit
 export async function retryIfConflicts<T>(

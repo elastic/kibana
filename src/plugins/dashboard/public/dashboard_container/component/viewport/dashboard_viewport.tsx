@@ -57,6 +57,7 @@ export const DashboardViewportComponent = () => {
     viewMode,
     useMargins,
     uuid,
+    fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -66,7 +67,8 @@ export const DashboardViewportComponent = () => {
     dashboardApi.panels$,
     dashboardApi.viewMode,
     dashboardApi.useMargins$,
-    dashboardApi.uuid$
+    dashboardApi.uuid$,
+    dashboardApi.fullScreenMode$
   );
 
   const panelCount = useMemo(() => {
@@ -114,6 +116,7 @@ export const DashboardViewportComponent = () => {
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
+        'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
       {viewMode !== ViewMode.PRINT ? (

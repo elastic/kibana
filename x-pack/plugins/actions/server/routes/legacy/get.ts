@@ -31,6 +31,7 @@ export const getActionRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
         tags: ['oas-tag:connectors'],
       },
