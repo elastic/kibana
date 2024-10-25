@@ -30,7 +30,7 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import type { GetFieldsByTypeFn, SuggestionRawDefinition } from './types';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   TIME_SYSTEM_PARAMS,
@@ -354,7 +354,7 @@ export async function getFieldsOrFunctionsSuggestions(
   types: string[],
   commandName: string,
   optionName: string | undefined,
-  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsByType: GetColumnsByTypeFn,
   {
     functions,
     fields,

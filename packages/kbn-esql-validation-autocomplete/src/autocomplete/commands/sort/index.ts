@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCommand } from '@kbn/esql-ast';
 import { noCaseCompare } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { getFieldsOrFunctionsSuggestions, handleFragment, pushItUpInTheList } from '../../helper';
-import { GetFieldsByTypeFn, SuggestionRawDefinition } from '../../types';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { getSortPos, sortModifierSuggestions } from './helper';
 
 export async function suggest(
   innerText: string,
-  getFieldsByType: GetFieldsByTypeFn,
+  _command: ESQLCommand<'sort'>,
+  getColumnsByType: GetColumnsByTypeFn,
   columnExists: (column: string) => boolean
 ): Promise<SuggestionRawDefinition[]> {
   const prependSpace = (s: SuggestionRawDefinition) => ({ ...s, text: ' ' + s.text });
@@ -105,14 +107,14 @@ export async function suggest(
     }
   }
 
-  const fieldSuggestions = await getFieldsByType('any', [], {
+  const fieldSuggestions = await getColumnsByType('any', [], {
     openSuggestions: true,
   });
   const functionSuggestions = await getFieldsOrFunctionsSuggestions(
     ['any'],
     'sort',
     undefined,
-    getFieldsByType,
+    getColumnsByType,
     {
       functions: true,
       fields: false,

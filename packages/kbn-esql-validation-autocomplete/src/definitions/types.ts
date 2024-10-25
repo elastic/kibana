@@ -8,7 +8,7 @@
  */
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
-import { GetFieldsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
+import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -159,8 +159,8 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
-export interface CommandBaseDefinition {
-  name: string;
+export interface CommandBaseDefinition<CommandName extends string> {
+  name: CommandName;
   alias?: string;
   description: string;
   /**
@@ -169,7 +169,8 @@ export interface CommandBaseDefinition {
   hidden?: boolean;
   suggest?: (
     innerText: string,
-    getFieldsByType: GetFieldsByTypeFn,
+    command: ESQLCommand<CommandName>,
+    getColumnsByType: GetColumnsByTypeFn,
     columnExists: (column: string) => boolean
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */
@@ -190,7 +191,8 @@ export interface CommandBaseDefinition {
   };
 }
 
-export interface CommandOptionsDefinition extends CommandBaseDefinition {
+export interface CommandOptionsDefinition<CommandName extends string>
+  extends CommandBaseDefinition<CommandName> {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
@@ -208,7 +210,8 @@ export interface CommandModeDefinition {
   prefix?: string;
 }
 
-export interface CommandDefinition extends CommandBaseDefinition {
+export interface CommandDefinition<CommandName extends string>
+  extends CommandBaseDefinition<CommandName> {
   /** @deprecated this property will disappear in the future */
   options?: CommandOptionsDefinition[];
   examples: string[];

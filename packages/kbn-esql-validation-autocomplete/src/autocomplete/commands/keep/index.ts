@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findPreviousWord, noCaseCompare } from '../../../shared/helpers';
-import { GetFieldsByTypeFn, SuggestionRawDefinition } from '../../types';
+import type { ESQLCommand } from '@kbn/esql-ast';
+import { findPreviousWord, isColumnItem, noCaseCompare } from '../../../shared/helpers';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { handleFragment } from '../../helper';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
 export async function suggest(
   innerText: string,
-  getFieldsByType: GetFieldsByTypeFn,
+  command: ESQLCommand<'keep'>,
+  getColumnsByType: GetColumnsByTypeFn,
   columnExists: (column: string) => boolean
 ): Promise<SuggestionRawDefinition[]> {
   if (
@@ -25,7 +27,9 @@ export async function suggest(
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const fieldSuggestions = await getFieldsByType('any', [], {});
+  const alreadyDeclaredFields = command.args.filter(isColumnItem).map((arg) => arg.name);
+  const fieldSuggestions = await getColumnsByType('any', alreadyDeclaredFields);
+
   return handleFragment(
     innerText,
     (fragment) => columnExists(fragment),

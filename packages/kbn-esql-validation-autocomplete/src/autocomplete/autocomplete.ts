@@ -18,7 +18,7 @@ import type {
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
-import type { EditorContext, ItemKind, SuggestionRawDefinition, GetFieldsByTypeFn } from './types';
+import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
   getColumnForASTNode,
   getCommandDefinition,
@@ -272,7 +272,7 @@ export async function suggest(
 export function getFieldsByTypeRetriever(
   queryString: string,
   resourceRetriever?: ESQLCallbacks
-): { getFieldsByType: GetFieldsByTypeFn; getFieldsMap: GetFieldsMapFn } {
+): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   return {
     getFieldsByType: async (
@@ -457,7 +457,7 @@ async function getSuggestionsWithinCommand(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: () => Promise<ESQLSourceResult[]>,
-  getFieldsByType: GetFieldsByTypeFn,
+  getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn
@@ -471,7 +471,7 @@ async function getSuggestionsWithinCommand(
   const references = { fields: fieldsMap, variables: anyVariables };
   if (commandDef.suggest) {
     // The new path.
-    return commandDef.suggest(innerText, getFieldsByType, (col) =>
+    return commandDef.suggest(innerText, command, getColumnsByType, (col: string) =>
       Boolean(getColumnByName(col, references))
     );
   } else {
@@ -481,7 +481,7 @@ async function getSuggestionsWithinCommand(
       commands,
       { command, option, node },
       getSources,
-      getFieldsByType,
+      getColumnsByType,
       getFieldsMap,
       getPolicies,
       getPolicyMetadata
@@ -506,7 +506,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: () => Promise<ESQLSourceResult[]>,
-  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn
@@ -1082,7 +1082,7 @@ async function getBuiltinFunctionNextArgument(
   nodeArg: ESQLFunction,
   nodeArgType: string,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>,
-  getFieldsByType: GetFieldsByTypeFn
+  getFieldsByType: GetColumnsByTypeFn
 ) {
   const suggestions = [];
   const isFnComplete = isFunctionArgComplete(nodeArg, references);
@@ -1192,7 +1192,7 @@ async function getFunctionArgsSuggestions(
     option: ESQLCommandOption | undefined;
     node: ESQLFunction;
   },
-  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   fullText: string,
@@ -1421,7 +1421,7 @@ async function getListArgsSuggestions(
     command: ESQLCommand;
     node: ESQLSingleAstItem | undefined;
   },
-  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsByType: GetColumnsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
@@ -1476,7 +1476,7 @@ async function getSettingArgsSuggestions(
     command: ESQLCommand;
     node: ESQLSingleAstItem | undefined;
   },
-  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsByType: GetColumnsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
@@ -1507,7 +1507,7 @@ async function getOptionArgsSuggestions(
     option: ESQLCommandOption;
     node: ESQLSingleAstItem | undefined;
   },
-  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsByType: GetColumnsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
