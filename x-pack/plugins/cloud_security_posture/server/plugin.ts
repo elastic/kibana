@@ -115,7 +115,7 @@ export class CspPlugin
         plugins.fleet.registerExternalCallback(
           'packagePolicyCreate',
           async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
-            const license = await plugins.licensing.refresh();
+            const license = await plugins.licensing.getLicense();
             if (isCspPackage(packagePolicy.package?.name)) {
               if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
                 throw new Error(

@@ -41,7 +41,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
         .map((cell) => {
-          const cellText = $(cell).text();
+          const cellText = $(cell).find('.euiDataGridRowCell__content').text();
           const columnData = $(cell).attr('data-gridcell-column-index');
           const rowData = $(cell).attr('data-gridcell-row-index');
           return { text: cellText, column: Number(columnData) + 1, row: Number(rowData) };

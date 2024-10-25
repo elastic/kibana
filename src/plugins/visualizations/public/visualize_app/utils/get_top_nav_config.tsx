@@ -623,7 +623,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              showSaveModal(saveModal, presentationUtil.ContextProvider);
+              showSaveModal(saveModal);
             },
           },
         ]

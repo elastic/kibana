@@ -216,7 +216,7 @@ $controlMinWidth: $euiSize * 14;
     align-items: center;
     border-radius: $euiBorderRadius;
     font-weight: $euiFontWeightSemiBold;
-    @include euiFormControlDefaultShadow;
+    border: $euiBorderWidthThin solid $euiFormBorderColor;
     background-color: $euiFormInputGroupLabelBackground;
     min-width: $controlMinWidth;
     @include euiFontSizeXS;

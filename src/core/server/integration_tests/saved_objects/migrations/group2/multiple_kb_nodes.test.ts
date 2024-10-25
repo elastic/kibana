@@ -34,7 +34,7 @@ import { delay, parseLogFile } from '../test_utils';
 import '../jest_matchers';
 import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
-const PARALLEL_MIGRATORS = 4;
+const PARALLEL_MIGRATORS = 3;
 type Job<T> = () => Promise<T>;
 
 const getLogFile = (node: number) => join(__dirname, `multiple_kb_nodes_${node}.log`);
@@ -139,7 +139,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
     const typesMap =
       indicesInfo[`${defaultKibanaIndex}_${nextMinor}_001`].mappings?._meta?.indexTypesMap;
-    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'server']); // 'deprecated' no longer present
+    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'recent', 'server']); // 'deprecated' no longer present
     expect(typesMap[kibanaSplitIndex]).toEqual(['basic', 'task']);
   }
 
@@ -239,11 +239,11 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
       )
     ).toEqual([
       {
-        destIndex: `.kibana_migrator_${nextMinor}_001`,
+        destIndex: `${defaultKibanaIndex}_${nextMinor}_001`,
         status: 'patched',
       },
       {
-        destIndex: `.kibana_migrator_split_${nextMinor}_001`,
+        destIndex: `${kibanaSplitIndex}_${nextMinor}_001`,
         status: 'patched',
       },
     ]);

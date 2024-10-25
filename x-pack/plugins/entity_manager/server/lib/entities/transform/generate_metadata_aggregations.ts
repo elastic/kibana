@@ -6,70 +6,28 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { calculateOffset } from '../helpers/calculate_offset';
-
-export function generateHistoryMetadataAggregations(definition: EntityDefinition) {
-  if (!definition.metadata) {
-    return {};
-  }
-  return definition.metadata.reduce((aggs, metadata) => {
-    let agg;
-    if (metadata.aggregation.type === 'terms') {
-      agg = {
-        terms: {
-          field: metadata.source,
-          size: metadata.aggregation.limit,
-        },
-      };
-    } else if (metadata.aggregation.type === 'top_value') {
-      agg = {
-        filter: {
-          exists: {
-            field: metadata.source,
-          },
-        },
-        aggs: {
-          top_value: {
-            top_metrics: {
-              metrics: {
-                field: metadata.source,
-              },
-              sort: metadata.aggregation.sort,
-            },
-          },
-        },
-      };
-    }
-
-    return {
-      ...aggs,
-      [`entity.metadata.${metadata.destination}`]: agg,
-    };
-  }, {});
-}
 
 export function generateLatestMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
     return {};
   }
 
-  const offsetInSeconds = `${calculateOffset(definition)}s`;
-
   return definition.metadata.reduce((aggs, metadata) => {
+    const lookbackPeriod = metadata.aggregation.lookbackPeriod || definition.latest.lookbackPeriod;
     let agg;
     if (metadata.aggregation.type === 'terms') {
       agg = {
         filter: {
           range: {
             '@timestamp': {
-              gte: `now-${offsetInSeconds}`,
+              gte: `now-${lookbackPeriod}`,
             },
           },
         },
         aggs: {
           data: {
             terms: {
-              field: metadata.destination,
+              field: metadata.source,
               size: metadata.aggregation.limit,
             },
           },
@@ -83,13 +41,13 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${metadata.aggregation.lookbackPeriod ?? offsetInSeconds}`,
+                    gte: `now-${lookbackPeriod}`,
                   },
                 },
               },
               {
                 exists: {
-                  field: metadata.destination,
+                  field: metadata.source,
                 },
               },
             ],
@@ -99,7 +57,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
           top_value: {
             top_metrics: {
               metrics: {
-                field: metadata.destination,
+                field: metadata.source,
               },
               sort: metadata.aggregation.sort,
             },

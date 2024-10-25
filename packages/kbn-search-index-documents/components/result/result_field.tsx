@@ -9,17 +9,12 @@
 
 import React from 'react';
 
-import {
-  EuiCodeBlock,
-  EuiIcon,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiText,
-  EuiToken,
-} from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiText, EuiToken } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ResultFieldProps } from './result_types';
+import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
+import { ResultFieldValue } from './result_field_value';
 
 const iconMap: Record<string, string> = {
   boolean: 'tokenBoolean',
@@ -64,9 +59,11 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
   fieldName,
   fieldValue,
-  fieldType,
+  fieldType = 'object',
   isExpanded,
 }) => {
+  const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
+
   return (
     <EuiTableRow className="resultField">
       <EuiTableRowCell className="resultFieldRowCell" width={euiThemeVars.euiSizeL} valign="middle">
@@ -79,31 +76,16 @@ export const ResultField: React.FC<ResultFieldProps> = ({
       </EuiTableRowCell>
       <EuiTableRowCell
         className="resultFieldRowCell"
-        width="25%"
+        width="20%"
         truncateText={!isExpanded}
         valign="middle"
       >
-        <EuiText size="xs">{fieldName}</EuiText>
+        <EuiText size="s" color="default">
+          {fieldName}
+        </EuiText>
       </EuiTableRowCell>
-      <EuiTableRowCell
-        className="resultFieldRowCell"
-        width={euiThemeVars.euiSizeXXL}
-        valign="middle"
-      >
-        <EuiIcon type="sortRight" color="subdued" />
-      </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={!isExpanded} valign="middle">
-        {(fieldType === 'object' ||
-          fieldType === 'array' ||
-          fieldType === 'nested' ||
-          Array.isArray(fieldValue)) &&
-        isExpanded ? (
-          <EuiCodeBlock language="json" overflowHeight="250" transparentBackground>
-            {fieldValue}
-          </EuiCodeBlock>
-        ) : (
-          <EuiText size="xs">{fieldValue}</EuiText>
-        )}
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+        <ResultFieldValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />
       </EuiTableRowCell>
     </EuiTableRow>
   );

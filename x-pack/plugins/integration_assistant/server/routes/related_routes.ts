@@ -18,7 +18,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { ErrorCode } from '../../common/constants';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -94,7 +94,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           return res.ok({ body: RelatedResponse.parse(results) });
         } catch (err) {
           try {
-            handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

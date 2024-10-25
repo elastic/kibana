@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   serverMock,
@@ -23,20 +24,20 @@ const getAllNotesRequest = (query?: GetNotesRequestQuery) =>
     query,
   });
 
-const createMockedNotes = (numberOfNotes: number) => {
-  return Array.from({ length: numberOfNotes }, (_, index) => {
-    return {
-      id: index + 1,
-      timelineId: 'timeline',
-      eventId: 'event',
-      note: `test note ${index}`,
-      created: 1280120812453,
-      createdBy: 'test',
-      updated: 108712801280,
-      updatedBy: 'test',
-    };
-  });
-};
+const createMockedNotes = (
+  numberOfNotes: number,
+  options?: { documentId?: string; savedObjectId?: string }
+) =>
+  Array.from({ length: numberOfNotes }, () => ({
+    id: uuidv4(),
+    timelineId: options?.savedObjectId || 'timeline',
+    eventId: options?.documentId || 'event',
+    note: `test note`,
+    created: 1280120812453,
+    createdBy: 'test',
+    updated: 108712801280,
+    updatedBy: 'test',
+  }));
 
 describe('get notes route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -45,7 +46,7 @@ describe('get notes route', () => {
   let mockGetAllSavedNote: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetModules();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
@@ -61,14 +62,16 @@ describe('get notes route', () => {
     jest.doMock('../../saved_object/notes', () => ({
       getAllSavedNote: mockGetAllSavedNote,
     }));
+
     const getNotesRoute = jest.requireActual('.').getNotesRoute;
     getNotesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   test('should return a list of notes and the count by default', async () => {
+    const mockNotes = createMockedNotes(3);
     mockGetAllSavedNote.mockResolvedValue({
-      notes: createMockedNotes(5),
-      totalCount: 5,
+      notes: mockNotes,
+      totalCount: mockNotes.length,
     });
 
     const response = await server.inject(
@@ -78,8 +81,88 @@ describe('get notes route', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      totalCount: 5,
-      notes: createMockedNotes(5),
+      notes: mockNotes,
+      totalCount: mockNotes.length,
+    });
+  });
+
+  test('should return a list of notes filtered by an array of document ids', async () => {
+    const documentId = 'document1';
+    const mockDocumentNotes = createMockedNotes(3, { documentId });
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockDocumentNotes,
+      totalCount: mockDocumentNotes.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({ documentIds: [documentId] }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({
+      notes: mockDocumentNotes,
+      totalCount: mockDocumentNotes.length,
+    });
+  });
+
+  test('should return a list of notes filtered by a single document id', async () => {
+    const documentId = 'document2';
+    const mockDocumentNotes = createMockedNotes(3, { documentId });
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockDocumentNotes,
+      totalCount: mockDocumentNotes.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({ documentIds: documentId }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({
+      notes: mockDocumentNotes,
+      totalCount: mockDocumentNotes.length,
+    });
+  });
+
+  test('should return a list of notes filtered by an array of saved object ids', async () => {
+    const savedObjectId = 'savedObject1';
+    const mockSavedObjectIdNotes = createMockedNotes(3, { savedObjectId });
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockSavedObjectIdNotes,
+      totalCount: mockSavedObjectIdNotes.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({ savedObjectIds: [savedObjectId] }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({
+      notes: mockSavedObjectIdNotes,
+      totalCount: mockSavedObjectIdNotes.length,
+    });
+  });
+
+  test('should return a list of notes filtered by a single saved object id', async () => {
+    const savedObjectId = 'savedObject2';
+    const mockSavedObjectIdNotes = createMockedNotes(3, { savedObjectId });
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockSavedObjectIdNotes,
+      totalCount: mockSavedObjectIdNotes.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({ savedObjectIds: savedObjectId }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({
+      notes: mockSavedObjectIdNotes,
+      totalCount: mockSavedObjectIdNotes.length,
     });
   });
 });

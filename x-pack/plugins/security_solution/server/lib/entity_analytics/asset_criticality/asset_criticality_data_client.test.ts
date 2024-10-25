@@ -9,6 +9,7 @@ import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mo
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
 
 type MockInternalEsClient = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
@@ -56,6 +57,41 @@ describe('AssetCriticalityDataClient', () => {
               },
               updated_at: {
                 type: 'date',
+              },
+              asset: {
+                properties: {
+                  criticality: {
+                    type: 'keyword',
+                  },
+                },
+              },
+              host: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
+              },
+              user: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
               },
             },
           },
@@ -138,6 +174,93 @@ describe('AssetCriticalityDataClient', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({ ignore_unavailable: true })
+      );
+    });
+  });
+
+  describe('#upsert()', () => {
+    let esClientMock: MockInternalEsClient;
+    let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
+    let subject: AssetCriticalityDataClient;
+
+    beforeEach(() => {
+      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+      loggerMock = loggingSystemMock.createLogger();
+      subject = new AssetCriticalityDataClient({
+        esClient: esClientMock,
+        logger: loggerMock,
+        namespace: 'default',
+        auditLogger: mockAuditLogger,
+      });
+    });
+
+    it('created "host" records in the asset criticality index', async () => {
+      const record: AssetCriticalityUpsert = {
+        idField: 'host.name',
+        idValue: 'host1',
+        criticalityLevel: 'high_impact',
+      };
+
+      await subject.upsert(record);
+
+      expect(esClientMock.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'host.name:host1',
+          index: '.asset-criticality.asset-criticality-default',
+          body: {
+            doc: {
+              id_field: 'host.name',
+              id_value: 'host1',
+              criticality_level: 'high_impact',
+              '@timestamp': expect.any(String),
+              asset: {
+                criticality: 'high_impact',
+              },
+              host: {
+                name: 'host1',
+                asset: {
+                  criticality: 'high_impact',
+                },
+              },
+            },
+            doc_as_upsert: true,
+          },
+        })
+      );
+    });
+
+    it('created "user" records in the asset criticality index', async () => {
+      const record: AssetCriticalityUpsert = {
+        idField: 'user.name',
+        idValue: 'user1',
+        criticalityLevel: 'medium_impact',
+      };
+
+      await subject.upsert(record);
+
+      expect(esClientMock.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'user.name:user1',
+          index: '.asset-criticality.asset-criticality-default',
+          body: {
+            doc: {
+              id_field: 'user.name',
+              id_value: 'user1',
+              criticality_level: 'medium_impact',
+              '@timestamp': expect.any(String),
+              asset: {
+                criticality: 'medium_impact',
+              },
+              user: {
+                name: 'user1',
+                asset: {
+                  criticality: 'medium_impact',
+                },
+              },
+            },
+            doc_as_upsert: true,
+          },
+        })
       );
     });
   });

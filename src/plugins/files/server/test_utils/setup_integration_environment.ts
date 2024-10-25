@@ -38,6 +38,7 @@ export async function setupIntegrationEnvironment() {
   ): Promise<FileJSON> => {
     const result = await request
       .post(root, `/api/files/files/${fileKind}`)
+      .set('x-elastic-internal-origin', 'files-setupIntegrationEnv')
       .send(
         defaults(fileAttrs, {
           name: 'myFile',
@@ -51,6 +52,7 @@ export async function setupIntegrationEnvironment() {
       disposables.push(async () => {
         await request
           .delete(root, `/api/files/files/${fileKind}/${result.body.file.id}`)
+          .set('x-elastic-internal-origin', 'files-setupIntegrationEnv')
           .send()
           .expect(200);
       });
@@ -85,7 +87,10 @@ export async function setupIntegrationEnvironment() {
    */
   const manageES = await startES();
 
-  const root = createRootWithCorePlugins({}, { oss: false });
+  const root = createRootWithCorePlugins(
+    { server: { restrictInternalApis: false } },
+    { oss: false }
+  );
   await root.preboot();
   await root.setup();
 
@@ -115,7 +120,14 @@ export async function setupIntegrationEnvironment() {
   /**
    * Wait for endpoints to be available
    */
-  await pRetry(() => request.get(root, '/api/licensing/info').expect(200), { retries: 5 });
+  await pRetry(
+    () =>
+      request
+        .get(root, '/api/licensing/info')
+        .set('x-elastic-internal-origin', 'files-plugin-server')
+        .expect(200),
+    { retries: 5 }
+  );
 
   return {
     manageES,

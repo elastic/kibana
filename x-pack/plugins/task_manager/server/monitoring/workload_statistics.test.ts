@@ -169,10 +169,6 @@ describe('Workload Statistics Aggregator', () => {
               missing: { field: 'task.schedule.interval' },
               aggs: { taskType: { terms: { size: 3, field: 'task.taskType' } } },
             },
-            ownerIds: {
-              filter: { range: { 'task.startedAt': { gte: 'now-1w/w' } } },
-              aggs: { ownerIds: { cardinality: { field: 'task.ownerId' } } },
-            },
             idleTasks: {
               filter: { term: { 'task.status': 'idle' } },
               aggs: {

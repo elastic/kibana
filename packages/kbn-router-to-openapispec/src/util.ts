@@ -17,7 +17,7 @@ import {
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
-import { KnownParameters } from './type';
+import { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';
@@ -105,13 +105,14 @@ export const getVersionedHeaderParam = (
 });
 
 export const prepareRoutes = <
-  R extends { path: string; options: { access?: 'public' | 'internal' } }
+  R extends { path: string; options: { access?: 'public' | 'internal'; excludeFromOAS?: boolean } }
 >(
   routes: R[],
   filters: GenerateOpenApiDocumentOptionsFilters = {}
 ): R[] => {
   if (Object.getOwnPropertyNames(filters).length === 0) return routes;
   return routes.filter((route) => {
+    if (route.options.excludeFromOAS) return false;
     if (
       filters.excludePathsMatching &&
       filters.excludePathsMatching.some((ex) => route.path.startsWith(ex))
@@ -164,3 +165,17 @@ export const getXsrfHeaderForMethod = (
     },
   ];
 };
+
+export function setXState(
+  availability: RouteConfigOptions<RouteMethod>['availability'],
+  operation: CustomOperationObject
+): void {
+  if (availability) {
+    if (availability.stability === 'experimental') {
+      operation['x-state'] = 'Technical Preview';
+    }
+    if (availability.stability === 'beta') {
+      operation['x-state'] = 'Beta';
+    }
+  }
+}

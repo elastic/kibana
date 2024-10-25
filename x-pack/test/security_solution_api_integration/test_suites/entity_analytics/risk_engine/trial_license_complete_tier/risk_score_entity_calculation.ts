@@ -16,7 +16,6 @@ import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/sec
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteAllRiskScores,
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
@@ -24,8 +23,6 @@ import {
   cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
-  enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -36,7 +33,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
@@ -79,9 +75,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
     this.tags(['esGate']);
-    before(async () => {
-      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
-    });
 
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
@@ -91,6 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       before(async () => {
+        await riskEngineRoutes.cleanUp();
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       });
 
@@ -103,15 +97,12 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await cleanRiskEngine({ kibanaServer, es, log });
       });
 
       afterEach(async () => {
-        await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-
-        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.cleanUp();
       });
 
       it('calculates and persists risk score for entity', async () => {

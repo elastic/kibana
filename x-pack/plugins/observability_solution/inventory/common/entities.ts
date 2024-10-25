@@ -4,17 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
+import {
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_ID,
+  ENTITY_IDENTITY_FIELDS,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from '@kbn/observability-shared-plugin/common';
 import { isRight } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 
-export const entityTypeRt = t.union([
-  t.literal('service'),
-  t.literal('host'),
-  t.literal('container'),
+export const entityColumnIdsRt = t.union([
+  t.literal(ENTITY_DISPLAY_NAME),
+  t.literal(ENTITY_LAST_SEEN),
+  t.literal(ENTITY_TYPE),
+  t.literal('alertsCount'),
 ]);
 
-export type EntityType = t.TypeOf<typeof entityTypeRt>;
+export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
+
+export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
 
 export const MAX_NUMBER_OF_ENTITIES = 500;
 
@@ -23,20 +34,8 @@ export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   dataset: ENTITY_LATEST,
 });
 
-const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
-const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
-const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
-
-export const defaultEntityDefinitions = [
-  BUILTIN_SERVICES_FROM_ECS_DATA,
-  BUILTIN_HOSTS_FROM_ECS_DATA,
-  BUILTIN_CONTAINERS_FROM_ECS_DATA,
-];
-
-export const defaultEntityTypes: EntityType[] = ['service', 'host', 'container'];
-
-const entityArrayRt = t.array(entityTypeRt);
-export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
+const entityArrayRt = t.array(t.string);
+export const entityTypesRt = new t.Type<string[], string, unknown>(
   'entityTypesRt',
   entityArrayRt.is,
   (input, context) => {
@@ -57,3 +56,14 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   },
   (arr) => arr.join()
 );
+
+export interface Entity {
+  [ENTITY_LAST_SEEN]: string;
+  [ENTITY_ID]: string;
+  [ENTITY_TYPE]: string;
+  [ENTITY_DISPLAY_NAME]: string;
+  [ENTITY_DEFINITION_ID]: string;
+  [ENTITY_IDENTITY_FIELDS]: string | string[];
+  alertsCount?: number;
+  [key: string]: any;
+}

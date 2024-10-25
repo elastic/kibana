@@ -22,7 +22,10 @@ import {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -54,6 +57,7 @@ export const DashboardViewportComponent = () => {
     viewMode,
     useMargins,
     uuid,
+    fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -63,7 +67,8 @@ export const DashboardViewportComponent = () => {
     dashboardApi.panels$,
     dashboardApi.viewMode,
     dashboardApi.useMargins$,
-    dashboardApi.uuid$
+    dashboardApi.uuid$,
+    dashboardApi.fullScreenMode$
   );
 
   const panelCount = useMemo(() => {
@@ -111,6 +116,7 @@ export const DashboardViewportComponent = () => {
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
+        'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
       {viewMode !== ViewMode.PRINT ? (
@@ -161,10 +167,7 @@ export const DashboardViewportComponent = () => {
 const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
   const dashboardApi = useDashboardApi();
 
-  const [isFullScreenMode, isEmbeddedExternally] = useBatchedPublishingSubjects(
-    dashboardApi.fullScreenMode$,
-    dashboardApi.embeddedExternally$
-  );
+  const isFullScreenMode = useStateFromPublishingSubject(dashboardApi.fullScreenMode$);
 
   return (
     <>
@@ -173,7 +176,7 @@ const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
         <EuiPortal>
           <ExitFullScreenButton
             onExit={() => dashboardApi.setFullScreenMode(false)}
-            toggleChrome={!isEmbeddedExternally}
+            toggleChrome={!dashboardApi.isEmbeddedExternally}
           />
         </EuiPortal>
       )}

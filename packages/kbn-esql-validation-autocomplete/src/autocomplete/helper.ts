@@ -53,23 +53,6 @@ export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: num
 }
 
 /**
- * Given a function signature, returns the parameter at the given position.
- *
- * Takes into account variadic functions (minParams), returning the last
- * parameter if the position is greater than the number of parameters.
- *
- * @param signature
- * @param position
- * @returns
- */
-export function getParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
-}
-
-/**
  * Given a function signature, returns the parameter at the given position, even if it's undefined or null
  *
  * @param {params}
@@ -86,9 +69,7 @@ export function strictlyGetParamAtPosition(
 export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.
-  return commands.length === 1 && ['from', 'row', 'show'].includes(commands[0].name)
-    ? ''
-    : queryString;
+  return commands.length === 1 && ['row', 'show'].includes(commands[0].name) ? '' : queryString;
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {

@@ -32,6 +32,7 @@ import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -167,7 +168,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
 interface PluginsSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  cloud?: { isCloudEnabled: boolean };
+  cloud?: CloudSetup;
   actions: ActionsPublicPluginSetup;
 }
 
@@ -305,6 +306,7 @@ export class Plugin
           ...coreStart,
           actions: plugins.actions,
           dashboard: pluginsStart.dashboard,
+          cloud: plugins.cloud,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,

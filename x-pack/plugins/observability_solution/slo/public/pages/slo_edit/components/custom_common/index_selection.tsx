@@ -16,6 +16,8 @@ import { SloPublicPluginsStart } from '../../../..';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
 
+const BTN_MAX_WIDTH = 515;
+
 export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
 const INDEX_FIELD = 'indicator.params.index';
 const TIMESTAMP_FIELD = 'indicator.params.timestampField';
@@ -67,7 +69,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
               color: fieldState.invalid ? 'danger' : 'primary',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
-              style: { width: '100%', maxWidth: '100%' },
+              style: { width: '100%', maxWidth: BTN_MAX_WIDTH },
             }}
             onChangeDataView={(newId: string) => {
               setValue(

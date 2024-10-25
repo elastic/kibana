@@ -57,7 +57,7 @@ const LogsApp: React.FC<{
   storage: Storage;
   theme$: AppMountParameters['theme$'];
 }> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
-  const uiCapabilities = core.application.capabilities;
+  const { logs, discover, fleet } = core.application.capabilities;
 
   return (
     <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
@@ -74,19 +74,21 @@ const LogsApp: React.FC<{
             toastsService={core.notifications.toasts}
           >
             <Routes>
-              <Route
-                path="/"
-                exact
-                render={() => {
-                  plugins.share.url.locators
-                    .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-                    ?.navigate({});
+              {Boolean(discover?.show && fleet?.read) && (
+                <Route
+                  path="/"
+                  exact
+                  render={() => {
+                    plugins.share.url.locators
+                      .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                      ?.navigate({});
 
-                  return null;
-                }}
-              />
+                    return null;
+                  }}
+                />
+              )}
               <Route path="/link-to" component={LinkToLogsPage} />
-              {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
+              {logs?.show && <Route path="/" component={LogsPage} />}
             </Routes>
           </KbnUrlStateStorageFromRouterProvider>
         </Router>

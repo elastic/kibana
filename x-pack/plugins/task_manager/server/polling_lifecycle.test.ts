@@ -91,6 +91,7 @@ describe('TaskPollingLifecycle', () => {
       request_timeouts: {
         update_by_query: 1000,
       },
+      auto_calculate_default_ech_capacity: false,
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
@@ -220,6 +221,29 @@ describe('TaskPollingLifecycle', () => {
       mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockClear();
       clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
+    });
+
+    test('stops polling if stop() is called', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        elasticsearchAndSOAvailability$,
+        ...taskManagerOpts,
+        config: {
+          ...taskManagerOpts.config,
+          poll_interval: 100,
+        },
+      });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(0);
+      elasticsearchAndSOAvailability$.next(true);
+
+      clock.tick(50);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
+
+      pollingLifecycle.stop();
+
+      clock.tick(100);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
     });
 
     test('restarts polling once the ES and SavedObjects services become available again', () => {
@@ -515,9 +539,10 @@ describe('TaskPollingLifecycle', () => {
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
       );
 
+      expect(pollingCycleEvent!.event.tag).toEqual('err');
       expect(pollingCycleEvent!.event).toEqual({
         tag: 'err',
-        error: new Error(`Failed to poll for work: Error: booo`),
+        error: new Error(`Failed to poll for work: booo`),
       });
     });
 

@@ -7,7 +7,7 @@
 
 import { partition, uniqBy } from 'lodash';
 import React from 'react';
-import type { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -24,6 +24,7 @@ import {
   getAggregateQueryMode,
   ExecutionContextSearch,
   getLanguageDisplayName,
+  isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
@@ -145,6 +146,7 @@ import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { TextBasedPersistedState } from '../datasources/text_based/types';
+import { getLongMessage } from '../user_messages_utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -250,7 +252,7 @@ export interface ViewUnderlyingDataArgs {
 }
 
 function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; canEdit: boolean }) {
-  const showMore = errors.length > 1;
+  const firstError = errors.at(0);
   const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
     <div className="lnsEmbeddedError">
@@ -260,10 +262,10 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
         data-test-subj="embeddable-lens-failure"
         body={
           <>
-            {errors.length ? (
+            {firstError ? (
               <>
-                <p>{errors[0].longMessage as React.ReactNode}</p>
-                {showMore && !canFixInLens ? (
+                <p>{getLongMessage(firstError)}</p>
+                {errors.length > 1 && !canFixInLens ? (
                   <p>
                     <FormattedMessage
                       id="xpack.lens.embeddable.moreErrors"
@@ -1032,6 +1034,8 @@ export class Embeddable
     this.activeData = newActiveData;
 
     this.renderUserMessages();
+
+    this.loadViewUnderlyingDataArgs();
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -1406,7 +1410,13 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
-    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
+    // if the embeddable is located in an app where there is the Unified search bar with the ES|QL editor, then use this query
+    // otherwise use the query from the saved object
+    let esqlQuery: AggregateQuery | Query | undefined;
+    if (this.isTextBasedLanguage()) {
+      const query = this.deps.data.query.queryString.getQuery();
+      esqlQuery = isOfAggregateQueryType(query) ? query : this.savedVis?.state.query;
+    }
 
     eventHandler?.({
       ...event.data,
@@ -1472,7 +1482,7 @@ export class Embeddable
     }
   }
 
-  private async loadViewUnderlyingDataArgs(): Promise<boolean> {
+  private async loadViewUnderlyingDataArgs(): Promise<void> {
     if (
       !this.savedVis ||
       !this.activeData ||
@@ -1481,13 +1491,15 @@ export class Embeddable
       !this.activeVisualization ||
       !this.activeVisualizationState
     ) {
-      return false;
+      this.canViewUnderlyingData$.next(false);
+      return;
     }
 
     const mergedSearchContext = this.getMergedSearchContext();
 
     if (!mergedSearchContext.timeRange) {
-      return false;
+      this.canViewUnderlyingData$.next(false);
+      return;
     }
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
@@ -1509,7 +1521,8 @@ export class Embeddable
     if (loaded) {
       this.viewUnderlyingDataArgs = viewUnderlyingDataArgs;
     }
-    return loaded;
+
+    this.canViewUnderlyingData$.next(loaded);
   }
 
   /**
@@ -1521,9 +1534,7 @@ export class Embeddable
     return this.viewUnderlyingDataArgs;
   }
 
-  public canViewUnderlyingData() {
-    return this.loadViewUnderlyingDataArgs();
-  }
+  public canViewUnderlyingData$ = new BehaviorSubject<boolean>(false);
 
   async initializeOutput() {
     if (!this.savedVis) {

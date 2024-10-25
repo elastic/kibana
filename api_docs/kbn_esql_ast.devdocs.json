@@ -489,6 +489,67 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.BasicPrettyPrinter.simplifyMultiplicationByOne",
+            "type": "Function",
+            "tags": [],
+            "label": "simplifyMultiplicationByOne",
+            "description": [],
+            "signature": [
+              "(node: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLSingleAstItem",
+                "text": "ESQLSingleAstItem"
+              },
+              ", minusCount?: number) => string | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.BasicPrettyPrinter.simplifyMultiplicationByOne.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLSingleAstItem",
+                    "text": "ESQLSingleAstItem"
+                  }
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.BasicPrettyPrinter.simplifyMultiplicationByOne.$2",
+                "type": "number",
+                "tags": [],
+                "label": "minusCount",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.BasicPrettyPrinter.visitor",
             "type": "Object",
             "tags": [],
@@ -17667,10 +17728,6 @@
               {
                 "plugin": "@kbn/esql-validation-autocomplete",
                 "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-validation-autocomplete",
-                "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts"
               }
             ]
           }

@@ -7,44 +7,67 @@
 
 import { EuiRange, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   MAX_LATEST_ALERTS,
   MIN_LATEST_ALERTS,
   TICK_INTERVAL,
-} from '../alerts/settings/alerts_settings';
+} from '../assistant/settings/alerts_settings/alerts_settings';
 import { KnowledgeBaseConfig } from '../assistant/types';
 import { ALERTS_RANGE } from './translations';
 
+export type SingleRangeChangeEvent =
+  | React.ChangeEvent<HTMLInputElement>
+  | React.KeyboardEvent<HTMLInputElement>
+  | React.MouseEvent<HTMLButtonElement>;
+
 interface Props {
-  knowledgeBase: KnowledgeBaseConfig;
-  setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   compressed?: boolean;
+  maxAlerts?: number;
+  minAlerts?: number;
+  onChange?: (e: SingleRangeChangeEvent) => void;
+  knowledgeBase?: KnowledgeBaseConfig;
+  setUpdatedKnowledgeBaseSettings?: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
+  step?: number;
+  value: string | number;
 }
 
 const MAX_ALERTS_RANGE_WIDTH = 649; // px
 
 export const AlertsRange: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, compressed = true }) => {
+  ({
+    compressed = true,
+    knowledgeBase,
+    maxAlerts = MAX_LATEST_ALERTS,
+    minAlerts = MIN_LATEST_ALERTS,
+    onChange,
+    setUpdatedKnowledgeBaseSettings,
+    step = TICK_INTERVAL,
+    value,
+  }) => {
     const inputRangeSliderId = useGeneratedHtmlId({ prefix: 'inputRangeSlider' });
+
+    const handleOnChange = useCallback(
+      (e: SingleRangeChangeEvent) => {
+        if (knowledgeBase != null && setUpdatedKnowledgeBaseSettings != null) {
+          setUpdatedKnowledgeBaseSettings({
+            ...knowledgeBase,
+            latestAlerts: Number(e.currentTarget.value),
+          });
+        }
+
+        if (onChange != null) {
+          onChange(e);
+        }
+      },
+      [knowledgeBase, onChange, setUpdatedKnowledgeBaseSettings]
+    );
 
     return (
       <EuiRange
         aria-label={ALERTS_RANGE}
+        fullWidth
         compressed={compressed}
-        data-test-subj="alertsRange"
-        id={inputRangeSliderId}
-        max={MAX_LATEST_ALERTS}
-        min={MIN_LATEST_ALERTS}
-        onChange={(e) =>
-          setUpdatedKnowledgeBaseSettings({
-            ...knowledgeBase,
-            latestAlerts: Number(e.currentTarget.value),
-          })
-        }
-        showTicks
-        step={TICK_INTERVAL}
-        value={knowledgeBase.latestAlerts}
         css={css`
           max-inline-size: ${MAX_ALERTS_RANGE_WIDTH}px;
           & .euiRangeTrack {
@@ -52,6 +75,14 @@ export const AlertsRange: React.FC<Props> = React.memo(
             margin-inline-end: 0;
           }
         `}
+        data-test-subj="alertsRange"
+        id={inputRangeSliderId}
+        max={maxAlerts}
+        min={minAlerts}
+        onChange={handleOnChange}
+        showTicks
+        step={step}
+        value={value}
       />
     );
   }

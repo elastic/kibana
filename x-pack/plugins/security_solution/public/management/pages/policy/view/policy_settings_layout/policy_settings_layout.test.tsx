@@ -21,7 +21,8 @@ import {
   getPolicySettingsFormTestSubjects,
   setMalwareMode,
 } from '../policy_settings_form/mocks';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
 import { waitFor, cleanup } from '@testing-library/react';
 import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';

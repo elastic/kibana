@@ -76,6 +76,11 @@ export interface LicensingPluginStart {
   license$: Observable<ILicense>;
 
   /**
+   * Retrieves the {@link ILicense | licensing information}
+   */
+  getLicense(): Promise<ILicense>;
+
+  /**
    * Triggers licensing information re-fetch.
    */
   refresh(): Promise<ILicense>;

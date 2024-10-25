@@ -66,6 +66,12 @@ const HOSTS = [
     cpuValue: 0.1,
   },
 ];
+
+const HOSTS_WITHOUT_DATA = [
+  {
+    hostName: 'host-7',
+  },
+];
 interface QueryParams {
   name?: string;
   alertMetric?: string;
@@ -398,8 +404,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickProcessesTab();
             const processesTotalValue =
               await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-            const processValue = await processesTotalValue.getVisibleText();
-            expect(processValue).to.eql('N/A');
+            await retry.tryForTime(5000, async () => {
+              expect(await processesTotalValue.getVisibleText()).to.eql('N/A');
+            });
           });
         });
       });
@@ -504,8 +511,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render processes tab and with Total Value summary', async () => {
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
+          await retry.tryForTime(5000, async () => {
+            expect(await processesTotalValue.getVisibleText()).to.eql('313');
+          });
         });
 
         it('should expand processes table row', async () => {
@@ -619,6 +627,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
           });
+        });
+      });
+    });
+
+    describe('#Asset Type: host without metrics', () => {
+      before(async () => {
+        await synthEsClient.index(
+          generateHostData({
+            from: DATE_WITH_HOSTS_DATA_FROM,
+            to: DATE_WITH_HOSTS_DATA_TO,
+            hosts: HOSTS_WITHOUT_DATA,
+          })
+        );
+
+        await navigateToNodeDetails('host-1', 'host', {
+          name: 'host-1',
+        });
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      after(() => synthEsClient.clean());
+
+      describe('Overview Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickOverviewTab();
+        });
+
+        [
+          { metric: 'cpuUsage' },
+          { metric: 'normalizedLoad1m' },
+          { metric: 'memoryUsage' },
+          { metric: 'diskUsage' },
+        ].forEach(({ metric }) => {
+          it(`${metric} tile should not be shown`, async () => {
+            await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
+          });
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
+        });
+      });
+
+      describe('Metrics Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickMetricsTab();
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
+        });
+      });
+
+      describe('Processes Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickProcessesTab();
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
         });
       });
     });

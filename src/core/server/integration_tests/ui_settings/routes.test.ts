@@ -17,6 +17,7 @@ describe('ui settings service', () => {
       root = createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
 
       await root.preboot();
@@ -104,6 +105,7 @@ describe('ui settings service', () => {
       root = createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
 
       await root.preboot();

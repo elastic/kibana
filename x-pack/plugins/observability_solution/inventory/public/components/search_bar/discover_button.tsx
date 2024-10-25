@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 
-import { useKibana } from '../../hooks/use_kibana';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
-import { EntityColumnIds } from '../entities_grid';
-import { defaultEntityDefinitions } from '../../../common/entities';
+} from '@kbn/observability-shared-plugin/common';
+import { ENTITIES_LATEST_ALIAS, EntityColumnIds } from '../../../common/entities';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
+import { useKibana } from '../../hooks/use_kibana';
 
 const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
 
@@ -44,7 +43,7 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
   if (entityDefinitionField) {
     const entityDefinitionFilter = buildPhrasesFilter(
       entityDefinitionField!,
-      defaultEntityDefinitions,
+      [ENTITIES_LATEST_ALIAS],
       dataView
     );
     filters.push(entityDefinitionFilter);

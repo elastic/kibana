@@ -78,6 +78,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
+    ebtManager,
+    fieldsMetadata,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -154,6 +156,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     settings: grid,
   });
 
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
+  );
+
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
   useEffect(() => {
@@ -175,9 +193,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
+      void ebtManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
   );
 
   const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
@@ -222,8 +245,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
+      void ebtManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
     },
-    [data.query.queryString, query, trackUiMetric]
+    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
@@ -274,8 +302,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       return undefined;
     }
 
-    return () => onAddColumn(draggingFieldName);
-  }, [onAddColumn, draggingFieldName, currentColumns]);
+    return () => onAddColumnWithTracking(draggingFieldName);
+  }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
@@ -396,10 +424,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarPanel={
               <SidebarMemoized
                 documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumn}
+                onAddField={onAddColumnWithTracking}
+                onRemoveField={onRemoveColumnWithTracking}
                 columns={currentColumns}
                 onAddFilter={onFilter}
-                onRemoveField={onRemoveColumn}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
                 selectedDataView={dataView}
                 trackUiMetric={trackUiMetric}

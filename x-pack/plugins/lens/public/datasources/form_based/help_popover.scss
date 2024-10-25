@@ -3,9 +3,9 @@
 }
 
 .lnsHelpPopover__content {
-  @include euiYScrollWithShadows;
   max-height: 40vh;
   padding: $euiSizeM;
+  @include euiYScrollWithShadows;
 }
 
 .lnsHelpPopover__buttonIcon {

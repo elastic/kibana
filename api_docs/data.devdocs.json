@@ -8074,10 +8074,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -8088,6 +8084,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -10195,7 +10195,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/public/index.ts",
             "deprecated": false,
@@ -17526,7 +17526,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/server/index.ts",
             "deprecated": false,
@@ -22972,7 +22972,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
         ],
         "path": "src/plugins/data/common/exports/export_csv.tsx",
         "deprecated": false,
@@ -23004,7 +23004,7 @@
             "id": "def-common.datatableToCSV.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }",
+            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }",
             "description": [],
             "signature": [
               "CSVOptions"
@@ -24603,10 +24603,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -24617,6 +24613,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",

@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     loadTestFile(require.resolve('./_root_profile'));
     loadTestFile(require.resolve('./_data_source_profile'));
+    loadTestFile(require.resolve('./_telemetry'));
     loadTestFile(require.resolve('./extensions/_get_row_indicator_provider'));
     loadTestFile(require.resolve('./extensions/_get_row_additional_leading_controls'));
     loadTestFile(require.resolve('./extensions/_get_doc_viewer'));

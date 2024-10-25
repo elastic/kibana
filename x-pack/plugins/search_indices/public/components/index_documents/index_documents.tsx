@@ -8,25 +8,23 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer } from '@elastic/eui';
-import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import { AddDocumentsCodeExample } from './add_documents_code_example';
-
-import { DEFAULT_PAGE_SIZE } from './constants';
+import { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { DocumentList } from './document_list';
 
 interface IndexDocumentsProps {
   indexName: string;
+  indexDocuments?: IndexDocumentsType;
+  isInitialLoading: boolean;
 }
 
-export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ indexName }) => {
-  const { data: indexDocuments, isInitialLoading } = useIndexDocumentSearch(indexName, {
-    pageSize: DEFAULT_PAGE_SIZE,
-    pageIndex: 0,
-  });
-
+export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
+  indexName,
+  indexDocuments,
+  isInitialLoading,
+}) => {
   const { data: mappingData } = useIndexMapping(indexName);
-
   const docs = indexDocuments?.results?.data ?? [];
   const mappingProperties = mappingData?.mappings?.properties ?? {};
 

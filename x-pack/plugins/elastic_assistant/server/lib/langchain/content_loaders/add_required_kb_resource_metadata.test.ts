@@ -7,9 +7,10 @@
 
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { mockExampleQueryDocsFromDirectoryLoader } from '../../../__mocks__/docs_from_directory_loader';
+import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
 
 describe('addRequiredKbResourceMetadata', () => {
-  const kbResource = 'esql';
+  const kbResource = SECURITY_LABS_RESOURCE;
 
   test('it includes the original metadata properties', () => {
     const EXPECTED_ADDITIONAL_KEYS_COUNT = 2; // two keys, `kbResource` and `required`
@@ -17,6 +18,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc, i) => {
@@ -31,6 +33,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc) => {
@@ -42,6 +45,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc) => {

@@ -185,6 +185,12 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+  // This is debugging code, helping you to understand which messages are sent to the data observables
+  // Adding a debugger in the functions can be helpful to understand what triggers a message
+  // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
+  // dataSubjects.documents$.subscribe((msg) => addLog('dataSubjects.documents$', msg));
+  // dataSubjects.totalHits$.subscribe((msg) => addLog('dataSubjects.totalHits$', msg););
+  // Add window.ELASTIC_DISCOVER_LOGGER = 'debug' to see messages in console
 
   let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   /**
@@ -275,25 +281,33 @@ export function getDataStateContainer({
               const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-
-              if (dataView) {
-                const stateUpdate = getDefaultProfileState({
-                  profilesManager,
-                  resetDefaultProfileState,
-                  defaultColumns,
-                  dataView,
-                  esqlQueryColumns,
+              const clearResetProfileState = () => {
+                internalStateContainer.transitions.setResetDefaultProfileState({
+                  columns: false,
+                  rowHeight: false,
                 });
+              };
 
-                if (stateUpdate) {
-                  await appStateContainer.replaceUrlState(stateUpdate);
-                }
+              if (!dataView) {
+                clearResetProfileState();
+                return;
               }
 
-              internalStateContainer.transitions.setResetDefaultProfileState({
-                columns: false,
-                rowHeight: false,
+              const stateUpdate = getDefaultProfileState({
+                profilesManager,
+                resetDefaultProfileState,
+                defaultColumns,
+                dataView,
+                esqlQueryColumns,
               });
+
+              if (!stateUpdate) {
+                clearResetProfileState();
+                return;
+              }
+
+              await appStateContainer.replaceUrlState(stateUpdate);
+              clearResetProfileState();
             }
           );
 

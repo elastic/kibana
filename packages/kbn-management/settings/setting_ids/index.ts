@@ -142,8 +142,10 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
+export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
+export const OBSERVABILITY_ENABLE_LOGS_STREAM = 'observability:enableLogsStream';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
@@ -177,16 +179,14 @@ export const SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID = 'securitySolution:rulesT
 export const SECURITY_SOLUTION_ENABLE_NEWS_FEED_ID = 'securitySolution:enableNewsFeed';
 export const SECURITY_SOLUTION_NEWS_FEED_URL_ID = 'securitySolution:newsFeedUrl';
 export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipReputationLinks';
-export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
-/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
-export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
-  'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
+export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
+  'securitySolution:enableVisualizationsInFlyout' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

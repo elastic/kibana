@@ -42,13 +42,14 @@ import { coreServices, dataService, embeddableService } from '../../../services/
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
-import { DashboardPublicState, UnsavedPanelState } from '../../types';
+import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
-import { DashboardCreationOptions } from '../dashboard_container_factory';
+import type { DashboardCreationOptions } from '../../..';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
+import { InitialComponentState } from '../../../dashboard_api/get_dashboard_api';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -100,17 +101,16 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Build the dashboard container.
   // --------------------------------------------------------------------------------------
-  const initialComponentState: DashboardPublicState = {
+  const initialComponentState: InitialComponentState = {
+    anyMigrationRun: savedObjectResult.anyMigrationRun ?? false,
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
     lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
       ...DEFAULT_DASHBOARD_INPUT,
       id: input.id,
     },
-    hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
-    animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
-    hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
-    managed: savedObjectResult.managed,
     lastSavedId: savedObjectId,
+    managed: savedObjectResult.managed ?? false,
+    fullScreenMode: creationOptions?.fullScreenMode ?? false,
   };
 
   const dashboardContainer = new DashboardContainer(
@@ -473,7 +473,7 @@ export const initializeDashboard = async ({
   // Start animating panel transforms 500 ms after dashboard is created.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) =>
-    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
+    setTimeout(() => dashboard.setAnimatePanelTransforms(true), 500)
   );
 
   // --------------------------------------------------------------------------------------

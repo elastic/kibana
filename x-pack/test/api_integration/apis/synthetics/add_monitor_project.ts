@@ -1814,7 +1814,10 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({
+                filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}`,
+                internal: true,
+              })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
@@ -2036,7 +2039,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev'",
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev|dev2'",
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

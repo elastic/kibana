@@ -172,44 +172,6 @@ export function defineRoutes({
     })
   );
 
-  router.post(
-    {
-      path: APIRoutes.POST_API_KEY,
-      validate: {
-        body: schema.object({
-          name: schema.string(),
-          expiresInDays: schema.number(),
-          indices: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    errorHandler(logger)(async (context, request, response) => {
-      const { name, expiresInDays, indices } = request.body;
-      const { client } = (await context.core).elasticsearch;
-
-      const apiKey = await client.asCurrentUser.security.createApiKey({
-        name,
-        expiration: `${expiresInDays}d`,
-        role_descriptors: {
-          [`playground-${name}-role`]: {
-            cluster: [],
-            indices: [
-              {
-                names: indices,
-                privileges: ['read'],
-              },
-            ],
-          },
-        },
-      });
-
-      return response.ok({
-        body: { apiKey },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
   // SECURITY: We don't apply any authorization tags to this route because all actions performed
   // on behalf of the user making the request and governed by the user's own cluster privileges.
   router.get(
@@ -301,6 +263,49 @@ export function defineRoutes({
           });
         }
 
+        throw e;
+      }
+    })
+  );
+  router.post(
+    {
+      path: APIRoutes.GET_INDEX_MAPPINGS,
+      validate: {
+        body: schema.object({
+          indices: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { indices } = request.body;
+
+      try {
+        if (indices.length === 0) {
+          return response.badRequest({
+            body: {
+              message: 'Indices cannot be empty',
+            },
+          });
+        }
+
+        const mappings = await client.asCurrentUser.indices.getMapping({
+          index: indices,
+        });
+        return response.ok({
+          body: {
+            mappings,
+          },
+        });
+      } catch (e) {
+        logger.error('Failed to get index mappings', e);
+        if (typeof e === 'object' && e.message) {
+          return response.badRequest({
+            body: {
+              message: e.message,
+            },
+          });
+        }
         throw e;
       }
     })

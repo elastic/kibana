@@ -21,7 +21,7 @@
             "section": "def-public.FieldCategoriesProps",
             "text": "FieldCategoriesProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
         "deprecated": false,
@@ -70,7 +70,7 @@
             "section": "def-public.FieldCategoryProps",
             "text": "FieldCategoryProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_category/category.tsx",
         "deprecated": false,
@@ -131,14 +131,14 @@
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
             "id": "def-public.FieldCategoryKibanaProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,7 +152,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -177,7 +177,7 @@
             "section": "def-public.FieldRowProviderProps",
             "text": "FieldRowProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_category/services.tsx",
         "deprecated": false,
@@ -401,7 +401,7 @@
             "section": "def-public.ClearQueryLinkProps",
             "text": "ClearQueryLinkProps"
           },
-          ", \"onClearQuery\" | \"fieldCount\">"
+          ", \"fieldCount\" | \"onClearQuery\">"
         ],
         "path": "packages/kbn-management/settings/components/field_category/category.tsx",
         "deprecated": false,
@@ -493,7 +493,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-management/settings/components/field_category/services.tsx",
             "deprecated": false,

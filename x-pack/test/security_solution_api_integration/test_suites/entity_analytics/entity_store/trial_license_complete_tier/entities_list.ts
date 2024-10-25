@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
 
-  describe('@ess @serverless @skipInServerlessMKI Entity store - Entities list API', () => {
+  describe('@ess @skipInServerlessMKI Entity store - Entities list API', () => {
     describe('when the entity store is disable', () => {
       it("should return response with success status when the index doesn't exist", async () => {
         const { body } = await securitySolutionApi.listEntities({

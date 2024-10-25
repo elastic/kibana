@@ -36,11 +36,13 @@ import { ExperimentalFeaturesService } from '../../../../services';
 import type { DetailViewPanelName } from '.';
 import { Detail } from '.';
 
+// Default timeout for tests is 5s, increasing to 8s due to long running requests leading to frequent flakyness
+const TESTS_TIMEOUT = 8000;
+
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-// Failing: See https://github.com/elastic/kibana/issues/192999
-describe.skip('when on integration detail', () => {
+describe('When on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;
@@ -75,7 +77,7 @@ describe.skip('when on integration detail', () => {
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
-    });
+    }, TESTS_TIMEOUT);
 
     it('should display agent policy usage count', async () => {
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
@@ -113,7 +115,7 @@ describe.skip('when on integration detail', () => {
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
-    });
+    }, TESTS_TIMEOUT);
 
     it('should NOT display agent policy usage count', async () => {
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
@@ -151,7 +153,7 @@ describe.skip('when on integration detail', () => {
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
-    });
+    }, TESTS_TIMEOUT);
 
     it('should NOT display agent policy usage count', async () => {
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
@@ -178,7 +180,7 @@ describe.skip('when on integration detail', () => {
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
-    });
+    }, TESTS_TIMEOUT);
 
     it('should show overview and settings tabs', () => {
       const tabs: DetailViewPanelName[] = ['overview', 'settings'];
@@ -284,7 +286,7 @@ describe.skip('when on integration detail', () => {
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
-    });
+    }, TESTS_TIMEOUT);
 
     afterEach(() => {
       // @ts-ignore
@@ -314,7 +316,7 @@ describe.skip('when on integration detail', () => {
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
       await act(() => mockedApi.waitForApi());
-    });
+    }, TESTS_TIMEOUT);
 
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;

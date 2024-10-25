@@ -224,12 +224,10 @@ function renderTestCases(
       expect(getThemeStylesheetPathsMock).toHaveBeenCalledTimes(2);
       expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: true,
-        themeVersion: 'v8',
         baseHref: '/mock-server-basepath',
       });
       expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: false,
-        themeVersion: 'v8',
         baseHref: '/mock-server-basepath',
       });
     });
@@ -380,7 +378,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -405,7 +402,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -428,7 +424,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -451,7 +446,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -474,7 +468,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -497,7 +490,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -520,7 +512,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });

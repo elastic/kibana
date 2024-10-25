@@ -28,7 +28,6 @@ export { popularizeField } from './src/utils/popularize_field';
 
 export { useColumns, type UseColumnsProps } from './src/hooks/use_data_grid_columns';
 export { OPEN_DETAILS, SELECT_ROW } from './src/components/data_table_columns'; // TODO: deprecate?
-export { DataTableRowControl } from './src/components/data_table_row_control';
 
 export type {
   UnifiedDataTableRenderCustomToolbar,

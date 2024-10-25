@@ -21,7 +21,7 @@ import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for'
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha1');
+  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
   hash.update(srcBuffer);
   return hash.digest('hex');
 }

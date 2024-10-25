@@ -55,13 +55,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { id } = response.body;
 
-      const savedObject = await kibanaServer.savedObjects.find({
-        type: SO_SLO_TYPE,
+      await retry.tryForTime(10000, async () => {
+        const savedObject = await kibanaServer.savedObjects.find({
+          type: SO_SLO_TYPE,
+        });
+
+        expect(savedObject.saved_objects.length).eql(1);
+
+        expect(savedObject.saved_objects[0].attributes.id).eql(id);
       });
-
-      expect(savedObject.saved_objects.length).eql(1);
-
-      expect(savedObject.saved_objects[0].attributes.id).eql(id);
 
       await retry.tryForTime(300 * 1000, async () => {
         // expect summary and rollup data to exist

@@ -114,7 +114,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       publicPathMap,
     });
 
-    const hash = createHash('sha1');
+    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
     hash.update(body);
     const etag = hash.digest('hex');
 

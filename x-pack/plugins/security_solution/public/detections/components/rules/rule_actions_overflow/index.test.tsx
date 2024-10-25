@@ -274,25 +274,6 @@ describe('RuleActionsOverflow', () => {
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
 
-    test('it does not show "Manual run" action item when feature flag "manualRuleRunEnabled" is set to false', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-
-      const { getByTestId } = render(
-        <RuleActionsOverflow
-          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
-          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-          rule={mockRule('id')}
-          userHasPermissions
-          canDuplicateRuleWithActions={true}
-          confirmDeletion={() => Promise.resolve(true)}
-        />,
-        { wrapper: TestProviders }
-      );
-      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-
-      expect(getByTestId('rules-details-menu-panel')).not.toHaveTextContent('Manual run');
-    });
-
     test('it calls telemetry.reportManualRuleRunOpenModal when rules-details-manual-rule-run is clicked', async () => {
       const { getByTestId } = render(
         <RuleActionsOverflow

@@ -33,6 +33,7 @@ export enum AdministrationSubTab {
   blocklist = 'blocklist',
   responseActionsHistory = 'response_actions_history',
   protectionUpdates = 'protection_updates',
+  notes = 'notes',
 }
 
 /**
