@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
@@ -26,6 +26,7 @@ import {
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
+  isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
@@ -81,9 +82,13 @@ export function useSetupTechnology({
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
-  const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
-    SetupTechnology.AGENT_BASED
-  );
+  const defaultSetupTechnology = useMemo(() => {
+    return isOnlyAgentlessIntegration(packageInfo)
+      ? SetupTechnology.AGENTLESS
+      : SetupTechnology.AGENT_BASED;
+  }, [packageInfo]);
+  const [selectedSetupTechnology, setSelectedSetupTechnology] =
+    useState<SetupTechnology>(defaultSetupTechnology);
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(() => {
     const agentless = generateNewAgentPolicyWithDefaults({
       inactivity_timeout: 3600,
@@ -137,6 +142,13 @@ export function useSetupTechnology({
     setSelectedSetupTechnology,
     updatePackagePolicy,
   ]);
+
+  useEffect(() => {
+    if (isEditPage) {
+      return;
+    }
+    setSelectedSetupTechnology(defaultSetupTechnology);
+  }, [packageInfo, defaultSetupTechnology, isEditPage]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
@@ -223,3 +235,4 @@ const getAdditionalAgentlessPolicyInfo = (
           : [],
       };
 };
+
