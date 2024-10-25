@@ -167,29 +167,23 @@ export const suggestionsApi = ({
   }
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  if (newSuggestions.length > 1 && preferredChartType && !preferredVisAttributes) {
+  if (newSuggestions.length > 1 && preferredChartType) {
     const suggestionFromModel = newSuggestions.find(
       (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
     );
     if (suggestionFromModel) {
-      return [suggestionFromModel];
+      const suggestion = preferredVisAttributes
+        ? mergeSuggestionWithVisContext({
+            suggestion: suggestionFromModel,
+            visAttributes: preferredVisAttributes,
+            context,
+          })
+        : suggestionFromModel;
+
+      return [suggestion];
     }
   }
 
-  if (newSuggestions.length > 1 && preferredChartType && preferredVisAttributes) {
-    const suggestionFromModel = newSuggestions.find(
-      (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
-    );
-    if (suggestionFromModel) {
-      return [
-        mergeSuggestionWithVisContext({
-          suggestion: suggestionFromModel,
-          visAttributes: preferredVisAttributes,
-          context,
-        }),
-      ];
-    }
-  }
   const suggestionsList = [activeVisualization, ...newSuggestions];
 
   // if there is no preference from the user, send everything
