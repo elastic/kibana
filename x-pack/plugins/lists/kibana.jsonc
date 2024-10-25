@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/lists-plugin",
-  "owner": "@elastic/security-detection-engine",
+  "owner": [
+    "@elastic/security-detection-engine"
+  ],
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "lists",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "lists"
