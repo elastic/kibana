@@ -60,8 +60,7 @@ describe('open in discover action', () => {
       // setup
       const embeddable = {
         ...compatibleEmbeddableApi,
-        canViewUnderlyingData: jest.fn(() => Promise.resolve(false)),
-        getViewUnderlyingDataArgs: jest.fn(() => undefined),
+        canViewUnderlyingData$: { getValue: jest.fn(() => false) },
       };
 
       // test false
@@ -75,10 +74,11 @@ describe('open in discover action', () => {
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
 
-      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
 
       // test true
-      embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
+      embeddable.canViewUnderlyingData$.getValue = jest.fn(() => true);
+
       expect(
         await createOpenInDiscoverAction(
           {} as DiscoverAppLocator,
@@ -89,7 +89,7 @@ describe('open in discover action', () => {
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
-      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
     });
   });
 

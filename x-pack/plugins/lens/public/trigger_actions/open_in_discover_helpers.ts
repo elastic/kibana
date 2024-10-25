@@ -31,7 +31,7 @@ type Context = EmbeddableApiContext & {
   timeFieldName?: string;
 };
 
-export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
+export function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
   try {
     return isLensApi(embeddable) && (await embeddable.canViewUnderlyingData?.());

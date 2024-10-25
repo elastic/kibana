@@ -113,9 +113,7 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-application-browser",
-    "@kbn/core-chrome-browser",
+    "@kbn/transpose-utils",
   ],
   "exclude": ["target/**/*"]
 }
