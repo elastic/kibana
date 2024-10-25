@@ -64,7 +64,7 @@ export const useStatusAction = ({
     [onAction, updateCases, onActionSuccess]
   );
 
-  const shouldDisableStatusFn = useShouldDisableStatus();
+  const shouldDisableStatus = useShouldDisableStatus();
 
   const getStatusIcon = (status: CaseStatuses): string =>
     selectedStatus && selectedStatus === status ? 'check' : 'empty';
@@ -75,7 +75,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.open].label,
         icon: getStatusIcon(CaseStatuses.open),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
-        disabled: isDisabled || shouldDisableStatusFn(selectedCases, CaseStatuses.open),
+        disabled: isDisabled || shouldDisableStatus(selectedCases, CaseStatuses.open),
         'data-test-subj': 'cases-bulk-action-status-open',
         key: 'cases-bulk-action-status-open',
       },
@@ -83,7 +83,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses['in-progress']].label,
         icon: getStatusIcon(CaseStatuses['in-progress']),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
-        disabled: isDisabled || shouldDisableStatusFn(selectedCases, CaseStatuses['in-progress']),
+        disabled: isDisabled || shouldDisableStatus(selectedCases, CaseStatuses['in-progress']),
         'data-test-subj': 'cases-bulk-action-status-in-progress',
         key: 'cases-bulk-action-status-in-progress',
       },
@@ -91,7 +91,7 @@ export const useStatusAction = ({
         name: statuses[CaseStatuses.closed].label,
         icon: getStatusIcon(CaseStatuses.closed),
         onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.closed),
-        disabled: isDisabled || shouldDisableStatusFn(selectedCases, CaseStatuses.closed),
+        disabled: isDisabled || shouldDisableStatus(selectedCases, CaseStatuses.closed),
         'data-test-subj': 'cases-bulk-action-status-closed',
         key: 'cases-bulk-status-action',
       },

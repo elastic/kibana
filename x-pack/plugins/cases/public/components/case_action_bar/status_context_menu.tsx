@@ -28,7 +28,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   onStatusChanged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const shouldDisableStatusFn = useShouldDisableStatus();
+  const shouldDisableStatus = useShouldDisableStatus();
   const togglePopover = useCallback(
     () => setIsPopoverOpen((prevPopoverStatus) => !prevPopoverStatus),
     []
@@ -57,13 +57,10 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     [closePopover, currentStatus, onStatusChanged]
   );
 
-  // TODO: Determine if we would prefer to show the disabled options with grayed out treatment
   const panelItems = useMemo(
     () =>
       caseStatuses
-        .filter(
-          (status: CaseStatuses) => !shouldDisableStatusFn([{ status: currentStatus }], status)
-        )
+        .filter((status: CaseStatuses) => !shouldDisableStatus([{ status: currentStatus }], status))
         .map((status: CaseStatuses) => (
           <EuiContextMenuItem
             data-test-subj={`case-view-status-dropdown-${status}`}
@@ -74,7 +71,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
             <Status status={status} />
           </EuiContextMenuItem>
         )),
-    [currentStatus, onContextMenuItemClick, shouldDisableStatusFn]
+    [currentStatus, onContextMenuItemClick, shouldDisableStatus]
   );
 
   if (disabled) {

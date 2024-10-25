@@ -382,5 +382,85 @@ describe('useActions', () => {
         expect(res.getByTestId(`case-action-popover-button-${basicCase.id}`)).toBeDisabled();
       });
     });
+
+    it('shows actions when user only has reopenCase permission', async () => {
+      appMockRender = createAppMockRenderer({
+        permissions: {
+          all: false,
+          read: true,
+          create: false,
+          update: false,
+          delete: false,
+          reopenCase: true,
+        },
+      });
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).not.toBe(null);
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
+
+      expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+      expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
+    });
+
+    it('shows actions with combination of reopenCase and other permissions', async () => {
+      appMockRender = createAppMockRenderer({
+        permissions: {
+          all: false,
+          read: true,
+          create: false,
+          update: false,
+          delete: true,
+          reopenCase: true,
+        },
+      });
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).not.toBe(null);
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
+
+      expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+    });
+
+    it('shows no actions with everything false but read', async () => {
+      appMockRender = createAppMockRenderer({
+        permissions: {
+          all: false,
+          read: true,
+          create: false,
+          update: false,
+          delete: false,
+          reopenCase: false,
+        },
+      });
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(result.current.actions).toBe(null);
+    });
   });
 });

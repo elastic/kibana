@@ -1668,7 +1668,7 @@ describe('update', () => {
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
           entities: [{ id: mockCases[0].id, owner: mockCases[0].attributes.owner }],
-          operation: Operations.updateCase,
+          operation: [Operations.updateCase],
         });
       });
 
@@ -1738,9 +1738,7 @@ describe('update', () => {
         clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
 
         const error = new Error('Unauthorized to reopen case');
-        clientArgs.authorization.ensureAuthorized
-          .mockResolvedValueOnce() // Allow updateCase
-          .mockRejectedValueOnce(error); // Reject reopenCase
+        clientArgs.authorization.ensureAuthorized.mockRejectedValueOnce(error); // Reject reopenCase
 
         await expect(
           bulkUpdate(

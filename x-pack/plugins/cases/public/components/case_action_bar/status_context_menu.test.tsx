@@ -11,12 +11,16 @@ import { mount } from 'enzyme';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusContextMenu } from './status_context_menu';
 import { TestProviders } from '../../common/mock';
+import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
-describe('SyncAlertsSwitch', () => {
+jest.mock('../actions/status/use_should_disable_status');
+
+describe('StatusContextMenu', () => {
   const onStatusChanged = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
   });
 
   it('renders', async () => {
@@ -72,6 +76,7 @@ describe('SyncAlertsSwitch', () => {
   });
 
   it('does not render the button at all if the status cannot change', async () => {
+    (useShouldDisableStatus as jest.Mock).mockReturnValue((cases, status) => true);
     const wrapper = mount(
       <TestProviders>
         <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
@@ -84,5 +89,57 @@ describe('SyncAlertsSwitch', () => {
     );
 
     expect(onStatusChanged).not.toHaveBeenCalled();
+  });
+
+  it('updates menu items when shouldDisableStatus changes', async () => {
+    const mockShouldDisableStatus = jest.fn().mockReturnValue(false);
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(mockShouldDisableStatus);
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
+
+    expect(mockShouldDisableStatus).toHaveBeenCalledWith(
+      [{ status: CaseStatuses.open }],
+      expect.any(String)
+    );
+  });
+
+  it('handles all statuses being disabled', async () => {
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
+    expect(wrapper.find('EuiContextMenuItem').prop('onClick')).toBeUndefined();
+  });
+
+  it('correctly evaluates each status option', async () => {
+    const mockShouldDisableStatus = jest
+      .fn()
+      .mockImplementation((cases, status) => status === CaseStatuses.closed);
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(mockShouldDisableStatus);
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
+
+    expect(mockShouldDisableStatus).toHaveBeenCalledTimes(3);
+
+    expect(
+      wrapper.find(`[data-test-subj="case-view-status-dropdown-closed"]`).exists()
+    ).toBeFalsy();
   });
 });
