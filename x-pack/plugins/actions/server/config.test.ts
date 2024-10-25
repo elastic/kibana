@@ -38,6 +38,9 @@ describe('config validation', () => {
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
+        "usage": Object {
+          "url": "https://usage-api.usage-api/api/v1/usage",
+        },
       }
     `);
   });
@@ -85,6 +88,9 @@ describe('config validation', () => {
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
         "responseTimeout": "PT1M",
+        "usage": Object {
+          "url": "https://usage-api.usage-api/api/v1/usage",
+        },
       }
     `);
   });
@@ -224,6 +230,9 @@ describe('config validation', () => {
         "ssl": Object {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
+        },
+        "usage": Object {
+          "url": "https://usage-api.usage-api/api/v1/usage",
         },
       }
     `);

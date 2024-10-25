@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.torq',
         'actions:.webhook',
         'actions:.xmatters',
+        'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
         'alerting:.es-query',
