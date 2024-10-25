@@ -18,7 +18,6 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 
@@ -277,15 +276,8 @@ export class SpacesGridPage extends Component<Props, State> {
         render: (value: string, rowRecord: Space) => {
           const SpaceName = () => {
             const isCurrent = this.state.activeSpace?.id === rowRecord.id;
-            const isWide = useIsWithinBreakpoints(['xl']);
-            const gridColumns = isCurrent && isWide ? 2 : 1;
             return (
-              <EuiFlexGrid
-                responsive={false}
-                columns={gridColumns}
-                alignItems="center"
-                gutterSize="s"
-              >
+              <EuiFlexGrid responsive={false} columns={2} alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiLink
                     {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
