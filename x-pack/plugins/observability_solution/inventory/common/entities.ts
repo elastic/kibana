@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { entityLatestSchema } from '@kbn/entities-schema';
+import { ENTITY_LATEST, entitiesAliasPattern, entityLatestSchema } from '@kbn/entities-schema';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
@@ -30,11 +30,10 @@ export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
 
 export const MAX_NUMBER_OF_ENTITIES = 500;
 
-export const ENTITIES_LATEST_ALIAS = '.entities.v1.latest*';
-// entitiesAliasPattern({
-//   type: '*',
-//   dataset: ENTITY_LATEST,
-// });
+export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
+  type: '*',
+  dataset: ENTITY_LATEST,
+});
 
 const entityArrayRt = t.array(t.string);
 export const entityTypesRt = new t.Type<string[], string, unknown>(

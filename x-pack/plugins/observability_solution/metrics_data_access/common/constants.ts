@@ -9,6 +9,5 @@ export const TIMESTAMP_FIELD = '@timestamp';
 export const HOST_FIELD = 'host.name';
 export const CONTAINER_FIELD = 'container.id';
 export const POD_FIELD = 'kubernetes.pod.uid';
-export const KUBENRNETES_CONTAINER_FIELD = 'kubernetes.container.id';
 
 export const METRICS_EXPLORER_API_MAX_METRICS = 20;
