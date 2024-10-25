@@ -49,55 +49,6 @@ const issueTypesResponse = createAxiosResponse({
   },
 });
 
-const fieldsResponse = createAxiosResponse({
-  data: {
-    projects: [
-      {
-        issuetypes: [
-          {
-            id: '10006',
-            name: 'Task',
-            fields: {
-              summary: { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-              priority: {
-                required: false,
-                schema: { type: 'string' },
-                fieldId: 'priority',
-                allowedValues: [
-                  {
-                    name: 'Highest',
-                    id: '1',
-                  },
-                  {
-                    name: 'High',
-                    id: '2',
-                  },
-                  {
-                    name: 'Medium',
-                    id: '3',
-                  },
-                  {
-                    name: 'Low',
-                    id: '4',
-                  },
-                  {
-                    name: 'Lowest',
-                    id: '5',
-                  },
-                ],
-                defaultValue: {
-                  name: 'Medium',
-                  id: '3',
-                },
-              },
-            },
-          },
-        ],
-      },
-    ],
-  },
-});
-
 const issueResponse = {
   id: '10267',
   key: 'RJ-107',
