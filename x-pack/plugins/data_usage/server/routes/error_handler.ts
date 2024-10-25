@@ -8,6 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../utils/custom_http_request_error';
 import { BaseError } from '../common/errors';
+import { AutoOpsError } from '../services/errors';
 
 export class NotFoundError extends BaseError {}
 
@@ -27,6 +28,13 @@ export const errorHandler = <E extends Error>(
   if (error instanceof CustomHttpRequestError) {
     return res.customError({
       statusCode: error.statusCode,
+      body: error,
+    });
+  }
+
+  if (error instanceof AutoOpsError) {
+    return res.customError({
+      statusCode: 503,
       body: error,
     });
   }
