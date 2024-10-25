@@ -27,35 +27,37 @@ export function EntityIcon({ entity }: EntityIconProps) {
   const entityType = entity[ENTITY_TYPE];
   const defaultIconSize = euiThemeVars.euiSizeL;
 
-  switch (entityType) {
-    case 'host':
-    case 'container': {
-      const cloudProvider = getSingleValue(
-        entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
-      );
-      return (
-        <EuiFlexGroup
-          style={{ width: defaultIconSize, height: defaultIconSize }}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <EuiFlexItem grow={false}>
-            <CloudProviderIcon
-              cloudProvider={cloudProvider}
-              size="m"
-              title={cloudProvider}
-              role="presentation"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-    case 'service': {
-      const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
-      return <AgentIcon agentName={agentName} role="presentation" />;
-    }
-    default:
-      // Return an empty EuiIcon instead of null to maintain UI alignment across all EntityIcon usages
-      return <EuiIcon type="" size="l" />;
+  if (entityType === 'host' || entityType === 'container') {
+    const cloudProvider = getSingleValue(
+      entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
+    );
+    return (
+      <EuiFlexGroup
+        style={{ width: defaultIconSize, height: defaultIconSize }}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false}>
+          <CloudProviderIcon
+            cloudProvider={cloudProvider}
+            size="m"
+            title={cloudProvider}
+            role="presentation"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
+
+  if (entityType === 'service') {
+    const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
+    return <AgentIcon agentName={agentName} role="presentation" />;
+  }
+
+  if (entityType.startsWith('kubernetes')) {
+    return <EuiIcon type="logoKubernetes" size="l" />;
+  }
+
+  // Return an empty EuiIcon instead of null to maintain UI alignment across all EntityIcon usages
+  return <EuiIcon type="" size="l" />;
 }
