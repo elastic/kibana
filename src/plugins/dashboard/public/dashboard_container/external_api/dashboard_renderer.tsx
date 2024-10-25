@@ -106,15 +106,17 @@ export function DashboardRenderer({
     }
 
     return dashboardApi && dashboardInternalApi ? (
-      <ExitFullScreenButtonKibanaProvider
-        coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
-      >
-        <DashboardContext.Provider value={dashboardApi}>
-          <DashboardInternalContext.Provider value={dashboardInternalApi}>
-            <DashboardViewport />
-          </DashboardInternalContext.Provider>
-        </DashboardContext.Provider>
-      </ExitFullScreenButtonKibanaProvider>
+      <div className="dashboardContainer">
+        <ExitFullScreenButtonKibanaProvider
+          coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
+        >
+          <DashboardContext.Provider value={dashboardApi}>
+            <DashboardInternalContext.Provider value={dashboardInternalApi}>
+              <DashboardViewport />
+            </DashboardInternalContext.Provider>
+          </DashboardContext.Provider>
+        </ExitFullScreenButtonKibanaProvider>
+      </div>
     ) : (
       loadingSpinner
     );
