@@ -298,8 +298,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/191806
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
     let synthtraceApmClient: ApmSynthtraceEsClient;
@@ -420,10 +419,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ].forEach(({ metric, value }) => {
               it(`${metric} tile should show ${value}`, async () => {
                 await retry.tryForTime(5000, async () => {
-                  const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                    metric
+                  expect(await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric)).to.eql(
+                    value
                   );
-                  expect(tileValue).to.eql(value);
                 });
               });
             });
