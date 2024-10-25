@@ -34,7 +34,7 @@ describe('<PreviewPanelFooter />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
-  it('should render footer', () => {
+  it('should render footer for alert', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -43,6 +43,20 @@ describe('<PreviewPanelFooter />', () => {
       </TestProviders>
     );
     expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toHaveTextContent('Show full alert details');
+  });
+
+  it('should render footer for event', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider
+          value={{ ...mockContextValue, getFieldsData: () => 'event' }}
+        >
+          <PreviewPanelFooter />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toHaveTextContent('Show full event details');
   });
 
   it('should open document details flyout when clicked', () => {
