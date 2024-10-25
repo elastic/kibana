@@ -88,7 +88,7 @@ const convertObjectMembersToParameterObjects = (
   knownParameters: KnownParameters = {},
   isPathParameter = false
 ) => {
-  let properties: undefined | Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
+  let properties: OpenAPIV3.SchemaObject['properties'];
   const required = new Map<string, boolean>();
   if (isNullableObjectType(schema)) {
     const { result } = parse({ schema, ctx });
