@@ -50,7 +50,7 @@ export function InventoryGroupAccordion({
           id={`inventory-group-${groupBy}-${field}`}
           buttonContent={
             <EuiTitle size="xs">
-              <h4>{field}</h4>
+              <h4 data-test-subj={`inventoryGroupTitle_${groupBy}_${field}`}>{field}</h4>
             </EuiTitle>
           }
           buttonElement="div"
