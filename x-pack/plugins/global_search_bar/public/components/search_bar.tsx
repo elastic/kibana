@@ -89,7 +89,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
-  const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
+  const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
@@ -122,17 +122,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [taggingApi, searchableTypes]
   );
 
-  const setOptions = useCallback(
+  const setDecoratedOptions = useCallback(
     (
       _options: GlobalSearchResult[],
       suggestions: SearchSuggestion[],
       searchTagIds: string[] = []
     ) => {
-      if (!isMounted()) {
-        return;
-      }
-
-      _setOptions([
+      setOptions([
         ...suggestions.map(suggestionToOption),
         ..._options.map((option) =>
           resultToOption(
@@ -143,7 +139,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         ),
       ]);
     },
-    [isMounted, _setOptions, taggingApi]
+    [setOptions, taggingApi]
   );
 
   useDebounce(
@@ -188,18 +184,20 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
+            if (!isMounted()) {
+              return;
+            }
+
             if (searchValue.length > 0) {
               aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
-              setOptions(aggregatedResults, suggestions, searchParams.tags);
+              setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
               return;
             }
 
             // if searchbar is empty, filter to only applications and sort alphabetically
             results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-
             aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
-
-            setOptions(aggregatedResults, suggestions, searchParams.tags);
+            setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {
             setIsLoading(false);
