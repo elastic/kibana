@@ -37,9 +37,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_copy_saved_objects',
+      security: {
+        authz: {
+          requiredPrivileges: ['copySavedObjectsToSpaces'],
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
-        tags: ['access:copySavedObjectsToSpaces', 'oas-tag:spaces'],
+        tags: ['oas-tag:spaces'],
         summary: `Copy saved objects between spaces`,
         description:
           'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.',
@@ -188,9 +193,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
+      security: {
+        authz: {
+          requiredPrivileges: ['copySavedObjectsToSpaces'],
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
-        tags: ['access:copySavedObjectsToSpaces'],
+
         summary: `Resolve conflicts copying saved objects`,
         description:
           'Overwrite saved objects that are returned as errors from the copy saved objects to space API.',
