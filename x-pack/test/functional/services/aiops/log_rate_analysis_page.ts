@@ -266,6 +266,22 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       );
     },
 
+    async clickAutoRunButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsLogRateAnalysisContentRunAnalysisButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('aiopsLogRateAnalysisContentRunAnalysisButton');
+      });
+    },
+
+    async assertAutoRunButtonExists() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('aiopsLogRateAnalysisContentRunAnalysisButton');
+      });
+    },
+
     async assertNoAutoRunButtonExists() {
       await testSubjects.existOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
     },

@@ -153,7 +153,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiForm>
+        <EuiForm data-test-subj="aiopsLogRateAnalysisControls">
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.aiops.embeddableLogRateAnalysis.config.dataViewLabel', {
@@ -175,6 +175,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
                 onChange={(newId) => {
                   setDataViewId(newId ?? '');
                 }}
+                data-test-subj="aiopsLogRateAnalysisEmbeddableDataViewSelector"
               />
               {isDataViewTimeBased === false && (
                 <>
