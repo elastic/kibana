@@ -234,7 +234,7 @@ PUT /my-connector-index
 }
 
 # 2. Create a connector
-# NOTE: Change these values if you want to use another connector type
+# NOTE: Change the service_type value if you want to use another connector type
 PUT _connector/my-connector-id
 {
   "name": "My connector",
