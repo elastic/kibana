@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+.buildkite/scripts/copy_es_snapshot_cache.sh
+
 echo --- Capture OAS snapshot
 cmd="node scripts/capture_oas_snapshot --include-path /api/status"
 if is_pr && ! is_auto_commit_disabled; then
