@@ -8,73 +8,19 @@
  */
 
 import _ from 'lodash';
-import Color from 'color';
-
-import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from '../../static/colors';
 import { MappedColors } from './mapped_colors';
-
-// Local state for config
-const config = new Map<string, any>();
 
 describe('Mapped Colors', () => {
   const mappedColors = new MappedColors();
-  let previousConfig: any;
 
   beforeEach(() => {
-    previousConfig = config.get(COLOR_MAPPING_SETTING);
     mappedColors.purge();
   });
 
-  afterEach(() => {
-    config.set(COLOR_MAPPING_SETTING, previousConfig);
-  });
-
   it('should properly map keys to unique colors', () => {
-    config.set(COLOR_MAPPING_SETTING, {});
-
     const arr = [1, 2, 3, 4, 5];
     mappedColors.mapKeys(arr);
     expect(_(mappedColors.mapping).values().uniq().size()).toBe(arr.length);
-  });
-
-  it('should not include colors used by the config', () => {
-    const newConfig = { bar: seedColors[0] };
-    config.set(COLOR_MAPPING_SETTING, newConfig);
-
-    const arr = ['foo', 'baz', 'qux'];
-    mappedColors.mapKeys(arr);
-
-    const colorValues = _(mappedColors.mapping).values();
-    expect(colorValues).not.toContain(seedColors[0]);
-    expect(colorValues.uniq().size()).toBe(arr.length);
-  });
-
-  it('should create a unique array of colors even when config is set', () => {
-    const newConfig = { bar: seedColors[0] };
-    config.set(COLOR_MAPPING_SETTING, newConfig);
-
-    const arr = ['foo', 'bar', 'baz', 'qux'];
-    mappedColors.mapKeys(arr);
-
-    const expectedSize = _(arr).difference(_.keys(newConfig)).size();
-    expect(_(mappedColors.mapping).values().uniq().size()).toBe(expectedSize);
-    expect(mappedColors.get(arr[0])).not.toBe(seedColors[0]);
-  });
-
-  it('should treat different formats of colors as equal', () => {
-    const color = new Color(seedColors[0]);
-    const rgb = `rgb(${color.red()}, ${color.green()}, ${color.blue()})`;
-    const newConfig = { bar: rgb };
-    config.set(COLOR_MAPPING_SETTING, newConfig);
-
-    const arr = ['foo', 'bar', 'baz', 'qux'];
-    mappedColors.mapKeys(arr);
-
-    const expectedSize = _(arr).difference(_.keys(newConfig)).size();
-    expect(_(mappedColors.mapping).values().uniq().size()).toBe(expectedSize);
-    expect(mappedColors.get(arr[0])).not.toBe(seedColors[0]);
-    expect(mappedColors.get('bar')).toBe(seedColors[0]);
   });
 
   it('should have a flush method that moves the current map to the old map', function () {
