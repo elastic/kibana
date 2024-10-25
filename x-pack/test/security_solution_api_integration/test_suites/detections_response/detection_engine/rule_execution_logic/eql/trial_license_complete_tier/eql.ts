@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import supertestLib from 'supertest';
 import url from 'url';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
@@ -55,7 +55,7 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { getMetricsRequest, getMetricsWithRetry } from './utils';
+import { getMetricsRequest, getMetricsWithRetry } from '../../utils';
 
 /**
  * Specific AGENT_ID to use for some of the tests. If the archiver changes and you see errors

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
-import { getEqlRuleForAlertTesting } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -16,7 +15,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../../../common/utils/security_solution';
 
 interface Ignore {
   normal_constant?: string;
@@ -25,7 +24,8 @@ interface Ignore {
   testing_regex?: string;
 }
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { getEqlRuleForAlertTesting } from '../../../../utils';
 export default ({ getService }: FtrProviderContext): void => {
   /**
    * See the config file (config.ts) for which field values were added to be ignored

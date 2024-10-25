@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { get } from 'lodash';
 import {
   EqlRuleCreateProps,
@@ -13,7 +13,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../utils';
+import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -23,8 +23,8 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+} from '../../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

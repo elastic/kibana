@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { orderBy } from 'lodash';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import {
@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getAlerts, getEqlRuleForAlertTesting } from '../../../utils';
+import { getAlerts, getEqlRuleForAlertTesting } from '../../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -25,9 +25,9 @@ import {
   getRuleForAlertTesting,
   getAlertsByIds,
   waitForRulePartialFailure,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

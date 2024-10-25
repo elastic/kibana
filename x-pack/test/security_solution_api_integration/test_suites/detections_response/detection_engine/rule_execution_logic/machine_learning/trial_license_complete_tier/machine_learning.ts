@@ -53,7 +53,7 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { getMetricsRequest, getMetricsWithRetry } from './utils';
+import { getMetricsRequest, getMetricsWithRetry } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
