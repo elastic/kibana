@@ -111,6 +111,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     }
   }, [globalSearch, initialLoad]);
 
+  // Whenever searchValue changes, isLoading = true
+  useEffect(() => {
+    setIsLoading(true);
+  }, [searchValue]);
+
   const loadSuggestions = useCallback(
     (term: string) => {
       return getSuggestions({
@@ -163,9 +168,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           setSearchCharLimitExceeded(false);
         }
 
-        setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
-        setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
 
@@ -192,7 +195,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // so the SearchOption won't highlight anything if only one call is fired
         // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
         setSearchTerm(rawParams.term ?? '');
-        setIsLoading(true);
+
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
