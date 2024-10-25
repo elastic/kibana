@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Transaction } from 'elastic-apm-node';
 import { withSyncSecuritySpan } from '../../../../../utils/with_security_span';
 import type {
   RuleResponse,
@@ -21,15 +20,13 @@ export const getUpgradeableRules = ({
   currentRules,
   versionSpecifiers,
   mode,
-  transaction,
 }: {
   rawUpgradeableRules: RuleTriad[];
   currentRules: RuleResponse[];
   versionSpecifiers?: RuleUpgradeSpecifier[];
   mode: Mode;
-  transaction: Transaction;
 }) => {
-  return withSyncSecuritySpan(transaction, 'getUpgradeableRules', () => {
+  return withSyncSecuritySpan('getUpgradeableRules', () => {
     const upgradeableRules = new Map(
       rawUpgradeableRules.map((_rule) => [_rule.current.rule_id, _rule])
     );

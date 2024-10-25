@@ -7,7 +7,6 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import apm from 'elastic-apm-node';
 import {
   PERFORM_RULE_UPGRADE_URL,
   PerformRuleUpgradeRequestBody,
@@ -49,7 +48,6 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
         },
       },
       async (context, request, response) => {
-        const transaction = apm.startTransaction('performRuleUpgradeRoute', 'endpoint_handler');
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -75,14 +73,12 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
             currentRules: ruleGroups.currentRules,
             versionSpecifiers,
             mode,
-            transaction,
           });
 
           const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets(
             {
               upgradeableRules,
               requestBody: request.body,
-              transaction,
             }
           );
 

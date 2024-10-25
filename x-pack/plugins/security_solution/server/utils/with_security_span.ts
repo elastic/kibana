@@ -6,8 +6,7 @@
  */
 import type { SpanOptions } from '@kbn/apm-utils';
 import { withSpan } from '@kbn/apm-utils';
-import type agent from 'elastic-apm-node';
-import type { Transaction } from 'elastic-apm-node';
+import agent from 'elastic-apm-node';
 import { APP_ID } from '../../common/constants';
 
 type Span = Exclude<typeof agent.currentSpan, undefined | null>;
@@ -37,12 +36,8 @@ export const withSecuritySpan = <T>(
     cb
   );
 
-export const withSyncSecuritySpan = <T>(
-  parent: Transaction,
-  name: string,
-  fn: (span: Span | null) => T
-): T => {
-  const span = parent.startSpan(name, APP_ID);
+export const withSyncSecuritySpan = <T>(name: string, fn: (span: Span | null) => T): T => {
+  const span = agent.startSpan(name, APP_ID);
 
   try {
     const result = fn(span);
