@@ -317,6 +317,11 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
 
   return (
     <EuiPanel hasBorder={true} paddingSize="l" grow={false}>
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.intro"
+        defaultMessage="As part of importing entities using a text file, you are also able to set Asset Criticality for the imported Entities."
+      />
+      <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiIcon type="questionInCircle" size="xl" />
         <EuiTitle size="xxs">
