@@ -371,9 +371,6 @@ export class SampleTaskManagerFixturePlugin
       },
 
       async beforeMarkRunning(context) {
-        if (context.taskInstance?.params?.originalParams?.throwOnMarkAsRunning) {
-          throw new Error(`Sample task ${context.taskInstance.id} threw on MarkAsRunning`);
-        }
         return context;
       },
     });
