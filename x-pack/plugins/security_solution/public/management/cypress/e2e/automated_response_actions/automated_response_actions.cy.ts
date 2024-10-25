@@ -6,6 +6,7 @@
  */
 
 import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlerts } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/alerts';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
@@ -94,7 +95,7 @@ describe(
       closeAllToasts();
 
       changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
-      cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
+      waitForAlerts();
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
       cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
