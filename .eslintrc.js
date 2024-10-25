@@ -2017,7 +2017,6 @@ module.exports = {
         'x-pack/plugins/observability_solution/synthetics/e2e/**',
         'x-pack/plugins/osquery/**',
         'x-pack/plugins/search_assistant/**',
-        'x-pack/plugins/security_solution/**',
         'x-pack/test_serverless/**',
         'x-pack/test/**',
         'x-pack/test/plugin_functional/plugins/resolver_test/**',
