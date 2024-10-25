@@ -7,6 +7,21 @@
 
 import React, { ReactElement } from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+export const MANAGED_REPOSITORY_TOOLTIP_MESSAGE = i18n.translate(
+  'xpack.snapshotRestore.repositoryForm.disableToolTip',
+  {
+    defaultMessage: 'This field is disabled because you are editing a managed repository.',
+  }
+);
+
+export const MANAGED_POLICY_TOOLTIP_MESSAGE = i18n.translate(
+  'xpack.snapshotRestore.policyForm.disableToolTip',
+  {
+    defaultMessage: 'This field is disabled because you are editing a managed policy.',
+  }
+);
 
 interface Props {
   isManaged?: boolean;

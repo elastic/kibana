@@ -20,8 +20,7 @@ import {
 import { Repository, S3Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
-import { DisableToolTip } from '../../disable_tooltip';
-import { MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../../constants';
+import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
 interface Props {
   repository: S3Repository;
