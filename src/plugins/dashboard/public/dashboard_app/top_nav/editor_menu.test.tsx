@@ -9,10 +9,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { buildMockDashboard } from '../../mocks';
+import { buildMockDashboardApi } from '../../mocks';
 import { EditorMenu } from './editor_menu';
 
-import { DashboardApi } from '../../dashboard_api/types';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import {
   embeddableService,
@@ -27,10 +26,11 @@ jest.spyOn(visualizationsService, 'getAliases').mockReturnValue([]);
 
 describe('editor menu', () => {
   it('renders without crashing', async () => {
+    const { api } = buildMockDashboardApi();
     render(<EditorMenu createNewVisType={jest.fn()} />, {
       wrapper: ({ children }) => {
         return (
-          <DashboardContext.Provider value={buildMockDashboard() as DashboardApi}>
+          <DashboardContext.Provider value={api}>
             {children}
           </DashboardContext.Provider>
         );

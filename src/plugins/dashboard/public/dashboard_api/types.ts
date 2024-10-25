@@ -166,6 +166,7 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
+    setExpandedPanelId: (id?: string | undefined) => void;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;

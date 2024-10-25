@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
-import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
-
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardContainerInput, DashboardPanelState } from '../common';
-import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
 import { DashboardStart } from './plugin';
+import { DashboardState } from './dashboard_api/types';
+import { getDashboardApi } from './dashboard_api/get_dashboard_api';
+import { DashboardPanelState } from '../common';
+import { DEFAULT_DASHBOARD_INPUT } from './dashboard_constants';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -78,36 +77,34 @@ export const mockControlGroupApi = {
   unsavedChanges: new BehaviorSubject(undefined),
 } as unknown as ControlGroupApi;
 
-export function buildMockDashboard({
+export function buildMockDashboardApi({
   overrides,
   savedObjectId,
 }: {
-  overrides?: Partial<DashboardContainerInput>;
+  overrides?: Partial<DashboardState>;
   savedObjectId?: string;
 } = {}) {
-  const initialInput = getSampleDashboardInput(overrides);
-  const dashboardContainer = new DashboardContainer(
-    initialInput,
-    mockedReduxEmbeddablePackage,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    {
-      anyMigrationRun: false,
-      isEmbeddedExternally: false,
-      lastSavedInput: initialInput,
-      lastSavedId: savedObjectId,
+  const initialState = getSampleDashboardState(overrides);
+  const results = getDashboardApi({
+    initialState,
+    savedObjectId,
+    savedObjectResult: {
+      dashboardFound: true,
+      newDashboardCreated: savedObjectId === undefined,
+      dashboardId: savedObjectId,
       managed: false,
+      dashboardInput: initialState,
+      anyMigrationRun: false,
+      references: []
     }
-  );
-  dashboardContainer?.setControlGroupApi(mockControlGroupApi);
-  return dashboardContainer;
+  });
+  results.internalApi.setControlGroupApi(mockControlGroupApi);
+  return results;
 }
 
-export function getSampleDashboardInput(
-  overrides?: Partial<DashboardContainerInput>
-): DashboardContainerInput {
+export function getSampleDashboardState(
+  overrides?: Partial<DashboardState>
+): DashboardState {
   return {
     // options
     useMargins: true,
@@ -116,7 +113,6 @@ export function getSampleDashboardInput(
     syncTooltips: false,
     hidePanelTitles: false,
 
-    id: '123',
     tags: [],
     filters: [],
     title: 'My Dashboard',
@@ -129,7 +125,7 @@ export function getSampleDashboardInput(
       from: 'now-15m',
     },
     timeRestore: false,
-    viewMode: ViewMode.VIEW,
+    viewMode: 'view',
     panels: {},
     executionContext: {
       type: 'dashboard',
@@ -138,8 +134,8 @@ export function getSampleDashboardInput(
   };
 }
 
-export function getSampleDashboardPanel<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>(
-  overrides: Partial<DashboardPanelState<TEmbeddableInput>> & {
+export function getSampleDashboardPanel(
+  overrides: Partial<DashboardPanelState> & {
     explicitInput: { id: string };
     type: string;
   }
