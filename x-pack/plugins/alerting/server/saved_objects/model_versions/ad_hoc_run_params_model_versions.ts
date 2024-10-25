@@ -16,4 +16,11 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
       create: rawAdHocRunParamsSchemaV1,
     },
   },
+  // '2': {
+  //   changes: [],
+  //   schemas: {
+  //     forwardCompatibility: rawAdHocRunParamsSchemaV2.extends({}, { unknowns: 'ignore' }),
+  //     create: rawAdHocRunParamsSchemaV2,
+  //   },
+  // },
 };

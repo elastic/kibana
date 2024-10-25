@@ -132,7 +132,7 @@ export class BackfillClient {
         adHocSOsToCreate.push({
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           attributes: transformBackfillParamToAdHocRun(param, rule, spaceId),
-          references: [reference],
+          references: [reference], // TODO need to extract action references here
         });
       } else if (error) {
         // keep track of the error encountered for this request by index so

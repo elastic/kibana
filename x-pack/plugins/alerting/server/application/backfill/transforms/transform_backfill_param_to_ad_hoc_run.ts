@@ -32,6 +32,7 @@ export const transformBackfillParamToAdHocRun = (
       params: rule.params,
       apiKeyOwner: rule.apiKeyOwner,
       apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+      actions: param.runActions ? rule.actions : [],
       consumer: rule.consumer,
       enabled: rule.enabled,
       schedule: rule.schedule,

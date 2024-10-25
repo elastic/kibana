@@ -27,6 +27,7 @@ type AdHocRunSORule = Pick<
   | 'name'
   | 'tags'
   | 'alertTypeId'
+  | 'actions'
   | 'params'
   | 'apiKeyOwner'
   | 'apiKeyCreatedByUser'
