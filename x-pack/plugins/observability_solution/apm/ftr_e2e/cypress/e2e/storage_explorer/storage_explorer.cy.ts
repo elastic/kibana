@@ -65,7 +65,7 @@ describe('Storage Explorer', () => {
 
   describe('When navigating to storage explorer with the required permissions', () => {
     beforeEach(() => {
-      cy.loginAsMonitorUser();
+      cy.loginAsEditorUser();
       cy.visitKibana(storageExplorerHref);
     });
 
@@ -109,7 +109,7 @@ describe('Storage Explorer', () => {
         cy.intercept({ pathname: endpoint }).as(aliasName);
       });
 
-      cy.loginAsMonitorUser();
+      cy.loginAsEditorUser();
       cy.visitKibana(storageExplorerHref);
     });
 
@@ -164,7 +164,7 @@ describe('Storage Explorer', () => {
         cy.intercept({ pathname: endpoint }).as(aliasName);
       });
 
-      cy.loginAsMonitorUser();
+      cy.loginAsEditorUser();
       cy.visitKibana(storageExplorerHref);
     });
 
