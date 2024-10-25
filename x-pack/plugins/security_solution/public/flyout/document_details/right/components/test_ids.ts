@@ -178,6 +178,9 @@ export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
 export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
   `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
 
+export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
+export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
+
 /* Response section */
 
 const RESPONSE_TEST_ID = `${PREFIX}Response` as const;

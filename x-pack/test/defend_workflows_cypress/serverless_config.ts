@@ -14,9 +14,7 @@ import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const defendWorkflowsCypressConfig = await readConfigFile(
-    require.resolve(
-      '@kbn/test-suites-serverless/functional/test_suites/security/cypress/security_config.base'
-    )
+    require.resolve('./serverless_config.base.ts')
   );
   const config = defendWorkflowsCypressConfig.getAll();
   const hostIp = getLocalhostRealIp();
