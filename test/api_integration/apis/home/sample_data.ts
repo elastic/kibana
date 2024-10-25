@@ -25,10 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
    */
   const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
 
-  const includesPathInAppLinks = (appLinks: Array<{ path: string }>, path: string): boolean => {
-    return appLinks.some((item) => item.path === path);
-  };
-
   describe('sample data apis', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
