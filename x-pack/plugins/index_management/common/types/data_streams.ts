@@ -33,6 +33,8 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 
 export type Health = 'green' | 'yellow' | 'red';
 
+export type IndexMode = 'standard' | 'logsdb' | 'time_series';
+
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   global_max_retention?: string;
   store_size?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size'];
