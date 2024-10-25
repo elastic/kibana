@@ -357,3 +357,18 @@ export const DUPLICATE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
       'Changing a knowledge base entry from global to private will create a private copy of the original global entry. Please delete the global entry if you would like to revoke the content for other users.',
   }
 );
+
+export const MISSING_INDEX_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.missingIndexError',
+  {
+    defaultMessage: `Index doesn't exist`,
+  }
+);
+
+export const MISSING_INDEX_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.missingIndexTootipContent',
+  {
+    defaultMessage:
+      'The index assigned to this knowledge base entry is unavailable. Check the permissions on the configured index, or that the index has not been deleted. You can update the index to be used for this knowledge entry, or delete the entry entirely.',
+  }
+);

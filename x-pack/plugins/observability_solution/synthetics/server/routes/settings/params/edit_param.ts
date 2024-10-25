@@ -6,8 +6,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObject } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
+import { validateRouteSpaceName } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
@@ -20,7 +21,7 @@ const RequestParamsSchema = schema.object({
 type RequestParams = TypeOf<typeof RequestParamsSchema>;
 
 export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsParams,
+  SyntheticsParams | undefined,
   RequestParams
 > = () => ({
   method: 'PUT',
@@ -30,46 +31,63 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       params: RequestParamsSchema,
       body: schema.object({
-        key: schema.string(),
-        value: schema.string(),
+        key: schema.maybe(
+          schema.string({
+            minLength: 1,
+          })
+        ),
+        value: schema.maybe(
+          schema.string({
+            minLength: 1,
+          })
+        ),
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
-        share_across_spaces: schema.maybe(schema.boolean()),
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request, server, response }) => {
-    try {
-      const { id: _spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
-        id: DEFAULT_SPACE_ID,
-      };
-      const { id } = request.params;
-      const { share_across_spaces: _shareAcrossSpaces, ...data } =
-        request.body as SyntheticsParamRequest & {
-          id: string;
-        };
+  handler: async (routeContext) => {
+    const { savedObjectsClient, request, response, spaceId, server } = routeContext;
+    const { invalidResponse } = await validateRouteSpaceName(routeContext);
+    if (invalidResponse) return invalidResponse;
 
-      const { value } = data;
+    const { id: paramId } = request.params;
+    const data = request.body as SyntheticsParamRequest;
+    if (isEmpty(data)) {
+      return response.badRequest({ body: { message: 'Request body cannot be empty' } });
+    }
+    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+
+    try {
+      const existingParam =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
+          syntheticsParamType,
+          paramId,
+          { namespace: spaceId }
+        );
+
+      const newParam = {
+        ...existingParam.attributes,
+        ...data,
+      };
+
+      // value from data since we aren't using encrypted client
+      const { value } = existingParam.attributes;
       const {
         id: responseId,
         attributes: { key, tags, description },
         namespaces,
-      } = (await savedObjectsClient.update(
+      } = (await savedObjectsClient.update<SyntheticsParams>(
         syntheticsParamType,
-        id,
-        data
+        paramId,
+        newParam
       )) as SavedObject<SyntheticsParams>;
 
       return { id: responseId, key, tags, description, namespaces, value };
-    } catch (error) {
-      if (error.output?.statusCode === 404) {
-        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        return response.notFound({
-          body: { message: `Kibana space '${spaceId}' does not exist` },
-        });
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        return response.notFound({ body: { message: 'Param not found' } });
       }
-
-      throw error;
     }
   },
 });
