@@ -24,9 +24,9 @@ describe('alerts', () => {
       aggregations: {
         counts: {
           buckets: [
-            { doc_count: 1, key: 1 },
-            { doc_count: 2, key: 2 },
-            { doc_count: 3, key: 3 },
+            { topAlertsPerBucket: { value: 12 } },
+            { topAlertsPerBucket: { value: 5 } },
+            { topAlertsPerBucket: { value: 3 } },
           ],
         },
         references: { cases: { max: { value: 1 } } },
@@ -48,8 +48,8 @@ describe('alerts', () => {
         all: {
           total: 5,
           daily: 3,
-          weekly: 2,
-          monthly: 1,
+          weekly: 5,
+          monthly: 12,
           maxOnACase: 1,
         },
       });

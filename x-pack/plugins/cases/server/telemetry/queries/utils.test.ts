@@ -1237,13 +1237,13 @@ describe('utils', () => {
         page: 1,
       });
 
-      const res = await getCountsAndMaxData({
+      const res = await getCountsAndMaxAlertsData({
         savedObjectsClient: telemetrySavedObjectsClient,
         savedObjectType: 'test',
       });
       expect(res).toEqual({
         all: {
-          total: 5,
+          total: 0,
           daily: 0,
           weekly: 0,
           monthly: 0,
