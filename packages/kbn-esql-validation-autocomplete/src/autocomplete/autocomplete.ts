@@ -208,7 +208,7 @@ export async function suggest(
   if (astContext.type === 'expression') {
     // suggest next possible argument, or option
     // otherwise a variable
-    return getExpressionSuggestionsByType(
+    return getSuggestionsWithinCommand(
       innerText,
       ast,
       astContext,
@@ -444,6 +444,55 @@ function extractArgMeta(
   return { argIndex, prevIndex, lastArg, nodeArg };
 }
 
+async function getSuggestionsWithinCommand(
+  innerText: string,
+  commands: ESQLCommand[],
+  {
+    command,
+    option,
+    node,
+  }: {
+    command: ESQLCommand;
+    option: ESQLCommandOption | undefined;
+    node: ESQLSingleAstItem | undefined;
+  },
+  getSources: () => Promise<ESQLSourceResult[]>,
+  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsMap: GetFieldsMapFn,
+  getPolicies: GetPoliciesFn,
+  getPolicyMetadata: GetPolicyMetadataFn
+) {
+  const commandDef = getCommandDefinition(command.name);
+
+  // collect all fields + variables to suggest
+  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
+
+  const references = { fields: fieldsMap, variables: anyVariables };
+  if (commandDef.suggest) {
+    // The new path.
+    return commandDef.suggest(innerText, getFieldsByType, (col) =>
+      Boolean(getColumnByName(col, references))
+    );
+  } else {
+    // The deprectated path.
+    return getExpressionSuggestionsByType(
+      innerText,
+      commands,
+      { command, option, node },
+      getSources,
+      getFieldsByType,
+      getFieldsMap,
+      getPolicies,
+      getPolicyMetadata
+    );
+  }
+}
+
+/**
+ * @deprecated — this generic logic will be replaced with the command-specific suggest functions
+ * from each command definition.
+ */
 async function getExpressionSuggestionsByType(
   innerText: string,
   commands: ESQLCommand[],
@@ -470,12 +519,6 @@ async function getExpressionSuggestionsByType(
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   const references = { fields: fieldsMap, variables: anyVariables };
-  if (commandDef.suggest) {
-    return await commandDef.suggest(innerText, getFieldsByType, (col) =>
-      Boolean(getColumnByName(col, references))
-    );
-  }
-
   if (!commandDef.signature || !commandDef.options) {
     return [];
   }
