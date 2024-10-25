@@ -39,10 +39,6 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 import { SearchBarProps } from './types';
 
-const NoMatchesMessage = (props: { basePathUrl: string }) => {
-  return <PopoverPlaceholder basePath={props.basePathUrl} />;
-};
-
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
     <>
@@ -397,7 +393,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }}
       errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<NoMatchesMessage {...props} />}
+      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
