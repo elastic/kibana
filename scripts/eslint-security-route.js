@@ -255,6 +255,12 @@ function processChangesByOwners(ownerFilesMap) {
       console.log('Created the following branches:');
       console.log(runCommand("git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/'"));
 
+      if (DRY_RUN) {
+        runCommand(
+          "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
+        );
+      }
+
       if (!DRY_RUN) {
         const title =
           process.env.ROUTE_TYPE === 'authorized'
@@ -272,7 +278,7 @@ function processChangesByOwners(ownerFilesMap) {
         runCommand(`git branch -D ${tempBranch}`);
 
         const labels = [
-          routeLabel,
+          // routeLabel,
           'enhancement',
           'release_note:skip',
           'backport:prev-minor',
@@ -290,8 +296,8 @@ function processChangesByOwners(ownerFilesMap) {
           [
             'pr',
             'create',
-            '--repo',
-            'elena-shostak/kibana',
+            // '--repo',
+            // 'elena-shostak/kibana',
             '--base',
             'main',
             '--head',
@@ -302,8 +308,9 @@ function processChangesByOwners(ownerFilesMap) {
             process.env.ROUTE_TYPE === 'authorized'
               ? PR_DESCRIPTION_TEXT_AUTHORIZED
               : PR_DESCRIPTION_TEXT_UNAUTHORIZED,
-            // '--label',
-            // labels.join(','),
+            '--label',
+            labels.join(','),
+            '--draft',
           ],
           { stdio: 'inherit' }
         );
