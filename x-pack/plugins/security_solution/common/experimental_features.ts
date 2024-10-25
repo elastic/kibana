@@ -183,10 +183,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
-  /*
-   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
-   */
-  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -240,6 +236,11 @@ export const allowedExperimentalValues = Object.freeze({
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

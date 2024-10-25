@@ -8,8 +8,24 @@
 import React from 'react';
 import { coreStartMock, render } from '../../helpers/test_helper';
 import { SettingsPage } from './settings_page';
+import { useKnowledgeBase } from '@kbn/ai-assistant';
+
+jest.mock('@kbn/ai-assistant');
+
+const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
 
 describe('Settings Page', () => {
+  const appContextValue = {
+    config: { spacesEnabled: true, visibilityEnabled: true, logSourcesEnabled: true },
+    setBreadcrumbs: () => {},
+  };
+  useKnowledgeBaseMock.mockReturnValue({
+    status: {
+      value: {
+        enabled: true,
+      },
+    },
+  });
   it('should navigate to home when not authorized', () => {
     render(<SettingsPage />, {
       coreStart: {
@@ -21,13 +37,16 @@ describe('Settings Page', () => {
           },
         },
       },
+      appContextValue,
     });
 
     expect(coreStartMock.application.navigateToApp).toBeCalledWith('home');
   });
 
   it('should render settings and knowledge base tabs', () => {
-    const { getByTestId } = render(<SettingsPage />);
+    const { getByTestId } = render(<SettingsPage />, {
+      appContextValue,
+    });
 
     expect(getByTestId('settingsPageTab-settings')).toBeInTheDocument();
     expect(getByTestId('settingsPageTab-knowledge_base')).toBeInTheDocument();
@@ -36,7 +55,7 @@ describe('Settings Page', () => {
   it('should set breadcrumbs', () => {
     const setBreadcrumbs = jest.fn();
     render(<SettingsPage />, {
-      appContextValue: { setBreadcrumbs },
+      appContextValue: { ...appContextValue, setBreadcrumbs },
     });
 
     expect(setBreadcrumbs).toHaveBeenCalledWith([

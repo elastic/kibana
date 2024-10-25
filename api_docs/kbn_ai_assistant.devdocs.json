@@ -803,7 +803,7 @@
         "label": "ConversationView",
         "description": [],
         "signature": [
-          "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scope, }: ConversationViewProps) => React.JSX.Element"
+          "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scopes, }: ConversationViewProps) => React.JSX.Element"
         ],
         "path": "x-pack/packages/kbn-ai-assistant/src/conversation/conversation_view.tsx",
         "deprecated": false,
@@ -814,7 +814,7 @@
             "id": "def-public.ConversationView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  conversationId,\n  navigateToConversation,\n  getConversationHref,\n  newConversationHref,\n  scope,\n}",
+            "label": "{\n  conversationId,\n  navigateToConversation,\n  getConversationHref,\n  newConversationHref,\n  scopes,\n}",
             "description": [],
             "signature": [
               "ConversationViewProps"
@@ -1041,10 +1041,10 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant",
-        "id": "def-public.useScope",
+        "id": "def-public.useScopes",
         "type": "Function",
         "tags": [],
-        "label": "useScope",
+        "label": "useScopes",
         "description": [],
         "signature": [
           "() => ",
@@ -1054,9 +1054,10 @@
             "docId": "kibKbnAiAssistantCommonPluginApi",
             "section": "def-common.AssistantScope",
             "text": "AssistantScope"
-          }
+          },
+          "[]"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_scope.ts",
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_scopes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
