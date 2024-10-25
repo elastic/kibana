@@ -6,7 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { ENTITY_DISPLAY_NAME } from '@kbn/observability-shared-plugin/common';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { Entity } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
@@ -46,11 +48,7 @@ export function EntityName({ entity }: EntityNameProps) {
 
   return href ? (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      data-test-subj="entityNameLink"
-      href={getEntityRedirectUrl()}
-      onClick={handleLinkClick}
-    >
+    <EuiLink data-test-subj="entityNameLink" href={href} onClick={handleLinkClick}>
       {entityName}
     </EuiLink>
   ) : (
