@@ -15,17 +15,19 @@ import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 import { logWarnOnExternalRequest } from './utils';
+import { DeprecationInfo } from '.';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
+  deprecationInfo: DeprecationInfo;
 }
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -42,8 +44,7 @@ export const registerFindRoute = (
         summary: `Search for saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: deprecationInfo,
       },
       validate: {
         query: schema.object({

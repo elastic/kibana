@@ -57,7 +57,20 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
     const access = 'public';
-    registerDeleteRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerDeleteRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

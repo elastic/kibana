@@ -14,17 +14,19 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';
+import { DeprecationInfo } from '.';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
+  deprecationInfo: DeprecationInfo;
 }
 
 export const registerResolveRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.get(
@@ -34,8 +36,7 @@ export const registerResolveRoute = (
         summary: `Resolve a saved object`,
         tags: ['oas-tag:saved objects'],
         access,
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: deprecationInfo,
         description: `Retrieve a single Kibana saved object by ID, using any legacy URL alias if it exists.
         Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved with the resolve API using either its new ID or its old ID.`,
       },

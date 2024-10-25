@@ -18,17 +18,19 @@ import {
   logWarnOnExternalRequest,
   throwIfTypeNotVisibleByAPI,
 } from './utils';
+import { DeprecationInfo } from '.';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
+  deprecationInfo: DeprecationInfo;
 }
 
 export const registerGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.get(
@@ -38,8 +40,7 @@ export const registerGetRoute = (
         summary: `Get a saved object`,
         tags: ['oas-tag:saved objects'],
         access,
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: deprecationInfo,
       },
       validate: {
         params: schema.object({

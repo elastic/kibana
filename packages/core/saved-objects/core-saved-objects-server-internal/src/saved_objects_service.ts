@@ -99,6 +99,7 @@ export interface SavedObjectsSetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   deprecations: DeprecationRegistryProvider;
+  docLinks: DocLinksServiceStart;
 }
 
 /** @internal */
@@ -135,7 +136,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations, docLinks } = setupDeps;
 
     const savedObjectsConfig = await firstValueFrom(
       this.coreContext.configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -164,6 +165,7 @@ export class SavedObjectsService
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
       isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
+      docLinks,
     });
 
     registerCoreObjectTypes(this.typeRegistry);

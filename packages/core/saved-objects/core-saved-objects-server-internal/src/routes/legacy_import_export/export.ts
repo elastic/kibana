@@ -14,6 +14,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { RouteAccess } from '@kbn/core-http-server';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { exportDashboards } from './lib';
+import { DeprecationInfo } from '..';
 
 export const registerLegacyExportRoute = (
   router: InternalSavedObjectRouter,
@@ -22,11 +23,13 @@ export const registerLegacyExportRoute = (
     coreUsageData,
     logger,
     access,
+    legacyDeprecationInfo,
   }: {
     kibanaVersion: string;
     coreUsageData: InternalCoreUsageDataSetup;
     logger: Logger;
     access: RouteAccess;
+    legacyDeprecationInfo: DeprecationInfo;
   }
 ) => {
   router.get(
@@ -39,6 +42,7 @@ export const registerLegacyExportRoute = (
       },
       options: {
         access,
+        deprecated: legacyDeprecationInfo,
         tags: ['api'],
       },
     },

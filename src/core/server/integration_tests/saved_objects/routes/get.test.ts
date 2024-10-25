@@ -82,8 +82,21 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
     const config = setupConfig();
     const access = 'public';
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
 
-    registerGetRoute(router, { config, coreUsageData, logger, access });
+    registerGetRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

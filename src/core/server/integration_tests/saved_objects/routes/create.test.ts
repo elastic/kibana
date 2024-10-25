@@ -60,8 +60,21 @@ describe('POST /api/saved_objects/{type}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
     const access = 'public';
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
 
-    registerCreateRoute(router, { config, coreUsageData, logger, access });
+    registerCreateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes

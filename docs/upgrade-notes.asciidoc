@@ -1477,6 +1477,72 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 ====
 
+[discrete]
+[[deprecation-150267]]
+.Deprecated Saved Objects APIs. (8.7)
+[%collapsible]
+====
+*Details* +
+The following Saved Objects APIs have been deprecated.
++
+[source,text]
+--
+/api/saved_objects/{type}/{id}
+/api/saved_objects/resolve/{type}/{id}
+/api/saved_objects/{type}/{id?}
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_find
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_bulk_get
+/api/saved_objects/_bulk_create
+/api/saved_objects/_bulk_resolve
+/api/saved_objects/_bulk_update
+/api/saved_objects/_bulk_delete
+--
+For more information, refer to {kibana-pull}150267[#150267].
+
+*Impact* +
+Use dedicated public APIs instead, for example use <<data-views-api>> to manage Data Views.
+
+====
+
+* GET endpoint
+* The `pkgkey` path parameter in the packages endpoint is split.
+* The `response` and `list` properties are renamed to `items` or `item` in some
+responses.
+
+For more information, refer to {kibana-pull}119494[#119494].
+
+*Impact* +
+When you upgrade to 8.0.0, use the following API changes:
+
+* Use `enrollment_api_keys` instead of `enrollment-api-keys`.
+
+* Use `agent_status` instead of `agent-status`.
+
+* Use `service_tokens` instead of `service-tokens`.
+
+* Use `/epm/packages/{packageName}/{version}` instead of `/epm/packages/{pkgkey}`.
+
+* Use `items[]` instead of `response[]` in:
++
+[source,text]
+--
+/api/fleet/enrollment_api_keys
+/api/fleet/agents
+/epm/packages/
+/epm/categories
+/epm/packages/_bulk
+/epm/packages/limited
+/epm/packages/{packageName}/{version} <1>
+--
+<1> Use `items[]` when the verb is `POST` or `DELETE`. Use `item` when the verb
+is `GET` or `PUT`.
+
+For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
+
+====
+
 [float]
 ==== Kibana platform
 

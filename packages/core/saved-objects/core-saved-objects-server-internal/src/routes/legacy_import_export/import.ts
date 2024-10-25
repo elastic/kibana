@@ -14,6 +14,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { RouteAccess } from '@kbn/core-http-server';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { importDashboards } from './lib';
+import { DeprecationInfo } from '..';
 
 export const registerLegacyImportRoute = (
   router: InternalSavedObjectRouter,
@@ -22,11 +23,13 @@ export const registerLegacyImportRoute = (
     coreUsageData,
     logger,
     access,
+    legacyDeprecationInfo,
   }: {
     maxImportPayloadBytes: number;
     coreUsageData: InternalCoreUsageDataSetup;
     logger: Logger;
     access: RouteAccess;
+    legacyDeprecationInfo: DeprecationInfo;
   }
 ) => {
   router.post(
@@ -50,6 +53,7 @@ export const registerLegacyImportRoute = (
         body: {
           maxBytes: maxImportPayloadBytes,
         },
+        deprecated: legacyDeprecationInfo,
       },
     },
     async (context, request, response) => {

@@ -14,6 +14,7 @@ import type {
   IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
@@ -34,6 +35,14 @@ import { registerLegacyExportRoute } from './legacy_import_export/export';
 import { registerBulkResolveRoute } from './bulk_resolve';
 import { registerDeleteUnknownTypesRoute } from './deprecations';
 
+export interface DeprecationInfo {
+  documentationUrl: string;
+  severity: 'warning';
+  reason: {
+    type: 'remove';
+  };
+}
+
 export function registerRoutes({
   http,
   coreUsageData,
@@ -43,6 +52,7 @@ export function registerRoutes({
   kibanaVersion,
   kibanaIndex,
   isServerless,
+  docLinks,
 }: {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
@@ -52,23 +62,71 @@ export function registerRoutes({
   kibanaVersion: string;
   kibanaIndex: string;
   isServerless: boolean;
+  docLinks: DocLinksServiceStart;
 }) {
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
   const internalOnServerless = isServerless ? 'internal' : 'public';
 
-  registerGetRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerResolveRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  const deprecationInfo = {
+    documentationUrl: `${docLinks.links.management.savedObjectsApiList}`,
+    severity: 'warning' as const,
+    reason: {
+      type: 'remove' as const,
+    },
+  };
+
+  const legacyDeprecationInfo = {
+    documentationUrl: `${docLinks.links.kibana.dashboardImportExport}`,
+    severity: 'warning' as const,
+    reason: {
+      type: 'remove' as const,
+    },
+  };
+
+  registerGetRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerResolveRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
   registerCreateRoute(router, {
     config,
     coreUsageData,
     logger,
     access: internalOnServerless,
+    deprecationInfo,
   });
-  registerDeleteRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerFindRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerUpdateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerDeleteRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerFindRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerUpdateRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
   registerBulkGetRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
   registerBulkCreateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
   registerBulkResolveRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
@@ -85,12 +143,14 @@ export function registerRoutes({
     coreUsageData,
     logger,
     access: internalOnServerless,
+    legacyDeprecationInfo,
   });
   registerLegacyExportRoute(legacyRouter, {
     kibanaVersion,
     coreUsageData,
     logger,
     access: internalOnServerless,
+    legacyDeprecationInfo,
   });
 
   const internalRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>(
