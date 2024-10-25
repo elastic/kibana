@@ -90,7 +90,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
@@ -190,11 +189,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           types: rawParams.filters.types,
           tags: tagIds,
         };
-        // TODO technically a subtle bug here
-        // this term won't be set until the next time the debounce is fired
-        // so the SearchOption won't highlight anything if only one call is fired
-        // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
-        setSearchTerm(rawParams.term ?? '');
 
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
@@ -373,7 +367,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
-      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
       listProps={{
         className: 'eui-yScroll',
         css: css`
