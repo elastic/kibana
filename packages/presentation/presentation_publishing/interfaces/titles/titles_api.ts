@@ -41,13 +41,13 @@ export const initializeTitles = (
 
   const setPanelTitle = (value: string | undefined) => {
     if (value !== panelTitle.value) panelTitle.next(value);
-  }
+  };
   const setHidePanelTitle = (value: boolean | undefined) => {
     if (value !== hidePanelTitle.value) hidePanelTitle.next(value);
-  }
+  };
   const setPanelDescription = (value: string | undefined) => {
     if (value !== panelDescription.value) panelDescription.next(value);
-  }
+  };
 
   const titleComparators: StateComparators<SerializedTitles> = {
     title: [panelTitle, setPanelTitle],
