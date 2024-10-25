@@ -11,7 +11,6 @@ export {
 } from './schemas/latest';
 export type {
   FindMaintenanceWindowsRequestQuery,
-  FindMaintenanceWindowsResponseBody,
   FindMaintenanceWindowsResponse,
 } from './types/latest';
 
@@ -21,6 +20,5 @@ export {
 } from './schemas/v1';
 export type {
   FindMaintenanceWindowsRequestQuery as FindMaintenanceWindowsRequestQueryV1,
-  FindMaintenanceWindowsResponseBody as FindMaintenanceWindowsResponseBodyV1,
   FindMaintenanceWindowsResponse as FindMaintenanceWindowsResponseV1,
 } from './types/v1';

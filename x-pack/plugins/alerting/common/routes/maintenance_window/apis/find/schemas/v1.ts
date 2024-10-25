@@ -8,39 +8,42 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowResponseSchemaV1 } from '../../../response';
 
-const MAX_DOCS_PER_PAGE = 10000
+const MAX_DOCS_PER_PAGE = 10000;
 
-export const findMaintenanceWindowsRequestQuerySchema = schema.object({
-  page: schema.maybe(
-    schema.number({
-      defaultValue: 1,
-      min: 1,
-      max: MAX_DOCS_PER_PAGE,
-      meta: {
-        description: 'The page number to return.',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      defaultValue: 20,
-      min: 0,
-      max: 100,
-      meta: {
-        description: 'The number of maintenance windows to return per page.',
-      },
-    })
-  ),
-}, {
-  validate: (params) => {
-    const pageAsNumber = params.page ?? 0;
-    const perPageAsNumber = params.per_page ?? 0;
-
-    if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
-      return `The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`;
-    }
+export const findMaintenanceWindowsRequestQuerySchema = schema.object(
+  {
+    page: schema.maybe(
+      schema.number({
+        defaultValue: 1,
+        min: 1,
+        max: MAX_DOCS_PER_PAGE,
+        meta: {
+          description: 'The page number to return.',
+        },
+      })
+    ),
+    per_page: schema.maybe(
+      schema.number({
+        defaultValue: 20,
+        min: 0,
+        max: 100,
+        meta: {
+          description: 'The number of maintenance windows to return per page.',
+        },
+      })
+    ),
   },
-});
+  {
+    validate: (params) => {
+      const pageAsNumber = params.page ?? 0;
+      const perPageAsNumber = params.per_page ?? 0;
+
+      if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
+        return `The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`;
+      }
+    },
+  }
+);
 
 export const findMaintenanceWindowsResponseBodySchema = schema.object({
   page: schema.number(),

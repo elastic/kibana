@@ -38,6 +38,45 @@ describe('MaintenanceWindowClient - find', () => {
     jest.useRealTimers();
   });
 
+  it('throws an error if page is string', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    savedObjectsClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+          id: 'test-1',
+        },
+        {
+          attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+          id: 'test-2',
+        },
+      ],
+      page: 1,
+      per_page: 5,
+    } as unknown as SavedObjectsFindResponse);
+
+    await expect(
+      findMaintenanceWindows(mockContext, { page: 'dfsd' as unknown as number, perPage: 10 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Error validating find maintenance windows data - [page]: expected value of type [number] but got [string]"'
+    );
+  });
+
+  it('throws an error if savedObjectsClient.find will throw an error', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    savedObjectsClient.find.mockImplementation(() => {
+      throw new Error('something went wrong!');
+    });
+
+    await expect(
+      findMaintenanceWindows(mockContext, { page: 1, perPage: 10 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to find maintenance window, Error: Error: something went wrong!: something went wrong!"'
+    );
+  });
+
   it('should find maintenance windows', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
     const spy = jest.spyOn(findMaintenanceWindowsParamsSchema, 'validate');

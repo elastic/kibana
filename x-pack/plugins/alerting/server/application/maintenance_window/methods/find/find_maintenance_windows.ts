@@ -29,7 +29,9 @@ export async function findMaintenanceWindows(
   try {
     const result = await findMaintenanceWindowSo({
       savedObjectsClient,
-      ...(params ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage } } : {}),
+      ...(params
+        ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage } }
+        : {}),
     });
 
     return {

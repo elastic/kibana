@@ -11,13 +11,9 @@ import {
   findMaintenanceWindowsRequestQuerySchema,
 } from '..';
 
-export type FindMaintenanceWindowsResponseBody = TypeOf<
+export type FindMaintenanceWindowsResponse = TypeOf<
   typeof findMaintenanceWindowsResponseBodySchema
 >;
 export type FindMaintenanceWindowsRequestQuery = TypeOf<
   typeof findMaintenanceWindowsRequestQuerySchema
 >;
-
-export interface FindMaintenanceWindowsResponse {
-  body: FindMaintenanceWindowsResponseBody;
-}

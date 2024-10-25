@@ -65,11 +65,10 @@ export const findMaintenanceWindowsRoute = (
         const findResult: FindMaintenanceWindowsResult = await maintenanceWindowClient.find(
           options
         );
-
-        const response: FindMaintenanceWindowsResponseV1 =
+        const responseBody: FindMaintenanceWindowsResponseV1 =
           transformFindMaintenanceWindowResponseV1(findResult);
 
-        return res.ok(response);
+        return res.ok({ body: responseBody });
       })
     )
   );

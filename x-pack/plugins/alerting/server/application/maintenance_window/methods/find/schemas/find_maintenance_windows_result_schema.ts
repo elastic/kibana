@@ -12,5 +12,5 @@ export const findMaintenanceWindowsResultSchema = schema.object({
   page: schema.number(),
   perPage: schema.number(),
   data: schema.arrayOf(maintenanceWindowSchema),
-  total: schema.number()
+  total: schema.number(),
 });

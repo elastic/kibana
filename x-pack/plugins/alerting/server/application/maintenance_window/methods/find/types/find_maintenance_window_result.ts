@@ -6,6 +6,6 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { findMaintenanceWindowsResultSchema, findMaintenanceWindowsParamsSchema } from '../schemas';
+import { findMaintenanceWindowsResultSchema } from '../schemas';
 
 export type FindMaintenanceWindowsResult = TypeOf<typeof findMaintenanceWindowsResultSchema>;

@@ -14,13 +14,11 @@ export const transformFindMaintenanceWindowResponse = (
   result: FindMaintenanceWindowsResult
 ): FindMaintenanceWindowsResponseV1 => {
   return {
-    body: {
-      page: result.page,
-      per_page: result.perPage,
-      total: result.total,
-      data: result.data.map((maintenanceWindow: MaintenanceWindow) =>
-        transformMaintenanceWindowToResponseV1(maintenanceWindow)
-      ),
-    },
+    page: result.page,
+    per_page: result.perPage,
+    total: result.total,
+    data: result.data.map((maintenanceWindow: MaintenanceWindow) =>
+      transformMaintenanceWindowToResponseV1(maintenanceWindow)
+    ),
   };
 };
