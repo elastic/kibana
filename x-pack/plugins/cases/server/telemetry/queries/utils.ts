@@ -48,10 +48,10 @@ export const getCountsAggregationQuery = (savedObjectType: string) => ({
   },
 });
 
-export const getAlertsCountsAggregationQuery = (savedObjectType: string) => ({
+export const getAlertsCountsAggregationQuery = () => ({
   counts: {
     date_range: {
-      field: `${savedObjectType}.attributes.created_at`,
+      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_at`,
       format: 'dd/MM/YYYY',
       ranges: [
         { from: 'now-1d', to: 'now' },
@@ -62,7 +62,7 @@ export const getAlertsCountsAggregationQuery = (savedObjectType: string) => ({
     aggregations: {
       topAlertsPerBucket: {
         cardinality: {
-          field: `${savedObjectType}.attributes.alertId`,
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
         },
       },
     },
@@ -98,22 +98,22 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
   },
 });
 
-export const getAlertsMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => ({
+export const getAlertsMaxBucketOnCaseAggregationQuery = () => ({
   references: {
     nested: {
-      path: `${savedObjectType}.references`,
+      path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
     },
     aggregations: {
       cases: {
         filter: {
           term: {
-            [`${savedObjectType}.references.type`]: CASE_SAVED_OBJECT,
+            [`${CASE_COMMENT_SAVED_OBJECT}.references.type`]: CASE_SAVED_OBJECT,
           },
         },
         aggregations: {
           ids: {
             terms: {
-              field: `${savedObjectType}.references.id`,
+              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
             },
             aggregations: {
               reverse: {
@@ -121,7 +121,7 @@ export const getAlertsMaxBucketOnCaseAggregationQuery = (savedObjectType: string
                 aggregations: {
                   topAlerts: {
                     cardinality: {
-                      field: `${savedObjectType}.attributes.alertId`,
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
                     },
                   },
                 },
@@ -139,10 +139,10 @@ export const getAlertsMaxBucketOnCaseAggregationQuery = (savedObjectType: string
   },
 });
 
-export const getUniqueAlertCommentsCountQuery = (savedObjectType: string) => ({
+export const getUniqueAlertCommentsCountQuery = () => ({
   uniqueAlertCommentsCount: {
     cardinality: {
-      field: `${savedObjectType}.attributes.alertId`,
+      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
     },
   },
 });
@@ -200,13 +200,11 @@ export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => 
 
 export const getCountsAndMaxAlertsData = async ({
   savedObjectsClient,
-  savedObjectType,
-  filter,
 }: {
   savedObjectsClient: TelemetrySavedObjectsClient;
-  savedObjectType: string;
-  filter?: KueryNode;
 }) => {
+  const filter = getOnlyAlertsCommentsFilter();
+
   const res = await savedObjectsClient.find<
     unknown,
     {
@@ -218,12 +216,12 @@ export const getCountsAndMaxAlertsData = async ({
     page: 0,
     perPage: 0,
     filter,
-    type: savedObjectType,
+    type: CASE_COMMENT_SAVED_OBJECT,
     namespaces: ['*'],
     aggs: {
-      ...getAlertsCountsAggregationQuery(savedObjectType),
-      ...getAlertsMaxBucketOnCaseAggregationQuery(savedObjectType),
-      ...getUniqueAlertCommentsCountQuery(savedObjectType),
+      ...getAlertsCountsAggregationQuery(),
+      ...getAlertsMaxBucketOnCaseAggregationQuery(),
+      ...getUniqueAlertCommentsCountQuery(),
     },
   });
 
