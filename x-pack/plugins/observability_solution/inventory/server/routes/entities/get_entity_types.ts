@@ -15,12 +15,15 @@ export async function getEntityTypes({
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
 }) {
-  const entityTypesEsqlResponse = await inventoryEsClient.esql('get_entity_types', {
-    query: `FROM ${ENTITIES_LATEST_ALIAS}
+  const entityTypesEsqlResponse = await inventoryEsClient.esql<{ [ENTITY_TYPE]: string }>(
+    'get_entity_types',
+    {
+      query: `FROM ${ENTITIES_LATEST_ALIAS}
      | ${getBuiltinEntityDefinitionIdESQLWhereClause()}
-     | STATS count = COUNT(${ENTITY_TYPE}) BY ${ENTITY_TYPE}
+     | STATS BY ${ENTITY_TYPE}
     `,
-  });
+    }
+  );
 
-  return entityTypesEsqlResponse.values.map(([_, val]) => val as string);
+  return entityTypesEsqlResponse.flatMap((types) => Object.values(types));
 }

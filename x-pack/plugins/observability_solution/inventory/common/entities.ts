@@ -17,6 +17,7 @@ import {
 import { decode, encode } from '@kbn/rison';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { AgentName } from '@kbn/elastic-agent-utils';
 
 export const entityColumnIdsRt = t.union([
   t.literal(ENTITY_DISPLAY_NAME),
@@ -121,4 +122,25 @@ export type EntityGroup = {
 
 export type InventoryEntityLatest = z.infer<typeof entityLatestSchema> & {
   alertsCount?: number;
+};
+
+export const isHostEntity = (
+  entity: InventoryEntityLatest
+): entity is InventoryEntityLatest & { cloud?: { provider: string } } => {
+  return entity.entity.type === 'host';
+};
+
+export const isContainerEntity = (
+  entity: InventoryEntityLatest
+): entity is InventoryEntityLatest & { cloud?: { provider: string } } => {
+  return entity.entity.type === 'container';
+};
+
+export const isServiceEntity = (
+  entity: InventoryEntityLatest
+): entity is InventoryEntityLatest & {
+  agent?: { name: AgentName };
+  service: { name: string; environment: string };
+} => {
+  return entity.entity.type === 'service';
 };

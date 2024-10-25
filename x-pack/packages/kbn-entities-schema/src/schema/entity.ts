@@ -11,7 +11,7 @@ import { arrayOfStringsSchema } from './common';
 export const entityBaseSchema = z.object({
   id: z.string(),
   type: z.string(),
-  identityFields: arrayOfStringsSchema,
+  identityFields: z.union([arrayOfStringsSchema, z.string()]),
   displayName: z.string(),
   metrics: z.optional(z.record(z.string(), z.number())),
   definitionVersion: z.string(),

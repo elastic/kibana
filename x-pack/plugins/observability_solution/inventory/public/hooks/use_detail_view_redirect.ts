@@ -14,7 +14,12 @@ import { useCallback } from 'react';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
-import type { InventoryEntityLatest } from '../../common/entities';
+import {
+  isHostEntity,
+  type InventoryEntityLatest,
+  isContainerEntity,
+  isServiceEntity,
+} from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
@@ -41,7 +46,7 @@ export const useDetailViewRedirect = () => {
 
   const getSingleIdentityFieldValue = useCallback(
     (latestEntity: InventoryEntityLatest) => {
-      const identityFields = castArray(latestEntity.entity.type);
+      const identityFields = castArray(latestEntity.entity.identityFields);
       if (identityFields.length > 1) {
         throw new Error(`Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`);
       }
@@ -54,31 +59,25 @@ export const useDetailViewRedirect = () => {
 
   const getDetailViewRedirectUrl = useCallback(
     (latestEntity: InventoryEntityLatest) => {
-      const type = latestEntity.entity.type;
       const identityValue = getSingleIdentityFieldValue(latestEntity);
 
-      switch (type) {
-        case ENTITY_TYPES.HOST:
-        case ENTITY_TYPES.CONTAINER:
-          return assetDetailsLocator?.getRedirectUrl({
-            assetId: identityValue,
-            assetType: type,
-          });
-
-        case 'service':
-          return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: identityValue,
-            // service.environemnt is not part of entity.identityFields
-            // we need to manually get its value
-            environment:
-              'service' in latestEntity
-                ? (latestEntity.service as { environment?: string }).environment
-                : undefined,
-          });
-
-        default:
-          return undefined;
+      if (isHostEntity(latestEntity) || isContainerEntity(latestEntity)) {
+        return assetDetailsLocator?.getRedirectUrl({
+          assetId: identityValue,
+          assetType: latestEntity.entity.type,
+        });
       }
+
+      if (isServiceEntity(latestEntity)) {
+        return serviceOverviewLocator?.getRedirectUrl({
+          serviceName: identityValue,
+          // service.environemnt is not part of entity.identityFields
+          // we need to manually get its value
+          environment: latestEntity.service.environment,
+        });
+      }
+
+      return undefined;
     },
     [assetDetailsLocator, getSingleIdentityFieldValue, serviceOverviewLocator]
   );

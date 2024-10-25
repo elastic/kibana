@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { withSpan } from '@kbn/apm-utils';
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { esqlResultToPlainObjects } from '../utils/esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
@@ -25,7 +26,10 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  esql(operationName: string, parameters: EsqlQueryRequest): Promise<ESQLSearchResponse>;
+  esql<TDocument = unknown>(
+    operationName: string,
+    parameters: EsqlQueryRequest
+  ): Promise<TDocument[]>;
   client: ElasticsearchClient;
 }
 
@@ -40,7 +44,7 @@ export function createObservabilityEsClient({
 }): ObservabilityElasticsearchClient {
   return {
     client,
-    esql(operationName: string, parameters: EsqlQueryRequest) {
+    esql<TDocument = unknown>(operationName: string, parameters: EsqlQueryRequest) {
       logger.trace(() => `Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);
       return withSpan({ name: operationName, labels: { plugin } }, () => {
         return client.esql.query(
@@ -54,7 +58,7 @@ export function createObservabilityEsClient({
       })
         .then((response) => {
           logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
-          return response as unknown as ESQLSearchResponse;
+          return esqlResultToPlainObjects<TDocument>(response as unknown as ESQLSearchResponse);
         })
         .catch((error) => {
           throw error;

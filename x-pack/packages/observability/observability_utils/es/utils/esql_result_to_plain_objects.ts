@@ -6,17 +6,14 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { castArray } from 'lodash';
 import { unflattenObject } from '../../object/unflatten_object';
 
-export function esqlResultToPlainObjects<T extends Record<string, any>>(
-  result: ESQLSearchResponse,
-  knownArrayFields?: string[]
-): T[] {
-  const knownArrayFieldsSet = new Set(knownArrayFields);
+export function esqlResultToPlainObjects<TDocument = unknown>(
+  result: ESQLSearchResponse
+): TDocument[] {
   return result.values.map((row) => {
     return unflattenObject(
-      row.reduce<Record<string, unknown>>((acc, value, index) => {
+      row.reduce<Record<string, any>>((acc, value, index) => {
         const column = result.columns[index];
 
         if (!column) {
@@ -26,11 +23,11 @@ export function esqlResultToPlainObjects<T extends Record<string, any>>(
         // Removes the type suffix from the column name
         const name = column.name.replace(/\.(text|keyword)$/, '');
         if (!acc[name]) {
-          acc[column.name] = knownArrayFieldsSet.has(column.name) ? castArray(value) : value;
+          acc[column.name] = value;
         }
 
         return acc;
       }, {})
-    );
-  }) as T[];
+    ) as TDocument;
+  });
 }

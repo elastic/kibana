@@ -6,31 +6,26 @@
  */
 
 import React from 'react';
-import { AGENT_NAME, CLOUD_PROVIDER, ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { InventoryEntityLatest } from '../../../common/entities';
+import {
+  isHostEntity,
+  type InventoryEntityLatest,
+  isContainerEntity,
+  isServiceEntity,
+} from '../../../common/entities';
 
 interface EntityIconProps {
   entity: InventoryEntityLatest;
 }
 
-type NotNullableCloudProvider = Exclude<CloudProvider, null>;
-
-const getSingleValue = <T,>(value?: T | T[] | null): T | undefined => {
-  return value == null ? undefined : Array.isArray(value) ? value[0] : value;
-};
-
 export function EntityIcon({ entity }: EntityIconProps) {
-  const entityType = entity.entity.type;
   const defaultIconSize = euiThemeVars.euiSizeL;
 
-  if (entityType === ENTITY_TYPES.HOST || entityType === ENTITY_TYPES.CONTAINER) {
-    const cloudProvider = getSingleValue(
-      entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
-    );
+  if (isHostEntity(entity) || isContainerEntity(entity)) {
+    const cloudProvider = entity.cloud?.provider;
+
     return (
       <EuiFlexGroup
         style={{ width: defaultIconSize, height: defaultIconSize }}
@@ -39,7 +34,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
       >
         <EuiFlexItem grow={false}>
           <CloudProviderIcon
-            cloudProvider={cloudProvider}
+            cloudProvider={cloudProvider as CloudProvider | undefined}
             size="m"
             title={cloudProvider}
             role="presentation"
@@ -49,9 +44,8 @@ export function EntityIcon({ entity }: EntityIconProps) {
     );
   }
 
-  if (entityType === ENTITY_TYPES.SERVICE) {
-    const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
-    return <AgentIcon agentName={agentName} role="presentation" />;
+  if (isServiceEntity(entity)) {
+    return <AgentIcon agentName={entity.agent?.name} role="presentation" />;
   }
 
   if (entityType.startsWith('kubernetes')) {

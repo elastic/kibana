@@ -674,12 +674,15 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
-export interface ESQLSearchResponse {
-  columns: ESQLColumn[];
+export interface ESQLSearchResponse<
+  TColumn extends ESQLColumn = ESQLColumn,
+  TRow extends ESQLRow = ESQLRow
+> {
+  columns: TColumn[];
   // In case of ?drop_null_columns in the query, then
   // all_columns will have available and empty fields
   // while columns only the available ones (non nulls)
-  all_columns?: ESQLColumn[];
+  all_columns?: TRow[];
   values: ESQLRow[];
   took?: number;
   _clusters?: estypes.ClusterStatistics;
