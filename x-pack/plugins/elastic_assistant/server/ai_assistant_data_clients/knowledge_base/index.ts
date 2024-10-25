@@ -221,7 +221,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           inference_config: {
             service: 'elasticsearch',
             service_settings: {
-              num_allocations: 1,
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 8,
+              },
               num_threads: 1,
               model_id: elserId,
             },
@@ -339,7 +343,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
-          await loadSecurityLabs(this, this.options.logger);
+          loadSecurityLabs(this, this.options.logger);
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
@@ -349,7 +353,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(`Error setting up Knowledge Base: ${e.message}`);
     }
-    this.options.setIsKBSetupInProgress(false);
   };
 
   /**

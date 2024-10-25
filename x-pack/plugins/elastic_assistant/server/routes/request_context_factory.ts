@@ -145,6 +145,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           currentUser,
         });
       }),
+
+      setIsKBSetupInProgress: memoize(() => {
+        if (this.assistantService.getIsKBSetupInProgress()) {
+          return this.assistantService.setIsKBSetupInProgress(false);
+        }
+      }),
     };
   }
 }

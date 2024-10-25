@@ -131,6 +131,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  setIsKBSetupInProgress: (isInProgress: boolean) => void;
   inference: InferenceServerStart;
   telemetry: AnalyticsServiceSetup;
 }
