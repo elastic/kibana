@@ -14,7 +14,6 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { escapeKuery } from '@kbn/es-query';
 
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
@@ -55,26 +54,6 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             return checkResponse;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-
-          const currentUser = ctx.elasticAssistant.getCurrentUser();
-          const userFilter = currentUser?.username
-            ? `name: "${currentUser?.username}"`
-            : `id: "${currentUser?.profile_uid}"`;
-
-          const escapedTitle = escapeKuery(request.body.title);
-
-          const result = await dataClient?.findDocuments({
-            perPage: 100,
-            page: 1,
-            filter: `users:{ ${userFilter} } AND title:${escapedTitle}`,
-            fields: ['title'],
-          });
-          if (result?.data != null && result.total > 0) {
-            return assistantResponse.error({
-              statusCode: 409,
-              body: `conversation title: "${request.body.title}" already exists`,
-            });
-          }
 
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,

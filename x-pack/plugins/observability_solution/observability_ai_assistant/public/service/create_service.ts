@@ -20,13 +20,13 @@ export function createService({
   analytics,
   coreStart,
   enabled,
-  scope,
+  scopes,
   scopeIsMutable,
 }: {
   analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
   enabled: boolean;
-  scope: AssistantScope;
+  scopes: [AssistantScope];
   scopeIsMutable: boolean;
 }): ObservabilityAIAssistantService {
   const apiClient = createCallObservabilityAIAssistantAPI(coreStart);
@@ -38,13 +38,13 @@ export function createService({
   ]);
   const predefinedConversation$ = new Subject<{ messages: Message[]; title?: string }>();
 
-  const scope$ = new BehaviorSubject<AssistantScope>(scope);
+  const scope$ = new BehaviorSubject<AssistantScope[]>(scopes);
 
   const getScreenContexts = () => {
-    const currentScope = scope$.value;
+    const currentScopes = scope$.value;
     const screenContexts = screenContexts$.value.map(({ starterPrompts, ...rest }) => ({
       ...rest,
-      starterPrompts: starterPrompts?.filter(filterScopes(currentScope)),
+      starterPrompts: starterPrompts?.filter(filterScopes(currentScopes)),
     }));
     return screenContexts;
   };
@@ -58,7 +58,13 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ analytics, apiClient, signal, registrations, scope$ });
+      return await mod.createChatService({
+        analytics,
+        apiClient,
+        signal,
+        registrations,
+        scope$,
+      });
     },
     callApi: apiClient,
     getScreenContexts,
@@ -103,12 +109,12 @@ export function createService({
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },
-    setScope: (newScope: AssistantScope) => {
+    setScopes: (newScopes: AssistantScope[]) => {
       if (!scopeIsMutable) {
-        scope$.next(newScope);
+        scope$.next(newScopes);
       }
     },
-    getScope: () => scope$.value,
+    getScopes: () => scope$.value,
     scope$,
   };
 }
