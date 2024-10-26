@@ -72,7 +72,17 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
-
+  const mockLog = {
+    trace: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    fatal: jest.fn(),
+    log: jest.fn(),
+    error: jest.fn(),
+    get: jest.fn(),
+    isLevelEnabled: jest.fn(),
+  };
   const setupOptions = ({
     createNewCopies = false,
     getTypeImpl = (type: string) =>
@@ -102,6 +112,7 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
       importHooks,
       managed,
+      log: mockLog,
     };
   };
   const createObject = ({
