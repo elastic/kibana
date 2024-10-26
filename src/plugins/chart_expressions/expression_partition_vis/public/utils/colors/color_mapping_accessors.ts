@@ -12,6 +12,7 @@ import { lightenColor } from '@kbn/charts-plugin/public';
 import { MultiFieldKey } from '@kbn/data-plugin/common';
 import { getColorFactory } from '@kbn/coloring';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import chroma from 'chroma-js';
 import { ChartTypes } from '../../../common/types';
 
 export function getCategoryKeys(category: string | MultiFieldKey): string | string[] {
@@ -35,7 +36,7 @@ const getPieFillColor =
     const category = getCategoryKeys(path[2].value);
     const color = getColorFn(category);
     // increase the lightness of the color on each layer.
-    return lightenColor(color, layerIndex + 1, numOfLayers);
+    return chroma(color).alpha(1 - (layerIndex + 1) * 0.3);
   };
 
 /**

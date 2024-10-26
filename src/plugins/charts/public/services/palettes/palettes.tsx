@@ -9,18 +9,18 @@
 
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import {
-  // euiPaletteCool,
-  // euiPaletteGray,
-  // euiPaletteRed,
-  // euiPaletteGreen,
-  // euiPaletteWarm,
-  // euiPaletteForStatus,
-  // euiPaletteForTemperature,
-  // euiPaletteComplementary,
-  // euiPaletteColorBlind,
-  euiPaletteColorBlindBehindText,
-} from '@elastic/eui';
+// import {
+// euiPaletteCool,
+// euiPaletteGray,
+// euiPaletteRed,
+// euiPaletteGreen,
+// euiPaletteWarm,
+// euiPaletteForStatus,
+// euiPaletteForTemperature,
+// euiPaletteComplementary,
+// euiPaletteColorBlind,
+// euiPaletteColorBlindBehindText,
+// } from '@elastic/eui';
 import {
   euiPaletteCool,
   euiPaletteGray,
@@ -31,6 +31,7 @@ import {
   euiPaletteForTemperature,
   euiPaletteComplementary,
   euiPaletteColorBlind,
+  euiPaletteColorBlindBehindText,
 } from '@kbn/palettes';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
@@ -41,8 +42,8 @@ import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
-  const colors = euiPaletteColorBlind({ rotations: 2 });
-  const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
+  const colors = euiPaletteColorBlind({ rotations: 3 });
+  const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 3 });
   const behindTextColorMap: Record<string, string> = Object.fromEntries(
     zip(colors, behindTextColors)
   );
@@ -69,7 +70,9 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
       return outputColor;
     }
 
-    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
+    return chroma(outputColor)
+      .alpha(1 - (series.length - 1) * 0.3)
+      .hex();
   }
   return {
     id: 'default',
