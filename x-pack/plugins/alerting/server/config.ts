@@ -60,24 +60,22 @@ const rulesSchema = schema.object({
   }),
 });
 
-export const configSchema = schema.object(
-  {
-    healthCheck: schema.object({
-      interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
-    }),
-    invalidateApiKeysTask: schema.object({
-      interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
-      removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
-    }),
-    enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
-    cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
-    rules: rulesSchema,
-    rulesSettings: schema.object({
-      cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
-    }),
-  },
-  { unknowns: 'allow' }
-);
+export const configSchema = schema.object({
+  healthCheck: schema.object({
+    interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
+  }),
+  invalidateApiKeysTask: schema.object({
+    interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
+    removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
+  }),
+  maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
+  enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
+  cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
+  rules: rulesSchema,
+  rulesSettings: schema.object({
+    cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
+  }),
+});
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
