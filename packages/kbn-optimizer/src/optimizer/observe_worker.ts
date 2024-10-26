@@ -67,6 +67,14 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
             : []),
         ],
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        env: {
+          // NOTE: with the default 2000 limit we get a lot of recursive watcher recreations (introduced in watchpack 2000)
+          // which makes the experience horrible and the performance between 2.5x to 3x worse when watching.
+          // If that fails in other mac machines with lower defaults for maxfiles and maxfilesperproc
+          // or just low powerful ones we need to default to polling instead of relying in the OS events watcher system.
+          // That can be done in the worker/run_compilers file.
+          WATCHPACK_WATCHER_LIMIT: '4000',
+        },
       });
 
       return {
