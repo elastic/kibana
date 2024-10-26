@@ -1744,9 +1744,9 @@
   version "0.0.1"
   resolved "file:./elastic_eui_theme_common_0.0.1_126_007.tgz#8131ec79992530787346857411739fb69b32d979"
 
-"@elastic/eui@file:./elastic_eui_97.0.0_126_007.tgz":
+"@elastic/eui@file:./elastic_eui_97.0.0_126_008.tgz":
   version "97.0.0"
-  resolved "file:./elastic_eui_97.0.0_126_007.tgz#8ba96701607ec69f6b95ecd87991c1d96388a1c9"
+  resolved "file:./elastic_eui_97.0.0_126_008.tgz#45372a1935ef6c71340dadae2e1199fc13c8cab2"
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
