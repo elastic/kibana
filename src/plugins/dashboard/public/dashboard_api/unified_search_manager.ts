@@ -202,7 +202,7 @@ export function initializeUnifiedSearchManager(
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
-      unifiedSearchFilters$
+      unifiedSearchFilters$,
     },
     comparators: {
       filters: [unifiedSearchFilters$, setAndSyncUnifiedSearchFilters, fastIsEqual],
