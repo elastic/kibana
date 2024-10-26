@@ -293,7 +293,7 @@
         "label": "AddDataPanel",
         "description": [],
         "signature": [
-          "({\n  content,\n  actions,\n  onDissmiss,\n  onLearnMore,\n  onTryIt,\n  onAddData,\n  'data-test-subj': dataTestSubj,\n}: ",
+          "({\n  content,\n  actions,\n  onDismiss,\n  onLearnMore,\n  onTryIt,\n  onAddData,\n  'data-test-subj': dataTestSubj,\n}: ",
           {
             "pluginId": "observabilityShared",
             "scope": "public",
@@ -312,7 +312,7 @@
             "id": "def-public.AddDataPanel.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  content,\n  actions,\n  onDissmiss,\n  onLearnMore,\n  onTryIt,\n  onAddData,\n  'data-test-subj': dataTestSubj,\n}",
+            "label": "{\n  content,\n  actions,\n  onDismiss,\n  onLearnMore,\n  onTryIt,\n  onAddData,\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
             "signature": [
               {
@@ -2381,10 +2381,10 @@
           },
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-public.AddDataPanelProps.onDissmiss",
+            "id": "def-public.AddDataPanelProps.onDismiss",
             "type": "Function",
             "tags": [],
-            "label": "onDissmiss",
+            "label": "onDismiss",
             "description": [],
             "signature": [
               "(() => void) | undefined"
