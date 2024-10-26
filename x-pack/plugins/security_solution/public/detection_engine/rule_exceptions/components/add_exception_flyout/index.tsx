@@ -32,7 +32,10 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import {
+  WildCardWithWrongOperatorCallout,
+  PartialCodeSignatureCallout,
+} from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -158,6 +161,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireTime,
       expireErrorExists,
       wildcardWarningExists,
+      partialCodeSignatureWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -189,6 +193,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       dispatch({
         type: 'setWildcardWithWrongOperator',
         warningExists: hasWrongOperatorWithWildcard(items),
+      });
+      dispatch({
+        type: 'setPartialCodeSignature',
+        warningExists: hasPartialCodeSignatureEntry(items),
       });
       dispatch({
         type: 'setExceptionItems',
@@ -564,6 +572,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           getExtendedFields={getExtendedFields}
         />
         {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />
