@@ -50,8 +50,5 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     stats: 'errors-only',
   };
 
-  // Override storybookConfig mainFields instead of merging with config
-  delete storybookConfig.resolve?.mainFields;
-
   return webpackMerge(storybookConfig, config);
 };
