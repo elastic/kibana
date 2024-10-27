@@ -84,8 +84,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/187182
-  describe.skip('Case', () => {
+  describe('Case', () => {
     let caseId: string;
 
     beforeEach(() => {
