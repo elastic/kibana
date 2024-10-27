@@ -98,6 +98,7 @@ describe('SavedObjectsService', () => {
       elasticsearch: elasticsearchMock,
       deprecations: deprecationsSetup,
       coreUsageData: createCoreUsageDataSetupMock(),
+      docLinks: docLinksServiceMock.createSetupContract(),
     };
   };
 

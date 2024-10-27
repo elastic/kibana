@@ -14,7 +14,7 @@ import type {
   IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
@@ -62,13 +62,12 @@ export function registerRoutes({
   kibanaVersion: string;
   kibanaIndex: string;
   isServerless: boolean;
-  docLinks: DocLinksServiceStart;
+  docLinks: DocLinksServiceSetup;
 }) {
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
   const internalOnServerless = isServerless ? 'internal' : 'public';
-
   const deprecationInfo = {
     documentationUrl: `${docLinks.links.management.savedObjectsApiList}`,
     severity: 'warning' as const,
