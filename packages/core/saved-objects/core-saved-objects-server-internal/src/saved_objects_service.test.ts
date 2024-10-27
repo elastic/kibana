@@ -181,6 +181,18 @@ describe('SavedObjectsService', () => {
       expect(registerRoutesMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
+    it('calls registerRoutes with docLinks', async () => {
+      const coreContext = createCoreContext();
+      const mockedLinks = docLinksServiceMock.createSetupContract();
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(registerRoutesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ docLinks: mockedLinks })
+      );
+    });
+
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
         const coreContext = createCoreContext();
