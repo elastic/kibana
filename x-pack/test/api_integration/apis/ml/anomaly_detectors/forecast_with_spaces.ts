@@ -15,6 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
   const spacesService = getService('spaces');
+  const retry = getService('retry');
 
   const forecastJobId = 'fq_single_forecast';
   const forecastJobDatafeedId = `datafeed-${forecastJobId}`;
@@ -45,21 +46,22 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER,
     expectedStatusCode: number
   ) {
-    const { body, status } = await supertest
-      .delete(
-        `${
-          space ? `/s/${space}` : ''
-        }/internal/ml/anomaly_detectors/${jobId}/_forecast/${forecastId}`
-      )
-      .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'));
-    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
+    await retry.tryForTime(10000, async () => {
+      const { body, status } = await supertest
+        .delete(
+          `${
+            space ? `/s/${space}` : ''
+          }/internal/ml/anomaly_detectors/${jobId}/_forecast/${forecastId}`
+        )
+        .auth(user, ml.securityCommon.getPasswordForUser(user))
+        .set(getCommonRequestHeader('1'));
+      ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
-    return body;
+      return body;
+    });
   }
 
-  // Failing see: https://github.com/elastic/kibana/issues/195602
-  describe.skip('POST anomaly_detectors _forecast with spaces', function () {
+  describe('POST anomaly_detectors _forecast with spaces', function () {
     let forecastId: string;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -110,11 +112,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not delete forecast for user without permissions', async () => {
-      await await deleteForecast(forecastJobId, forecastId, idSpace1, USER.ML_VIEWER, 403);
+      await deleteForecast(forecastJobId, forecastId, idSpace1, USER.ML_VIEWER, 403);
     });
 
     it('should delete forecast for user with permissions', async () => {
-      await await deleteForecast(forecastJobId, forecastId, idSpace1, USER.ML_POWERUSER, 200);
+      await deleteForecast(forecastJobId, forecastId, idSpace1, USER.ML_POWERUSER, 200);
     });
 
     it('should not run forecast for open job with invalid duration', async () => {

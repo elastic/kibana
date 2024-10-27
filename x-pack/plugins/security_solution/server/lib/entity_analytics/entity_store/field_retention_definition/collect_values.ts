@@ -30,7 +30,7 @@ export const collectValuesProcessor: FieldRetentionOperatorBuilder<CollectValues
   Set uniqueVals = new HashSet();
   
   if (!(${isFieldMissingOrEmpty(ctxField)})) {
-    if(${ctxField} instanceof List) {
+    if(${ctxField} instanceof Collection) {
       uniqueVals.addAll(${ctxField});
     } else {
       uniqueVals.add(${ctxField});
