@@ -10,55 +10,12 @@
 /* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
-import webpack, { Configuration } from 'webpack';
+import { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 
-type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
-
-interface BabelLoaderRule extends webpack.RuleSetRule {
-  use: Array<{
-    loader: 'babel-loader';
-    [key: string]: unknown;
-  }>;
-}
-
-function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
-  return !!(
-    rule.use &&
-    Array.isArray(rule.use) &&
-    rule.use.some(
-      (l) =>
-        typeof l === 'object' && typeof l?.loader === 'string' && l?.loader.includes('babel-loader')
-    )
-  );
-}
-
-function getPresetPath(preset: Preset) {
-  if (typeof preset === 'string') return preset;
-  if (Array.isArray(preset)) return preset[0];
-  return undefined;
-}
-
-function getTsPreset(preset: Preset) {
-  if (getPresetPath(preset)?.includes('preset-typescript')) {
-    if (typeof preset === 'string') return [preset, {}];
-    if (Array.isArray(preset)) return preset;
-
-    throw new Error('unsupported preset-typescript format');
-  }
-}
-
-function isDesiredPreset(preset: Preset) {
-  return !getPresetPath(preset)?.includes('preset-flow');
-}
-
-// Extend the Storybook Webpack config with some customizations
-/**
- * @returns {import('webpack').Configuration}
- */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
     externals,
@@ -96,54 +53,5 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
   // Override storybookConfig mainFields instead of merging with config
   delete storybookConfig.resolve?.mainFields;
 
-  const updatedModuleRules: webpack.RuleSetRule[] = [];
-  // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset
-  for (const originalRule of storybookConfig.module?.rules ?? []) {
-    const rule = typeof originalRule !== 'string' ? { ...originalRule } : {};
-    updatedModuleRules.push(rule);
-
-    if (isBabelLoaderRule(rule)) {
-      rule.use = [...rule.use];
-      const loader = (rule.use[0] = { ...rule.use[0] });
-      const options = (loader.options = { ...(loader.options as Record<string, any>) });
-
-      // capture the plugins defined at the root level
-      const plugins: string[] = options.plugins ?? [];
-      options.plugins = [];
-
-      // move the plugins to the top of the preset array so they will run after the typescript preset
-      options.presets = [
-        require.resolve('@kbn/babel-preset/common_preset'),
-        { plugins },
-        ...((options.presets as Preset[]) ? options.preset : [])
-          .filter(isDesiredPreset)
-          .map((preset) => {
-            const tsPreset = getTsPreset(preset);
-            if (!tsPreset) {
-              return preset;
-            }
-
-            return [
-              tsPreset[0],
-              {
-                ...tsPreset[1],
-                allowNamespaces: true,
-                allowDeclareFields: true,
-              },
-            ];
-          }),
-      ];
-    }
-  }
-
-  return webpackMerge<object>(
-    {
-      ...storybookConfig,
-      module: {
-        ...storybookConfig.module,
-        rules: updatedModuleRules,
-      },
-    },
-    config
-  );
+  return webpackMerge(storybookConfig, config);
 };

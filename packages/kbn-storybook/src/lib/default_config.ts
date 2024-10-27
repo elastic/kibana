@@ -97,19 +97,25 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
-  // babel: async (options) => {
-  //   options?.presets?.push([
-  //     require.resolve('@emotion/babel-preset-css-prop'),
-  //     {
-  //       // There's an issue where emotion classnames may be duplicated,
-  //       // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
-  //       // https://github.com/emotion-js/emotion/issues/2417
-  //       autoLabel: 'always',
-  //       labelFormat: '[filename]--[local]',
-  //     },
-  //   ]);
-  //   return options;
-  // },
+  async babel(config: any, options: any) {
+    if (!config?.presets) {
+      config.presets = [];
+    }
+
+    config.presets.push([
+      require.resolve('@kbn/babel-preset/common_preset'),
+      //   require.resolve('@emotion/babel-preset-css-prop'),
+      //   {
+      //     // There's an issue where emotion classnames may be duplicated,
+      //     // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+      //     // https://github.com/emotion-js/emotion/issues/2417
+      //     autoLabel: 'always',
+      //     labelFormat: '[filename]--[local]',
+      //   },
+    ]);
+
+    return config;
+  },
   webpackFinal: (config, options) => {
     if (process.env.CI) {
       config.parallelism = 4;
