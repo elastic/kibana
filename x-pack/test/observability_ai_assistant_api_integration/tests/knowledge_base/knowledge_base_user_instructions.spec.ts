@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const instructions = res.body.userInstructions;
 
-          const sortByDocId = (data) => sortBy(data, 'doc_id');
+          const sortByDocId = (data: any) => sortBy(data, 'doc_id');
           expect(sortByDocId(instructions)).to.eql(
             sortByDocId([
               {
