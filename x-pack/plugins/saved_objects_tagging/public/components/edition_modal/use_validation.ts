@@ -9,8 +9,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
-import { type TagValidation, validateTagName } from '../../../common';
 import type { ITagsClient, TagAttributes } from '../../../common/types';
+import { type TagValidation, validateTagName } from '../../../common';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage, validateTag } from './utils';
 
 const initialValidation: TagValidation = {
