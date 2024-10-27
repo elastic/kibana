@@ -56,143 +56,100 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await clearKnowledgeBase(es);
 
-        const knowledgeBaseEntries = [
+        const promises = [
           {
-            doc_id: 'public-doc-from-editor',
-            text: 'Public user instruction from "editor"',
             username: 'editor',
             isPublic: true,
           },
           {
-            doc_id: 'private-doc-from-editor',
-            text: 'Private user instruction from "editor"',
             username: 'editor',
             isPublic: false,
           },
           {
-            doc_id: 'public-doc-from-john',
-            text: 'Public user instruction from "john"',
             username: userJohn,
             isPublic: true,
           },
           {
-            doc_id: 'private-doc-from-john',
-            text: 'Private user instruction from "john"',
             username: userJohn,
             isPublic: false,
           },
-        ];
+        ].map(async ({ username, isPublic }) => {
+          const visibility = isPublic ? 'Public' : 'Private';
 
-        // Initial attempt to create all entries
-        await Promise.all(
-          knowledgeBaseEntries.map(async ({ doc_id: id, text, username, isPublic }) => {
-            await getScopedApiClientForUsername(username)({
-              endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-              params: {
-                body: {
-                  id,
-                  text,
-                  public: isPublic,
-                },
+          await getScopedApiClientForUsername(username)({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: `${visibility.toLowerCase()}-doc-from-${username}`,
+                text: `${visibility} user instruction from "${username}"`,
+                public: isPublic,
               },
-            }).expect(200);
-          })
-        );
-
-        // To resolve flakiness, retry the logic to only add the missing entries
-        await retry.try(async () => {
-          const editorEntries = await observabilityAIAssistantAPIClient.editorUser({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          });
-          const userJohnEntries = await getScopedApiClientForUsername(userJohn)({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          });
-
-          const existingIds = [
-            ...editorEntries.body.userInstructions.map((entry) => entry.doc_id),
-            ...userJohnEntries.body.userInstructions.map((entry) => entry.doc_id),
-          ];
-
-          const missingEntries = knowledgeBaseEntries.filter(
-            (entry) => !existingIds.includes(entry.doc_id)
-          );
-
-          if (missingEntries.length === 0) {
-            return; // All entries are present, exit retry
-          }
-
-          // Retry creating only the missing entries
-          await Promise.all(
-            missingEntries.map(async ({ doc_id: id, text, username, isPublic }) => {
-              await getScopedApiClientForUsername(username)({
-                endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-                params: {
-                  body: {
-                    id,
-                    text,
-                    public: isPublic,
-                  },
-                },
-              }).expect(200);
-            })
-          );
+            },
+          }).expect(200);
         });
+
+        await Promise.all(promises);
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.editorUser({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-        });
-        const instructions = res.body.userInstructions;
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
 
-        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
-        expect(sortByDocId(instructions)).to.eql(
-          sortByDocId([
-            {
-              doc_id: 'private-doc-from-editor',
-              public: false,
-              text: 'Private user instruction from "editor"',
-            },
-            {
-              doc_id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              doc_id: 'public-doc-from-john',
-              public: true,
-              text: 'Public user instruction from "john"',
-            },
-          ])
-        );
+          const instructions = res.body.userInstructions;
+
+          const sortByDocId = (data) => sortBy(data, 'doc_id');
+          expect(sortByDocId(instructions)).to.eql(
+            sortByDocId([
+              {
+                doc_id: 'private-doc-from-editor',
+                public: false,
+                text: 'Private user instruction from "editor"',
+              },
+              {
+                doc_id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                doc_id: 'public-doc-from-john',
+                public: true,
+                text: 'Public user instruction from "john"',
+              },
+            ])
+          );
+        });
       });
 
       it('"john" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await getScopedApiClientForUsername(userJohn)({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-        });
-        const instructions = res.body.userInstructions;
+        await retry.try(async () => {
+          const res = await getScopedApiClientForUsername(userJohn)({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+          const instructions = res.body.userInstructions;
 
-        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
-        expect(sortByDocId(instructions)).to.eql(
-          sortByDocId([
-            {
-              doc_id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              doc_id: 'public-doc-from-john',
-              public: true,
-              text: 'Public user instruction from "john"',
-            },
-            {
-              doc_id: 'private-doc-from-john',
-              public: false,
-              text: 'Private user instruction from "john"',
-            },
-          ])
-        );
+          const sortByDocId = (data: any) => sortBy(data, 'doc_id');
+          expect(sortByDocId(instructions)).to.eql(
+            sortByDocId([
+              {
+                doc_id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                doc_id: 'public-doc-from-john',
+                public: true,
+                text: 'Public user instruction from "john"',
+              },
+              {
+                doc_id: 'private-doc-from-john',
+                public: false,
+                text: 'Private user instruction from "john"',
+              },
+            ])
+          );
+        });
       });
     });
 
