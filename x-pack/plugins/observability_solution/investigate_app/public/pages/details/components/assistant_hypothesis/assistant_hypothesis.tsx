@@ -7,8 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisForServiceEvent } from '@kbn/observability-utils-server/llm/service_rca';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import { ALERT_START } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import moment from 'moment';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
@@ -22,9 +20,7 @@ export interface InvestigationContextualInsight {
 export function AssistantHypothesis({ investigationId }: { investigationId: string }) {
   const {
     alert,
-    globalParams: {
-      timeRange: { from, to },
-    },
+    globalParams: { timeRange },
   } = useInvestigation();
   const {
     core: { notifications },
@@ -45,7 +41,6 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
   const [loading, setLoading] = useState(false);
 
   const runRootCauseAnalysis = ({
-    alert: nonNullishAlert,
     connectorId,
     serviceName: nonNullishServiceName,
   }: {
@@ -53,9 +48,9 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
     connectorId: string;
     serviceName: string;
   }) => {
-    const rangeFrom = moment(from).toISOString();
+    const rangeFrom = timeRange.from;
 
-    const rangeTo = moment(to).toISOString();
+    const rangeTo = timeRange.to;
 
     const signal = new AbortController().signal;
 
@@ -68,7 +63,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
             connectorId,
             context: `The user is investigating an alert for the ${serviceName} service,
             and wants to find the root cause. Here is the alert:
-            
+
             ${JSON.stringify(alert)}`,
             rangeFrom,
             rangeTo,
@@ -79,7 +74,6 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
       })
       .subscribe({
         next: (event) => {
-          console.log(event);
           setEvents((prev) => {
             return prev.concat(event.event);
           });

@@ -113,8 +113,14 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
           await handleProcessInterruptions(
             async () => {
-              const { body } = await nodeFetch(agentDownloadUrl);
-              await finished(body.pipe(outputStream));
+              try {
+                const { body } = await nodeFetch(agentDownloadUrl);
+                await finished(body.pipe(outputStream));
+              } catch (error) {
+                this.log.error(`Error during download attempt ${attempt}: ${error.message}`);
+                // Ensure any errors here propagate and trigger retry
+                throw error;
+              }
             },
             () => fs.unlinkSync(newDownloadInfo.fullFilePath) // Clean up on interruption
           );
