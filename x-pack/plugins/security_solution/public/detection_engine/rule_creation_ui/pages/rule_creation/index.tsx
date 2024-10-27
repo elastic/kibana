@@ -26,6 +26,7 @@ import {
   isMlRule,
   isThreatMatchRule,
   isEsqlRule,
+  isEqlSequenceQuery,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -83,6 +84,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
+import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -218,6 +220,12 @@ const CreateRulePageComponent: React.FC = () => {
   const { getRuleFormsErrors } = useRuleFormsErrors();
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
+
+  const isEqlSeqQuery = isEqlSequenceQuery(defineStepData.queryBar?.query?.query as string);
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
+    ruleType,
+    isEqlSequenceQuery(defineStepData.queryBar?.query?.query as string)
+  );
 
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
 
@@ -679,6 +687,7 @@ const CreateRulePageComponent: React.FC = () => {
             isLoading={isCreateRuleLoading || loading}
             form={aboutStepForm}
             esqlQuery={esqlQueryForAboutStep}
+            eqlSequenceSuppressionEnabled={isAlertSuppressionEnabled && isEqlSeqQuery}
           />
 
           <NextStep
@@ -703,6 +712,8 @@ const CreateRulePageComponent: React.FC = () => {
       loading,
       memoAboutStepReadOnly,
       esqlQueryForAboutStep,
+      isAlertSuppressionEnabled,
+      isEqlSeqQuery,
     ]
   );
   const memoAboutStepExtraAction = useMemo(
