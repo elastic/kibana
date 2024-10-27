@@ -252,18 +252,6 @@ export function getWebpackConfig(
           },
         },
         {
-          test: /node_modules\/@?xstate5\/.*\.js$/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET],
-              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
-            },
-          },
-        },
-        {
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
@@ -310,6 +298,15 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        // TODO: remove once https://github.com/xyflow/xyflow/pull/4755 gets released
+        '@xyflow/react/dist/style.css': Path.resolve(
+          worker.repoRoot,
+          'node_modules/@xyflow/react/dist/style.css'
+        ),
+        '@xyflow/react': Path.resolve(
+          worker.repoRoot,
+          'node_modules/@xyflow/react/dist/esm/index.js'
+        ),
       },
     },
 
