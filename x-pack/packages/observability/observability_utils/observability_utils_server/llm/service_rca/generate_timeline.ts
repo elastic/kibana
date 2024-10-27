@@ -7,7 +7,9 @@
 
 import { InferenceClient, withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { lastValueFrom, map } from 'rxjs';
-import { RCA_SYSTEM_PROMPT_BASE, RCA_TIMELINE_GUIDE_EXTENDED } from './system_prompt_base';
+import { RCA_SYSTEM_PROMPT_BASE } from './system_prompt_base';
+import { ObservationStepSummary } from './observe';
+import { stringifySummaries } from './stringify_summaries';
 
 type SignificantEventSeverity = 'info' | 'unusual' | 'warning' | 'critical';
 
@@ -15,7 +17,7 @@ type SignificantEventType = 'alert' | 'slo' | 'event';
 
 export interface SignificantEvent {
   severity: SignificantEventSeverity;
-  '@timestamp': string;
+  '@timestamp'?: string;
   description: string;
   type: SignificantEventType;
 }
@@ -28,22 +30,24 @@ export async function generateSignificantEventsTimeline({
   inferenceClient,
   report,
   connectorId,
+  summaries,
 }: {
   inferenceClient: InferenceClient;
   report: string;
   connectorId: string;
+  summaries: ObservationStepSummary[];
 }): Promise<SignificantEventsTimeline> {
   return await lastValueFrom(
     inferenceClient
       .output('generate_timeline', {
-        system: `${RCA_SYSTEM_PROMPT_BASE}
-        
-        ${RCA_TIMELINE_GUIDE_EXTENDED}`,
+        system: `${RCA_SYSTEM_PROMPT_BASE}`,
         connectorId,
         input: `Your current task is to generate a timeline
         of significant events, based on the given RCA report,
         according to a structured schema. This timeline will
         be presented to the user as a visualization.
+
+        ${stringifySummaries(summaries)}
 
         # Report
 
@@ -74,7 +78,7 @@ export async function generateSignificantEventsTimeline({
                     description: 'A description of the event',
                   },
                 },
-                required: ['timestamp', 'severity', 'description'],
+                required: ['severity', 'description'],
               },
             },
           },

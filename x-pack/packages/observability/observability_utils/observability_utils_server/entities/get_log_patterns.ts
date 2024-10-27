@@ -36,11 +36,10 @@ interface FieldPatternResultBase {
 interface FieldPatternResultChanges {
   timeseries: Array<{ x: number; y: number }>;
   change: {
+    timestamp?: string;
     significance: 'high' | 'medium' | 'low' | null;
     type: ChangePointType;
     change_point?: number;
-    r_value?: number;
-    trend?: string;
     p_value?: number;
   };
 }
@@ -224,14 +223,21 @@ export async function runCategorizeTextAggregation({
                 x: dateBucket.key,
                 y: dateBucket.doc_count,
               })),
-              change: Object.entries(bucket.changes.type).map(([changePointType, change]) => {
-                return {
-                  key: bucket.changes.bucket?.key,
-                  type: changePointType,
-                  significance: change.p_value !== undefined ? pValueToLabel(change.p_value) : null,
-                  ...change,
-                };
-              })[0],
+              change: Object.entries(bucket.changes.type).map(
+                ([changePointType, change]): FieldPatternResultChanges['change'] => {
+                  return {
+                    type: changePointType as ChangePointType,
+                    significance:
+                      change.p_value !== undefined ? pValueToLabel(change.p_value) : null,
+                    change_point: change.change_point,
+                    p_value: change.p_value,
+                    timestamp:
+                      change.change_point !== undefined
+                        ? bucket.timeseries.buckets[change.change_point].key_as_string
+                        : undefined,
+                  };
+                }
+              )[0],
             }
           : {}),
       };

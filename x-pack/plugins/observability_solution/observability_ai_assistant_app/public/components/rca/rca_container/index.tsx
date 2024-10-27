@@ -6,7 +6,8 @@
  */
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChatCompletionEventType, MessageRole } from '@kbn/inference-plugin/public';
+import { ToolMessage } from '@kbn/inference-plugin/common';
+import { MessageRole } from '@kbn/inference-plugin/public';
 import type {
   RootCauseAnalysisForServiceEvent,
   RootCauseAnalysisToolMessage,
@@ -60,82 +61,78 @@ export function RootCauseAnalysisContainer({
     );
   }
 
-  function getToolResponseItem(message: RootCauseAnalysisToolMessage | ToolErrorMessage) {
-    const response = message.response;
-    if ('error' in response) {
-      return getToolResponseErrorItem(response);
+  function getToolResponseItem(
+    message: RootCauseAnalysisToolMessage | ToolErrorMessage
+  ): React.ReactElement {
+    if (message.name === 'error') {
+      return getToolResponseErrorItem(message.response);
     }
-    if ('instructions' in message.response) {
-      const analysis = message.response.analysis;
-      const data = 'data' in message ? message.data : undefined;
-      return analysis && data ? (
+
+    if (message.name === 'investigateEntity') {
+      return (
         <RootCauseAnalysisEntityInvestigation
-          summary={analysis.summary}
-          entity={analysis.entity}
-          ownPatterns={data.attachments.ownPatterns}
-          patternsFromOtherEntities={data.attachments.patternsFromOtherEntities}
-        />
-      ) : (
-        <RootCauseAnalysisStepItem
-          label={i18n.translate('xpack.observabilityAiAssistant.rca.entityNotFound', {
-            defaultMessage: 'Entity not found',
-          })}
-          iconType="alert"
-          color="warning"
+          summary={message.response.summary}
+          entity={message.response.entity}
+          ownPatterns={message.data.attachments.ownPatterns}
+          patternsFromOtherEntities={message.data.attachments.patternsFromOtherEntities}
         />
       );
     }
 
-    if ('report' in message.response) {
-      return (
-        <RootCauseAnalysisReport
-          report={message.response.report}
-          timeline={message.response.timeline}
-        />
-      );
+    if (message.name === 'observe') {
+      return <RootCauseAnalysisHypothesizeStepItem content={message.response.content} />;
     }
+
+    return (
+      <RootCauseAnalysisReport
+        report={message.response.report}
+        timeline={message.response.timeline}
+      />
+    );
   }
 
   function getTaskItem(toolCall: RootCauseAnalysisToolRequest) {
-    if (toolCall.function.name === 'hypothesize') {
-      return <RootCauseAnalysisHypothesizeStepItem content={toolCall.function.arguments.content} />;
-    }
     const toolResponse = events?.find((event) => {
       return (
         'role' in event &&
         event.role === MessageRole.Tool &&
         event.toolCallId === toolCall.toolCallId
       );
-    });
+    }) as Extract<RootCauseAnalysisForServiceEvent, ToolMessage> | undefined;
 
     const isPending = !toolResponse;
     const isError = !!(toolResponse && 'error' in toolResponse);
 
+    if (toolResponse) {
+      return getToolResponseItem(toolResponse);
+    }
+
     let label: React.ReactNode;
 
     switch (toolCall.function.name) {
-      case 'concludeAnalysis':
+      case 'endProcessAndWriteReport':
         label = i18n.translate('xpack.observabilityAiAssistant.rca.finalizingReport', {
           defaultMessage: `Finalizing report`,
         });
         break;
 
-      case 'findRelatedEntities':
-        label = i18n.translate('xpack.observabilityAiAssistant.rca.findingRelatedEntities', {
-          defaultMessage: `Finding related entities`,
+      case 'observe':
+        label = i18n.translate('xpack.observabilityAiAssistant.rca.summarizingInvestigation', {
+          defaultMessage: `Thinking...`,
         });
         break;
 
-      case 'analyzeEntityHealth':
+      case 'investigateEntity':
         label = (
           <EuiFlexGroup direction="row" gutterSize="s">
             {i18n.translate('xpack.observabilityAiAssistant.rca.investigatingEntity', {
               defaultMessage: `Investigating`,
             })}
             <EntityBadge
-              entity={Object.fromEntries(
-                toolCall.function.arguments.entity.fields.map(({ field, value }) => [field, value])
-              )}
+              entity={{
+                [toolCall.function.arguments.entity.field]:
+                  toolCall.function.arguments.entity.value,
+              }}
             />
           </EuiFlexGroup>
         );
@@ -151,19 +148,10 @@ export function RootCauseAnalysisContainer({
   }
 
   events?.forEach((event) => {
-    if ('type' in event && event.type === ChatCompletionEventType.ChatCompletionMessage) {
+    if (event.role === MessageRole.Assistant) {
       event.toolCalls.forEach((toolCall) => {
         elements.push(getTaskItem(toolCall));
       });
-      return;
-    }
-    if (!('role' in event) || event.role !== MessageRole.Tool) {
-      return;
-    }
-
-    const element = getToolResponseItem(event);
-    if (element) {
-      elements.push(element);
     }
   });
 

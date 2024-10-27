@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { ToolCall, ToolCallsOf, ToolOptions } from './tools';
+import type { ToolCall, ToolCallsOf, ToolNamesOf, ToolOptions } from './tools';
 
 export enum MessageRole {
   User = 'user',
@@ -21,18 +21,36 @@ interface MessageBase<TRole extends MessageRole> {
 
 export type UserMessage = MessageBase<MessageRole.User> & { content: string };
 
-export type AssistantMessage = MessageBase<MessageRole.Assistant> & {
+export type AssistantMessage<
+  TToolCalls extends { toolCalls?: ToolCall[] } = { toolCalls?: ToolCall[] }
+> = MessageBase<MessageRole.Assistant> & {
   content: string | null;
-  toolCalls?: Array<ToolCall<string, Record<string, any> | undefined>>;
+} & TToolCalls;
+
+export type ToolMessage<
+  TName extends string = string,
+  TToolResponse extends Record<string, any> | unknown = unknown
+> = MessageBase<MessageRole.Tool> & {
+  toolCallId: string;
+  name: TName;
+  response: TToolResponse;
 };
 
-export type ToolMessage<TToolResponse extends Record<string, any> | unknown> =
-  MessageBase<MessageRole.Tool> & {
-    toolCallId: string;
-    response: TToolResponse;
-  };
+export type AssistantMessageOf<TToolOptions extends ToolOptions = ToolOptions> = AssistantMessage<
+  ToolCallsOf<TToolOptions>
+>;
 
-export type Message = UserMessage | AssistantMessage | ToolMessage<unknown>;
+export type ToolMessageOf<TToolOptions extends ToolOptions = ToolOptions> = ToolMessage<
+  ToolNamesOf<TToolOptions>,
+  Record<string, any>
+>;
+
+export type Message = UserMessage | AssistantMessage | ToolMessage;
+
+export type MessageOf<TToolOptions extends ToolOptions = ToolOptions> =
+  | UserMessage
+  | AssistantMessageOf<TToolOptions>
+  | ToolMessageOf<TToolOptions>;
 
 export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage> & {

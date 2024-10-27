@@ -6,9 +6,9 @@
  */
 
 import { InferenceClient, withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
-import { Message, MessageRole } from '@kbn/inference-plugin/common';
 import { lastValueFrom, map } from 'rxjs';
-import { findLastIndex } from 'lodash';
+import { ObservationStepSummary } from './observe';
+import { stringifySummaries } from './stringify_summaries';
 import { RCA_SYSTEM_PROMPT_BASE, RCA_TIMELINE_GUIDE_EXTENDED } from './system_prompt_base';
 
 const SYSTEM_PROMPT_ADDENDUM = `
@@ -47,7 +47,7 @@ failures.
 
 Summarize the key steps of the investigation, outlining:
 - **What hypotheses were proposed and why.**
-- **Which entities were investigated (e.g., \`myservice\`, \`auth-service\`,
+- **Which entities were investigated (e.g., \`myservice\`, \`myotherservice\`,
 \`notification-service\`).**
 - **Which hypotheses were discarded and why.**
 
@@ -66,11 +66,11 @@ rates.
     - **Weak:** CPU usage remained stable, making resource exhaustion a partial
 explanation.
 
-- **Hypothesis 2:** Upstream latency from \`auth-service\` caused delays.
+- **Hypothesis 2:** Upstream latency from \`myotherservice\` caused delays.
   - **Evidence:**
     - **Strong:** API logs showed frequent retries and timeouts from
-\`auth-service\`.
-    - **Weak:** No errors were observed in \`auth-service\` logs, suggesting an
+\`myotherservice\`.
+    - **Weak:** No errors were observed in \`myotherservice\` logs, suggesting an
 issue isolated to \`myservice\`.
 
 ---
@@ -117,7 +117,7 @@ at 10:00 AM, peaking at 12:00 PM, where memory usage surpassed 90%, triggering
 the alert.
 - **Error Rate Logs:** Error rates for \`/api/submit\` began increasing around
 11:30 AM, correlating with the memory pressure in \`myservice\`.
-- **API Logs:** \`auth-service\` API logs showed no internal errors, ruling out
+- **API Logs:** \`myotherservice\` API logs showed no internal errors, ruling out
 an upstream dependency as the primary cause.
 
 ---
@@ -172,23 +172,14 @@ recurrence. Investigate adding a memory ceiling for \`myservice\` to prevent
 future resource exhaustion.`;
 
 export async function writeRcaReport({
-  messages,
+  summaries,
   inferenceClient,
   connectorId,
-  reason,
 }: {
-  messages: Message[];
+  summaries: ObservationStepSummary[];
   inferenceClient: InferenceClient;
   connectorId: string;
-  reason: string;
 }): Promise<string> {
-  const indexOfLastUserMessage = findLastIndex(
-    messages,
-    (message) => message.role === MessageRole.User
-  );
-
-  const untilLastUserMessage = messages.slice(0, indexOfLastUserMessage + 1);
-
   return await lastValueFrom(
     inferenceClient
       .output('write_rca_report', {
@@ -196,11 +187,9 @@ export async function writeRcaReport({
         system: `${RCA_SYSTEM_PROMPT_BASE}
         
         ${SYSTEM_PROMPT_ADDENDUM}`,
-        previousMessages: untilLastUserMessage,
-        input: `Write the RCA report. The following reason for
-    concluding the investigation was given:
-    
-    ${reason}`,
+        input: `Write the RCA report, based on the observations.
+        
+        ${stringifySummaries(summaries)}`,
       })
       .pipe(
         withoutOutputUpdateEvents(),

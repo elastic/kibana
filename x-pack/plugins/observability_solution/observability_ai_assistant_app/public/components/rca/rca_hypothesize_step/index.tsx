@@ -6,8 +6,19 @@
  */
 
 import React from 'react';
+import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { RootCauseAnalysisStepItem } from '../rca_step';
 
 export function RootCauseAnalysisHypothesizeStepItem({ content }: { content: string }) {
-  return <RootCauseAnalysisStepItem label={content} color="success" iconType="bolt" />;
+  return (
+    <RootCauseAnalysisStepItem
+      label={
+        <EuiText size="xs">
+          <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
+        </EuiText>
+      }
+      color="success"
+      iconType="bolt"
+    />
+  );
 }

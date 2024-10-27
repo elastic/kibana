@@ -75,13 +75,14 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       end,
       esClient,
       inferenceClient,
-      logSources,
+      logSources: logSources.concat(['traces-apm*']),
       rulesClient,
       serviceName,
       sloSummaryIndices,
       spaceId,
       context,
       logger,
+      summaries: [],
     }).pipe(
       switchMap((event) => {
         return of({

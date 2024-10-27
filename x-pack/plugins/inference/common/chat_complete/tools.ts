@@ -32,7 +32,7 @@ type ToolResponsesOf<TTools extends Record<string, ToolDefinition> | undefined> 
       >
     : never[];
 
-type ToolResponseOf<TName extends string, TToolDefinition extends ToolDefinition> = ToolCall<
+export type ToolResponseOf<TName extends string, TToolDefinition extends ToolDefinition> = ToolCall<
   TName,
   TToolDefinition extends { schema: ToolSchema } ? FromToolSchema<TToolDefinition['schema']> : {}
 >;
@@ -77,6 +77,12 @@ export interface ToolCall<
     name: TName;
   } & (TArguments extends Record<string, any> ? { arguments: TArguments } : {});
 }
+
+export type ToolNamesOf<TToolOptions> = TToolOptions extends ToolOptions<infer TNames>
+  ? TNames extends string
+    ? TNames
+    : never
+  : never;
 
 export interface ToolOptions<TToolNames extends string = string> {
   toolChoice?: ToolChoice<TToolNames>;

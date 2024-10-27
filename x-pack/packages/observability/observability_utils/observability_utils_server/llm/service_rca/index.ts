@@ -5,201 +5,213 @@
  * 2.0.
  */
 
-import { MessageRole } from '@kbn/inference-plugin/common';
 import {
-  ChatCompletionEvent,
-  ChatCompletionEventType,
-  ChatCompletionMessageEvent,
+  isChatCompletionMessageEvent,
+  isOutputCompleteEvent,
+  MessageRole,
+} from '@kbn/inference-plugin/common';
+import {
+  AssistantMessage,
+  AssistantMessageOf,
   ToolMessage,
   UserMessage,
 } from '@kbn/inference-plugin/common/chat_complete';
-import { catchError, from, merge, Observable, of, OperatorFunction, switchMap } from 'rxjs';
-import { ToolCallsOf, ToolChoiceType } from '@kbn/inference-plugin/common/chat_complete/tools';
-import { callTools } from '../call_tools';
 import {
-  analyzeEntityHealth,
-  EntityHealthAnalysis,
-  EntityHealthAnalysisParameters,
-} from './analyze_entity_health';
-import { RCA_SYSTEM_PROMPT_BASE } from './system_prompt_base';
-import { findRelatedEntitiesViaKeywordSearches } from './find_related_entities_via_keyword_searches';
-import { writeKeywordSearch } from './write_keyword_search';
-import { writeRcaReport } from './write_rca_report';
+  ToolCallsOf,
+  ToolChoice,
+  ToolChoiceType,
+} from '@kbn/inference-plugin/common/chat_complete/tools';
+import { compact, findLast, omit, pick, uniqueId } from 'lodash';
+import {
+  catchError,
+  filter,
+  from,
+  ignoreElements,
+  map,
+  merge,
+  Observable,
+  of,
+  OperatorFunction,
+  share,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { callTools } from '../call_tools';
 import { generateSignificantEventsTimeline, SignificantEventsTimeline } from './generate_timeline';
+import {
+  EntityInvestigation,
+  EntityInvestigationParameters,
+  investigateEntity,
+} from './investigate_entity';
+import { ObservationStepSummary, observe } from './observe';
+import {
+  RCA_SYSTEM_PROMPT_BASE,
+  SYSTEM_PROMPT_CHANGES,
+  SYSTEM_PROMPT_ENTITIES,
+} from './system_prompt_base';
+import { writeRcaReport } from './write_rca_report';
+import { formatEntity } from './format_entity';
+
+const OBSERVE_TOOL_NAME = 'observe';
+const END_PROCESS_TOOL_NAME = 'endProcessAndWriteReport';
+const INVESTIGATE_ENTITY_TOOL_NAME = 'investigateEntity';
+
+const SYSTEM_PROMPT_WITH_OBSERVE_INSTRUCTIONS = `${RCA_SYSTEM_PROMPT_BASE}
+
+Your next step is to request an observation from another agent based
+on the initial context or the results of previous investigations.`;
+
+const SYSTEM_PROMPT_WITH_DECISION_INSTRUCTIONS = `${RCA_SYSTEM_PROMPT_BASE}
+
+${SYSTEM_PROMPT_ENTITIES}
+
+${SYSTEM_PROMPT_CHANGES}
+
+  To determine whether to end the process or continue analyzing another entity,
+follow these principles:
+
+  Continuing the process:
+  - There are still unexplained symptoms (e.g. elevated error rates or
+connection issues), but you haven't yet uncovered a clear root cause,
+ continue investigating entities. Focus on investigating entities that could be
+causing or be affected by the incident.
+  - Do not investigate an entity twice. This will result in a failure.
+  - Logs, traces, or observability data that suggest upstream or downstream
+issues (such as connection failures, timeouts, or authentication errors)
+indicate further investigation is required.
+  Follow these breadcrumbs to investigate related services, hosts, or
+containers.
+  
+  Ending the process:
+  - Probable root cause identified: If a change or action (such as a recent
+deployment, configuration modification, or version update) has been pinpointed
+as the likely cause of the incident, you can end the process. The identified
+root cause must be related to an observable system change, such as a version
+mismatch or a configuration drift, rather than just an external symptom.
+  - No further entities to investigate: If there are no unexplored upstream or
+downstream dependencies, and all related entities have been investigated without
+discovering new anomalies, it may be appropriate to end the process.
+  - If all investigated entities (e.g., services, hosts, containers) are
+functioning normally, with no relevant issues found, and there are no signs of
+dependencies being affected, you may consider ending the process.
+  - Avoid concluding the investigation based solely on symptoms or the absence
+of immediate errors in the data. Unless a system change has been connected to
+the incident, it is important to continue investigating dependencies to ensure
+the root cause has been accurately identified.`;
+
+const EMPTY_ASSISTANT_MESSAGE: Extract<RootCauseAnalysisForServiceEvent, AssistantMessage> = {
+  content: '',
+  role: MessageRole.Assistant,
+  toolCalls: [],
+};
 
 const tools = {
-  // findRelatedServices: {
-  //   description: `Find related services to the current entity that might
-  //       be needed in your investigation.`,
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       context: {
-  //         type: 'string',
-  //         description: `Any context that you want to provide to the agent that will
-  //             try to find related services to your investigation. Use this to
-  //             tell the agent what you are looking for, and what data can be used to
-  //             search for it. For instance, provide IP addresses, ports, URL paths,
-  //             transaction names, span ids etc`,
-  //       },
-  //     },
-  //     required: ['context'],
-  //   },
-  // },
-  concludeAnalysis: {
-    description: `Use this when your investigation is finished.
-    
-    This happens when you have identified the root cause, or
-    do not have any reasonable hypothesis or the capabilities
-    to verify the hypothesis. Summarize the reason for
-    concluding the investigation. This context will be given
-    to the lead SRE to write a thorough RCA report, in
-    addition to the rest of the investigation.`,
+  [OBSERVE_TOOL_NAME]: {
+    description: `Request an observation from another agent on
+    the results of the returned investigations`,
     schema: {
       type: 'object',
       properties: {
-        reason: {
-          type: 'string',
+        observe: {
+          type: 'boolean',
         },
       },
-      required: ['reason'],
+      required: ['observe'],
     },
   },
-  hypothesize: {
-    description: `Use this to form a hypothesis. For a hypothesis,
-    consider the pieces of evidence, the capabilities you have,
-    and next steps that can provide further evidence of the
-    correctness of the hypothesis. Form one or two sentences
-    that will be displayed by the user. After this, your
-    hypothesis will be displayed to the user and you can
-    execute your next step.`,
+  [END_PROCESS_TOOL_NAME]: {
+    description: `End the RCA process by requesting a
+    written report from another agent`,
     schema: {
       type: 'object',
       properties: {
-        content: {
-          type: 'string',
-          description: `The text to be displayed to the user.
-          Mention a hypothesis, and the next step in your
-          process to verify or reject this hypothesis.`,
+        endProcess: {
+          type: 'boolean',
         },
       },
-      required: ['content'],
+      required: ['endProcess'],
     },
   },
-  findRelatedEntities: {
-    description: `Find related entities via keyword searches, based
-    on data from the investigation`,
-    schema: {
-      type: 'object',
-      properties: {
-        groupBy: {
-          type: 'string',
-          description: `The field to group data by, such as "service.name"
-          or "host.name"`,
-        },
-        context: {
-          type: 'string',
-          description: `Additional context that you want to provide to the agent
-          that will try to find the related entities.  If applicable, mention
-          whether you are looking for an upstream or downstream service, and
-          the pieces of data that could be relevant.
-          E.g., use this to describe what you are looking for, such as "I'm
-          investigating an issue for \`${JSON.stringify({
-            'service.name': 'opbeans-java',
-          })}\`. I'm looking for an upstream service that is running on
-          10.44.0.11 that might be exhibiting availability issues which
-          causes issues in the investigated service."`,
-        },
-      },
-      required: ['groupBy', 'context'],
-    },
-  },
-  analyzeEntityHealth: {
-    description: `Analyze the health of a related entity.  Only use this tool if
-    you have evidence of the entity existing with the exact field-value pairs.`,
+  [INVESTIGATE_ENTITY_TOOL_NAME]: {
+    description: `Investigate an entity`,
     schema: {
       type: 'object',
       properties: {
         context: {
           type: 'string',
-          description: `Any context that you want to provide to the agent that will
-          analyze the entity health, such as hypotheses from your previous
-          investigations. For instance, mention the reason why you are
-          investigating this entity, and how it could be relevant to your
-          investigation, and what symptoms you are looking for.`,
+          description:
+            'Context for investigating this entity. Mention the kind of change you are looking for.',
         },
         entity: {
           type: 'object',
           description: `The entity you want to investigate, such as a service. Use
           the Elasticsearch field names and values. For example, for services, use
           the following structure: ${JSON.stringify({
-            entity: { fields: [{ field: 'service.name', value: 'opbeans-java' }] },
+            entity: { field: 'service.name', value: 'opbeans-java' },
           })}`,
           properties: {
-            fields: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  field: {
-                    type: 'string',
-                  },
-                  value: {
-                    type: 'string',
-                  },
-                },
-              },
+            field: {
+              type: 'string',
+            },
+            value: {
+              type: 'string',
             },
           },
-          required: ['fields'],
+          required: ['field', 'value'],
         },
       },
-      required: ['entity', 'context'],
+      required: ['context', 'entity'],
     },
   },
 } as const;
 
-export type ToolErrorMessage = ToolMessage<{
-  error: {
-    message: string;
-  };
-}>;
+export type ToolErrorMessage = ToolMessage<
+  'error',
+  {
+    error: {
+      message: string;
+    };
+  }
+>;
 
-type HypothesisToolMessage = ToolMessage<{
-  content: string;
-}>;
+type EndProcessToolMessage = ToolMessage<
+  typeof END_PROCESS_TOOL_NAME,
+  {
+    report: string;
+    timeline: SignificantEventsTimeline;
+  }
+>;
 
-type ConcludeAnalysisToolMessage = ToolMessage<{
-  report: string;
-  timeline: SignificantEventsTimeline;
-}>;
+type ObservationToolMessage = ToolMessage<
+  typeof OBSERVE_TOOL_NAME,
+  {
+    content: string;
+  }
+> & {
+  data: ObservationStepSummary;
+};
 
-type FindRelatedEntitiesViaKeywordSearchesToolMessage = ToolMessage<{
-  relatedEntitiesSummary: string;
-}>;
-
-export type AnalyzeEntityHealthToolMessage = ToolMessage<{
-  instructions: string;
-  analysis?: Omit<EntityHealthAnalysis, 'attachments'>;
-}> & {
-  data?: { attachments: EntityHealthAnalysis['attachments'] };
+type InvestigateEntityToolMessage = ToolMessage<
+  typeof INVESTIGATE_ENTITY_TOOL_NAME,
+  Pick<EntityInvestigation, 'entity' | 'summary' | 'relationships'>
+> & {
+  data: { attachments: EntityInvestigation['attachments'] };
 };
 
 export type RootCauseAnalysisForServiceEvent =
-  | ChatCompletionEvent<{ tools: typeof tools }>
   | RootCauseAnalysisToolMessage
   | ToolErrorMessage
-  | UserMessage;
+  | UserMessage
+  | AssistantMessageOf<{ tools: typeof tools; toolChoice?: ToolChoice<keyof typeof tools> }>;
 
 export type RootCauseAnalysisToolRequest = ToolCallsOf<{
   tools: typeof tools;
 }>['toolCalls'][number];
 
 export type RootCauseAnalysisToolMessage =
-  | FindRelatedEntitiesViaKeywordSearchesToolMessage
-  | AnalyzeEntityHealthToolMessage
-  | ConcludeAnalysisToolMessage
-  | HypothesisToolMessage;
+  | EndProcessToolMessage
+  | InvestigateEntityToolMessage
+  | ObservationToolMessage;
 
 export function runRootCauseAnalysisForService({
   serviceName,
@@ -213,61 +225,153 @@ export function runRootCauseAnalysisForService({
   spaceId,
   connectorId,
   inferenceClient,
-  context,
-  logger,
-}: Omit<EntityHealthAnalysisParameters, 'entity'> & {
+  context: initialContext,
+  logger: incomingLogger,
+}: Omit<EntityInvestigationParameters, 'entity'> & {
+  context: string;
   serviceName: string;
 }): Observable<RootCauseAnalysisForServiceEvent> {
+  const logger = incomingLogger.get('rca');
+
+  const inferenceClientLogger = logger.get('inference');
+
   const entity = { 'service.name': serviceName };
+
+  const investigationTimeRangePrompt = `## Time range
+  
+    The time range of the investigation is ${new Date(start).toISOString()} until ${new Date(
+    end
+  ).toISOString()}`;
+
+  initialContext = `${initialContext}
+
+  ${investigationTimeRangePrompt}
+  `;
 
   const initialMessage = {
     role: MessageRole.User as const,
-    content: `Investigate the health status of ${JSON.stringify(entity)}.
+    content: `Investigate the health status of ${formatEntity(entity)}.
     
     The context given for this investigation is:
 
-    ${context}
+    ${initialContext}`,
+  };
 
+  const originalOutput = inferenceClient.output.bind(inferenceClient);
 
-    `,
+  inferenceClient.output = (...args) => {
+    const next$ = originalOutput(...args).pipe(share());
+    const requestId = uniqueId('inferenceClient.output-');
+    const id = `${requestId}/${args[0]}`;
+    inferenceClientLogger.debug(() => `Output (${id}) request: ${JSON.stringify(args[1])}`);
+    return merge(
+      next$,
+      next$.pipe(
+        tap((event) => {
+          if (isOutputCompleteEvent(event)) {
+            inferenceClientLogger.debug(() => `Output (${id}) response: ${JSON.stringify(event)}`);
+          }
+        }),
+        ignoreElements()
+      )
+    );
+  };
+
+  const originalChatComplete = inferenceClient.chatComplete.bind(inferenceClient);
+
+  inferenceClient.chatComplete = (request) => {
+    const next$ = originalChatComplete(request).pipe(share());
+    const requestId = uniqueId('inferenceClient.chatComplete');
+    const id = `${requestId}`;
+    const messagesWithoutData = request.messages.map((msg) => omit(msg, 'data'));
+    inferenceClientLogger.debug(
+      () =>
+        `chatComplete (${id}) request: ${JSON.stringify({
+          ...request,
+          messages: messagesWithoutData,
+        })}`
+    );
+    return merge(
+      next$,
+      next$.pipe(
+        tap((event) => {
+          if (isChatCompletionMessageEvent(event)) {
+            inferenceClientLogger.debug(
+              () => `chatComplete (${id}) response: ${JSON.stringify(event)}`
+            );
+          }
+        }),
+        ignoreElements()
+      )
+    );
   };
 
   const next$ = callTools(
     {
-      system: `${RCA_SYSTEM_PROMPT_BASE}
-
-      Your goal is to help the user perform a root cause analysis for an
-      entity. You analyze its health status, by looking at log patterns,
-      and open alerts and SLOs. Additionally, you can investigate other
-      entities related to the currently investigated entity. Continue
-      your investigation as long as you have strong indicators that
-      the root cause of an incident is actually occurring in a related
-      entity.
-
-      The user is not able to chat with you directly, so do not ask
-      them what to do.
-      
-      Keep the user informed of your plan using the "hypothesize"
-      tool, and conclude your investigation by using the
-      "concludeAnalysis" tool.
-      `,
+      system: RCA_SYSTEM_PROMPT_BASE,
       connectorId,
       inferenceClient,
       messages: [initialMessage],
-      tools,
-      toolChoice: ToolChoiceType.required,
+      logger,
     },
-    ({ toolCalls, messages }) => {
-      return merge(
+    ({ messages }) => {
+      const lastSuccessfulToolResponse = findLast(
+        messages,
+        (message) => message.role === MessageRole.Tool && message.name !== 'error'
+      ) as Exclude<ToolMessage, ToolErrorMessage> | undefined;
+
+      const shouldWriteObservationNext =
+        !lastSuccessfulToolResponse || lastSuccessfulToolResponse.name !== OBSERVE_TOOL_NAME;
+
+      const nextTools = shouldWriteObservationNext
+        ? pick(tools, OBSERVE_TOOL_NAME)
+        : pick(tools, END_PROCESS_TOOL_NAME, INVESTIGATE_ENTITY_TOOL_NAME);
+
+      const nextSystem = shouldWriteObservationNext
+        ? SYSTEM_PROMPT_WITH_OBSERVE_INSTRUCTIONS
+        : SYSTEM_PROMPT_WITH_DECISION_INSTRUCTIONS;
+
+      return {
+        messages,
+        system: `${nextSystem}
+
+        ${investigationTimeRangePrompt}`,
+        tools: nextTools,
+        toolChoice: shouldWriteObservationNext
+          ? { function: OBSERVE_TOOL_NAME }
+          : ToolChoiceType.required,
+      };
+    },
+    ({
+      toolCalls,
+      messages,
+    }): Observable<
+      | ObservationToolMessage
+      | ToolErrorMessage
+      | InvestigateEntityToolMessage
+      | EndProcessToolMessage
+      | AssistantMessage
+    > => {
+      const observationMessages = messages.filter((message) => {
+        return message.role === MessageRole.Tool && message.name === OBSERVE_TOOL_NAME;
+      }) as ObservationToolMessage[];
+
+      const summaries = observationMessages.map((message) => message.data);
+
+      const withToolResponses$ = merge(
         ...toolCalls.map((toolCall) => {
           function catchToolCallError<T>(): OperatorFunction<T, T | ToolErrorMessage> {
             return catchError((error) => {
               logger.error(`Failed executing task: ${error.message}`);
-              logger.error(JSON.stringify({ error, toolCall }));
+              logger.error(error);
               const toolErrorMessage: ToolErrorMessage = {
+                name: 'error',
                 role: MessageRole.Tool,
                 response: {
                   error: {
+                    ...('toJSON' in error && typeof error.toJSON === 'function'
+                      ? error.toJSON()
+                      : {}),
                     message: error.message,
                   },
                 },
@@ -277,112 +381,84 @@ export function runRootCauseAnalysisForService({
             });
           }
 
-          switch (toolCall.function.name) {
-            case 'concludeAnalysis': {
+          const { name } = toolCall.function;
+
+          switch (name) {
+            case OBSERVE_TOOL_NAME:
+              const lastAssistantMessage = findLast(
+                messages.slice(0, -1),
+                (message) => message.role === MessageRole.Assistant
+              );
+
+              const toolMessagesByToolCallId = Object.fromEntries(
+                compact(
+                  messages.map((message) =>
+                    'toolCallId' in message && message.name === INVESTIGATE_ENTITY_TOOL_NAME
+                      ? [message.toolCallId, message as InvestigateEntityToolMessage]
+                      : undefined
+                  )
+                )
+              );
+
+              const investigationToolMessages =
+                lastAssistantMessage && lastAssistantMessage.toolCalls
+                  ? compact(
+                      lastAssistantMessage.toolCalls.map(
+                        ({ toolCallId }) => toolMessagesByToolCallId[toolCallId]
+                      )
+                    )
+                  : [];
+
+              const investigations = investigationToolMessages.map(
+                ({ response: { entity: investigatedEntity, relationships, summary }, data }) => {
+                  return {
+                    entity: investigatedEntity,
+                    relationships,
+                    summary,
+                    attachments: data.attachments,
+                  };
+                }
+              );
+
               return from(
-                writeRcaReport({
+                observe({
                   connectorId,
                   inferenceClient,
-                  messages,
-                  reason: toolCall.function.arguments.reason,
+                  summaries,
+                  investigations,
+                  initialContext,
+                  logger,
+                }).then((summary) => {
+                  const observationToolMessage: ObservationToolMessage = {
+                    name: OBSERVE_TOOL_NAME,
+                    response: {
+                      content: summary.content,
+                    },
+                    data: summary,
+                    role: MessageRole.Tool,
+                    toolCallId: toolCall.toolCallId,
+                  };
+                  return observationToolMessage;
                 })
-                  .then(async (report) => {
-                    return {
-                      report,
-                      timeline: await generateSignificantEventsTimeline({
-                        inferenceClient,
-                        connectorId,
-                        report,
-                      }),
-                    };
-                  })
-                  .then(({ report, timeline }) => {
-                    const toolMessage: ConcludeAnalysisToolMessage = {
-                      role: MessageRole.Tool,
-                      toolCallId: toolCall.toolCallId,
-                      response: {
-                        report,
-                        timeline,
-                      },
-                    };
-                    return toolMessage;
-                  })
               ).pipe(
                 switchMap((toolMessage) => {
-                  const emptyAssistantMessage: ChatCompletionMessageEvent<{ tools: typeof tools }> =
-                    {
-                      type: ChatCompletionEventType.ChatCompletionMessage,
-                      content: '',
-                      toolCalls: [],
-                    };
-
-                  return of(toolMessage, emptyAssistantMessage);
-                }),
-                catchToolCallError()
-              );
-            }
-
-            case 'hypothesize':
-              return of({
-                role: MessageRole.Tool as const,
-                toolCallId: toolCall.toolCallId,
-                response: {
-                  content: toolCall.function.arguments.content,
-                },
-              } as HypothesisToolMessage);
-
-            case 'findRelatedEntities':
-              const searchContext = toolCall.function.arguments.context;
-              const groupBy = toolCall.function.arguments.groupBy;
-
-              return from(
-                writeKeywordSearch({
-                  connectorId,
-                  context: `The entities will be grouped by the field
-                  \`${groupBy}\`.
-
-                  ${searchContext}`,
-                  inferenceClient,
-                  messages,
+                  return of(toolMessage);
                 })
-                  .then((searches) => {
-                    return findRelatedEntitiesViaKeywordSearches({
-                      start,
-                      end,
-                      context: searchContext,
-                      searches: searches.values,
-                      groupBy,
-                      connectorId,
-                      esClient,
-                      index: logSources,
-                      inferenceClient,
-                    });
-                  })
-                  .then((relatedEntitiesSummary) => {
-                    const toolMessage: FindRelatedEntitiesViaKeywordSearchesToolMessage = {
-                      role: MessageRole.Tool,
-                      toolCallId: toolCall.toolCallId,
-                      response: {
-                        relatedEntitiesSummary,
-                      },
-                    };
-
-                    return toolMessage;
-                  })
-              ).pipe(catchToolCallError());
-
-            case 'analyzeEntityHealth':
-              const nextEntity = Object.fromEntries(
-                toolCall.function.arguments.entity.fields.map(({ field, value }) => [field, value])
               );
+
+            case INVESTIGATE_ENTITY_TOOL_NAME:
+              const nextEntity = {
+                [toolCall.function.arguments.entity.field]:
+                  toolCall.function.arguments.entity.value,
+              };
+
               return from(
-                analyzeEntityHealth({
+                investigateEntity({
                   start,
                   end,
                   entity: nextEntity,
                   alertsClient,
                   connectorId,
-                  context: toolCall.function.arguments.context,
                   esClient,
                   inferenceClient,
                   logSources,
@@ -390,32 +466,40 @@ export function runRootCauseAnalysisForService({
                   sloSummaryIndices,
                   spaceId,
                   logger,
+                  summaries,
+                  context: toolCall.function.arguments.context,
                 })
               ).pipe(
-                switchMap((entityHealthAnalysis) => {
-                  if (!entityHealthAnalysis) {
-                    const entityNotFoundToolMessage: AnalyzeEntityHealthToolMessage = {
+                switchMap((entityInvestigation) => {
+                  if (!entityInvestigation) {
+                    const entityNotFoundToolMessage: ToolErrorMessage = {
+                      name: 'error',
                       role: MessageRole.Tool,
                       response: {
-                        instructions: `Entity ${JSON.stringify(nextEntity)} not found, have
+                        error: {
+                          message: `Entity ${JSON.stringify(nextEntity)} not found, have
                         you verified it exists and if the field and value you are using
                         are correct?`,
+                        },
                       },
                       toolCallId: toolCall.toolCallId,
                     };
                     return of(entityNotFoundToolMessage);
                   }
-                  const { attachments, ...analysisForLlm } = entityHealthAnalysis;
-                  const toolMessage: AnalyzeEntityHealthToolMessage = {
+                  const {
+                    attachments,
+                    relationships,
+                    entity: investigatedEntity,
+                    summary,
+                  } = entityInvestigation;
+                  const toolMessage: InvestigateEntityToolMessage = {
+                    name: INVESTIGATE_ENTITY_TOOL_NAME,
                     role: MessageRole.Tool as const,
                     toolCallId: toolCall.toolCallId,
                     response: {
-                      instructions: `Use this summary to determine what to do next.
-                      You can either summarize this to the user and end your
-                      investigation, by using the "concludeAnalysis" tool,
-                      or continuing your investigation by calling the "hypothesize"
-                      tool.`,
-                      analysis: analysisForLlm,
+                      entity: investigatedEntity,
+                      relationships,
+                      summary,
                     },
                     data: {
                       attachments,
@@ -426,11 +510,57 @@ export function runRootCauseAnalysisForService({
                 }),
                 catchToolCallError()
               );
+
+            case END_PROCESS_TOOL_NAME:
+              return from(
+                writeRcaReport({
+                  summaries,
+                  inferenceClient,
+                  connectorId,
+                }).then(async (report) => {
+                  return {
+                    report,
+                    timeline: await generateSignificantEventsTimeline({
+                      inferenceClient,
+                      connectorId,
+                      report,
+                      summaries,
+                    }),
+                  };
+                })
+              ).pipe(
+                switchMap(({ report, timeline }) => {
+                  const toolMessage: EndProcessToolMessage = {
+                    name: END_PROCESS_TOOL_NAME,
+                    role: MessageRole.Tool,
+                    toolCallId: toolCall.toolCallId,
+                    response: {
+                      report,
+                      timeline,
+                    },
+                  };
+
+                  return of(toolMessage, EMPTY_ASSISTANT_MESSAGE);
+                }),
+                catchToolCallError()
+              );
           }
         })
       );
+
+      return withToolResponses$;
     }
   );
 
-  return next$;
+  return next$.pipe(
+    filter((event) =>
+      Boolean(event.role !== MessageRole.Assistant || event.content || event.toolCalls?.length)
+    ),
+    map((event) => {
+      if (event.role === MessageRole.Assistant) {
+        return event as Extract<RootCauseAnalysisForServiceEvent, AssistantMessage>;
+      }
+      return event;
+    })
+  );
 }

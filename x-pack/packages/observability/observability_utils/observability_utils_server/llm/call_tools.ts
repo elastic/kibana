@@ -5,125 +5,155 @@
  * 2.0.
  */
 
-import {
-  isChatCompletionMessageEvent,
-  Message,
-  ToolDefinition,
-} from '@kbn/inference-plugin/common';
-import {
-  ChatCompletionEvent,
-  MessageRole,
-  ToolMessage,
-  UserMessage,
-} from '@kbn/inference-plugin/common/chat_complete';
+import { Message, ToolDefinition } from '@kbn/inference-plugin/common';
+import { MessageOf, MessageRole, ToolMessage } from '@kbn/inference-plugin/common/chat_complete';
 import { ToolCallsOf, ToolChoice } from '@kbn/inference-plugin/common/chat_complete/tools';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { last, merge, Observable, of, OperatorFunction, share, switchMap, tap } from 'rxjs';
+import {
+  InferenceClient,
+  withoutChunkEvents,
+  withoutTokenCountEvents,
+} from '@kbn/inference-plugin/server';
+import { Logger } from '@kbn/logging';
+import { last, merge, Observable, of, OperatorFunction, share, switchMap, toArray } from 'rxjs';
 
-type CallbackReturn = ChatCompletionEvent | ToolMessage<Record<string, any>> | UserMessage;
-
-type CallbackOf<
-  TCallToolOptions extends CallToolOptions,
-  TCallbackReturn extends CallbackReturn
-> = ({}: {
-  messages: Message[];
-  toolCalls: ToolCallsOf<TCallToolOptions>['toolCalls'];
-}) => Observable<TCallbackReturn>;
-
-interface CallToolOptions {
+interface CallToolOptions extends CallToolTools {
   system: string;
   messages: Message[];
   inferenceClient: InferenceClient;
   connectorId: string;
+  logger: Logger;
+}
+
+interface CallToolTools {
   tools: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice<string>;
 }
 
-type ObservableTypeOf<
-  TCallToolOptions extends CallToolOptions,
-  TCallbackReturn extends CallbackReturn
-> = ChatCompletionEvent<TCallToolOptions> | TCallbackReturn;
+type CallbackOf<
+  TCallToolTools extends CallToolTools,
+  TEmittedMessage extends Message
+> = (parameters: {
+  messages: Message[];
+  toolCalls: ToolCallsOf<TCallToolTools>['toolCalls'];
+}) => Observable<TEmittedMessage>;
+
+type GetNextRequestCallback<TCallToolTools extends CallToolTools> = ({
+  messages,
+  system,
+}: {
+  messages: Message[];
+  system: string;
+}) => { system: string; messages: Message[] } & TCallToolTools;
+
+export function callTools<TCallToolOptions extends CallToolOptions>(
+  { system, messages, inferenceClient, connectorId, tools, toolChoice, logger }: TCallToolOptions,
+  callback: CallbackOf<TCallToolOptions, ToolMessage>
+): Observable<MessageOf<TCallToolOptions>>;
 
 export function callTools<
-  TCallToolOptions extends CallToolOptions,
-  TCallbackReturn extends CallbackReturn
+  TCallToolOptions extends Omit<CallToolOptions, 'tools' | 'toolChoice'> = never,
+  TCallToolTools extends CallToolTools = never,
+  TEmittedMessage extends Message = never
 >(
-  { system, messages, inferenceClient, connectorId, tools, toolChoice }: TCallToolOptions,
-  callback: CallbackOf<TCallToolOptions, TCallbackReturn>
-): Observable<ObservableTypeOf<TCallToolOptions, TCallbackReturn>> {
-  const nextMessages: Message[] = messages.concat();
+  options: TCallToolOptions,
+  getNextRequest: GetNextRequestCallback<TCallToolTools>,
+  callback: CallbackOf<TCallToolTools, TEmittedMessage>
+): Observable<TEmittedMessage>;
 
-  return inferenceClient
-    .chatComplete({
-      connectorId,
-      system,
-      messages,
-      toolChoice,
-      tools,
+export function callTools(
+  { system, messages, inferenceClient, connectorId, tools, toolChoice, logger }: CallToolOptions,
+  ...callbacks:
+    | [GetNextRequestCallback<CallToolTools>, CallbackOf<CallToolOptions, ToolMessage>]
+    | [CallbackOf<CallToolTools, ToolMessage>]
+): Observable<Message> {
+  const callback = callbacks.length === 2 ? callbacks[1] : callbacks[0];
+
+  const getNextRequest =
+    callbacks.length === 2
+      ? callbacks[0]
+      : (next: { messages: Message[]; system: string }) => {
+          return {
+            ...next,
+            tools,
+            toolChoice,
+          };
+        };
+
+  const nextRequest = getNextRequest({ system, messages });
+
+  const chatComplete$ = inferenceClient.chatComplete({
+    connectorId,
+    ...nextRequest,
+  });
+
+  const asCompletedMessages$ = chatComplete$.pipe(
+    withoutChunkEvents(),
+    withoutTokenCountEvents(),
+    switchMap((event) => {
+      return of({
+        role: MessageRole.Assistant as const,
+        content: event.content,
+        toolCalls: event.toolCalls,
+      });
     })
+  );
+
+  const withToolResponses$ = asCompletedMessages$
     .pipe(
-      switchMap((event) => {
-        if (isChatCompletionMessageEvent<TCallToolOptions>(event)) {
-          nextMessages.push({
-            role: MessageRole.Assistant,
-            content: event.content,
-            toolCalls: event.toolCalls,
-          });
-
-          if (event.toolCalls.length) {
-            return merge(
-              of(event),
-              callback({ toolCalls: event.toolCalls, messages: nextMessages }).pipe(
-                handleToolCalls()
-              )
-            );
-          }
+      switchMap((message) => {
+        if (message.toolCalls.length) {
+          return merge(
+            of(message),
+            callback({ toolCalls: message.toolCalls, messages: messages.concat(message) })
+          );
         }
-        return of(event);
+        return of(message);
       })
-    );
+    )
+    .pipe(handleNext());
 
-  function handleToolCalls(): OperatorFunction<
-    ObservableTypeOf<TCallToolOptions, TCallbackReturn>,
-    ObservableTypeOf<TCallToolOptions, TCallbackReturn>
-  > {
+  return withToolResponses$;
+
+  function handleNext(): OperatorFunction<Message, Message> {
     return (source$) => {
       const shared$ = source$.pipe(share());
 
       const next$ = merge(
         shared$,
         shared$.pipe(
-          tap((event) => {
-            if ('role' in event) {
-              nextMessages.push(event);
-            } else if (isChatCompletionMessageEvent<TCallToolOptions>(event)) {
-              nextMessages.push({
-                role: MessageRole.Assistant,
-                content: event.content,
-                toolCalls: event.toolCalls,
-              });
-            }
-          }),
+          toArray(),
           last(),
-          switchMap(() => {
+          switchMap((nextMessages) => {
+            logger.debug(() =>
+              JSON.stringify(
+                nextMessages.map((message) => {
+                  return {
+                    role: message.role,
+                    toolCalls: 'toolCalls' in message ? message.toolCalls : undefined,
+                    toolCallId: 'toolCallId' in message ? message.toolCallId : undefined,
+                  };
+                })
+              )
+            );
+
             if (nextMessages[nextMessages.length - 1].role !== MessageRole.Assistant) {
-              const after$ = callTools<TCallToolOptions, TCallbackReturn>(
-                {
-                  system,
-                  connectorId,
-                  inferenceClient,
-                  messages: nextMessages,
-                  tools,
-                  toolChoice,
-                } as TCallToolOptions,
-                callback
-              );
+              const options: CallToolOptions = {
+                system,
+                connectorId,
+                inferenceClient,
+                messages: messages.concat(nextMessages),
+                tools,
+                toolChoice,
+                logger,
+              };
+              const after$ = callTools(options, getNextRequest, callback);
               return after$;
             }
             return of();
           })
         )
       );
+
       return next$;
     };
   }

@@ -20,7 +20,12 @@ export interface InvestigationContextualInsight {
 }
 
 export function AssistantHypothesis({ investigationId }: { investigationId: string }) {
-  const { alert } = useInvestigation();
+  const {
+    alert,
+    globalParams: {
+      timeRange: { from, to },
+    },
+  } = useInvestigation();
   const {
     core: { notifications },
     services: { investigateAppRepositoryClient },
@@ -48,17 +53,9 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
     connectorId: string;
     serviceName: string;
   }) => {
-    const start = moment(nonNullishAlert[ALERT_START]);
+    const rangeFrom = moment(from).toISOString();
 
-    const minutesSinceStart = Math.abs(moment().diff(start)) / 1000 / 60;
-
-    const minutesBeforeAlertStart = Math.min(30, Math.max(5, Math.ceil(minutesSinceStart)));
-
-    const rangeFrom = moment(nonNullishAlert[ALERT_START])
-      .subtract(minutesBeforeAlertStart, 'minute')
-      .toISOString();
-
-    const rangeTo = new Date().toISOString();
+    const rangeTo = moment(to).toISOString();
 
     const signal = new AbortController().signal;
 
@@ -82,10 +79,8 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
       })
       .subscribe({
         next: (event) => {
+          console.log(event);
           setEvents((prev) => {
-            if ('type' in event.event && event.event.type === 'chatCompletionChunk') {
-              return prev;
-            }
             return prev.concat(event.event);
           });
         },

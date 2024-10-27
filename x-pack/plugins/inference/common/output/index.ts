@@ -62,6 +62,9 @@ export type OutputAPI = <
     schema?: TOutputSchema;
     previousMessages?: Message[];
     functionCalling?: FunctionCallingMode;
+    retry?: {
+      onValidationError?: boolean;
+    };
   }
 ) => Observable<
   OutputEvent<TId, TOutputSchema extends ToolSchema ? FromToolSchema<TOutputSchema> : undefined>

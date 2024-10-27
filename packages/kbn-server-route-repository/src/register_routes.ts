@@ -94,7 +94,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return result;
         } else if (isObservable(result)) {
           return response.ok({
-            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>),
+            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>, logger),
           });
         } else {
           const body = result || {};
