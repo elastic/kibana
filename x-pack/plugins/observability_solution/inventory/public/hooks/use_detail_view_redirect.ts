@@ -9,7 +9,7 @@ import {
   AssetDetailsLocatorParams,
   ENTITY_IDENTITY_FIELDS,
   ENTITY_TYPE,
-  MANAGED_ENTITY_TYPE,
+  ENTITY_TYPES,
   SERVICE_ENVIRONMENT,
   SERVICE_OVERVIEW_LOCATOR_ID,
   ServiceOverviewParams,
@@ -24,16 +24,14 @@ import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
-  [MANAGED_ENTITY_TYPE.KUBERNETES.CLUSTER.ECS]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.CRONJOB.ECS]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.DAEMONSET.ECS]: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.DEPLOYMENT.ECS]:
-    'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.JOB.ECS]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.NODE.ECS]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.POD.ECS]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-  [MANAGED_ENTITY_TYPE.KUBERNETES.STATEFULSET.ECS]:
-    'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.CLUSTER.ecs]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+  [ENTITY_TYPES.KUBERNETES.CRONJOB.ecs]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs]: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs]: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+  [ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs]: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
 };
 
 export const useDetailViewRedirect = () => {
@@ -69,8 +67,8 @@ export const useDetailViewRedirect = () => {
       const identityValue = getSingleIdentityFieldValue(entity);
 
       switch (type) {
-        case MANAGED_ENTITY_TYPE.HOST:
-        case MANAGED_ENTITY_TYPE.CONTAINER:
+        case ENTITY_TYPES.HOST:
+        case ENTITY_TYPES.CONTAINER:
           return assetDetailsLocator?.getRedirectUrl({
             assetId: identityValue,
             assetType: type,

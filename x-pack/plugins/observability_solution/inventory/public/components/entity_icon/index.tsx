@@ -10,7 +10,7 @@ import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   ENTITY_TYPE,
-  MANAGED_ENTITY_TYPE,
+  ENTITY_TYPES,
 } from '@kbn/observability-shared-plugin/common';
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
@@ -32,7 +32,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
   const entityType = entity[ENTITY_TYPE];
   const defaultIconSize = euiThemeVars.euiSizeL;
 
-  if (entityType === MANAGED_ENTITY_TYPE.HOST || entityType === MANAGED_ENTITY_TYPE.CONTAINER) {
+  if (entityType === ENTITY_TYPES.HOST || entityType === ENTITY_TYPES.CONTAINER) {
     const cloudProvider = getSingleValue(
       entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
     );
@@ -54,7 +54,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
     );
   }
 
-  if (entityType === MANAGED_ENTITY_TYPE.SERVICE) {
+  if (entityType === ENTITY_TYPES.SERVICE) {
     const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
     return <AgentIcon agentName={agentName} role="presentation" />;
   }

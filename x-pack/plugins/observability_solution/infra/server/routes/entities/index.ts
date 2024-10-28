@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { METRICS_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { MANAGED_ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getDataStreamTypes } from './get_data_stream_types';
@@ -24,8 +24,8 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
       validate: {
         params: schema.object({
           entityType: schema.oneOf([
-            schema.literal(MANAGED_ENTITY_TYPE.HOST),
-            schema.literal(MANAGED_ENTITY_TYPE.CONTAINER),
+            schema.literal(ENTITY_TYPES.HOST),
+            schema.literal(ENTITY_TYPES.CONTAINER),
           ]),
           entityId: schema.string(),
         }),

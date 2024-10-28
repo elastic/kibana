@@ -6,11 +6,11 @@
  */
 
 const createKubernetesEntity = <T extends string>(base: T) => ({
-  ECS: `kubernetes_${base}_ecs` as const,
-  SEMCONV: `kubernetes_${base}_semconv` as const,
+  ecs: `kubernetes_${base}_ecs` as const,
+  semconv: `kubernetes_${base}_semconv` as const,
 });
 
-export const MANAGED_ENTITY_TYPE = {
+export const ENTITY_TYPES = {
   HOST: 'host',
   CONTAINER: 'container',
   SERVICE: 'service',
