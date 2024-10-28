@@ -20,6 +20,9 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../comm
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
+// Default timeout for tests is 5s, increasing to 8s due to long running requests leading to frequent flakyness
+const TESTS_TIMEOUT = 10000;
+
 jest.mock('../../../../../services');
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
@@ -602,7 +605,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitForNextUpdate({ timeout: TESTS_TIMEOUT });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
