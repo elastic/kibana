@@ -1,6 +1,6 @@
 # Lens Suggestions API
 
-This document provides an overview of the Lens Suggestions API. It is used mostly for suggesting ES|QL charts based on an ES|QL query. It is used by the observability assistant, Discover and Dashboards.
+This document provides an overview of the Lens Suggestions API. It is used mostly for suggesting ES|QL charts based on an ES|QL query. It is used by the observability assistant, Discover and Dashboards ES|QL charts.
 
 ## Overview
 
