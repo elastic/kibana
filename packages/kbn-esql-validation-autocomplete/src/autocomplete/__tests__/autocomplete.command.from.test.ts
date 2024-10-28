@@ -92,13 +92,11 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a, b METADATA /', metadataFields);
-        await assertSuggestions('from a, b METADATA /', metadataFields);
       });
 
       test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b metadata _index /', [',', '| ']);
         await assertSuggestions('from a, b metadata _index /', [',', '| ']);
         await assertSuggestions('from a, b metadata _index, _source /', [',', '| ']);
         await assertSuggestions(`from a, b metadata ${METADATA_FIELDS.join(', ')} /`, ['| ']);
@@ -107,7 +105,6 @@ describe('autocomplete.suggest', () => {
       test('filters out already used metadata fields', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b metadata _index, /', metadataFieldsAndIndex);
         await assertSuggestions('from a, b metadata _index, /', metadataFieldsAndIndex);
       });
     });
