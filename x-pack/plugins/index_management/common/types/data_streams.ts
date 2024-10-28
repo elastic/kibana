@@ -74,7 +74,7 @@ export interface DataStream {
     retention_determined_by?: string;
     globalMaxRetention?: string;
   };
-  indexMode: string;
+  indexMode: IndexMode;
 }
 
 export interface DataStreamIndex {

@@ -28,6 +28,7 @@ import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
+import { getIndexModeLabel } from '../../../../../lib/index_mode_labels';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -232,7 +233,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {indexSettings?.mode ?? 'standard'}
+              {getIndexModeLabel(indexSettings?.mode)}
             </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
