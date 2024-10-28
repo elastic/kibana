@@ -11,7 +11,9 @@ import { firstValueFrom } from 'rxjs';
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { MlFeatures } from '../../../common/constants/app';
-import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
+import { isFullLicense } from '../../../common/license/is_full_license';
+import { isMinimumLicense } from '../../../common/license/is_minimum_license';
+import { isMlEnabled } from '../../../common/license/is_ml_enabled';
 import {
   type MlCapabilities,
   basicLicenseMlCapabilities,
