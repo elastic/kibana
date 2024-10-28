@@ -104,7 +104,6 @@
     "@kbn/management-settings-ids",
     "@kbn/logs-data-access-plugin",
     "@kbn/discover-shared-plugin",
-    "@kbn/expandable-flyout"
   ],
   "exclude": [
     "target/**/*"
