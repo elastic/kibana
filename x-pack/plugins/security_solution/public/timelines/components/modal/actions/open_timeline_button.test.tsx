@@ -62,7 +62,11 @@ describe('OpenTimelineButton', () => {
   it('should open the modal after clicking on the button', async () => {
     (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
     (useStartTransaction as jest.Mock).mockReturnValue({ startTransaction: jest.fn() });
-    (useSourcererDataView as jest.Mock).mockReturnValue({ dataViewId: '', selectedPatterns: [] });
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: '',
+      selectedPatterns: [],
+      sourcererDataView: {},
+    });
     (useTimelineStatus as jest.Mock).mockReturnValue({
       timelineStatus: 'active',
       templateTimelineFilter: null,
