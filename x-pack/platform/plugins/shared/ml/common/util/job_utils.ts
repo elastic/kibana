@@ -18,27 +18,24 @@ import type { Filter } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
-import { isDefined } from '@kbn/ml-is-defined';
-import {
-  type MlEntityField,
-  ES_AGGREGATION,
-  ML_JOB_AGGREGATION,
-  MLCATEGORY,
-} from '@kbn/ml-anomaly-utils';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { maxLengthValidator, ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { CREATED_BY_LABEL } from '../constants/new_job';
+import { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 import type {
   CombinedJob,
   CombinedJobWithStats,
-  CustomSettings,
-  Datafeed,
-  Job,
-  JobId,
-} from '../types/anomaly_detection_jobs';
-import type { MlServerLimits } from '../types/ml_server_info';
-import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job, JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
+import type {
+  JobValidationMessage,
+  JobValidationMessageId,
+} from '@kbn/ml-common-constants/messages';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
@@ -850,7 +847,7 @@ export function getLatestDataOrBucketTimestamp(
  * it was created by a job wizard as the rules cannot currently be edited
  * in the job wizards and so would be lost in a clone.
  */
-export function processCreatedBy(customSettings: CustomSettings) {
+export function processCreatedBy(customSettings: estypes.MlCustomSettings) {
   if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by as CREATED_BY_LABEL)) {
     delete customSettings.created_by;
   }
@@ -860,21 +857,6 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
     ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
-}
-
-/**
- * Resolves the longest time interval from the list.
- * @param timeIntervals Collection of the strings representing time intervals, e.g. ['15m', '1h', '2d']
- */
-export function resolveMaxTimeInterval(timeIntervals: estypes.Duration[]): number | undefined {
-  const result = Math.max(
-    ...timeIntervals
-      .map((b) => parseInterval(b))
-      .filter(isDefined)
-      .map((v) => v.asSeconds())
-  );
-
-  return Number.isFinite(result) ? result : undefined;
 }
 
 export function getFiltersForDSLQuery(

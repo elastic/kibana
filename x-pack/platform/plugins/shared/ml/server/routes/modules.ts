@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { type CompatibleModule, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { type CompatibleModule, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';
 import {

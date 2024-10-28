@@ -13,6 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import {
+  JOB_TYPE,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+  DEFAULT_BUCKET_SPAN,
+} from '@kbn/ml-common-constants/new_job';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -24,11 +29,6 @@ import {
   isRareJobCreator,
   isGeoJobCreator,
 } from '../../common/job_creator';
-import {
-  JOB_TYPE,
-  DEFAULT_MODEL_MEMORY_LIMIT,
-  DEFAULT_BUCKET_SPAN,
-} from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
 import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';

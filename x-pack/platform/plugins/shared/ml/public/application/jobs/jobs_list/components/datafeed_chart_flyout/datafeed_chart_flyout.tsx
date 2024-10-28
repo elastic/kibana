@@ -52,14 +52,12 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import type {
-  CombinedJobWithStats,
-  MlSummaryJob,
-  ModelSnapshot,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
-import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
+import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import type { LineAnnotationDatumWithModelSnapshot } from '@kbn/ml-common-types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
@@ -321,7 +319,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ padding: '10px' }}>
+            <EuiFlexItem grow={false} css={{ padding: '10px' }}>
               <EuiDatePicker
                 aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.chartIntervalEndTime', {
                   defaultMessage: 'Chart interval end time',

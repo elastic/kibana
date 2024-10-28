@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const ML_NOTIFICATIONS_MESSAGE_LEVEL = {
-  ERROR: 'error',
-  INFO: 'info',
-  WARNING: 'warning',
-} as const;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/common_types'],
+};

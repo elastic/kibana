@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { estypes } from '@elastic/elasticsearch';
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';

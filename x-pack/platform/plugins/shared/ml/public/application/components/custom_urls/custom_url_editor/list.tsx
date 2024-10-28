@@ -30,13 +30,13 @@ import {
 import { parseUrlState } from '@kbn/ml-url-state';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
 import { TIME_RANGE_TYPE } from './constants';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.

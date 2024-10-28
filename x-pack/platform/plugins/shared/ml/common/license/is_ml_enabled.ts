@@ -6,7 +6,7 @@
  */
 
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN_ID } from '../constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 
 export function isMlEnabled(license: ILicense) {
   return license.getFeature(PLUGIN_ID).isEnabled;

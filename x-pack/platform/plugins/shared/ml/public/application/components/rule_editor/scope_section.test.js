@@ -22,7 +22,7 @@ jest.mock('../../contexts/kibana', () => ({
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { ScopeSection } from './scope_section';
 

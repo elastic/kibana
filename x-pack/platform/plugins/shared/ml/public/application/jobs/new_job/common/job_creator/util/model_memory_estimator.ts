@@ -25,7 +25,7 @@ import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
+import { DEFAULT_MODEL_MEMORY_LIMIT } from '@kbn/ml-common-constants/new_job';
 import type { JobValidator } from '../../job_validator/job_validator';
 import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { useMlKibana } from '../../../../../contexts/kibana';

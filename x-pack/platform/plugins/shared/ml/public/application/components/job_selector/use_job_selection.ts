@@ -7,8 +7,10 @@
 
 import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+
 import { i18n } from '@kbn/i18n';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+
 import { useNotifications } from '../../contexts/kibana';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { useAnomalyExplorerContext } from '../../explorer/anomaly_explorer_context';

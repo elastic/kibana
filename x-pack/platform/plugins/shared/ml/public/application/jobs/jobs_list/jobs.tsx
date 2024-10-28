@@ -13,7 +13,6 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { css } from '@emotion/react';
 import { JobsListView } from './components/jobs_list_view';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageHeader } from '../../components/page_header';

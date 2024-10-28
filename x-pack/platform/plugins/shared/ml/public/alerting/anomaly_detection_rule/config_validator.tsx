@@ -11,11 +11,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
-import { DATAFEED_STATE } from '../../../common/constants/states';
-import { type MlAnomalyDetectionAlertParams } from '../../../common/types/alerts';
-import { type MlAnomalyAlertTriggerProps } from './ml_anomaly_alert_trigger';
-import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
+import { TOP_N_BUCKETS_COUNT } from '@kbn/ml-common-constants/alerts';
+import type { MlAnomalyAlertTriggerProps } from './ml_anomaly_alert_trigger';
 
 interface ConfigValidatorProps {
   alertInterval: string;

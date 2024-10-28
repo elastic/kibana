@@ -8,11 +8,11 @@
 import type { FC } from 'react';
 import React, { useContext } from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { useDashboardService } from '../../../../../../../../../services/dashboard_service';
 import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import type { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
 export const CustomUrlsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);

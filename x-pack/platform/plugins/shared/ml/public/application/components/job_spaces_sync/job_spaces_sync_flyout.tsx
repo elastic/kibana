@@ -25,8 +25,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import type { SyncSavedObjectResponse, SyncResult } from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '../../contexts/kibana';
-import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { SyncToAllSpacesWarning } from './sync_to_all_spaces_warning';

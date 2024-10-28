@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { MlServerDefaults, MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
 import type { MlApi } from './ml_api_service';
-import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
 
 export interface CloudInfo {
   cloudId: string | null;

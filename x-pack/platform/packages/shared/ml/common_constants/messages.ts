@@ -12,7 +12,19 @@ import type { DocLinksStart } from '@kbn/core/public';
 
 import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from '@kbn/ml-validators';
 
-import { renderTemplate } from '../util/string_utils';
+// A simple template renderer, it replaces mustache/angular style {{...}} tags with
+// the values provided via the data object
+export function renderTemplate(str: string, data?: Record<string, string>): string {
+  const matches = str.match(/{{(.*?)}}/g);
+
+  if (Array.isArray(matches) && data !== undefined) {
+    matches.forEach((v) => {
+      str = str.replace(v, data[v.replace(/{{|}}/g, '')]);
+    });
+  }
+
+  return str;
+}
 
 export type MessageId = keyof ReturnType<typeof getMessages>;
 

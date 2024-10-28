@@ -33,11 +33,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 
-import type {
-  ModelSnapshot,
-  CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlApi, useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
 import { mlResultsServiceProvider } from '../../../services/results_service';

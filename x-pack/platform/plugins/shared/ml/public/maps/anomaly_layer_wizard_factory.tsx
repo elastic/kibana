@@ -13,16 +13,16 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LayerWizard, RenderWizardArguments } from '@kbn/maps-plugin/public';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common/descriptor_types';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import { getActualStyle } from './util';
-import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
-import type { AnomalySourceDescriptor } from './anomaly_source';
-import { AnomalySource } from './anomaly_source';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
 
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import type { MlApi } from '../application/services/ml_api_service';
 
+import { getActualStyle } from './util';
+import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
+import type { AnomalySourceDescriptor } from './anomaly_source';
+import { AnomalySource } from './anomaly_source';
 import { anomalyLayerWizard } from './anomaly_layer_wizard';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';

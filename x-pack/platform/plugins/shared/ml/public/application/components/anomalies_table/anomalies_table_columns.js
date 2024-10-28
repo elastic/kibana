@@ -12,7 +12,8 @@ import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_JOB_AGGREGATION, isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,

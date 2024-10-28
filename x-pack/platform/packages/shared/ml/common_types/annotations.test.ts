@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ANNOTATION_TYPE } from '../constants/annotations';
+import { ANNOTATION_TYPE } from './annotations';
 
 import { isAnnotation, isAnnotations } from './annotations';
 

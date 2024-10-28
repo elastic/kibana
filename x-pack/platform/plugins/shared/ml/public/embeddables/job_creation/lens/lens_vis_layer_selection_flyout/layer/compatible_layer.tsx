@@ -10,12 +10,12 @@ import React, { useMemo } from 'react'; // useCallback
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import type { LensApi } from '@kbn/lens-plugin/public';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 import {
   redirectToADJobWizards,
   QuickLensJobCreator,
 } from '../../../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../../common/context';
 import type { CreateADJobParams } from '../../../common/job_details';
 import { JobDetails } from '../../../common/job_details';

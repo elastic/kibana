@@ -56,5 +56,10 @@
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/ml-string-hash",
+    "@kbn/core-chrome-browser",
+    "@kbn/event-log-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/intercepts-plugin",
+    "@kbn/ml-common-types"
   ]
 }

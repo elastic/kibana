@@ -7,13 +7,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { TrainedModelLink } from '../../../../../model_management/model_link';
-import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   AnalyticsManagementItems,
   AnomalyDetectionManagementItems,
   TrainedModelsManagementItems,
-} from '../../../../../../../common/types/management';
+} from '@kbn/ml-common-types/management';
+import { TrainedModelLink } from '../../../../../model_management/model_link';
 import { AnomalyDetectionJobIdLink } from '../../../../../jobs/jobs_list/components/jobs_list/job_id_link';
 import { DFAnalyticsJobIdLink } from '../../../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
 

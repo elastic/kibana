@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { ML_APP_NAME } from '../../../common/constants/app';
+import { ML_APP_NAME } from '@kbn/ml-common-constants/app';
 import type { MlRoute } from './router';
 import { useMlKibana } from '../contexts/kibana';
 

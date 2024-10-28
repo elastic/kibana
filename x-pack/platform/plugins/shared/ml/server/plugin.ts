@@ -27,16 +27,17 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import { type MlCapabilities, alertingFeatures } from '../common/types/capabilities';
-import { notificationsRoutes } from './routes/notifications';
+import { type MlCapabilities, alertingFeatures } from '@kbn/ml-common-types/capabilities';
 import {
   type MlFeatures,
   PLUGIN_ID,
   type ConfigSchema,
   initEnabledFeatures,
   type CompatibleModule,
-} from '../common/constants/app';
+} from '@kbn/ml-common-constants/app';
+import { getPluginPrivileges } from '@kbn/ml-common-types/capabilities';
+import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import { notificationsRoutes } from './routes/notifications';
 import { initMlServerLog } from './lib/log';
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
@@ -57,7 +58,6 @@ import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import type { SharedServices } from './shared_services';
 import { createSharedServices } from './shared_services';
-import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';

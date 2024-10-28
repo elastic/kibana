@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
-import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
+import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '@kbn/ml-common-constants/app';
 
 import type { MlDependencies } from './app';
 import { AppLazy } from './app_lazy';

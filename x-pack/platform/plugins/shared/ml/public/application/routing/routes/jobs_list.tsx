@@ -15,7 +15,7 @@ import {
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
+import { DEFAULT_REFRESH_INTERVAL_MS } from '@kbn/ml-common-constants/jobs_list';
 import type { MlRoute } from '../router';
 import { PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';

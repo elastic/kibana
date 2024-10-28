@@ -9,17 +9,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { Job, Detector, CustomRule } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { CREATED_BY_LABEL, JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 
 import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-  CustomRule,
-} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';

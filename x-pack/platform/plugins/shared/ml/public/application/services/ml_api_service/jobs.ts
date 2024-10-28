@@ -10,30 +10,32 @@ import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { CategorizationAnalyzer, FieldValidationResults } from '@kbn/ml-category-validator';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
 
-import type { Dictionary } from '../../../../common/types/common';
+import type { Dictionary } from '@kbn/ml-common-types/common';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type {
+  Datafeed,
+  IndicesOptions,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type {
   MlJobWithTimeRange,
   MlSummaryJobs,
-  CombinedJobWithStats,
-  Job,
-  Datafeed,
-  IndicesOptions,
-} from '../../../../common/types/anomaly_detection_jobs';
-import type { JobMessage } from '../../../../common/types/audit_message';
-import type { JobAction } from '../../../../common/constants/job_actions';
-import type { Group } from '../../../../common/types/groups';
-import type { ExistingJobsAndGroups } from '../job_service';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import type { JobAction } from '@kbn/ml-common-constants/job_actions';
+import type { Group } from '@kbn/ml-common-types/groups';
 
-import type { Category } from '../../../../common/types/categories';
+import type { Category } from '@kbn/ml-common-types/categories';
 import type {
   JobsExistResponse,
   BulkCreateResults,
   ResetJobsResponse,
-} from '../../../../common/types/job_service';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+} from '@kbn/ml-common-types/job_service';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { ExistingJobsAndGroups } from '../job_service';
+import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {

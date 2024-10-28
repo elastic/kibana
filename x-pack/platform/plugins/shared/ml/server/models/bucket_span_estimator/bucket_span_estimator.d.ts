@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { BucketSpanEstimatorData } from '../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 
 export function estimateBucketSpanFactory({
   asCurrentUser,

@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Field, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { mlResultsServiceProvider } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';

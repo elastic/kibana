@@ -42,7 +42,7 @@ import { context } from '@kbn/kibana-react-plugin/public';
 import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -74,7 +74,7 @@ import {
 } from './timeseriesexplorer_constants';
 import { timeSeriesSearchServiceFactory } from './timeseriesexplorer_utils/time_series_search_service';
 import { getTimeseriesexplorerDefaultState } from './timeseriesexplorer_utils';
-import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '@kbn/ml-common-constants/settings';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
 import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
