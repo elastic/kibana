@@ -15,7 +15,7 @@ import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { AnnotationService } from '../../models/annotation_service/annotation';
 import type { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 
 const MOCK_DATE_NOW = 1487076708000;
 

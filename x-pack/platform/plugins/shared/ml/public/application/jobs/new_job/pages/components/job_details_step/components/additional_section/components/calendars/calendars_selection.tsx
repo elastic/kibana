@@ -21,16 +21,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import type { MlCalendar } from '@kbn/ml-common-types/calendars';
+import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
 import {
   filterCalendarsForDst,
   separateCalendarsByType,
 } from '../../../../../../../../../settings/calendars/dst_utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import type { MlCalendar } from '../../../../../../../../../../../common/types/calendars';
 import { useMlApi } from '../../../../../../../../../contexts/kibana';
-import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
-import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 import { DescriptionDst } from './description_dst';
 import { useMlManagementLink } from '../../../../../../../../../contexts/kibana/use_create_url';
 import { MANAGEMENT_SECTION_IDS } from '../../../../../../../../../management';

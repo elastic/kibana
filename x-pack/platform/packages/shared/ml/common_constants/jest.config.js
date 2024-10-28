@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export * from './job';
-export * from './job_stats';
-export * from './datafeed';
-export * from './datafeed_stats';
-export * from './combined_job';
-export * from './summary_job';
-export * from './model_snapshot';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/common_constants'],
+};

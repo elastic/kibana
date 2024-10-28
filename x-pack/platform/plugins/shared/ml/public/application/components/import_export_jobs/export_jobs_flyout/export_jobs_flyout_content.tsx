@@ -26,8 +26,8 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { ExportJobDependenciesWarningCallout } from './export_job_warning_callout';
-import type { JobType } from '../../../../../common/types/saved_objects';
 import { useMlKibana } from '../../../contexts/kibana';
 import { JobsExportService } from './jobs_export_service';
 import type { JobDependencies } from './jobs_export_service';

@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { JobObject, MLSavedObjectService, TrainedModelObject } from './service';
 import type {
   JobType,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
   MlSavedObjectType,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
+import type { JobObject, MLSavedObjectService, TrainedModelObject } from './service';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
 import {

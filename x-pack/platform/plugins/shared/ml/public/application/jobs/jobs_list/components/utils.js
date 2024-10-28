@@ -13,12 +13,12 @@ import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { stringMatch } from '../../../util/string_utils';
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import { JOB_ACTION } from '../../../../../common/constants/job_actions';
+import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
+import { JOB_ACTION } from '@kbn/ml-common-constants/job_actions';
 import { mlCalendarService } from '../../../services/calendar_service';
 import { jobCloningService } from '../../../services/job_cloning_service';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 
 export function loadFullJob(mlApi, jobId) {
   return new Promise((resolve, reject) => {

@@ -18,23 +18,21 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
-import type {
-  DFAModelItem,
-  TrainedModelItem,
-  TrainedModelUIItem,
-} from '../../../common/types/trained_models';
 import {
+  type DFAModelItem,
+  type TrainedModelItem,
+  type TrainedModelUIItem,
   isBuiltInModel,
   isDFAModelItem,
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';

@@ -27,9 +27,7 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { MlClient } from '../../lib/ml_client';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -40,7 +38,13 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { ChartType } from '@kbn/ml-common-constants/charts';
+import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '@kbn/ml-common-constants/charts';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job as MlJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -49,15 +53,13 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
-import type { CombinedJob, Datafeed } from '../../shared';
-
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
-import type { ChartType } from '../../../common/constants/charts';
-import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import type { MlJob } from '../..';
+
+import type { MlClient } from '../../lib/ml_client';
+
+import type { CriteriaField } from './results_service';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {

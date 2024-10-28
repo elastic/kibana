@@ -34,7 +34,7 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { mlJobServiceFactory } from '../../../services/job_service';
 import { mlTableService } from '../../../services/table_service';
-import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
@@ -44,8 +44,8 @@ import { annotationsRefresh$, annotationsRefreshed } from '../../../services/ann
 import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
-} from '../../../../../common/constants/annotations';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
+} from '@kbn/ml-common-constants/annotations';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';

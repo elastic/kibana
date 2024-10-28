@@ -142,5 +142,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-browser",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-common-types",
   ]
 }
