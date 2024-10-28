@@ -421,7 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/note?createdByFilter=elastic')
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '2023-10-31');
-          const { totalCount } = response.body as GetNotesResult;
+          const { totalCount } = response.body;
 
           expect(totalCount).to.be(2);
         });
@@ -451,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get(`${NOTE_URL}?createdByFilter=wrong_user`)
+          .get('/api/note?createdByFilter=wrong_user')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
 
