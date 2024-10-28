@@ -31,7 +31,11 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-} from '../../../common/constants/search';
+} from '@kbn/ml-common-constants/search';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
+import { ML_RESULTS_INDEX_PATTERN } from '@kbn/ml-common-constants/index_patterns';
+
 import type { MlIndexUtils } from '../util/index_service';
 import {
   isSourceDataChartableForDetector,
@@ -43,11 +47,8 @@ import type { MlJobService } from '../services/job_service';
 
 import type { SwimlaneType } from './explorer_constants';
 import { MAX_CATEGORY_EXAMPLES, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
 import type { TableSeverityState } from '../components/controls/select_severity';
 

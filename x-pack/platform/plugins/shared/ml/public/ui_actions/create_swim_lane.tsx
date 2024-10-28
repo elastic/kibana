@@ -12,7 +12,7 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
+import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';

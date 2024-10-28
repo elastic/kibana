@@ -7,11 +7,10 @@
 
 import type { ApplicationStart, ToastsStart } from '@kbn/core/public';
 
-import type { DATAFEED_STATE } from '../../../../../common/constants/states';
-import type {
-  CombinedJobWithStats,
-  MlSummaryJob,
-} from '../../../../../common/types/anomaly_detection_jobs';
+import type { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+
 import type { MlApi } from '../../../services/ml_api_service';
 
 export function loadFullJob(mlApi: MlApi, jobId: string): Promise<CombinedJobWithStats>;
