@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/serverless/publish_oas/publish_oas_utils.sh
 
 KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get selected-commit)
