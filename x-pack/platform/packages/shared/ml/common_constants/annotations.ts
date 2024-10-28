@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export enum ANNOTATION_TYPE {
-  ANNOTATION = 'annotation',
-  COMMENT = 'comment',
-}
-
 export const ANNOTATION_USER_UNKNOWN = '<user unknown>';
 
 // UI enforced limit to the maximum number of characters that can be entered for an annotation.

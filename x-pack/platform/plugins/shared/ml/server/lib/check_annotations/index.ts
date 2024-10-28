@@ -6,12 +6,11 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { mlLog } from '../log';
-
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-} from '../../../common/constants/index_patterns';
+} from '@kbn/ml-common-constants/index_patterns';
+import { mlLog } from '../log';
 
 // Annotations Feature is available if:
 // - ML_ANNOTATIONS_INDEX_ALIAS_READ alias is present

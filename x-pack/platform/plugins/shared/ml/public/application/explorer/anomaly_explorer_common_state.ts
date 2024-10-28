@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs';
+import {
+  distinctUntilChanged,
+  map,
+  shareReplay,
+  filter,
+  BehaviorSubject,
+  Subscription,
+  type Observable,
+} from 'rxjs';
 import { isEqual } from 'lodash';
+
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { GlobalState, UrlStateService } from '@kbn/ml-url-state/src/url_state';
-import { createJobs, type ExplorerJob } from './explorer_utils';
-import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
-import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
-import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
+import type { AnomalyExplorerFilterUrlState } from '@kbn/ml-common-types/locator';
+
 import { StateService } from '../services/state_service';
 import type { MlJobService } from '../services/job_service';
 import type { GroupObj } from '../components/job_selector/job_selector';
+
+import { createJobs, type ExplorerJob } from './explorer_utils';
+import type { ExplorerJob } from './explorer_utils';
+import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
+import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
 
 export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];
