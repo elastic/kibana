@@ -13,8 +13,8 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import type { SingleMetricViewerEmbeddableApi } from '../embeddables';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
+import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
 import type { MlCoreSetup } from '../plugin';
 import { getEmbeddableTimeRange } from './get_embeddable_time_range';
