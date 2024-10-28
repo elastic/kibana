@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { DataViewBase } from '@kbn/es-query';
 import type { Optional } from 'utility-types';
 
+import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -45,7 +46,7 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps;
 export type NetworkRoutesProps = GlobalTimeArgs & {
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
-  indexPattern: DataViewBase;
+  dataViewSpec: DataViewSpec;
   indexNames: string[];
 };
 
