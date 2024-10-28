@@ -5,7 +5,8 @@ CODEQL_DIR=".codeql"
 DATABASE_PATH="$CODEQL_DIR/database"
 QUERY_OUTPUT="$DATABASE_PATH/results.sarif"
 OUTPUT_FORMAT="sarif-latest"
-DOCKER_IMAGE="docker.elastic.co/employees/elena-shostak/codeql-env:latest"
+DOCKER_IMAGE="codeql-env"
+BASE_DIR="$(cd "$(dirname "$0")"; pwd)"
 
 # Colors
 bold=$(tput bold)
@@ -38,6 +39,15 @@ PLATFORM_FLAG=""
 # CodeQL CLI binary does not support arm64 architecture, setting the platform to linux/amd64
 if [[ "$ARCH" == "arm64" ]]; then
     PLATFORM_FLAG="--platform linux/amd64"
+fi
+
+if [[ "$(docker images -q $DOCKER_IMAGE 2> /dev/null)" == "" ]]; then
+    echo "Docker image $DOCKER_IMAGE not found. Building locally..."
+    docker build $PLATFORM_FLAG -t "$DOCKER_IMAGE" -f "$BASE_DIR/codeql.dockerfile" "$BASE_DIR"
+    if [ $? -ne 0 ]; then
+        echo "${red}Docker image build failed.${reset}"
+        exit 1
+    fi
 fi
 
 cleanup_database() {
