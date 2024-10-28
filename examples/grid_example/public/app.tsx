@@ -11,29 +11,31 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { v4 as uuidv4 } from 'uuid';
 
-import { GridLayout, type GridLayoutApi } from '@kbn/grid-layout';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiProvider,
-  EuiSpacer,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageTemplate,
+  EuiProvider,
+  EuiSpacer,
 } from '@elastic/eui';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { GridLayout, type GridLayoutApi } from '@kbn/grid-layout';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
 } from '@kbn/grid-layout/grid/constants';
+import { getPanelId } from './get_panel_id';
 import {
   clearSerializedGridLayout,
   getSerializedGridLayout,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
 
-export const GridExample = () => {
+export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
   const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
 
@@ -45,8 +47,12 @@ export const GridExample = () => {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={() => {
-                  gridLayoutApi?.addPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
+                onClick={async () => {
+                  const panelId = await getPanelId({
+                    coreStart,
+                    suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
+                  });
+                  gridLayoutApi?.addPanel(panelId);
                 }}
               >
                 Add a panel
@@ -95,8 +101,12 @@ export const GridExample = () => {
                     Delete this panel
                   </EuiButtonEmpty>
                   <EuiButtonEmpty
-                    onClick={() => {
-                      gridLayoutApi?.replacePanel(id, 'test');
+                    onClick={async () => {
+                      const newPanelId = await getPanelId({
+                        coreStart,
+                        suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
+                      });
+                      gridLayoutApi?.replacePanel(id, newPanelId);
                     }}
                   >
                     Replace this panel
@@ -122,8 +132,11 @@ export const GridExample = () => {
   );
 };
 
-export const renderGridExampleApp = (element: AppMountParameters['element']) => {
-  ReactDOM.render(<GridExample />, element);
+export const renderGridExampleApp = (
+  element: AppMountParameters['element'],
+  coreStart: CoreStart
+) => {
+  ReactDOM.render(<GridExample coreStart={coreStart} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
