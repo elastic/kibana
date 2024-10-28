@@ -6,14 +6,12 @@
  */
 
 import expect from 'expect';
-import { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
   createRule,
   deleteAllRules,
@@ -123,6 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_id: ruleId,
             index: ['*'],
             interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+            enabled: false,
           })
         ),
       ]);
@@ -543,29 +542,27 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('legacy investigation fields', () => {
-      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
-      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
-      let ruleWithIntendedInvestigationField: RuleResponse;
-
-      beforeEach(async () => {
-        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
-          supertest,
-          getRuleSavedObjectWithLegacyInvestigationFields()
-        );
-
-        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
-          supertest,
-          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
-        );
-
-        ruleWithIntendedInvestigationField = await createRule(supertest, log, {
-          ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
-          name: 'Test investigation fields object',
-          investigation_fields: { field_names: ['host.name'] },
-        });
-      });
-
       it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
+        const [
+          ruleWithLegacyInvestigationField,
+          ruleWithLegacyInvestigationFieldEmptyArray,
+          ruleWithIntendedInvestigationField,
+        ] = await Promise.all([
+          createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFields()
+          ),
+          createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+          ),
+          createRule(supertest, log, {
+            ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
+            name: 'Test investigation fields object',
+            investigation_fields: { field_names: ['host.name'] },
+          }),
+        ]);
+
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.export },
@@ -635,6 +632,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete rules with investigation fields and transform legacy field in response', async () => {
+        const [ruleWithLegacyInvestigationField, ruleWithLegacyInvestigationFieldEmptyArray] =
+          await Promise.all([
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFields()
+            ),
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+            ),
+            createRule(supertest, log, {
+              ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
+              name: 'Test investigation fields object',
+              investigation_fields: { field_names: ['host.name'] },
+            }),
+          ]);
+
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.delete },
@@ -676,6 +690,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should enable rules with legacy investigation fields and transform legacy field in response', async () => {
+        const [ruleWithLegacyInvestigationField, ruleWithLegacyInvestigationFieldEmptyArray] =
+          await Promise.all([
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFields({ enabled: false })
+            ),
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray({ enabled: false })
+            ),
+            createRule(supertest, log, {
+              ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
+              name: 'Test investigation fields object',
+              investigation_fields: { field_names: ['host.name'] },
+            }),
+          ]);
+
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.enable },
@@ -747,6 +778,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should disable rules with legacy investigation fields and transform legacy field in response', async () => {
+        const [ruleWithLegacyInvestigationField, ruleWithLegacyInvestigationFieldEmptyArray] =
+          await Promise.all([
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFields({ enabled: true })
+            ),
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray({ enabled: false })
+            ),
+            createRule(supertest, log, {
+              ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
+              name: 'Test investigation fields object',
+              investigation_fields: { field_names: ['host.name'] },
+            }),
+          ]);
+
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.disable },
@@ -821,6 +869,26 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should duplicate rules with legacy investigation fields and transform field in response', async () => {
+        const [
+          ruleWithLegacyInvestigationField,
+          ruleWithLegacyInvestigationFieldEmptyArray,
+          ruleWithIntendedInvestigationField,
+        ] = await Promise.all([
+          createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFields()
+          ),
+          createRuleThroughAlertingEndpoint(
+            supertest,
+            getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+          ),
+          createRule(supertest, log, {
+            ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
+            name: 'Test investigation fields object',
+            investigation_fields: { field_names: ['host.name'] },
+          }),
+        ]);
+
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             body: {
@@ -941,6 +1009,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should edit rules with legacy investigation fields', async () => {
+        const [ruleWithLegacyInvestigationField, ruleWithLegacyInvestigationFieldEmptyArray] =
+          await Promise.all([
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFields()
+            ),
+            createRuleThroughAlertingEndpoint(
+              supertest,
+              getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+            ),
+            createRule(supertest, log, {
+              ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
+              name: 'Test investigation fields object',
+              investigation_fields: { field_names: ['host.name'] },
+            }),
+          ]);
+
         const { body } = await securitySolutionApi.performRulesBulkAction({
           body: {
             query: '',
