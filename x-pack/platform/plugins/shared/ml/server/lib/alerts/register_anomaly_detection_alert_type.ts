@@ -33,7 +33,7 @@ import {
   ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import { MINIMUM_FULL_LICENSE } from '../../../common/license/constants';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
 import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
