@@ -8,7 +8,6 @@
 import type {
   PluginInitializerContext,
   AppDeepLinkLocations,
-  ApplicationStart,
 } from '@kbn/core/public';
 import {
   type AppMountParameters,
@@ -19,7 +18,6 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { METRICS_EXPLORER_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import {
@@ -27,8 +25,6 @@ import {
   combineLatest,
   distinctUntilChanged,
   from,
-  of,
-  switchMap,
   map,
   firstValueFrom,
 } from 'rxjs';
@@ -138,75 +134,68 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndAccessibleFlag$ = combineLatest([
-      from(core.getStartServices()),
-      core.settings.client.get$<boolean>(enableInfrastructureHostsView),
-    ]).pipe(
-      switchMap(([[{ application }], isInfrastructureHostsViewEnabled]) =>
-        combineLatest([
-          of(application),
-          of(isInfrastructureHostsViewEnabled),
-          getLogsExplorerAccessible$(application),
-        ])
-      )
-    );
+    const startDep$AndHostViewFlag$ = combineLatest([from(core.getStartServices())]);
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndAccessibleFlag$.pipe(
-        map(([application, isInfrastructureHostsViewEnabled, isLogsExplorerAccessible]) => {
-          const { infrastructure, logs } = application.capabilities;
-          return [
-            ...(logs.show
-              ? [
-                  {
-                    label: logsTitle,
-                    sortKey: 200,
-                    entries: getLogsNavigationEntries({
-                      isLogsExplorerAccessible,
-                      config: this.config,
-                      routes: logRoutes,
-                    }),
-                  },
-                ]
-              : []),
-            ...(infrastructure.show
-              ? [
-                  {
-                    label: metricsTitle,
-                    sortKey: 300,
-                    entries: [
-                      {
-                        label: inventoryTitle,
-                        app: 'metrics',
-                        path: '/inventory',
-                      },
-                      ...(this.config.featureFlags.metricsExplorerEnabled
-                        ? [
-                            {
-                              label: metricsExplorerTitle,
-                              app: 'metrics',
-                              path: '/explorer',
-                            },
-                          ]
-                        : []),
-                      ...(isInfrastructureHostsViewEnabled
-                        ? [
-                            {
-                              label: hostsTitle,
-                              app: 'metrics',
-                              path: '/hosts',
-                            },
-                          ]
-                        : []),
-                    ],
-                  },
-                ]
-              : []),
-          ];
-        })
+      startDep$AndHostViewFlag$.pipe(
+        map(
+          ([
+            [
+              {
+                application: { capabilities },
+              },
+            ],
+          ]) => {
+            const { infrastructure, logs } = capabilities;
+            return [
+              ...(logs.show
+                ? [
+                    {
+                      label: logsTitle,
+                      sortKey: 200,
+                      entries: getLogsNavigationEntries({
+                        capabilities,
+                        config: this.config,
+                        routes: logRoutes,
+                      }),
+                    },
+                  ]
+                : []),
+              ...(infrastructure.show
+                ? [
+                    {
+                      label: metricsTitle,
+                      sortKey: 300,
+                      entries: [
+                        {
+                          label: inventoryTitle,
+                          app: 'metrics',
+                          path: '/inventory',
+                        },
+                        ...(this.config.featureFlags.metricsExplorerEnabled
+                          ? [
+                              {
+                                label: metricsExplorerTitle,
+                                app: 'metrics',
+                                path: '/explorer',
+                              },
+                            ]
+                          : []),
+                        {
+                          label: hostsTitle,
+                          app: 'metrics',
+                          path: '/hosts',
+                        },
+                      ],
+                    },
+                  ]
+                : []),
+            ];
+          }
+        )
       )
     );
 
@@ -253,10 +242,8 @@ export class Plugin implements InfraClientPluginClass {
 
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
-      hostsEnabled,
       metricsExplorerEnabled,
     }: {
-      hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
@@ -268,18 +255,14 @@ export class Plugin implements InfraClientPluginClass {
           path: '/inventory',
           visibleIn,
         },
-        ...(hostsEnabled
-          ? [
-              {
-                id: 'hosts',
-                title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-                  defaultMessage: 'Hosts',
-                }),
-                path: '/hosts',
-                visibleIn,
-              },
-            ]
-          : []),
+        {
+          id: 'hosts',
+          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+            defaultMessage: 'Hosts',
+          }),
+          path: '/hosts',
+          visibleIn,
+        },
         ...(metricsExplorerEnabled
           ? [
               {
@@ -318,7 +301,6 @@ export class Plugin implements InfraClientPluginClass {
       category: DEFAULT_APP_CATEGORIES.observability,
       updater$: this.appUpdater$,
       deepLinks: getInfraDeepLinks({
-        hostsEnabled: core.settings.client.get<boolean>(enableInfrastructureHostsView),
         metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
       }),
       mount: async (params: AppMountParameters) => {
@@ -343,15 +325,10 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    startDep$AndAccessibleFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled, _isLogsExplorerAccessible]: [
-        ApplicationStart,
-        boolean,
-        boolean
-      ]) => {
+    startDep$AndHostViewFlag$.subscribe(
+      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports]]) => {
         this.appUpdater$.next(() => ({
           deepLinks: getInfraDeepLinks({
-            hostsEnabled: isInfrastructureHostsViewEnabled,
             metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
           }),
         }));
