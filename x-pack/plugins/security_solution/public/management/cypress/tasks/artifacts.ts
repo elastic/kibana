@@ -162,6 +162,14 @@ export const trustedAppsFormSelectors = {
     }
   },
 
+  expectAllFieldOptionsRendered: () => {
+    trustedAppsFormSelectors.expectedFieldOptions();
+  },
+
+  expectFieldOptionsNotRendered: () => {
+    trustedAppsFormSelectors.expectedFieldOptions([]);
+  },
+
   openTrustedApps: ({ create, itemId }: { create?: boolean; itemId?: string } = {}) => {
     if (!create && !itemId) {
       loadPage(APP_TRUSTED_APPS_PATH);

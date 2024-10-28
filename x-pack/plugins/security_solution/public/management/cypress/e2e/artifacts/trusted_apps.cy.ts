@@ -31,6 +31,8 @@ const {
   validateRenderedConditions,
   deleteTrustedAppItem,
   removeSingleCondition,
+  expectAllFieldOptionsRendered,
+  expectFieldOptionsNotRendered,
 } = trustedAppsFormSelectors;
 
 describe(
@@ -104,17 +106,17 @@ describe(
       it('Correctly renders all blocklist fields for different OSs', () => {
         openTrustedApps({ create: true });
         selectOs('windows');
-        expectedFieldOptions([]); // Shouldn't be rendered
+        expectFieldOptionsNotRendered();
         openFieldSelector();
-        expectedFieldOptions(); // All fields should be rendered
+        expectAllFieldOptionsRendered();
 
         selectOs('macos');
-        expectedFieldOptions([]); // Shouldn't be rendered
+        expectFieldOptionsNotRendered();
         openFieldSelector();
-        expectedFieldOptions(); // All fields should be rendered
+        expectAllFieldOptionsRendered();
 
         selectOs('linux');
-        expectedFieldOptions([]); // Shouldn't be rendered
+        expectFieldOptionsNotRendered();
         openFieldSelector();
         expectedFieldOptions(['Path', 'Hash']);
       });

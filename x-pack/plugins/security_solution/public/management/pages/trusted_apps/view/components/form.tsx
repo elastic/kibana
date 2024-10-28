@@ -44,7 +44,7 @@ import {
   getPolicyIdsFromArtifact,
   getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
-import { excludeSignerFieldCondition, includeSignerFieldCondition } from '../../state/type_guards';
+import { isSignerFieldExcluded, isSignerFieldIncluded } from '../../state/type_guards';
 
 import {
   CONDITIONS_HEADER,
@@ -363,7 +363,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
         if (os === OperatingSystem.LINUX) {
           const linuxConditionEntry = item.entries.filter((entry) =>
-            excludeSignerFieldCondition(entry as TrustedAppConditionEntry)
+            isSignerFieldExcluded(entry as TrustedAppConditionEntry)
           );
           nextItem.entries.push(...linuxConditionEntry);
           if (item.entries.length === 0) {
@@ -429,13 +429,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       if (os === OperatingSystem.LINUX) {
         nextItem.entries = [
           ...item.entries.filter((entry) =>
-            excludeSignerFieldCondition(entry as TrustedAppConditionEntry)
+            isSignerFieldExcluded(entry as TrustedAppConditionEntry)
           ),
           defaultConditionEntry(),
         ];
       } else {
         nextItem.entries = [...item.entries, defaultConditionEntry()].filter((entry) =>
-          includeSignerFieldCondition(entry as TrustedAppConditionEntry)
+          isSignerFieldIncluded(entry as TrustedAppConditionEntry)
         );
       }
       processChanged(nextItem);

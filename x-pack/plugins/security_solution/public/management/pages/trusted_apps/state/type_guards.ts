@@ -12,13 +12,13 @@ import type {
   WindowsMacosConditionEntry,
 } from '../../../../../common/endpoint/types';
 
-export const includeSignerFieldCondition = (
+export const isSignerFieldIncluded = (
   condition: TrustedAppConditionEntry
 ): condition is WindowsMacosConditionEntry => {
   return condition.field === ConditionEntryField.SIGNER || true;
 };
 
-export const excludeSignerFieldCondition = (
+export const isSignerFieldExcluded = (
   condition: TrustedAppConditionEntry
 ): condition is LinuxConditionEntry => {
   return condition.field !== ConditionEntryField.SIGNER;
