@@ -39,6 +39,7 @@ export const nodesListRouteFactory = (
     },
   ],
   enableDatePicker: true,
+  'data-test-subj': 'mlPageMemoryUsage',
 });
 
 const PageWrapper: FC = () => {

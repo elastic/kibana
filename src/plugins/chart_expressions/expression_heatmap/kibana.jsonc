@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/expression-heatmap-plugin",
-  "owner": "@elastic/kibana-visualizations",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Expression Heatmap plugin adds a `heatmap` renderer and function to the expression plugin. The renderer will display the `heatmap` chart.",
   "plugin": {
     "id": "expressionHeatmap",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "expressions",
       "fieldFormats",
