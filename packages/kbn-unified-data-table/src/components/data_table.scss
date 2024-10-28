@@ -41,7 +41,15 @@
   }
 
   .euiDataGridHeaderCell {
-    align-items: start;
+    align-items: center;
+
+    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
+      align-self: center;
+    }
+  }
+
+  .euiDataGridHeaderCell__draggableIcon {
+    align-self: center;
   }
 
   .euiDataGrid--bordersHorizontal .euiDataGridHeader {
@@ -94,10 +102,6 @@
   .euiDataGridRowCell__content--lineCountHeight,
   .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
-  }
-
-  .euiDataGridHeaderCell__draggableIcon {
-    padding-top: 2px;
   }
 }
 
