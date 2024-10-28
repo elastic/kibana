@@ -1012,7 +1012,7 @@ describe('utils', () => {
       });
     });
 
-    it('returns zero counts when the bucket do not have the topAlertsPerBucket field', () => {
+    it('returns zero counts when the bucket does not have the topAlertsPerBucket field', () => {
       const buckets = [{}];
       // @ts-expect-error
       expect(getAlertsCountsFromBuckets(buckets)).toEqual({
