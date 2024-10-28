@@ -42,10 +42,6 @@
 
   .euiDataGridHeaderCell {
     align-items: start;
-
-    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
-      align-self: center;
-    }
   }
 
   .euiDataGrid--bordersHorizontal .euiDataGridHeader {
@@ -101,7 +97,7 @@
   }
 
   .euiDataGridHeaderCell__draggableIcon {
-    align-self: center;
+    padding-top: 2px;
   }
 }
 
