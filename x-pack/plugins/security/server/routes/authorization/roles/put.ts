@@ -26,6 +26,8 @@ export function definePutRolesRoutes({
       path: '/api/security/role/{name}',
       access: 'public',
       summary: `Create or update a role`,
+      description:
+        'Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.',
       options: {
         tags: ['oas-tag:roles'],
       },
@@ -35,8 +37,19 @@ export function definePutRolesRoutes({
         version: API_VERSIONS.roles.public.v1,
         validate: {
           request: {
-            params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
-            query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                maxLength: 1024,
+                meta: { description: 'The role name.' },
+              }),
+            }),
+            query: schema.object({
+              createOnly: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'When true, a role is not overwritten if it already exists.' },
+              }),
+            }),
             body: getPutPayloadSchema(() => {
               const privileges = authz.privileges.get();
               return {
@@ -44,6 +57,11 @@ export function definePutRolesRoutes({
                 space: Object.keys(privileges.space),
               };
             }),
+          },
+          response: {
+            204: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },
