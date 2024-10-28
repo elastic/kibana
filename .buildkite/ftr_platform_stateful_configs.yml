@@ -43,7 +43,7 @@ disabled:
   # Default http2 config to use for performance journeys
   - x-pack/performance/configs/http2_config.ts
 
-  # Gen AI suites, disables for now
+  # Gen AI suites, disabled for now
   - x-pack/test/functional_gen_ai/inference/config.ts
 
 defaultQueue: 'n2-4-spot'
