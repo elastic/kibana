@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { DataViewBase, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { HostsTableType } from '../../store/model';
 import type { HostsQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -40,6 +41,6 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     indexNames: string[];
     hostDetailsFilter: Filter[];
     filterQuery?: string;
-    indexPattern: DataViewBase;
+    dataViewSpec?: DataViewSpec;
     type: hostsModel.HostsType;
   };
