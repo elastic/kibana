@@ -480,7 +480,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   <EuiToolTip
                     position="bottom"
                     content={
-                      !hasUpdateMappingsPrivilege
+                      hasUpdateMappingsPrivilege !== undefined && !hasUpdateMappingsPrivilege
                         ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
                             defaultMessage: 'You do not have permission to add fields in an Index',
                           })
@@ -493,7 +493,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                       color="text"
                       size="m"
                       data-test-subj="indexDetailsMappingsAddField"
-                      isDisabled={!hasUpdateMappingsPrivilege}
+                      isDisabled={
+                        hasUpdateMappingsPrivilege !== undefined && !hasUpdateMappingsPrivilege
+                      }
                     >
                       <FormattedMessage
                         id="xpack.idxMgmt.indexDetails.mappings.addNewField"

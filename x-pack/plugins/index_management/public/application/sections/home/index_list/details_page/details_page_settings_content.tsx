@@ -190,7 +190,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           <EuiToolTip
             position="bottom"
             content={
-              !hasUpdateSettingsPrivilege
+              hasUpdateSettingsPrivilege !== undefined && !hasUpdateSettingsPrivilege
                 ? i18n.translate('xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage', {
                     defaultMessage: 'You do not have permission to update index settings',
                   })
@@ -207,7 +207,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
               }
               checked={isEditMode}
               onChange={onEditModeChange}
-              disabled={!hasUpdateSettingsPrivilege}
+              disabled={hasUpdateSettingsPrivilege !== undefined && !hasUpdateSettingsPrivilege}
             />
           </EuiToolTip>
 
