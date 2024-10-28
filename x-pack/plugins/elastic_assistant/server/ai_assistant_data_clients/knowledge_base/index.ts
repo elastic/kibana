@@ -200,6 +200,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         );
       }
     } catch (e) {
+      this.options.logger.error(`Error checking if ELSER model '${elserId}' is deployed: ${e}`);
       // Returns 404 if it doesn't exist
       return false;
     }
@@ -209,11 +210,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-      return await !!esClient.inference.get({
+      return !!(await esClient.inference.get({
         inference_id: ASSISTANT_ELSER_INFERENCE_ID,
         task_type: 'sparse_embedding',
-      });
+      }));
     } catch (error) {
+      this.options.logger.error(
+        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
+      );
       return false;
     }
   };
