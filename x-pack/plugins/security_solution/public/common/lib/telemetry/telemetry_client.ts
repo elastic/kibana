@@ -220,10 +220,10 @@ export class TelemetryClient implements TelemetryClientStart {
   };
 
   public reportEntityStoreEnablement = (params: ReportEntityStoreEnablementParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.EntityStoreEnablement, params);
+    this.analytics.reportEvent(TelemetryEventTypes.EntityStoreEnablementToggleClicked, params);
   };
 
   public reportEntityStoreInit = (params: ReportEntityStoreInitParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.EntityStoreInit, params);
+    this.analytics.reportEvent(TelemetryEventTypes.EntityStoreDashboardInitButtonClicked, params);
   };
 }

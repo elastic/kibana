@@ -216,7 +216,7 @@ export const assetCriticalityCsvImportedEvent: TelemetryEvent = {
 };
 
 export const entityStoreInitEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.EntityStoreInit,
+  eventType: TelemetryEventTypes.EntityStoreDashboardInitButtonClicked,
   schema: {
     timestamp: {
       type: 'date',
@@ -229,7 +229,7 @@ export const entityStoreInitEvent: TelemetryEvent = {
 };
 
 export const entityStoreEnablementEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.EntityStoreEnablement,
+  eventType: TelemetryEventTypes.EntityStoreEnablementToggleClicked,
   schema: {
     timestamp: {
       type: 'date',
