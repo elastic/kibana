@@ -495,6 +495,7 @@
     "/api/actions/action/{id}": {
       "delete": {
         "deprecated": true,
+        "description": "WARNING: When you delete a connector, it cannot be recovered.",
         "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -869,6 +870,7 @@
     },
     "/api/actions/connector/{id}": {
       "delete": {
+        "description": "WARNING: When you delete a connector, it cannot be recovered.",
         "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -1254,6 +1256,7 @@
     },
     "/api/actions/connector/{id}/_execute": {
       "post": {
+        "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.",
         "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0",
         "parameters": [
           {
@@ -1370,6 +1373,7 @@
     },
     "/api/actions/connector_types": {
       "get": {
+        "description": "You do not need any Kibana feature privileges to run this API.",
         "operationId": "%2Fapi%2Factions%2Fconnector_types#0",
         "parameters": [
           {
@@ -41860,6 +41864,7 @@
     },
     "/api/spaces/_copy_saved_objects": {
       "post": {
+        "description": "It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.",
         "operationId": "%2Fapi%2Fspaces%2F_copy_saved_objects#0",
         "parameters": [
           {
@@ -42033,6 +42038,7 @@
     },
     "/api/spaces/_get_shareable_references": {
       "post": {
+        "description": "Collect references and space contexts for saved objects.",
         "operationId": "%2Fapi%2Fspaces%2F_get_shareable_references#0",
         "parameters": [
           {
@@ -42101,6 +42107,7 @@
     },
     "/api/spaces/_resolve_copy_saved_objects_errors": {
       "post": {
+        "description": "Overwrite saved objects that are returned as errors from the copy saved objects to space API.",
         "operationId": "%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0",
         "parameters": [
           {
@@ -42221,6 +42228,7 @@
     },
     "/api/spaces/_update_objects_spaces": {
       "post": {
+        "description": "Update one or more saved objects to add or remove them from some spaces.",
         "operationId": "%2Fapi%2Fspaces%2F_update_objects_spaces#0",
         "parameters": [
           {

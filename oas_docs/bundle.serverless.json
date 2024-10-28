@@ -495,6 +495,7 @@
     "/api/actions/action/{id}": {
       "delete": {
         "deprecated": true,
+        "description": "WARNING: When you delete a connector, it cannot be recovered.",
         "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -869,6 +870,7 @@
     },
     "/api/actions/connector/{id}": {
       "delete": {
+        "description": "WARNING: When you delete a connector, it cannot be recovered.",
         "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0",
         "parameters": [
           {
@@ -1254,6 +1256,7 @@
     },
     "/api/actions/connector/{id}/_execute": {
       "post": {
+        "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.",
         "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0",
         "parameters": [
           {
@@ -1370,6 +1373,7 @@
     },
     "/api/actions/connector_types": {
       "get": {
+        "description": "You do not need any Kibana feature privileges to run this API.",
         "operationId": "%2Fapi%2Factions%2Fconnector_types#0",
         "parameters": [
           {
