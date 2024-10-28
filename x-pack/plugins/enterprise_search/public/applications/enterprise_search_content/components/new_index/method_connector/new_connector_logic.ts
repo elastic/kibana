@@ -146,9 +146,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       }
     },
     connectorNameGenerated: ({ connectorName }) => {
-      if (!values.rawName) {
-        actions.setRawName(connectorName);
-      }
+      actions.setRawName(connectorName);
     },
     createConnector: ({
       isSelfManaged,
@@ -194,7 +192,6 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     setSelectedConnector: ({ connector }) => {
       if (connector) {
         actions.generateConnectorName({
-          connectorName: values.rawName,
           connectorType: connector.serviceType,
         });
       }
