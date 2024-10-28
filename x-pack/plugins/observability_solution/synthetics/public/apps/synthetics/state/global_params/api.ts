@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   DeleteParamsResponse,
@@ -35,16 +36,22 @@ export const editGlobalParam = async ({
   id,
 }: {
   id: string;
-  paramRequest: SyntheticsParamRequest;
-}): Promise<SyntheticsParams> =>
-  apiService.put<SyntheticsParams>(
+  paramRequest: Partial<SyntheticsParamRequest>;
+}): Promise<SyntheticsParams> => {
+  const data = paramRequest;
+  if (isEmpty(paramRequest.value)) {
+    // omit empty value
+    delete data.value;
+  }
+  return await apiService.put<SyntheticsParams>(
     SYNTHETICS_API_URLS.PARAMS + `/${id}`,
-    paramRequest,
+    data,
     SyntheticsParamsCodec,
     {
       version: INITIAL_REST_VERSION,
     }
   );
+};
 
 export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> =>
   apiService.delete(
