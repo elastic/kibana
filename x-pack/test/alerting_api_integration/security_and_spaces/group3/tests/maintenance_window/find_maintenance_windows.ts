@@ -194,7 +194,8 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '[request query]: The number of documents is too high. Paginating through more than 10000 documents is not possible.',
+                message:
+                  '[request query]: The number of documents is too high. Paginating through more than 10000 documents is not possible.',
               });
               break;
             default:
