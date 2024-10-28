@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  getSearchKnowledgeBaseEntryMock,
-  getKnowledgeBaseEntryResponseMock,
-  mockUser,
-} from './mocks';
 
+import {
+  getKnowledgeBaseEntryMock,
+  getKnowledgeBaseEntrySearchEsMock,
+} from '../../__mocks__/knowledge_base_entry_schema.mock';
+export const mockUser = {
+  username: 'my_username',
+  authentication_realm: {
+    type: 'my_realm_type',
+    name: 'my_realm_name',
+  },
+} as AuthenticatedUser;
 describe('getKnowledgeBaseEntry', () => {
   let loggerMock: Logger;
   beforeEach(() => {
@@ -27,7 +33,7 @@ describe('getKnowledgeBaseEntry', () => {
   });
 
   test('it returns an entry as expected if the entry is found', async () => {
-    const data = getSearchKnowledgeBaseEntryMock();
+    const data = getKnowledgeBaseEntrySearchEsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
     const entry = await getKnowledgeBaseEntry({
@@ -37,12 +43,12 @@ describe('getKnowledgeBaseEntry', () => {
       logger: loggerMock,
       user: mockUser,
     });
-    const expected = getKnowledgeBaseEntryResponseMock();
+    const expected = getKnowledgeBaseEntryMock();
     expect(entry).toEqual(expected);
   });
 
   test('it returns null if the search is empty', async () => {
-    const data = getSearchKnowledgeBaseEntryMock();
+    const data = getKnowledgeBaseEntrySearchEsMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);

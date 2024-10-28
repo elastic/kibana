@@ -57,7 +57,7 @@ export interface GetAIAssistantKnowledgeBaseDataClientParams {
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
-interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
+export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
   getElserId: GetElser;
   getIsKBSetupInProgress: () => boolean;

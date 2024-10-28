@@ -16,7 +16,9 @@ import { getPromptsSearchEsMock } from './prompts_schema.mock';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
 import { getAttackDiscoverySearchEsMock } from './attack_discovery_schema.mock';
+import { getKnowledgeBaseEntrySearchEsMock } from './knowledge_base_entry_schema.mock';
 import { EsAttackDiscoverySchema } from '../lib/attack_discovery/persistence/types';
+import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
@@ -28,6 +30,14 @@ export const getEmptyFindResult = (): FindResponse<EsConversationSchema> => ({
   total: 0,
   data: getBasicEmptySearchResponse(),
 });
+
+export const getFindKnowledgeBaseEntriesResultWithSingleHit =
+  (): FindResponse<EsKnowledgeBaseEntrySchema> => ({
+    page: 1,
+    perPage: 1,
+    total: 1,
+    data: getKnowledgeBaseEntrySearchEsMock(),
+  });
 
 export const getFindConversationsResultWithSingleHit = (): FindResponse<EsConversationSchema> => ({
   page: 1,

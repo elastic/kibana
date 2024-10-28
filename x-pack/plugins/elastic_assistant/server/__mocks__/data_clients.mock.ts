@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 
@@ -14,6 +15,8 @@ type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsD
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
 type AttackDiscoveryDataClientContract = PublicMethodsOf<AttackDiscoveryDataClient>;
 export type AttackDiscoveryDataClientMock = jest.Mocked<AttackDiscoveryDataClientContract>;
+type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient>;
+export type KnowledgeBaseDataClientMock = jest.Mocked<KnowledgeBaseDataClientContract>;
 
 const createConversationsDataClientMock = () => {
   const mocked: ConversationsDataClientMock = {
@@ -50,6 +53,32 @@ export const attackDiscoveryDataClientMock: {
   create: () => AttackDiscoveryDataClientMock;
 } = {
   create: createAttackDiscoveryDataClientMock,
+};
+
+const createKnowledgeBaseDataClientMock = () => {
+  const mocked: KnowledgeBaseDataClientMock = {
+    findDocuments: jest.fn(),
+    isSetupAvailable: jest.fn(),
+    isModelInstalled: jest.fn(),
+    isModelDeployed: jest.fn(),
+    setupKnowledgeBase: jest.fn(),
+    addKnowledgeBaseDocuments: jest.fn(),
+    isESQLDocsLoaded: jest.fn(),
+    isSecurityLabsDocsLoaded: jest.fn(),
+    getKnowledgeBaseDocumentEntries: jest.fn(),
+    getRequiredKnowledgeBaseDocumentEntries: jest.fn(),
+    createKnowledgeBaseEntry: jest.fn(),
+    getAssistantTools: jest.fn(),
+    getReader: jest.fn(),
+    getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+  };
+  return mocked;
+};
+
+export const knowledgeBaseDataClientMock: {
+  create: () => KnowledgeBaseDataClientMock;
+} = {
+  create: createKnowledgeBaseDataClientMock,
 };
 
 type AIAssistantDataClientContract = PublicMethodsOf<AIAssistantDataClient>;

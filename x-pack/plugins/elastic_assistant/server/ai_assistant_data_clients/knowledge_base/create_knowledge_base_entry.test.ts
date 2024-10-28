@@ -11,15 +11,21 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import {
-  getKnowledgeBaseEntryResponseMock,
-  getCreateKnowledgeBaseEntryMock,
-  mockUser,
-} from './mocks';
+  getKnowledgeBaseEntryMock,
+  getCreateKnowledgeBaseEntrySchemaMock,
+} from '../../__mocks__/knowledge_base_entry_schema.mock';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 jest.mock('./get_knowledge_base_entry', () => ({
   getKnowledgeBaseEntry: jest.fn(),
 }));
-
+export const mockUser = {
+  username: 'my_username',
+  authentication_realm: {
+    type: 'my_realm_type',
+    name: 'my_realm_name',
+  },
+} as AuthenticatedUser;
 describe('createKnowledgeBaseEntry', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   beforeEach(() => {
@@ -42,9 +48,9 @@ describe('createKnowledgeBaseEntry', () => {
   });
 
   test('it creates a knowledge base entry with legacy create schema when isV2 = false', async () => {
-    const knowledgeBaseEntry = getCreateKnowledgeBaseEntryMock();
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
     (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
-      ...getKnowledgeBaseEntryResponseMock(),
+      ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     });
 
@@ -83,16 +89,16 @@ describe('createKnowledgeBaseEntry', () => {
     });
 
     const expected: KnowledgeBaseEntryResponse = {
-      ...getKnowledgeBaseEntryResponseMock(),
+      ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     };
 
     expect(createdEntry).toEqual(expected);
   });
   test('it creates a knowledge base entry with create schema when isV2 = true', async () => {
-    const knowledgeBaseEntry = getCreateKnowledgeBaseEntryMock();
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
     (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
-      ...getKnowledgeBaseEntryResponseMock(),
+      ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     });
 
@@ -133,7 +139,7 @@ describe('createKnowledgeBaseEntry', () => {
     });
 
     const expected: KnowledgeBaseEntryResponse = {
-      ...getKnowledgeBaseEntryResponseMock(),
+      ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     };
 
@@ -141,7 +147,7 @@ describe('createKnowledgeBaseEntry', () => {
   });
 
   test('it throws an error when creating a knowledge base entry fails', async () => {
-    const knowledgeBaseEntry = getCreateKnowledgeBaseEntryMock();
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockRejectedValue(new Error('Test error'));
     await expect(

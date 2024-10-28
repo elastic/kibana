@@ -18,6 +18,7 @@ import {
   attackDiscoveryDataClientMock,
   conversationsDataClientMock,
   dataClientMock,
+  knowledgeBaseDataClientMock,
 } from './data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -42,7 +43,7 @@ export const createMockClients = () => {
       logger: loggingSystemMock.createLogger(),
       telemetry: coreMock.createSetup().analytics,
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
-      getAIAssistantKnowledgeBaseDataClient: dataClientMock.create(),
+      getAIAssistantKnowledgeBaseDataClient: knowledgeBaseDataClientMock.create(),
       getAIAssistantPromptsDataClient: dataClientMock.create(),
       getAttackDiscoveryDataClient: attackDiscoveryDataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
