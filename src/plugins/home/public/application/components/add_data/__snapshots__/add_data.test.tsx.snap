@@ -47,8 +47,8 @@ exports[`AddData disable sample data and upload buttons for a read-only user 1`]
                     "navLinks": Object {
                       "integrations": true,
                     },
-                    "roles": Object {
-                      "save": false,
+                    "savedObjectsManagement": Object {
+                      "edit": false,
                     },
                   },
                 },
@@ -186,8 +186,8 @@ exports[`AddData render 1`] = `
                     "navLinks": Object {
                       "integrations": true,
                     },
-                    "roles": Object {
-                      "save": true,
+                    "savedObjectsManagement": Object {
+                      "edit": true,
                     },
                   },
                 },

@@ -31,14 +31,14 @@ beforeEach(() => {
 const applicationStartMock = {
   capabilities: {
     navLinks: { integrations: true },
-    roles: { save: true },
+    savedObjectsManagement: { edit: true },
   },
 } as unknown as ApplicationStart;
 
 const applicationStartMockRestricted = {
   capabilities: {
     navLinks: { integrations: true },
-    roles: { save: false },
+    savedObjectsManagement: { edit: false },
   },
 } as unknown as ApplicationStart;
 
