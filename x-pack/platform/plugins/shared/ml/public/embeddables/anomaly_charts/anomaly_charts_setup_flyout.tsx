@@ -11,7 +11,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalyChartsEmbeddableState } from '..';
+import type { AnomalyChartsEmbeddableState } from '../types';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { getMlGlobalServices } from '../../application/util/get_services';

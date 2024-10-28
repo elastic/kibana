@@ -14,7 +14,7 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
-import type { SwimLaneDrilldownContext } from '../embeddables';
+import type { SwimLaneDrilldownContext } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
