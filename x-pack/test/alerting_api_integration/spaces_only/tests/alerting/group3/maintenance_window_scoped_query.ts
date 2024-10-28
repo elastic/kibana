@@ -245,5 +245,72 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
         retry,
       });
     });
+
+    it('should associate alerts when scoped query contains wildcards', async () => {
+      await createMaintenanceWindow({
+        supertest,
+        objectRemover,
+        overwrites: {
+          scoped_query: {
+            kql: 'kibana.alert.rule.name: *test*',
+            filters: [],
+          },
+          category_ids: ['management'],
+        },
+      });
+
+      // Create action and rule
+      const action = await await createAction({
+        supertest,
+        objectRemover,
+      });
+
+      const { body: rule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            name: 'rule-test-rule',
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            tags: ['test'],
+            throttle: undefined,
+            notify_when: 'onActiveAlert',
+            params: {
+              index: alertAsDataIndex,
+              reference: 'test',
+            },
+            actions: [
+              {
+                id: action.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: action.id,
+                group: 'recovered',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+      // Run the first time - active
+      await getRuleEvents({
+        id: rule.id,
+        activeInstance: 2,
+        retry,
+        getService,
+      });
+
+      await expectNoActionsFired({
+        id: rule.id,
+        supertest,
+        retry,
+      });
+    });
   });
 }

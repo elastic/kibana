@@ -18,10 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
@@ -85,7 +83,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { data: dataServices, application, triggersActionsUi } = useKibana().services;
+  const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
@@ -94,7 +92,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     rule.immutable ? RuleStep.ruleActions : RuleStep.defineRule
   );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
-  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
@@ -102,21 +99,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const [isSaveWithErrorsModalVisible, setIsSaveWithErrorsModalVisible] = useState(false);
   const [nonBlockingRuleErrors, setNonBlockingRuleErrors] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchDataViews = async () => {
-      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
-      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.id]: item,
-        }),
-        {}
-      );
-      setDataViewOptions(dataViewIdIndexPatternMap);
-    };
-    fetchDataViews();
-  }, [dataServices.dataViews]);
 
   const backOptions = useMemo(
     () => ({
@@ -241,7 +223,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                 <StepDefineRule
                   isLoading={loading || isLoading || isSavedQueryLoading}
                   isUpdateView
-                  kibanaDataViews={dataViewOptions}
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
                   defaultSavedQuery={savedQuery}
@@ -365,7 +346,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       loading,
       isSavedQueryLoading,
       isLoading,
-      dataViewOptions,
       indicesConfig,
       threatIndicesConfig,
       savedQuery,
