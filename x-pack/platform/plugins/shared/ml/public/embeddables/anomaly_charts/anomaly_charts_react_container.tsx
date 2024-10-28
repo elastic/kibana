@@ -23,7 +23,7 @@ import type {
   AnomalyChartsEmbeddableServices,
   AnomalyChartsApi,
   AnomalyChartsAttachmentApi,
-} from '..';
+} from '../types';
 
 import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
