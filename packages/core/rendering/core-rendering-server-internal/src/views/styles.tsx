@@ -40,9 +40,15 @@ const InlineStyles: FC<{ darkMode: boolean; themeVersion: ThemeVersion }> = ({
       progressBefore: darkMode ? '#1BA9F5' : '#006DE4',
     },
     borealis: {
-      pageBackground: darkMode ? '#050F21' : '#F6F9FC',
-      welcomeText: darkMode ? '#546D95' : '#89A0C4',
-      progress: darkMode ? '#152640' : '#E0E6F1',
+      pageBackground: darkMode ? '#07101F' : '#F6F9FC',
+      welcomeText: darkMode ? '#5A6D8C' : '#8E9FBC',
+      progress: darkMode ? '#172336' : '#E3E8F2',
+      progressBefore: darkMode ? '#599DFF' : '#0B64DD',
+    },
+    borealisgrey: {
+      pageBackground: darkMode ? '#0E0F12' : '#F6F9FC',
+      welcomeText: darkMode ? '#666D78' : '#989FAA',
+      progress: darkMode ? '#23262C' : '#E3E6EB',
       progressBefore: darkMode ? '#599DFF' : '#0B64DD',
     },
   };

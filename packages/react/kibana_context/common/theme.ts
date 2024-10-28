@@ -10,6 +10,7 @@
 import { type EuiThemeSystem } from '@elastic/eui';
 import { EuiThemeAmsterdam } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
+import { EuiThemeBorealis as EuiThemeBorealisGrey } from '@elastic/eui-theme-borealis-grey';
 import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 export interface ThemeDescriptor {
@@ -22,6 +23,9 @@ export const KIBANA_THEMES: Record<ThemeVersion, ThemeDescriptor> = {
   },
   borealis: {
     euiTheme: EuiThemeBorealis,
+  },
+  borealisgrey: {
+    euiTheme: EuiThemeBorealisGrey,
   },
 };
 

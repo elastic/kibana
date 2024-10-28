@@ -1736,9 +1736,13 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_126_011.tgz":
+"@elastic/eui-theme-borealis-grey@file:./elastic_eui_theme_borealis_0.0.1_126_grey_01.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_theme_borealis_0.0.1_126_011.tgz#a6ce018e5b690443840daf25ceb8d750db769004"
+  resolved "file:./elastic_eui_theme_borealis_0.0.1_126_grey_01.tgz#6f37aae1e2fd30b4e14d01b6143f559caadaa6f0"
+
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_126_blue_01.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_theme_borealis_0.0.1_126_blue_01.tgz#3785f787a4b37129f9c4c762e6fda47e6c154dd2"
 
 "@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_126_008.tgz":
   version "0.0.1"

@@ -112,7 +112,10 @@ export const getThemeSettings = (
               defaultMessage: 'Amsterdam',
             }),
             borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
-              defaultMessage: 'Borealis',
+              defaultMessage: 'Borealis (blueGrey)',
+            }),
+            borealisgrey: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
+              defaultMessage: 'Borealis (mutedGrey)',
             }),
           },
     },
