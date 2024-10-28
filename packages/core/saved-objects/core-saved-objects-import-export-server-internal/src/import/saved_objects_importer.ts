@@ -75,7 +75,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       importHooks: this.#importHooks,
       managed,
       log: this.#log,
-    })
+    });
   }
 
   public resolveImportErrors({
