@@ -170,6 +170,7 @@ export type {
 export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
 export type {
+  SavedObjectsClientContract,
   SimpleSavedObject,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
