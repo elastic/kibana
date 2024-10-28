@@ -23,6 +23,8 @@ import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import type { MlApi } from '../application/services/ml_api_service';
 
+import { anomalyLayerWizard } from './anomaly_layer_wizard';
+
 export const ML_ANOMALY = 'ML_ANOMALIES';
 
 const AnomalySourceEditorWithTheme: React.FC<{
@@ -99,9 +101,6 @@ export class AnomalyLayerWizardFactory {
       // eslint-disable-next-line no-console
       console.error('Unable to get job management path.');
     }
-
-    const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
-
     anomalyLayerWizard.getIsDisabled = () => !this.canGetJobs;
 
     anomalyLayerWizard.renderWizard = ({ previewLayers }: RenderWizardArguments) => {
