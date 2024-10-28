@@ -7,12 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { MlFeatures } from '../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
   CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
-} from '../../common/constants/cases';
+} from '@kbn/ml-common-constants/cases';
 
 export function registerCasesPersistableState(
   cases: CasesServerSetup,

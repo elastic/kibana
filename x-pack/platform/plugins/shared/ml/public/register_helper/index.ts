@@ -12,4 +12,5 @@ export { registerSearchLinks } from './register_search_links';
 export { registerCasesAttachments } from '../cases';
 export { registerMlAlerts } from '../alerting/register_ml_alerts';
 export { registerMapExtension } from '../maps/register_map_extension';
+export { registerHomeFeature } from './register_home_feature';
 export { registerManagementSections } from '../application/management';

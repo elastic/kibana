@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
 import { useMlManagementLocator } from '../../../../contexts/kibana';
 
 export function NewJobButton({ size = 's' }) {

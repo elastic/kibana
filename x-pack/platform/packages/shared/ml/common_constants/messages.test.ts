@@ -7,7 +7,7 @@
 
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
-import { parseMessages } from './messages';
+import { parseMessages, renderTemplate } from './messages';
 
 import {
   basicValidJobMessages,
@@ -18,6 +18,26 @@ import {
 const BASE_URL_DOCS = 'https://www.elastic.co/docs';
 const BASE_URL_API = `${BASE_URL_DOCS}/api/doc/elasticsearch/operation`;
 const BASE_URL_EXPLORE = `${BASE_URL_DOCS}/explore-analyze/machine-learning/anomaly-detection`;
+
+describe('ML - string utils', () => {
+  describe('renderTemplate', () => {
+    test('returns plain string', () => {
+      const templateString = 'plain string';
+      const result = renderTemplate(templateString);
+      expect(result).toBe(result);
+    });
+    test('returns rendered template with one replacement', () => {
+      const templateString = 'string with {{one}} replacement';
+      const result = renderTemplate(templateString, { one: '1' });
+      expect(result).toBe('string with 1 replacement');
+    });
+    test('returns rendered template with two replacements', () => {
+      const templateString = 'string with {{one}} replacement, and a {{two}} one.';
+      const result = renderTemplate(templateString, { one: '1', two: '2nd' });
+      expect(result).toBe('string with 1 replacement, and a 2nd one.');
+    });
+  });
+});
 
 describe('Constants: Messages parseMessages()', () => {
   const docLinksService = docLinksServiceMock.createStartContract();

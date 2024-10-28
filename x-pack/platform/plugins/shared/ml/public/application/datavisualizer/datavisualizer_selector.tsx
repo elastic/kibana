@@ -107,7 +107,7 @@ export const DatavisualizerSelector: FC = () => {
           <Fragment>
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
-            <EuiFlexGrid gutterSize="xl" columns={2} style={{ maxWidth: '1000px' }}>
+            <EuiFlexGrid gutterSize="xl" columns={2} css={{ maxWidth: '1000px' }}>
               <EuiFlexItem>
                 <EuiCard
                   hasBorder

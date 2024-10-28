@@ -14,7 +14,9 @@ import type {
   MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
 import { type MlEntityField, type MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
-import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
+import type { Datafeed } from './anomaly_detection_jobs/datafeed';
+import type { JobId } from './anomaly_detection_jobs/job';
+import type { ModelSnapshot } from './anomaly_detection_jobs/model_snapshot';
 
 export interface GetAnomaliesTableDataResult {
   anomalies: MlAnomaliesTableRecord[];

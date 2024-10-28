@@ -25,7 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { JOB_STATE } from '../../../../../common/constants/states';
+import { JOB_STATE } from '@kbn/ml-common-constants/states';
 import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
 import { ForecastProgress } from './forecast_progress';
 import {

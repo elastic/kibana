@@ -21,7 +21,7 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
-import { PLUGIN_ID } from '../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlLicense } from '../../common/license';

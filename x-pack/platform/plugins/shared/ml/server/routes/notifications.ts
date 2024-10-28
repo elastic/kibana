@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { NotificationsService } from '../models/notifications_service';
 import {
   getNotificationsCountQuerySchema,

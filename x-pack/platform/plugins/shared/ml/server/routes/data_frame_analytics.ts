@@ -18,7 +18,7 @@ import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';

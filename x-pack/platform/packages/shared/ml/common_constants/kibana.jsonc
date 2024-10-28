@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-common-constants",
+  "owner": "@elastic/ml-ui"
+}

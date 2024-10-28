@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   useEuiTheme,
   EuiButtonEmpty,
@@ -17,14 +16,19 @@ import {
   EuiSpacer,
   type EuiThemeComputed,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
+
 import { useMlKibana } from '../../../contexts/kibana';
-import { Controls, Cytoscape, JobMapLegend } from './components';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
+import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
+
+import { Controls, Cytoscape, JobMapLegend } from './components';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
-import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 
 const getCytoscapeDivStyle = (theme: EuiThemeComputed) => ({
   background: `linear-gradient(

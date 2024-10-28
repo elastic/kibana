@@ -21,12 +21,15 @@ import {
   EuiProgress,
   EuiBadge,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getSeverity, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
+
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
+
 import { useInfluencersListStyles } from './influencers_list_styles';
 
 export interface InfluencerValueData {

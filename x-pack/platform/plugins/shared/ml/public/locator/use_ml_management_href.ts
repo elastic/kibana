@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import type { MlPluginSetup } from '..';
-import type { MlLocatorParams } from '../../common/types/locator';
 
 /**
  * Provides a URL to ML management pages

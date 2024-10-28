@@ -7,16 +7,30 @@
 
 import type { FC } from 'react';
 import React, { useEffect, Fragment, useMemo } from 'react';
+
 import { EuiText } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import {
+  JOB_TYPE,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+  DEFAULT_BUCKET_SPAN,
+} from '@kbn/ml-common-constants/new_job';
+
 import { PageTitle } from '../../../../components/page_title';
 import { jobCloningService } from '../../../../services/job_cloning_service';
-import { Wizard } from './wizard';
-import { WIZARD_STEPS } from '../components/step_types';
+import { useDataSource } from '../../../../contexts/ml';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { MlPageHeader } from '../../../../components/page_header';
+
 import { cloneDatafeed, getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
   jobCreatorFactory,
@@ -25,22 +39,14 @@ import {
   isRareJobCreator,
   isGeoJobCreator,
 } from '../../common/job_creator';
-import {
-  JOB_TYPE,
-  DEFAULT_MODEL_MEMORY_LIMIT,
-  DEFAULT_BUCKET_SPAN,
-} from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
 import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-import { useDataSource } from '../../../../contexts/ml';
-import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
-import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { getNewJobDefaults } from '../../../../services/ml_server_info';
-import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { MlPageHeader } from '../../../../components/page_header';
+
+import { WIZARD_STEPS } from '../components/step_types';
+
+import { Wizard } from './wizard';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;

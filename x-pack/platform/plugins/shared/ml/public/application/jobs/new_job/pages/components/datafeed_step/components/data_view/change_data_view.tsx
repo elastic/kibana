@@ -32,11 +32,6 @@ import { useNavigateToManagementMlLink } from '../../../../../../../contexts/kib
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
-import type {
-  CombinedJob,
-  Datafeed,
-} from '../../../../../../../../../common/types/anomaly_detection_jobs';
-import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
 import { useMlKibana, useMlApi } from '../../../../../../../contexts/kibana';
 

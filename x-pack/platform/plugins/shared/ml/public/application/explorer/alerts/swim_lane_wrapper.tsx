@@ -31,13 +31,13 @@ import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { PanelHeaderItems } from '../../components/collapsible_panel';
-import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_TIMESTAMP,
   alertFieldNameMap,
-} from '../../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
+import { PanelHeaderItems } from '../../components/collapsible_panel';
+import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import {
   getAlertEntryFormatter,
   getAlertFormatters,

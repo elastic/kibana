@@ -1,0 +1,39 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.json"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-runtime-field-utils",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/data-plugin",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/ml-query-utils",
+    "@kbn/ml-url-state",
+    "@kbn/core",
+    "@kbn/field-formats-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/ml-date-picker",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ml-local-storage",
+    "@kbn/rule-data-utils",
+    "@kbn/config-schema",
+  ]
+}

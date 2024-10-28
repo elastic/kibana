@@ -32,7 +32,6 @@ import { SpaceManagementContextWrapper } from '../../../../components/space_mana
 import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
-import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
 import {
   checkGetManagementMlJobsResolver,
@@ -43,12 +42,11 @@ import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
-import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
-interface Props {
+export interface JobsListPageProps {
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
@@ -60,7 +58,7 @@ interface Props {
   mlFeatures: MlFeatures;
 }
 
-export const JobsListPage: FC<Props> = ({
+export const JobsListPage: FC<JobsListPageProps> = ({
   coreStart,
   share,
   history,

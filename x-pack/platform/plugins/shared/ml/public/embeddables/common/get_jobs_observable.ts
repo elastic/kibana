@@ -11,7 +11,7 @@ import { catchError, distinctUntilChanged, EMPTY, map, switchMap } from 'rxjs';
 
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { ExplorerJob } from '../../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 

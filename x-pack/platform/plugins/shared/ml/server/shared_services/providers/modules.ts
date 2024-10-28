@@ -8,7 +8,7 @@
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import type { CompatibleModule } from '../../../common/constants/app';
+import type { CompatibleModule } from '@kbn/ml-common-constants/app';
 import type { GetGuards } from '../shared_services';
 import type { DataRecognizer } from '../../models/data_recognizer';
 import { dataRecognizerFactory } from '../../models/data_recognizer';

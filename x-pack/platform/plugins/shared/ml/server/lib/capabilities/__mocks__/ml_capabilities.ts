@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { MlCapabilities } from '../../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import {
   adminMlCapabilities,
   userMlCapabilities,
   getDefaultCapabilities,
-} from '../../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
 
 export function getAdminCapabilities() {
   const caps: any = Object.create(null);

@@ -46,13 +46,13 @@ import { dictionaryValidator } from '@kbn/ml-validators';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import useObservable from 'react-use/lib/useObservable';
-import type { NLPSettings } from '../../../common/constants/app';
-
 import {
   isModelDownloadItem,
   isNLPModelItem,
   type TrainedModelDeploymentStatsResponse,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import type { NLPSettings } from '@kbn/ml-common-constants/app';
+
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 

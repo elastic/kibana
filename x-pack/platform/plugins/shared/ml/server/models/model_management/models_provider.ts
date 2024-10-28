@@ -10,18 +10,17 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten, groupBy, isEmpty } from 'lodash';
 import type {
+  IndexName,
+  IndicesIndexState,
   InferenceInferenceEndpoint,
   InferenceTaskType,
   IngestDocument,
-  MlGetTrainedModelsRequest,
-  TasksTaskInfo,
-  TransformGetTransformTransformSummary,
-} from '@elastic/elasticsearch/lib/api/types';
-import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
-import type {
   IngestPipeline,
   IngestSimulateRequest,
+  MlGetTrainedModelsRequest,
   NodesInfoResponseBase,
+  TasksTaskInfo,
+  TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   ELASTIC_MODEL_DEFINITIONS,
@@ -36,26 +35,25 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
-import type { MlFeatures } from '../../../common/constants/app';
-import type {
-  DFAModelItem,
-  ExistingModelBase,
-  ModelDownloadItem,
-  NLPModelItem,
-  TrainedModelItem,
-  TrainedModelUIItem,
-  TrainedModelWithPipelines,
-} from '../../../common/types/trained_models';
-import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '@kbn/ml-common-constants/trained_models';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import {
+  isBuiltInModel,
+  isExistingModel,
   isDFAModelItem,
   isElasticModel,
   isNLPModelItem,
   type ModelDownloadState,
   type PipelineDefinition,
   type TrainedModelConfigResponse,
-} from '../../../common/types/trained_models';
+  type DFAModelItem,
+  type ExistingModelBase,
+  type ModelDownloadItem,
+  type NLPModelItem,
+  type TrainedModelItem,
+  type TrainedModelUIItem,
+  type TrainedModelWithPipelines,
+} from '@kbn/ml-common-types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';

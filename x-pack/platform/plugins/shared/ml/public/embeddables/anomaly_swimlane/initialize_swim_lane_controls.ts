@@ -8,8 +8,8 @@
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { AnomalySwimlaneEmbeddableUserInput } from '../types';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
 import type { AnomalySwimLaneComponentApi, AnomalySwimLaneEmbeddableState } from './types';

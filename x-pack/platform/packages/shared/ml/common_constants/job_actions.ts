@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { JobActionState } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+
 export const JOB_ACTION = {
   DELETE: 'delete',
   RESET: 'reset',
@@ -12,8 +14,6 @@ export const JOB_ACTION = {
 } as const;
 
 export type JobAction = (typeof JOB_ACTION)[keyof typeof JOB_ACTION];
-
-export type JobActionState = 'deleting' | 'resetting' | 'reverting';
 
 export function getJobActionString(action: JobAction): JobActionState {
   switch (action) {

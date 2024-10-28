@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '../../common/constants/cases';
+import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '@kbn/ml-common-constants/cases';
 import type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimLaneEmbeddableState,

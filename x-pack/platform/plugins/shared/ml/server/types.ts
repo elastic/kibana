@@ -27,10 +27,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import type { RouteGuard } from './lib/route_guard';
-import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { MlLicense } from '../common/license';
-import type { MlFeatures } from '../common/constants/app';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;

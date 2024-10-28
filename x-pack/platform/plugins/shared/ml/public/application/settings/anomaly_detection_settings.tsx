@@ -21,11 +21,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
 
 import { useMlApi } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useToastNotificationService } from '../services/toast_notification_service';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
 import { separateCalendarsByType } from './calendars/dst_utils';
 import { MANAGEMENT_SECTION_IDS } from '../management';
@@ -133,7 +133,7 @@ export const AnomalyDetectionSettings: FC = () => {
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center">
             {canGetCalendars && (
-              <EuiFlexItem grow={false} style={{ display: 'block' }}>
+              <EuiFlexItem grow={false} css={{ display: 'block' }}>
                 <EuiText>
                   <FormattedMessage
                     id="xpack.ml.settings.anomalyDetection.calendarsSummaryCount"
@@ -200,7 +200,7 @@ export const AnomalyDetectionSettings: FC = () => {
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center">
             {canGetCalendars && (
-              <EuiFlexItem grow={false} style={{ display: 'block' }}>
+              <EuiFlexItem grow={false} css={{ display: 'block' }}>
                 <EuiText>
                   <FormattedMessage
                     id="xpack.ml.settings.anomalyDetection.calendarsDstSummaryCount"

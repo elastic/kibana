@@ -10,12 +10,11 @@ import { useEffect } from 'react';
 
 import { useUrlState } from '@kbn/ml-url-state';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
-
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
-} from '../../../../../../../common/constants/jobs_list';
+} from '@kbn/ml-common-constants/jobs_list';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 

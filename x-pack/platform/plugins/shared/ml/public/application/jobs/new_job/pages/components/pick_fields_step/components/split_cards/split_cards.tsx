@@ -18,7 +18,7 @@ import {
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import type { SplitField } from '@kbn/ml-anomaly-utils';
-import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 
 interface Props {
   fieldValues: string[];

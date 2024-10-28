@@ -7,6 +7,7 @@
 
 import type { FC, ChangeEvent } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiButtonIcon,
@@ -32,9 +33,8 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
-import { css } from '@emotion/react';
-import type { Job } from '../../../../../common';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';

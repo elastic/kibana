@@ -175,5 +175,6 @@
     "@kbn/visualizations-common",
     "@kbn/es-types",
     "@kbn/connector-schemas",
+    "@kbn/ml-common-types",
   ]
 }

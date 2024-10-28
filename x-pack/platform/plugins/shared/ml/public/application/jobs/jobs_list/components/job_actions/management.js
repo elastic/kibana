@@ -7,7 +7,7 @@
 
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { JOB_ACTION } from '../../../../../../common/constants/job_actions';
+import { JOB_ACTION } from '@kbn/ml-common-constants/job_actions';
 
 import {
   stopDatafeeds,

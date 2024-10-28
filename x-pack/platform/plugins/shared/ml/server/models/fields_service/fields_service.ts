@@ -14,11 +14,15 @@ import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import type {
+  Datafeed,
+  IndicesOptions,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
-import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
-import type { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+
+import { initCardinalityFieldsCache } from './fields_aggs_cache';
 
 /**
  * Service for carrying out queries to obtain data

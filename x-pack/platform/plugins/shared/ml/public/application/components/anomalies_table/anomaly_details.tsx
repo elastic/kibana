@@ -27,7 +27,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
+import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { getAnomalyDescription } from '../../../../common/util/anomaly_description';
 import { MAX_CHARS } from './anomalies_table_constants';
 import type { CategoryDefinition } from '../../services/ml_api_service/results';

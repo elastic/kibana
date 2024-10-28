@@ -52,12 +52,6 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { MlSharedServices } from './application/services/get_shared_ml_services';
-import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import type { MlLocatorParams } from './locator';
-import { MlLocatorDefinition, type MlLocator } from './locator';
-import { isFullLicense } from '../common/license/is_full_license';
-import { isMlEnabled } from '../common/license/is_ml_enabled';
 import {
   initEnabledFeatures,
   type MlFeatures,
@@ -69,10 +63,16 @@ import {
   initExperimentalFeatures,
   initModelDeploymentSettings,
   type NLPSettings,
-} from '../common/constants/app';
+} from '@kbn/ml-common-constants/app';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlSharedServices } from './application/services/get_shared_ml_services';
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
+import type { MlLocatorParams } from './locator/ml_locator';
+import { MlLocatorDefinition, type MlLocator } from './locator/ml_locator';
+import { isFullLicense } from '../common/license/is_full_license';
+import { isMlEnabled } from '../common/license/is_ml_enabled';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
-import type { MlCapabilities } from '../common/types/capabilities';
 import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';

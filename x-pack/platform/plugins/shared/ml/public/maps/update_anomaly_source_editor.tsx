@@ -12,7 +12,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { LayerSelector } from './layer_selector';
 import type { MlAnomalyLayersType } from './util';
 
-interface UpdateAnomalySourceEditorProps {
+export interface UpdateAnomalySourceEditorProps {
   onChange: (...args: Array<{ propName: string; value: unknown }>) => void;
   typicalActual: MlAnomalyLayersType;
 }

@@ -39,20 +39,18 @@ import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
-import type {
-  DFAModelItem,
-  NLPModelItem,
-  TrainedModelItem,
-  TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import {
+  type DFAModelItem,
+  type NLPModelItem,
+  type TrainedModelItem,
+  type TrainedModelUIItem,
   isBaseNLPModelItem,
   isBuiltInModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';

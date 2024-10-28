@@ -29,14 +29,13 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import {
-  isCategorizationAnomaly,
-  isRuleSupported,
-  type MlCustomUrlAnomalyRecordDoc,
-  type MlKibanaUrlConfig,
-  type MlAnomaliesTableRecord,
-  MLCATEGORY,
+import type {
+  MlCustomUrlAnomalyRecordDoc,
+  MlKibanaUrlConfig,
+  MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
+import { isCategorizationAnomaly, isRuleSupported } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -47,10 +46,10 @@ import { isQuery } from '@kbn/data-plugin/public';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { PLUGIN_ID } from '../../../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 
 import { useMlJobService } from '../../services/job_service';
