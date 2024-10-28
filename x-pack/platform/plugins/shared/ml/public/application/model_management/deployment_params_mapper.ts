@@ -6,10 +6,10 @@
  */
 
 import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { NLPSettings } from '../../../common/constants/app';
-import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
+import type { NLPSettings } from '@kbn/ml-common-constants/app';
+import type { TrainedModelDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
+import type { MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
 import type { CloudInfo } from '../services/ml_server_info';
-import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import type { AdaptiveAllocations } from '../../../server/lib/ml_client/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 

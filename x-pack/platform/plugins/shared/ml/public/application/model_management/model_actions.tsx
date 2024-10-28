@@ -17,26 +17,24 @@ import {
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
 import useMountedState from 'react-use/lib/useMountedState';
-import type {
-  DFAModelItem,
-  NLPModelItem,
-  TrainedModelItem,
-  TrainedModelUIItem,
-} from '../../../common/types/trained_models';
 import {
+  type DFAModelItem,
+  type NLPModelItem,
+  type TrainedModelItem,
+  type TrainedModelUIItem,
   isBuiltInModel,
   isDFAModelItem,
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';

@@ -29,10 +29,11 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import { type MlFeatures, PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
-import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 
@@ -40,14 +41,13 @@ import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
-import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-interface Props {
+export interface JobsListPageProps {
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
@@ -59,7 +59,7 @@ interface Props {
   mlFeatures: MlFeatures;
 }
 
-export const JobsListPage: FC<Props> = ({
+export const JobsListPage: FC<JobsListPageProps> = ({
   coreStart,
   share,
   history,

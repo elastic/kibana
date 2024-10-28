@@ -12,10 +12,10 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PLUGIN_ID } from '../../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
-import { ML_PAGES } from '../../locator';
 
 /**
  * Provides an active route of the ML app.

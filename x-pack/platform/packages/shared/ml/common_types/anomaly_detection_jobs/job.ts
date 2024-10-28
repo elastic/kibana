@@ -33,8 +33,6 @@ export interface PerPartitionCategorization {
   stop_on_warn?: boolean;
 }
 
-export type CustomSettings = estypes.MlCustomSettings;
-
 export function isAnomalyDetectionJob(arg: unknown): arg is Job {
   return (
     isPopulatedObject(arg) && typeof arg.job_id === 'string' && arg.analysis_config !== undefined

@@ -26,13 +26,13 @@ import {
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { APP_ID as CASE_APP_ID, FEATURE_ID_V2 as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
-import { getAlertFlyout } from './use_alerts_flyout';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
-  ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import { getAlertFlyout } from './use_alerts_flyout';
 import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
 import { AlertActionsLazy } from './alert_actions_lazy';
 

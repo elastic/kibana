@@ -12,13 +12,14 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { EuiHealth } from '@elastic/eui';
 import {
   alertFieldNameMap,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
-} from '../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
 import { getFieldFormatterProvider } from '../../application/contexts/kibana/use_field_formatter';
 
 export const getMappedNonEcsValue = ({

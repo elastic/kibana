@@ -7,14 +7,14 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import rison from '@kbn/rison';
-import { mlJob, mlTrainedModel, mlModule } from './mappings';
-
-import { migrations } from './migrations';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
+import { mlJob, mlTrainedModel, mlModule } from './mappings';
+
+import { migrations } from './migrations';
 
 interface MlModuleAttributes {
   id: string;

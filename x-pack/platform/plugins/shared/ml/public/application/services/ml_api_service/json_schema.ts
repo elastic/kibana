@@ -7,7 +7,7 @@
 
 import { omitBy } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { type SupportedPath } from '../../../../common/api_schemas/json_schema_schema';
 import type { HttpService } from '../http_service';
 

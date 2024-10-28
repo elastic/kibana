@@ -18,8 +18,8 @@ import type {
   MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { SeriesConfigWithMetadata } from '../../../common/types/results';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';

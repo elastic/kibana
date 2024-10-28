@@ -6,7 +6,7 @@
  */
 
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN_ID } from '../constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { MINIMUM_FULL_LICENSE } from './constants';
 
 export function isFullLicense(license: ILicense) {

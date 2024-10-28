@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiButton, EuiComboBox, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ALL_JOBS_SELECTION } from '@kbn/ml-common-constants/alerts';
 import { useMlKibana } from '../application/contexts/kibana';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlApi } from '../application/services/ml_api_service';
-import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 import { LoadingIndicator } from '../application/components/loading_indicator';
 
 export interface JobSelection {

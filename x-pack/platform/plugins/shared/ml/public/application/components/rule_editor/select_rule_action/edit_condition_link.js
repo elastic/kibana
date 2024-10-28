@@ -17,7 +17,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@el
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { formatValue } from '../../../formatters/format_value';
 import { getAppliesToValueFromAnomaly } from '../utils';
