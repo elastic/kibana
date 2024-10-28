@@ -19,7 +19,7 @@ import { DashboardLocatorParams } from '../../dashboard_container';
 import { DASHBOARD_APP_ID, createDashboardEditUrl } from '../../dashboard_constants';
 import { coreServices } from '../../services/kibana_services';
 
-export const getDashboardListItemLink = (id: string) => {
+export const getDashboardListItemLink = (id: string, includeBasepath: boolean = false) => {
   let unsavedStateForLocator: DashboardLocatorParams = {};
 
   const { dashboardState: unsavedDashboardState, panels: panelModifications } =
@@ -76,6 +76,7 @@ export const getDashboardListItemLink = (id: string) => {
   }
   const url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
     path: `#${createDashboardEditUrl(id)}`,
+    absolute: includeBasepath,
   });
   const _g = getStateFromKbnUrl<QueryState>('_g', url);
   const baseUrl = setStateToKbnUrl('_g', _g, undefined, url);

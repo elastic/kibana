@@ -40,7 +40,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings } from '../dashboard_app/types';
-import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
+import { LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -54,6 +54,7 @@ import {
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
+import { getDashboardListItemLink } from '../dashboard_app/listing_page/get_dashboard_list_item_link';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -132,7 +133,7 @@ export function InternalDashboardTopNav({
       .subscribe((visible) => setIsChromeVisible(visible));
 
     if (lastSavedId && title) {
-      const fullEditPath = getFullEditPath(lastSavedId, viewMode === 'edit');
+      const fullEditPath = getDashboardListItemLink(lastSavedId, true);
       coreServices.chrome.recentlyAccessed.add(fullEditPath, title, lastSavedId);
       getDashboardRecentlyAccessedService().add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
