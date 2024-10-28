@@ -353,7 +353,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeToolTip', {
           defaultMessage:
-            'The index mode setting of the index template that configured this data stream.',
+            "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
         }),
         content: getIndexModeLabel(indexMode),
         dataTestSubj: 'indexModeDetail',
