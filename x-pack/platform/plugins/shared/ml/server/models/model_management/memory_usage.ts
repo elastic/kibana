@@ -9,20 +9,20 @@ import type { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import { pick } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import type {
   MemoryUsageInfo,
   TrainedModelStatsResponse,
   MemoryStatsResponse,
-} from '../../../common/types/trained_models';
-
-import type { JobStats } from '../../../common/types/anomaly_detection_jobs';
-import type { MlSavedObjectType } from '../../../common/types/saved_objects';
-import type { MlClient } from '../../lib/ml_client';
+} from '@kbn/ml-common-types/trained_models';
+import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   NodeDeploymentStatsResponse,
   NodesOverviewResponse,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+
+import type { MlClient } from '../../lib/ml_client';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();

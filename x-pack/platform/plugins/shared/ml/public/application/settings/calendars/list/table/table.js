@@ -13,9 +13,9 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
+import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
 import { MANAGEMENT_SECTION_IDS } from '../../../../management';
 
 export const CalendarsListTable = ({

@@ -32,7 +32,7 @@ import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-ut
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,

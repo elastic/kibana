@@ -9,8 +9,9 @@
 jest.mock('../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
+
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { ScopeExpression } from './scope_expression';
 
