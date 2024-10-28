@@ -6,7 +6,7 @@
  */
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ELASTICSEARCH_USERNAME } from '../env_var_names_constants';
+import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../env_var_names_constants';
 
 export interface Exception {
   field: string;
@@ -58,19 +58,12 @@ export const getException = (): Exception => ({
   values: ['foo'],
 });
 
+const isServerless = Cypress.env(IS_SERVERLESS);
+const username = isServerless ? 'elastic_admin' : Cypress.env(ELASTICSEARCH_USERNAME);
+
 export const expectedExportedExceptionList = (
   exceptionListResponse: Cypress.Response<ExceptionListSchema>
 ): string => {
   const jsonRule = exceptionListResponse.body;
-  return `{"_version":"${jsonRule._version}","created_at":"${
-    jsonRule.created_at
-  }","created_by":"${Cypress.env(ELASTICSEARCH_USERNAME)}","description":"${
-    jsonRule.description
-  }","id":"${jsonRule.id}","immutable":false,"list_id":"${jsonRule.list_id}","name":"${
-    jsonRule.name
-  }","namespace_type":"single","os_types":[],"tags":[],"tie_breaker_id":"${
-    jsonRule.tie_breaker_id
-  }","type":"${jsonRule.type}","updated_at":"${jsonRule.updated_at}","updated_by":"${Cypress.env(
-    ELASTICSEARCH_USERNAME
-  )}","version":1}\n{"exported_exception_list_count":1,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n`;
+  return `{"_version":"${jsonRule._version}","created_at":"${jsonRule.created_at}","created_by":"${username}","description":"${jsonRule.description}","id":"${jsonRule.id}","immutable":false,"list_id":"${jsonRule.list_id}","name":"${jsonRule.name}","namespace_type":"single","os_types":[],"tags":[],"tie_breaker_id":"${jsonRule.tie_breaker_id}","type":"${jsonRule.type}","updated_at":"${jsonRule.updated_at}","updated_by":"${username}","version":1}\n{"exported_exception_list_count":1,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n`;
 };
