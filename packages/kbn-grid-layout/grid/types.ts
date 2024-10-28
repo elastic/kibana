@@ -10,11 +10,15 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
+import { SerializableRecord } from '@kbn/utility-types';
+
 export interface GridLayoutApi {
-  addNewPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
-  getPanelCount: () => number;
+  addPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
+  // replacePanel: (oldPanelId: string, newPanelId: string) => void
   removePanel: (panelId: string) => void;
-  serializeState: () => GridLayoutData;
+
+  getPanelCount: () => number;
+  serializeState: () => GridLayoutData & SerializableRecord;
 }
 
 export interface GridCoordinate {

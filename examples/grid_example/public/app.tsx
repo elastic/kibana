@@ -46,7 +46,7 @@ export const GridExample = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={() => {
-                  gridLayoutApi?.addNewPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
+                  gridLayoutApi?.addPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
                 }}
               >
                 Add a panel
