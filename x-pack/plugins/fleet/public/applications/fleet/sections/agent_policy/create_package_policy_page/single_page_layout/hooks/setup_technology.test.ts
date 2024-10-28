@@ -20,7 +20,7 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../comm
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
-// Default timeout for tests is 5s, increasing to 8s due to long running requests leading to frequent flakyness
+// Default timeout for tests is 5s, increasing to 10s due to long running requests leading to frequent flakyness
 const TESTS_TIMEOUT = 10000;
 
 jest.mock('../../../../../services');
