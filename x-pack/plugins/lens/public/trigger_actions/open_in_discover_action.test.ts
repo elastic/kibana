@@ -31,6 +31,10 @@ describe('open in discover action', () => {
     });
     it('is incompatible if user cant access Discover app', async () => {
       // setup
+      const lensApi = {
+        ...compatibleEmbeddableApi,
+        canViewUnderlyingData$: { getValue: jest.fn(() => true) },
+      };
 
       let hasDiscoverAccess = true;
       // make sure it would work if we had access to Discover
@@ -40,7 +44,7 @@ describe('open in discover action', () => {
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
-          embeddable: compatibleEmbeddableApi,
+          embeddable: lensApi,
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
@@ -52,7 +56,7 @@ describe('open in discover action', () => {
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
-          embeddable: compatibleEmbeddableApi,
+          embeddable: lensApi,
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
     });
