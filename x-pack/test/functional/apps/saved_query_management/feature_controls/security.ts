@@ -77,7 +77,7 @@ export default function (ctx: FtrProviderContext) {
         break;
       case 'dashboard':
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadSavedDashboard('A Dashboard');
         break;
       case 'maps':
         await maps.openNewMap();

@@ -20,7 +20,6 @@ import {
   EuiLink,
   EuiImage,
   EuiCallOut,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -34,8 +33,7 @@ import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
-
-const feedbackUrl = 'https://ela.st/otelcollector';
+import { FeedbackButtons } from '../shared/feedback_buttons';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -343,37 +341,8 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
             },
           ]}
         />
-        <EuiHorizontalRule />
 
-        <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
-              {i18n.translate(
-                'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label',
-                {
-                  defaultMessage: 'Was this helpful or were there any problems?',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="editorComment"
-              data-test-subj="observabilityOnboardingOtelLogsPanelGiveFeedbackButton"
-              href={feedbackUrl}
-              color="warning"
-              target="_blank"
-            >
-              {i18n.translate(
-                'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title',
-                {
-                  defaultMessage: 'Give feedback',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FeedbackButtons flow="otel_logs" />
       </EuiFlexGroup>
     </EuiPanel>
   );
