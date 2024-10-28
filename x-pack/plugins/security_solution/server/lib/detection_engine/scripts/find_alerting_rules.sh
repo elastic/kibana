@@ -12,7 +12,7 @@ set -e
 
 # Example: ./find_alerting_rules.sh
 # https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-findrules
-# use ./find_rules.sh to work with Detection(Security) rules
+# Related: use ./find_rules.sh to retrieve Detection Engine (Security) rules
 curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X GET ${KIBANA_URL}${SPACE_URL}/api/alerting/rules/_find \
