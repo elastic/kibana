@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactElement } from 'react';
 import { css, CSSObject } from '@emotion/react';
 import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -18,19 +18,21 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { RenderCustomGridColumnInfoPopover, DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
-interface DataTableColumnHeaderProps {
+export interface DataTableColumnHeaderProps {
   dataView: DataView;
   columnName: string | null;
   columnDisplayName: string;
   columnsMeta?: DataTableColumnsMeta;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
+  customColumnToken?: ReactElement;
   renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
 }
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnDisplayName,
   showColumnTokens,
+  customColumnToken,
   columnName,
   columnsMeta,
   dataView,
@@ -38,7 +40,13 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   renderCustomGridColumnInfoPopover,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="xs">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      direction="row"
+      responsive={false}
+      gutterSize="xs"
+    >
       <EuiFlexItem grow={false}>
         <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
           {showColumnTokens && (
@@ -46,13 +54,14 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
               columnName={columnName}
               columnsMeta={columnsMeta}
               dataView={dataView}
+              customColumnToken={customColumnToken}
             />
           )}
           <DataTableColumnTitle columnDisplayName={columnDisplayName} />
         </ColumnHeaderTruncateContainer>
       </EuiFlexItem>
       {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
         </EuiFlexItem>
       ) : null}
@@ -60,18 +69,24 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   );
 };
 
+const tokenCss = css`
+  padding-right: ${euiThemeVars.euiSizeXS};
+`;
+
 const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView' | 'customColumnToken'>
 > = (props) => {
-  const { columnName, columnsMeta, dataView } = props;
+  const { columnName, columnsMeta, dataView, customColumnToken } = props;
   const columnToken = useMemo(
     () => getRenderedToken({ columnName, columnsMeta, dataView }),
     [columnName, columnsMeta, dataView]
   );
 
-  return columnToken ? (
-    <span css={{ paddingRight: euiThemeVars.euiSizeXS }}>{columnToken}</span>
-  ) : null;
+  if (customColumnToken) {
+    return <span css={tokenCss}>{customColumnToken}</span>;
+  }
+
+  return columnToken ? <span css={tokenCss}>{columnToken}</span> : null;
 };
 
 const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDisplayName'>> = ({
@@ -113,54 +128,19 @@ function getRenderedToken({
   return null;
 }
 
-export const DataTableTimeColumnHeader = ({
-  dataView,
-  dataViewField,
-  headerRowHeight = 1,
-  columnLabel,
-  columnName,
-  columnsMeta,
-  renderCustomGridColumnInfoPopover,
-}: {
-  dataView: DataView;
-  dataViewField?: DataViewField;
-  headerRowHeight?: number;
-  columnLabel?: string;
-} & Pick<
-  DataTableColumnHeaderProps,
-  'columnName' | 'columnsMeta' | 'renderCustomGridColumnInfoPopover'
->) => {
-  const timeFieldName = columnLabel || (dataViewField?.customLabel ?? dataView.timeFieldName);
-  const primaryTimeAriaLabel = i18n.translate(
-    'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
-    {
-      defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
-      values: { timeFieldName },
-    }
-  );
+export const DataTableTimeColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
   const primaryTimeTooltip = i18n.translate('unifiedDataTable.tableHeader.timeFieldIconTooltip', {
     defaultMessage: 'This field represents the time that events occurred.',
   });
 
   return (
-    <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <div
-          aria-label={primaryTimeAriaLabel}
-          css={css`
-            text-align: left;
-          `}
-        >
-          <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-            {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
-          </ColumnHeaderTruncateContainer>
-        </div>
-      </EuiFlexItem>
-      {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
-        <EuiFlexItem>
-          {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+    <DataTableColumnHeader
+      {...props}
+      customColumnToken={
+        <>
+          <EuiIconTip type="clock" content={primaryTimeTooltip} />{' '}
+        </>
+      }
+    />
   );
 };

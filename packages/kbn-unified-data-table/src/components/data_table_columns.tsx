@@ -36,7 +36,11 @@ import {
 } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
-import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import {
+  DataTableColumnHeader,
+  DataTableColumnHeaderProps,
+  DataTableTimeColumnHeader,
+} from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
@@ -211,6 +215,16 @@ function buildEuiGridColumn({
 
   const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
 
+  const columnHeaderCommonProps: DataTableColumnHeaderProps = {
+    dataView,
+    columnName,
+    columnDisplayName,
+    columnsMeta,
+    showColumnTokens,
+    headerRowHeight,
+    renderCustomGridColumnInfoPopover,
+  };
+
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
@@ -220,15 +234,7 @@ function buildEuiGridColumn({
       ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
-        <DataTableColumnHeaderMemoized
-          dataView={dataView}
-          columnName={columnName}
-          columnDisplayName={columnDisplayName}
-          columnsMeta={columnsMeta}
-          showColumnTokens={showColumnTokens}
-          headerRowHeight={headerRowHeight}
-          renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
-        />
+        <DataTableColumnHeaderMemoized {...columnHeaderCommonProps} />
       ) : undefined,
     displayAsText: columnDisplayName,
     actions: {
@@ -268,17 +274,7 @@ function buildEuiGridColumn({
   };
 
   if (column.id === dataView.timeFieldName) {
-    column.display = (
-      <DataTableTimeColumnHeaderMemoized
-        dataView={dataView}
-        dataViewField={dataViewField}
-        headerRowHeight={headerRowHeight}
-        columnLabel={columnDisplay}
-        columnName={columnName}
-        columnsMeta={columnsMeta}
-        renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
-      />
-    );
+    column.display = <DataTableTimeColumnHeaderMemoized {...columnHeaderCommonProps} />;
     if (numberOfColumns > 1) {
       column.initialWidth = defaultTimeColumnWidth;
     }

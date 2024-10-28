@@ -69,13 +69,16 @@ export const getDiscoverGridColumnInfoPopover =
           display: inline-block;
           width: ${euiTheme.size.base};
           line-height: ${euiTheme.size.base};
+          margin-right: ${euiTheme.size.xs};
         `}
       >
         <UnifiedFieldListItemPopover
           ButtonComponent={({ onTogglePopover }) => (
             <EuiButtonIcon
-              iconType="iInCircle"
+              iconType="expand"
               color="text"
+              size="xs"
+              iconSize="s"
               aria-label={i18n.translate('discover.dataGrid.columnInfoPopoverButtonAriaLabel', {
                 defaultMessage: 'Open column info popover',
               })}
