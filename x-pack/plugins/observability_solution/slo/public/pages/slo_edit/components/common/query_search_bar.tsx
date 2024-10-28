@@ -69,7 +69,7 @@ export const QuerySearchBar = memo(
               field.onChange(String(value?.query));
             } else {
               field.onChange({
-                ...(field.value ?? {}),
+                filters: field.value?.filters ?? {},
                 kqlQuery: String(value?.query),
               });
             }
@@ -111,15 +111,20 @@ export const QuerySearchBar = memo(
                   }
                   onQuerySubmit={(value) => handleQueryChange(value.query, value.dateRange)}
                   onFiltersUpdated={(filters) => {
+                    const updatedFilters = filters.map((filter) => {
+                      const { $state, meta, ...rest } = filter;
+                      return { meta, query: filter?.query ? { ...filter.query } : { ...rest } };
+                    });
+
                     if (kqlQuerySchema.is(field.value)) {
                       field.onChange({
-                        filters,
+                        filters: updatedFilters,
                         kqlQuery: field.value,
                       });
                     } else {
                       field.onChange({
-                        ...(field.value ?? {}),
-                        filters,
+                        kqlQuery: field.value?.kqlQuery ?? '',
+                        filters: updatedFilters,
                       });
                     }
                   }}
