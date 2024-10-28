@@ -395,8 +395,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickProcessesTab();
             const processesTotalValue =
               await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-            const processValue = await processesTotalValue.getVisibleText();
-            expect(processValue).to.eql('N/A');
+            await retry.tryForTime(5000, async () => {
+              expect(await processesTotalValue.getVisibleText()).to.eql('N/A');
+            });
           });
         });
       });
@@ -501,8 +502,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render processes tab and with Total Value summary', async () => {
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
+          await retry.tryForTime(5000, async () => {
+            expect(await processesTotalValue.getVisibleText()).to.eql('313');
+          });
         });
 
         it('should expand processes table row', async () => {

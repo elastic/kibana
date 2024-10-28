@@ -21,6 +21,7 @@ import {
   getColorsFromMapping,
   DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { DataType } from '../../types';
 
@@ -90,11 +91,7 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   return displayStops;
 }
 
-export const findMinMaxByColumnId = (
-  columnIds: string[],
-  table: Datatable | undefined,
-  getOriginalId: (id: string) => string = (id: string) => id
-) => {
+export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
   const minMaxMap = new Map<string, DataBounds>();
 
   if (table != null) {
