@@ -7,7 +7,7 @@
 
 import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
@@ -30,45 +30,13 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       params: RequestParamsSchema,
     },
   },
-  handler: async ({ savedObjectsClient, request, response, server, spaceId }) => {
+  handler: async (routeContext) => {
+    const { savedObjectsClient, request, response, spaceId } = routeContext;
     try {
       const { id: paramId } = request.params;
 
-      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
-
-      const canSave =
-        (
-          await server.coreStart?.capabilities.resolveCapabilities(request, {
-            capabilityPath: 'uptime.*',
-          })
-        ).uptime.save ?? false;
-
-      if (canSave) {
-        if (paramId) {
-          const savedObject =
-            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
-              syntheticsParamType,
-              paramId,
-              { namespace: spaceId }
-            );
-          return toClientResponse(savedObject);
-        }
-
-        const finder =
-          await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>(
-            {
-              type: syntheticsParamType,
-              perPage: 1000,
-              namespaces: [spaceId],
-            }
-          );
-
-        const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
-        for await (const result of finder.find()) {
-          hits.push(...result.saved_objects);
-        }
-
-        return hits.map((savedObject) => toClientResponse(savedObject));
+      if (await isAnAdminUser(routeContext)) {
+        return getDecryptedParams(routeContext, paramId);
       } else {
         if (paramId) {
           const savedObject = await savedObjectsClient.get<SyntheticsParamsReadonly>(
@@ -78,11 +46,7 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           return toClientResponse(savedObject);
         }
 
-        const data = await savedObjectsClient.find<SyntheticsParamsReadonly>({
-          type: syntheticsParamType,
-          perPage: 10000,
-        });
-        return data.saved_objects.map((savedObject) => toClientResponse(savedObject));
+        return findAllParams(routeContext);
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {
@@ -93,6 +57,70 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     }
   },
 });
+
+const isAnAdminUser = async (routeContext: RouteContext) => {
+  const { request, server } = routeContext;
+  const user = server.coreStart.security.authc.getCurrentUser(request);
+
+  const isSuperUser = user?.roles.includes('superuser');
+  const isAdmin = user?.roles.includes('kibana_admin');
+
+  const canSave =
+    (
+      await server.coreStart?.capabilities.resolveCapabilities(request, {
+        capabilityPath: 'uptime.*',
+      })
+    ).uptime.save ?? false;
+
+  return (isSuperUser || isAdmin) && canSave;
+};
+
+const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: string) => {
+  const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+
+  if (paramId) {
+    const savedObject =
+      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
+        syntheticsParamType,
+        paramId,
+        { namespace: spaceId }
+      );
+    return toClientResponse(savedObject);
+  }
+  const finder =
+    await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>(
+      {
+        type: syntheticsParamType,
+        perPage: 1000,
+        namespaces: [spaceId],
+      }
+    );
+
+  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  for await (const result of finder.find()) {
+    hits.push(...result.saved_objects);
+  }
+
+  void finder.close();
+
+  return hits.map((savedObject) => toClientResponse(savedObject));
+};
+
+const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
+  const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsParams>({
+    type: syntheticsParamType,
+    perPage: 1000,
+  });
+
+  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  for await (const result of finder.find()) {
+    hits.push(...result.saved_objects);
+  }
+
+  void finder.close();
+
+  return hits.map((savedObject) => toClientResponse(savedObject));
+};
 
 const toClientResponse = (
   savedObject: SavedObject<SyntheticsParams | SyntheticsParamsReadonly>

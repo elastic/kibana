@@ -3,7 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
@@ -22,6 +26,11 @@
     "@kbn/config-schema",
     "@kbn/core-ui-settings-common",
     "@kbn/logs-data-access-plugin",
+    "@kbn/core-plugins-browser",
+    "@kbn/ai-assistant",
+    "@kbn/core-plugins-server"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
