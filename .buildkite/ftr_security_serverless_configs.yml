@@ -1,16 +1,16 @@
 disabled:
   # Base config files, only necessary to inform config finding script
-  - x-pack/test_serverless/functional/test_suites/security/cypress/security_config.base.ts
-  - x-pack/test_serverless/functional/test_suites/security/cypress/cypress.config.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
+  - x-pack/test/defend_workflows_cypress/serverless_config.base.ts
+  - x-pack/test/osquery_cypress/serverless_config.base.ts
 
   # Cypress configs, for now these are still run manually
   - x-pack/test/defend_workflows_cypress/serverless_config.ts
   - x-pack/test/osquery_cypress/serverless_cli_config.ts
-  - x-pack/test_serverless/functional/test_suites/security/cypress/security_config.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
+
 
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
