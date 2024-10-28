@@ -20,8 +20,6 @@ import { createEmptyLensState } from '../helper';
  */
 export function LensRenderer({
   title,
-  query,
-  filters,
   withDefaultActions,
   extraActions,
   showInspector,
@@ -49,9 +47,7 @@ export function LensRenderer({
 
   const apiRef = useRef<LensApi | undefined>(undefined);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes
-      ? { attributes: props.attributes }
-      : createEmptyLensState(null, title, '', query, filters)
+    props.attributes ? { attributes: props.attributes } : createEmptyLensState(null, title)
   );
 
   const searchApi = useSearchApi(props);
@@ -63,7 +59,7 @@ export function LensRenderer({
   useEffect(() => {
     const lensApi = apiRef.current;
     // trigger a re-render if the attributes change
-    if (lensApi && lensApi) {
+    if (lensApi) {
       lensApi.updateAttributes({ ...initialStateRef.current, ...props.attributes });
       lensApi.updateOverrides(props.overrides);
     }
