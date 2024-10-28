@@ -266,38 +266,38 @@ export const OWNER_FIELD = 'owner';
 export const OBSERVABLE_TYPES_BUILTIN = [
   {
     label: 'IPv4',
-    key: '7cd21408-cb6a-406c-b6f2-db975f0ad9ab',
+    key: 'observable-type-ipv4',
   },
   {
     label: 'IPv6',
-    key: 'ff08a2de-a382-4f4a-9b16-58bad08b1abd',
+    key: 'observable-type-ipv6',
   },
   {
     label: 'URL',
-    key: '9dfbafca-8c51-4e05-ac87-627ebd2480f9',
+    key: 'observable-type-url',
   },
   {
     label: 'Domain',
-    key: '18d916e5-1111-4fc4-b479-3aa2b0c8de57',
+    key: 'observable-type-domain',
   },
   {
     label: 'URI',
-    key: 'a7259d37-1591-4cce-94cc-9097ac6e5f1f',
+    key: 'observable-type-uri',
   },
   {
     label: 'Hostname',
-    key: 'eaae0882-d0c4-4e8e-a80c-d8d88717340f',
+    key: 'observable-type-hostname',
   },
   {
     label: 'File hash',
-    key: '6e2b0ea5-a805-4edf-83c2-26f4be4fe9e3',
+    key: 'observable-type-file-hash',
   },
   {
     label: 'File path',
-    key: 'f51ba961-4d4e-4fb2-a4f7-3cf4fb0a2823',
+    key: 'observable-type-file-path',
   },
   {
     label: 'Email',
-    key: '7cd21408-cb6a-406c-b6f2-db975f0ad9ab',
+    key: 'observable-type-email',
   },
 ];
