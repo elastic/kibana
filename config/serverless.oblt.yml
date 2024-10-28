@@ -183,6 +183,7 @@ xpack.apm.featureFlags.storageExplorerAvailable: false
 
 ## Set the AI Assistant type
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAIAssistant.scope: "observability"
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability

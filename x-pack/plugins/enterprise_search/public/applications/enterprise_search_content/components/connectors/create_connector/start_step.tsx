@@ -106,6 +106,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     name="first"
                     value={rawName}
                     onChange={handleNameChange}
+                    disabled={!!connector}
                     onBlur={() => {
                       if (selectedConnector) {
                         generateConnectorName({
