@@ -144,7 +144,7 @@ export const DashboardViewport = () => {
       ) : null}
       {fullScreenMode && (
         <EuiPortal>
-          </EuiPortal><ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
+          <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
         </EuiPortal>
       )}
       {panelCount === 0 && <DashboardEmptyScreen />}
