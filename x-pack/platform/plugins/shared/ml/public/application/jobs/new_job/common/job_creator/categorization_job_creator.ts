@@ -21,19 +21,17 @@ import {
   VALIDATION_RESULT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '@kbn/ml-category-validator';
-import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import { createBasicDetector } from './util/default_configs';
+import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import {
   JOB_TYPE,
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
-} from '../../../../../../common/constants/new_job';
+} from '@kbn/ml-common-constants/new_job';
+
+import { JobCreator } from './job_creator';
+import { createBasicDetector } from './util/default_configs';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 

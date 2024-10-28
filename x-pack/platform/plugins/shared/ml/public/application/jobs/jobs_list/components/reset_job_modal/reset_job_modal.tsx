@@ -23,14 +23,18 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '@kbn/ml-common-constants/jobs_list';
+
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
-import { resetJobs } from '../utils';
-import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
-import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
+
 import { isManagedJob } from '../../../jobs_utils';
+
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+import { resetJobs } from '../utils';
+
+import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 

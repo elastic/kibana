@@ -7,7 +7,7 @@
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,

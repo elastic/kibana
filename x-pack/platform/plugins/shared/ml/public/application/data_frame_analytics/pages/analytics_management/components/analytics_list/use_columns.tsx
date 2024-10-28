@@ -25,6 +25,8 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import type { DataFrameAnalyticsListRow } from './common';
 import {
   getDataFrameAnalyticsProgressPhase,
@@ -37,7 +39,6 @@ import { useActions } from './use_actions';
 import { useMlLink, useMlKibana } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
-import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
 import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 const TRUNCATE_TEXT_LINES = 3;
@@ -100,12 +101,12 @@ export const progressColumn = {
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         {isBatchTransform && (
           <Fragment>
-            <EuiFlexItem style={{ width: '60px' }} grow={false}>
+            <EuiFlexItem css={{ width: '60px' }} grow={false}>
               <EuiText size="xs">
                 Phase {currentPhase}/{totalPhases}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '40px' }} grow={false}>
+            <EuiFlexItem css={{ width: '40px' }} grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.ml.dataframe.analyticsList.progressOfPhase', {
                   defaultMessage: 'Progress of phase {currentPhase}: {progress}%',
@@ -129,7 +130,7 @@ export const progressColumn = {
         )}
         {!isBatchTransform && (
           <Fragment>
-            <EuiFlexItem style={{ width: '40px' }} grow={false}>
+            <EuiFlexItem css={{ width: '40px' }} grow={false}>
               {isDataFrameAnalyticsRunning(item.stats.state) && (
                 <EuiProgress color="primary" size="m" />
               )}
@@ -137,7 +138,7 @@ export const progressColumn = {
                 <EuiProgress value={0} max={100} color="primary" size="m" />
               )}
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '35px' }} grow={false}>
+            <EuiFlexItem css={{ width: '35px' }} grow={false}>
               &nbsp;
             </EuiFlexItem>
           </Fragment>

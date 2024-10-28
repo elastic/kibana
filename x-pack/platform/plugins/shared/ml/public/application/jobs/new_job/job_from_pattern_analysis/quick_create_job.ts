@@ -14,7 +14,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
+import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '@kbn/ml-common-constants/new_job';
 import { type CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
 import type { MlApi } from '../../../services/ml_api_service';
 import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/default_configs';

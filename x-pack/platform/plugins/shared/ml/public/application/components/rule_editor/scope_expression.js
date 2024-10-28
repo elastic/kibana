@@ -22,7 +22,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils/detector_rule';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
