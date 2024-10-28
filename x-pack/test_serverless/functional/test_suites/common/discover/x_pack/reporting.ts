@@ -10,6 +10,8 @@ import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  // see details: https://github.com/elastic/kibana/issues/197957
+  this.tags(['failsOnMKI']);
   const reportingAPI = getService('reporting');
   const log = getService('log');
   const es = getService('es');
