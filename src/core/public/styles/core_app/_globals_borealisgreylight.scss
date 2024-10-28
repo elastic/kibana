@@ -2,8 +2,8 @@
 //
 // prepended to all .scss imports (from JS, when borealis light theme selected)
 
-@import '@elastic/eui-theme-borealis/src/theme_light.scss';
+@import '@elastic/eui-theme-borealis-grey/src/theme_light.scss';
 
 @import './mixins';
 
-$kbnThemeVersion: 'borealislight';
+$kbnThemeVersion: 'borealisgrey_light';

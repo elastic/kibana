@@ -10,8 +10,13 @@
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 export const DEFAULT_THEME_VERSION: ThemeVersion = 'v8';
-export const AVAILABLE_THEME_VERSIONS: string[] = ['v8', 'borealis'];
+export const AVAILABLE_THEME_VERSIONS: string[] = ['v8', 'borealis', 'borealisgrey'];
 
 export const ThemeAmsterdamTags = ['v8light', 'v8dark'] as const;
-export const ThemeBorealisTags = ['borealislight', 'borealisdark'] as const;
+export const ThemeBorealisTags = [
+  'borealislight',
+  'borealisdark',
+  'borealisgreylight',
+  'borealisgreydark',
+] as const;
 export const AVAILABLE_THEME_TAGS = [...ThemeAmsterdamTags, ...ThemeBorealisTags];

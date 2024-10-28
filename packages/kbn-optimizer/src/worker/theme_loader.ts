@@ -12,7 +12,12 @@ import webpack from 'webpack';
 import { AVAILABLE_THEME_VERSIONS } from '@kbn/core-ui-settings-common';
 import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
 
-const getVersion = (tag: ThemeTag) => (tag.includes(AVAILABLE_THEME_VERSIONS[1]) ? 9 : 8);
+const getVersion = (tag: ThemeTag) =>
+  tag.includes(AVAILABLE_THEME_VERSIONS[1])
+    ? 9
+    : tag.includes(AVAILABLE_THEME_VERSIONS[2])
+    ? 10
+    : 8;
 const getIsDark = (tag: ThemeTag) => tag.includes('dark');
 const compare = (a: ThemeTag, b: ThemeTag) =>
   (getVersion(a) === getVersion(b) ? 1 : 0) + (getIsDark(a) === getIsDark(b) ? 1 : 0);
