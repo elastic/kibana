@@ -42,7 +42,6 @@ export function supertestToObservable<T = any>(response: supertest.Test): Observ
       return new Promise<void>((resolve, reject) => {
         const decoder = new TextDecoder();
 
-        // Function to process each chunk
         const processChunk = (value: BufferSource) => {
           parser.feed(decoder.decode(value, { stream: true }));
         };
