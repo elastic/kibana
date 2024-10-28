@@ -8,7 +8,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { HttpService } from '../../application/services/http_service';
 import type { MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import type { AnomalyChartsEmbeddableServices } from '..';
+import type { AnomalyChartsEmbeddableServices } from '../types';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export const getAnomalyChartsServiceDependencies = async (
