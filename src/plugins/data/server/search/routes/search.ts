@@ -82,6 +82,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
             return res.ok({
               body: response.rawResponse,
               headers: {
+                'kbn-is-restored': response.isRestored ? '?1' : '?0',
                 requestParams: JSON.stringify(response.requestParams),
               },
             });

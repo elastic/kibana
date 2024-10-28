@@ -475,6 +475,8 @@ export class SearchInterceptor {
           const requestParams =
             response.requestParams ??
             JSON.parse(rawResponse.response?.headers.get('requestParams') || '{}');
+          const isRestored =
+            response.isRestored ?? rawResponse.response?.headers.get('kbn-is-restored') === '?1';
           const error = (response as unknown as Record<string, unknown>).error;
           if (error) {
             // eslint-disable-next-line no-throw-literal
@@ -483,6 +485,7 @@ export class SearchInterceptor {
                 error,
                 rawResponse: response,
                 requestParams,
+                isRestored,
               },
             };
           }
@@ -500,6 +503,7 @@ export class SearchInterceptor {
                 rawResponse: shimmedResponse,
                 warning,
                 requestParams,
+                isRestored,
                 ...getTotalLoaded(shimmedResponse),
               };
             case ESQL_ASYNC_SEARCH_STRATEGY:
