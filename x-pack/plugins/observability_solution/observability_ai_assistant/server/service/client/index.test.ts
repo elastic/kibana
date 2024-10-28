@@ -124,6 +124,7 @@ describe('Observability AI Assistant client', () => {
     getActions: jest.fn(),
     validate: jest.fn(),
     getInstructions: jest.fn(),
+    getAdhocInstructions: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
