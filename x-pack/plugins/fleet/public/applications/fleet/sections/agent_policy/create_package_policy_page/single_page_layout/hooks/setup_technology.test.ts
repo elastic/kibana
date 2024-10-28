@@ -135,7 +135,8 @@ describe('useAgentless', () => {
   });
 });
 
-describe('useSetupTechnology', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/189038
+describe.skip('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
