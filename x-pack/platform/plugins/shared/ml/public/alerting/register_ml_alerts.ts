@@ -23,7 +23,6 @@ export function registerMlAlerts(
   alerting?: AlertingSetup
 ) {
   registerAnomalyDetectionRule(triggersActionsUi, getStartServices, mlCapabilities);
-
   registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 
   if (alerting) {
