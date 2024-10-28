@@ -242,7 +242,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                               onClick={refreshButtonClick}
                               disabled={!connector.index_name}
                               aria-label={i18n.translate(
-                                'pack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+                                'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
                                 { defaultMessage: 'Refresh an Elasticsearch API key' }
                               )}
                             />
