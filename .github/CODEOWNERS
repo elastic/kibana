@@ -1459,7 +1459,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
-/x-pack/test_serverless/functional/test_suites/security/cypress @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
