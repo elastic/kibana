@@ -20,5 +20,3 @@ steps:
       - build_project_image
       - linting
       - linting_with_types
-      - checks
-      - check_types
