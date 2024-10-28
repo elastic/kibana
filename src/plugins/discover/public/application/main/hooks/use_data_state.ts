@@ -10,30 +10,17 @@
 import { useState, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { DataMsg } from '../state_management/discover_data_state_container';
-import { FetchStatus } from '../../types';
-
-function hasUpdatedResultWhenComplete<T extends DataMsg>(next: T, current: T) {
-  if (next.fetchStatus === FetchStatus.COMPLETE && 'result' in next && 'result' in current) {
-    return next.result !== current.result;
-  }
-  return false;
-}
 
 export function useDataState<T extends DataMsg>(data$: BehaviorSubject<T>) {
-  const [fetchState, setFetchState] = useState<T>({ fetchStatus: FetchStatus.UNINITIALIZED } as T);
+  const [fetchState, setFetchState] = useState<T>(data$.getValue());
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
-      // Do not look just into status, but also in the result is available
-      // if the fetch doesn't emit a partial status, then it will never update its result
-      if (
-        next.fetchStatus !== fetchState.fetchStatus ||
-        hasUpdatedResultWhenComplete(next, fetchState)
-      ) {
+      if (next.fetchStatus !== fetchState.fetchStatus) {
         setFetchState({ ...fetchState, ...next, ...(next.error ? {} : { error: undefined }) });
       }
     });
     return () => subscription.unsubscribe();
-  }, [fetchState, setFetchState, data$]);
+  }, [data$, fetchState, setFetchState]);
   return fetchState;
 }
