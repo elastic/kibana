@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, useEuiTheme, EuiToolTip, EuiFlexItem } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -26,7 +26,19 @@ export const FieldStatsUnavailableMessage = ({
   if (!content) return null;
 
   if (id === 'dashboard_embeddable') {
-    return <EmptyPlaceholder icon={'warning'} message={title} />;
+    return (
+      <EuiFlexItem
+        alignItems="center"
+        fullWidth
+        css={css`
+          height: 100%;
+        `}
+      >
+        <EuiToolTip content={content}>
+          <EmptyPlaceholder icon={'warning'} message={title} />
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
   return (
     <EuiEmptyPrompt
