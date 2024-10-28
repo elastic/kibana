@@ -1,0 +1,158 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { createKnowledgeBaseEntry } from './create_knowledge_base_entry';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
+import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import {
+  getKnowledgeBaseEntryResponseMock,
+  getCreateKnowledgeBaseEntryMock,
+  mockUser,
+} from './mocks';
+
+jest.mock('./get_knowledge_base_entry', () => ({
+  getKnowledgeBaseEntry: jest.fn(),
+}));
+
+describe('createKnowledgeBaseEntry', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    logger = loggingSystemMock.createLogger();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+    const date = '2024-01-28T04:20:02.394Z';
+    jest.setSystemTime(new Date(date));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  test('it creates a knowledge base entry with legacy create schema when isV2 = false', async () => {
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntryMock();
+    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getKnowledgeBaseEntryResponseMock(),
+      id: 'elastic-id-123',
+    });
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.create.mockResponse(
+      // @ts-expect-error not full response interface
+      { _id: 'elastic-id-123' }
+    );
+    const createdEntry = await createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: 'index-1',
+      spaceId: 'test',
+      user: mockUser,
+      knowledgeBaseEntry,
+      logger,
+    });
+    expect(esClient.create).toHaveBeenCalledWith({
+      body: {
+        '@timestamp': '2024-01-28T04:20:02.394Z',
+        created_at: '2024-01-28T04:20:02.394Z',
+        created_by: 'unknown',
+        updated_at: '2024-01-28T04:20:02.394Z',
+        updated_by: 'unknown',
+        namespace: 'test',
+        users: [{ id: undefined, name: 'my_username' }],
+        type: 'document',
+        source: 'test',
+        text: 'test',
+        name: 'test',
+        kbResource: 'test',
+        vector: undefined,
+      },
+      id: expect.any(String),
+      index: 'index-1',
+      refresh: 'wait_for',
+    });
+
+    const expected: KnowledgeBaseEntryResponse = {
+      ...getKnowledgeBaseEntryResponseMock(),
+      id: 'elastic-id-123',
+    };
+
+    expect(createdEntry).toEqual(expected);
+  });
+  test('it creates a knowledge base entry with create schema when isV2 = true', async () => {
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntryMock();
+    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getKnowledgeBaseEntryResponseMock(),
+      id: 'elastic-id-123',
+    });
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.create.mockResponse(
+      // @ts-expect-error not full response interface
+      { _id: 'elastic-id-123' }
+    );
+    const createdEntry = await createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: 'index-1',
+      spaceId: 'test',
+      user: mockUser,
+      knowledgeBaseEntry,
+      logger,
+      isV2: true,
+    });
+    expect(esClient.create).toHaveBeenCalledWith({
+      body: {
+        '@timestamp': '2024-01-28T04:20:02.394Z',
+        created_at: '2024-01-28T04:20:02.394Z',
+        created_by: 'unknown',
+        updated_at: '2024-01-28T04:20:02.394Z',
+        updated_by: 'unknown',
+        namespace: 'test',
+        users: [{ id: undefined, name: 'my_username' }],
+        type: 'document',
+        source: 'test',
+        text: 'test',
+        name: 'test',
+        kb_resource: 'test',
+        required: false,
+        vector: undefined,
+      },
+      id: expect.any(String),
+      index: 'index-1',
+      refresh: 'wait_for',
+    });
+
+    const expected: KnowledgeBaseEntryResponse = {
+      ...getKnowledgeBaseEntryResponseMock(),
+      id: 'elastic-id-123',
+    };
+
+    expect(createdEntry).toEqual(expected);
+  });
+
+  test('it throws an error when creating a knowledge base entry fails', async () => {
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntryMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.create.mockRejectedValue(new Error('Test error'));
+    await expect(
+      createKnowledgeBaseEntry({
+        esClient,
+        knowledgeBaseIndex: 'index-1',
+        spaceId: 'test',
+        user: mockUser,
+        knowledgeBaseEntry,
+        logger,
+      })
+    ).rejects.toThrowError('Test error');
+  });
+});
