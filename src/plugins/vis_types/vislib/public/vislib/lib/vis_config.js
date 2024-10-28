@@ -25,8 +25,8 @@ const DEFAULT_VIS_CONFIG = {
 };
 
 export class VisConfig {
-  constructor(visConfigArgs, data, uiState, el, createColorLookupFunction) {
-    this.data = new Data(data, uiState, createColorLookupFunction);
+  constructor(visConfigArgs, data, uiState, el) {
+    this.data = new Data(data, uiState);
 
     const visType = visTypes[visConfigArgs.type];
     const typeDefaults = visType(visConfigArgs, this.data);

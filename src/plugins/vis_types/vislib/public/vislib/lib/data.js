@@ -45,15 +45,11 @@ class D3MappableObject {
  * @param attr {Object|*} Visualization options
  */
 export class Data {
-  constructor(data, uiState, createColorLookupFunction) {
+  constructor(data, uiState) {
     this.uiState = uiState;
-    this.createColorLookupFunction = createColorLookupFunction;
     this.data = this.copyDataObj(data);
     this.type = this.getDataType();
     this.labels = this._getLabels(this.data);
-    this.color = this.labels
-      ? createColorLookupFunction(this.labels, uiState.get('vis.colors'))
-      : undefined;
     this._normalizeOrdered();
   }
 
@@ -385,7 +381,7 @@ export class Data {
     const defaultColors = this.uiState.get('vis.defaultColors');
     const overwriteColors = this.uiState.get('vis.colors');
     const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
-    return this.createColorLookupFunction(this.getLabels(), colors);
+    return (value) => colors[value];
   }
 
   /**
