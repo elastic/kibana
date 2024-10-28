@@ -1044,8 +1044,7 @@ describe('utils', () => {
 
   describe('getUniqueAlertCommentsCountQuery', () => {
     it('returns the correct query', () => {
-      const savedObjectType = 'cases-comments';
-      expect(getUniqueAlertCommentsCountQuery(savedObjectType)).toEqual({
+      expect(getUniqueAlertCommentsCountQuery()).toEqual({
         uniqueAlertCommentsCount: {
           cardinality: {
             field: 'cases-comments.attributes.alertId',
