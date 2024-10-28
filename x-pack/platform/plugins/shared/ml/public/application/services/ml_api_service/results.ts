@@ -12,15 +12,15 @@ import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
 import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   GetAnomaliesTableDataResult,
-} from '../../../../common/types/results';
-import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { ExplorerChartsData } from '../../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { PartitionFieldsConfig } from '@kbn/ml-common-types/storage';
+import type { ExplorerChartsData } from '@kbn/ml-common-types/results';
 
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';

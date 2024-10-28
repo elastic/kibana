@@ -12,7 +12,7 @@ import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 
 import type { ModelPlotOutputResults } from '../../../../services/results_service';
 import {

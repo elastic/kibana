@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
 import type { MlClient } from '../../lib/ml_client';
 
 type ScheduledEvent = estypes.MlCalendarEvent;

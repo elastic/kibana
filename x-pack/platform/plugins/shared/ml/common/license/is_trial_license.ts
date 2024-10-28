@@ -6,7 +6,7 @@
  */
 
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN_ID } from '../constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { TRIAL_LICENSE } from './constants';
 
 export function isTrialLicense(license: ILicense) {

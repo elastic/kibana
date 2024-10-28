@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   showActualForFunction,
@@ -19,18 +21,22 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
-import { getIndicesOptions } from '../../../common/util/datafeed_utils';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   DatafeedResultsChartDataParams,
-} from '../../../common/types/results';
-import { defaultSearchQuery } from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import { defaultSearchQuery } from '@kbn/ml-common-types/results';
+
+import { getIndicesOptions } from '../../../common/util/datafeed_utils';
+
 import type { MlClient } from '../../lib/ml_client';
+
 import { datafeedsProvider } from '../job_service/datafeeds';
+
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { annotationServiceProvider } from '../annotation_service';
 import { anomalyChartsDataProvider } from './anomaly_charts';
 

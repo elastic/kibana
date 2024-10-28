@@ -12,12 +12,8 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
+import { CREATED_BY_LABEL, JOB_TYPE, DEFAULT_BUCKET_SPAN } from '@kbn/ml-common-constants/new_job';
 import type { MlApi } from '../../../services/ml_api_service';
-import {
-  CREATED_BY_LABEL,
-  JOB_TYPE,
-  DEFAULT_BUCKET_SPAN,
-} from '../../../../../common/constants/new_job';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import type { JobCreatorType } from '../common/job_creator';
 import { getJobsItemsFromEmbeddable } from './utils';

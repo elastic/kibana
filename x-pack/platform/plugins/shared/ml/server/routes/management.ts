@@ -7,18 +7,18 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type {
+  AnomalyDetectionManagementItems,
+  AnalyticsManagementItems,
+  TrainedModelsManagementItems,
+} from '@kbn/ml-common-types/management';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import { listTypeSchema } from './schemas/management_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { checksFactory } from '../saved_objects';
-import type {
-  AnomalyDetectionManagementItems,
-  AnalyticsManagementItems,
-  TrainedModelsManagementItems,
-} from '../../common/types/management';
 import { filterForEnabledFeatureModels } from './trained_models';
 
 /**

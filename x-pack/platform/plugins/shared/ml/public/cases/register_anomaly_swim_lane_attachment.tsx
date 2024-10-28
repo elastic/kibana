@@ -9,8 +9,8 @@ import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { PLUGIN_ICON } from '../../common/constants/app';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '../../common/constants/cases';
+import { PLUGIN_ICON } from '@kbn/ml-common-constants/app';
+import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '@kbn/ml-common-constants/cases';
 import type { MlStartDependencies } from '../plugin';
 
 export function registerAnomalySwimLaneCasesAttachment(

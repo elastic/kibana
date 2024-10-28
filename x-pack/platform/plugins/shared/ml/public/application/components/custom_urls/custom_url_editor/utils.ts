@@ -27,6 +27,9 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { isAnomalyDetectionJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -46,8 +49,6 @@ import {
 } from '../../../util/custom_url_utils';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
-import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
-import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 import type { TimeRangeType } from './constants';
 import type { MlApi } from '../../../services/ml_api_service';
 
