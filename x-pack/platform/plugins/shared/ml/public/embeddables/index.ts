@@ -13,9 +13,6 @@ import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
 } from './constants';
 
-export * from './constants';
-export type * from './types';
-
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
     const { getAnomalySwimLaneEmbeddableFactory } = await import('./anomaly_swimlane');
