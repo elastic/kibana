@@ -165,11 +165,11 @@ describe('processRouter', () => {
     expect(result.paths['/qux']?.post).toBeDefined();
 
     expect(result.paths['/qux']?.post?.description).toEqual(
-      '[Authz] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+      '[Required authorization] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
     );
 
     expect(result.paths['/quux']?.post?.description).toEqual(
-      'This a test route description.[Authz] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+      'This a test route description.<br/><br/>[Required authorization] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
     );
   });
 });
