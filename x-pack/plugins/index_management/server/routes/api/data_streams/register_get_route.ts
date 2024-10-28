@@ -73,9 +73,14 @@ const enhanceDataStreams = ({
       }
     }
 
-    const indexTemplate = indexTemplates.find((template) => template.name === dataStream.template);
-    if (indexTemplate) {
-      enhancedDataStream.index_mode = indexTemplate.index_template?.template?.settings?.index?.mode;
+    if (indexTemplates) {
+      const indexTemplate = indexTemplates.find(
+        (template) => template.name === dataStream.template
+      );
+      if (indexTemplate) {
+        enhancedDataStream.index_mode =
+          indexTemplate.index_template?.template?.settings?.index?.mode;
+      }
     }
 
     return enhancedDataStream;
