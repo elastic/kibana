@@ -8,12 +8,12 @@
  */
 
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components';
 import { getSummaryColumn } from '../../../../../components/data_types/logs/summary_column';
 import {
   LOG_LEVEL_FIELDS,
   SERVICE_NAME_FIELDS,
 } from '../../../../../../common/data_types/logs/constants';
-import { getLogLevelBadgeCell } from '../../../../../components/data_types/logs/log_level_badge_cell';
 import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 

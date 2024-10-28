@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './delete_all_timelines';
-export * from './wait_for';
+import { LogCategory } from '../types';
+
+export const getLogCategoryTerms = (logCategory: LogCategory) => {
+  return logCategory.terms.split(' ');
+};
