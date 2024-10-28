@@ -461,7 +461,7 @@ describe('StatefulEditDataProvider', () => {
     expect(screen.getByTestId('save')).toBeDisabled();
   });
 
-  test('it invokes onDataProviderEdited with the expected values when the user clicks the save button', () => {
+  test('it invokes onDataProviderEdited with the expected values when the user clicks the save button', async () => {
     const onDataProviderEdited = jest.fn();
 
     render(
@@ -480,7 +480,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('save'));
+    await userEvent.click(screen.getByTestId('save'));
 
     expect(onDataProviderEdited).toBeCalledWith({
       andProviderId: undefined,

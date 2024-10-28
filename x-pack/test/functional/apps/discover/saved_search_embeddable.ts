@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
 
   describe('discover saved search embeddable', () => {
     before(async () => {
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.setTime({
+      await common.setTime({
         from: 'Sep 22, 2015 @ 00:00:00.000',
         to: 'Sep 23, 2015 @ 00:00:00.000',
       });
@@ -38,29 +38,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     beforeEach(async () => {
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
     });
 
     const addSearchEmbeddableToDashboard = async (title = 'Rendering-Test:-saved-search') => {
       await dashboardAddPanel.addSavedSearch(title);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const rows = await dataGrid.getDocTableRows();
       expect(rows.length).to.be.above(0);
     };
 
     const refreshDashboardPage = async (requireRenderComplete = false) => {
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       if (requireRenderComplete) {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       }
     };
 
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
       await addSearchEmbeddableToDashboard(searchTitle);
-      await PageObjects.dashboard.saveDashboard('Dashboard with deleted saved search', {
+      await dashboard.saveDashboard('Dashboard with deleted saved search', {
         waitDialogIsClosed: true,
         exitFromEditMode: false,
         saveAsNew: true,
@@ -101,9 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await refreshDashboardPage();
       await testSubjects.existOrFail('embeddableError');
-      const panels = await PageObjects.dashboard.getDashboardPanels();
+      const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('embeddableError');
     });
   });

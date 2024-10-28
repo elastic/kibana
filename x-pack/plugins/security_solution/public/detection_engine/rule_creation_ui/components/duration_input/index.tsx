@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFieldNumber,
-  EuiFormRow,
-  EuiSelect,
-  EuiFormControlLayout,
-  transparentize,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiSelect, transparentize } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -37,39 +31,23 @@ const getNumberFromUserInput = (input: string, minimumValue = 0): number | undef
 };
 
 const StyledEuiFormRow = styled(EuiFormRow)`
-  max-width: none;
+  max-width: 235px;
 
-  .euiFormControlLayout {
-    max-width: 235px;
-    width: auto;
-  }
-
-  .euiFormControlLayout__childrenWrapper > *:first-child {
-    box-shadow: none;
-    height: 38px;
-    width: 100%;
-  }
-
-  .euiFormControlLayout__childrenWrapper > select {
-    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-
-  .euiFormControlLayout--group .euiFormControlLayout {
-    min-width: 100px;
+  .euiFormControlLayout__append {
+    padding-inline: 0 !important;
   }
 
   .euiFormControlLayoutIcons {
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
-
-  .euiFormControlLayout:not(:first-child) {
-    border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  }
 `;
 
 const MyEuiSelect = styled(EuiSelect)`
-  width: auto;
+  min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
+  box-shadow: none;
+  background: ${({ theme }) =>
+    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
+  color: ${({ theme }) => theme.eui.euiColorPrimary};
 `;
 
 // This component is similar to the ScheduleItem component, but instead of combining the value
@@ -111,10 +89,9 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
 
   return (
     <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid}>
-      <EuiFormControlLayout
+      <EuiFieldNumber
         append={
           <MyEuiSelect
-            fullWidth={false}
             options={durationUnitOptions}
             onChange={onChangeTimeType}
             value={durationUnit}
@@ -122,17 +99,13 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
             {...rest}
           />
         }
-      >
-        <EuiFieldNumber
-          fullWidth={false}
-          min={minimumValue}
-          max={Number.MAX_SAFE_INTEGER}
-          onChange={onChangeTimeVal}
-          value={durationValue}
-          data-test-subj="interval"
-          {...rest}
-        />
-      </EuiFormControlLayout>
+        min={minimumValue}
+        max={Number.MAX_SAFE_INTEGER}
+        onChange={onChangeTimeVal}
+        value={durationValue}
+        data-test-subj="interval"
+        {...rest}
+      />
     </StyledEuiFormRow>
   );
 };

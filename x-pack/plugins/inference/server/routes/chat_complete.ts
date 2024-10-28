@@ -6,7 +6,7 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { MessageRole } from '../../common/chat_complete';
 import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
 import { ToolCall, ToolChoiceType } from '../../common/chat_complete/tools';
@@ -71,14 +71,19 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
       }),
     ])
   ),
+  functionCalling: schema.maybe(
+    schema.oneOf([schema.literal('native'), schema.literal('simulated')])
+  ),
 });
 
 export function registerChatCompleteRoute({
   coreSetup,
   router,
+  logger,
 }: {
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
   router: IRouter<RequestHandlerContext>;
+  logger: Logger;
 }) {
   router.post(
     {
@@ -92,9 +97,9 @@ export function registerChatCompleteRoute({
         .getStartServices()
         .then(([coreStart, pluginsStart]) => pluginsStart.actions);
 
-      const client = createInferenceClient({ request, actions });
+      const client = createInferenceClient({ request, actions, logger });
 
-      const { connectorId, messages, system, toolChoice, tools } = request.body;
+      const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
 
       const chatCompleteResponse = client.chatComplete({
         connectorId,
@@ -102,10 +107,11 @@ export function registerChatCompleteRoute({
         system,
         toolChoice,
         tools,
+        functionCalling,
       });
 
       return response.ok({
-        body: observableIntoEventSourceStream(chatCompleteResponse),
+        body: observableIntoEventSourceStream(chatCompleteResponse, logger),
       });
     }
   );

@@ -26,6 +26,7 @@ export const findMaintenanceWindowsRoute = (
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_find`,
       validate: {},
       options: {
+        access: 'internal',
         tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
       },
     },

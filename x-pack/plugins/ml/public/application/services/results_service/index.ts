@@ -7,8 +7,8 @@
 
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
-import type { MlApiServices } from '../ml_api_service';
-import { useMlApiContext } from '../../contexts/kibana';
+import type { MlApi } from '../ml_api_service';
+import { useMlApi } from '../../contexts/kibana';
 
 export type MlResultsService = ReturnType<typeof resultsServiceProvider> &
   ReturnType<typeof resultsServiceRxProvider>;
@@ -25,18 +25,18 @@ export interface CriteriaField {
 
 // This is to retain the singleton behavior of the previous direct instantiation and export.
 let mlResultsService: MlResultsService;
-export function mlResultsServiceProvider(mlApiServices: MlApiServices) {
+export function mlResultsServiceProvider(mlApi: MlApi) {
   if (mlResultsService) return mlResultsService;
 
   mlResultsService = {
-    ...resultsServiceProvider(mlApiServices),
-    ...resultsServiceRxProvider(mlApiServices),
+    ...resultsServiceProvider(mlApi),
+    ...resultsServiceRxProvider(mlApi),
   };
 
   return mlResultsService;
 }
 
 export function useMlResultsService(): MlResultsService {
-  const mlApiServices = useMlApiContext();
-  return mlResultsServiceProvider(mlApiServices);
+  const mlApi = useMlApi();
+  return mlResultsServiceProvider(mlApi);
 }

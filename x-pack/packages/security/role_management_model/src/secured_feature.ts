@@ -7,6 +7,7 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeature } from '@kbn/features-plugin/common';
+import { getMinimalPrivilegeId } from '@kbn/security-authorization-core-common';
 
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
@@ -31,8 +32,14 @@ export class SecuredFeature extends KibanaFeature {
     );
 
     this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
-      ([id, privilege]) =>
-        new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
+      ([id, privilege]) => {
+        const minimalPrivilegeId = getMinimalPrivilegeId(id);
+        return new PrimaryFeaturePrivilege(
+          minimalPrivilegeId,
+          privilege,
+          actionMapping[minimalPrivilegeId]
+        );
+      }
     );
 
     this.securedSubFeatures =

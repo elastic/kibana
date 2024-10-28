@@ -13,8 +13,10 @@ import { act } from '@testing-library/react';
 import type { CommandExecutionComponentProps } from '../types';
 
 describe('When using CommandExecutionOutput component', () => {
-  let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
-  let renderResult: ReturnType<typeof render>;
+  let render: (
+    props?: Partial<ConsoleProps>
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
   let setCmd1ToComplete: () => void;
 
   beforeEach(() => {
@@ -34,16 +36,16 @@ describe('When using CommandExecutionOutput component', () => {
       }
     );
 
-    render = (props = {}) => {
+    render = async (props = {}) => {
       renderResult = renderConsole(props);
-      enterCommand('cmd1');
+      await enterCommand('cmd1');
       return renderResult;
     };
   });
 
-  it('should show long running hint message if pending and >15s have passed', () => {
+  it('should show long running hint message if pending and >15s have passed', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    render();
+    await render();
 
     expect(renderResult.queryByTestId('test-longRunningCommandHint')).toBeNull();
 
@@ -56,7 +58,7 @@ describe('When using CommandExecutionOutput component', () => {
 
   it('should remove long running hint message if command completes', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    render();
+    await render();
 
     act(() => {
       jest.advanceTimersByTime(16 * 1000);

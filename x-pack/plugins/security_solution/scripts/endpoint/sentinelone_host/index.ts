@@ -8,6 +8,8 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ensureSpaceIdExists, fetchActiveSpace } from '../common/spaces';
 import {
   isFleetServerRunning,
   startFleetServer,
@@ -17,6 +19,7 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import {
   addSentinelOneIntegrationToAgentPolicy,
   DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+  enableFleetSpaceAwareness,
   enrollHostVmWithFleet,
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
@@ -56,6 +59,8 @@ console and pushes the data to Elasticsearch.`,
         's1Url',
         's1ApiToken',
         'vmName',
+        'spaceId',
+        'apiKey',
       ],
       boolean: ['forceFleetServer', 'forceNewS1Host'],
       default: {
@@ -63,6 +68,8 @@ console and pushes the data to Elasticsearch.`,
         username: 'elastic',
         password: 'changeme',
         policy: '',
+        spaceId: '',
+        apiKey: '',
       },
       help: `
       --s1Url             Required. The base URL for SentinelOne management console.
@@ -82,6 +89,10 @@ console and pushes the data to Elasticsearch.`,
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
+      --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
+                            and 'password' arguments are ignored.
+      --spaceId           Optional. The space id where the host should be added to in kibana. The
+                            space will be created if it does not exist. Default: default space.
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
 `,
     },
@@ -95,6 +106,8 @@ const runCli: RunFn = async ({ log, flags }) => {
   const s1Url = flags.s1Url as string;
   const s1ApiToken = flags.s1ApiToken as string;
   const policy = flags.policy as string;
+  const spaceId = flags.spaceId as string;
+  const apiKey = flags.apiKey as string;
   const forceFleetServer = flags.forceFleetServer as boolean;
   const forceNewS1Host = flags.forceNewS1Host as boolean;
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
@@ -111,7 +124,16 @@ const runCli: RunFn = async ({ log, flags }) => {
     url: kibanaUrl,
     username,
     password,
+    spaceId,
+    apiKey,
   });
+
+  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    await ensureSpaceIdExists(kbnClient, spaceId, { log });
+    await enableFleetSpaceAwareness(kbnClient);
+  }
+
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
   const runningS1VMs = (
     await findVm(
@@ -152,15 +174,16 @@ const runCli: RunFn = async ({ log, flags }) => {
     id: agentPolicyId,
     agents = 0,
     name: agentPolicyName,
+    namespace: agentPolicyNamespace,
   } = policy
     ? await fetchAgentPolicy(kbnClient, policy)
     : await getOrCreateDefaultAgentPolicy({
         kbnClient,
         log,
-        policyName: DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+        policyName: `${DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME} - ${activeSpaceId}`,
       });
 
-  await addSentinelOneIntegrationToAgentPolicy({
+  const { namespace: integrationPolicyNamespace } = await addSentinelOneIntegrationToAgentPolicy({
     kbnClient,
     log,
     agentPolicyId,
@@ -176,7 +199,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
     agentPolicyVm = await createVm({
       type: 'multipass',
-      name: generateVmName('agentless-integrations'),
+      name: generateVmName(`agentless-integrations-${activeSpaceId}`),
     });
 
     if (forceFleetServer || !(await isFleetServerRunning(kbnClient, log))) {
@@ -201,7 +224,11 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   await Promise.all([
     createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url }),
-    createDetectionEngineSentinelOneRuleIfNeeded(kbnClient, log),
+    createDetectionEngineSentinelOneRuleIfNeeded(
+      kbnClient,
+      log,
+      integrationPolicyNamespace || agentPolicyNamespace
+    ),
   ]);
 
   // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana

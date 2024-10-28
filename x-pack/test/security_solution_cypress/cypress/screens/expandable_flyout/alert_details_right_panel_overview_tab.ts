@@ -116,6 +116,8 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTAINER =
   getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER =
   getDataTestSubjectSelector('securitySolutionFlyoutSessionPreviewContent');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_NO_DATA =
+  getDataTestSubjectSelector('securitySolutionFlyoutSessionViewNoData');
 
 /* Response section */
 

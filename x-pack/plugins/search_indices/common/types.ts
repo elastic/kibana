@@ -15,3 +15,11 @@ export interface UserStartPrivilegesResponse {
     canCreateIndex: boolean;
   };
 }
+
+export interface CreateIndexRequest {
+  indexName: string;
+}
+
+export interface CreateIndexResponse {
+  index: string;
+}

@@ -21,7 +21,7 @@ import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
 import type { SignalSource } from '../types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;
@@ -39,6 +39,7 @@ export const wrapSuppressedNewTermsAlerts = ({
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
@@ -50,6 +51,7 @@ export const wrapSuppressedNewTermsAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest & SuppressionFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const event = eventAndTerms.event;
@@ -69,20 +71,22 @@ export const wrapSuppressedNewTermsAlerts = ({
       eventAndTerms.newTerms,
     ]);
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      event,
+      doc: event,
       mergeStrategy,
-      [],
-      true,
-      buildReasonMessageForNewTermsAlert,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageForNewTermsAlert,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+      intendedTimestamp,
+    });
 
     return {
       _id: id,

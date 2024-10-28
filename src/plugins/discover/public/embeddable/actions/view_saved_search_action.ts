@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
@@ -19,6 +20,7 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;
   public readonly type = ACTION_VIEW_SAVED_SEARCH;
+  public readonly order = 20; // Same order as ACTION_OPEN_IN_DISCOVER
 
   constructor(
     private readonly application: ApplicationStart,
@@ -42,7 +44,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   }
 
   getIconType(): string | undefined {
-    return 'inspect';
+    return 'discoverApp';
   }
 
   async isCompatible({ embeddable }: EmbeddableApiContext) {

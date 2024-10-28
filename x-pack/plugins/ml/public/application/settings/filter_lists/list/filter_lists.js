@@ -62,9 +62,9 @@ export class FilterListsUI extends Component {
   };
 
   refreshFilterLists = () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     // Load the list of filters.
-    ml.filters
+    mlApi.filters
       .filtersStats()
       .then((filterLists) => {
         this.setFilterLists(filterLists);

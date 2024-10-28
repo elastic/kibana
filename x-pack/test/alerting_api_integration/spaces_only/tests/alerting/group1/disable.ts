@@ -31,7 +31,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  describe('disable', () => {
+  describe('disable', function () {
+    this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const ruleUtils = new RuleUtils({ space: Spaces.space1, supertestWithoutAuth });
 
@@ -265,7 +266,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     });
 
-    describe('legacy', () => {
+    describe('legacy', function () {
       it('should handle disable rule request appropriately', async () => {
         const { body: createdRule } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

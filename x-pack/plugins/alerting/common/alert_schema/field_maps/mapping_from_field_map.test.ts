@@ -260,6 +260,9 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                intended_timestamp: {
+                  type: 'date',
+                },
                 rule: {
                   properties: {
                     category: {
@@ -272,6 +275,9 @@ describe('mappingFromFieldMap', () => {
                       properties: {
                         timestamp: {
                           type: 'date',
+                        },
+                        type: {
+                          type: 'keyword',
                         },
                         uuid: {
                           type: 'keyword',

@@ -5,10 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omit, omitBy } from 'lodash';
+import { omit } from 'lodash';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
 import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -70,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     let monitorId = 'test-id';
 
-    const defaultFields = omitBy(DEFAULT_FIELDS.http, removeMonitorEmptyValues);
+    const defaultFields = DEFAULT_FIELDS.http;
     it('adds test monitor', async () => {
       const monitor = {
         type: 'http',
@@ -116,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev'"
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2'"
       );
     });
 
@@ -142,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(result.message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev' Private Location(s) 'moon' not found. No private location available to use."
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2' Private Location(s) 'moon' not found. No private location available to use."
       );
     });
 

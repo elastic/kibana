@@ -81,10 +81,7 @@ class RuleEditorFlyoutUI extends Component {
     this.partitioningFieldNames = [];
     this.canGetFilters = checkPermission('canGetFilters');
 
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApiServices
-    );
+    this.mlJobService = mlJobServiceFactory(props.kibana.services.mlServices.mlApi);
   }
 
   componentDidMount() {
@@ -154,7 +151,7 @@ class RuleEditorFlyoutUI extends Component {
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters. These are used for configuring rule scope.
-      this.props.kibana.services.mlServices.mlApiServices.filters
+      this.props.kibana.services.mlServices.mlApi.filters
         .filters()
         .then((filters) => {
           const filterListIds = filters.map((filter) => filter.filter_id);
@@ -344,13 +341,13 @@ class RuleEditorFlyoutUI extends Component {
   updateRuleAtIndex = (ruleIndex, editedRule) => {
     const mlJobService = this.mlJobService;
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices } = this.props.kibana.services.mlServices;
+    const { mlApi } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    saveJobRule(mlJobService, job, detectorIndex, ruleIndex, editedRule, mlApiServices)
+    saveJobRule(mlJobService, job, detectorIndex, ruleIndex, editedRule, mlApi)
       .then((resp) => {
         if (resp.success) {
           toasts.add({
@@ -400,12 +397,12 @@ class RuleEditorFlyoutUI extends Component {
   deleteRuleAtIndex = (index) => {
     const mlJobService = this.mlJobService;
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices } = this.props.kibana.services.mlServices;
+    const { mlApi } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    deleteJobRule(mlJobService, job, detectorIndex, index, mlApiServices)
+    deleteJobRule(mlJobService, job, detectorIndex, index, mlApi)
       .then((resp) => {
         if (resp.success) {
           toasts.addSuccess(
@@ -453,8 +450,8 @@ class RuleEditorFlyoutUI extends Component {
 
   addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices } = this.props.kibana.services.mlServices;
-    addItemToFilter(item, filterId, mlApiServices)
+    const { mlApi } = this.props.kibana.services.mlServices;
+    addItemToFilter(item, filterId, mlApi)
       .then(() => {
         if (closeFlyoutOnAdd === true) {
           toasts.add({

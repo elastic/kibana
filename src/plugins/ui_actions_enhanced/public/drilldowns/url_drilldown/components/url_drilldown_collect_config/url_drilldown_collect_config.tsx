@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useRef } from 'react';
@@ -29,6 +30,19 @@ export interface UrlDrilldownCollectConfigProps {
   syntaxHelpDocsLink?: string;
   variablesHelpDocsLink?: string;
 }
+
+const isCursorBetweenDoubleCurlyBrackets = (editor: monaco.editor.IStandaloneCodeEditor) => {
+  const model = editor.getModel();
+  const position = editor.getPosition();
+  if (!model || !position) return false;
+
+  const offset = model.getOffsetAt(position);
+  const text = model.getValue();
+  const twoCharactersBeforeOffset = text.slice(offset - 2, offset);
+  const twoCharactersAfterOffset = text.slice(offset, offset + 2);
+
+  return twoCharactersBeforeOffset === '{{' && twoCharactersAfterOffset === '}}';
+};
 
 export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = ({
   config,
@@ -63,9 +77,10 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
       onSelect={(variable: string) => {
         const editor = editorRef.current;
         if (!editor) return;
+        const text = isCursorBetweenDoubleCurlyBrackets(editor) ? variable : `{{${variable}}}`;
 
         editor.trigger('keyboard', 'type', {
-          text: '{{' + variable + '}}',
+          text,
         });
       }}
     />

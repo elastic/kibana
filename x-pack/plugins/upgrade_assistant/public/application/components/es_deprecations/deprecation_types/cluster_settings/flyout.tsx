@@ -124,7 +124,7 @@ export const RemoveClusterSettingsFlyout = ({
               iconType="warning"
               data-test-subj="deleteClusterSettingsError"
             >
-              {statusDetails!.message}
+              {statusDetails!.message as string}
             </EuiCallOut>
             <EuiSpacer />
           </>

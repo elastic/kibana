@@ -33,7 +33,6 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { mlJobServiceFactory } from '../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import {
@@ -101,10 +100,7 @@ class AnnotationsTableUI extends Component {
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
     };
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApiServices
-    );
+    this.mlJobService = mlJobServiceFactory(props.kibana.services.mlServices.mlApi);
   }
 
   getAnnotations() {
@@ -115,11 +111,11 @@ class AnnotationsTableUI extends Component {
       isLoading: true,
     });
 
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
 
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
-      ml.annotations
+      mlApi.annotations
         .getAnnotations$({
           jobIds: [job.job_id],
           earliestMs: null,
@@ -223,6 +219,7 @@ class AnnotationsTableUI extends Component {
   openSingleMetricView = async (annotation = {}) => {
     const {
       services: {
+        chrome: { recentlyAccessed },
         application: { navigateToUrl },
         share,
       },
@@ -307,7 +304,12 @@ class AnnotationsTableUI extends Component {
       { absolute: true }
     );
 
-    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
+    addItemToRecentlyAccessed(
+      'timeseriesexplorer',
+      job.job_id,
+      singleMetricViewerLink,
+      recentlyAccessed
+    );
     await navigateToUrl(singleMetricViewerLink);
   };
 
@@ -558,7 +560,7 @@ class AnnotationsTableUI extends Component {
                 );
           },
           enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
-          icon: 'visLine',
+          icon: 'singleMetricViewer',
           type: 'icon',
           onClick: (annotation) => this.openSingleMetricView(annotation),
           'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,

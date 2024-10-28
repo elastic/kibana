@@ -29,38 +29,39 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { FlyoutParamProps } from './types';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
 import {
+  getMonitorAction,
   selectMonitorUpsertStatus,
-  selectOverviewState,
   selectServiceLocationsState,
+  selectSyntheticsMonitor,
+  selectSyntheticsMonitorError,
+  selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
+import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
-import { fetchSyntheticsMonitor } from '../../../../state/monitor_details/api';
 
 interface Props {
   configId: string;
   id: string;
   location: string;
   locationId: string;
+  spaceId?: string;
   onClose: () => void;
   onEnabledChange: () => void;
-  onLocationChange: (params: {
-    configId: string;
-    id: string;
-    location: string;
-    locationId: string;
-  }) => void;
+  onLocationChange: (params: FlyoutParamProps) => void;
   currentDurationChartFrom?: string;
   currentDurationChartTo?: string;
   previousDurationChartFrom?: string;
@@ -217,20 +218,23 @@ export function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, configId, onLocationChange, locationId } = props;
-  const {
-    data: { monitors },
-  } = useSelector(selectOverviewState);
+  const { id, configId, onLocationChange, locationId, spaceId } = props;
 
-  const monitor: MonitorOverviewItem | undefined = useMemo(() => {
-    const overviewItem = monitors.filter(({ id: overviewItemId }) => overviewItemId === id)[0];
+  const { status: overviewStatus } = useOverviewStatus({ scopeStatusByLocation: true });
+
+  const monitor: OverviewStatusMetaData | undefined = useMemo(() => {
+    const allConfigs = Object.values({
+      ...(overviewStatus?.upConfigs ?? {}),
+      ...(overviewStatus?.downConfigs ?? {}),
+    });
+    const overviewItem = allConfigs.find((ov) => ov.configId === configId);
     if (overviewItem) return overviewItem;
-  }, [id, monitors]);
+  }, [overviewStatus?.upConfigs, overviewStatus?.downConfigs, configId]);
 
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>
-      onLocationChange({ id, configId, location, locationId: locationIdT }),
-    [id, configId, onLocationChange]
+      onLocationChange({ id, configId, location, locationId: locationIdT, spaceId }),
+    [onLocationChange, id, configId, spaceId]
   );
 
   const detailLink = useMonitorDetailLocator({
@@ -247,21 +251,22 @@ export function MonitorDetailFlyout(props: Props) {
   }, [dispatch]);
 
   const upsertStatus = useSelector(selectMonitorUpsertStatus(configId));
+  const monitorObject = useSelector(selectSyntheticsMonitor);
+  const isLoading = useSelector(selectSyntheticsMonitorLoading);
+  const error = useSelector(selectSyntheticsMonitorError);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
-  const {
-    data: monitorObject,
-    error,
-    status,
-    loading,
-  } = useFetcher(
-    () => fetchSyntheticsMonitor({ monitorId: configId }),
-    // FIXME: Dario thinks there is a better way to do this but
-    // he's getting tired and maybe the Synthetics folks can fix it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [configId, upsertSuccess]
-  );
+  const { space } = useKibanaSpace();
+
+  useEffect(() => {
+    dispatch(
+      getMonitorAction.get({
+        monitorId: configId,
+        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+      })
+    );
+  }, [configId, dispatch, space?.id, spaceId, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -280,9 +285,9 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
-      {status === FETCH_STATUS.LOADING && <LoadingState />}
-      {status === FETCH_STATUS.SUCCESS && monitorObject && (
+      {error && !isLoading && <EuiErrorBoundary>{error?.body?.message}</EuiErrorBoundary>}
+      {isLoading && <LoadingState />}
+      {monitorObject && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
@@ -329,7 +334,7 @@ export function MonitorDetailFlyout(props: Props) {
                 ...monitorObject,
                 id,
               }}
-              loading={Boolean(loading)}
+              loading={Boolean(isLoading)}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

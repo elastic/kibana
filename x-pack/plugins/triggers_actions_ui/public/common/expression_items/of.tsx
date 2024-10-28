@@ -144,7 +144,7 @@ export const OfExpression = ({
               id="ofField"
               fullWidth
               isInvalid={Number(errors.aggField.length) > 0 && aggField !== undefined}
-              error={errors.aggField}
+              error={errors.aggField as string[]}
               data-test-subj="availableFieldsOptionsFormRow"
               helpText={helpText}
             >

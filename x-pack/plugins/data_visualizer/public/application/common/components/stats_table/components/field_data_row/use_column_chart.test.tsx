@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import '@testing-library/jest-dom/extend-expect';
 
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 

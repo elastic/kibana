@@ -1,0 +1,41 @@
+openapi: 3.0.0
+
+info:
+  title: Get Entity Engine stats
+  version: '2023-10-31'
+paths:
+   /api/entity_store/engines/{entityType}/stats:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetEntityEngineStats
+      summary: Get Entity Engine stats
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type of the engine (either 'user' or 'host').
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:      
+                  type:
+                    $ref : '../common.schema.yaml#/components/schemas/EntityType'
+                  indexPattern:
+                    $ref : '../common.schema.yaml#/components/schemas/IndexPattern'
+                  status:
+                    $ref : '../common.schema.yaml#/components/schemas/EngineStatus'
+                  transforms:
+                    type: array
+                    items:
+                      type: object
+                  indices:
+                    type: array  
+                    items:
+                      type: object

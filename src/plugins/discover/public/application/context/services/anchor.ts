@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
@@ -14,7 +16,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
-import { createDataViewDataSource } from '../../../../common/data_sources';
+import { createDataSource } from '../../../../common/data_sources';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -32,7 +34,7 @@ export async function fetchAnchor(
   const solutionNavId = await firstValueFrom(core.chrome.getActiveSolutionNavId$());
   await profilesManager.resolveRootProfile({ solutionNavId });
   await profilesManager.resolveDataSourceProfile({
-    dataSource: dataView?.id ? createDataViewDataSource({ dataViewId: dataView.id }) : undefined,
+    dataSource: createDataSource({ dataView, query: undefined }),
     dataView,
     query: { query: '', language: 'kuery' },
   });

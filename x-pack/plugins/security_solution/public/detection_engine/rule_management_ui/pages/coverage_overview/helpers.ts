@@ -23,9 +23,9 @@ export const getCardBackgroundColor = (value: number) => {
 export const extractSelected = <
   T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
 >(
-  options: Array<{ checked?: string; label: T }>
+  options: EuiSelectableOption[]
 ): T[] => {
-  return options.filter((option) => option.checked === 'on').map((option) => option.label);
+  return options.filter((option) => option.checked === 'on').map((option) => option.label as T);
 };
 
 export const populateSelected = <

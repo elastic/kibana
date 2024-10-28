@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   buildAlertStatusesFilter,
-  buildAlertsFilter,
+  buildAlertsFilterByRuleIds,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
 import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
@@ -76,10 +76,12 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             'in-progress',
           ]);
 
+          const filterByRuleIds = buildAlertsFilterByRuleIds(ruleStaticIds);
+
           const filter = await getEsQueryFilter(
             '',
             'kuery',
-            [...ruleStaticIds.flatMap((id) => buildAlertsFilter(id)), ...alertStatusFilter],
+            [...filterByRuleIds, ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItems),
             false

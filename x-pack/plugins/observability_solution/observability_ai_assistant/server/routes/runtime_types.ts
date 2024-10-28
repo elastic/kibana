@@ -17,8 +17,6 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
-const serializeableRt = t.any;
-
 export const messageRt: t.Type<Message> = t.type({
   '@timestamp': t.string,
   message: t.intersection([
@@ -35,6 +33,7 @@ export const messageRt: t.Type<Message> = t.type({
       content: t.string,
       name: t.string,
       event: t.string,
+      data: t.string,
       function_call: t.intersection([
         t.type({
           name: t.string,
@@ -45,8 +44,7 @@ export const messageRt: t.Type<Message> = t.type({
           ]),
         }),
         t.partial({
-          arguments: serializeableRt,
-          data: serializeableRt,
+          arguments: t.string,
         }),
       ]),
     }),
@@ -74,6 +72,12 @@ export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
   numeric_labels: t.record(t.string, t.number),
   public: toBooleanRt,
 });
+
+export const assistantScopeType = t.union([
+  t.literal('observability'),
+  t.literal('search'),
+  t.literal('all'),
+]);
 
 export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
   baseConversationRt,
@@ -130,11 +134,14 @@ export const functionRt = t.intersection([
   }),
 ]);
 
-export const starterPromptRt: t.Type<StarterPrompt> = t.type({
-  title: t.string,
-  prompt: t.string,
-  icon: t.any,
-});
+export const starterPromptRt: t.Type<StarterPrompt> = t.intersection([
+  t.type({
+    title: t.string,
+    prompt: t.string,
+    icon: t.any,
+  }),
+  t.partial({ scopes: t.array(assistantScopeType) }),
+]);
 
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
   description: t.string,

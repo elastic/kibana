@@ -89,6 +89,7 @@ export default function Filters() {
           onIntegrationsChange={onIntegrationsChange}
         />
         <Selector
+          dataTestSubj="datasetQualityFilterType"
           label={typesLabel}
           searchPlaceholder={typesSearchPlaceholder}
           noneMatchingMessage={typesNoneMatching}

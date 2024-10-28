@@ -1,24 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
-import { getUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
+import { getUpdatedRootFields, getNewAndUpdatedTypes } from './compare_mappings';
 
-describe('getUpdatedTypes', () => {
+describe('getNewAndUpdatedTypes', () => {
   test('returns all types if _meta is missing in indexMappings', () => {
     const indexTypes = ['foo', 'bar'];
     const latestMappingsVersions = {};
 
-    expect(getUpdatedTypes({ indexTypes, indexMeta: undefined, latestMappingsVersions })).toEqual([
-      'foo',
-      'bar',
-    ]);
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+      indexTypes,
+      indexMeta: undefined,
+      latestMappingsVersions,
+    });
+    expect(newTypes).toEqual([]);
+    expect(updatedTypes).toEqual(['foo', 'bar']);
   });
 
   test('returns all types if migrationMappingPropertyHashes and mappingVersions are missing in indexMappings', () => {
@@ -26,14 +30,17 @@ describe('getUpdatedTypes', () => {
     const indexMeta: IndexMappingMeta = {};
     const latestMappingsVersions = {};
 
-    expect(getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions })).toEqual([
-      'foo',
-      'bar',
-    ]);
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+      indexTypes,
+      indexMeta,
+      latestMappingsVersions,
+    });
+    expect(newTypes).toEqual([]);
+    expect(updatedTypes).toEqual(['foo', 'bar']);
   });
 
   describe('when ONLY migrationMappingPropertyHashes exists in indexMappings', () => {
-    test('uses the provided hashToVersionMap to compare changes and return only the types that have changed', async () => {
+    test('uses the provided hashToVersionMap to compare changes and return new types and types that have changed', async () => {
       const indexTypes = ['type1', 'type2', 'type4'];
       const indexMeta: IndexMappingMeta = {
         migrationMappingPropertyHashes: {
@@ -55,14 +62,19 @@ describe('getUpdatedTypes', () => {
         type4: '10.5.0', // new type, no need to pick it up
       };
 
-      expect(
-        getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions, hashToVersionMap })
-      ).toEqual(['type2']);
+      const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+        indexTypes,
+        indexMeta,
+        latestMappingsVersions,
+        hashToVersionMap,
+      });
+      expect(newTypes).toEqual(['type4']);
+      expect(updatedTypes).toEqual(['type2']);
     });
   });
 
   describe('when mappingVersions exist in indexMappings', () => {
-    test('compares the modelVersions and returns only the types that have changed', async () => {
+    test('compares the modelVersions and returns new types and types that have changed', async () => {
       const indexTypes = ['type1', 'type2', 'type4'];
 
       const indexMeta: IndexMappingMeta = {
@@ -89,9 +101,14 @@ describe('getUpdatedTypes', () => {
         // empty on purpose, not used as mappingVersions is present in indexMappings
       };
 
-      expect(
-        getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions, hashToVersionMap })
-      ).toEqual(['type2']);
+      const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+        indexTypes,
+        indexMeta,
+        latestMappingsVersions,
+        hashToVersionMap,
+      });
+      expect(newTypes).toEqual(['type4']);
+      expect(updatedTypes).toEqual(['type2']);
     });
   });
 });

@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom/extend-expect';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditFilterList } from './edit_filter_list';
@@ -35,7 +34,7 @@ const mockKibanaContext = {
     docLinks: { links: { ml: { customRules: 'test' } } },
     notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
     mlServices: {
-      mlApiServices: {
+      mlApi: {
         filters: {
           filters: mockFilters,
         },
@@ -110,10 +109,7 @@ describe('EditFilterList', () => {
     expect(mockFilters).toHaveBeenCalledTimes(0);
   });
 
-  // There is a bug in `v13.5.0` of `@testing-library/user-event` that doesn't
-  // allow to click on elements that (wrongly ?) inherit pointer-events.
-  // A PR to update the lib is up here: https://github.com/elastic/kibana/pull/189949
-  test.skip('renders the edit page for an existing filter list and updates description', async () => {
+  test('renders the edit page for an existing filter list and updates description', async () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <EditFilterList {...props} filterId="safe_domains" />
@@ -214,10 +210,7 @@ describe('EditFilterList', () => {
     expect(getAllByTestId('mlGridItemCheckbox')).toHaveLength(3);
   });
 
-  // There is a bug in `v13.5.0` of `@testing-library/user-event` that doesn't
-  // allow to click on elements that (wrongly ?) inherit pointer-events.
-  // A PR to update the lib is up here: https://github.com/elastic/kibana/pull/189949
-  test.skip('adds new items to filter list', async () => {
+  test('adds new items to filter list', async () => {
     const { getByTestId, getByText, findByText, findByTestId, queryByTestId, queryByText } = render(
       <IntlProvider locale="en">
         <EditFilterList {...props} filterId="safe_domains" />

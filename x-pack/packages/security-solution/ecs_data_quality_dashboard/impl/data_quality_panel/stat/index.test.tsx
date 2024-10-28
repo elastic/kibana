@@ -20,7 +20,7 @@ describe('Stat', () => {
 
   it('renders stat with tooltip', async () => {
     render(<Stat badgeText="thebadge" badgeColor="hollow" tooltipText="thetooltip" />);
-    userEvent.hover(screen.getByText('thebadge'));
+    await userEvent.hover(screen.getByText('thebadge'));
     expect(screen.getByText('thebadge')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('thetooltip')).toBeInTheDocument());
   });

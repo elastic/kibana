@@ -9,6 +9,7 @@ export interface CasesSubActionParamsUI {
   timeWindow: string;
   reopenClosedCases: boolean;
   groupingBy: string[];
+  templateId?: string;
 }
 export interface CasesActionParams {
   subAction: string;

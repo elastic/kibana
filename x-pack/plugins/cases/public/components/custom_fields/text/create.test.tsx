@@ -14,7 +14,8 @@ import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 
-describe('Create ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/193026
+describe.skip('Create ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
@@ -102,9 +103,10 @@ describe('Create ', () => {
       `${customFieldConfiguration.key}-text-create-custom-field`
     );
 
-    userEvent.clear(textCustomField);
-    userEvent.paste(textCustomField, 'this is a sample text!');
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.clear(textCustomField);
+    await userEvent.click(textCustomField);
+    await userEvent.paste('this is a sample text!');
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -128,12 +130,12 @@ describe('Create ', () => {
 
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
-    userEvent.paste(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      sampleText
+    await userEvent.click(
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     );
+    await userEvent.paste(sampleText);
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     expect(
       await screen.findByText(
@@ -158,11 +160,11 @@ describe('Create ', () => {
 
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
-    userEvent.paste(
-      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      sampleText
+    await userEvent.click(
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     );
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.paste(sampleText);
+    await userEvent.click(await screen.findByText('Submit'));
 
     expect(
       await screen.findByText(
@@ -185,10 +187,10 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.clear(
+    await userEvent.clear(
       await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     );
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     expect(
       await screen.findByText(`${customFieldConfiguration.label} is required.`)
@@ -214,7 +216,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({}, true);

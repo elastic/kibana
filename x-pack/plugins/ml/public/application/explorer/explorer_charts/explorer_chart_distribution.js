@@ -16,6 +16,8 @@ import React from 'react';
 import d3 from 'd3';
 import moment from 'moment';
 
+import { EuiPopover } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
@@ -25,6 +27,10 @@ import {
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
+import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalies_table_utils';
+
+import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
+import { RuleEditorFlyout } from '../../components/rule_editor';
 import { formatValue } from '../../formatters/format_value';
 import {
   getChartType,
@@ -40,7 +46,9 @@ import { CHART_TYPE } from '../explorer_constants';
 import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
 import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
+import { SCHEDULE_EVENT_MARKER_ENTITY } from '../../../../common/constants/charts';
 
+const popoverMenuOffset = 0;
 const CONTENT_WRAPPER_HEIGHT = 215;
 const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
 
@@ -57,6 +65,7 @@ export class ExplorerChartDistribution extends React.Component {
   static propTypes = {
     seriesConfig: PropTypes.object,
     severity: PropTypes.number,
+    tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
   };
@@ -65,7 +74,9 @@ export class ExplorerChartDistribution extends React.Component {
     super(props);
     this.chartScales = undefined;
     this.cursorStateSubscription = undefined;
+    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
   }
+
   componentDidMount() {
     this.renderChart();
     this.cursorStateSubscription = this.props.cursor$
@@ -158,12 +169,29 @@ export class ExplorerChartDistribution extends React.Component {
         .key((d) => d.entity)
         .entries(chartData)
         .sort((a, b) => {
+          // To display calendar event markers we populate the chart with fake data points.
+          // If a category has fake data points, it should be sorted to the end.
+          const aHasFakeData = a.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY);
+          const bHasFakeData = b.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY);
+
+          if (aHasFakeData && !bHasFakeData) {
+            return 1;
+          }
+
+          if (bHasFakeData && !aHasFakeData) {
+            return -1;
+          }
+
           return b.values.length - a.values.length;
         })
         .filter((d, i) => {
           // only filter for rare charts
           if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-            return i < categoryLimit || d.key === highlight;
+            return (
+              i < categoryLimit ||
+              d.key === highlight ||
+              d.values.some((d) => d.entity === SCHEDULE_EVENT_MARKER_ENTITY)
+            );
           }
           return true;
         })
@@ -373,7 +401,8 @@ export class ExplorerChartDistribution extends React.Component {
         .orient('left')
         .innerTickSize(0)
         .outerTickSize(0)
-        .tickPadding(10);
+        .tickPadding(10)
+        .tickFormat((d) => (d === SCHEDULE_EVENT_MARKER_ENTITY ? null : d));
 
       if (fieldFormat !== undefined) {
         yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
@@ -428,6 +457,8 @@ export class ExplorerChartDistribution extends React.Component {
       dots.exit().remove();
     }
 
+    const that = this;
+
     function drawRareChartHighlightedSpan() {
       if (showSelectedInterval === false) return;
       // Draws a rectangle which highlights the time span that has been selected for view.
@@ -465,6 +496,11 @@ export class ExplorerChartDistribution extends React.Component {
         .enter()
         .append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
+        .on('click', function (d) {
+          d3.event.preventDefault();
+          if (d.anomalyScore === undefined) return;
+          showAnomalyPopover(d, this);
+        })
         // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
@@ -511,6 +547,35 @@ export class ExplorerChartDistribution extends React.Component {
         );
     }
 
+    function showAnomalyPopover(marker, circle) {
+      const anomalyTime = marker.date;
+
+      const tableItem = getTableItemClosestToTimestamp(
+        that.props.tableData.anomalies,
+        anomalyTime,
+        that.props.seriesConfig.entityFields
+      );
+
+      if (tableItem) {
+        // Overwrite the timestamp of the possibly aggregated table item with the
+        // timestamp of the anomaly clicked in the chart so we're able to pick
+        // the right baseline and deviation time ranges for Log Rate Analysis.
+        tableItem.source.timestamp = anomalyTime;
+
+        // Calculate the relative coordinates of the clicked anomaly marker
+        // so we're able to position the popover actions menu above it.
+        const dotRect = circle.getBoundingClientRect();
+        const rootRect = that.rootNode.getBoundingClientRect();
+        const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
+        const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - popoverMenuOffset;
+
+        // Hide any active tooltip
+        that.props.tooltipService.hide();
+        // Set the popover state to enable the actions menu
+        that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
+      }
+    }
+
     function showLineChartTooltip(marker, circle) {
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
@@ -518,7 +583,8 @@ export class ExplorerChartDistribution extends React.Component {
       const tooltipData = [{ label: formattedDate }];
       const seriesKey = config.detectorLabel;
 
-      if (marker.entity !== undefined) {
+      // Hide entity for scheduled events with mocked value.
+      if (marker.entity !== undefined && marker.entity !== SCHEDULE_EVENT_MARKER_ENTITY) {
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.entityLabel', {
             defaultMessage: 'entity',
@@ -590,7 +656,11 @@ export class ExplorerChartDistribution extends React.Component {
             });
           }
         }
-      } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
+      } else if (
+        chartType !== CHART_TYPE.EVENT_DISTRIBUTION &&
+        // Hide value for scheduled events with mocked value.
+        marker.entity !== SCHEDULE_EVENT_MARKER_ENTITY
+      ) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',
@@ -642,6 +712,22 @@ export class ExplorerChartDistribution extends React.Component {
     this.rootNode = componentNode;
   }
 
+  closePopover() {
+    this.setState({ popoverData: null, popoverCoords: [0, 0] });
+  }
+
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func,
+    });
+  };
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    this.setState({
+      showRuleEditorFlyout: () => {},
+    });
+  };
+
   render() {
     const { seriesConfig } = this.props;
 
@@ -654,10 +740,47 @@ export class ExplorerChartDistribution extends React.Component {
     const isLoading = seriesConfig.loading;
 
     return (
-      <div className="ml-explorer-chart" ref={this.setRef.bind(this)}>
-        {isLoading && <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />}
-        {!isLoading && <div className="content-wrapper" />}
-      </div>
+      <>
+        <RuleEditorFlyout
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
+        {this.state.popoverData !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              marginLeft: this.state.popoverCoords[0],
+              marginTop: this.state.popoverCoords[1],
+            }}
+          >
+            <EuiPopover
+              isOpen={true}
+              closePopover={() => this.closePopover()}
+              panelPaddingSize="none"
+              anchorPosition="upLeft"
+            >
+              <LinksMenuUI
+                anomaly={this.state.popoverData}
+                bounds={{
+                  min: moment(seriesConfig.plotEarliest),
+                  max: moment(seriesConfig.plotLatest),
+                }}
+                showMapsLink={false}
+                showViewSeriesLink={true}
+                isAggregatedData={this.props.tableData.interval !== 'second'}
+                interval={this.props.tableData.interval}
+                showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                onItemClick={() => this.closePopover()}
+                sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
+              />
+            </EuiPopover>
+          </div>
+        )}
+        <div className="ml-explorer-chart" ref={this.setRef.bind(this)}>
+          {isLoading && <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />}
+          {!isLoading && <div className="content-wrapper" />}
+        </div>
+      </>
     );
   }
 }

@@ -39,9 +39,9 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   jobsWithTimeRange,
 }) => {
   const {
-    services: { cases, presentationUtil, uiSettings, mlServices },
+    services: { cases, uiSettings, mlServices },
   } = useMlKibana();
-  const { mlApiServices: ml } = mlServices;
+  const { mlApi } = mlServices;
 
   const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
@@ -77,7 +77,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
-      const fetchedStoppedPartitions = await ml.results.getCategoryStoppedPartitions(
+      const fetchedStoppedPartitions = await mlApi.results.getCategoryStoppedPartitions(
         selectedJobIds,
         ML_JOB_ID
       );
@@ -194,7 +194,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   }
 
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
-  const PresentationContextProvider = presentationUtil?.ContextProvider ?? React.Fragment;
 
   const casesPermissions = cases?.helpers.canUseCases();
 
@@ -218,27 +217,25 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
         </EuiFlexGroup>
       </MlPageHeader>
       <CasesContext owner={[]} permissions={casesPermissions!}>
-        <PresentationContextProvider>
-          {jobsWithTimeRange.length === 0 ? (
-            <AnomalyDetectionEmptyState />
-          ) : (
-            <Explorer
-              {...{
-                explorerState,
-                overallSwimlaneData,
-                showCharts,
-                severity: tableSeverity.val,
-                stoppedPartitions,
-                invalidTimeRangeError,
-                selectedJobsRunning,
-                timeBuckets,
-                timefilter,
-                selectedCells,
-                swimLaneSeverity,
-              }}
-            />
-          )}
-        </PresentationContextProvider>
+        {jobsWithTimeRange.length === 0 ? (
+          <AnomalyDetectionEmptyState />
+        ) : (
+          <Explorer
+            {...{
+              explorerState,
+              overallSwimlaneData,
+              showCharts,
+              severity: tableSeverity.val,
+              stoppedPartitions,
+              invalidTimeRangeError,
+              selectedJobsRunning,
+              timeBuckets,
+              timefilter,
+              selectedCells,
+              swimLaneSeverity,
+            }}
+          />
+        )}
       </CasesContext>
     </div>
   );

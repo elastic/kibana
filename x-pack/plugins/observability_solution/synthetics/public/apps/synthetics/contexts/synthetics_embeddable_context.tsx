@@ -16,7 +16,9 @@ const defaultContext: SyntheticsEmbeddableContext = {} as SyntheticsEmbeddableCo
 
 export const SyntheticsEmbeddableContext = createContext(defaultContext);
 
-export const SyntheticsEmbeddableStateContextProvider: React.FC = ({ children }) => {
+export const SyntheticsEmbeddableStateContextProvider: React.FC<React.PropsWithChildren<{}>> = ({
+  children,
+}) => {
   const value = useMemo(() => {
     return { history: createMemoryHistory() };
   }, []);

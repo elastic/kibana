@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execFile } from 'child_process';
@@ -69,7 +70,7 @@ void run(async ({ log, flagsReader }) => {
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
-    logger.write(`See above for details.`);
+    logger.write(`See the script(s) marked with ❌ above for details.`);
     process.exitCode = 1;
   } else {
     logger.write('--- All checks passed. ✅');

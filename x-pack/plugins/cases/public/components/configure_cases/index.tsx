@@ -28,6 +28,7 @@ import type {
   CustomFieldConfiguration,
   TemplateConfiguration,
   CustomFieldTypes,
+  ActionConnector,
 } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -159,8 +160,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   } = useGetActionTypes();
 
   const onConnectorUpdated = useCallback(
-    async (updatedConnector) => {
-      setEditedConnectorItem(updatedConnector);
+    async (updatedConnector: ActionConnector) => {
+      setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
       refetchConnectors();
       refetchActionTypes();
       refetchCaseConfigure();
@@ -169,7 +170,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   const onConnectorCreated = useCallback(
-    async (createdConnector) => {
+    async (createdConnector: ActionConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
       await persistCaseConfigureAsync({
@@ -483,7 +484,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
         }
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
-        renderHeader={() => <span>{i18n.ADD_CUSTOM_FIELD}</span>}
+        renderHeader={() => (
+          <span>{customFieldToEdit ? i18n.EDIT_CUSTOM_FIELD : i18n.ADD_CUSTOM_FIELD} </span>
+        )}
       >
         {({ onChange }) => (
           <CustomFieldsForm onChange={onChange} initialValue={customFieldToEdit} />
@@ -503,7 +506,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
         }
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
-        renderHeader={() => <span>{i18n.CREATE_TEMPLATE}</span>}
+        renderHeader={() => (
+          <span>{templateToEdit ? i18n.EDIT_TEMPLATE : i18n.CREATE_TEMPLATE}</span>
+        )}
       >
         {({ onChange }) => (
           <TemplateForm

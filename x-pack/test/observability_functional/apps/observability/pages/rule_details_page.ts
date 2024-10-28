@@ -194,7 +194,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('User permissions', () => {
+    describe('User permissions', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });

@@ -28,6 +28,7 @@ import {
   getTaskClaimer,
 } from '../task_claimers';
 import { TaskPartitioner } from '../lib/task_partitioner';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 
 export type { ClaimOwnershipResult } from '../task_claimers';
 export interface TaskClaimingOpts {
@@ -107,7 +108,7 @@ export class TaskClaiming {
     this.maxAttempts = opts.maxAttempts;
     this.taskStore = opts.taskStore;
     this.getAvailableCapacity = opts.getAvailableCapacity;
-    this.logger = opts.logger.get('taskClaiming');
+    this.logger = createWrappedLogger({ logger: opts.logger, tags: ['taskClaiming'] });
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;

@@ -47,13 +47,20 @@ export const RISK_SCORING_TITLE = i18n.translate(
   }
 );
 
-export const ENTITY_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle', {
-    defaultMessage: '{riskEntity} risk level',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
-    },
-  });
+export const ENTITY_RISK_LEVEL = (riskEntity?: RiskScoreEntity) =>
+  riskEntity
+    ? i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle', {
+        defaultMessage: '{riskEntity} risk level',
+        values: {
+          riskEntity: getRiskEntityTranslation(riskEntity),
+        },
+      })
+    : i18n.translate(
+        'xpack.securitySolution.entityAnalytics.riskDashboard.noEntity.riskLevelTitle',
+        {
+          defaultMessage: 'Risk level',
+        }
+      );
 
 export const getRiskEntityTranslation = (
   riskEntity?: RiskScoreEntity,

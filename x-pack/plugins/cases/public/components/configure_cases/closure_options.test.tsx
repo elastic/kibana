@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ReactWrapper, ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
 
 import type { ClosureOptionsProps } from './closure_options';
@@ -24,7 +24,9 @@ describe('ClosureOptions', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<ClosureOptions {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ClosureOptions {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   test('it shows the closure options form group', () => {

@@ -17,7 +17,7 @@ import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlApiContext, useMlKibana, useMlLink } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana, useMlLink } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import type { Dictionary } from '../../../../../common/types/common';
@@ -56,7 +56,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
   const {
     services: { charts: chartsService },
   } = useMlKibana();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   const { displayErrorToast } = useToastNotificationService();
   const { showNodeInfo } = useEnabledFeatures();
@@ -85,7 +85,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
 
     let lazyJobCount = 0;
     try {
-      const jobsResult: MlSummaryJobs = await ml.jobs.jobsSummary([]);
+      const jobsResult: MlSummaryJobs = await mlApi.jobs.jobsSummary([]);
       const jobsSummaryList = jobsResult.map((job: MlSummaryJob) => {
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
         if (job.awaitingNodeAssignment) {

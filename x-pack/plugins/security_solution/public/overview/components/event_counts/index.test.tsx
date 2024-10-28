@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 
 import type { OverviewHostProps } from '../overview_host';
@@ -34,7 +34,9 @@ describe('EventCounts', () => {
   };
 
   test('it filters the `Host events` widget with a `host.name` `exists` filter', () => {
-    const wrapper = mount(<EventCounts {...testProps} />, { wrappingComponent: TestProviders });
+    const wrapper = mount(<EventCounts {...testProps} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
 
     expect(
       (wrapper.find('Memo(OverviewHostComponent)').first().props() as OverviewHostProps).filterQuery
@@ -42,7 +44,9 @@ describe('EventCounts', () => {
   });
 
   test('it filters the `Network events` widget with a `source.ip` or `destination.ip` `exists` filter', () => {
-    const wrapper = mount(<EventCounts {...testProps} />, { wrappingComponent: TestProviders });
+    const wrapper = mount(<EventCounts {...testProps} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
 
     expect(
       (wrapper.find('Memo(OverviewNetworkComponent)').first().props() as OverviewNetworkProps)

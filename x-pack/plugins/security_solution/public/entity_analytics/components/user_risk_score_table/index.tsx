@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   Columns,
   Criteria,
@@ -26,7 +26,7 @@ import type { UserRiskScoreItem } from '../../../../common/search_strategy/secur
 import type { SeverityCount } from '../severity/types';
 import { SeverityBadges } from '../severity/severity_badges';
 import { SeverityBar } from '../severity/severity_bar';
-import { SeverityFilterGroup } from '../severity/severity_filter_group';
+import { SeverityFilter } from '../severity/severity_filter';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import type {
@@ -186,12 +186,13 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
             <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.user} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SeverityFilterGroup
-              selectedSeverities={severitySelectionRedux}
-              severityCount={severityCount}
-              onSelect={onSelect}
-              riskEntity={RiskScoreEntity.user}
-            />
+            <EuiFilterGroup>
+              <SeverityFilter
+                selectedItems={severitySelectionRedux}
+                onSelect={onSelect}
+                riskEntity={RiskScoreEntity.user}
+              />
+            </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

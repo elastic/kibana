@@ -60,9 +60,9 @@ export function Introduction({ isBeta, guideLink }: IntroductionProps) {
           <EuiText>
             <FormattedMessage
               id="xpack.apm.onboarding.specProvider.longDescription"
-              defaultMessage="Application Performance Monitoring (APM) collects in-depth \
-            performance metrics and errors from inside your application. \
-            It allows you to monitor the performance of thousands of applications in real time. \
+              defaultMessage="Application Performance Monitoring (APM) collects in-depth
+            performance metrics and errors from inside your application.
+            It allows you to monitor the performance of thousands of applications in real time.
             {learnMoreLink}."
               values={{
                 learnMoreLink: (

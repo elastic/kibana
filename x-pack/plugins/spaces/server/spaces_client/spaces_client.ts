@@ -14,10 +14,13 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
+import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
 
 const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
@@ -88,7 +91,8 @@ export class SpacesClient implements ISpacesClient {
     private readonly config: ConfigType,
     private readonly repository: ISavedObjectsRepository,
     private readonly nonGlobalTypeNames: string[],
-    private readonly buildFlavour: BuildFlavor
+    private readonly buildFlavour: BuildFlavor,
+    private readonly features: FeaturesPluginStart
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
   }
@@ -150,6 +154,8 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
     }
 
+    this.validateDisabledFeatures(space);
+
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
@@ -182,6 +188,8 @@ export class SpacesClient implements ISpacesClient {
     if (Object.hasOwn(space, 'solution') && !space.solution) {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
+
+    this.validateDisabledFeatures(space);
 
     const attributes = this.generateSpaceAttributes(space);
     await this.repository.update('space', id, attributes);
@@ -216,6 +224,28 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.bulkUpdate(objectsToUpdate);
   }
 
+  private validateDisabledFeatures = (space: v1.Space) => {
+    if (!space.disabledFeatures.length || this.isServerless) {
+      return;
+    }
+
+    const kibanaFeatures = this.features.getKibanaFeatures();
+
+    if (
+      space.disabledFeatures.some((feature) => {
+        const disabledKibanaFeature = kibanaFeatures.find((f) => f.id === feature);
+
+        return (
+          disabledKibanaFeature && !disabledKibanaFeature.scope?.includes(KibanaFeatureScope.Spaces)
+        );
+      })
+    ) {
+      throw Boom.badRequest(
+        'Unable to create Space, one or more disabledFeatures do not have the required space scope'
+      );
+    }
+  };
+
   private transformSavedObjectToSpace = (savedObject: SavedObject<any>): v1.Space => {
     return {
       id: savedObject.id,
@@ -224,7 +254,11 @@ export class SpacesClient implements ISpacesClient {
       color: savedObject.attributes.color,
       initials: savedObject.attributes.initials,
       imageUrl: savedObject.attributes.imageUrl,
-      disabledFeatures: savedObject.attributes.disabledFeatures ?? [],
+      disabledFeatures: withSpaceSolutionDisabledFeatures(
+        this.features.getKibanaFeatures(),
+        savedObject.attributes.disabledFeatures ?? [],
+        !this.isServerless ? savedObject.attributes.solution : undefined
+      ),
       _reserved: savedObject.attributes._reserved,
       ...(!this.isServerless ? { solution: savedObject.attributes.solution } : {}),
     } as v1.Space;

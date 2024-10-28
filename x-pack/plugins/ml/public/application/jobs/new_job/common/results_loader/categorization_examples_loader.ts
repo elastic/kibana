@@ -39,7 +39,7 @@ export class CategorizationExamplesLoader {
       };
     }
 
-    const resp = await this._jobCreator.mlApiServices.jobs.categorizationFieldExamples(
+    const resp = await this._jobCreator.mlApi.jobs.categorizationFieldExamples(
       this._indexPatternTitle,
       this._query,
       NUMBER_OF_CATEGORY_EXAMPLES,

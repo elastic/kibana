@@ -61,6 +61,8 @@ export * from './user_profiles';
 export * from './omit';
 export * from './configuration';
 export * from './files';
+export * from './telemetry';
+
 export { getSpaceUrlPrefix } from './helpers';
 
 function toArray<T>(input: T | T[]): T[] {

@@ -91,7 +91,7 @@ describe('FormattedIp', () => {
     expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -106,7 +106,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {
         id: NetworkPanelKey,

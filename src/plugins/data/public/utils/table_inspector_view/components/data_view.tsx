@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -34,15 +34,6 @@ interface DataViewComponentProps extends InspectorViewProps {
 }
 
 class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
-  static propTypes = {
-    adapters: PropTypes.object.isRequired,
-    title: PropTypes.string.isRequired,
-    uiSettings: PropTypes.object,
-    uiActions: PropTypes.object.isRequired,
-    fieldFormats: PropTypes.object.isRequired,
-    isFilterable: PropTypes.func.isRequired,
-  };
-
   state = {} as DataViewComponentState;
 
   static getDerivedStateFromProps(
@@ -53,9 +44,10 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       return null;
     }
 
-    const { tables } = nextProps.adapters.tables;
+    const { tables, initialSelectedTable } = nextProps.adapters.tables ?? {};
     const keys = Object.keys(tables);
-    const datatable = keys.length ? tables[keys[0]] : undefined;
+    const intialTableKey = keys.includes(initialSelectedTable) ? initialSelectedTable : keys[0];
+    const datatable = keys.length ? tables[intialTableKey] : undefined;
 
     return {
       adapters: nextProps.adapters,

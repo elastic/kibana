@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { config as pathConfig } from '@kbn/utils';
@@ -32,6 +33,7 @@ import { config as deprecationConfig } from '@kbn/core-deprecations-server-inter
 import { statusConfig } from '@kbn/core-status-server-internal';
 import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
+import { featureFlagsConfig } from '@kbn/core-feature-flags-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
 import { coreConfig } from './core_config';
@@ -47,6 +49,7 @@ export function registerServiceConfig(configService: ConfigService) {
     coreAppConfig,
     elasticApmConfig,
     executionContextConfig,
+    featureFlagsConfig,
     externalUrlConfig,
     httpConfig,
     i18nConfig,

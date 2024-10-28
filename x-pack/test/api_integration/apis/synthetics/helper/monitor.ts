@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { omit, omitBy } from 'lodash';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { omit } from 'lodash';
 
 export function omitResponseTimestamps(monitor: object) {
-  return omitBy(omit(monitor, ['created_at', 'updated_at']), removeMonitorEmptyValues);
+  return omit(monitor, ['created_at', 'updated_at']);
 }
 
 export function omitEmptyValues(monitor: object) {
-  const { url, ...rest } = omit(monitor, ['created_at', 'updated_at', 'form_monitor_type']) as any;
+  const { url, ...rest } = omit(monitor, ['created_at', 'updated_at']) as any;
 
-  return omitBy(
-    {
-      ...rest,
-      ...(url ? { url } : {}),
-    },
-    removeMonitorEmptyValues
-  );
+  return {
+    ...rest,
+    ...(url ? { url } : {}),
+  };
 }

@@ -8,7 +8,7 @@
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_PAGES } from '../../../../locator';
 import type { CategorizationType } from './quick_create_job';
@@ -35,7 +35,7 @@ export async function redirectToADJobWizards(
       stopOnWarn,
       from: timeRange.from,
       to: timeRange.to,
-      query: JSON.stringify(query),
+      query: query as Query,
     },
   });
 

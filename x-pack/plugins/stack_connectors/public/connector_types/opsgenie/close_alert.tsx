@@ -117,7 +117,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"
         fullWidth
-        error={errors['subActionParams.alias']}
+        error={errors['subActionParams.alias'] as React.ReactNode}
         isInvalid={isAliasInvalid}
         label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}

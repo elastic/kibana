@@ -34,7 +34,7 @@ import {
 } from '@kbn/ml-data-grid';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import { getIndexData, getIndexFields } from '../../../../common';
@@ -51,7 +51,7 @@ export const useExplorationResults = (
       notifications: { toasts },
     },
   } = useMlKibana();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
 
   const trainedModelsApiService = useTrainedModelsApiService();
@@ -63,7 +63,7 @@ export const useExplorationResults = (
 
   if (jobConfig !== undefined) {
     const resultsField = jobConfig.dest.results_field!;
-    const { fieldTypes } = getIndexFields(ml, jobConfig, needsDestIndexFields);
+    const { fieldTypes } = getIndexFields(mlApi, jobConfig, needsDestIndexFields);
     columns.push(
       ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
         sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -84,7 +84,7 @@ export const useExplorationResults = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(ml, jobConfig, dataGrid, searchQuery, options);
+    getIndexData(mlApi, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -93,7 +93,7 @@ export const useExplorationResults = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () => (dataView !== undefined ? new DataLoader(dataView, ml) : undefined),
+    () => (dataView !== undefined ? new DataLoader(dataView, mlApi) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]
   );

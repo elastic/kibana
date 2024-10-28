@@ -8,7 +8,6 @@
 import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import * as actions from '../actions/elements';
 
 const { assign, push, del, set } = immutable;
 
@@ -102,17 +101,16 @@ const getPageWithElementId = (workpad, elementId) => {
 
 export const elementsReducer = handleActions(
   {
-    // TODO: This takes the entire element, which is not necessary, it could just take the id.
-    [actions.setExpression]: (workpadState, { payload }) => {
+    ['setExpression']: (workpadState, { payload }) => {
       const { expression, pageId, elementId } = payload;
       return assignNodeProperties(workpadState, pageId, elementId, { expression });
     },
-    [actions.setFilter]: (workpadState, { payload }) => {
+    ['setFilter']: (workpadState, { payload }) => {
       const { filter, elementId } = payload;
       const pageId = getPageWithElementId(workpadState, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
     },
-    [actions.setMultiplePositions]: (workpadState, { payload }) =>
+    ['setMultiplePositions']: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(
         (previousWorkpadState, { position, pageId, elementId }) =>
           assignNodeProperties(previousWorkpadState, pageId, elementId, {
@@ -120,11 +118,11 @@ export const elementsReducer = handleActions(
           }),
         workpadState
       ),
-    [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
+    ['elementLayer']: (workpadState, { payload: { pageId, elementId, movement } }) => {
       const location = getLocationFromIds(workpadState, pageId, elementId);
       return moveNodeLayer(workpadState, pageId, elementId, movement, location);
     },
-    [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
+    ['addElement']: (workpadState, { payload: { pageId, element } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;
@@ -143,7 +141,7 @@ export const elementsReducer = handleActions(
         trimElement(element)
       );
     },
-    [actions.insertNodes]: (workpadState, { payload: { pageId, elements } }) => {
+    ['insertNodes']: (workpadState, { payload: { pageId, elements } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;
@@ -158,7 +156,7 @@ export const elementsReducer = handleActions(
         workpadState
       );
     },
-    [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
+    ['removeElements']: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;

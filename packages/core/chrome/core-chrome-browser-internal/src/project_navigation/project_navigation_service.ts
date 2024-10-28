@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
   ChromeNavLinks,
   SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
@@ -73,9 +73,13 @@ export class ProjectNavigationService {
   // The navigation tree for the Side nav UI that still contains layout information (body, footer, etc.)
   private navigationTreeUi$ = new BehaviorSubject<NavigationTreeDefinitionUI | null>(null);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  // Keep a reference to the nav node selected when the navigation panel is opened
+  private readonly panelSelectedNode$ = new BehaviorSubject<ChromeProjectNavigationNode | null>(
+    null
+  );
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
-    breadcrumbs: ChromeProjectBreadcrumb[];
+    breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
@@ -148,7 +152,7 @@ export class ProjectNavigationService {
         return this.customProjectSideNavComponent$.asObservable();
       },
       setProjectBreadcrumbs: (
-        breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
+        breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
         params?: Partial<ChromeSetProjectBreadcrumbsParams>
       ) => {
         this.projectBreadcrumbs$.next({
@@ -156,7 +160,7 @@ export class ProjectNavigationService {
           params: { absolute: false, ...params },
         });
       },
-      getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
+      getProjectBreadcrumbs$: (): Observable<ChromeBreadcrumb[]> => {
         return combineLatest([
           this.projectBreadcrumbs$,
           this.activeNodes$,
@@ -186,6 +190,8 @@ export class ProjectNavigationService {
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
       /** In stateful Kibana, get the id of the active solution navigation */
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
+      getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
+      setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
     };
   }
 
@@ -412,6 +418,34 @@ export class ProjectNavigationService {
         ...solutionNavs,
       });
     }
+  }
+
+  private setPanelSelectedNode = (_node: string | ChromeProjectNavigationNode | null) => {
+    const node = typeof _node === 'string' ? this.findNodeById(_node) : _node;
+    this.panelSelectedNode$.next(node);
+  };
+
+  private findNodeById(id: string): ChromeProjectNavigationNode | null {
+    const allNodes = this.navigationTree$.getValue();
+    if (!allNodes) return null;
+
+    const find = (nodes: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode | null => {
+      // Recursively search for the node with the given id
+      for (const node of nodes) {
+        if (node.id === id) {
+          return node;
+        }
+        if (node.children) {
+          const found = find(node.children);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+
+    return find(allNodes);
   }
 
   private get http() {

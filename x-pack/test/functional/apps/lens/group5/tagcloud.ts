@@ -9,38 +9,43 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'tagCloud']);
+  const { visualize, lens, header, tagCloud } = getPageObjects([
+    'visualize',
+    'lens',
+    'header',
+    'tagCloud',
+  ]);
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
 
   describe('lens tagcloud', () => {
     before(async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsTagcloud', 'Tag cloud');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('lnsTagcloud', 'Tag cloud');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsTagcloud_tagDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsTagcloud_valueDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.waitForVisualization('tagCloudVisualization');
+      await header.waitUntilLoadingHasFinished();
+      await lens.waitForVisualization('tagCloudVisualization');
 
       // avoid picking up tags in suggestion panel by closing panel
-      await PageObjects.lens.closeSuggestionPanel();
+      await lens.closeSuggestionPanel();
     });
 
     it('should render tagcloud', async () => {
-      const tags = await PageObjects.tagCloud.getTextTag();
+      const tags = await tagCloud.getTextTag();
       expect(tags).to.eql([
         '97.220.3.248',
         '78.83.247.30',
@@ -51,14 +56,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add filter from clicking on tag', async () => {
-      await PageObjects.tagCloud.selectTagCloudTag('97.220.3.248');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await tagCloud.selectTagCloudTag('97.220.3.248');
+      await header.waitUntilLoadingHasFinished();
       const hasTagFilter = await filterBar.hasFilter('ip', '97.220.3.248');
       expect(hasTagFilter).to.be(true);
     });
 
     it('should filter results by filter bar', async () => {
-      const tags = await PageObjects.tagCloud.getTextTag();
+      const tags = await tagCloud.getTextTag();
       expect(tags).to.eql(['97.220.3.248']);
     });
   });

@@ -7,6 +7,8 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
+import { AGENTS_INDEX } from '../../../common';
+
 import { createAppContextStartContractMock } from '../../mocks';
 
 import { appContextService } from '../app_context';
@@ -167,5 +169,68 @@ describe('getAgentStatusForAgentPolicy', () => {
     );
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls esClient.search with correct parameters when agentPolicyIds are provided', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: {
+          status: {
+            buckets: [
+              { key: 'online', doc_count: 2 },
+              { key: 'error', doc_count: 1 },
+            ],
+          },
+        },
+      }),
+    };
+
+    const soClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: 'agentPolicyId1', attributes: { name: 'Policy 1' } },
+          { id: 'agentPolicyId2', attributes: { name: 'Policy 2' } },
+        ],
+      }),
+    };
+
+    const agentPolicyIds = ['agentPolicyId1', 'agentPolicyId2'];
+    const filterKuery = 'filterKuery';
+    const spaceId = 'spaceId';
+
+    await getAgentStatusForAgentPolicy(
+      esClient as any,
+      soClient as any,
+      undefined,
+      filterKuery,
+      spaceId,
+      agentPolicyIds
+    );
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: AGENTS_INDEX,
+        size: 0,
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            must: expect.arrayContaining([
+              expect.objectContaining({
+                terms: {
+                  policy_id: agentPolicyIds,
+                },
+              }),
+            ]),
+          }),
+        }),
+        aggregations: expect.objectContaining({
+          status: expect.objectContaining({
+            terms: expect.objectContaining({
+              field: 'status',
+              size: expect.any(Number),
+            }),
+          }),
+        }),
+      })
+    );
   });
 });

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEffect, useRef } from 'react';
+
 import { resolveGridRow } from './resolve_grid_row';
-import { GridPanelData, GridLayoutStateManager } from './types';
+import { GridLayoutStateManager, GridPanelData } from './types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
   return (
@@ -34,12 +36,11 @@ export const useGridLayoutEvents = ({
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) return;
+      if (!interactionEvent$.value || interactionEvent$.value.type === 'drop') return;
       e.preventDefault();
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
-      const previewElement = gridLayoutStateManager.dragPreviewRef.current;
 
       const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
@@ -52,7 +53,7 @@ export const useGridLayoutEvents = ({
         }
       })();
 
-      if (!runtimeSettings$.value || !previewElement || !gridRowElements || !currentGridData) {
+      if (!runtimeSettings$.value || !gridRowElements || !currentGridData) {
         return;
       }
 
@@ -67,7 +68,7 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-      gridLayoutStateManager.updatePreviewElement(previewRect);
+      gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -153,17 +154,9 @@ export const useGridLayoutEvents = ({
           const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
+
         gridLayout$.next(nextLayout);
       }
-    };
-
-    const onMouseUp = (e: MouseEvent) => {
-      if (!interactionEvent$.value) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      interactionEvent$.next(undefined);
-      gridLayoutStateManager.hideDragPreview();
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -171,11 +164,9 @@ export const useGridLayoutEvents = ({
       calculateUserEvent(e);
     };
 
-    document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('scroll', calculateUserEvent);
     return () => {
-      document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);
     };

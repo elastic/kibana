@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
+  const { common, discover, header, timePicker, dashboard } = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -30,8 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
@@ -39,35 +46,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows chart by default', async function () {
-      expect(await PageObjects.discover.isChartVisible()).to.be(true);
+      expect(await discover.isChartVisible()).to.be(true);
     });
 
     it('hiding the chart persists the setting', async function () {
-      await PageObjects.discover.toggleChartVisibility();
-      expect(await PageObjects.discover.isChartVisible()).to.be(false);
+      await discover.toggleChartVisibility();
+      expect(await discover.isChartVisible()).to.be(false);
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.navigateToApp();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
 
-      expect(await PageObjects.discover.isChartVisible()).to.be(false);
+      expect(await discover.isChartVisible()).to.be(false);
     });
 
     it('persists hidden chart option on the saved search ', async function () {
       const savedSearchTitle = 'chart hidden';
-      await PageObjects.discover.saveSearch(savedSearchTitle);
+      await discover.saveSearch(savedSearchTitle);
 
-      await PageObjects.discover.toggleChartVisibility();
-      expect(await PageObjects.discover.isChartVisible()).to.be(true);
+      await discover.toggleChartVisibility();
+      expect(await discover.isChartVisible()).to.be(true);
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.isChartVisible()).to.be(true);
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.isChartVisible()).to.be(true);
 
-      await PageObjects.discover.loadSavedSearch(savedSearchTitle);
-      expect(await PageObjects.discover.isChartVisible()).to.be(false);
+      await discover.loadSavedSearch(savedSearchTitle);
+      expect(await discover.isChartVisible()).to.be(false);
     });
   });
 }

@@ -64,7 +64,7 @@ export function SettingWithSiblingFlyout({
   }, [isInlineEditing, isFlyoutOpen]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ cursor: 'pointer' }}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <SettingTrigger onClick={toggleFlyout} />
       {isFlyoutOpen && siblingRef.current && (
         <EuiPortal insert={{ sibling: siblingRef.current, position: 'after' }}>

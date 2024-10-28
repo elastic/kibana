@@ -804,6 +804,22 @@
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.test.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchServiceSetup.publicBaseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "publicBaseUrl",
+            "description": [
+              "\nThe public base URL (if any) that should be used by end users to access the Elasticsearch cluster."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -941,6 +957,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchServiceStart.publicBaseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "publicBaseUrl",
+            "description": [
+              "\nThe public base URL (if any) that should be used by end users to access the Elasticsearch cluster."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

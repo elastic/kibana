@@ -18,11 +18,13 @@ import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { HelpMenu } from '../../../components/help_menu';
+import { isDstCalendar } from '../dst_utils';
 
 export class CalendarsListUI extends Component {
   static propTypes = {
     canCreateCalendar: PropTypes.bool.isRequired,
     canDeleteCalendar: PropTypes.bool.isRequired,
+    isDst: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -38,11 +40,13 @@ export class CalendarsListUI extends Component {
   }
 
   loadCalendars = async () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     this.setState({ loading: true });
 
     try {
-      const calendars = await ml.calendars();
+      const calendars = (await mlApi.calendars()).filter(
+        (calendar) => isDstCalendar(calendar) === this.props.isDst
+      );
 
       this.setState({
         calendars,
@@ -81,12 +85,12 @@ export class CalendarsListUI extends Component {
   };
 
   deleteCalendars = () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const toasts = this.props.kibana.services.notifications.toasts;
     const { selectedForDeletion } = this.state;
 
     this.closeDestroyModal();
-    deleteCalendars(ml, toasts, selectedForDeletion, this.loadCalendars);
+    deleteCalendars(mlApi, toasts, selectedForDeletion, this.loadCalendars);
   };
 
   addRequiredFieldsToList = (calendarsList = []) => {
@@ -146,6 +150,7 @@ export class CalendarsListUI extends Component {
           <CalendarsListHeader
             totalCount={calendars.length}
             refreshCalendars={this.loadCalendars}
+            isDst={this.props.isDst}
           />
           <CalendarsListTable
             loading={loading}
@@ -156,6 +161,7 @@ export class CalendarsListUI extends Component {
             mlNodesAvailable={nodesAvailable}
             setSelectedCalendarList={this.setSelectedCalendarList}
             itemsSelected={selectedForDeletion.length > 0}
+            isDst={this.props.isDst}
           />
           {destroyModal}
         </div>

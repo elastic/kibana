@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getTimeFieldFromESQLQuery, getIndexPatternFromESQLQuery } from './query_parsing_helpers';
@@ -42,7 +44,7 @@ export async function getESQLAdHocDataview(
 
   dataView.timeFieldName = timeField;
 
-  // If the indexPattern is empty string means that the user used either the ROW or META FUNCTIONS / SHOW INFO commands
+  // If the indexPattern is empty string means that the user used either the ROW, SHOW INFO commands
   // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
   if (!timeField && indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
     dataView.timeFieldName = '@timestamp';

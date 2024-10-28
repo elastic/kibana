@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
@@ -99,12 +100,14 @@ export const isParameterType = (str: string | undefined): str is FunctionParamet
 
 /**
  * This is the return type of a function definition.
+ *
+ * TODO: remove `any`
  */
-export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'unknown' | 'any';
 
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
   str !== 'unsupported' &&
-  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
+  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
@@ -119,7 +122,6 @@ export interface FunctionDefinition {
       name: string;
       type: FunctionParameterType;
       optional?: boolean;
-      noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
       /**
        * If set, this parameter does not accept a field. It only accepts a constant,
@@ -136,7 +138,7 @@ export interface FunctionDefinition {
        * we can't check the return value of a function to see if it
        * matches one of the options prior to runtime.
        */
-      literalOptions?: string[];
+      acceptedValues?: string[];
       /**
        * Must only be included _in addition to_ literalOptions.
        *
@@ -172,7 +174,7 @@ export interface CommandBaseDefinition {
       name: string;
       type: string;
       optional?: boolean;
-      innerTypes?: string[];
+      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;
@@ -204,6 +206,7 @@ export interface CommandDefinition extends CommandBaseDefinition {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
   modes: CommandModeDefinition[];
+  hasRecommendedQueries?: boolean;
 }
 
 export interface Literals {

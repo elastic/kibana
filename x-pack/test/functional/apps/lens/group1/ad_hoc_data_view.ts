@@ -10,18 +10,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'visualize',
-    'lens',
-    'header',
-    'unifiedSearch',
-    'dashboard',
-    'timeToVisualize',
-    'common',
-    'discover',
-    'unifiedFieldList',
-    'share',
-  ]);
+  const { visualize, lens, header, dashboard, timeToVisualize, discover, unifiedFieldList } =
+    getPageObjects([
+      'visualize',
+      'lens',
+      'header',
+      'dashboard',
+      'timeToVisualize',
+      'discover',
+      'unifiedFieldList',
+    ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
@@ -48,21 +46,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   async function setupAdHocDataView() {
-    await PageObjects.visualize.navigateToNewVisualization();
-    await PageObjects.visualize.clickVisType('lens');
+    await visualize.navigateToNewVisualization();
+    await visualize.clickVisType('lens');
     await elasticChart.setNewChartUiDebugFlag(true);
     await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
     await dataViews.waitForSwitcherToBe('*stash*');
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await dashboardPanelActions.clickContextMenuItem(
-      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
-    );
+    await dashboardPanelActions.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    await header.waitUntilLoadingHasFinished();
 
     const actualIndexPattern = await (
       await testSubjects.find('discover-dataView-switch-link')
@@ -75,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const waitForPageReady = async () => {
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    await header.waitUntilLoadingHasFinished();
     await retry.waitFor('page ready after refresh', async () => {
       const queryBarVisible = await testSubjects.exists('globalQueryBar');
       return queryBarVisible;
@@ -85,123 +81,121 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens ad hoc data view tests', () => {
     it('should allow building a chart based on ad hoc data view', async () => {
       await setupAdHocDataView();
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data!);
-      await PageObjects.lens.removeLayer();
+      await lens.removeLayer();
     });
 
     it('should allow adding and using a field', async () => {
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
         await dataViews.clickAddFieldFromSearchBar();
         await fieldEditor.setName('runtimefield');
         await fieldEditor.enableValue();
         await fieldEditor.typeScript("emit('abc')");
         await fieldEditor.save();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.lens.searchField('runtime');
-        await PageObjects.lens.waitForField('runtimefield');
-        await PageObjects.lens.dragFieldToWorkspace('runtimefield');
+        await header.waitUntilLoadingHasFinished();
+        await lens.searchField('runtime');
+        await lens.waitForField('runtimefield');
+        await lens.dragFieldToWorkspace('runtimefield');
       });
-      await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
-        'Top 5 values of runtimefield'
-      );
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
-      await PageObjects.lens.removeLayer();
+      await lens.waitForVisualization();
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
+      await lens.removeLayer();
     });
 
     it('should allow switching to another data view and back', async () => {
       await dataViews.switchTo('logstash-*');
-      await PageObjects.lens.waitForFieldMissing('runtimefield');
+      await lens.waitForFieldMissing('runtimefield');
       await dataViews.switchTo('*stash*');
-      await PageObjects.lens.waitForField('runtimefield');
+      await lens.waitForField('runtimefield');
     });
 
     it('should allow removing a field', async () => {
-      await PageObjects.lens.clickField('runtimefield');
-      await PageObjects.lens.removeField('runtimefield');
+      await lens.clickField('runtimefield');
+      await lens.removeField('runtimefield');
       await fieldEditor.confirmDelete();
-      await PageObjects.lens.waitForFieldMissing('runtimefield');
+      await lens.waitForFieldMissing('runtimefield');
     });
 
     it('should allow adding an ad-hoc chart to a dashboard', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await lens.switchToVisualization('lnsMetric');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization('mtrVis');
-      const metricData = await PageObjects.lens.getMetricVisualizationData();
+      await lens.waitForVisualization('mtrVis');
+      const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].value).to.eql('5,727.322');
       expect(metricData[0].title).to.eql('Average of bytes');
-      await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
+      await lens.save('New Lens from Modal', false, false, false, 'new');
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       expect(metricData[0].value).to.eql('5,727.322');
 
-      const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await PageObjects.timeToVisualize.resetNewDashboard();
+      await timeToVisualize.resetNewDashboard();
     });
 
     it('should allow saving the ad-hoc chart into a saved object', async () => {
       await setupAdHocDataView();
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await lens.switchToVisualization('lnsMetric');
 
-      await PageObjects.lens.waitForVisualization('mtrVis');
-      await PageObjects.lens.save('Lens with adhoc data view');
-      await PageObjects.lens.waitForVisualization('mtrVis');
-      const metricData = await PageObjects.lens.getMetricVisualizationData();
+      await lens.waitForVisualization('mtrVis');
+      await lens.save('Lens with adhoc data view');
+      await lens.waitForVisualization('mtrVis');
+      const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].value).to.eql('5,727.322');
       expect(metricData[0].title).to.eql('Average of bytes');
     });
 
     it('should be possible to share a URL of a visualization with adhoc dataViews', async () => {
-      const url = await PageObjects.lens.getUrl();
+      const url = await lens.getUrl();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();
 
       await browser.navigateTo(url);
       // check that it's the same configuration in the new URL when ready
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsMetric_primaryMetricDimensionPanel')
-      ).to.eql('Average of bytes');
+      await header.waitUntilLoadingHasFinished();
+      expect(await lens.getDimensionTriggerText('lnsMetric_primaryMetricDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should be possible to download a visualization with adhoc dataViews', async () => {
-      await PageObjects.lens.setCSVDownloadDebugFlag(true);
-      await PageObjects.lens.openCSVDownloadShare();
+      await lens.setCSVDownloadDebugFlag(true);
+      await lens.openCSVDownloadShare();
 
-      const csv = await PageObjects.lens.getCSVContent();
+      const csv = await lens.getCSVContent();
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(1);
-      await PageObjects.lens.setCSVDownloadDebugFlag(false);
+      await lens.setCSVDownloadDebugFlag(false);
     });
 
     it('should navigate to discover correctly', async () => {
@@ -209,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       const actualIndexPattern = await (
         await testSubjects.find('discover-dataView-switch-link')
@@ -219,14 +213,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
       expect(actualDiscoverQueryHits).to.be('14,005');
 
-      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      const prevDataViewId = await discover.getCurrentDataViewId();
 
-      await PageObjects.discover.addRuntimeField(
-        '_bytes-runtimefield',
-        `emit(doc["bytes"].value.toString())`
-      );
-      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
-      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      await discover.addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
+      await unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
+      const newDataViewId = await discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
       expect(await dataViews.isAdHoc()).to.be(true);
 
@@ -237,30 +228,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await setupAdHocDataView();
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.save(
-        'embeddable-test-with-adhoc-data-view',
-        false,
-        false,
-        false,
-        'new'
-      );
+      await lens.save('embeddable-test-with-adhoc-data-view', false, false, false, 'new');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();
       const [daashboardHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(daashboardHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       // adhoc data view should be persisted after refresh
       await browser.refresh();

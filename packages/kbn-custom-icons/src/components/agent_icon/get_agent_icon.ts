@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   isAndroidAgentName,
   isIosAgentName,
   isJavaAgentName,
   isRumAgentName,
+  hasOpenTelemetryPrefix,
   OpenTelemetryAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils';
@@ -64,6 +67,15 @@ const darkAgentIcons: { [key: string]: string } = {
   rust: darkRustIcon,
 };
 
+const sanitizeAgentName = (agentName: string) => {
+  if (hasOpenTelemetryPrefix(agentName)) {
+    // for OpenTelemetry only split the agent name by `/` and take the second part, format is `(opentelemetry|otlp)/{agentName}/{details}`
+    return agentName.split('/')[1];
+  }
+
+  return agentName;
+};
+
 // This only needs to be exported for testing purposes, since we stub the SVG
 // import values in test.
 export function getAgentIconKey(agentName: string) {
@@ -88,11 +100,10 @@ export function getAgentIconKey(agentName: string) {
     return 'android';
   }
 
-  // Remove "opentelemetry/" prefix
-  const agentNameWithoutPrefix = lowercasedAgentName.replace(/^opentelemetry\//, '');
+  const cleanAgentName = sanitizeAgentName(lowercasedAgentName);
 
-  if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
-    return agentNameWithoutPrefix;
+  if (Object.keys(agentIcons).includes(cleanAgentName)) {
+    return cleanAgentName;
   }
 
   // OpenTelemetry-only agents

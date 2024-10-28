@@ -203,9 +203,9 @@ export class NodesChangedRule extends BaseRule {
     });
     const action = `[${fullActionText}](elasticsearch/nodes)`;
     const states = getNodeStates(nodes);
-    const added = states.added.map((node) => node.nodeName).join(',');
-    const removed = states.removed.map((node) => node.nodeName).join(',');
-    const restarted = states.restarted.map((node) => node.nodeName).join(',');
+    const added = states.added.map((node) => node.nodeName).join(',') || 'none';
+    const removed = states.removed.map((node) => node.nodeName).join(',') || 'none';
+    const restarted = states.restarted.map((node) => node.nodeName).join(',') || 'none';
     const internalShortMessage = i18n.translate(
       'xpack.monitoring.alerts.nodesChanged.firing.internalShortMessage',
       {
@@ -223,7 +223,7 @@ export class NodesChangedRule extends BaseRule {
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.firing.internalFullMessage',
           {
-            defaultMessage: `Nodes changed alert is firing for {clusterName}. The following Elasticsearch nodes have been added:{added} removed:{removed} restarted:{restarted}. {action}`,
+            defaultMessage: `Nodes changed alert is firing for {clusterName}. The following Elasticsearch nodes have been added: {added} / removed: {removed} / restarted: {restarted}. {action}`,
             values: {
               clusterName: cluster.clusterName,
               added,

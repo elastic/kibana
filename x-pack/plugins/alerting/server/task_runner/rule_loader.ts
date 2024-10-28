@@ -10,6 +10,7 @@ import {
   CoreKibanaRequest,
   FakeRawRequest,
   Headers,
+  Logger,
   SavedObject,
   SavedObjectReference,
   SavedObjectsErrorHelpers,
@@ -25,6 +26,7 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getAlertFromRaw } from '../rules_client/lib';
 
 interface RuleData {
   rawRule: RawRule;
@@ -34,6 +36,7 @@ interface RuleData {
 
 interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
+  logger: Logger;
   paramValidator?: RuleTypeParamsValidator<Params>;
   ruleData: RuleData;
   ruleId: string;
@@ -52,6 +55,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
 ): RunRuleParams<Params> {
   const {
     context,
+    logger,
     paramValidator,
     ruleData: { rawRule, references, version },
     ruleId,
@@ -72,14 +76,16 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   }
 
   const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
-  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rule = rulesClient.getAlertFromRaw({
+  const rule = getAlertFromRaw({
     id: ruleId,
-    ruleTypeId,
+    includeLegacyId: false,
+    isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
+    logger,
+    omitGeneratedValues: false,
     rawRule,
     references,
-    includeLegacyId: false,
-    omitGeneratedValues: false,
+    ruleTypeId,
+    ruleTypeRegistry,
   });
 
   try {
@@ -112,7 +118,6 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     apiKey,
     fakeRequest,
     rule,
-    rulesClient,
     validatedParams,
     version,
   };

@@ -6,13 +6,21 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawRuleSchemaV1 } from '../schemas/raw_rule';
+import { rawRuleSchemaV1, rawRuleSchemaV2 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
+      forwardCompatibility: rawRuleSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV1,
+    },
+  },
+  '2': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV2,
     },
   },
 };

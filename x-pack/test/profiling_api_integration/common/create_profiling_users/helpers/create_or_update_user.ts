@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { difference, union } from 'lodash';
-import { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 import { Elasticsearch, Kibana } from '..';
 import { callKibana, isAxiosError } from './call_kibana';
 

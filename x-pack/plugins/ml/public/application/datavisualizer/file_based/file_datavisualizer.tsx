@@ -17,7 +17,7 @@ import type {
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlApiContext, useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -36,9 +36,9 @@ export const FileDataVisualizerPage: FC = () => {
       },
     },
   } = useMlKibana();
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const mlLocator = useMlLocator()!;
-  getMlNodeCount(mlApiServices);
+  getMlNodeCount(mlApi);
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
   const [resultLinks, setResultLinks] = useState<ResultLinks | null>(null);
@@ -105,7 +105,7 @@ export const FileDataVisualizerPage: FC = () => {
   useEffect(() => {
     // ML uses this function
     if (dataVisualizer !== undefined) {
-      getMlNodeCount(mlApiServices);
+      getMlNodeCount(mlApi);
       const { getFileDataVisualizerComponent } = dataVisualizer;
       getFileDataVisualizerComponent().then((resp) => {
         const items = resp();

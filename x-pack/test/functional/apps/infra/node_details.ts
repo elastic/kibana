@@ -66,6 +66,12 @@ const HOSTS = [
     cpuValue: 0.1,
   },
 ];
+
+const HOSTS_WITHOUT_DATA = [
+  {
+    hostName: 'host-7',
+  },
+];
 interface QueryParams {
   name?: string;
   alertMetric?: string;
@@ -139,19 +145,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
-      await synthEsClient.clean();
       await kibanaServer.savedObjects.cleanStandardList();
       await browser.setWindowSize(1600, 1200);
+
+      return synthEsClient.clean();
     });
 
-    after(async () => {
-      await synthEsClient.clean();
-    });
+    after(() => synthEsClient.clean());
 
     describe('#Asset Type: host', () => {
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index(
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
@@ -159,20 +162,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             hosts: HOSTS,
           })
         );
+
         await navigateToNodeDetails('host-1', 'host', {
           name: 'host-1',
         });
 
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await pageObjects.timePicker.setAbsoluteRange(
-          START_HOST_DATE.format(DATE_PICKER_FORMAT),
-          END_HOST_DATE.format(DATE_PICKER_FORMAT)
-        );
       });
 
-      after(async () => {
-        await synthEsClient.clean();
-      });
+      after(() => synthEsClient.clean());
 
       it('preserves selected tab between page reloads', async () => {
         await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
@@ -406,8 +404,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickProcessesTab();
             const processesTotalValue =
               await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-            const processValue = await processesTotalValue.getVisibleText();
-            expect(processValue).to.eql('N/A');
+            await retry.tryForTime(5000, async () => {
+              expect(await processesTotalValue.getVisibleText()).to.eql('N/A');
+            });
           });
         });
       });
@@ -512,8 +511,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render processes tab and with Total Value summary', async () => {
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
+          await retry.tryForTime(5000, async () => {
+            expect(await processesTotalValue.getVisibleText()).to.eql('313');
+          });
         });
 
         it('should expand processes table row', async () => {
@@ -631,10 +631,69 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('#Asset Type: host without metrics', () => {
+      before(async () => {
+        await synthEsClient.index(
+          generateHostData({
+            from: DATE_WITH_HOSTS_DATA_FROM,
+            to: DATE_WITH_HOSTS_DATA_TO,
+            hosts: HOSTS_WITHOUT_DATA,
+          })
+        );
+
+        await navigateToNodeDetails('host-1', 'host', {
+          name: 'host-1',
+        });
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      after(() => synthEsClient.clean());
+
+      describe('Overview Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickOverviewTab();
+        });
+
+        [
+          { metric: 'cpuUsage' },
+          { metric: 'normalizedLoad1m' },
+          { metric: 'memoryUsage' },
+          { metric: 'diskUsage' },
+        ].forEach(({ metric }) => {
+          it(`${metric} tile should not be shown`, async () => {
+            await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
+          });
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
+        });
+      });
+
+      describe('Metrics Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickMetricsTab();
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
+        });
+      });
+
+      describe('Processes Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickProcessesTab();
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
+        });
+      });
+    });
+
     describe('#Asset type: host with kubernetes section', () => {
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index(
           generateHostsWithK8sNodeData({
             from: DATE_WITH_HOSTS_DATA_FROM,
@@ -651,9 +710,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      after(async () => {
-        await synthEsClient.clean();
-      });
+      after(() => synthEsClient.clean());
 
       describe('Overview Tab', () => {
         before(async () => {
@@ -727,8 +784,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Asset Type: container', () => {
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index(
           generateDockerContainersData({
             from: DATE_WITH_DOCKER_DATA_FROM,
@@ -744,9 +799,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      after(async () => {
-        await synthEsClient.clean();
-      });
+      after(() => synthEsClient.clean());
 
       describe('when container asset view is disabled', () => {
         before(async () => {

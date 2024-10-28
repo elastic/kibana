@@ -1,0 +1,5 @@
+[role="xpack"]
+[[search-assistant]]
+== Search AI Assistant
+
+(coming in 8.16.0)

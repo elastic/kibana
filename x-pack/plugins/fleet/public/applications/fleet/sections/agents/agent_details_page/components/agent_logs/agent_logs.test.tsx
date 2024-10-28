@@ -29,7 +29,7 @@ jest.mock('@kbn/logs-shared-plugin/public', () => {
 jest.mock('@kbn/logs-shared-plugin/common', () => {
   return {
     getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
-      logsLocator: { getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') },
+      logsLocator: { getRedirectUrl: jest.fn(() => 'https://logs-explorer-redirect-url') },
     }),
   };
 });
@@ -130,7 +130,7 @@ describe('AgentLogsUI', () => {
     const result = renderComponent();
     expect(result.getByTestId('viewInLogsBtn')).toHaveAttribute(
       'href',
-      `https://discover-redirect-url`
+      `https://logs-explorer-redirect-url`
     );
   });
 

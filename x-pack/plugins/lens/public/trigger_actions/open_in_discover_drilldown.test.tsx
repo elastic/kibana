@@ -46,7 +46,7 @@ describe('open in discover drilldown', () => {
     window.open = originalOpen;
   });
 
-  it('provides UI to edit config', () => {
+  it('provides UI to edit config', async () => {
     const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
       .ReactCollectConfig;
     const setConfig = jest.fn();
@@ -57,7 +57,7 @@ describe('open in discover drilldown', () => {
         context={{} as ActionFactoryContext}
       />
     );
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
 

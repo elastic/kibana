@@ -183,7 +183,7 @@
           "() => ",
           "QueryDslQueryContainer"
         ],
-        "path": "x-pack/packages/ml/query_utils/src/get_default_query.ts",
+        "path": "x-pack/packages/ml/query_utils/src/get_default_dsl_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

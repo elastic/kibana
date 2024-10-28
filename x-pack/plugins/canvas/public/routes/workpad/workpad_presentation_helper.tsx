@@ -14,7 +14,7 @@ import { getWorkpad } from '../../state/selectors/workpad';
 import { useFullscreenPresentationHelper } from './hooks/use_fullscreen_presentation_helper';
 import { useAutoplayHelper } from './hooks/use_autoplay_helper';
 import { useRefreshHelper } from './hooks/use_refresh_helper';
-import { usePlatformService } from '../../services';
+import { coreServices, spacesService } from '../../services/kibana_services';
 
 const getWorkpadLabel = () =>
   i18n.translate('xpack.canvas.workpadConflict.redirectLabel', {
@@ -22,7 +22,6 @@ const getWorkpadLabel = () =>
   });
 
 export const WorkpadPresentationHelper: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const platformService = usePlatformService();
   const workpad = useSelector(getWorkpad);
   useFullscreenPresentationHelper();
   useAutoplayHelper();
@@ -30,18 +29,18 @@ export const WorkpadPresentationHelper: FC<PropsWithChildren<unknown>> = ({ chil
   const history = useHistory();
 
   useEffect(() => {
-    platformService.setBreadcrumbs([
+    coreServices.chrome.setBreadcrumbs([
       getBaseBreadcrumb(history),
       getWorkpadBreadcrumb({ name: workpad.name }),
     ]);
-  }, [workpad.name, platformService, history]);
+  }, [workpad.name, history]);
 
   useEffect(() => {
     setDocTitle(workpad.name || getUntitledWorkpadLabel());
   }, [workpad.name, workpad.id]);
 
   const conflictElement = workpad.aliasId
-    ? platformService.getLegacyUrlConflict?.({
+    ? spacesService?.ui.components.getLegacyUrlConflict({
         objectNoun: getWorkpadLabel(),
         currentObjectId: workpad.id,
         otherObjectId: workpad.aliasId,

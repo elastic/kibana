@@ -41,6 +41,36 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 
+const validateCanUpdateFlapping = (
+  isFlappingEnabled: boolean,
+  originalFlapping: RuleAttributes['flapping'],
+  updateFlapping: UpdateRuleParams['data']['flapping']
+) => {
+  // If flapping is enabled, allow rule flapping to be updated and do nothing
+  if (isFlappingEnabled) {
+    return;
+  }
+
+  // If updated flapping is undefined then don't do anything, it's not being updated
+  if (updateFlapping === undefined) {
+    return;
+  }
+
+  // If both versions are falsy, allow it even if its changing between undefined and null
+  if (!originalFlapping && !updateFlapping) {
+    return;
+  }
+
+  // If both values are equal, allow it because it's essentially not changing anything
+  if (isEqual(originalFlapping, updateFlapping)) {
+    return;
+  }
+
+  throw Boom.badRequest(
+    `Error updating rule: can not update rule flapping if global flapping is disabled`
+  );
+};
+
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
 export interface UpdateRuleParams<Params extends RuleParams = never> {
@@ -48,6 +78,7 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   data: UpdateRuleData<Params>;
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
+  isFlappingEnabled?: boolean;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -70,6 +101,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     data: initialData,
     allowMissingConnectorSecrets,
     id,
+    isFlappingEnabled = false,
     shouldIncrementRevision = () => true,
   } = updateParams;
 
@@ -114,8 +146,18 @@ async function updateWithOCC<Params extends RuleParams = never>(
     systemActions: genSystemActions,
   };
 
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRuleSavedObject.attributes;
+  const {
+    alertTypeId,
+    consumer,
+    enabled,
+    schedule,
+    name,
+    apiKey,
+    apiKeyCreatedByUser,
+    flapping: originalFlapping,
+  } = originalRuleSavedObject.attributes;
+
+  validateCanUpdateFlapping(isFlappingEnabled, originalFlapping, initialData.flapping);
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -148,7 +190,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
         error,
       })
     );
@@ -159,7 +201,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
     })
   );
 

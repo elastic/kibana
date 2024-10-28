@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
@@ -39,10 +40,8 @@ const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
   }
 
   return {
-    flapping: {
-      lookBackWindow: flapping.look_back_window,
-      statusChangeThreshold: flapping.status_change_threshold,
-    },
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
   };
 };
 
@@ -90,7 +89,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
-  ...(flapping !== undefined ? transformFlapping(flapping) : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
   ...rest,
 });
 

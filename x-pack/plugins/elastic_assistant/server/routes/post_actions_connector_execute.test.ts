@@ -79,6 +79,9 @@ const mockContext = {
         appendConversationMessages:
           appendConversationMessages.mockResolvedValue(existingConversation),
       }),
+      getAIAssistantPromptsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn(),
+      }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
       }),

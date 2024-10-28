@@ -340,7 +340,7 @@ export const STEP_4A_DESCRIPTION = i18n.translate(
 );
 
 export const STEP_4B = i18n.translate('xpack.stackConnectors.components.casesWebhook.step4b', {
-  defaultMessage: 'Add comment in case',
+  defaultMessage: 'Add comment in case (optional)',
 });
 
 export const STEP_4B_DESCRIPTION = i18n.translate(

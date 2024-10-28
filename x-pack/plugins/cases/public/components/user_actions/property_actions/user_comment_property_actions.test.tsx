@@ -41,7 +41,7 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
@@ -57,12 +57,12 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
     expect(props.onEdit).toHaveBeenCalled();
   });
@@ -72,12 +72,12 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
 
     expect(props.onQuote).toHaveBeenCalled();
   });
@@ -87,18 +87,18 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
-    userEvent.click(await screen.findByText('Delete'));
+    await userEvent.click(await screen.findByText('Delete'));
     expect(props.onDelete).toHaveBeenCalled();
   });
 

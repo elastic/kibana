@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import joi from 'joi';
@@ -87,12 +88,17 @@ const convertObjectMembersToParameterObjects = (
   knownParameters: KnownParameters = {},
   isPathParameter = false
 ) => {
-  let properties: Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
+  let properties: OpenAPIV3.SchemaObject['properties'];
   const required = new Map<string, boolean>();
   if (isNullableObjectType(schema)) {
     const { result } = parse({ schema, ctx });
-    const anyOf = (result as OpenAPIV3.SchemaObject).anyOf as OpenAPIV3.SchemaObject[];
-    properties = anyOf.find((s) => s.type === 'object')!.properties!;
+    if (result.anyOf) {
+      properties = result.anyOf.find(
+        (s): s is OpenAPIV3.SchemaObject => !isReferenceObject(s) && s.type === 'object'
+      )?.properties;
+    } else if (result.type === 'object') {
+      properties = result.properties;
+    }
   } else if (isObjectType(schema)) {
     const { result } = parse({ schema, ctx });
     if ('$ref' in result)
@@ -105,6 +111,10 @@ const convertObjectMembersToParameterObjects = (
     return [];
   } else {
     throw createError(`Expected record, object or nullable object type, but got '${schema.type}'`);
+  }
+
+  if (!properties) {
+    throw createError(`Could not extract properties from ${schema.describe()}`);
   }
 
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {

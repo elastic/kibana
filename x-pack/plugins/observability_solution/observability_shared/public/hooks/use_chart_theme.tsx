@@ -25,10 +25,10 @@ export function useChartThemes(): { baseTheme: Theme; theme: PartialTheme[] } {
         color: 'transparent',
       },
       lineSeriesStyle: {
-        point: { visible: false },
+        point: { visible: 'never' },
       },
       areaSeriesStyle: {
-        point: { visible: false },
+        point: { visible: 'never' },
       },
     };
 

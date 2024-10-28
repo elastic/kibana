@@ -1,4 +1,5 @@
-summary: The create rule API returns a JSON object that contains details about the rule.
+summary: Elasticsearch query rule (ES|QL)
+description: The response for successfully creating an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
 value:
   id: e0d62360-78e8-11ee-9177-f7d404c8c945
   enabled: true

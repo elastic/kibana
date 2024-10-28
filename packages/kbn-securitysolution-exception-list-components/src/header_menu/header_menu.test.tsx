@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { createEvent, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { HeaderMenu } from '.';
@@ -17,7 +19,7 @@ describe('HeaderMenu', () => {
       <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
@@ -26,7 +28,7 @@ describe('HeaderMenu', () => {
   it('should not render icon', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={null} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
@@ -42,7 +44,7 @@ describe('HeaderMenu', () => {
     );
 
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('ActionItemdelete')).toBeDisabled();
     expect(wrapper.getByTestId('ActionItemedit')).toBeEnabled();
   });
@@ -58,7 +60,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -77,7 +79,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -97,7 +99,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -127,7 +129,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));

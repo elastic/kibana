@@ -167,8 +167,9 @@ const bulkDeleteWithOCC = async (
           if (rule.attributes.apiKey && !rule.attributes.apiKeyCreatedByUser) {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
-          if (rule.attributes.name) {
-            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          const ruleName = rule.attributes.name;
+          if (ruleName) {
+            ruleNameToRuleIdMapping[rule.id] = ruleName;
           }
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
@@ -179,7 +180,11 @@ const bulkDeleteWithOCC = async (
             ruleAuditEvent({
               action: RuleAuditAction.DELETE,
               outcome: 'unknown',
-              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+              savedObject: {
+                type: RULE_SAVED_OBJECT_TYPE,
+                id: rule.id,
+                name: ruleName,
+              },
             })
           );
         }

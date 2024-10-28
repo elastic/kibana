@@ -13,7 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
+import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
@@ -31,7 +31,7 @@ export interface Props {
 
 interface UseCurrentConversation {
   currentConversation: Conversation | undefined;
-  currentSystemPromptId: string | undefined;
+  currentSystemPrompt: PromptResponse | undefined;
   handleCreateConversation: () => Promise<void>;
   handleOnConversationDeleted: (cTitle: string) => Promise<void>;
   handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
@@ -41,7 +41,7 @@ interface UseCurrentConversation {
     isStreamRefetch?: boolean;
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
-  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: (promptId: string | undefined) => void;
 }
 
 /**
@@ -83,12 +83,22 @@ export const useCurrentConversation = ({
     [allSystemPrompts, currentConversation]
   );
 
-  const [currentSystemPromptId, setCurrentSystemPromptId] = useState<string | undefined>(
-    currentSystemPrompt?.id
+  // Write the selected system prompt to the conversation config
+  const setCurrentSystemPromptId = useCallback(
+    async (promptId?: string) => {
+      if (currentConversation && currentConversation.apiConfig) {
+        await setApiConfig({
+          conversation: currentConversation,
+          apiConfig: {
+            ...currentConversation.apiConfig,
+            defaultSystemPromptId: promptId,
+          },
+        });
+        await refetchCurrentUserConversations();
+      }
+    },
+    [currentConversation, refetchCurrentUserConversations, setApiConfig]
   );
-  useEffect(() => {
-    setCurrentSystemPromptId(currentSystemPrompt?.id);
-  }, [currentSystemPrompt?.id]);
 
   /**
    * END SYSTEM PROMPT
@@ -248,10 +258,20 @@ export const useCurrentConversation = ({
       });
       return;
     }
+    const newSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
     const newConversation = await createConversation({
       title: NEW_CHAT,
-      apiConfig: currentConversation?.apiConfig,
+      ...(currentConversation?.apiConfig != null &&
+      currentConversation?.apiConfig?.actionTypeId != null
+        ? {
+            apiConfig: {
+              connectorId: currentConversation.apiConfig.connectorId,
+              actionTypeId: currentConversation.apiConfig.actionTypeId,
+              ...(newSystemPrompt?.id != null ? { defaultSystemPromptId: newSystemPrompt.id } : {}),
+            },
+          }
+        : {}),
     });
 
     if (newConversation) {
@@ -263,6 +283,7 @@ export const useCurrentConversation = ({
       await refetchCurrentUserConversations();
     }
   }, [
+    allSystemPrompts,
     conversations,
     createConversation,
     currentConversation?.apiConfig,
@@ -272,7 +293,7 @@ export const useCurrentConversation = ({
 
   return {
     currentConversation,
-    currentSystemPromptId,
+    currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,

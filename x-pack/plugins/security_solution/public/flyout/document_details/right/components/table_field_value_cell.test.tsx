@@ -8,11 +8,48 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { DocumentDetailsContext } from '../../shared/context';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
-const contextId = 'test';
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
+    return (props: T) => {
+      return <Component {...props} />;
+    };
+  },
+}));
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+
+const panelContextValue = {
+  eventId: 'event id',
+  indexName: 'indexName',
+  scopeId: 'scopeId',
+} as unknown as DocumentDetailsContext;
+
+const scopeId = 'scopeId';
 
 const eventId = 'TUWyf3wBFCFU0qRJTauW';
 
@@ -31,16 +68,26 @@ const hostIpData: EventFieldsData = {
 const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', 'fe80::4001:aff:fec8:32'];
 
 describe('TableFieldValueCell', () => {
+  beforeAll(() => {
+    jest.clearAllMocks();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  });
+
   describe('common behavior', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <TableFieldValueCell
-            contextId={contextId}
-            data={hostIpData}
-            eventId={eventId}
-            values={hostIpValues}
-          />
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <TableFieldValueCell
+              scopeId={scopeId}
+              data={hostIpData}
+              eventId={eventId}
+              values={hostIpValues}
+              ruleId="ruleId"
+              isPreview={false}
+            />
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
     });
@@ -54,13 +101,17 @@ describe('TableFieldValueCell', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <TableFieldValueCell
-            contextId={contextId}
-            data={hostIpData}
-            eventId={eventId}
-            fieldFromBrowserField={undefined} // <-- no metadata
-            values={hostIpValues}
-          />
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <TableFieldValueCell
+              scopeId={scopeId}
+              data={hostIpData}
+              eventId={eventId}
+              fieldFromBrowserField={undefined} // <-- no metadata
+              values={hostIpValues}
+              ruleId="ruleId"
+              isPreview={false}
+            />
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
     });
@@ -98,13 +149,17 @@ describe('TableFieldValueCell', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <TableFieldValueCell
-            contextId={contextId}
-            data={messageData}
-            eventId={eventId}
-            fieldFromBrowserField={messageFieldFromBrowserField}
-            values={messageValues}
-          />
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <TableFieldValueCell
+              scopeId={scopeId}
+              data={messageData}
+              eventId={eventId}
+              fieldFromBrowserField={messageFieldFromBrowserField}
+              values={messageValues}
+              ruleId="ruleId"
+              isPreview={false}
+            />
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
     });
@@ -132,13 +187,17 @@ describe('TableFieldValueCell', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <TableFieldValueCell
-            contextId={contextId}
-            data={hostIpData}
-            eventId={eventId}
-            fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata
-            values={hostIpValues}
-          />
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <TableFieldValueCell
+              scopeId={scopeId}
+              data={hostIpData}
+              eventId={eventId}
+              fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata
+              values={hostIpValues}
+              ruleId="ruleId"
+              isPreview={false}
+            />
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
     });
@@ -156,6 +215,19 @@ describe('TableFieldValueCell', () => {
     it('should render each of the expected values when `fieldFromBrowserField` is provided', () => {
       hostIpValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
+      });
+    });
+
+    it('should open preview when preview is not disabled', () => {
+      screen.getByTestId(`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-0`).click();
+
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: NetworkPanelKey,
+        params: {
+          ip: '127.0.0.1',
+          flowTarget: 'source',
+          banner: NETWORK_PREVIEW_BANNER,
+        },
       });
     });
   });

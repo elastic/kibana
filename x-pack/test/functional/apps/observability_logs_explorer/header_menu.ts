@@ -66,12 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.waitForSwitcherToBe('All logs');
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getColumnHeaders()).to.eql([
-            '@timestamp',
-            'host.name',
-            'service.name',
-            'message',
-          ]);
+          expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'Summary']);
         });
 
         await retry.try(async () => {

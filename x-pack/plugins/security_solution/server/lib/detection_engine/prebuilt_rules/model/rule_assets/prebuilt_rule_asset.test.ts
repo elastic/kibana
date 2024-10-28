@@ -32,12 +32,13 @@ describe('Prebuilt rule asset schema', () => {
     expect(result.data).toEqual(getPrebuiltRuleMock());
   });
 
-  describe('ommited fields from the rule schema are ignored', () => {
+  describe('omitted fields from the rule schema are ignored', () => {
     // The PrebuiltRuleAsset schema is built out of the rule schema,
     // but the following fields are manually omitted.
     // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
     const omittedBaseFields = [
       'actions',
+      'response_actions',
       'throttle',
       'meta',
       'output_index',

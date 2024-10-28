@@ -8,19 +8,12 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'visualize',
-    'lens',
-    'timePicker',
-    'security',
-  ]);
+  const { dashboard, security } = getPageObjects(['dashboard', 'security']);
 
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
+  const securityService = getService('security');
   const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -44,9 +37,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
 
-      await security.role.create(ROLE, {
+      await securityService.role.create(ROLE, {
         elasticsearch: {
           indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
         },
@@ -60,17 +53,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ],
       });
 
-      await security.user.create(USERNAME, {
+      await securityService.user.create(USERNAME, {
         password: 'changeme',
         roles: [ROLE],
         full_name: USERNAME,
       });
 
-      await PageObjects.security.login(USERNAME, 'changeme', {
+      await security.login(USERNAME, 'changeme', {
         expectSpaceSelector: true,
       });
 
-      await PageObjects.dashboard.gotoDashboardListingURL({
+      await dashboard.gotoDashboardListingURL({
         args: {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
@@ -81,10 +74,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
       await spaces.delete(customSpace);
-      await security.user.delete(USERNAME);
-      await security.role.delete(ROLE);
+      await securityService.user.delete(USERNAME);
+      await securityService.role.delete(ROLE);
 
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',

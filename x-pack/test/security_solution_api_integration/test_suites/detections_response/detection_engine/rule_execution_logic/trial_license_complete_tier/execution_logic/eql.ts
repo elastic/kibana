@@ -18,6 +18,7 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_SUPPRESSION_DOCS_COUNT,
   EVENT_KIND,
+  ALERT_RULE_EXECUTION_TYPE,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -34,10 +35,7 @@ import {
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
-} from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   getEqlRuleForAlertTesting,
   getAlerts,
@@ -71,7 +69,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
   // TODO: add a new service for loading archiver files similar to "getService('es')"
@@ -158,12 +155,12 @@ export default ({ getService }: FtrProviderContext) => {
         ecs: {
           version: '1.0.0-beta2',
         },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-audit-configuration',
           category: 'configuration',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
+        'event.kind': 'signal',
         host: {
           architecture: 'x86_64',
           containerized: false,
@@ -300,12 +297,11 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-audit-configuration',
           category: 'configuration',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
         service: {
           type: 'auditd',
         },
@@ -427,12 +423,11 @@ export default ({ getService }: FtrProviderContext) => {
         },
         cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
         ecs: { version: '1.0.0-beta2' },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-promiscuous-mode-on-device',
           category: 'anomoly',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
         host: {
           architecture: 'x86_64',
           containerized: false,
@@ -775,9 +770,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-        await kibanaServer.uiSettings.update({
-          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-        });
       });
 
       after(async () => {
@@ -999,8 +991,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
-
         expect(alerts.hits.hits.length).equal(3);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1010,6 +1002,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits.length).equal(6);
+        expect(allNewAlerts.hits.hits[5]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1189,6 +1182,32 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedAlerts.hits.hits.length).equal(1);
 
         expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
+      });
+    });
+
+    describe('preview logged requests', () => {
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+        });
+
+        expect(logs[0].requests).equal(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).to.have.length(1);
+        expect(requests![0].description).to.be('EQL request to find all matches');
+        expect(requests![0].request).to.contain(
+          'POST /auditbeat-*/_eql/search?allow_no_indices=true'
+        );
       });
     });
   });

@@ -117,8 +117,7 @@ const validateHTTP: ValidationLibrary = {
     return validateHeaders(headers);
   },
   [ConfigKey.MAX_REDIRECTS]: ({ [ConfigKey.MAX_REDIRECTS]: value }) =>
-    (!!value && !`${value}`.match(DIGITS_ONLY)) ||
-    parseFloat(value as MonitorFields[ConfigKey.MAX_REDIRECTS]) < 0,
+    (!!value && !`${value}`.match(DIGITS_ONLY)) || parseFloat(value as string) < 0,
   [ConfigKey.URLS]: ({ [ConfigKey.URLS]: value }) => !value,
   ...validateCommon,
 };

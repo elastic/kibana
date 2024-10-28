@@ -135,6 +135,21 @@ describe('MaintenanceWindowClient - update', () => {
         eventEndTime: '2023-03-05T01:00:00.000Z',
       })
     );
+
+    expect(uiSettings.get).toHaveBeenCalledTimes(3);
+    expect(uiSettings.get.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "query:allowLeadingWildcards",
+        ],
+        Array [
+          "query:queryString:options",
+        ],
+        Array [
+          "courier:ignoreFilterIfFieldNotInIndex",
+        ],
+      ]
+    `);
   });
 
   it('should not regenerate all events if rrule and duration did not change', async () => {

@@ -44,6 +44,11 @@ export const createMockConfig = (): ConfigType => {
           maxBulkRequestBodySizeBytes: 10_485_760,
         },
       },
+      entityStore: {
+        developer: {
+          pipelineDebugMode: false,
+        },
+      },
     },
   };
 };

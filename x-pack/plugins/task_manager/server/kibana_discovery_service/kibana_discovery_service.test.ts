@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { DEFAULT_TIMEOUT, KibanaDiscoveryService } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
@@ -26,6 +26,7 @@ describe('KibanaDiscoveryService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
+    jest.spyOn(global, 'clearTimeout');
     jest.setSystemTime(new Date(now));
   });
 
@@ -110,6 +111,23 @@ describe('KibanaDiscoveryService', () => {
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
     });
 
+    it('timeout should not be less than two seconds', async () => {
+      savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse([]));
+      const kibanaDiscoveryService = new KibanaDiscoveryService({
+        savedObjectsRepository,
+        logger,
+        currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: 500,
+        },
+      });
+      await kibanaDiscoveryService.start();
+
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), DEFAULT_TIMEOUT);
+    });
+
     it('reschedules when upsert fails on start', async () => {
       savedObjectsRepository.update.mockRejectedValueOnce(new Error('foo'));
 
@@ -180,13 +198,12 @@ describe('KibanaDiscoveryService', () => {
         "Kibana Discovery Service couldn't update this node's last_seen timestamp. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
       );
     });
-  });
 
-  describe('getActiveKibanaNodes', () => {
-    const mockActiveNodes = [createFindSO('456', '10.10.2024')];
-    savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse(mockActiveNodes));
+    it('does not schedule when Kibana is shutting down', async () => {
+      savedObjectsRepository.update.mockResolvedValueOnce(
+        {} as SavedObjectsUpdateResponse<unknown>
+      );
 
-    it('returns the active kibana nodes', async () => {
       const kibanaDiscoveryService = new KibanaDiscoveryService({
         savedObjectsRepository,
         logger,
@@ -195,6 +212,50 @@ describe('KibanaDiscoveryService', () => {
           active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
           interval: DEFAULT_DISCOVERY_INTERVAL_MS,
         },
+      });
+      await kibanaDiscoveryService.start();
+
+      expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith('Kibana Discovery Service has been started');
+      expect(kibanaDiscoveryService.isStarted()).toBe(true);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
+
+      kibanaDiscoveryService.stop();
+
+      await jest.advanceTimersByTimeAsync(15000);
+
+      expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
+      expect(clearTimeout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getActiveKibanaNodes', () => {
+    const mockActiveNodes = [createFindSO('456', '10.10.2024')];
+    savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse(mockActiveNodes));
+
+    it('returns the active kibana nodes', async () => {
+      const onNodesCounted = jest.fn();
+      const kibanaDiscoveryService = new KibanaDiscoveryService({
+        savedObjectsRepository,
+        logger,
+        currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
+        onNodesCounted,
       });
 
       const activeNodes = await kibanaDiscoveryService.getActiveKibanaNodes();
@@ -206,6 +267,7 @@ describe('KibanaDiscoveryService', () => {
         type: BACKGROUND_TASK_NODE_SO_NAME,
       });
       expect(activeNodes).toEqual(mockActiveNodes);
+      expect(onNodesCounted).toHaveBeenCalledWith(mockActiveNodes.length);
     });
   });
 
