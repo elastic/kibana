@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 import type { CustomUrlListProps } from './list';
 import { CustomUrlList } from './list';

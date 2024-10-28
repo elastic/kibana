@@ -31,7 +31,7 @@ import {
   BLOCKED_JOBS_REFRESH_INTERVAL_MS,
   BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS,
   BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
-} from '../../../../../../common/constants/jobs_list';
+} from '@kbn/ml-common-constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';

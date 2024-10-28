@@ -653,6 +653,8 @@
     "@kbn/ml-cancellable-search": "link:x-pack/packages/ml/cancellable_search",
     "@kbn/ml-category-validator": "link:x-pack/packages/ml/category_validator",
     "@kbn/ml-chi2test": "link:x-pack/packages/ml/chi2test",
+    "@kbn/ml-common-constants": "link:x-pack/packages/ml/common_constants",
+    "@kbn/ml-common-types": "link:x-pack/packages/ml/common_types",
     "@kbn/ml-creation-wizard-utils": "link:x-pack/packages/ml/creation_wizard_utils",
     "@kbn/ml-data-frame-analytics-utils": "link:x-pack/packages/ml/data_frame_analytics_utils",
     "@kbn/ml-data-grid": "link:x-pack/packages/ml/data_grid",

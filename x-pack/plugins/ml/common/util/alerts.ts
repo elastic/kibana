@@ -10,9 +10,12 @@ import { pick } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
-import { resolveMaxTimeInterval } from './job_utils';
-import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
+
+import { resolveMaxTimeInterval } from './time_interval_utils';
 
 const narrowBucketLength = 60;
 

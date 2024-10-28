@@ -15,7 +15,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getSeverity, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
+import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
