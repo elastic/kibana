@@ -149,7 +149,7 @@ export const useRuleIndexPattern = ({
 
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
-        if (dataViewId != null) {
+        if (dataViewId != null && dataViewId !== '') {
           const dv = await data.dataViews.get(dataViewId);
           setIndexPattern(dv);
         }
