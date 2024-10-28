@@ -490,7 +490,9 @@ export class SearchInterceptor {
             case ENHANCED_ES_SEARCH_STRATEGY:
               if (response.rawResponse) return response;
               const typedResponse = response as unknown as AsyncSearchGetResponse;
-              const shimmedResponse = shimHitsTotal(typedResponse.response);
+              const shimmedResponse = shimHitsTotal(typedResponse.response, {
+                legacyHitsTotal: searchOptions.legacyHitsTotal,
+              });
               return {
                 id: typedResponse.id,
                 isPartial: typedResponse.is_partial,
