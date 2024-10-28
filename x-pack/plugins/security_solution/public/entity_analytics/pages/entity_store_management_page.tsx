@@ -290,7 +290,7 @@ export const EntityStoreManagementPage = () => {
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.subTitle"
-          defaultMessage="Allows comprehensive monitoring of your system's hosts and users."
+          defaultMessage="Store host and user entities observed in events."
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
