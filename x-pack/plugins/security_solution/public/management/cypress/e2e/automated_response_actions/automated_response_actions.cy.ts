@@ -7,9 +7,11 @@
 
 import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
 import type { PolicyData } from '../../../../../common/endpoint/types';
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -79,6 +81,9 @@ describe(
     });
 
     it('should have been called against a created host', () => {
+      loadPage(APP_ENDPOINTS_PATH);
+      cy.contains(createdHost.hostname).should('exist');
+
       toggleRuleOffAndOn(ruleName);
 
       visitRuleAlerts(ruleName);
