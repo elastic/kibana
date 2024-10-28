@@ -112,6 +112,23 @@ describe('updateAgentPolicySpaces', () => {
     );
   });
 
+  it('throw when trying to change a managed policies space', async () => {
+    jest.mocked(agentPolicyService.get).mockResolvedValue({
+      id: 'policy1',
+      space_ids: ['default'],
+      is_managed: true,
+    } as any);
+    jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([] as any);
+    await expect(
+      updateAgentPolicySpaces({
+        agentPolicyId: 'policy1',
+        currentSpaceId: 'default',
+        newSpaceIds: ['test'],
+        authorizedSpaces: ['test', 'default'],
+      })
+    ).rejects.toThrowError(/Cannot update hosted agent policy policy1 space/);
+  });
+
   it('throw when trying to add a space with missing permissions', async () => {
     await expect(
       updateAgentPolicySpaces({
