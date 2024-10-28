@@ -38,7 +38,7 @@ interface Props {
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric, guidedOnboardingService } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
-  const onlyReadAccess = !application.capabilities.rulesSettings.writeFlappingSettingsUI;
+  const onlyReadAccess = !application.capabilities.roles.save;
 
   if (canAccessIntegrations) {
     return (

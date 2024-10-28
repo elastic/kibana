@@ -31,14 +31,14 @@ beforeEach(() => {
 const applicationStartMock = {
   capabilities: {
     navLinks: { integrations: true },
-    rulesSettings: { writeFlappingSettingsUI: true },
+    roles: { save: true },
   },
 } as unknown as ApplicationStart;
 
 const applicationStartMockRestricted = {
   capabilities: {
     navLinks: { integrations: true },
-    rulesSettings: { writeFlappingSettingsUI: false },
+    roles: { save: false },
   },
 } as unknown as ApplicationStart;
 
