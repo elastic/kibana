@@ -141,6 +141,12 @@ export class EntityStoreDataClient {
     }
 
     this.log('info', entityType, `Initializing entity store`);
+    this.audit(
+      EntityEngineActions.INIT,
+      EntityStoreResource.ENTITY_ENGINE,
+      entityType,
+      'Initializing entity engine'
+    );
 
     const descriptor = await this.engineClient.init(entityType, {
       filter,
@@ -240,12 +246,6 @@ export class EntityStoreDataClient {
       const updated = await this.start(entityType, { force: true });
 
       // the task will execute the enrich policy on a schedule
-      this.audit(
-        EntityEngineActions.START,
-        EntityStoreResource.FIELD_RETENTION_ENRICH_POLICY_TASK,
-        entityType,
-        'Starting entity store field retention enrich task'
-      );
       await startEntityStoreFieldRetentionEnrichTask({
         namespace,
         logger,
@@ -262,7 +262,7 @@ export class EntityStoreDataClient {
         EntityEngineActions.INIT,
         EntityStoreResource.ENTITY_ENGINE,
         entityType,
-        'Failed to initialize entity engine',
+        'Failed to initialize entity engine resources',
         err
       );
 
