@@ -19,11 +19,16 @@ import { DashboardLocatorParams } from '../../dashboard_container';
 import { DASHBOARD_APP_ID, createDashboardEditUrl } from '../../dashboard_constants';
 import { coreServices } from '../../services/kibana_services';
 
-export const getDashboardListItemLink = (id: string, includeBasepath: boolean = false) => {
+export const getDashboardListItemLink = (
+  id: string,
+  spaceId?: string,
+  includeBasepath: boolean = false
+) => {
   let unsavedStateForLocator: DashboardLocatorParams = {};
 
   const { dashboardState: unsavedDashboardState, panels: panelModifications } =
     getDashboardBackupService().getState(id) ?? {};
+
   const allUnsavedPanels = (() => {
     if (
       Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
@@ -51,7 +56,7 @@ export const getDashboardListItemLink = (id: string, includeBasepath: boolean = 
       : {};
 
     const allUnsavedPanelsMap = {
-      ...latestPanels,
+      ...latestPanels.spaceId,
       ...modifiedPanels,
     };
     return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
