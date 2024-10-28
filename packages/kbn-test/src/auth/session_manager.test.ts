@@ -172,7 +172,7 @@ describe('SamlSessionManager', () => {
   describe('for cloud session', () => {
     const hostOptions = {
       protocol: 'https' as 'http' | 'https',
-      hostname: 'cloud',
+      hostname: 'my-test-deployment.test.elastic.cloud',
       username: 'elastic',
       password: 'changeme',
     };
@@ -326,6 +326,50 @@ describe('SamlSessionManager', () => {
         `User with '${noCredentialsRole}' role is not defined`
       );
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
+    });
+  });
+
+  describe(`for cloud session with 'isCloud=false'`, () => {
+    const hostOptions = {
+      protocol: 'https' as 'http' | 'https',
+      hostname: 'my-test-deployment.test.elastic.cloud',
+      username: 'elastic',
+      password: 'changeme',
+    };
+    const samlSessionManagerOptions = {
+      hostOptions,
+      isCloud: false,
+      log,
+      cloudUsersFilePath,
+    };
+    const cloudCookieInstance = Cookie.parse(
+      'sid=cloud_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
+    )!;
+    const cloudEmail = 'viewer@elastic.co';
+    const cloudUsers = new Array<[Role, User]>();
+    cloudUsers.push(['viewer', { email: 'viewer@elastic.co', password: 'p1234' }]);
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      jest
+        .requireMock('../kbn_client/kbn_client')
+        .KbnClient.mockImplementation(() => ({ version: { get } }));
+      get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
+
+      readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
+      createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
+    });
+
+    test('should create an instance of SamlSessionManager', () => {
+      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
+      expect(samlSessionManager).toBeInstanceOf(SamlSessionManager);
+    });
+
+    test(`'getSessionCookieForRole' should call 'createCloudSAMLSession' instead of 'createLocalSAMLSession'`, async () => {
+      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(0);
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(1);
     });
   });
 });

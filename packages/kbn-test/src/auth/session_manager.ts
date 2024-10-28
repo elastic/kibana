@@ -54,7 +54,6 @@ export class SamlSessionManager {
   private readonly cloudUsersFilePath: string;
 
   constructor(options: SamlSessionManagerOptions) {
-    this.isCloud = options.isCloud;
     this.log = options.log;
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
@@ -62,6 +61,7 @@ export class SamlSessionManager {
       port: options.hostOptions.port,
     };
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
+    this.isCloud = this.validateCloudSetting(options.isCloud, this.kbnHost);
     this.kbnClient = new KbnClient({
       log: this.log,
       url: Url.format({
@@ -73,6 +73,22 @@ export class SamlSessionManager {
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
+  }
+
+  /**
+   * Validates if the 'kbnHost' points to Cloud, even if 'isCloud' was set to false
+   */
+  private validateCloudSetting(isCloud: boolean, kbnHost: string): boolean {
+    const cloudIndicator = '.elastic.cloud';
+
+    if (!isCloud && kbnHost.includes(cloudIndicator)) {
+      this.log.warning(
+        `'isCloud' was set to false, but the 'kbnHost' appears to be a Cloud instance. Adjusting 'isCloud' to true.
+        If you run FTR tests against Cloud make sure to add TEST_CLOUD=1 to your command`
+      );
+      return true;
+    }
+    return isCloud;
   }
 
   /**
