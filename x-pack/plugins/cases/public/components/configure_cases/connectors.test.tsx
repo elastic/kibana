@@ -189,7 +189,7 @@ describe('Connectors', () => {
     expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
   });
 
-  it('it should hide the "Add Connector" button when the user lacks the capability to add a new connector', async () => {
+  it('it should hide the "Add Connector" button when the user lacks the capability to add a new connector', () => {
     useApplicationCapabilitiesMock().actions = { crud: false, read: true };
 
     appMockRender.render(<Connectors {...props} />);
