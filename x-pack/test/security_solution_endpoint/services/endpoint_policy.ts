@@ -55,7 +55,6 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
   const supertest = getService('supertest');
   const log = getService('log');
   const retry = getService('retry');
-  const kbnClient = getService('kibanaServer');
 
   const logSupertestApiErrorAndThrow = (message: string, error: any): never => {
     const responseBody = error?.response?.body;
