@@ -110,7 +110,7 @@ export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) 
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { deleteEntityEngine } = useEntityStoreRoutes();
   return useMutation<DeleteEntityEngineResponse[]>(
-    () => Promise.all([deleteEntityEngine('user'), deleteEntityEngine('host')]),
+    () => Promise.all([deleteEntityEngine('user', true), deleteEntityEngine('host', true)]),
     {
       ...options,
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
