@@ -95,7 +95,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/saved-objects-tagging-plugin",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",
     "@kbn/safer-lodash-set",
@@ -221,6 +220,7 @@
     "@kbn/cloud-security-posture",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
+    "@kbn/cloud-security-posture-graph",
     "@kbn/presentation-publishing",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
@@ -231,5 +231,7 @@
     "@kbn/serverless",
     "@kbn/core-user-profile-browser",
     "@kbn/data-stream-adapter",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-user-profile-common",
   ]
 }
