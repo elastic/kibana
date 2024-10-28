@@ -57,7 +57,7 @@ export function useCustomCardsForCategory(
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectDescription',
             {
-              defaultMessage: 'Scan your host for log and metric files, auto-install integrations',
+              defaultMessage: 'Scan your host for log files, metrics, auto-install integrations',
             }
           ),
           extraLabelsBadges: [
