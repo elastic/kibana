@@ -12,14 +12,14 @@ import { switchMap, map, tap, retry } from 'rxjs';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import { useMlKibana } from '../kibana';
 import {
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
   type MlStorageKey,
   type TMlStorageMapped,
-} from '../../../../common/types/storage';
+} from '@kbn/ml-common-types/storage';
+import type { NotificationsCountResponse } from '@kbn/ml-common-types/notifications';
+import { useMlKibana } from '../kibana';
 import { useAsObservable } from '../../hooks';
-import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
 const NOTIFICATIONS_CHECK_INTERVAL = 60000;
 

@@ -18,11 +18,11 @@ import type {
   TimeSeriesExplorerAppState,
   TimeSeriesExplorerGlobalState,
   TimeSeriesExplorerUrlState,
-} from '../../../common/types/locator';
-import { ML_PAGES } from '../../../common/constants/locator';
+} from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import type { AppPageState } from '@kbn/ml-common-types/common';
 import { formatGenericMlUrl } from './common';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import type { AppPageState } from '../../../common/types/common';
 
 /**
  * Creates URL to the Anomaly Detection Job management page

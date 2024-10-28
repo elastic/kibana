@@ -14,8 +14,7 @@ import moment from 'moment';
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
+import type { Annotation, AnnotationsTable } from '@kbn/ml-common-types/annotations';
 
 import type { ChartTooltipService } from '../components/chart_tooltip';
 import { useAnnotationStyles } from '../timeseriesexplorer/styles';
