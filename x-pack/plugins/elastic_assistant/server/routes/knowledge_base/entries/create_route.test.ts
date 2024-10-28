@@ -34,6 +34,10 @@ describe('Create conversation route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    context.elasticAssistant.getRegisteredFeatures.mockReturnValue({
+      assistantKnowledgeBaseByDefault: true,
+      assistantModelEvaluation: true,
+    });
     clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getEmptyFindResult())
     ); // no current conversations
@@ -49,12 +53,12 @@ describe('Create conversation route', () => {
   });
 
   describe('status codes', () => {
-    test.only('returns 200 with a conversation created via AIAssistantKnowledgeBaseDataClient', async () => {
+    test('returns 200 with a conversation created via AIAssistantKnowledgeBaseDataClient', async () => {
       const response = await server.inject(
         getCreateKnowledgeBaseEntryRequest(),
         requestContextMock.convertContext(context)
       );
-      expect(response.calls[1].status).toEqual(200);
+      expect(response.status).toEqual(200);
     });
 
     test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
@@ -87,57 +91,18 @@ describe('Create conversation route', () => {
   });
 
   describe('request validation', () => {
-    test('disallows unknown title', async () => {
+    test('disallows wrong name type', async () => {
       const request = requestMock.create({
         method: 'post',
         path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
         body: {
           ...getCreateKnowledgeBaseEntrySchemaMock(),
-          title: true,
+          name: true,
         },
       });
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
-    });
-  });
-  describe('conversation containing messages', () => {
-    const getMessage = (role: string = 'user') => ({
-      role,
-      content: 'test content',
-      timestamp: '2019-12-13T16:40:33.400Z',
-    });
-    const defaultMessage = getMessage();
-
-    test('is successful', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: {
-          ...getCreateKnowledgeBaseEntrySchemaMock(),
-          messages: [defaultMessage],
-        },
-      });
-
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(200);
-    });
-
-    test('fails when provided with an unsupported message role', async () => {
-      const wrongMessage = getMessage('test_thing');
-
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: {
-          ...getCreateKnowledgeBaseEntrySchemaMock(),
-          messages: [wrongMessage],
-        },
-      });
-      const result = await server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(
-        `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'test_thing'`
-      );
     });
   });
 });
