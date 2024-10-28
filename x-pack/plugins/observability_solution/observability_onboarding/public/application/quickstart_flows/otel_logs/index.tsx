@@ -31,9 +31,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ObservabilityOnboardingAppServices } from '../../..';
-import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
+import { EmptyPrompt } from '../shared/empty_prompt';
 
 const feedbackUrl = 'https://ela.st/otelcollector';
 
@@ -48,11 +48,15 @@ const HOST_COMMAND = i18n.translate(
 export const OtelLogsPanel: React.FC = () => {
   const {
     data: apiKeyData,
-    status: apiKeyStatus,
     error,
-  } = useFetcher((callApi) => {
-    return callApi('POST /internal/observability_onboarding/otel/api_key', {});
-  }, []);
+    refetch,
+  } = useFetcher(
+    (callApi) => {
+      return callApi('POST /internal/observability_onboarding/otel/api_key', {});
+    },
+    [],
+    { showToastOnError: false }
+  );
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi('GET /internal/observability_onboarding/logs/setup/environment');
@@ -118,15 +122,14 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
 
   const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
+  if (error) {
+    return <EmptyPrompt onboardingFlowType="otel_logs" error={error} onRetryClick={refetch} />;
+  }
+
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiFlexGroup direction="column" gutterSize="none">
         <MultiIntegrationInstallBanner />
-        {error && (
-          <EuiFlexItem>
-            <ApiKeyBanner status={apiKeyStatus} payload={apiKeyData} error={error} />
-          </EuiFlexItem>
-        )}
         <EuiSteps
           steps={[
             {
