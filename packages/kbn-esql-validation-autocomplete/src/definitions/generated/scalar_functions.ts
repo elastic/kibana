@@ -941,7 +941,7 @@ const coalesceDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -957,7 +957,7 @@ const coalesceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -1973,7 +1973,7 @@ const greatestDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -1989,7 +1989,7 @@ const greatestDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -2484,7 +2484,7 @@ const leastDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -2500,7 +2500,7 @@ const leastDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -3198,7 +3198,7 @@ const ltrimDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -3475,7 +3475,7 @@ const mvAppendDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -3920,7 +3920,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4067,7 +4067,7 @@ const mvFirstDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4224,7 +4224,7 @@ const mvLastDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4341,7 +4341,7 @@ const mvMaxDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4583,7 +4583,7 @@ const mvMinDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -5054,7 +5054,7 @@ const mvSliceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -5221,7 +5221,7 @@ const mvSortDefinition: FunctionDefinition = {
           acceptedValues: ['asc', 'desc'],
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -6131,7 +6131,7 @@ const reverseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6323,7 +6323,7 @@ const rtrimDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8597,7 +8597,7 @@ const toLowerDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8995,7 +8995,7 @@ const toUpperDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -9077,7 +9077,7 @@ const trimDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
