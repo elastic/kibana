@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ResourceFieldDescriptor } from './utils';
 
 const MAX_LIMITED_FIELDS_VISIBLE = 3;
@@ -19,6 +19,7 @@ interface ResourceProps {
   /* When true, the column will render a predefined number of resources and indicates with a badge how many more we have */
   limited?: boolean;
   onFilter?: DocViewFilterFn;
+  css?: CommonProps['css'];
 }
 
 export const Resource = ({ fields, limited = false, onFilter, ...props }: ResourceProps) => {
