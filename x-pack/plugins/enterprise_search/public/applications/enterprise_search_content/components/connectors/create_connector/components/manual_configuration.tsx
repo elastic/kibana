@@ -193,7 +193,7 @@ GET connector-${rawName}/_search
         content={i18n.translate(
           'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel',
           {
-            defaultMessage: 'Try in Console',
+            defaultMessage: 'Run in Console',
           }
         )}
         type="link"
