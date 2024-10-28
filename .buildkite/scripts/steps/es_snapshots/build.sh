@@ -85,7 +85,7 @@ echo "--- Create kibana-ci docker cloud image archives"
 # When we bump versions, these dependencies may not exist yet, but we don't want to
 # block the rest of the snapshot promotion process
 set +e
-./gradlew :distribution:docker:cloud-docker-export:assemble && {
+./gradlew :distribution:docker:cloud-ess-docker-export:assemble && {
   ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
   ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
   KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
