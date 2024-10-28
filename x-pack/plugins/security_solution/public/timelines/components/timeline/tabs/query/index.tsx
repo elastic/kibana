@@ -86,7 +86,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     browserFields,
     dataViewId,
     loading: loadingSourcerer,
-    indexPattern,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
@@ -119,13 +118,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      indexPattern,
+      indexPattern: sourcererDataView,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode]);
+  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -177,7 +176,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     indexNames: selectedPatterns,
     language: kqlQuery.language,
     limit: sampleSize,
-    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     startDate: start,
