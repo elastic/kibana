@@ -6,7 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean } from '@storybook/addon-knobs';
+import { boolean } from '@storybook/addon-controls';
 import React from 'react';
 import { ColorPicker } from '../color_picker';
 

@@ -46,6 +46,7 @@ export const defaultConfig: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/addon-webpack5-compiler-babel',
     {
+      // https://storybook.js.org/docs/essentials
       name: '@storybook/addon-essentials',
       options: {
         // docs requires ESM support, disable
