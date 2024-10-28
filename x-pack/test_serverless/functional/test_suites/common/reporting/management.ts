@@ -36,9 +36,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Reporting Management app', function () {
-    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
-    this.tags('failsOnMKI');
-
     let reportJob: ReportApiJSON;
     let path: string;
 
@@ -56,6 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           params: { savedSearchId: 'ab12e3c0-f231-11e6-9486-733b1ac9221a' },
         },
       ],
+      title: 'report for management app test',
     };
 
     // Kibana CI and MKI use different users
