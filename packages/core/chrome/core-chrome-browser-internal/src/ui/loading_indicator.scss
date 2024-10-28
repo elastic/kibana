@@ -2,3 +2,7 @@
   visibility: hidden;
   animation-play-state: paused;
 }
+
+.euiHeaderSectionItem .euiButtonEmpty__text {
+  display: flex;
+}

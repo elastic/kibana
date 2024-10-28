@@ -179,7 +179,14 @@ class NavControlPopoverUI extends Component<Props, State> {
   }
 
   private getAlignedLoadingSpinner() {
-    return <EuiSkeletonRectangle borderRadius="m" contentAriaLabel="Loading spaces navigation" />;
+    return (
+      <EuiSkeletonRectangle
+        borderRadius="m"
+        contentAriaLabel={i18n.translate('xpack.spaces.navControl.popover.loadingSpacesLabel', {
+          defaultMessage: 'Loading spaces navigation',
+        })}
+      />
+    );
   }
 
   private getActiveSpaceButton = () => {
