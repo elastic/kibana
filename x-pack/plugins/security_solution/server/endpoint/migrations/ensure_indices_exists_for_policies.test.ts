@@ -10,7 +10,8 @@ import { ensureIndicesExistsForPolicies } from './ensure_indices_exists_for_poli
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from '../../fleet_integration/handlers/create_policy_datastreams';
 
 jest.mock('../../fleet_integration/handlers/create_policy_datastreams');
-const createPolicyDataStreamsIfNeededMock = _createPolicyDataStreamsIfNeeded as jest.Mock;
+const createPolicyDataStreamsIfNeededMock =
+  _createPolicyDataStreamsIfNeeded as unknown as jest.Mock;
 
 describe('Ensure indices exists for policies migration', () => {
   let endpointAppContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -18,11 +19,11 @@ describe('Ensure indices exists for policies migration', () => {
   beforeEach(() => {
     endpointAppContextServicesMock = createMockEndpointAppContextService();
 
-    endpointAppContextServicesMock
-      .getInternalFleetServices()
-      .packagePolicy.listIds.mockResolvedValue({
-        items: ['foo-1', 'foo-2', 'foo-3'],
-      });
+    (
+      endpointAppContextServicesMock.getInternalFleetServices().packagePolicy.listIds as jest.Mock
+    ).mockResolvedValue({
+      items: ['foo-1', 'foo-2', 'foo-3'],
+    });
   });
 
   it('should query fleet looking for all endpoint integration policies', async () => {
