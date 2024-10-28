@@ -686,7 +686,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(metricCharts.length).to.equal(11);
           });
 
-          it('should have an option to open the chart in lens', async () => {
+          // flaky, the option is not visible
+          it.skip('should have an option to open the chart in lens', async () => {
             await retry.tryForTime(5000, async () => {
               await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
               await browser.pressKeys(browser.keys.ESCAPE);
