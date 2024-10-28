@@ -34,7 +34,7 @@ import {
   ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
 import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
-import { AlertActions } from './alert_actions';
+import { AlertActionsLazy } from './alert_actions_lazy';
 
 export function registerAlertsTableConfiguration(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -133,7 +133,7 @@ export function registerAlertsTableConfiguration(
     sort,
     useActionsColumn: () => ({
       renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
-        return <AlertActions {...props} />;
+        return <AlertActionsLazy {...props} />;
       },
     }),
     ruleTypeIds: [ML_ALERT_TYPES.ANOMALY_DETECTION],
