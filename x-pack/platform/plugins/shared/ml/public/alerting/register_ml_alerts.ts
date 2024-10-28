@@ -15,6 +15,7 @@ import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 import { registerAnomalyDetectionRule } from './anomaly_detection_rule';
+import { registerAlertsTableConfiguration } from './anomaly_detection_alerts_table';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -23,19 +24,15 @@ export function registerMlAlerts(
   alerting?: AlertingSetup
 ) {
   registerAnomalyDetectionRule(triggersActionsUi, getStartServices, mlCapabilities);
-
   registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 
   if (alerting) {
     registerNavigation(alerting);
   }
 
-  // Async import to prevent a bundle size increase
-  Promise.all([getStartServices(), import('./anomaly_detection_alerts_table')]).then(
-    ([[_, mlStartDependencies], { registerAlertsTableConfiguration }]) => {
-      registerAlertsTableConfiguration(triggersActionsUi, mlStartDependencies.fieldFormats);
-    }
-  );
+  getStartServices().then(([_, mlStartDependencies]) => {
+    registerAlertsTableConfiguration(triggersActionsUi, mlStartDependencies.fieldFormats);
+  });
 }
 
 export function registerNavigation(alerting: AlertingSetup) {
