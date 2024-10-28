@@ -119,7 +119,9 @@ export const injectESQLQueryIntoLensLayers = (
   const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
 
   Object.values(datasourceState.layers).forEach((layer) => {
-    layer.query = query;
+    if (!isEqual(layer.query, query)) {
+      layer.query = query;
+    }
   });
 
   return {
