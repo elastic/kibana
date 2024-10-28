@@ -575,11 +575,8 @@ export class TaskStore {
     let allTasks = new Array<ConcreteTaskInstance>();
 
     for (const response of responses) {
-      if (response.status && response.status !== 200) {
-        const err = new MsearchError(
-          `Unexpected status code from taskStore::msearch: ${response.status}`,
-          response.status
-        );
+      if (response.status !== 200) {
+        const err = new MsearchError(response.status);
         this.errors$.next(err);
         throw err;
       }

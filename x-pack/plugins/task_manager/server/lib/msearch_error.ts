@@ -6,10 +6,10 @@
  */
 
 export class MsearchError extends Error {
-  private _statusCode: number;
+  private _statusCode?: number;
 
-  constructor(message: string, statusCode: number) {
-    super(message);
+  constructor(statusCode?: number) {
+    super(`Unexpected status code from taskStore::msearch: ${statusCode ?? 'unknown'}`);
     this._statusCode = statusCode;
   }
 

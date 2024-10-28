@@ -494,6 +494,7 @@ describe('TaskStore', () => {
 
       try {
         await store.msearch([{}]);
+        throw new Error('should have thrown');
       } catch (err) {
         expect(err instanceof MsearchError).toBe(true);
         expect(err.statusCode).toEqual(429);
