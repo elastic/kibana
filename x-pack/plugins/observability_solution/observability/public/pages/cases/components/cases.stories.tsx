@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StoryFn } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { Cases as Component, CasesProps } from './cases';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryObj, StoryFn } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
 import TutorialFleetInstructions from '.';

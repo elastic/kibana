@@ -70,5 +70,5 @@ export const IconButtonGroup = {
     return <Component legend="Example icon group" buttons={iconButtons.slice(0, buttonCount)} />;
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StoryFn } from '@storybook/react';
-
-import { AssistantAvatar as Component, AssistantAvatarProps } from './assistant_avatar';
+import { AssistantAvatar as Component } from './assistant_avatar';
 
 export default {
   component: Component,

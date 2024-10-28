@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { StoryFn } from '@storybook/react';
-import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
 import { buildSlo } from '../../../data/slo/slo';
-import { Props, SloSummary as Component } from './slo_summary';
+import { SloSummary as Component } from './slo_summary';
 
 export default {
   component: Component,

@@ -60,5 +60,5 @@ export const ToolbarButton = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

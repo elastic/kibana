@@ -102,5 +102,5 @@ export const OutputsTable = {
     );
   },
 
-  args: args,
+  args,
 };

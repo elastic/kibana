@@ -38,5 +38,5 @@ export const FleetServerHostsFlyout = {
     );
   },
 
-  args: args,
+  args,
 };

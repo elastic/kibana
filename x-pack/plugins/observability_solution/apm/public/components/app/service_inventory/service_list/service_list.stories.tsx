@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { StoryObj, Meta, StoryFn } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ApmServicesTable } from './apm_services_table';

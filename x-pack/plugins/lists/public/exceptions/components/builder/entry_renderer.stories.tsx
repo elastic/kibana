@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
@@ -17,7 +16,7 @@ import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
+import { BuilderEntryItem } from './entry_renderer';
 
 const mockAutocompleteService = {
   getValueSuggestions: () =>

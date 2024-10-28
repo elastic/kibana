@@ -53,7 +53,7 @@ export const HostsInput = {
     );
   },
 
-  args: args,
+  args,
 };
 
 export const HostsInputDisabled = {

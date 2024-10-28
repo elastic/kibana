@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { CoreStart } from '@kbn/core/public';
-import { StoryObj, Meta, StoryFn } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { ErrorGroupList } from '.';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';

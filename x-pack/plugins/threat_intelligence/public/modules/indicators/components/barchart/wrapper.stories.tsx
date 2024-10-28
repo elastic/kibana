@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
-import { StoryObj, StoryFn } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';

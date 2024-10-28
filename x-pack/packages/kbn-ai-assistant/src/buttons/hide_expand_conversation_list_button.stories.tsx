@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StoryFn } from '@storybook/react';
-
-import {
-  HideExpandConversationListButton as Component,
-  HideExpandConversationListButtonProps,
-} from './hide_expand_conversation_list_button';
+import { HideExpandConversationListButton as Component } from './hide_expand_conversation_list_button';
 
 export default {
   component: Component,

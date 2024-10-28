@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { StoryObj, Meta, StoryFn } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { CreateAgentKeyFlyout } from './create_agent_key';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';

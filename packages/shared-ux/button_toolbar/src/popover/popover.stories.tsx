@@ -81,5 +81,5 @@ export const Popover = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

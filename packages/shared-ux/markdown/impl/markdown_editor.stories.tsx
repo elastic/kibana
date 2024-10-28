@@ -40,5 +40,5 @@ export const MarkdownStoryComponent = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

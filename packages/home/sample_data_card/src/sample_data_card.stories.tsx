@@ -48,5 +48,5 @@ export const Card = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

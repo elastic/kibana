@@ -37,5 +37,5 @@ export const Requirements = {
     );
   },
 
-  args: args,
+  args,
 };

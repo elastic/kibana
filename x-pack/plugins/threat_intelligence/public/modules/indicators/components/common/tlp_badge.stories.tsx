@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { StoryFn } from '@storybook/react';
-import React from 'react';
-import { TLPBadge, TLPBadgeProps } from './tlp_badge';
+import { TLPBadge } from './tlp_badge';
 
 export default {
   component: TLPBadge,

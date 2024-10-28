@@ -64,7 +64,7 @@ export const TrivialExample = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };
 
 export const NonTrivialExample = {
@@ -180,5 +180,5 @@ export const NonTrivialExample = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

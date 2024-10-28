@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryObj, StoryFn } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { ExceptionStacktrace } from './exception_stacktrace';
 

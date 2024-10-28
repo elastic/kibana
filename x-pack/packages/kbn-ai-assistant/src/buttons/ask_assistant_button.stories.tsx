@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StoryFn } from '@storybook/react';
 import { EuiButtonSize } from '@elastic/eui';
 
-import { AskAssistantButton as Component, AskAssistantButtonProps } from './ask_assistant_button';
+import { AskAssistantButton as Component } from './ask_assistant_button';
 
 export default {
   component: Component,
