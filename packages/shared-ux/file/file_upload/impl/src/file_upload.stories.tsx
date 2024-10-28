@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';

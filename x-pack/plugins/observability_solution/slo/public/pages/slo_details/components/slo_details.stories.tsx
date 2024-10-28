@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { StoryFn } from '@storybook/react';
-
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
 import { SloDetails as Component, Props } from './slo_details';

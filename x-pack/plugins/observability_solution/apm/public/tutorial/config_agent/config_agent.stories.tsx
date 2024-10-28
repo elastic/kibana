@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryObj, StoryFn } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import { HttpStart } from '@kbn/core/public';
 import React from 'react';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';

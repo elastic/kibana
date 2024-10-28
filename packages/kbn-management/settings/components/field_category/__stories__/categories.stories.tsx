@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { StoryObj, Meta, StoryFn } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FieldCategories as Component } from '../categories';
 import { Params, useCategoryStory } from './use_category_story';

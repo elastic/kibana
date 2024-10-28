@@ -6,7 +6,7 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { StoryObj, Meta, StoryFn } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { LatencyChart } from '.';

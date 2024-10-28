@@ -6,10 +6,10 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, StoryFn } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-import { LogStream, LogStreamProps } from './log_stream';
+import { LogStream } from './log_stream';
 import { decorateWithKibanaContext } from './log_stream.story_decorators';
 
 const startTimestamp = 1595145600000;

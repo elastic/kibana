@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryObj, StoryFn } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';

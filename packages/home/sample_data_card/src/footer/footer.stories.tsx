@@ -48,5 +48,5 @@ export const CardFooter = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

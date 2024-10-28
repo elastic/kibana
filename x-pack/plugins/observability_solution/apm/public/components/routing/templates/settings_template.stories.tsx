@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { StoryObj, Meta, StoryFn } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import { noop } from 'lodash';
 import React, { ComponentProps } from 'react';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import type { FileImageMetadata, FileKindBrowser } from '@kbn/shared-ux-file-types';
@@ -24,7 +24,7 @@ const getFileKind = (id: string) =>
     id: kind,
     http: {},
     allowedMimeTypes: ['*'],
-  }) as FileKindBrowser;
+  } as FileKindBrowser);
 
 const defaultProps: FilePickerProps = {
   kind,

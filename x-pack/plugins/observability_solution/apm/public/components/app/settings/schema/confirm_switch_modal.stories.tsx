@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj, StoryFn } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ConfirmSwitchModal } from './confirm_switch_modal';

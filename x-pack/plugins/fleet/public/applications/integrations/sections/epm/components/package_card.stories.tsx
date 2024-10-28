@@ -63,8 +63,8 @@ export const AvailablePackage = {
     </div>
   ),
 
-  args: args,
-  argTypes: argTypes,
+  args,
+  argTypes,
 };
 
 export const InstalledPackage = {
@@ -74,6 +74,6 @@ export const InstalledPackage = {
     </div>
   ),
 
-  args: args,
-  argTypes: argTypes,
+  args,
+  argTypes,
 };

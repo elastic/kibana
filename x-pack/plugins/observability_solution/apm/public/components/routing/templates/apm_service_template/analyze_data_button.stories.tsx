@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj, StoryFn, DecoratorFn } from '@storybook/react';
+import type { StoryObj, DecoratorFn } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

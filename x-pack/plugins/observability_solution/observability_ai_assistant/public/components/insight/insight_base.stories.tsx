@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
 
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

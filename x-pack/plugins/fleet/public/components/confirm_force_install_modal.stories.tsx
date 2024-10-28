@@ -66,6 +66,6 @@ export const UnverifiedIntegrationModal = {
     );
   },
 
-  args: args,
-  argTypes: argTypes,
+  args,
+  argTypes,
 };

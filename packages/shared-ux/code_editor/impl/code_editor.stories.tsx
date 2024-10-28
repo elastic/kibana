@@ -44,7 +44,7 @@ export const Basic = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };
 
 // A sample language definition with a few example tokens
@@ -87,7 +87,7 @@ export const CustomLogLanguage = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };
 
 export const JSONSupport = () => {
@@ -227,7 +227,7 @@ export const AutomaticResize = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };
 
 export const FitToContent = {
@@ -248,5 +248,5 @@ export const FitToContent = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

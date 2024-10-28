@@ -41,5 +41,5 @@ export const ProjectSwitcher = {
     );
   },
 
-  argTypes: argTypes,
+  argTypes,
 };

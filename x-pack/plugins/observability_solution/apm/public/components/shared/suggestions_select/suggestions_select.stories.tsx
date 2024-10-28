@@ -6,7 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { StoryObj, Meta, StoryFn } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';

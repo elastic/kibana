@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryObj, StoryFn } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { DependencyLink } from './dependency_link';

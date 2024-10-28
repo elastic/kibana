@@ -40,5 +40,5 @@ export const YamlCodeEditorWithPlaceholder = {
     );
   },
 
-  args: args,
+  args,
 };
