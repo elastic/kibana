@@ -59,10 +59,10 @@ export const useFilterInOut = ({
       key,
       value,
       filterType,
-      sourcererDataView?.id
+      sourcererDataView.id
     );
     filterManager.setFilters(newFilters);
-  }, [filterManager, filterType, key, sourcererDataView?.id, value]);
+  }, [filterManager, filterType, key, sourcererDataView.id, value]);
 
   if (!fieldAndValueValid(key, value)) {
     return {} as unknown as UseFilterInValue;
