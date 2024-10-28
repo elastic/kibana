@@ -14,7 +14,7 @@ import { isEqual } from 'lodash';
 import type { MlApi } from '../application/services/ml_api_service';
 import { AnomalyJobSelectorEmptyState } from './anomaly_job_selector_empty_state';
 
-interface Props {
+export interface AnomalyJobSelectorProps {
   onJobChange: (jobId: string) => void;
   mlJobsService: MlApi['jobs'];
   jobsManagementPath?: string;
@@ -26,7 +26,7 @@ interface State {
   jobIdList?: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export class AnomalyJobSelector extends Component<Props, State> {
+export class AnomalyJobSelector extends Component<AnomalyJobSelectorProps, State> {
   private _isMounted: boolean = false;
 
   state: State = {};
@@ -43,7 +43,10 @@ export class AnomalyJobSelector extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
+  componentDidUpdate(
+    prevProps: Readonly<AnomalyJobSelectorProps>,
+    prevState: Readonly<State>
+  ): void {
     this._loadJobs();
   }
 
@@ -90,3 +93,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
     );
   }
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default AnomalyJobSelector;

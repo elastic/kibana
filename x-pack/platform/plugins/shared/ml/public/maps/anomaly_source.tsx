@@ -34,7 +34,7 @@ import {
 import { ML_PAGES } from '../../common/constants/locator';
 import type { MlAnomalyLayersType } from './util';
 import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
-import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
+import { UpdateAnomalySourceEditorLazy } from './update_anomaly_source_editor_lazy';
 import type { MlApi } from '../application/services/ml_api_service';
 
 const RESULT_LIMIT = 1000;
@@ -231,7 +231,7 @@ export class AnomalySource implements IVectorSource {
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
     return (
-      <UpdateAnomalySourceEditor
+      <UpdateAnomalySourceEditorLazy
         onChange={onChange}
         typicalActual={this._descriptor.typicalActual}
       />
