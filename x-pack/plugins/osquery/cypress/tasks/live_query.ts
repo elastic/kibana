@@ -147,7 +147,6 @@ export const viewRecentCaseAndCheckResults = () => {
   checkResults();
 };
 
-//
 export const checkActionItemsInResults = ({
   lens,
   discover,
