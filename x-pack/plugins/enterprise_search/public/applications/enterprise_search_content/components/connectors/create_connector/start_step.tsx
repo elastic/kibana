@@ -106,6 +106,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     name="first"
                     value={rawName}
                     onChange={handleNameChange}
+                    disabled={!!connector}
                     onBlur={() => {
                       if (selectedConnector) {
                         generateConnectorName({
@@ -142,7 +143,7 @@ export const StartStep: React.FC<StartStepProps> = ({
             <EuiTitle size="s">
               <h4>
                 {i18n.translate('xpack.enterpriseSearch.createConnector.startStep.h4.setUpLabel', {
-                  defaultMessage: 'Set up',
+                  defaultMessage: 'Setup',
                 })}
               </h4>
             </EuiTitle>
@@ -152,8 +153,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 {i18n.translate(
                   'xpack.enterpriseSearch.createConnector.startStep.p.whereDoYouWantLabel',
                   {
-                    defaultMessage:
-                      'Where do you want to store the connector and how do you want to manage it?',
+                    defaultMessage: 'Choose how to deploy and manage your connector:',
                   }
                 )}
               </p>
@@ -223,7 +223,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     'xpack.enterpriseSearch.createConnector.startStep.p.youWillStartTheLabel',
                     {
                       defaultMessage:
-                        'You will start the process of creating a new index, API key, and a Web Crawler Connector ID manually. Optionally you can bring your own configuration as well.',
+                        "We'll automatically configure your index, API key, and connector ID. Alternatively, create these manually and use a custom configuration.",
                     }
                   )}
                 </p>
