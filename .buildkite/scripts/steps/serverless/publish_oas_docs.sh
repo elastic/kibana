@@ -4,6 +4,12 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+## Set deps
+cur_dir="$(pwd)"
+cd .buildkite/scripts/steps/serverless
+npm install
+cd $cur_dir
+
 echo "--- Publish OAS docs"
 
 deploy_to_bump() {
