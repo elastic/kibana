@@ -65,7 +65,9 @@ api-docs-overlay: ## Apply all overlays
 
 .PHONY: api-docs-preview
 api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
+	@echo "Rendering stateful docs preview..."
 	@npx bump preview "output/kibana.yaml"
+	@echo "Rendering serverless docs preview..."
 	@npx bump preview "output/kibana.serverless.yaml"
 
 help:  ## Display help
