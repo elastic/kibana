@@ -77,12 +77,12 @@ import type { MlCapabilities } from '../common/types/capabilities';
 import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 
-import {
-  registerEmbeddables,
-  registerMlUiActions,
-  registerSearchLinks,
-  registerCasesAttachments,
-} from './register_helper';
+import { registerEmbeddables } from './embeddables';
+import { registerMlUiActions } from './ui_actions';
+import { registerSearchLinks } from './register_helper/register_search_links';
+import { registerCasesAttachments } from './cases';
+import { registerMlAlerts } from './alerting/register_ml_alerts';
+import { registerMapExtension } from './maps/register_map_extension';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -279,10 +279,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 // Register rules for basic license to show them in the UI as disabled
                 !fullLicense)
             ) {
-              // This module contains async imports itself, and it is conditionally loaded based on the license. We'll save
-              // traffic if we load it async.
-              const { registerMlAlerts } = await import('./alerting/register_ml_alerts');
-
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
                 core.getStartServices,
@@ -302,10 +298,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 }
 
                 if (pluginsSetup.maps) {
-                  // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save
-                  // traffic if we load it async.
-                  const { registerMapExtension } = await import('./maps/register_map_extension');
-
                   // Pass canGetJobs as minimum permission to show anomalies card in maps layers
                   await registerMapExtension(pluginsSetup.maps, core, {
                     canGetJobs: mlCapabilities.canGetJobs,
