@@ -11,12 +11,18 @@ import type { EndpointAppContextService } from '../endpoint_app_context_services
 export const ensureIndicesExistsForPolicies = async (
   endpointServices: EndpointAppContextService
 ): Promise<void> => {
+  const logger = endpointServices.createLogger('startupPolicyIndicesChecker');
+
   const fleetServices = endpointServices.getInternalFleetServices();
   const soClient = fleetServices.savedObjects.createInternalUnscopedSoClient();
   const endpointPoliciesIds = await fleetServices.packagePolicy.listIds(soClient, {
     kuery: fleetServices.endpointPolicyKuery,
     perPage: 10000,
   });
+
+  logger.info(
+    `Checking to ensure [${endpointPoliciesIds.items.length}] endpoint policies have backing indices`
+  );
 
   await createPolicyDataStreamsIfNeeded({
     endpointServices,
