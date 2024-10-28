@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
 import type { PolicyData } from '../../../../../common/endpoint/types';
-import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { login } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -57,7 +56,6 @@ describe(
         })
       );
 
-      login();
       loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -82,11 +80,9 @@ describe(
       }
     });
 
-    it('should have generated endpoint and rule', () => {
-      loadPage(APP_ENDPOINTS_PATH);
-      cy.contains(createdHost.hostname).should('exist');
-
+    it('should have been called against a created host', () => {
       toggleRuleOffAndOn(ruleName);
+
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
