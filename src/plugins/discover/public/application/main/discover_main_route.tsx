@@ -41,7 +41,7 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import { useProfileAccessor, useRootProfile } from '../../context_awareness';
+import { useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -345,31 +345,26 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
-  const { rootProfileLoading } = useRootProfile();
-  const getRenderAppWrapperAccessor = useProfileAccessor('getRenderAppWrapper');
-  const AppWrapper = useMemo(
-    () => getRenderAppWrapperAccessor(({ children }) => <>{children}</>),
-    [getRenderAppWrapperAccessor]
-  );
+  const rootProfileState = useRootProfile();
 
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService || rootProfileLoading) {
+  if (!customizationService || rootProfileState.rootProfileLoading) {
     return loadingIndicator;
   }
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <AppWrapper>
+        <rootProfileState.AppWrapper>
           <DiscoverTopNavInline
             stateContainer={stateContainer}
             hideNavMenuItems={loading || noDataState.showNoDataPage}
           />
           {mainContent}
-        </AppWrapper>
+        </rootProfileState.AppWrapper>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );

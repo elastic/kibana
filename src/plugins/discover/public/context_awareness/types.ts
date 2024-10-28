@@ -21,10 +21,10 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { PropsWithChildren, ReactElement } from 'react';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 
 /**
  * Supports customizing the Discover document viewer flyout

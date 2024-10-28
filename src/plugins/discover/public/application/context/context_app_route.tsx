@@ -16,7 +16,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useProfileAccessor, useRootProfile } from '../../context_awareness';
+import { useRootProfile } from '../../context_awareness';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -49,12 +49,7 @@ export function ContextAppRoute() {
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
   const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
-  const { rootProfileLoading } = useRootProfile();
-  const getRenderAppWrapperAccessor = useProfileAccessor('getRenderAppWrapper');
-  const AppWrapper = useMemo(
-    () => getRenderAppWrapperAccessor(({ children }) => <>{children}</>),
-    [getRenderAppWrapperAccessor]
-  );
+  const rootProfileState = useRootProfile();
 
   if (error) {
     return (
@@ -78,13 +73,13 @@ export function ContextAppRoute() {
     );
   }
 
-  if (!dataView || rootProfileLoading) {
+  if (!dataView || rootProfileState.rootProfileLoading) {
     return <LoadingIndicator />;
   }
 
   return (
-    <AppWrapper>
+    <rootProfileState.AppWrapper>
       <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
-    </AppWrapper>
+    </rootProfileState.AppWrapper>
   );
 }

@@ -9,7 +9,9 @@
 
 import { useEffect, useState } from 'react';
 import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
+import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { Profile } from '../types';
 
 /**
  * Hook to trigger and wait for root profile resolution
@@ -18,7 +20,10 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
  */
 export const useRootProfile = () => {
   const { profilesManager, core } = useDiscoverServices();
-  const [rootProfileLoading, setRootProfileLoading] = useState(true);
+  const [rootProfileState, setRootProfileState] = useState<
+    | { rootProfileLoading: true }
+    | { rootProfileLoading: false; AppWrapper: Profile['getRenderAppWrapper'] }
+  >({ rootProfileLoading: true });
 
   useEffect(() => {
     const subscription = core.chrome
@@ -26,9 +31,16 @@ export const useRootProfile = () => {
       .pipe(
         distinctUntilChanged(),
         filter((id) => id !== undefined),
-        tap(() => setRootProfileLoading(true)),
+        tap(() => setRootProfileState({ rootProfileLoading: true })),
         switchMap((id) => profilesManager.resolveRootProfile({ solutionNavId: id })),
-        tap(() => setRootProfileLoading(false))
+        tap(({ getRenderAppWrapper }) => {
+          const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
+
+          setRootProfileState({
+            rootProfileLoading: false,
+            AppWrapper: getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper,
+          });
+        })
       )
       .subscribe();
 
@@ -37,5 +49,5 @@ export const useRootProfile = () => {
     };
   }, [core.chrome, profilesManager]);
 
-  return { rootProfileLoading };
+  return rootProfileState;
 };

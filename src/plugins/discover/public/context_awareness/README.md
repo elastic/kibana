@@ -233,7 +233,7 @@ For more advanced use cases, such as when state needs to be shared across extens
 // The app wrapper extension point supports common patterns like React context
 const flyoutContext = createContext({ setFlyoutOpen: (open: boolean) => {} });
 
-// App wrapper implementations can exist at the root or data source level -- when implemented at the root, their lifecycle will match the Discover lifecycle
+// App wrapper implementations can only exist at the root level, and their lifecycle will match the Discover lifecycle
 export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'security-root-profile',
   profile: {
@@ -244,7 +244,7 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
         const [flyoutOpen, setFlyoutOpen] = useState(false);
 
         return (
-          // Be sure to render previous wrappers as well since other implementations may depend on them
+          // Be sure to render the previous wrapper as well
           <PrevWrapper>
             // This is our wrapper -- it uses React context to give extension point implementations
             access to the shared state
