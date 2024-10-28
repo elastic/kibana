@@ -18,5 +18,3 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
-      - linting
-      - linting_with_types
