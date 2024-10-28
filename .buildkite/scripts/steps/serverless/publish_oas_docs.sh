@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-## Set deps
+echo "--- Install bump deps"
 cur_dir="$(pwd)"
 cd .buildkite/scripts/steps/serverless
 npm install
