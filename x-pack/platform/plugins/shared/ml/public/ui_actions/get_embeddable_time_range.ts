@@ -7,7 +7,8 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
-import type { MlEmbeddableBaseApi } from '../embeddables';
+
+import type { MlEmbeddableBaseApi } from '../embeddables/types';
 
 export const getEmbeddableTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
   let timeRange = embeddable.timeRange$?.getValue();

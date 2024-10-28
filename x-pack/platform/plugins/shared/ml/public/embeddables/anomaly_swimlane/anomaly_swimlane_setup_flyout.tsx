@@ -10,7 +10,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
+import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '../types';
 import { HttpService } from '../../application/services/http_service';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';

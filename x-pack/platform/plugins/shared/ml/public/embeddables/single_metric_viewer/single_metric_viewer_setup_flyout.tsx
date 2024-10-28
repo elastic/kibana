@@ -12,7 +12,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
+import type {
+  SingleMetricViewerEmbeddableUserInput,
+  SingleMetricViewerEmbeddableInput,
+} from '../types';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlApi } from '../../application/services/ml_api_service';
 
