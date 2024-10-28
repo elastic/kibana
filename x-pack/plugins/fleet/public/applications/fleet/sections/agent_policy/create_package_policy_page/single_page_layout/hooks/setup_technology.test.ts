@@ -20,9 +20,6 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../comm
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
-// Default timeout for tests is 5s, increasing to 10s due to long running requests leading to frequent flakyness
-const TESTS_TIMEOUT = 10000;
-
 jest.mock('../../../../../services');
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
@@ -595,7 +592,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -604,8 +601,7 @@ describe('useSetupTechnology', () => {
         packagePolicy: packagePolicyMock,
       })
     );
-
-    await waitForNextUpdate({ timeout: TESTS_TIMEOUT });
+    await rerender();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
@@ -614,21 +610,17 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-
-    waitFor(() => {
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
-        name: 'Agentless policy for endpoint-1',
-        supports_agentless: true,
-        inactivity_timeout: 3600,
-      });
+    expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      id: 'agentless-policy-id',
     });
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    });
   });
 
   it('should have global_data_tags with the integration team when updating the agentless policy', async () => {
