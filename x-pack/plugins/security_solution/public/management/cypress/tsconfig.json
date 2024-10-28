@@ -34,5 +34,6 @@
     "@kbn/security-solution-serverless",
     "@kbn/dev-utils",
     "@kbn/spaces-plugin",
+    "@kbn/test-suites-xpack/security_solution_cypress/cypress",
   ]
 }
