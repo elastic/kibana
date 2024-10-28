@@ -336,19 +336,20 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     options = { deleteData: false, deleteEngine: true }
   ) {
-    const { namespace, logger, appClient, dataViewsService } = this.options;
+    const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+
     // TODO delete unitedDefinition from this method. we only need the id for deletion
     const unitedDefinition = getUnitedEntityDefinition({
       indexPatterns,
       entityType,
       namespace: this.options.namespace,
       fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
-      syncDelay: descriptor?.syncDelay ?? '1m',
-      frequency: descriptor?.frequency ?? '1m',
+      syncDelay: `${config.syncDelay.asSeconds()}s`,
+      frequency: `${config.frequency.asSeconds()}s`,
     });
     const { entityManagerDefinition } = unitedDefinition;
     logger.info(`In namespace ${namespace}: Deleting entity store for ${entityType}`);
