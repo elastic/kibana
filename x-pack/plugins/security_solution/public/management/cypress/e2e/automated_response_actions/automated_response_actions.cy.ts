@@ -6,6 +6,7 @@
  */
 
 import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { login } from '../../tasks/login';
 import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { closeAllToasts } from '../../tasks/toasts';
@@ -39,6 +40,9 @@ describe(
     let createdHost: CreateAndEnrollEndpointHostResponse;
     let ruleId: string;
     let ruleName: string;
+    beforeEach(() => {
+      login();
+    });
 
     before(() => {
       getEndpointIntegrationVersion()
