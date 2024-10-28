@@ -12,7 +12,7 @@ import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { fetch$ } from '@kbn/presentation-publishing';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { AnomalyChartsServices, AnomalyChartsApi } from '..';
+import type { AnomalyChartsServices, AnomalyChartsApi } from '../types';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { processFilters } from '../common/process_filters';
