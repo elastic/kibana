@@ -732,18 +732,24 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           expect(response.status).to.eql(204);
         });
 
-        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
+        const eventLogs = await waitForEventLogDocs(
+          ruleId,
+          new Map([['execute', { equal: ++run }]])
+        );
 
         const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
         const isFlapping = alertDocs[0]._source![ALERT_FLAPPING];
 
-        log.debug(`Alert docs for i=${i}: ${JSON.stringify(alertDocs)}`);
+        log.debug(`Alert docs for run=${run}: ${JSON.stringify(alertDocs)}`);
+        log.debug(`Event log docs for run=${run}: ${JSON.stringify(eventLogs)}`);
 
         if (!runWhichItFlapped && isFlapping) {
           runWhichItFlapped = run;
         }
 
-        log.debug(`runWhichItFlapped for i=${i}, isFlapping=${isFlapping}: ${runWhichItFlapped}`);
+        log.debug(
+          `runWhichItFlapped for run=${run}, isFlapping=${isFlapping}: ${runWhichItFlapped}`
+        );
       }
 
       // Never flapped, since globl flapping is off
