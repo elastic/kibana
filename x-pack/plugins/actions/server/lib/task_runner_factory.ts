@@ -115,7 +115,8 @@ export class TaskRunnerFactory {
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
-          spaceIdToNamespace
+          spaceIdToNamespace,
+          logger
         );
 
         const { spaceId } = actionTaskExecutorParams;
@@ -183,7 +184,8 @@ export class TaskRunnerFactory {
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
-          spaceIdToNamespace
+          spaceIdToNamespace,
+          logger
         );
 
         const request = getFakeRequest(apiKey);
@@ -247,7 +249,8 @@ function getFakeRequest(apiKey?: string) {
 async function getActionTaskParams(
   executorParams: ActionTaskExecutorParams,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  spaceIdToNamespace: SpaceIdToNamespaceFunction
+  spaceIdToNamespace: SpaceIdToNamespaceFunction,
+  logger: Logger
 ): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
@@ -276,10 +279,17 @@ async function getActionTaskParams(
         },
       };
     } catch (e) {
+      const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
+        ? TaskErrorSource.USER
+        : TaskErrorSource.FRAMEWORK;
+      logger.error(
+        `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
+        { tags: ['connector-run-failed', `${errorSource}-error`] }
+      );
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw createRetryableError(createTaskRunError(e, TaskErrorSource.USER), true);
+        throw createRetryableError(createTaskRunError(e, errorSource), true);
       }
-      throw createRetryableError(createTaskRunError(e, TaskErrorSource.FRAMEWORK), true);
+      throw createRetryableError(createTaskRunError(e, errorSource), true);
     }
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
