@@ -12,16 +12,14 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import { timeFormatter } from '@kbn/ml-date-utils';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-common-constants/states';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import { useMlApi } from '../../contexts/kibana';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
-import { DATAFEED_STATE, JOB_STATE } from '../../../../common/constants/states';
 import { CloseJobConfirm } from './close_job_confirm';
-import type {
-  CombinedJobWithStats,
-  ModelSnapshot,
-} from '../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   job: CombinedJobWithStats;
