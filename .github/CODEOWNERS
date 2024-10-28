@@ -1090,6 +1090,7 @@ src/plugins/discover/public/context_awareness/profile_providers/security @elasti
 # Platform Docs
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/index.ts @elastic/platform-docs
 /x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts @elastic/platform-docs
+/x-pack/test/screenshot_creation @elastic/platform-docs
 
 # Visualizations
 /x-pack/test/accessibility/apps/group3/graph.ts @elastic/kibana-visualizations
@@ -1498,7 +1499,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
-/x-pack/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops # Does this team also own x-pack/test/screenshot_creation???
+/x-pack/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/test/functional/es_archives/cases/default @elastic/response-ops
