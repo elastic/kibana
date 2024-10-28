@@ -6,8 +6,10 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Merge Kibana OpenAPI specs
 
-npm install -g bump-cli@^2.8.2
+cd oas_docs
 
-(cd oas_docs && make api-docs && make api-docs-lint)
+npm install .
+
+(make api-docs && make api-docs-lint)
 
 check_for_changed_files "make api-docs" true
