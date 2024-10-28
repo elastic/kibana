@@ -9,7 +9,8 @@
 
 import * as path from 'path';
 import fs from 'fs';
-import type { StorybookConfig } from '@storybook/react-webpack5';
+import type { StorybookConfig as BaseStorybookConfig } from '@storybook/react-webpack5';
+import type { TypescriptOptions } from '@storybook/preset-react-webpack';
 import webpack from 'webpack';
 import { resolve } from 'path';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
@@ -19,6 +20,14 @@ import { default as WebpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js'];
+
+/*
+ * false is a valid option for typescript.reactDocgen,
+ * but it is not in the type definition
+ */
+interface StorybookConfig extends BaseStorybookConfig {
+  typescript: Partial<TypescriptOptions>;
+}
 
 export type { StorybookConfig };
 
