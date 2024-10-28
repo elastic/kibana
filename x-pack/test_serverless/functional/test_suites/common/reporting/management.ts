@@ -8,10 +8,11 @@
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import {
   CSV_REPORT_TYPE_V2,
-  JobParamsCsvFromSavedObject,
+  type JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -20,10 +21,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
-  let roleAuthc: RoleCredentials;
-  let roleName: string;
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
@@ -39,6 +38,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Reporting Management app', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
     this.tags('failsOnMKI');
+
+    let reportJob: ReportApiJSON;
+    let path: string;
+
     const savedObjectsArchive = 'test/functional/fixtures/kbn_archiver/discover';
 
     const job: JobParamsCsvFromSavedObject = {
@@ -57,31 +60,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Kibana CI and MKI use different users
     before('initialize saved object archive', async () => {
-      roleName = 'admin';
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope(roleName);
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
+
+      // generate a report that can be tested to show in the listing
+      const result = await reportingAPI.createReportJobInternal(
+        CSV_REPORT_TYPE_V2,
+        job,
+        cookieCredentials,
+        internalReqHeader
+      );
+
+      path = result.path;
+      reportJob = result.job;
     });
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
     });
 
     it(`user sees a job they've created`, async () => {
-      const {
-        job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
-        CSV_REPORT_TYPE_V2,
-        job,
-        roleAuthc,
-        internalReqHeader
-      );
-
       await navigateToReportingManagement();
-      await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
+      await testSubjects.existOrFail(`viewReportingLink-${reportJob.id}`);
     });
   });
 };

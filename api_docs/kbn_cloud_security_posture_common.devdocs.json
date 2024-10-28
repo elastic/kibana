@@ -183,7 +183,7 @@
         "label": "buildMutedRulesFilter",
         "description": [],
         "signature": [
-          "(rulesStates: Record<string, Readonly<{} & { rule_id: string; muted: boolean; rule_number: string; benchmark_id: string; benchmark_version: string; }>>) => ",
+          "(rulesStates: Record<string, Readonly<{} & { muted: boolean; rule_id: string; rule_number: string; benchmark_id: string; benchmark_version: string; }>>) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -199,7 +199,7 @@
             "label": "rulesStates",
             "description": [],
             "signature": [
-              "Record<string, Readonly<{} & { rule_id: string; muted: boolean; rule_number: string; benchmark_id: string; benchmark_version: string; }>>"
+              "Record<string, Readonly<{} & { muted: boolean; rule_id: string; rule_number: string; benchmark_id: string; benchmark_version: string; }>>"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
             "deprecated": false,
