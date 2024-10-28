@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
+import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
@@ -113,4 +115,6 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   addSyntheticsMonitorRoute,
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorBulkRoute,
+  deleteSyntheticsParamsBulkRoute,
 ];

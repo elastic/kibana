@@ -53,18 +53,14 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
     }
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
-    try {
-      const { errors } = await deleteMonitorAPI.execute({
-        monitorIds: idsToDelete,
-      });
+    const { errors } = await deleteMonitorAPI.execute({
+      monitorIds: idsToDelete,
+    });
 
-      if (errors && errors.length > 0) {
-        return response.ok({
-          body: { message: 'error pushing monitor to the service', attributes: { errors } },
-        });
-      }
-    } catch (getErr) {
-      throw getErr;
+    if (errors && errors.length > 0) {
+      return response.ok({
+        body: { message: 'error pushing monitor to the service', attributes: { errors } },
+      });
     }
 
     return deleteMonitorAPI.result;
