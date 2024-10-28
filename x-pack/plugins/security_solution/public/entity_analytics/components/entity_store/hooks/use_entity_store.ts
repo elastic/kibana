@@ -41,20 +41,8 @@ export const useEntityStoreEnablement = () => {
   const { initEntityStore } = useEntityStoreRoutes();
   const { refetch: initialize } = useQuery({
     queryKey: [ENTITY_STORE_ENABLEMENT_INIT],
-    queryFn: async () => {
-      const start = Date.now();
-      console.log('initEntityStore');
-      console.log('user');
-      const usr = await initEntityStore('user');
-
-      console.log('user took', (Date.now() - start) / 1000);
-      console.log('host');
-      const host = await initEntityStore('host');
-      console.log('host took', (Date.now() - start) / 1000);
-
-      console.log('done', (Date.now() - start) / 1000);
-      return [usr, host];
-    },
+    queryFn: async () =>
+      initEntityStore('user').then((usr) => initEntityStore('host').then((host) => [usr, host])),
     enabled: false,
   });
 

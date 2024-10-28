@@ -136,7 +136,7 @@ export const createPlatformPipeline = async ({
     },
   };
 
-  logger.debug(`Attempting to create pipeline: ${pipeline.id}`);
+  logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);
 
   await esClient.ingest.putPipeline(pipeline);
 };
