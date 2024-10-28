@@ -62,7 +62,7 @@ function lastSeenTimestampTransform() {
       const timestamp = document['@timestamp'];
       if (timestamp) {
         const isoString = new Date(timestamp).toISOString();
-        document['entity.lastSeenTimestamp'] = isoString;
+        document['entity.last_seen_timestamp'] = isoString;
         document['event.ingested'] = isoString;
         delete document['@timestamp'];
       }
@@ -82,7 +82,8 @@ function getRoutingTransform() {
       const entityIndexName = `${entityType}s`;
       document._action = {
         index: {
-          _index: `.entities.v1.latest.builtin_${entityIndexName}_from_ecs_data`,
+          _index:
+            `.entities.v1.latest.builtin_${entityIndexName}_from_ecs_data`.toLocaleLowerCase(),
           _id: document['entity.id'],
         },
       };

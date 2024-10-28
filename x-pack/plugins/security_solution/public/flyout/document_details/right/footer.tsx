@@ -8,9 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -26,10 +24,6 @@ import { useRefetchByScope } from './hooks/use_refetch_by_scope';
 import { useExceptionFlyout } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { isActiveTimeline } from '../../../helpers';
 import { useEventFilterModal } from '../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
-
-const StyledEuiFlyoutFooter = styled('div')`
-  padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
-`;
 
 interface AlertSummaryData {
   /**
@@ -182,27 +176,29 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
 
   return (
     <>
-      <StyledEuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {dataAsNestedObject && (
-              <TakeActionDropdown
-                dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-                dataAsNestedObject={dataAsNestedObject}
-                handleOnEventClosed={closeFlyout}
-                isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-                onAddEventFilterClick={onAddEventFilterClick}
-                onAddExceptionTypeClick={onAddExceptionTypeClick}
-                onAddIsolationStatusClick={showHostIsolationPanelCallback}
-                refetchFlyoutData={refetchFlyoutData}
-                refetch={refetchAll}
-                scopeId={scopeId}
-                onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </StyledEuiFlyoutFooter>
+      <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
+        <EuiPanel color="transparent">
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              {dataAsNestedObject && (
+                <TakeActionDropdown
+                  dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+                  dataAsNestedObject={dataAsNestedObject}
+                  handleOnEventClosed={closeFlyout}
+                  isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+                  onAddEventFilterClick={onAddEventFilterClick}
+                  onAddExceptionTypeClick={onAddExceptionTypeClick}
+                  onAddIsolationStatusClick={showHostIsolationPanelCallback}
+                  refetchFlyoutData={refetchFlyoutData}
+                  refetch={refetchAll}
+                  scopeId={scopeId}
+                  onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlyoutFooter>
 
       {openAddExceptionFlyout &&
         alertSummaryData.ruleId != null &&
