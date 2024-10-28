@@ -2,7 +2,7 @@
 
 source .buildkite/scripts/serverless/publish_oas/publish_oas_utils.sh
 
-KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get selected-commit-hash)
+KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get selected-commit)
 
 if [[ ! -z KIBANA_COMMIT_SHA ]]; then
   echo "--- Deploying $KIBANA_COMMIT_SHA to bump.sh";
