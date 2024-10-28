@@ -121,6 +121,26 @@ describe('processRouter', () => {
           },
         },
       },
+      {
+        path: '/quux',
+        method: 'post',
+        options: {
+          description: 'This a test route description.',
+        },
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+        security: {
+          authz: {
+            requiredPrivileges: [
+              'manage_spaces',
+              {
+                allRequired: ['taskmanager'],
+                anyRequired: ['console'],
+              },
+            ],
+          },
+        },
+      },
     ],
   } as unknown as Router;
 
@@ -129,7 +149,7 @@ describe('processRouter', () => {
       version: '2023-10-31',
     });
 
-    expect(Object.keys(result1.paths!)).toHaveLength(4);
+    expect(Object.keys(result1.paths!)).toHaveLength(5);
 
     const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
       version: '2024-10-31',
@@ -146,6 +166,10 @@ describe('processRouter', () => {
 
     expect(result.paths['/qux']?.post?.description).toEqual(
       '[Authz] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+    );
+
+    expect(result.paths['/quux']?.post?.description).toEqual(
+      'This a test route description.[Authz] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
     );
   });
 });
