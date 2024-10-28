@@ -68,28 +68,8 @@ describe('Model versions', () => {
               "addedMappings": Object {
                 "observables": Object {
                   "properties": Object {
-                    "createdAt": Object {
-                      "ignore_malformed": true,
-                      "type": "date",
-                    },
-                    "description": Object {
-                      "type": "text",
-                    },
-                    "hasBeenSighted": Object {
-                      "type": "boolean",
-                    },
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "isIoc": Object {
-                      "type": "boolean",
-                    },
                     "typeKey": Object {
                       "type": "keyword",
-                    },
-                    "updatedAt": Object {
-                      "ignore_malformed": true,
-                      "type": "date",
                     },
                     "value": Object {
                       "type": "keyword",
