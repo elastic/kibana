@@ -25,7 +25,7 @@ async function getCurrentProdReleaseSha() {
   // @ts-ignore
   const fileContent = Buffer.from(releasesFile.data.content, 'base64').toString('utf8');
 
-  const sha = fileContent.match(`production-canary-ds-1: "([a-z0-9]+)"`)?.[1];
+  const sha = fileContent.match(`production-noncanary-ds-1: "([a-z0-9]+)"`)?.[1];
 
   if (!sha) {
     throw new Error('Could not find production hash in current releases file');
