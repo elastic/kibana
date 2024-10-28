@@ -174,6 +174,7 @@ describe('Observability AI Assistant client', () => {
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue(['system']);
+    functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
