@@ -325,11 +325,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         buttonRef={visibilityButtonRef}
         color="text"
         data-test-subj="nav-search-reveal"
-        iconType="search"
         onClick={() => {
           setIsVisible(true);
         }}
-      />
+      >
+        <EuiIcon type="search" size="m" />
+      </EuiHeaderSectionItemButton>
     );
   }
 
