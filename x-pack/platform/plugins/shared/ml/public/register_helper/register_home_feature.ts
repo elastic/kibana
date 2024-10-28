@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ML_APP_ROUTE, PLUGIN_ID } from '../common/constants/app';
+import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
 
 export const registerHomeFeature = (home: HomePublicPluginSetup) => {
   // register ML so it appears on the Kibana home page
