@@ -19,11 +19,11 @@ export const similarCaseRoute = createCasesRoute({
     tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
+    const options = request.body as caseApiV1.SimilarCasesSearchRequest;
+
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-
-      const options = request.body as caseApiV1.SimilarCasesSearchRequest;
 
       const res: caseApiV1.CasesFindResponse = await casesClient.cases.similar({ ...options });
 
@@ -32,7 +32,7 @@ export const similarCaseRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to find similar cases in route for case with ID ${request.params.case_id}: ${error}`,
+        message: `Failed to find similar cases in route for case with ID ${options.case_id}: ${error}`,
         error,
       });
     }

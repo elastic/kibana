@@ -30,8 +30,6 @@ import { patchCaseConfigureRoute } from './configure/patch_configure';
 import { postCaseConfigureRoute } from './configure/post_configure';
 import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
-import { postObservableRoute } from './observables/post_observable';
-import { similarCaseRoute } from './cases/similar';
 
 export const getExternalRoutes = () =>
   [
@@ -60,6 +58,4 @@ export const getExternalRoutes = () =>
     patchCaseConfigureRoute,
     postCaseConfigureRoute,
     getAllAlertsAttachedToCaseRoute,
-    postObservableRoute,
-    similarCaseRoute,
   ] as CaseRoute[];

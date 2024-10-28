@@ -20,6 +20,8 @@ import { getCaseMetricRoute } from './internal/get_case_metrics';
 import { getCasesMetricRoute } from './internal/get_cases_metrics';
 import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
+import { postObservableRoute } from './observables/post_observable';
+import { similarCaseRoute } from './cases/similar';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
@@ -36,4 +38,6 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     getCasesMetricRoute,
     searchCasesRoute,
     replaceCustomFieldRoute,
+    postObservableRoute,
+    similarCaseRoute,
   ] as CaseRoute[];
