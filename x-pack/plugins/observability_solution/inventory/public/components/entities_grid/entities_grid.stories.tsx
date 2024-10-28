@@ -10,7 +10,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { useArgs } from '@storybook/addons';
+import { useArgs } from '@storybook/manager-api';
 import { EntitiesGrid } from '.';
 import { entitiesMock } from './mock/entities_mock';
 

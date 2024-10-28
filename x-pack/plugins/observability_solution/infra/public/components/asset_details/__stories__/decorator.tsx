@@ -14,7 +14,7 @@ import {
 import { Observable, of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
-import { useParameter } from '@storybook/addons';
+import { useParameter } from '@storybook/manager-api';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';

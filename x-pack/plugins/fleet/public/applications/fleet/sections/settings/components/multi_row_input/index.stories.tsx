@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState } from '@storybook/addons';
+import { useState } from '@storybook/preview-api';
 import { addParameters } from '@storybook/react';
 import React from 'react';
 
@@ -53,7 +53,7 @@ export const HostsInput = {
     );
   },
 
-  args: args,
+  args,
 };
 
 export const HostsInputDisabled = {
