@@ -34,6 +34,7 @@ import {
 import type { CommandDefinition } from './types';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -333,6 +334,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
     },
+    suggest: suggestForDrop,
     validate: (command: ESQLCommand) => {
       const messages: ESQLMessage[] = [];
       const wildcardItems = command.args.filter((arg) => isColumnItem(arg) && arg.name === '*');
