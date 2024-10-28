@@ -16,6 +16,6 @@ steps:
 
   - label: "Deploy commit to bump.sh"
     commands:
-      - bash .buildkite/scripts/serverless/publish_oas/publish_oas_utils.sh
+      - bash .buildkite/scripts/serverless/publish_oas/publish_oas.sh
     key: deploy_to_bump
     depends_on: select_commit
