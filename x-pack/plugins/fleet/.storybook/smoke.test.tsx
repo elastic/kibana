@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @storybook/addon-storyshots is not supported in Jest 27+ https://github.com/storybookjs/storybook/issues/15916
+// @storybook/addon-storyshots has been removed in Storybook 8 https://github.com/storybookjs/storybook/blob/next/MIGRATION.md#storyshots-has-been-removed
 describe.skip('Fleet Storybook Smoke', () => {
   test('Init', async () => {
     // await initStoryshots({
