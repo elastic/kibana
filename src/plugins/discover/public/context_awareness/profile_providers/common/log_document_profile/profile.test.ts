@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import {

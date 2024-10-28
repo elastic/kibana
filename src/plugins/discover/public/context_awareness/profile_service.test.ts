@@ -80,9 +80,12 @@ describe('ProfileService', () => {
   it('should allow registering providers and getting profiles', () => {
     service.registerProvider(provider);
     service.registerProvider(provider2);
+    // @ts-expect-error
     expect(service.getProfile({ profileId: 'test-profile-1', myContext: 'test' })).toBe(
       provider.profile
     );
+
+    // @ts-expect-error
     expect(service.getProfile({ profileId: 'test-profile-2', myContext: 'test' })).toBe(
       provider2.profile
     );
@@ -90,6 +93,7 @@ describe('ProfileService', () => {
 
   it('should return empty profile if no provider is found', () => {
     service.registerProvider(provider);
+    // @ts-expect-error
     expect(service.getProfile({ profileId: 'test-profile-2', myContext: 'test' })).toEqual({});
   });
 

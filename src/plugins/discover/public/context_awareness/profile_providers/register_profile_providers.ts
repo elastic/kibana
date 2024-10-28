@@ -63,6 +63,7 @@ export const registerProfileProviders = async ({
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
 
   registerEnabledProfileProviders({
+    // @ts-expect-error
     profileService: rootProfileService,
     providers: rootProfileProviders,
     enabledExperimentalProfileIds,

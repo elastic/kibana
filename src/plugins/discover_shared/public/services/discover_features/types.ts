@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { ComponentType, ReactElement } from 'react';
+import type { PropsWithChildren, ReactElement } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { FeaturesRegistry } from '../../../common';
 
@@ -45,9 +45,7 @@ interface SecuritySolutionAppWrapperFeatureArgs {
 export interface SecuritySolutionAppWrapperFeature {
   id: 'security-solution-app-wrapper';
   getWrapper: () => Promise<
-    (
-      args: SecuritySolutionAppWrapperFeatureArgs
-    ) => ComponentType<{ children: React.ReactNode | React.ReactNode[] }>
+    (args: SecuritySolutionAppWrapperFeatureArgs) => (props: PropsWithChildren<{}>) => ReactElement
   >;
 }
 

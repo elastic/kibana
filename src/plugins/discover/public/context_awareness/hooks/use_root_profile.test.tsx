@@ -14,7 +14,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { useRootProfile } from './use_root_profile';
 
 const render = () => {
-  return renderHook((props) => useRootProfile(props), {
+  return renderHook(() => useRootProfile(), {
     initialProps: { solutionNavId: 'solutionNavId' } as React.PropsWithChildren<{
       solutionNavId: string;
     }>,

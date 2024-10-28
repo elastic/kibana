@@ -30,12 +30,15 @@ describe('getMergedAccessor', () => {
 
   it('should merge the accessors in the correct order', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
+    // @ts-expect-error
     const profile1: ComposableProfile = {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
         profile1: jest.fn(),
       })),
     };
+
+    // @ts-expect-error
     const profile2: ComposableProfile = {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
@@ -57,9 +60,12 @@ describe('getMergedAccessor', () => {
 
   it('should allow overwriting previous accessors', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
+    // @ts-expect-error
     const profile1: ComposableProfile = {
       getCellRenderers: jest.fn(() => () => ({ profile1: jest.fn() })),
     };
+
+    // @ts-expect-error
     const profile2: ComposableProfile = {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_pofile';

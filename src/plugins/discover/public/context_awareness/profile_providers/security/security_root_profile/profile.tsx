@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DiscoverGridFlyoutProps } from '../../../../components/discover_grid_flyout';
+import React, { PropsWithChildren } from 'react';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
-  RootProfileProvider<{
-    solutionType: SolutionType.Security;
-    store: unknown;
-    appWrapper: React.FC;
-  }>
+  Promise<
+    RootProfileProvider<{
+      solutionType: SolutionType.Security;
+      store: unknown;
+      appWrapper: ((props: PropsWithChildren<{}>) => React.ReactElement) | undefined;
+    }>
+  >
 > = async (services: ProfileProviderServices) => {
   const { discoverFeaturesRegistry } = services;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-render');
@@ -32,37 +32,22 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     profileId: 'security-root-profile',
     isExperimental: true,
     profile: {
-      getRenderDocViewerFlyout: (PrevFlyout, params) => {
-        const SecurityFlyout = (props: DiscoverGridFlyoutProps) => {
-          const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
-          useEffect(() => {
-            if (!props.hit.raw._id) return;
-            openFlyout({
-              right: {
-                id: 'document-details-right',
-                params: {
-                  id: props.hit.raw._id,
-                  indexName: props.hit.raw._index ?? '',
-                  scopeId: 'security',
-                },
-              },
-            });
-          }, [openFlyout, props.hit.raw._id, props.hit.raw._index]);
-
-          return null;
-        };
-        return (props) => <SecurityFlyout {...props} />;
-      },
-      getRenderAppWrapper: (PrevWrapper, params) => params.context.appWrapper,
-      getCellRenderers: (prev, params) => () => ({
+      getRenderAppWrapper: (PrevWrapper, params) => params.context.appWrapper ?? PrevWrapper,
+      getCellRenderers: (prev, _params) => () => ({
         ...prev(),
         'host.name': (props) => {
-          if (!cellRendererFeature) return undefined;
+          if (!cellRendererFeature) {
+            const PrevComponent = prev()['host.name'];
+            return <PrevComponent {...props} />;
+          }
           const CellRenderer = cellRendererFeature.getRender();
           return <CellRenderer {...props} />;
         },
         'user.name': (props) => {
-          if (!cellRendererFeature) return undefined;
+          if (!cellRendererFeature) {
+            const PrevComponent = prev()['user.name'];
+            return <PrevComponent {...props} />;
+          }
           const CellRenderer = cellRendererFeature.getRender();
           return <CellRenderer {...props} />;
         },

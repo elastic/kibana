@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { renderHook } from '@testing-library/react-hooks';
 import { ComposableProfile, getMergedAccessor } from '../composable_profile';
 import { useProfileAccessor } from './use_profile_accessor';

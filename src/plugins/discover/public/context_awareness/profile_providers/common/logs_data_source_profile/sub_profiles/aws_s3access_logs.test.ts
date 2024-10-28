@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';

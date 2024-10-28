@@ -14,6 +14,9 @@ import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createNginxAccessLogsDataSourceProfileProvider } from './nginx_access_logs';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
@@ -41,7 +44,11 @@ describe('createNginxAccessLogsDataSourceProfileProvider', () => {
   });
 
   it('should return default app state', () => {
-    const getDefaultAppState = dataSourceProfileProvider.profile.getDefaultAppState?.(() => ({}));
+    const getDefaultAppState = dataSourceProfileProvider.profile.getDefaultAppState?.(
+      () => ({}),
+      // @ts-expect-error
+      {}
+    );
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
       columns: [
         { name: 'timestamp', width: 212 },

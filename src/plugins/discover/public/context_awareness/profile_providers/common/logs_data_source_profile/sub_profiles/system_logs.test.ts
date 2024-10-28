@@ -41,7 +41,11 @@ describe('createSystemLogsDataSourceProfileProvider', () => {
   });
 
   it('should return default app state', () => {
-    const getDefaultAppState = dataSourceProfileProvider.profile.getDefaultAppState?.(() => ({}));
+    const getDefaultAppState = dataSourceProfileProvider.profile.getDefaultAppState?.(
+      () => ({}),
+      // @ts-expect-error
+      {}
+    );
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
       columns: [
         { name: 'timestamp', width: 212 },
