@@ -82,10 +82,10 @@ export function LensRenderer({
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() => ({
-        // forward the unified search context
-        ...searchApi,
         // forward the Lens components to the embeddable
         ...props,
+        // forward the unified search context
+        ...searchApi,
         viewMode: viewMode$Ref.current,
         // pass the sync* settings with the unified settings interface
         settings,
