@@ -6,27 +6,20 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useEuiTheme, formatDate } from '@elastic/eui';
-import { Axis, BarSeries, Chart, ScaleType, Settings, Position } from '@elastic/charts';
+import { Axis, Chart, ScaleType, Settings, Position, AreaSeries } from '@elastic/charts';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 
 interface Props {
-  from: string;
-  to: string;
-  monitorIds: string[];
-  locations?: string[];
   histogram: Array<{ x: number; y: number }>;
 }
-export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations, histogram }: Props) => {
+export const OverviewErrorsSparklines = ({ histogram }: Props) => {
   const { charts } = useKibana<ClientPluginsStart>().services;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
-
   const { euiTheme } = useEuiTheme();
-
-  const time = useMemo(() => ({ from, to }), [from, to]);
 
   return (
     <>
@@ -55,7 +48,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations, hist
             },
           }}
         />
-        <BarSeries
+        <AreaSeries
           id="errorsSparklines"
           name={ERRORS_LABEL}
           xScaleType={ScaleType.Linear}

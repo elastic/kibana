@@ -12,29 +12,16 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiStat,
 } from '@elastic/eui';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { useErrorsHistogram } from '../../../hooks/use_errors_histogram';
-import { useMonitorQueryIds } from '../overview_alerts';
-import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
-import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
-  const { status } = useSelector(selectOverviewStatus);
-
-  const loading = !status?.allIds || status?.allIds.length === 0;
-
-  const { from, to } = useRefreshedRange(6, 'hours');
-
-  const { locations } = useGetUrlParams();
-
-  const monitorIds = useMonitorQueryIds();
-
-  const { histogram, totalErrors } = useErrorsHistogram();
+  const { histogram, totalErrors, loading } = useErrorsHistogram();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -47,22 +34,16 @@ export function OverviewErrors() {
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <OverviewErrorsCount
-              from={from}
-              to={to}
-              monitorIds={monitorIds}
-              locations={locations}
-              totalErrors={totalErrors}
+            <EuiStat
+              description={ERRORS_LABEL}
+              title={totalErrors}
+              titleColor="danger"
+              reverse
+              titleSize="m"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <OverviewErrorsSparklines
-              histogram={histogram}
-              from={from}
-              to={to}
-              monitorIds={monitorIds}
-              locations={locations}
-            />
+            <OverviewErrorsSparklines histogram={histogram} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

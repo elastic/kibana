@@ -7,7 +7,10 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -16,37 +19,76 @@ import {
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-export const getErrorFilters = () => [
-  {
-    exists: {
-      field: 'summary',
+export const useErrorFilters = (spaceId?: string) => {
+  const { locations, monitorTypes, tags, query, projects } = useGetUrlParams();
+
+  const filters: QueryDslQueryContainer[] = [
+    {
+      exists: {
+        field: 'summary',
+      },
     },
-  },
-  {
-    exists: {
-      field: 'error',
+    {
+      term: {
+        'meta.space_id': spaceId,
+      },
     },
-  },
-  EXCLUDE_RUN_ONCE_FILTER,
-  getRangeFilter({
-    from: 'now-24h',
-    to: 'now',
-  }),
-];
+    {
+      exists: {
+        field: 'error',
+      },
+    },
+    EXCLUDE_RUN_ONCE_FILTER,
+    getRangeFilter({
+      from: 'now-6h',
+      to: 'now',
+    }),
+
+    ...(projects && projects.length > 0 ? [{ terms: { 'monitor.project.id': projects } }] : []),
+    ...(monitorTypes && monitorTypes.length > 0
+      ? [{ terms: { 'monitor.type': monitorTypes } }]
+      : []),
+    ...(tags && tags.length > 0 ? [{ terms: { tags } }] : []),
+    ...(locations && locations.length > 0 ? [{ terms: { 'observer.geo.name': locations } }] : []),
+    ...(query
+      ? [
+          {
+            query_string: {
+              query: `${query}*`,
+              fields: [
+                'monitor.name',
+                'tags',
+                'observer.geo.name',
+                'observer.name',
+                'urls',
+                'hosts',
+                'monitor.project.id',
+              ],
+            },
+          },
+        ]
+      : []),
+  ];
+
+  return filters;
+};
 
 export function useErrorsHistogram() {
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const { space } = useKibanaSpace();
 
-  const { data } = useEsSearch(
+  const filters = useErrorFilters(space?.id);
+
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
         query: {
           bool: {
-            filter: getErrorFilters(),
+            filter: filters,
           },
         },
         sort: {
@@ -59,29 +101,48 @@ export function useErrorsHistogram() {
             date_histogram: {
               field: '@timestamp',
               min_doc_count: 0,
-              fixed_interval: '1h',
+              fixed_interval: '30m',
               extended_bounds: {
                 min: 'now-24h',
                 max: 'now',
               },
             },
+            aggs: {
+              errors: {
+                cardinality: {
+                  field: 'state.id',
+                },
+              },
+            },
+          },
+          totalErrors: {
+            cardinality: {
+              field: 'state.id',
+            },
           },
         },
       },
     },
-    [syntheticsMonitors, lastRefresh],
-    { name: 'getMonitorErrors' }
+    [syntheticsMonitors, lastRefresh, JSON.stringify(filters)],
+    { name: 'getMonitorErrors', isRequestReady: !!space?.id }
   );
 
   return useMemo(() => {
     const histogram =
-      data?.aggregations?.errorsHistogram.buckets.map((bucket) => ({
-        x: bucket.key,
-        y: bucket.doc_count,
-      })) ?? [];
+      data?.aggregations?.errorsHistogram.buckets.map((bucket) => {
+        const count = bucket.errors.value;
+        return {
+          x: bucket.key,
+          y: count,
+        };
+      }) ?? [];
 
-    const totalErrors = histogram.reduce((acc, { y }) => acc + y, 0);
+    const totalErrors = data?.aggregations?.totalErrors.value ?? 0;
 
-    return { histogram, totalErrors };
-  }, [data]);
+    return { histogram, totalErrors, loading };
+  }, [
+    data?.aggregations?.errorsHistogram?.buckets,
+    data?.aggregations?.totalErrors?.value,
+    loading,
+  ]);
 }
