@@ -1784,6 +1784,41 @@ describe('Package policy service', () => {
       });
     });
 
+    it('should run "packagePolicyPostUpdate" external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackagePolicy = createPackagePolicyMock();
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      jest.spyOn(appContextService, 'getExternalCallbacks');
+
+      soClient.get.mockResolvedValue({
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      });
+
+      soClient.update.mockResolvedValue({
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      });
+
+      await packagePolicyService.update(soClient, esClient, 'test-package-policy', {
+        ...mockPackagePolicy,
+        inputs: [],
+      });
+
+      expect(appContextService.getExternalCallbacks).toHaveBeenCalledWith(
+        'packagePolicyPostUpdate'
+      );
+    });
+
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
