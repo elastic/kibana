@@ -45,6 +45,8 @@ export const useKnowledgeBaseStatus = ({
     {
       retry: false,
       keepPreviousData: true,
+      // Polling interval for Knowledge Base setup in progress
+      refetchInterval: (data) => (data?.is_setup_in_progress ? 5000 : false),
       // Deprecated, hoist to `queryCache` w/in `QueryClient. See: https://stackoverflow.com/a/76961109
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {

@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
 import { isSystemEntry } from './helpers';
+import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 
 const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   const { userProfileService } = useAssistantContext();
@@ -148,13 +149,15 @@ export const useKnowledgeBaseTable = () => {
             return isSystemEntry(entry) ? (
               <>
                 {`${entry.text}`}
-                {isKbSetupInProgress && (
+                {isKbSetupInProgress ? (
                   <EuiLoadingSpinner
-                    size="s"
+                    size="m"
                     css={css`
                       margin-left: 8px;
                     `}
                   />
+                ) : (
+                  <SetupKnowledgeBaseButton display="refresh" />
                 )}
               </>
             ) : entry.type === DocumentEntryType.value ? (

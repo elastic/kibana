@@ -172,6 +172,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     http,
     toasts,
     enabled: enableKnowledgeBaseByDefault,
+    isRefetching: kbStatus?.is_setup_in_progress,
   });
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(

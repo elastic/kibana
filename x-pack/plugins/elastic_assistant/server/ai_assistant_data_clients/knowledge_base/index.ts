@@ -8,6 +8,7 @@
 import {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
+  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -176,35 +177,39 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Checking if ELSER model '${elserId}' is deployed...`);
 
     try {
-      const esClient = await this.options.elasticsearchClientPromise;
-      const getResponse = await esClient.ml.getTrainedModelsStats({
-        model_id: elserId,
-      });
+      if (this.isV2KnowledgeBaseEnabled) {
+        return await this.isInferenceEndpointExists();
+      } else {
+        const esClient = await this.options.elasticsearchClientPromise;
+        const getResponse = await esClient.ml.getTrainedModelsStats({
+          model_id: elserId,
+        });
 
-      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
-      const isReadyESS = (stats: MlTrainedModelStats) =>
-        stats.deployment_stats?.state === 'started' &&
-        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+        // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
+        const isReadyESS = (stats: MlTrainedModelStats) =>
+          stats.deployment_stats?.state === 'started' &&
+          stats.deployment_stats?.allocation_status.state === 'fully_allocated';
 
-      const isReadyServerless = (stats: MlTrainedModelStats) =>
-        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
-          (node) => node.routing_state.routing_state === 'started'
+        const isReadyServerless = (stats: MlTrainedModelStats) =>
+          (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+            (node) => node.routing_state.routing_state === 'started'
+          );
+
+        return getResponse.trained_model_stats.some(
+          (stats) => isReadyESS(stats) || isReadyServerless(stats)
         );
-
-      return getResponse.trained_model_stats.some(
-        (stats) => isReadyESS(stats) || isReadyServerless(stats)
-      );
+      }
     } catch (e) {
       // Returns 404 if it doesn't exist
       return false;
     }
   };
 
-  public isInferenceEndpointExists = async () => {
+  public isInferenceEndpointExists = async (): Promise<boolean> => {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-      return await esClient.inference.get({
+      return await !!esClient.inference.get({
         inference_id: ASSISTANT_ELSER_INFERENCE_ID,
         task_type: 'sparse_embedding',
       });
@@ -533,7 +538,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         track_total_hits: true,
       });
 
-      return result.hits?.total === expectedDocsCount;
+      return (result.hits?.total as SearchTotalHits).value === expectedDocsCount;
     } catch (e) {
       return false;
     }

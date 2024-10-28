@@ -64,7 +64,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
           const isModelDeployed = await kbDataClient.isModelDeployed();
-          const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded(); // && !kbDataClient.isSetupInProgress;
+          const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
