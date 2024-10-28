@@ -6,12 +6,11 @@
  */
 
 import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
 import type { PolicyData } from '../../../../../common/endpoint/types';
-import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -42,24 +41,26 @@ describe(
     let ruleName: string;
 
     before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
+      getEndpointIntegrationVersion()
+        .then((version) =>
+          createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
+            indexedPolicy = data;
+            policy = indexedPolicy.integrationPolicies[0];
 
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_ids[0]).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            return enableAllPolicyProtections(policy.id).then(() => {
+              // Create and enroll a new Endpoint host
+              return createEndpointHost(policy.policy_ids[0]).then((host) => {
+                createdHost = host as CreateAndEnrollEndpointHostResponse;
+              });
             });
+          })
+        )
+        .then(() => {
+          loadRule().then((data) => {
+            ruleId = data.id;
+            ruleName = data.name;
           });
-        })
-      );
-
-      loadRule().then((data) => {
-        ruleId = data.id;
-        ruleName = data.name;
-      });
+        });
     });
 
     after(() => {
@@ -81,9 +82,7 @@ describe(
     });
 
     it('should have been called against a created host', () => {
-      loadPage(APP_ENDPOINTS_PATH);
-      cy.contains(createdHost.hostname).should('exist');
-
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       toggleRuleOffAndOn(ruleName);
 
       visitRuleAlerts(ruleName);
