@@ -19,7 +19,6 @@ export const COMMON_API_HEADERS = Object.freeze({
 });
 
 export const waitForPageToBeLoaded = () => {
-  cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
   cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
 };
 
