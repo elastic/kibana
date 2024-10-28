@@ -137,5 +137,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-security-server",
     "@kbn/charts-theme",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-common-types",
   ]
 }
