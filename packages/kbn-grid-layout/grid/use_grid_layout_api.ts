@@ -36,6 +36,7 @@ export const useGridLayoutApi = ({
           placementStrategy
         );
         gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
+        gridLayoutStateManager.layoutUpdateEvent$.next('add');
       },
 
       removePanel: (panelId) => {
@@ -61,6 +62,7 @@ export const useGridLayoutApi = ({
             panels: updatedPanels,
           });
           gridLayoutStateManager.gridLayout$.next(newLayout);
+          gridLayoutStateManager.layoutUpdateEvent$.next('delete');
         }
       },
 
@@ -86,6 +88,7 @@ export const useGridLayoutApi = ({
           const newLayout = [...currentLayout];
           newLayout[rowIndex].panels = updatedPanels;
           gridLayoutStateManager.gridLayout$.next(newLayout);
+          gridLayoutStateManager.layoutUpdateEvent$.next('add');
         }
       },
 

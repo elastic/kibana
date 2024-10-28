@@ -30,7 +30,7 @@ export const GridPanel = forwardRef<
     rowIndex: number;
     renderPanelContents: (panelId: string) => React.ReactNode;
     interactionStart: (
-      type: PanelInteractionEvent['type'],
+      type: PanelInteractionEvent['type'] | 'drop',
       e: React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
     gridLayoutStateManager: GridLayoutStateManager;

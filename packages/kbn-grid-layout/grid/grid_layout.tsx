@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { distinctUntilChanged, map, skip } from 'rxjs';
+import { distinctUntilChanged, map, pairwise, skip, withLatestFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { GridHeightSmoother } from './grid_height_smoother';
@@ -17,23 +17,16 @@ import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutApi } from './use_grid_layout_api';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { isLayoutEqual } from './utils/equality_checks';
 
 interface GridLayoutProps {
   getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
   renderPanelContents: (panelId: string) => React.ReactNode;
+  onLayoutChange: (newLayout: GridLayoutData) => void;
 }
 
 export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
-  (
-    {
-      getCreationOptions,
-      renderPanelContents,
-    }: {
-      getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
-      renderPanelContents: (panelId: string) => React.ReactNode;
-    },
-    ref
-  ) => {
+  ({ getCreationOptions, renderPanelContents, onLayoutChange }, ref) => {
     const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
       getCreationOptions,
     });
@@ -60,7 +53,23 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
         .subscribe((newRowCount) => {
           setRowCount(newRowCount);
         });
-      return () => rowCountSubscription.unsubscribe();
+
+      const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdateEvent$
+        .pipe(
+          withLatestFrom(gridLayoutStateManager.gridLayout$),
+          map(([_, layout]) => layout),
+          pairwise()
+        )
+        .subscribe(([layoutBefore, layoutAfter]) => {
+          if (!isLayoutEqual(layoutBefore, layoutAfter)) {
+            onLayoutChange(layoutAfter);
+          }
+        });
+
+      return () => {
+        rowCountSubscription.unsubscribe();
+        onLayoutChangeSubscription.unsubscribe();
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -85,8 +94,9 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
                     gridLayoutStateManager.gridLayout$.next(currentLayout);
                   }}
                   setInteractionEvent={(nextInteractionEvent) => {
-                    if (nextInteractionEvent?.type === 'drop') {
+                    if (!nextInteractionEvent) {
                       gridLayoutStateManager.activePanel$.next(undefined);
+                      gridLayoutStateManager.layoutUpdateEvent$.next('drop');
                     }
                     gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                   }}

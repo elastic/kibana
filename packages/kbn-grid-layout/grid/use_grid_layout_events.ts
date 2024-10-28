@@ -9,19 +9,9 @@
 
 import deepEqual from 'fast-deep-equal';
 import { useEffect, useRef } from 'react';
-
-import { resolveGridRow } from './resolve_grid_row';
-import { GridLayoutStateManager, GridPanelData } from './types';
-
-export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
-  return (
-    a?.id === b?.id &&
-    a?.column === b?.column &&
-    a?.row === b?.row &&
-    a?.width === b?.width &&
-    a?.height === b?.height
-  );
-};
+import { resolveGridRow } from './utils/resolve_grid_row';
+import { GridPanelData, GridLayoutStateManager } from './types';
+import { isGridDataEqual } from './utils/equality_checks';
 
 export const useGridLayoutEvents = ({
   gridLayoutStateManager,
@@ -37,7 +27,7 @@ export const useGridLayoutEvents = ({
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value || interactionEvent$.value.type === 'drop') return;
+      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
 

@@ -77,6 +77,8 @@ export interface GridLayoutStateManager {
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
+  layoutUpdateEvent$: BehaviorSubject<'drop' | 'delete' | 'add' | undefined>;
+
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
 }
@@ -88,7 +90,7 @@ export interface PanelInteractionEvent {
   /**
    * The type of interaction being performed.
    */
-  type: 'drag' | 'resize' | 'drop';
+  type: 'drag' | 'resize';
 
   /**
    * The id of the panel being interacted with.

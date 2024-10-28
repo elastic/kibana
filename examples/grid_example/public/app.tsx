@@ -86,7 +86,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
-            // onLayoutChange
+            onLayoutChange={(newLayout) => {
+              console.log('NEW LAYOUT', newLayout);
+            }}
             key={layoutKey}
             ref={setGridLayoutApi}
             renderPanelContents={(id) => {
