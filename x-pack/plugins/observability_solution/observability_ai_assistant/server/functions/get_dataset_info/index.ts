@@ -94,7 +94,6 @@ export function registerGetDatasetInfoFunction({
           stats: relevantFieldNames.stats,
         },
       };
-    },
-    ['all']
+    }
   );
 }
