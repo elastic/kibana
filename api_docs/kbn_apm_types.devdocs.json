@@ -4997,6 +4997,51 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TELEMETRY_SDK_LANGUAGE",
+        "type": "string",
+        "tags": [],
+        "label": "TELEMETRY_SDK_LANGUAGE",
+        "description": [],
+        "signature": [
+          "\"telemetry.sdk.language\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TELEMETRY_SDK_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "TELEMETRY_SDK_NAME",
+        "description": [],
+        "signature": [
+          "\"telemetry.sdk.name\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TELEMETRY_SDK_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "TELEMETRY_SDK_VERSION",
+        "description": [],
+        "signature": [
+          "\"telemetry.sdk.version\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.TIER",
         "type": "string",
         "tags": [],

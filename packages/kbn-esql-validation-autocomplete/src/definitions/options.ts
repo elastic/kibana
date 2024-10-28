@@ -129,7 +129,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
     const [firstArg] = option.args;
     if (
       !Array.isArray(firstArg) &&
-      (!isLiteralItem(firstArg) || firstArg.literalType !== 'string')
+      (!isLiteralItem(firstArg) || firstArg.literalType !== 'keyword')
     ) {
       const value =
         'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;

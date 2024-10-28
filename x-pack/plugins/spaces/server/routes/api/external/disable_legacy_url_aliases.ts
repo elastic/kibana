@@ -20,15 +20,25 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_disable_legacy_url_aliases',
       options: {
         access: isServerless ? 'internal' : 'public',
-        description: `Disable legacy URL aliases`,
+        summary: 'Disable legacy URL aliases',
+        tags: ['oas-tag:spaces'],
       },
       validate: {
         body: schema.object({
           aliases: schema.arrayOf(
             schema.object({
-              targetSpace: schema.string(),
-              targetType: schema.string(),
-              sourceId: schema.string(),
+              targetSpace: schema.string({
+                meta: { description: 'The space where the alias target object exists.' },
+              }),
+              targetType: schema.string({
+                meta: { description: 'The type of alias target object. ' },
+              }),
+              sourceId: schema.string({
+                meta: {
+                  description:
+                    'The alias source object identifier. This is the legacy object identifier.',
+                },
+              }),
             })
           ),
         }),

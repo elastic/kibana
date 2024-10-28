@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
   const endpointTestresources = getService('endpointTestResources');
 
-  describe('@ess @serverless Endpoint policy response api', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint policy response api', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {

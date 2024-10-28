@@ -30,6 +30,8 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import useAsync from 'react-use/lib/useAsync';
+import { KnowledgeBaseTour } from '../../tour/knowledge_base';
 import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
 import { useAssistantContext } from '../../assistant_context';
@@ -172,10 +174,22 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     toasts,
     enabled: enableKnowledgeBaseByDefault,
   });
+
+  const { value: existingIndices } = useAsync(() => {
+    const indices: string[] = [];
+    entries.data.forEach((entry) => {
+      if (entry.type === 'index') {
+        indices.push(entry.index);
+      }
+    });
+    return dataViews.getExistingIndices(indices);
+  }, [entries.data]);
+
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(
     () =>
       getColumns({
+        existingIndices,
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
           return (
             !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
@@ -196,7 +210,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
       }),
-    [entries.data, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
+    [entries.data, existingIndices, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
   );
 
   // Refresh button
@@ -295,7 +309,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       </>
     );
   }
-
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -412,6 +425,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           <p>{i18n.DELETE_ENTRY_CONFIRMATION_CONTENT}</p>
         </EuiConfirmModal>
       )}
+      <KnowledgeBaseTour isKbSettingsPage />
     </>
   );
 });

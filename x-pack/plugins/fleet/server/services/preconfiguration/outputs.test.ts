@@ -53,7 +53,10 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 );
 
 describe('output preconfiguration', () => {
+  let logstashSecretHash: string;
+
   beforeEach(async () => {
+    logstashSecretHash = await hashSecret('secretKey');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
@@ -120,13 +123,41 @@ describe('output preconfiguration', () => {
           id: 'existing-logstash-output-with-secrets-2',
           is_default: false,
           is_default_monitoring: false,
-          name: 'Logstash Output With Secrets 2',
+          name: 'Logstash Output With Secrets ',
           type: 'logstash',
           hosts: ['test:4343'],
           is_preconfigured: true,
           secrets: {
             ssl: {
               key: 'secretKey',
+            },
+          },
+        },
+        {
+          id: 'existing-logstash-output-with-secrets-3-outdatded-hash',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Logstash Output With Secrets 3',
+          type: 'logstash',
+          hosts: ['test:4343'],
+          is_preconfigured: true,
+          secrets: {
+            ssl: {
+              key: { id: 'test456', hash: 'test456:outdatedhash' },
+            },
+          },
+        },
+        {
+          id: 'existing-logstash-output-with-secrets-4-hash',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Logstash Output With Secrets 4',
+          type: 'logstash',
+          hosts: ['test:4343'],
+          is_preconfigured: true,
+          secrets: {
+            ssl: {
+              key: { id: 'test123', hash: logstashSecretHash },
             },
           },
         },
@@ -687,6 +718,56 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should update output if a preconfigured logstash output with secrets exists and hash algorithm changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-logstash-output-with-secrets-3-outdatded-hash',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Logstash Output With Secrets 3',
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey', // no change
+          },
+        },
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should not update output if a preconfigured logstash output with secrets exists and hash algorithm did not changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-logstash-output-with-secrets-4-hash',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Logstash Output With Secrets 4',
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey', // no change
+          },
+        },
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
   it('should update output if a preconfigured kafka output with plain value secrets exists and did not change', async () => {
