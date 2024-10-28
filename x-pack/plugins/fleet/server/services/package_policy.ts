@@ -94,6 +94,7 @@ import type {
   DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
+  PutPackagePolicyPostUpdateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -127,6 +128,8 @@ import type {
   PackagePolicyClient,
   PackagePolicyClientFetchAllItemsOptions,
   PackagePolicyService,
+  RunExternalCallbacksPackagePolicyArgument,
+  RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
@@ -1091,9 +1094,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([...bumpPromises, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
+
     logger.debug(`Package policy ${id} update completed`);
 
-    return newPolicy;
+    // Run external post-update callbacks and return
+    return packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostUpdate',
+      newPolicy,
+      soClient,
+      esClient
+    );
   }
 
   public async bulkUpdate(
@@ -1930,48 +1940,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: A extends 'packagePolicyDelete'
-      ? DeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never,
+    packagePolicy: RunExternalCallbacksPackagePolicyArgument<A>,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
     request?: KibanaRequest
-  ): Promise<
-    A extends 'packagePolicyDelete'
-      ? void
-      : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never
-  >;
-  public async runExternalCallbacks(
-    externalCallbackType: ExternalCallback[0],
-    packagePolicy:
-      | PackagePolicy
-      | NewPackagePolicy
-      | PostDeletePackagePoliciesResponse
-      | DeletePackagePoliciesResponse,
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    context?: RequestHandlerContext,
-    request?: KibanaRequest
-  ): Promise<PackagePolicy | NewPackagePolicy | void> {
+  ): Promise<RunExternalCallbacksPackagePolicyResponse<A>> {
     const logger = appContextService.getLogger();
     const numberOfCallbacks = appContextService.getExternalCallbacks(externalCallbackType)?.size;
+    let runResult: any;
+
     logger.debug(`Running ${numberOfCallbacks} external callbacks for ${externalCallbackType}`);
+
     try {
       if (externalCallbackType === 'packagePolicyPostDelete') {
-        return await this.runPostDeleteExternalCallbacks(
+        runResult = await this.runPostDeleteExternalCallbacks(
           packagePolicy as PostDeletePackagePoliciesResponse,
           soClient,
           esClient,
@@ -1979,7 +1962,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           request
         );
       } else if (externalCallbackType === 'packagePolicyDelete') {
-        return await this.runDeleteExternalCallbacks(
+        runResult = await this.runDeleteExternalCallbacks(
           packagePolicy as DeletePackagePoliciesResponse,
           soClient,
           esClient
@@ -1988,21 +1971,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!Array.isArray(packagePolicy)) {
           let newData = packagePolicy;
           const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+
           if (externalCallbacks && externalCallbacks.size > 0) {
-            let updatedNewData = newData;
+            let updatedNewData: any = newData;
+
             for (const callback of externalCallbacks) {
-              let result;
+              let thisCallbackResponse;
+
               if (externalCallbackType === 'packagePolicyPostCreate') {
-                result = await (callback as PostPackagePolicyPostCreateCallback)(
+                thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
                   updatedNewData as PackagePolicy,
                   soClient,
                   esClient,
                   context,
                   request
                 );
-                updatedNewData = PackagePolicySchema.validate(result) as NewPackagePolicy;
+                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+              } else if (externalCallbackType === 'packagePolicyPostUpdate') {
+                thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
+                  updatedNewData as PackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
               } else {
-                result = await (callback as PostPackagePolicyCreateCallback)(
+                thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                   updatedNewData as NewPackagePolicy,
                   soClient,
                   esClient,
@@ -2012,10 +2007,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               }
 
               if (externalCallbackType === 'packagePolicyCreate') {
-                updatedNewData = NewPackagePolicySchema.validate(result) as NewPackagePolicy;
+                updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
               } else if (externalCallbackType === 'packagePolicyUpdate') {
                 const omitted = {
-                  ...omit(result, [
+                  ...omit(thisCallbackResponse, [
                     'id',
                     'spaceIds',
                     'version',
@@ -2026,16 +2021,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     'created_by',
                     'elasticsearch',
                   ]),
-                  inputs: result.inputs.map((input) => omit(input, ['compiled_input'])),
+                  inputs: thisCallbackResponse.inputs.map((input) =>
+                    omit(input, ['compiled_input'])
+                  ),
                 };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted) as PackagePolicy;
+                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
               }
             }
 
             newData = updatedNewData;
           }
-          return newData;
+
+          runResult = newData;
         }
       }
     } catch (error) {
@@ -2043,6 +2041,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       logger.error(error);
       throw error;
     }
+
+    return runResult as unknown as RunExternalCallbacksPackagePolicyResponse<A>;
   }
 
   public async runPostDeleteExternalCallbacks(
