@@ -6409,7 +6409,6 @@
     },
     "/api/fleet/agent-status": {
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
         "parameters": [
           {
@@ -9776,6 +9775,191 @@
         ]
       }
     },
+    "/api/fleet/agent_policies/outputs": {
+      "post": {
+        "description": "Get list of outputs associated with agent policies",
+        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "ids": {
+                    "description": "list of package policy ids",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "agentPolicyId": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "integrations": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "integrationPolicyName": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "pkgName": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "output": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          },
+                          "monitoring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "output": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "monitoring",
+                          "data"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Elastic Agent policies"
+        ]
+      }
+    },
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
         "description": "Get an agent policy by ID",
@@ -12896,6 +13080,164 @@
                           "type": "object"
                         }
                       ]
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Elastic Agent policies"
+        ]
+      }
+    },
+    "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
+      "get": {
+        "description": "Get list of outputs associated with agent policy by policy id",
+        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Foutputs#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentPolicyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "agentPolicyId": {
+                          "type": "string"
+                        },
+                        "data": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "integrations": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "integrationPolicyName": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "pkgName": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "output": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "output"
+                          ],
+                          "type": "object"
+                        },
+                        "monitoring": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "output": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "output"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "monitoring",
+                        "data"
+                      ],
+                      "type": "object"
                     }
                   },
                   "required": [
@@ -17136,7 +17478,6 @@
         ]
       },
       "put": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
         "parameters": [
           {
@@ -17836,7 +18177,6 @@
     },
     "/api/fleet/enrollment-api-keys": {
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#0",
         "parameters": [
           {
@@ -17883,7 +18223,6 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#1",
         "parameters": [
           {
@@ -17940,7 +18279,6 @@
     },
     "/api/fleet/enrollment-api-keys/{keyId}": {
       "delete": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1",
         "parameters": [
           {
@@ -17979,7 +18317,6 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0",
         "parameters": [
           {
@@ -24710,7 +25047,6 @@
     },
     "/api/fleet/epm/packages/{pkgkey}": {
       "delete": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
         "parameters": [
           {
@@ -24768,7 +25104,6 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
         "parameters": [
           {
@@ -24830,7 +25165,6 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
         "parameters": [
           {
@@ -24914,7 +25248,6 @@
         "tags": []
       },
       "put": {
-        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
         "parameters": [
           {
@@ -40129,7 +40462,6 @@
     },
     "/api/fleet/service-tokens": {
       "post": {
-        "deprecated": true,
         "description": "Create a service token",
         "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
         "parameters": [
@@ -41022,6 +41354,7 @@
             }
           },
           {
+            "description": "If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.",
             "in": "query",
             "name": "replaceDeprecatedPrivileges",
             "required": false,
@@ -41030,7 +41363,11 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Get all roles",
         "tags": [
           "roles"
@@ -41073,7 +41410,11 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Delete a role",
         "tags": [
           "roles"
@@ -41095,6 +41436,7 @@
             }
           },
           {
+            "description": "The role name.",
             "in": "path",
             "name": "name",
             "required": true,
@@ -41104,6 +41446,7 @@
             }
           },
           {
+            "description": "If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.",
             "in": "query",
             "name": "replaceDeprecatedPrivileges",
             "required": false,
@@ -41112,13 +41455,18 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Get a role",
         "tags": [
           "roles"
         ]
       },
       "put": {
+        "description": "Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.",
         "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2",
         "parameters": [
           {
@@ -41144,6 +41492,7 @@
             }
           },
           {
+            "description": "The role name.",
             "in": "path",
             "name": "name",
             "required": true,
@@ -41154,6 +41503,7 @@
             }
           },
           {
+            "description": "When true, a role is not overwritten if it already exists.",
             "in": "query",
             "name": "createOnly",
             "required": false,
@@ -41170,6 +41520,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "description": {
+                    "description": "A description for the role.",
                     "maxLength": 2048,
                     "type": "string"
                   },
@@ -41178,6 +41529,7 @@
                     "properties": {
                       "cluster": {
                         "items": {
+                          "description": "Cluster privileges that define the cluster level actions that users can perform.",
                           "type": "string"
                         },
                         "type": "array"
@@ -41187,11 +41539,13 @@
                           "additionalProperties": false,
                           "properties": {
                             "allow_restricted_indices": {
+                              "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.",
                               "type": "boolean"
                             },
                             "field_security": {
                               "additionalProperties": {
                                 "items": {
+                                  "description": "The document fields that the role members have read access to.",
                                   "type": "string"
                                 },
                                 "type": "array"
@@ -41200,6 +41554,7 @@
                             },
                             "names": {
                               "items": {
+                                "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -41207,12 +41562,14 @@
                             },
                             "privileges": {
                               "items": {
+                                "description": "The index level privileges that the role members have for the data streams and indices.",
                                 "type": "string"
                               },
                               "minItems": 1,
                               "type": "array"
                             },
                             "query": {
+                              "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
                               "type": "string"
                             }
                           },
@@ -41230,6 +41587,7 @@
                           "properties": {
                             "clusters": {
                               "items": {
+                                "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -41237,6 +41595,7 @@
                             },
                             "privileges": {
                               "items": {
+                                "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -41256,10 +41615,12 @@
                           "additionalProperties": false,
                           "properties": {
                             "allow_restricted_indices": {
+                              "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.",
                               "type": "boolean"
                             },
                             "clusters": {
                               "items": {
+                                "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -41268,6 +41629,7 @@
                             "field_security": {
                               "additionalProperties": {
                                 "items": {
+                                  "description": "The document fields that the role members have read access to.",
                                   "type": "string"
                                 },
                                 "type": "array"
@@ -41276,6 +41638,7 @@
                             },
                             "names": {
                               "items": {
+                                "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
                                 "type": "string"
                               },
                               "minItems": 1,
@@ -41283,12 +41646,14 @@
                             },
                             "privileges": {
                               "items": {
+                                "description": "The index level privileges that role members have for the specified indices.",
                                 "type": "string"
                               },
                               "minItems": 1,
                               "type": "array"
                             },
                             "query": {
+                              "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members. ",
                               "type": "string"
                             }
                           },
@@ -41303,6 +41668,7 @@
                       },
                       "run_as": {
                         "items": {
+                          "description": "A user name that the role member can impersonate.",
                           "type": "string"
                         },
                         "type": "array"
@@ -41337,12 +41703,14 @@
                           "oneOf": [
                             {
                               "items": {
+                                "description": "A base privilege that grants applies to all spaces.",
                                 "type": "string"
                               },
                               "type": "array"
                             },
                             {
                               "items": {
+                                "description": "A base privilege that applies to specific spaces.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41352,6 +41720,7 @@
                         "feature": {
                           "additionalProperties": {
                             "items": {
+                              "description": "The privileges that the role member has for the feature.",
                               "type": "string"
                             },
                             "type": "array"
@@ -41373,6 +41742,7 @@
                             },
                             {
                               "items": {
+                                "description": "A space that the privilege applies to.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41403,7 +41773,11 @@
             }
           }
         },
-        "responses": {},
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Create or update a role",
         "tags": [
           "roles"
@@ -41448,6 +41822,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "description": {
+                          "description": "A description for the role.",
                           "maxLength": 2048,
                           "type": "string"
                         },
@@ -41456,6 +41831,7 @@
                           "properties": {
                             "cluster": {
                               "items": {
+                                "description": "Cluster privileges that define the cluster level actions that users can perform.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41465,11 +41841,13 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "allow_restricted_indices": {
+                                    "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.",
                                     "type": "boolean"
                                   },
                                   "field_security": {
                                     "additionalProperties": {
                                       "items": {
+                                        "description": "The document fields that the role members have read access to.",
                                         "type": "string"
                                       },
                                       "type": "array"
@@ -41478,6 +41856,7 @@
                                   },
                                   "names": {
                                     "items": {
+                                      "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41485,12 +41864,14 @@
                                   },
                                   "privileges": {
                                     "items": {
+                                      "description": "The index level privileges that the role members have for the data streams and indices.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
                                     "type": "array"
                                   },
                                   "query": {
+                                    "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
                                     "type": "string"
                                   }
                                 },
@@ -41508,6 +41889,7 @@
                                 "properties": {
                                   "clusters": {
                                     "items": {
+                                      "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41515,6 +41897,7 @@
                                   },
                                   "privileges": {
                                     "items": {
+                                      "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41534,10 +41917,12 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "allow_restricted_indices": {
+                                    "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.",
                                     "type": "boolean"
                                   },
                                   "clusters": {
                                     "items": {
+                                      "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41546,6 +41931,7 @@
                                   "field_security": {
                                     "additionalProperties": {
                                       "items": {
+                                        "description": "The document fields that the role members have read access to.",
                                         "type": "string"
                                       },
                                       "type": "array"
@@ -41554,6 +41940,7 @@
                                   },
                                   "names": {
                                     "items": {
+                                      "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
                                       "type": "string"
                                     },
                                     "minItems": 1,
@@ -41561,12 +41948,14 @@
                                   },
                                   "privileges": {
                                     "items": {
+                                      "description": "The index level privileges that role members have for the specified indices.",
                                       "type": "string"
                                     },
                                     "minItems": 1,
                                     "type": "array"
                                   },
                                   "query": {
+                                    "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members. ",
                                     "type": "string"
                                   }
                                 },
@@ -41581,6 +41970,7 @@
                             },
                             "run_as": {
                               "items": {
+                                "description": "A user name that the role member can impersonate.",
                                 "type": "string"
                               },
                               "type": "array"
@@ -41615,12 +42005,14 @@
                                 "oneOf": [
                                   {
                                     "items": {
+                                      "description": "A base privilege that grants applies to all spaces.",
                                       "type": "string"
                                     },
                                     "type": "array"
                                   },
                                   {
                                     "items": {
+                                      "description": "A base privilege that applies to specific spaces.",
                                       "type": "string"
                                     },
                                     "type": "array"
@@ -41630,6 +42022,7 @@
                               "feature": {
                                 "additionalProperties": {
                                   "items": {
+                                    "description": "The privileges that the role member has for the feature.",
                                     "type": "string"
                                   },
                                   "type": "array"
@@ -41651,6 +42044,7 @@
                                   },
                                   {
                                     "items": {
+                                      "description": "A space that the privilege applies to.",
                                       "type": "string"
                                     },
                                     "type": "array"
@@ -41689,7 +42083,11 @@
             }
           }
         },
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
         "summary": "Create or update roles",
         "tags": [
           "roles"

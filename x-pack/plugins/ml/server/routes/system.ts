@@ -202,8 +202,9 @@ export function systemRoutes(
       options: {
         tags: ['access:ml:canGetJobs'],
       },
-      deprecated: true,
       summary: 'ES Search wrapper',
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+      deprecated: true,
     })
     .addVersion(
       {
