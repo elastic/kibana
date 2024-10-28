@@ -56,7 +56,7 @@ function handleAdditionalArgs(
 }
 
 export function getCommandSignature(
-  { name, signature, options, examples }: CommandDefinition,
+  { name, signature, options, examples }: CommandDefinition<string>,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
@@ -75,7 +75,7 @@ export function getCommandSignature(
 }
 
 function printCommandArguments(
-  { multipleParams, params }: CommandDefinition['signature'],
+  { multipleParams, params }: CommandDefinition<string>['signature'],
   withTypes: boolean
 ): string {
   return `${params.map((arg) => printCommandArgument(arg, withTypes)).join(', `')}${
@@ -86,7 +86,7 @@ function printCommandArguments(
 }
 
 function printCommandArgument(
-  param: CommandDefinition['signature']['params'][number],
+  param: CommandDefinition<string>['signature']['params'][number],
   withTypes: boolean
 ): string {
   if (!withTypes) {

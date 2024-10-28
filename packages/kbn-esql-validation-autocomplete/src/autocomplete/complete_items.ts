@@ -87,7 +87,7 @@ export const getBuiltinCompatibleFunctionDefinition = (
 };
 
 export const getCommandAutocompleteDefinitions = (
-  commands: CommandDefinition[]
+  commands: Array<CommandDefinition<string>>
 ): SuggestionRawDefinition[] =>
   commands.filter(({ hidden }) => !hidden).map(getSuggestionCommandDefinition);
 

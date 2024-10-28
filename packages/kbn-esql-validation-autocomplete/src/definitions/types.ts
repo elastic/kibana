@@ -191,7 +191,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
   };
 }
 
-export interface CommandOptionsDefinition<CommandName extends string>
+export interface CommandOptionsDefinition<CommandName extends string = string>
   extends CommandBaseDefinition<CommandName> {
   wrapped?: string[];
   optional: boolean;
@@ -212,13 +212,13 @@ export interface CommandModeDefinition {
 
 export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
-  /** @deprecated this property will disappear in the future */
-  options?: CommandOptionsDefinition[];
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
-  /** @deprecated this property will disappear in the future */
-  modes?: CommandModeDefinition[];
   hasRecommendedQueries?: boolean;
+  /** @deprecated this property will disappear in the future */
+  modes: CommandModeDefinition[];
+  /** @deprecated this property will disappear in the future */
+  options: CommandOptionsDefinition[];
 }
 
 export interface Literals {

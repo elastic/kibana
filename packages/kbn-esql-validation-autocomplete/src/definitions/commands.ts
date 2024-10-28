@@ -150,7 +150,7 @@ const statsValidator = (command: ESQLCommand) => {
   }
   return messages;
 };
-export const commandDefinitions: CommandDefinition[] = [
+export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'row',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rowDoc', {
