@@ -79,8 +79,12 @@ export const EntityStoreUtils = (
       60_000,
       async () => {
         const { body } = await api.listEntityEngines(namespace).expect(200);
+        console.log('RETRY\n:', body);
         if (body.engines.every((engine: any) => engine.status === 'started')) {
           return true;
+        }
+        if (body.engines.some((engine: any) => engine.status === 'error')) {
+          throw new Error('Engines not started', JSON.stringify(body));
         }
         return false;
       }

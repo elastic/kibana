@@ -153,6 +153,7 @@ export class EntityStoreDataClient {
       fieldHistoryLength,
       indexPattern,
     });
+
     this.log('debug', entityType, `Initialized engine`);
 
     this.asyncSetup(
@@ -376,10 +377,15 @@ export class EntityStoreDataClient {
     );
 
     try {
-      await this.entityClient.deleteEntityDefinition({
-        id: entityManagerDefinition.id,
-        deleteData,
-      });
+      await this.entityClient
+        .deleteEntityDefinition({
+          id: entityManagerDefinition.id,
+          deleteData,
+        })
+        // Swallowing the error as it is expected to fail if no entity definition exists
+        .catch((e) =>
+          this.log(`error`, entityType, `Error deleting entity definition: ${e.message}`)
+        );
       this.log('debug', entityType, `Deleted entity definition`);
 
       await deleteEntityIndexComponentTemplate({
@@ -428,7 +434,7 @@ export class EntityStoreDataClient {
 
       return { deleted: true };
     } catch (err) {
-      logger.error(`Error deleting entity store for ${entityType}: ${err.message}`);
+      this.log(`error`, entityType, `Error deleting entity store: ${err.message}`);
 
       this.audit(
         EntityEngineActions.DELETE,
