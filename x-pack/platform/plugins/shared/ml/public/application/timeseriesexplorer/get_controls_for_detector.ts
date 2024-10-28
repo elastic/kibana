@@ -7,7 +7,7 @@
 
 import type { Entity } from './components/entity_control/entity_control';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlEntity } from '../../embeddables';
+import type { MlEntity } from '../../embeddables/types';
 
 /**
  * Extracts entities from the detector configuration

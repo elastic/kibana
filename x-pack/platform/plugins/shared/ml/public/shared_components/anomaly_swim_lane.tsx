@@ -13,9 +13,12 @@ import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 import type { anomalySwimlanePropsSchema } from '../../server/embeddable/schemas';
+import type {
+  AnomalySwimLaneEmbeddableApi,
+  AnomalySwimLaneEmbeddableState,
+} from '../embeddables/types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
 type AnomalySwimlaneEmbeddableCustomInputProps = TypeOf<typeof anomalySwimlanePropsSchema>;
 

@@ -28,8 +28,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '..';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '../types';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../constants';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import {
   anomalyChartsComparators,

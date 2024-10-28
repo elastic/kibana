@@ -31,7 +31,7 @@ import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimlaneInitialInput } from '..';
+import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimlaneInitialInput } from '../types';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
 

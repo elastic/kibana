@@ -36,7 +36,11 @@ import {
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import { useMlLink } from '../../application/contexts/kibana';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import type { SingleMetricViewerEmbeddableUserInput, MlEntity } from '..';
+import type {
+  SingleMetricViewerEmbeddableInput,
+  SingleMetricViewerEmbeddableUserInput,
+  MlEntity,
+} from '../types';
 import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
 import type { SingleMetricViewerEmbeddableInput } from './types';
 

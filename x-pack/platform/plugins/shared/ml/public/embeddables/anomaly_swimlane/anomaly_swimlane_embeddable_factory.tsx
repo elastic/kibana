@@ -44,8 +44,8 @@ import {
 import fastIsEqual from 'fast-deep-equal';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
-import type { AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import type { AnomalySwimlaneEmbeddableServices } from '../types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -365,6 +365,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 >
                   {error ? (
                     <EuiCallOut
+                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.ml.swimlaneEmbeddable.errorMessage"

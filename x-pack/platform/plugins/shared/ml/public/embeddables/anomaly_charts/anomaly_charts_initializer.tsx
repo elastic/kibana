@@ -22,7 +22,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalyChartsEmbeddableState } from '..';
+import type { AnomalyChartsEmbeddableState } from '../types';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import { ML_PAGES } from '../../../common/constants/locator';
