@@ -99,6 +99,10 @@
   .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
   }
+
+  .euiDataGridHeaderCell__draggableIcon {
+    align-self: center;
+  }
 }
 
 .unifiedDataTable__table {
