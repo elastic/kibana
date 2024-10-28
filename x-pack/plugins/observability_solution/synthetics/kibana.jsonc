@@ -19,6 +19,7 @@
       "actions",
       "alerting",
       "cases",
+      "charts",
       "data",
       "fleet",
       "embeddable",

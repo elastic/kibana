@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import { EuiStat } from '@elastic/eui';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
-import { ClientPluginsStart } from '../../../../../../../plugin';
 
 interface MonitorErrorsCountProps {
   from: string;
@@ -17,6 +15,7 @@ interface MonitorErrorsCountProps {
   locationLabel?: string;
   monitorIds: string[];
   locations?: string[];
+  totalErrors: number;
 }
 
 export const OverviewErrorsCount = ({
@@ -24,31 +23,9 @@ export const OverviewErrorsCount = ({
   from,
   to,
   locations,
+  totalErrors,
 }: MonitorErrorsCountProps) => {
-  const {
-    exploratoryView: { ExploratoryViewEmbeddable },
-  } = useKibana<ClientPluginsStart>().services;
-
   const time = useMemo(() => ({ from, to }), [from, to]);
 
-  return (
-    <ExploratoryViewEmbeddable
-      id="overviewErrorsCount"
-      align="left"
-      customHeight="70px"
-      reportType={ReportTypes.SINGLE_METRIC}
-      attributes={[
-        {
-          time,
-          reportDefinitions: {
-            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
-            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
-          },
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor_errors',
-          name: ERRORS_LABEL,
-        },
-      ]}
-    />
-  );
+  return <EuiStat description={ERRORS_LABEL} title={totalErrors} titleColor="danger" reverse />;
 };

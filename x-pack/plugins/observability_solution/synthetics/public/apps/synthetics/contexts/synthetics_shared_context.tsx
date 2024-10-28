@@ -40,6 +40,7 @@ export const SyntheticsSharedContext: React.FC<
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,
+        charts: startPlugins.charts,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

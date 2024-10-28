@@ -16,6 +16,7 @@ import {
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useErrorsHistogram } from '../../../hooks/use_errors_histogram';
 import { useMonitorQueryIds } from '../overview_alerts';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
@@ -33,6 +34,8 @@ export function OverviewErrors() {
 
   const monitorIds = useMonitorQueryIds();
 
+  const { histogram, totalErrors } = useErrorsHistogram();
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
@@ -49,10 +52,12 @@ export function OverviewErrors() {
               to={to}
               monitorIds={monitorIds}
               locations={locations}
+              totalErrors={totalErrors}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <OverviewErrorsSparklines
+              histogram={histogram}
               from={from}
               to={to}
               monitorIds={monitorIds}

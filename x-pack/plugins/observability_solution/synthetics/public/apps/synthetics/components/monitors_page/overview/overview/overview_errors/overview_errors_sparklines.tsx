@@ -7,7 +7,8 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, formatDate } from '@elastic/eui';
+import { Axis, BarSeries, Chart, ScaleType, Settings, Position } from '@elastic/charts';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 
@@ -16,38 +17,55 @@ interface Props {
   to: string;
   monitorIds: string[];
   locations?: string[];
+  histogram: Array<{ x: number; y: number }>;
 }
-export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations }: Props) => {
-  const {
-    exploratoryView: { ExploratoryViewEmbeddable },
-  } = useKibana<ClientPluginsStart>().services;
+export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations, histogram }: Props) => {
+  const { charts } = useKibana<ClientPluginsStart>().services;
+
+  const baseTheme = charts.theme.useChartsBaseTheme();
 
   const { euiTheme } = useEuiTheme();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
   return (
-    <ExploratoryViewEmbeddable
-      id="overviewErrorsSparklines"
-      reportType="kpi-over-time"
-      axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
-      legendIsVisible={false}
-      hideTicks={true}
-      attributes={[
-        {
-          time,
-          seriesType: 'area',
-          reportDefinitions: {
-            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
-            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
-          },
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor_errors',
-          name: ERRORS_LABEL,
-          color: euiTheme.colors.danger,
-          operationType: 'unique_count',
-        },
-      ]}
-    />
+    <>
+      <Chart
+        size={{
+          height: 70,
+        }}
+      >
+        <Settings baseTheme={baseTheme} />
+        <Axis
+          id="bottomAxis"
+          position={Position.Bottom}
+          tickFormat={(d: any) => formatDate(d, 'LTS')}
+          style={{
+            tickLabel: {
+              visible: false,
+            },
+          }}
+        />
+        <Axis
+          id="leftAxis"
+          position={Position.Left}
+          style={{
+            tickLabel: {
+              visible: false,
+            },
+          }}
+        />
+        <BarSeries
+          id="errorsSparklines"
+          name={ERRORS_LABEL}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={histogram}
+          color={euiTheme.colors.danger}
+        />
+      </Chart>
+    </>
   );
 };
