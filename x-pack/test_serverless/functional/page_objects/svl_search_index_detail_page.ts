@@ -136,9 +136,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
       await testSubjects.existOrFail('dataTab', { timeout: 2000 });
     },
-    async expectShouldDefaultToDataTab() {
-      expect(await browser.getCurrentUrl()).contain('/data');
-    },
     async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
       await testSubjects.click(tab);
     },
@@ -202,7 +199,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
       });
     },
-
     async expectSearchIndexDetailsTabsExists() {
       await testSubjects.existOrFail('dataTab');
       await testSubjects.existOrFail('mappingsTab');

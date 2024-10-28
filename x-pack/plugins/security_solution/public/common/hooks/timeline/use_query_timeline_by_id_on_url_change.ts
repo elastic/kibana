@@ -21,7 +21,6 @@ import {
   getQueryStringFromLocation,
 } from '../../utils/global_query_string/helpers';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 /**
  * After the initial load of the security solution, timeline is not updated when the timeline URL search value is changed
@@ -41,10 +40,6 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const { search } = useLocation();
   const oldSearch = usePrevious(search);
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
-
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
-  );
 
   const [previousTimeline, currentTimeline] = useMemo(() => {
     const oldUrlStateString = getQueryStringKeyValue({
@@ -74,18 +69,9 @@ export const useQueryTimelineByIdOnUrlChange = () => {
         graphEventId,
         timelineId: newId,
         openTimeline: true,
-        unifiedComponentsInTimelineDisabled,
       });
     }
-  }, [
-    timelineIdFromReduxStore,
-    oldId,
-    newId,
-    activeTab,
-    graphEventId,
-    queryTimelineById,
-    unifiedComponentsInTimelineDisabled,
-  ]);
+  }, [timelineIdFromReduxStore, oldId, newId, activeTab, graphEventId, queryTimelineById]);
 };
 
 export const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>

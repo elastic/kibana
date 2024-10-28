@@ -596,6 +596,7 @@ packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
+packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
@@ -742,7 +743,7 @@ x-pack/plugins/runtime_fields @elastic/kibana-management
 packages/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
 x-pack/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget @elastic/response-ops
+x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
 x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
@@ -930,9 +931,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
@@ -945,6 +946,7 @@ packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
+packages/kbn-transpose-utils @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
@@ -1455,7 +1457,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/task_manager_claimer_mget/ @elastic/response-ops
+/x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
@@ -1531,7 +1533,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/security-solution
 
 /x-pack/test_serverless/functional/test_suites/security/cypress @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
@@ -1595,7 +1596,12 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
-## Security Solution sub teams - Threat Hunting Investigations
+## Security Solution sub teams - Threat Hunting
+
+/x-pack/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
+
+## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
 /x-pack/plugins/security_solution/common/api/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
@@ -1625,7 +1631,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 /x-pack/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
 
-## Security Solution sub teams - Threat Hunting Explore
+## Security Solution Threat Hunting areas - Threat Hunting Explore
 /x-pack/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
@@ -1835,10 +1841,10 @@ x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detections/components/osquery @elastic/security-defend-workflows
 
 # Cloud Defend
-/x-pack/plugins/cloud_defend/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 
 # Cloud Security Posture
+x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
@@ -1853,7 +1859,8 @@ x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
 /x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
-/x-pack/test/security_solution_cypress/cypress/e2e/explore/hosts/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+/x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+/x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
@@ -1906,6 +1913,8 @@ packages/react @elastic/appex-sharedux
 test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
+/x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
+/x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/.spectral.yaml                       @elastic/platform-docs
