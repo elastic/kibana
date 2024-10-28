@@ -7,5 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { observableIntoEventSourceStream } from './src/observable_into_event_source_stream';
-export { supertestToObservable } from './src/supertest_to_observable';
+interface CurrentConnectorService {
+  get(): string;
+  set(id: string);
+}
+
+export function CurrentConnectorService(): CurrentConnectorService {
+  let currentConnector: string;
+
+  return {
+    get: () => currentConnector,
+    set: (connector) => {
+      currentConnector = connector;
+    },
+  };
+}
