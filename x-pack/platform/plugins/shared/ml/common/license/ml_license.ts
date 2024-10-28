@@ -11,7 +11,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 
-import { PLUGIN_ID } from '../constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 
 import { isFullLicense } from './is_full_license';
 import { isMinimumLicense } from './is_minimum_license';

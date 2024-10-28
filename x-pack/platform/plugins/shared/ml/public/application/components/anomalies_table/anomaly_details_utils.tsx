@@ -18,15 +18,14 @@ import {
   EuiLink,
   EuiIconTip,
 } from '@elastic/eui';
+import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import {
   getAnomalyScoreExplanationImpactValue,
   showActualForFunction,
   showTypicalForFunction,
-  type MlAnomaliesTableRecord,
-  type MlAnomalyRecordDoc,
-  ML_JOB_AGGREGATION,
-  useSeverityColor,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { useSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';

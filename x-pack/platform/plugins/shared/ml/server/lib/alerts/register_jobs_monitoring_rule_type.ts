@@ -34,14 +34,14 @@ import {
   ALERT_DELAYED_DATA_RESULTS,
   ALERT_JOB_ERRORS_RESULTS,
   ALERT_MML_RESULTS,
-  ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
-import { PLUGIN_ID } from '../../../common/constants/app';
+} from '@kbn/ml-common-constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license/constants';
 import { assertUserError } from './utils';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 
