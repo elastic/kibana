@@ -82,12 +82,12 @@ export class SamlSessionManager {
     const cloudIndicator = '.elastic.cloud';
 
     if (!isCloud && kbnHost.includes(cloudIndicator)) {
-      this.log.warning(
-        `'isCloud' was set to false, but the 'kbnHost' appears to be a Cloud instance. Adjusting 'isCloud' to true.
-        If you run FTR tests against Cloud make sure to add TEST_CLOUD=1 to your command`
+      throw new Error(
+        `SamlSessionManager: 'isCloud' was set to false, but 'kbnHost' appears to be a Cloud instance: ${kbnHost}
+Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       );
-      return true;
     }
+
     return isCloud;
   }
 

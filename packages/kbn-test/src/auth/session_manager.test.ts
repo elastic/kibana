@@ -329,7 +329,7 @@ describe('SamlSessionManager', () => {
     });
   });
 
-  describe(`for cloud session with 'isCloud=false'`, () => {
+  describe(`for cloud session with 'isCloud' set to false`, () => {
     const hostOptions = {
       protocol: 'https' as 'http' | 'https',
       hostname: 'my-test-deployment.test.elastic.cloud',
@@ -360,16 +360,12 @@ describe('SamlSessionManager', () => {
       createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
     });
 
-    test('should create an instance of SamlSessionManager', () => {
-      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      expect(samlSessionManager).toBeInstanceOf(SamlSessionManager);
-    });
-
-    test(`'getSessionCookieForRole' should call 'createCloudSAMLSession' instead of 'createLocalSAMLSession'`, async () => {
-      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
-      expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(0);
-      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(1);
+    test('should throw an error when kbnHost points to a Cloud instance', () => {
+      const kbnHost = `${hostOptions.protocol}://${hostOptions.hostname}`;
+      expect(() => new SamlSessionManager(samlSessionManagerOptions)).toThrow(
+        `SamlSessionManager: 'isCloud' was set to false, but 'kbnHost' appears to be a Cloud instance: ${kbnHost}
+Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
+      );
     });
   });
 });
