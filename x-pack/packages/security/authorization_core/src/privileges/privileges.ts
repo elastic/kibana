@@ -11,11 +11,7 @@ import type {
   FeatureKibanaPrivileges,
   FeatureKibanaPrivilegesReference,
 } from '@kbn/features-plugin/common';
-import type {
-  FeaturesPluginSetup,
-  KibanaFeature,
-  SubFeaturePrivilegeIterator,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
 import {
   getMinimalPrivilegeId,
   isMinimalPrivilegeId,
