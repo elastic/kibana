@@ -26,6 +26,7 @@ import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
   const es = getService('es');
+  const log = getService('log');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -35,8 +36,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  // Failing: See https://github.com/elastic/kibana/issues/195573
-  describe.skip('alerts as data flapping', function () {
+  describe('alerts as data flapping', function () {
     this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({
@@ -737,9 +737,13 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
         const isFlapping = alertDocs[0]._source![ALERT_FLAPPING];
 
+        log.debug(`Alert docs for i=${i}: ${JSON.stringify(alertDocs)}`);
+
         if (!runWhichItFlapped && isFlapping) {
           runWhichItFlapped = run;
         }
+
+        log.debug(`runWhichItFlapped for i=${i}, isFlapping=${isFlapping}: ${runWhichItFlapped}`);
       }
 
       // Never flapped, since globl flapping is off
