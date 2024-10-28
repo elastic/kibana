@@ -1116,7 +1116,7 @@
         "signature": [
           "{ [x: string]: FilterValue; }"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/public/src/hooks/use_navigate_findings.ts",
+        "path": "x-pack/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
