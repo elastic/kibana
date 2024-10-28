@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/dataset-quality-plugin/common/rest';
 import { CustomIntegration } from '../../../services/package_api';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const packageApi = getService('packageApi');
 
   const endpoint = 'GET /internal/dataset_quality/integrations';
@@ -33,27 +33,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   ];
 
   async function callApiAs({
-    roleAuthc,
-    headers,
+    roleScopedSupertestWithCookieCredentials,
   }: {
-    roleAuthc: RoleCredentials;
-    headers: InternalRequestHeader;
+    roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType;
   }): Promise<any> {
-    const { body } = await supertestWithoutAuth
-      .get('/internal/dataset_quality/integrations')
-      .set(roleAuthc.apiKeyHeader)
-      .set(headers);
+    const { body } = await roleScopedSupertestWithCookieCredentials.get(
+      '/internal/dataset_quality/integrations'
+    );
 
     return body;
   }
 
   describe('Integrations', () => {
     let adminRoleAuthc: RoleCredentials;
-    let internalHeaders: InternalRequestHeader;
+    let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
 
     after(async () => {
@@ -74,8 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('returns all installed integrations and its datasets map', async () => {
         const body = await callApiAs({
-          roleAuthc: adminRoleAuthc,
-          headers: internalHeaders,
+          roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
         expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
@@ -108,8 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('returns custom integrations and its datasets map', async () => {
         const body = await callApiAs({
-          roleAuthc: adminRoleAuthc,
-          headers: internalHeaders,
+          roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
         expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
