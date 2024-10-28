@@ -75,7 +75,7 @@ export const useKnowledgeBaseEntries = ({
       enabled,
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
-      refetchInterval: isRefetching ? 5000 : false,
+      refetchInterval: isRefetching ? 30000 : false,
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(error, {

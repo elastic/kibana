@@ -44,7 +44,7 @@ export const getKBVectorSearchQuery = ({
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
-  query: string;
+  query?: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;
   v2KnowledgeBaseEnabled: boolean;
@@ -112,18 +112,20 @@ export const getKBVectorSearchQuery = ({
     ],
   };
 
-  return {
-    bool: {
-      must: [
+  const semanticTextFilter = query
+    ? [
         {
           semantic: {
             field: 'semantic_text',
             query,
           },
         },
-        ...requiredFilter,
-        ...resourceFilter,
-      ],
+      ]
+    : [];
+
+  return {
+    bool: {
+      must: [...semanticTextFilter, ...requiredFilter, ...resourceFilter],
       ...userFilter,
       filter,
       minimum_should_match: 1,
@@ -216,6 +218,17 @@ export const getStructuredToolForIndexEntry = ({
               return { ...prev, [field]: hit._source[field] };
             }, {});
           }
+
+          // We want to send relevant inner hits (chunks) to the LLM as a context
+          const innerHitPath = `${indexEntry.name}.${indexEntry.field}`;
+          if (hit.inner_hits?.[innerHitPath]) {
+            return {
+              text: hit.inner_hits[innerHitPath].hits.hits
+                .map((innerHit) => innerHit._source.text)
+                .join('\n --- \n'),
+            };
+          }
+
           return {
             text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
           };

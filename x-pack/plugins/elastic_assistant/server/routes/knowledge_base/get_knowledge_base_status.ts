@@ -78,7 +78,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             return response.ok({
               body: {
                 ...body,
-                security_labs_exists: v2KnowledgeBaseEnabled ? securityLabsExists : true,
+                security_labs_exists: securityLabsExists,
                 user_data_exists: await kbDataClient.isUserDataExists(),
               },
             });

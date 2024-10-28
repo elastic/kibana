@@ -1,0 +1,34 @@
+summary: Elasticsearch and Kibana feature privileges
+description: Grant Elasticsearch and Kibana feature privileges.
+value:
+  description: Grant all cluster privileges and full access to index1 and index2. Grant full access to remote_index1 and remote_index2, and the monitor_enrich cluster privilege on remote_cluster1. Grant all Kibana privileges in the default space.
+  metadata:
+    version: 1
+  elasticsearch:
+    cluster:
+      - all
+    indices:
+      - names:
+          - index1
+          - index2
+        privileges:
+          - all
+    remote_indices:
+      - clusters:
+          - remote_cluster1
+        names:
+          - remote_index1
+          - remote_index2
+        privileges:
+          - all
+    remote_cluster:
+      - clusters:
+          - remote_cluster1
+        privileges:
+          - monitor_enrich
+  kibana:
+    - base:
+        - all
+      feature: { }
+      spaces:
+        - default

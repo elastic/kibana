@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiText,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
@@ -35,6 +36,10 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   const { userProfileService } = useAssistantContext();
 
   const userProfile = useAsync(async () => {
+    if (isSystemEntry(entry) || entry.createdBy === 'unknown') {
+      return;
+    }
+
     const profile = await userProfileService?.bulkGet<{ avatar: UserProfileAvatarData }>({
       uids: new Set([entry.createdBy]),
       dataPath: 'avatar',
@@ -46,7 +51,7 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
     () => userProfile?.value?.username ?? 'Unknown',
     [userProfile?.value?.username]
   );
-  const userAvatar = userProfile.value?.avatar;
+  const userAvatar = userProfile?.value?.avatar;
   const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
   const userImage = isSystemEntry(entry) ? (
     <EuiIcon
@@ -85,6 +90,39 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   );
 };
 
+const NameColumn = ({
+  entry,
+  existingIndices,
+}: {
+  entry: KnowledgeBaseEntryResponse;
+  existingIndices?: string[];
+}) => {
+  let showMissingIndexWarning = false;
+  if (existingIndices && entry.type === 'index') {
+    showMissingIndexWarning = !existingIndices.includes(entry.index);
+  }
+  return (
+    <>
+      <EuiText size={'s'}>{entry.name}</EuiText>
+      {showMissingIndexWarning && (
+        <EuiToolTip
+          data-test-subj="missing-index-tooltip"
+          content={i18n.MISSING_INDEX_TOOLTIP_CONTENT}
+        >
+          <EuiIcon
+            data-test-subj="missing-index-icon"
+            type="warning"
+            color="danger"
+            css={css`
+              margin-left: 10px;
+            `}
+          />
+        </EuiToolTip>
+      )}
+    </>
+  );
+};
+
 export const useKnowledgeBaseTable = () => {
   const getActions = useInlineActions<KnowledgeBaseEntryResponse & { isDefault?: undefined }>();
 
@@ -105,12 +143,14 @@ export const useKnowledgeBaseTable = () => {
 
   const getColumns = useCallback(
     ({
+      existingIndices,
       isDeleteEnabled,
       isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
       isKbSetupInProgress,
     }: {
+      existingIndices?: string[];
       isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
@@ -125,7 +165,9 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: ({ name }: KnowledgeBaseEntryResponse) => name,
+          render: (entry: KnowledgeBaseEntryResponse) => (
+            <NameColumn entry={entry} existingIndices={existingIndices} />
+          ),
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
         },

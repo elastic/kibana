@@ -492,7 +492,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const vectorSearchQuery = getKBVectorSearchQuery({
         kbResource: USER_RESOURCE,
-        query: '',
         required: false,
         user,
         v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
@@ -529,7 +528,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const vectorSearchQuery = getKBVectorSearchQuery({
         kbResource: SECURITY_LABS_RESOURCE,
-        query: '',
         required: false,
         user,
         v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
@@ -542,8 +540,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         track_total_hits: true,
       });
 
-      return (result.hits?.total as SearchTotalHits).value === expectedDocsCount;
+      const existingDocs = (result.hits?.total as SearchTotalHits).value;
+
+      if (existingDocs !== expectedDocsCount) {
+        this.options.logger.error(
+          `Security Labs docs are not loaded, existing docs: ${existingDocs}, expected docs: ${expectedDocsCount}`
+        );
+      }
+      return existingDocs === expectedDocsCount;
     } catch (e) {
+      this.options.logger.error(`Error checking if Security Labs docs are loaded: ${e.message}`);
       return false;
     }
   };
