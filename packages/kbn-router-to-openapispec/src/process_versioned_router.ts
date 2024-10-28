@@ -15,6 +15,7 @@ import {
 } from '@kbn/core-http-router-server-internal';
 import type { RouteMethod } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
+import { extractAuthzDescription } from './extract_authz_description';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
 import { isReferenceObject } from './oas_converter/common';
@@ -91,12 +92,20 @@ export const processVersionedRouter = (
         ];
       }
 
+      let description = '';
+      if (route.options.security) {
+        const authzDescription = extractAuthzDescription(route.options.security);
+
+        description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
+      }
+
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
       const hasVersionFilter = Boolean(filters?.version);
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
+        ...(description ? { description } : {}),
         ...(route.options.description ? { description: route.options.description } : {}),
         ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
