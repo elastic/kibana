@@ -1722,7 +1722,7 @@
     "faker": "^5.1.0",
     "fetch-mock": "^7.3.9",
     "file-loader": "^4.2.0",
-    "find-cypress-specs": "^1.41.4",
+    "find-cypress-specs": "^1.45.2",
     "form-data": "^4.0.0",
     "geckodriver": "^4.4.4",
     "gulp-brotli": "^3.0.0",
