@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
