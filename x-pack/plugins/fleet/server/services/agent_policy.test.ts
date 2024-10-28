@@ -1285,6 +1285,38 @@ describe('Agent policy', () => {
         })
       ).resolves.not.toThrow();
     });
+
+    it('should run external "agentPolicyPostUpdate" callbacks when update is successful', async () => {
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const postUpdateCallback = jest.fn(async (policy) => policy);
+      mockedAppContextService.getExternalCallbacks.mockImplementation((type) => {
+        if (type === 'agentPolicyPostUpdate') {
+          return new Set([postUpdateCallback]);
+        }
+      });
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(mockedAppContextService.getExternalCallbacks).toHaveBeenCalledWith(
+        'agentPolicyPostUpdate'
+      );
+
+      expect(postUpdateCallback).toHaveBeenCalled();
+    });
   });
 
   describe('deployPolicy', () => {
