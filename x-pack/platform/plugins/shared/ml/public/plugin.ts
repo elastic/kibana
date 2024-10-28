@@ -75,6 +75,7 @@ import {
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
+import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
@@ -188,7 +189,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
           {
