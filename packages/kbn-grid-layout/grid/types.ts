@@ -12,6 +12,9 @@ import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { SerializableRecord } from '@kbn/utility-types';
 
+/**
+ * The external API provided through the GridLayout component
+ */
 export interface GridLayoutApi {
   addPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
   removePanel: (panelId: string) => void;
@@ -25,7 +28,6 @@ export interface GridCoordinate {
   column: number;
   row: number;
 }
-
 export interface GridRect extends GridCoordinate {
   width: number;
   height: number;

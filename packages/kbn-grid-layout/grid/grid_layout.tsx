@@ -11,14 +11,10 @@ import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'rea
 import { distinctUntilChanged, map, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SerializableRecord } from '@kbn/utility-types';
-
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from './constants';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { compactGridRow } from './resolve_grid_row';
-import { runPanelPlacementStrategy } from './run_panel_placement';
 import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
+import { useGridLayoutApi } from './use_grid_layout_api';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 
@@ -43,90 +39,8 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
     });
     useGridLayoutEvents({ gridLayoutStateManager });
 
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          addPanel: (panelId, placementStrategy) => {
-            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-            const [firstRow, ...rest] = currentLayout;
-            const nextRow = runPanelPlacementStrategy(
-              firstRow,
-              {
-                id: panelId,
-                width: DEFAULT_PANEL_WIDTH,
-                height: DEFAULT_PANEL_HEIGHT,
-              },
-              placementStrategy
-            );
-            gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
-          },
-
-          removePanel: (panelId) => {
-            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-
-            // find the row where the panel exists and delete it from the corresponding panels object
-            let rowIndex = 0;
-            let updatedPanels;
-            for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
-              const row = currentLayout[rowIndex];
-              if (Object.keys(row.panels).includes(panelId)) {
-                updatedPanels = { ...row.panels };
-                delete updatedPanels[panelId];
-                break;
-              }
-            }
-
-            // if the panels were updated (i.e. the panel was successfully found and deleted), update the layout
-            if (updatedPanels) {
-              const newLayout = [...currentLayout];
-              newLayout[rowIndex] = compactGridRow({
-                ...newLayout[rowIndex],
-                panels: updatedPanels,
-              });
-              gridLayoutStateManager.gridLayout$.next(newLayout);
-            }
-          },
-
-          replacePanel: (oldPanelId, newPanelId) => {
-            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-
-            // find the row where the panel exists and update its ID to trigger a re-render
-            let rowIndex = 0;
-            let updatedPanels;
-            for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
-              const row = currentLayout[rowIndex];
-              if (Object.keys(row.panels).includes(oldPanelId)) {
-                updatedPanels = { ...row.panels };
-                const oldPanel = updatedPanels[oldPanelId];
-                delete updatedPanels[oldPanelId];
-                updatedPanels[newPanelId] = { ...oldPanel, id: newPanelId };
-                break;
-              }
-            }
-
-            // if the panels were updated (i.e. the panel was successfully found and replaced), update the layout
-            if (updatedPanels) {
-              const newLayout = [...currentLayout];
-              newLayout[rowIndex].panels = updatedPanels;
-              gridLayoutStateManager.gridLayout$.next(newLayout);
-            }
-          },
-
-          getPanelCount: () => {
-            return gridLayoutStateManager.gridLayout$.getValue().reduce((prev, row) => {
-              return prev + Object.keys(row.panels).length;
-            }, 0);
-          },
-
-          serializeState: () => {
-            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-            return currentLayout as GridLayoutData & SerializableRecord;
-          },
-        };
-      },
-      [gridLayoutStateManager.gridLayout$]
-    );
+    const gridLayoutApi = useGridLayoutApi({ gridLayoutStateManager });
+    useImperativeHandle(ref, () => gridLayoutApi, [gridLayoutApi]);
 
     const [rowCount, setRowCount] = useState<number>(
       gridLayoutStateManager.gridLayout$.getValue().length
