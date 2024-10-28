@@ -94,6 +94,13 @@ export const GridExample = () => {
                   >
                     Delete this panel
                   </EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      gridLayoutApi?.replacePanel(id, 'test');
+                    }}
+                  >
+                    Replace this panel
+                  </EuiButtonEmpty>
                 </>
               );
             }}

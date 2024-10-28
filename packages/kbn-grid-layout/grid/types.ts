@@ -14,8 +14,8 @@ import { SerializableRecord } from '@kbn/utility-types';
 
 export interface GridLayoutApi {
   addPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
-  // replacePanel: (oldPanelId: string, newPanelId: string) => void
   removePanel: (panelId: string) => void;
+  replacePanel: (oldPanelId: string, newPanelId: string) => void;
 
   getPanelCount: () => number;
   serializeState: () => GridLayoutData & SerializableRecord;

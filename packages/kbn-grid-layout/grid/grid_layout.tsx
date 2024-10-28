@@ -11,6 +11,8 @@ import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'rea
 import { distinctUntilChanged, map, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SerializableRecord } from '@kbn/utility-types';
+
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from './constants';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
@@ -64,24 +66,49 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
             const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
 
             // find the row where the panel exists and delete it from the corresponding panels object
-            let index = 0;
+            let rowIndex = 0;
             let updatedPanels;
-            for (const row of currentLayout) {
+            for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
+              const row = currentLayout[rowIndex];
               if (Object.keys(row.panels).includes(panelId)) {
                 updatedPanels = { ...row.panels };
                 delete updatedPanels[panelId];
                 break;
               }
-              index++;
             }
 
             // if the panels were updated (i.e. the panel was successfully found and deleted), update the layout
             if (updatedPanels) {
               const newLayout = [...currentLayout];
-              newLayout[index] = compactGridRow({
-                ...newLayout[index],
+              newLayout[rowIndex] = compactGridRow({
+                ...newLayout[rowIndex],
                 panels: updatedPanels,
               });
+              gridLayoutStateManager.gridLayout$.next(newLayout);
+            }
+          },
+
+          replacePanel: (oldPanelId, newPanelId) => {
+            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+
+            // find the row where the panel exists and update its ID to trigger a re-render
+            let rowIndex = 0;
+            let updatedPanels;
+            for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
+              const row = currentLayout[rowIndex];
+              if (Object.keys(row.panels).includes(oldPanelId)) {
+                updatedPanels = { ...row.panels };
+                const oldPanel = updatedPanels[oldPanelId];
+                delete updatedPanels[oldPanelId];
+                updatedPanels[newPanelId] = { ...oldPanel, id: newPanelId };
+                break;
+              }
+            }
+
+            // if the panels were updated (i.e. the panel was successfully found and replaced), update the layout
+            if (updatedPanels) {
+              const newLayout = [...currentLayout];
+              newLayout[rowIndex].panels = updatedPanels;
               gridLayoutStateManager.gridLayout$.next(newLayout);
             }
           },
@@ -94,7 +121,7 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
 
           serializeState: () => {
             const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-            return currentLayout;
+            return currentLayout as GridLayoutData & SerializableRecord;
           },
         };
       },
