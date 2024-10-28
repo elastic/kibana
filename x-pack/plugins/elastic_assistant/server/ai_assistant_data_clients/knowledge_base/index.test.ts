@@ -53,6 +53,10 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       v2KnowledgeBaseEnabled: true,
       manageGlobalKnowledgeBaseAIAssistant: true,
     };
+    clusterClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      getKnowledgeBaseEntrySearchEsMock()
+    );
   });
 
   beforeAll(() => {
@@ -63,22 +67,63 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-
-  test('should fetch the required knowledge base entry successfully', async () => {
-    clusterClient.search.mockReturnValue(
+  describe('isSetupAvailable', () => {
+    it('should return true if ML capabilities check succeeds', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(assistantKnowledgeBaseDataClientParams);
       // @ts-expect-error not full response interface
-      getKnowledgeBaseEntrySearchEsMock()
-    );
+      clusterClient.ml.getMemoryStats.mockResolvedValue({});
+      const result = await client.isSetupAvailable();
+      expect(result).toBe(true);
+      expect(clusterClient.ml.getMemoryStats).toHaveBeenCalled();
+    });
 
-    const assistantKnowledgeBaseDataClient = new AIAssistantKnowledgeBaseDataClient(
-      assistantKnowledgeBaseDataClientParams
-    );
-    const result = await assistantKnowledgeBaseDataClient.getRequiredKnowledgeBaseDocumentEntries();
+    it('should return false if ML capabilities check fails', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(assistantKnowledgeBaseDataClientParams);
+      clusterClient.ml.getMemoryStats.mockRejectedValue(new Error('Mocked Error'));
+      const result = await client.isSetupAvailable();
+      expect(result).toBe(false);
+    });
+  });
 
-    expect(clusterClient.search).toHaveBeenCalledTimes(1);
+  describe('getRequiredKnowledgeBaseDocumentEntries', () => {
+    it('should throw is user is not found', async () => {
+      const assistantKnowledgeBaseDataClient = new AIAssistantKnowledgeBaseDataClient({
+        ...assistantKnowledgeBaseDataClientParams,
+        currentUser: null,
+      });
+      await expect(
+        assistantKnowledgeBaseDataClient.getRequiredKnowledgeBaseDocumentEntries()
+      ).rejects.toThrowError(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    });
+    it('should fetch the required knowledge base entry successfully', async () => {
+      const assistantKnowledgeBaseDataClient = new AIAssistantKnowledgeBaseDataClient(
+        assistantKnowledgeBaseDataClientParams
+      );
+      const result =
+        await assistantKnowledgeBaseDataClient.getRequiredKnowledgeBaseDocumentEntries();
 
-    expect(result).toEqual([
-      getKnowledgeBaseEntryMock(getCreateKnowledgeBaseEntrySchemaMock({ required: true })),
-    ]);
+      expect(clusterClient.search).toHaveBeenCalledTimes(1);
+
+      expect(result).toEqual([
+        getKnowledgeBaseEntryMock(getCreateKnowledgeBaseEntrySchemaMock({ required: true })),
+      ]);
+    });
+    it('should return empty array if unexpected response from findDocuments', async () => {
+      // @ts-expect-error not full response interface
+      clusterClient.search.mockResolvedValue({});
+
+      const assistantKnowledgeBaseDataClient = new AIAssistantKnowledgeBaseDataClient(
+        assistantKnowledgeBaseDataClientParams
+      );
+      const result =
+        await assistantKnowledgeBaseDataClient.getRequiredKnowledgeBaseDocumentEntries();
+
+      expect(clusterClient.search).toHaveBeenCalledTimes(1);
+
+      expect(result).toEqual([]);
+      expect(logger.error).toHaveBeenCalledTimes(2);
+    });
   });
 });
