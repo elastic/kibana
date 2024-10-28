@@ -10,11 +10,12 @@ import { BehaviorSubject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
+
 import { PLUGIN_ID } from '../constants/app';
 
-export const MINIMUM_LICENSE = 'basic';
-export const MINIMUM_FULL_LICENSE = 'platinum';
-export const TRIAL_LICENSE = 'trial';
+import { isFullLicense } from './is_full_license';
+import { isMinimumLicense } from './is_minimum_license';
+import { isTrialLicense } from './is_trial_license';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -124,20 +125,4 @@ export class MlLicense {
   public isTrialLicense() {
     return this._isTrialLicense;
   }
-}
-
-export function isFullLicense(license: ILicense) {
-  return license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid';
-}
-
-export function isTrialLicense(license: ILicense) {
-  return license.check(PLUGIN_ID, TRIAL_LICENSE).state === 'valid';
-}
-
-export function isMinimumLicense(license: ILicense) {
-  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid' || license.isAvailable;
-}
-
-export function isMlEnabled(license: ILicense) {
-  return license.getFeature(PLUGIN_ID).isEnabled;
 }
