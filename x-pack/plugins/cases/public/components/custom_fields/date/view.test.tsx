@@ -33,6 +33,6 @@ describe('View ', () => {
   it('renders correctly', async () => {
     render(<View customField={customField} />);
 
-    expect(screen.getByText('28/02/2024, 00:00:00')).toBeInTheDocument();
+    expect(screen.getByText('Feb 28th 2024, 12:00:00 am')).toBeInTheDocument();
   });
 });

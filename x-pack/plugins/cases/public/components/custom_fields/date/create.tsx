@@ -43,6 +43,7 @@ const CreateComponent: CustomFieldType<CaseCustomFieldDate>['Create'] = ({
           showTimeSelect: true,
           clearable: true,
           locale: i18n.getLocale(),
+          placeholder: 'Select a date',
         },
       }}
     />

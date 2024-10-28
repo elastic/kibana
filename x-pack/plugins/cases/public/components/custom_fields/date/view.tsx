@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-
 import { EuiText } from '@elastic/eui';
+import moment from 'moment';
+
 import type { CaseCustomFieldDate } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
 const ViewComponent: CustomFieldType<CaseCustomFieldDate>['View'] = ({ customField }) => {
-  const value = customField?.value ? new Date(customField.value).toLocaleString() : '-';
+  const value = customField?.value
+    ? moment(customField.value).format('MMM Do YYYY, h:mm:ss a')
+    : '-';
 
   return (
     <EuiText

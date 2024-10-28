@@ -12,7 +12,7 @@ import type {
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ConnectorTypeFields } from '../../common/types/domain';
+import type { ConnectorTypeFields, CustomFieldDate } from '../../common/types/domain';
 import { ConnectorTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
@@ -234,7 +234,7 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = (value: string | boolean) => {
+export const convertCustomFieldValue = (value: string | boolean | CustomFieldDate) => {
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
   }

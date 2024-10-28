@@ -53,7 +53,7 @@ describe('Edit ', () => {
       )
     ).toBeInTheDocument();
     expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
-    expect(await screen.findByText('28/02/2024, 00:00:00')).toBeInTheDocument();
+    expect(await screen.findByText('Feb 28th 2024, 12:00:00 am')).toBeInTheDocument();
   });
 
   it('does not shows the edit button if the user does not have permissions', async () => {
@@ -361,7 +361,7 @@ describe('Edit ', () => {
       screen.queryByTestId(`case-date-custom-field-form-field-${customFieldConfiguration.key}`)
     ).not.toBeInTheDocument();
 
-    expect(await screen.findByText('28/02/2024, 00:00:00')).toBeInTheDocument();
+    expect(await screen.findByText('Feb 28th 2024, 12:00:00 am')).toBeInTheDocument();
   });
 
   it('shows validation error if the field is required', async () => {
