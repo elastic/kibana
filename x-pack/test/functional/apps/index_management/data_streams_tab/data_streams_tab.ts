@@ -88,6 +88,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('closeDetailsButton');
     });
 
+    it('shows the correct index mode in the details flyout', async () => {
+      // Open details flyout
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+      // Check that index mode detail exists and its label is "Standard"
+      expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+      expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('Standard');
+      // Close flyout
+      await testSubjects.click('closeDetailsButton');
+    });
+
     it('allows to update data retention', async () => {
       // Open details flyout
       await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);

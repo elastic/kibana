@@ -270,13 +270,13 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
 
               {/* Index mode */}
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle data-test-subj="indexModeTitle">
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexModeLabel"
                   defaultMessage="Index mode"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
+              <EuiDescriptionListDescription data-test-subj="indexModeValue">
                 {getIndexModeLabel(
                   serializedSettings?.['index.mode'] ?? serializedSettings?.index?.mode
                 )}
