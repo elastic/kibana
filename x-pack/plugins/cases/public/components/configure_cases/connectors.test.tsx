@@ -121,7 +121,7 @@ describe('Connectors', () => {
   it('shows the add connector flyout when the button is clicked', async () => {
     appMockRender.render(<Connectors {...props} />);
 
-    await userEvent.click(screen.getByTestId('add-new-connector'));
+    await userEvent.click(await screen.findByTestId('add-new-connector'));
     expect(onAddNewConnector).toHaveBeenCalled();
   });
 
