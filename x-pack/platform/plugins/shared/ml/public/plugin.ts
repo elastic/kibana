@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BehaviorSubject, mergeMap, take } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
@@ -13,9 +15,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject, mergeMap } from 'rxjs';
-import { take } from 'rxjs';
-
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -55,11 +54,10 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSections } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
-import { registerHomeFeature } from './register_home_feature';
-import { isFullLicense, isMlEnabled } from '../common/license';
+import { isFullLicense } from '../common/license/is_full_license';
+import { isMlEnabled } from '../common/license/is_ml_enabled';
 import {
   initEnabledFeatures,
   type MlFeatures,
@@ -247,6 +245,16 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           // register various ML plugin features which require a full license
           // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
           if (mlEnabled) {
+            const {
+              registerHomeFeature,
+              registerManagementSections,
+              registerMapExtension,
+              registerMlAlerts,
+              registerMlUiActions,
+              registerSearchLinks,
+              registerCasesAttachments,
+            } = await import('./register_helper');
+
             // add ML to home page
             if (pluginsSetup.home) {
               registerHomeFeature(pluginsSetup.home);
@@ -269,13 +277,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerEmbeddables(pluginsSetup.embeddable, core);
             }
 
-            const {
-              registerMapExtension,
-              registerMlAlerts,
-              registerMlUiActions,
-              registerSearchLinks,
-              registerCasesAttachments,
-            } = await import('./register_helper');
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,

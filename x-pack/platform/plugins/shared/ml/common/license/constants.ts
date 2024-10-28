@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export type { LicenseStatus } from './ml_license';
-export { MlLicense } from './ml_license';
+export const MINIMUM_LICENSE = 'basic';
+export const MINIMUM_FULL_LICENSE = 'platinum';
+export const TRIAL_LICENSE = 'trial';

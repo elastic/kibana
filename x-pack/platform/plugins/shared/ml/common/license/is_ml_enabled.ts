@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { LicenseStatus } from './ml_license';
-export { MlLicense } from './ml_license';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { PLUGIN_ID } from '../constants/app';
+
+export function isMlEnabled(license: ILicense) {
+  return license.getFeature(PLUGIN_ID).isEnabled;
+}
