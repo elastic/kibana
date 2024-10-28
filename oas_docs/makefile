@@ -59,7 +59,6 @@ api-docs-overlay: ## Apply all overlays
 	@npx bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
 	@npx @redocly/cli bundle output/kibana.serverless.tmp4.yaml --ext yaml -o output/kibana.serverless.yaml
 	@npx @redocly/cli bundle output/kibana.tmp4.yaml --ext yaml -o output/kibana.yaml
-	@sed -i '' -e 's/; Elastic-Api-Version=[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}//g' output/kibana.yaml
 	rm output/kibana.tmp*.yaml
 	rm output/kibana.serverless.tmp*.yaml
 
