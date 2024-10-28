@@ -48,7 +48,7 @@ export interface LinuxConditionEntries {
   entries: LinuxConditionEntry[];
 }
 
-export interface WindowsMacosConditionEntries {
+export interface MacosWindowsConditionEntries {
   os: OperatingSystem.WINDOWS | OperatingSystem.MAC;
   entries: WindowsMacosConditionEntry[];
 }
@@ -70,7 +70,7 @@ export type NewTrustedApp = {
   name: string;
   description?: string;
   effectScope: EffectScope;
-} & (LinuxConditionEntries | WindowsMacosConditionEntries);
+} & (LinuxConditionEntries | MacosWindowsConditionEntries);
 
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {
