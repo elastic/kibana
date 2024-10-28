@@ -342,7 +342,7 @@ describe('Package policy service', () => {
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
       ).rejects.toThrowError(
-        /Reusable integration policy could not be used with agent policies belonging to multiple spaces./
+        /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
     });
   });
