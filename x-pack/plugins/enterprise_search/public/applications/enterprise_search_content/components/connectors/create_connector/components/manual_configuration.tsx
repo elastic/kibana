@@ -128,7 +128,7 @@ POST /_security/api_key
 
 # 🔧 Configure your connector
 # NOTE: Configuration keys differ per service type.
-PUT _connector/my-connector-id/_configuration
+PUT _connector/${rawName}/_configuration
 {
   "values": {
 ${dynamicConfigValues}
