@@ -23,15 +23,20 @@ import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
-import { RefreshInterval, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import {
+  GlobalQueryStateFromUrl,
+  RefreshInterval,
+  syncGlobalQueryStateWithUrl,
+} from '@kbn/data-plugin/public';
 import { dataService } from '../services/kibana_services';
 import { DashboardCreationOptions, DashboardState } from './types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_constants';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   waitForPanelsToLoad$: Observable<void>,
+  getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions
 ) {
   const {
@@ -108,7 +113,11 @@ export function initializeUnifiedSearchManager(
   setAndSyncUnifiedSearchFilters(initialState.filters);
   if (initialState.timeRestore) {
     setAndSyncRefreshInterval(initialState.refreshInterval);
-    setAndSyncTimeRange(initialState.timeRange);
+    const urlOverrideTimeRange =
+      creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
+        GLOBAL_STATE_STORAGE_KEY
+      )?.time;
+    setAndSyncTimeRange(urlOverrideTimeRange ? urlOverrideTimeRange : initialState.timeRange);
   } else {
     setTimeRange(timefilterService.getTime());
     setRefreshInterval(timefilterService.getRefreshInterval());
@@ -166,11 +175,41 @@ export function initializeUnifiedSearchManager(
     );
     unifiedSearchSubscriptions.add(
       timefilterService.getTimeUpdate$().subscribe(() => {
+        const urlOverrideTimeRange =
+          creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
+            GLOBAL_STATE_STORAGE_KEY
+          )?.time;
+        if (urlOverrideTimeRange) {
+          setTimeRange(urlOverrideTimeRange);
+          return;
+        }
+
+        const lastSavedTimeRange = getLastSavedState()?.timeRange;
+        if (timeRestore$.value && lastSavedTimeRange) {
+          setAndSyncTimeRange(lastSavedTimeRange);
+          return;
+        }
+
         setTimeRange(timefilterService.getTime());
       })
     );
     unifiedSearchSubscriptions.add(
       timefilterService.getRefreshIntervalUpdate$().subscribe(() => {
+        const urlOverrideRefreshInterval =
+          creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
+            GLOBAL_STATE_STORAGE_KEY
+          )?.refreshInterval;
+        if (urlOverrideRefreshInterval) {
+          setRefreshInterval(urlOverrideRefreshInterval);
+          return;
+        }
+
+        const lastSavedRefreshInterval = getLastSavedState()?.refreshInterval;
+        if (timeRestore$.value && lastSavedRefreshInterval) {
+          setAndSyncRefreshInterval(lastSavedRefreshInterval);
+          return;
+        }
+
         setRefreshInterval(timefilterService.getRefreshInterval());
       })
     );

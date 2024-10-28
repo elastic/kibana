@@ -119,6 +119,7 @@ export function initializeUnsavedChangesManager({
       unsavedChangesSubscription.unsubscribe();
     },
     internalApi: {
+      getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
 

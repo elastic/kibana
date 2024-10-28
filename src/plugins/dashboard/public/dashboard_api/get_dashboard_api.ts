@@ -64,12 +64,14 @@ export function getDashboardApi({
   let references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
 
-  let untilEmbeddableLoadedBreakCircularDep: (id: string) => Promise<undefined> = async (
-    id: string
-  ) => undefined;
   const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
-  const trackPanel = initializeTrackPanel(untilEmbeddableLoadedBreakCircularDep);
-  const panelsManager = initializePanelsManager(
+  // panelsManager is assigned after trackPanel
+  // eslint-disable-next-line prefer-const
+  let panelsManager: ReturnType<typeof initializePanelsManager> | undefined;
+  const trackPanel = initializeTrackPanel(async (id: string) =>
+    panelsManager ? await panelsManager.api.untilEmbeddableLoaded(id) : undefined
+  );
+  panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
     initialPanelsRuntimeState ?? {},
@@ -77,16 +79,20 @@ export function getDashboardApi({
     (id: string) => getReferencesForPanelId(id, references),
     (refs: Reference[]) => references.push(...refs)
   );
-  untilEmbeddableLoadedBreakCircularDep = panelsManager.api.untilEmbeddableLoaded;
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupApi$,
     panelsManager.api.children$
   );
+  // unsavedChangesManager is assigned after unifiedSearchManager
+  // eslint-disable-next-line prefer-const
+  let unsavedChangesManager: ReturnType<typeof initializeUnsavedChangesManager> | undefined;
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupApi$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
+    () =>
+      unsavedChangesManager ? unsavedChangesManager.internalApi.getLastSavedState() : undefined,
     creationOptions
   );
   const settingsManager = initializeSettingsManager({
@@ -94,7 +100,7 @@ export function getDashboardApi({
     setTimeRestore: unifiedSearchManager.internalApi.setTimeRestore,
     timeRestore$: unifiedSearchManager.internalApi.timeRestore$,
   });
-  const unsavedChangesManager = initializeUnsavedChangesManager({
+  unsavedChangesManager = initializeUnsavedChangesManager({
     anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
     creationOptions,
     controlGroupApi$,
@@ -108,7 +114,7 @@ export function getDashboardApi({
     unifiedSearchManager,
   });
   async function getState() {
-    const { panels, references: panelReferences } = await panelsManager.internalApi.getState();
+    const { panels, references: panelReferences } = await panelsManager!.internalApi.getState();
     const dashboardState: DashboardState = {
       executionContext: initialState.executionContext,
       ...settingsManager.internalApi.getState(),
@@ -174,7 +180,7 @@ export function getDashboardApi({
       });
 
       if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
+        unsavedChangesManager!.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -202,7 +208,7 @@ export function getDashboardApi({
         lastSavedId: savedObjectId$.value,
       });
 
-      unsavedChangesManager.internalApi.onSave(dashboardState);
+      unsavedChangesManager!.internalApi.onSave(dashboardState);
       references = saveResult.references ?? [];
 
       return;
@@ -245,7 +251,7 @@ export function getDashboardApi({
         };
       },
       getRuntimeStateForControlGroup: () => {
-        return panelsManager.api.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
+        return panelsManager!.api.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
@@ -255,7 +261,7 @@ export function getDashboardApi({
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
-      unsavedChangesManager.cleanup();
+      unsavedChangesManager!.cleanup();
     },
   };
 }
