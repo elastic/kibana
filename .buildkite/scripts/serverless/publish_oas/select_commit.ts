@@ -29,9 +29,9 @@ async function getCurrentProdReleaseSha() {
 
   if (!sha) {
     throw new Error('Could not find production hash in current releases file');
-  } else {
-    return sha;
   }
+
+  return sha;
 }
 
 async function main() {
