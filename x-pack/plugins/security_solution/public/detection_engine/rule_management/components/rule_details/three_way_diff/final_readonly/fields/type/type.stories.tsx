@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TypeReadOnly } from './type';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -22,7 +22,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <FieldReadOnly fieldName="type" />
@@ -30,10 +30,12 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    type: 'query',
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      type: 'query',
+    }),
+  },
 };

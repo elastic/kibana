@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 
 import { getCustomIntegrationsContextDecorator } from './decorator';
 

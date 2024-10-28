@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { ThresholdReadOnly } from './threshold';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -22,7 +22,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <FieldReadOnly fieldName="threshold" />
@@ -30,14 +30,16 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockThresholdRule({
-    threshold: {
-      field: ['Responses.process.pid'],
-      value: 100,
-      cardinality: [{ field: 'host.id', value: 2 }],
-    },
-  }),
+  args: {
+    finalDiffableRule: mockThresholdRule({
+      threshold: {
+        field: ['Responses.process.pid'],
+        value: 100,
+        cardinality: [{ field: 'host.id', value: 2 }],
+      },
+    }),
+  },
 };

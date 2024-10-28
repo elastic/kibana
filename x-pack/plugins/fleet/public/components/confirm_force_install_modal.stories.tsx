@@ -45,24 +45,27 @@ const argTypes = {
   },
 };
 
-export const UnverifiedIntegrationModal = ({ packageName, packageVersion }: Args) => {
-  const mockDocLinks: DocLinksStart = {
-    links: {
-      // @ts-ignore only defining what we need
-      fleet: {
-        packageSignatures: 'elastic.co',
+export const UnverifiedIntegrationModal = {
+  render: ({ packageName, packageVersion }: Args) => {
+    const mockDocLinks: DocLinksStart = {
+      links: {
+        // @ts-ignore only defining what we need
+        fleet: {
+          packageSignatures: 'elastic.co',
+        },
       },
-    },
-  };
+    };
 
-  return (
-    <ConfirmForceInstallModal
-      onCancel={() => {}}
-      onConfirm={() => {}}
-      pkg={{ name: packageName, version: packageVersion }}
-      docLinks={mockDocLinks}
-    />
-  );
+    return (
+      <ConfirmForceInstallModal
+        onCancel={() => {}}
+        onConfirm={() => {}}
+        pkg={{ name: packageName, version: packageVersion }}
+        docLinks={mockDocLinks}
+      />
+    );
+  },
+
+  args,
+  argTypes,
 };
-UnverifiedIntegrationModal.args = args;
-UnverifiedIntegrationModal.argTypes = argTypes;

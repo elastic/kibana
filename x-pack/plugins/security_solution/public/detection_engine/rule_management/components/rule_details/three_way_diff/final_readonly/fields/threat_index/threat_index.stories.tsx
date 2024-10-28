@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndexReadOnly } from './threat_index';
@@ -22,7 +22,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <FieldReadOnly fieldName="threat_index" />
@@ -30,10 +30,12 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_index: ['logs-ti_*', 'logs-defend_*'],
-  }),
+  args: {
+    finalDiffableRule: mockThreatMatchRule({
+      threat_index: ['logs-ti_*', 'logs-defend_*'],
+    }),
+  },
 };

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndicatorPathReadOnly } from './threat_indicator_path';
@@ -23,7 +23,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <FieldReadOnly fieldName="threat_indicator_path" />
@@ -31,10 +31,12 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_indicator_path: 'threat.indicator',
-  }),
+  args: {
+    finalDiffableRule: mockThreatMatchRule({
+      threat_indicator_path: 'threat.indicator',
+    }),
+  },
 };

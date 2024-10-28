@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { Schema } from '.';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
@@ -118,6 +118,6 @@ export default {
   ],
 };
 
-export const Example: Story = () => {
+export const Example: StoryFn = () => {
   return <Schema />;
 };

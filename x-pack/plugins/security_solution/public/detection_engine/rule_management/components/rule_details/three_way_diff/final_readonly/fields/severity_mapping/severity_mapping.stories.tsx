@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { SeverityMappingReadOnly } from './severity_mapping';
@@ -23,7 +23,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <FieldReadOnly fieldName="severity_mapping" />
@@ -31,23 +31,25 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    severity_mapping: [
-      {
-        field: 'event.severity',
-        operator: 'equals',
-        severity: 'low',
-        value: 'LOW',
-      },
-      {
-        field: 'google_workspace.alert.metadata.severity',
-        operator: 'equals',
-        severity: 'high',
-        value: 'VERY HIGH',
-      },
-    ],
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      severity_mapping: [
+        {
+          field: 'event.severity',
+          operator: 'equals',
+          severity: 'low',
+          value: 'LOW',
+        },
+        {
+          field: 'google_workspace.alert.metadata.severity',
+          operator: 'equals',
+          severity: 'high',
+          value: 'VERY HIGH',
+        },
+      ],
+    }),
+  },
 };

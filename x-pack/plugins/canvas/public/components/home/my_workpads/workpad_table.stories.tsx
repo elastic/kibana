@@ -24,19 +24,21 @@ export default {
   parameters: {},
 };
 
-export const WorkpadTable = (args: { findWorkpads: number }) => {
-  const { findWorkpads } = args;
-  const [workpads, setWorkpads] = useState(getSomeWorkpads(findWorkpads));
+export const WorkpadTable = {
+  render: (args: { findWorkpads: number }) => {
+    const { findWorkpads } = args;
+    const [workpads, setWorkpads] = useState(getSomeWorkpads(findWorkpads));
 
-  useEffect(() => {
-    setWorkpads(getSomeWorkpads(findWorkpads));
-  }, [findWorkpads]);
+    useEffect(() => {
+      setWorkpads(getSomeWorkpads(findWorkpads));
+    }, [findWorkpads]);
 
-  return (
-    <EuiPanel>
-      <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
-        <Component />
-      </WorkpadsContext.Provider>
-    </EuiPanel>
-  );
+    return (
+      <EuiPanel>
+        <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
+          <Component />
+        </WorkpadsContext.Provider>
+      </EuiPanel>
+    );
+  },
 };

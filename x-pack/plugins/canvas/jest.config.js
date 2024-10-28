@@ -9,9 +9,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/canvas'],
-  transform: {
-    '^.+\\.stories\\.tsx?$': '@storybook/addon-storyshots/injectFileName',
-  },
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/canvas',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [

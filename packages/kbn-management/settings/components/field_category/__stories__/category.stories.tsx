@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -51,41 +51,43 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 type FieldCategoryParams = Pick<ComponentProps, 'category'> & Params;
 
-export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
-  const { onClearQuery, onFieldChange, unsavedChanges } = useCategoryStory({
-    isFiltered,
-    isSavingEnabled,
-  });
+export const Category = {
+  render: ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
+    const { onClearQuery, onFieldChange, unsavedChanges } = useCategoryStory({
+      isFiltered,
+      isSavingEnabled,
+    });
 
-  const { count, fields } = categorizeFields(definitions)[category];
-  const rows = isFiltered ? [fields[0]] : fields;
+    const { count, fields } = categorizeFields(definitions)[category];
+    const rows = isFiltered ? [fields[0]] : fields;
 
-  return (
-    <FieldCategoryProvider
-      showDanger={action('showDanger')}
-      links={{ deprecationKey: 'link/to/deprecation/docs' }}
-      validateChange={async (key, value) => {
-        action(`validateChange`)({
-          key,
-          value,
-        });
-        return { successfulValidation: true, valid: true };
-      }}
-      {...{ isSavingEnabled, onFieldChange }}
-    >
-      <Component category={category} fieldCount={count} onClearQuery={onClearQuery}>
-        {rows.map((field) => (
-          <FieldRow
-            key={field.id}
-            unsavedChange={unsavedChanges[field.id]}
-            {...{ field, isSavingEnabled, onFieldChange }}
-          />
-        ))}
-      </Component>
-    </FieldCategoryProvider>
-  );
+    return (
+      <FieldCategoryProvider
+        showDanger={action('showDanger')}
+        links={{ deprecationKey: 'link/to/deprecation/docs' }}
+        validateChange={async (key, value) => {
+          action(`validateChange`)({
+            key,
+            value,
+          });
+          return { successfulValidation: true, valid: true };
+        }}
+        {...{ isSavingEnabled, onFieldChange }}
+      >
+        <Component category={category} fieldCount={count} onClearQuery={onClearQuery}>
+          {rows.map((field) => (
+            <FieldRow
+              key={field.id}
+              unsavedChange={unsavedChanges[field.id]}
+              {...{ field, isSavingEnabled, onFieldChange }}
+            />
+          ))}
+        </Component>
+      </FieldCategoryProvider>
+    );
+  },
 };

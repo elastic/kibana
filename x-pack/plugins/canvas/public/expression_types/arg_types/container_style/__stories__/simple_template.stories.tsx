@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
@@ -44,20 +43,35 @@ const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) =
   return defaultValues[arg];
 };
 
-storiesOf('arguments/ContainerStyle', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('simple', () => <Interactive />);
+export default {
+  title: 'arguments/ContainerStyle',
 
-storiesOf('arguments/ContainerStyle/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('simple template', () => (
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
+};
+
+export const Simple = {
+  render: () => <Interactive />,
+  name: 'simple',
+};
+
+export default {
+  title: 'arguments/ContainerStyle/components',
+
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
+};
+
+export const _SimpleTemplate = {
+  render: () => (
     <SimpleTemplate
       getArgValue={getArgValue}
       setArgValue={action('setArgValue')}
       workpad={getDefaultWorkpad()}
     />
-  ));
+  ),
+
+  name: 'simple template',
+};

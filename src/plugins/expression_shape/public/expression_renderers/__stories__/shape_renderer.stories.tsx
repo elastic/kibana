@@ -8,20 +8,27 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getShapeRenderer } from '..';
 import { Shape } from '../../../common/types';
 
-storiesOf('renderers/shape', module).add('default', () => {
-  const config = {
-    type: 'shape' as 'shape',
-    border: '#FFEEDD',
-    borderWidth: 8,
-    shape: Shape.BOOKMARK,
-    fill: '#112233',
-    maintainAspect: true,
-  };
+export default {
+  title: 'renderers/shape',
+};
 
-  return <Render renderer={getShapeRenderer()} config={config} />;
-});
+export const Default = {
+  render: () => {
+    const config = {
+      type: 'shape' as 'shape',
+      border: '#FFEEDD',
+      borderWidth: 8,
+      shape: Shape.BOOKMARK,
+      fill: '#112233',
+      maintainAspect: true,
+    };
+
+    return <Render renderer={getShapeRenderer()} config={config} />;
+  },
+
+  name: 'default',
+};

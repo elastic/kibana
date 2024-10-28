@@ -10,21 +10,23 @@ import { EuiButton } from '@elastic/eui';
 
 import { FleetServerFlyout as FleetServerFlyoutComponent } from '.';
 
-export const FleetServerFlyout = () => {
-  const [isOpen, setIsOpen] = React.useState(false);
+export const FleetServerFlyout = {
+  render: () => {
+    const [isOpen, setIsOpen] = React.useState(false);
 
-  return (
-    <div style={{ width: 900 }}>
-      <EuiButton size="m" fill color="primary" onClick={() => setIsOpen(true)}>
-        Show flyout
-      </EuiButton>
-      {isOpen && <FleetServerFlyoutComponent onClose={() => setIsOpen(false)} />}
-    </div>
-  );
-};
+    return (
+      <div style={{ width: 900 }}>
+        <EuiButton size="m" fill color="primary" onClick={() => setIsOpen(true)}>
+          Show flyout
+        </EuiButton>
+        {isOpen && <FleetServerFlyoutComponent onClose={() => setIsOpen(false)} />}
+      </div>
+    );
+  },
 
-FleetServerFlyout.args = {
-  isCloudEnabled: false,
+  args: {
+    isCloudEnabled: false,
+  },
 };
 
 export default {

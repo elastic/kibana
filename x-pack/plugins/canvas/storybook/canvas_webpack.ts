@@ -6,17 +6,19 @@
  */
 
 import { resolve } from 'path';
-import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
+import { Configuration } from 'webpack';
+import { merge as webpackMerge } from 'webpack-merge';
 import { KIBANA_ROOT } from './constants';
 
-export const canvasWebpack = {
+export const canvasWebpack: Configuration = {
   module: {
     rules: [
       // Enable CSS Modules in Storybook (Shareable Runtime)
       {
         test: /\.module\.s(a|c)ss$/,
-        loader: [
+        use: [
           'style-loader',
           {
             loader: 'css-loader',
@@ -43,19 +45,14 @@ export const canvasWebpack = {
           },
         ],
       },
-      // Exclude large-dependency, troublesome or irrelevant modules.
-      {
-        test: [
-          resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout'),
-          resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public'),
-        ],
-        use: 'null-loader',
-      },
     ],
   },
   resolve: {
     alias: {
       'src/plugins': resolve(KIBANA_ROOT, 'src/plugins'),
+      // Exclude large-dependency, troublesome or irrelevant modules.
+      [resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout')]: false,
+      [resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public')]: false,
     },
   },
 };
@@ -63,5 +60,5 @@ export const canvasWebpack = {
 export const canvasStorybookConfig: StorybookConfig = {
   ...defaultConfig,
   addons: [...(defaultConfig.addons || []), require.resolve('./addon/register')],
-  ...mergeWebpackFinal(canvasWebpack),
+  webpackFinal: (config) => webpackMerge(config, canvasWebpack),
 };

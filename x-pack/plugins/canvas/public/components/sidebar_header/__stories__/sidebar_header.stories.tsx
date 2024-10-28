@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { SidebarHeader } from '../sidebar_header.component';
 
@@ -17,9 +16,18 @@ const handlers = {
   sendToBack: action('sendToBack'),
 };
 
-storiesOf('components/Sidebar/SidebarHeader', module)
-  .addDecorator((story) => <div style={{ width: '300px' }}>{story()}</div>)
-  .add('default', () => <SidebarHeader title="Selected layer" {...handlers} />)
-  .add('with layer controls', () => (
-    <SidebarHeader title="Grouped element" showLayerControls={true} {...handlers} />
-  ));
+export default {
+  title: 'components/Sidebar/SidebarHeader',
+  decorators: [(story) => <div style={{ width: '300px' }}>{story()}</div>],
+};
+
+export const Default = {
+  render: () => <SidebarHeader title="Selected layer" {...handlers} />,
+  name: 'default',
+};
+
+export const WithLayerControls = {
+  render: () => <SidebarHeader title="Grouped element" showLayerControls={true} {...handlers} />,
+
+  name: 'with layer controls',
+};

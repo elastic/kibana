@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React from 'react';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
@@ -62,19 +62,19 @@ export default {
   title: 'IndicatorsBarChart',
 };
 
-export const Default: Story<void> = () => (
+export const Default: StoryFn<void> = () => (
   <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
     <IndicatorsBarChart indicators={mockIndicators} field={mockField} dateRange={mockDateRange} />
   </StoryProvidersComponent>
 );
 
-export const NoData: Story<void> = () => (
+export const NoData: StoryFn<void> = () => (
   <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
     <IndicatorsBarChart indicators={[]} field={mockField} dateRange={mockDateRange} />
   </StoryProvidersComponent>
 );
 
-export const CustomHeight: Story<void> = () => {
+export const CustomHeight: StoryFn<void> = () => {
   const mockHeight = '500px';
 
   return (

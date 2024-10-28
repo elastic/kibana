@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { buildSystemMessage } from '../utils/builders';
 import { KibanaReactStorybookDecorator } from '../utils/storybook_decorator.stories';
 import { ChatBody as Component } from './chat_body';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Organisms/ChatBody',
   decorators: [KibanaReactStorybookDecorator],
 };
 
 export default meta;
-const defaultProps: ComponentStoryObj<typeof Component> = {
+const defaultProps: StoryObj<typeof Component> = {
   args: {
     initialTitle: 'My Conversation',
     initialMessages: [
@@ -76,6 +76,6 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const ChatBody: ComponentStoryObj<typeof Component> = {
+export const ChatBody: StoryObj<typeof Component> = {
   ...defaultProps,
 };

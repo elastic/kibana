@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -101,7 +101,7 @@ const registeredPanels = [
   },
 ];
 
-export const Right: Story<void> = () => {
+export const Right: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -127,7 +127,7 @@ export const Right: Story<void> = () => {
   );
 };
 
-export const Left: Story<void> = () => {
+export const Left: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -155,7 +155,7 @@ export const Left: Story<void> = () => {
   );
 };
 
-export const Preview: Story<void> = () => {
+export const Preview: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -187,7 +187,7 @@ export const Preview: Story<void> = () => {
   );
 };
 
-export const MultiplePreviews: Story<void> = () => {
+export const MultiplePreviews: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -222,7 +222,7 @@ export const MultiplePreviews: Story<void> = () => {
   );
 };
 
-export const CollapsedPushMode: Story<void> = () => {
+export const CollapsedPushMode: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -248,7 +248,7 @@ export const CollapsedPushMode: Story<void> = () => {
   );
 };
 
-export const ExpandedPushMode: Story<void> = () => {
+export const ExpandedPushMode: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -276,7 +276,7 @@ export const ExpandedPushMode: Story<void> = () => {
   );
 };
 
-export const DisableTypeSelection: Story<void> = () => {
+export const DisableTypeSelection: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -306,7 +306,7 @@ export const DisableTypeSelection: Story<void> = () => {
   );
 };
 
-export const ResetWidths: Story<void> = () => {
+export const ResetWidths: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {
@@ -331,7 +331,7 @@ export const ResetWidths: Story<void> = () => {
   );
 };
 
-export const DisableResizeWidthSelection: Story<void> = () => {
+export const DisableResizeWidthSelection: StoryFn<void> = () => {
   const state: State = {
     panels: {
       byId: {

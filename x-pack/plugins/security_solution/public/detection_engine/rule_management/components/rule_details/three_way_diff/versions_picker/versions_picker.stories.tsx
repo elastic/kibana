@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { VersionsPicker } from './versions_picker';
 import { SelectedVersions } from './constants';
 
@@ -22,7 +22,7 @@ export default {
   },
 };
 
-const Template: Story<{ hasBaseVersion: boolean }> = (args) => {
+const Template: StoryFn<{ hasBaseVersion: boolean }> = (args) => {
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
     SelectedVersions.CurrentFinal
   );
@@ -36,12 +36,18 @@ const Template: Story<{ hasBaseVersion: boolean }> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
-Default.args = {
-  hasBaseVersion: true,
+export const Default = {
+  render: Template,
+
+  args: {
+    hasBaseVersion: true,
+  },
 };
 
-export const NoBaseVersion = Template.bind({});
-NoBaseVersion.args = {
-  hasBaseVersion: false,
+export const NoBaseVersion = {
+  render: Template,
+
+  args: {
+    hasBaseVersion: false,
+  },
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { EmbeddableFactoryDefinition, IEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -92,14 +91,22 @@ const testVisTypeAliases: VisTypeAlias[] = [
   },
 ];
 
-storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
-  <EditorMenu
-    addPanelActions={[]}
-    factories={testFactories}
-    promotedVisTypes={testVisTypes}
-    visTypeAliases={testVisTypeAliases}
-    createNewVisType={() => action('createNewVisType')}
-    createNewEmbeddableFromFactory={() => action('createNewEmbeddableFromFactory')}
-    createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
-  />
-));
+export default {
+  title: 'components/WorkpadHeader/EditorMenu',
+};
+
+export const Default = {
+  render: () => (
+    <EditorMenu
+      addPanelActions={[]}
+      factories={testFactories}
+      promotedVisTypes={testVisTypes}
+      visTypeAliases={testVisTypeAliases}
+      createNewVisType={() => action('createNewVisType')}
+      createNewEmbeddableFromFactory={() => action('createNewEmbeddableFromFactory')}
+      createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
+    />
+  ),
+
+  name: 'default',
+};

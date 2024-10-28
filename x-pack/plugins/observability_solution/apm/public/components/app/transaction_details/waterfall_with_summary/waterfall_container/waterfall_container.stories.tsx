@@ -7,7 +7,7 @@
 import { EuiFilePicker, EuiForm } from '@elastic/eui';
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Meta, Story } from '@storybook/react';
+import { StoryFn, Meta } from '@storybook/react';
 import { noop } from 'lodash';
 import React, { ComponentProps, useState } from 'react';
 import { WaterfallContainer } from '.';
@@ -36,7 +36,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<any> = () => {
+export const Example: StoryFn<any> = () => {
   const serviceName = 'synth-apple';
   const instanceJava = apm
     .service({
@@ -99,7 +99,7 @@ export const Example: Story<any> = () => {
 };
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
-export const WaterfallFromJSON: Story<{}> = () => {
+export const WaterfallFromJSON: StoryFn<{}> = () => {
   const [json, setJson] = useState<string | undefined>();
 
   function renderWaterfall() {
