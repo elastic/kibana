@@ -8,7 +8,6 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 import { inspect, promisify } from 'util';
 
 import webpack from 'webpack';
@@ -19,6 +18,7 @@ import {
   isConcatenatedModule,
   isDelegatedModule,
   isRuntimeModule,
+  getModulePath,
 } from '@kbn/optimizer-webpack-helpers';
 
 import {
@@ -37,7 +37,6 @@ interface InputFileSystem {
     encoding: null | undefined,
     callback: (err: Error | null, stats: Buffer) => void
   ) => void;
-  stat: (path: string, callback: (err: Error | null, stats: Fs.Stats) => void) => void;
 }
 
 /**
@@ -63,9 +62,33 @@ export class PopulateBundleCachePlugin {
       throw new Error('expected inputFs to be defined');
     }
     const readFile = promisify(inputFs.readFile);
-    const stat = promisify(inputFs.stat);
+    const moduleFileDepsMap = new Map();
+    const allFileDepsPathSet = new Set();
 
     compiler.hooks.compilation.tap('PopulateBundleCachePlugin', (compilation) => {
+      const hooks = webpack.NormalModule.getCompilationHooks(compilation);
+
+      // first collect file deps for modules
+      hooks.beforeSnapshot.tap('PopulateBundleCachePlugin', (module: any) => {
+        // make sure we have file deps for this module
+        if (module.buildInfo.fileDependencies.size > 0) {
+          const realFileDeps = [];
+
+          for (const path of module.buildInfo.fileDependencies) {
+            // in webpack v5 there a lot of paths collected that are not real files
+            // but instead folders or partial paths.
+            // Here we're verifying if what we have as indeed a filepath
+            if (Path.extname(path).length > 0) {
+              realFileDeps.push(path);
+              allFileDepsPathSet.add(path);
+            }
+          }
+
+          moduleFileDepsMap.set(module.identifier(), realFileDeps);
+        }
+      });
+
+      // in the end process assets to calculate workUnites and references
       compilation.hooks.processAssets.tapAsync(
         {
           name: 'PopulateBundleCachePlugin',
@@ -74,7 +97,7 @@ export class PopulateBundleCachePlugin {
         async (_, callback) => {
           const bundleRefExportIds: string[] = [];
           let moduleCount = 0;
-          let workUnits = compilation.fileDependencies.size;
+          let workUnits = allFileDepsPathSet.size;
 
           const paths = new Set<string>();
           const rawHashes = new Map<string, string | null>();
@@ -100,38 +123,41 @@ export class PopulateBundleCachePlugin {
             await addReferenced(bundle.manifestPath);
           }
 
-          // add all files from the fileDependencies (which includes a bunch of directories) to the cache
-          for (const path of compilation.fileDependencies) {
-            const cStat = await stat(path);
-            if (!cStat.isFile()) {
-              continue;
-            }
-
-            await addReferenced(path);
-            if (path.endsWith('.scss')) {
-              workUnits += EXTRA_SCSS_WORK_UNITS;
-              continue;
-            }
-
-            const parsedPath = parseFilePath(path);
-            if (!parsedPath.dirs.includes('node_modules')) {
-              continue;
-            }
-
-            const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
-            const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-            const pkgJsonPath = Path.join(
-              parsedPath.root,
-              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-              'package.json'
-            );
-            await addReferenced(pkgJsonPath);
-            continue;
-          }
-
           for (const module of compilation.modules) {
             if (isNormalModule(module)) {
+              const path = getModulePath(module);
+              if (Path.extname(path).length === 0) {
+                continue;
+              }
+
               moduleCount += 1;
+              const parsedPath = parseFilePath(path);
+
+              if (!parsedPath.dirs.includes('node_modules')) {
+                await addReferenced(path);
+
+                if (path.endsWith('.scss')) {
+                  workUnits += EXTRA_SCSS_WORK_UNITS;
+
+                  const dependencies = moduleFileDepsMap.get(module.identifier());
+                  if (dependencies) {
+                    await Promise.all(
+                      dependencies.map((depPath: string) => addReferenced(depPath))
+                    );
+                  }
+                }
+
+                continue;
+              }
+
+              const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
+              const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
+              const pkgJsonPath = Path.join(
+                parsedPath.root,
+                ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+                'package.json'
+              );
+              await addReferenced(pkgJsonPath);
               continue;
             }
 
@@ -146,7 +172,6 @@ export class PopulateBundleCachePlugin {
             }
 
             if (isDelegatedModule(module)) {
-              // delegated modules are the references to the ui-shared-deps-npm dll
               dllRefKeys.add(module.userRequest);
               continue;
             }

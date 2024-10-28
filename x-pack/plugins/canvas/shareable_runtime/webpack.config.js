@@ -26,6 +26,7 @@ module.exports = {
   entry: {
     [SHAREABLE_RUNTIME_NAME]: require.resolve('./index.ts'),
   },
+  target: 'web',
   mode: isProd ? 'production' : 'development',
   output: {
     path: SHAREABLE_RUNTIME_OUTPUT,
@@ -39,16 +40,25 @@ module.exports = {
       [require.resolve('highlight.js')]: false,
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
-    mainFields: ['browser', 'main'],
+    mainFields: ['browser', 'module', 'main'],
+    fallback: {
+      fs: false,
+      child_process: false,
+    },
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loaders: 'babel-loader',
+        loader: 'babel-loader',
         options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          presets: [
+            [
+              require.resolve('@kbn/babel-preset/webpack_preset'),
+              { useTransformRequireDefault: true },
+            ],
+          ],
         },
       },
       {
@@ -107,15 +117,15 @@ module.exports = {
       },
       {
         test: /\.module\.s(a|c)ss$/,
-        loader: [
+        use: [
           'style-loader',
           {
             loader: 'css-loader',
             options: {
               modules: {
                 localIdentName: '[name]__[local]___[hash:base64:5]',
+                exportLocalsConvention: 'camelCase',
               },
-              localsConvention: 'camelCase',
               sourceMap: !isProd,
             },
           },
@@ -184,11 +194,23 @@ module.exports = {
       },
       {
         test: require.resolve('jquery'),
-        loader: 'expose-loader?jQuery!expose-loader?$',
+        use: [
+          {
+            loader: 'expose-loader',
+            options: {
+              exposes: ['jQuery', '$'],
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-        loader: 'url-loader',
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192,
+          },
+        },
         sideEffects: false,
       },
       {
@@ -201,10 +223,6 @@ module.exports = {
         use: require.resolve('@kbn/peggy-loader'),
       },
     ],
-  },
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
   },
   plugins: [
     isProd ? new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }) : [],

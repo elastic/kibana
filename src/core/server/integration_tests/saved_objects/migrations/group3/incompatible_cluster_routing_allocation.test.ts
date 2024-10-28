@@ -34,12 +34,7 @@ const { startES } = createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(
-        __dirname,
-        '..',
-        'archives',
-        '8.0.0_v1_migrations_sample_data_saved_objects.zip'
-      ),
+      dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
     },
   },
 });

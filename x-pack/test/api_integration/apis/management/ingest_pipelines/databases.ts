@@ -62,20 +62,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/196765
-    describe.skip('List', () => {
+    describe('List', () => {
       it('returns existing databases', async () => {
         const { body } = await supertest.get(url).set('kbn-xsrf', 'xxx').expect(200);
         expect(body).to.eql([
           {
-            id: normalizedIpinfoDatabaseName,
-            name: ipinfoDatabaseName,
-            type: 'ipinfo',
-          },
-          {
             id: normalizedMaxmindDatabaseName,
             name: maxmindDatabaseName,
             type: 'maxmind',
+          },
+          {
+            id: normalizedIpinfoDatabaseName,
+            name: ipinfoDatabaseName,
+            type: 'ipinfo',
           },
         ]);
       });

@@ -24,6 +24,7 @@ const defaultProps: StoryObj<typeof Component> = {
         loading: false,
         value: {
           ready: false,
+          enabled: true,
         },
         refresh: () => {},
       },
@@ -43,12 +44,15 @@ export const Loading: StoryObj<typeof Component> = merge({}, defaultProps, {
 });
 
 export const NotInstalled: StoryObj<typeof Component> = merge({}, defaultProps, {
-  args: { knowledgeBase: { status: { loading: false, value: { ready: false } } } },
+  args: { knowledgeBase: { status: { loading: false, value: { ready: false, enabled: true } } } },
 });
 
 export const Installing: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: {
-    knowledgeBase: { status: { loading: false, value: { ready: false } }, isInstalling: true },
+    knowledgeBase: {
+      status: { loading: false, value: { ready: false, enabled: true } },
+      isInstalling: true,
+    },
   },
 });
 
@@ -57,7 +61,7 @@ export const InstallError: StoryObj<typeof Component> = merge({}, defaultProps, 
     knowledgeBase: {
       status: {
         loading: false,
-        value: { ready: false },
+        value: { ready: false, enabled: true },
       },
       isInstalling: false,
       installError: new Error(),
@@ -66,5 +70,5 @@ export const InstallError: StoryObj<typeof Component> = merge({}, defaultProps, 
 });
 
 export const Installed: StoryObj<typeof Component> = merge({}, defaultProps, {
-  args: { knowledgeBase: { status: { loading: false, value: { ready: true } } } },
+  args: { knowledgeBase: { status: { loading: false, value: { ready: true, enabled: true } } } },
 });

@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
   "id": "@kbn/cloud-security-posture-graph",
-  "owner": "@elastic/kibana-cloud-security-posture"
+  "owner": "@elastic/kibana-cloud-security-posture",
+  "type": "shared-browser"
 }

@@ -37,6 +37,7 @@ const defaultProps: StoryObj<typeof Component> = {
         loading: false,
         value: {
           ready: true,
+          enabled: true,
         },
         refresh: () => {},
       },
