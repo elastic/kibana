@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 import type { AnomalySourceDescriptor } from './anomaly_source';
-import { AnomalyJobSelector } from './anomaly_job_selector';
+import { AnomalyJobSelectorLazy } from './anomaly_job_selector_lazy';
 import { LayerSelector } from './layer_selector';
 import type { MlAnomalyLayersType } from './util';
 import { ML_ANOMALY_LAYERS } from './util';
@@ -81,7 +81,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     ) : null;
     return (
       <EuiPanel>
-        <AnomalyJobSelector
+        <AnomalyJobSelectorLazy
           onJobChange={this.previewLayer}
           mlJobsService={this.props.mlJobsService}
           jobsManagementPath={this.props.jobsManagementPath}
@@ -92,3 +92,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     );
   }
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default CreateAnomalySourceEditor;
