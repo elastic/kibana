@@ -685,6 +685,17 @@ function validateAction(
 
   try {
     validatedParams = validateParams(actionType, params, validatorServices);
+  } catch (err) {
+    throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+      actionId,
+      status: 'error',
+      message: err.message,
+      retry: !!taskInfo,
+      errorSource: TaskErrorSource.USER,
+    });
+  }
+
+  try {
     validatedConfig = validateConfig(actionType, config, validatorServices);
     validatedSecrets = validateSecrets(actionType, secrets, validatorServices);
     if (actionType.validate?.connector) {
