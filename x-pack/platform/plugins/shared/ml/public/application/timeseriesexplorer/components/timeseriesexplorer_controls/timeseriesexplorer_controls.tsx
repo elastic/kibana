@@ -33,7 +33,7 @@ import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/j
 import { useMlKibana } from '../../../contexts/kibana';
 import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
-import type { MlEntity } from '../../../../embeddables';
+import type { MlEntity } from '../../../../embeddables/types';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
 import { ForecastingModal } from '../forecasting_modal/forecasting_modal';

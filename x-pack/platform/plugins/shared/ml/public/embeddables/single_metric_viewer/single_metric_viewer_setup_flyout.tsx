@@ -12,7 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { SingleMetricViewerEmbeddableUserInput } from '..';
+import type { SingleMetricViewerEmbeddableUserInput } from '../types';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlApi } from '../../application/services/ml_api_service';
 import { ML_STORAGE_KEYS } from '../../../common/types/storage';

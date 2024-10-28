@@ -22,7 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
 import {

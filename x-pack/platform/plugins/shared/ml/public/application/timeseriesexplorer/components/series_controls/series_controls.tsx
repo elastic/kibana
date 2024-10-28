@@ -37,7 +37,7 @@ import {
 import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
-import type { MlEntity } from '../../../../embeddables';
+import type { MlEntity } from '../../../../embeddables/types';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {

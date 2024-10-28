@@ -10,7 +10,8 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from './kibana_context';
-import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
+import type { MappedEmbeddableTypeOf } from '../../../embeddables/types';
+import type { MlEmbeddableTypes } from '../../../embeddables/constants';
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.
