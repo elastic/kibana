@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ElasticsearchClient } from '@kbn/core/server';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
@@ -87,7 +88,7 @@ export async function fetchClusterHealth(
       health:
         hit._source!.cluster_state?.status || hit._source!.elasticsearch?.cluster?.stats?.status,
       clusterUuid: hit._source!.cluster_uuid || hit._source!.elasticsearch?.cluster?.id,
-      ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
+      ccs: isCCSRemoteIndexName(hit._index) ? hit._index.split(':')[0] : undefined,
     } as AlertClusterHealth;
   });
 }

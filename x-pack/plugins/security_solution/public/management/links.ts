@@ -223,7 +223,7 @@ export const links: LinkItem = {
       title: NOTES,
       description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
         defaultMessage:
-          'Oversee, revise and revisit the annotations within each document and timeline.',
+          'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
       }),
       landingIcon: 'filebeatApp',
       path: NOTES_PATH,
