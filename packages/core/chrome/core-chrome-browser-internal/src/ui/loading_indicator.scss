@@ -4,5 +4,6 @@
 }
 
 .euiHeaderSectionItem .euiButtonEmpty__text {
+  // stop global header buttons from jumping during loading state
   display: flex;
 }
