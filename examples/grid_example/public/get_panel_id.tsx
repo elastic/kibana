@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFieldText,
+  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
@@ -22,15 +23,17 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 const PanelIdModal = ({
   suggestion,
+  onClose,
   onSubmit,
 }: {
   suggestion: string;
+  onClose: () => void;
   onSubmit: (id: string) => void;
 }) => {
   const [panelId, setPanelId] = useState<string>(suggestion);
 
   return (
-    <>
+    <EuiModal onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>Panel ID</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -52,7 +55,7 @@ const PanelIdModal = ({
           Submit
         </EuiButton>
       </EuiModalFooter>
-    </>
+    </EuiModal>
   );
 };
 
@@ -62,12 +65,16 @@ export const getPanelId = async ({
 }: {
   coreStart: CoreStart;
   suggestion: string;
-}): Promise<string> => {
-  return new Promise<string>((resolve) => {
+}): Promise<string | undefined> => {
+  return new Promise<string | undefined>((resolve) => {
     const session = coreStart.overlays.openModal(
       toMountPoint(
         <PanelIdModal
           suggestion={suggestion}
+          onClose={() => {
+            resolve(undefined);
+            session.close();
+          }}
           onSubmit={(newPanelId) => {
             resolve(newPanelId);
             session.close();

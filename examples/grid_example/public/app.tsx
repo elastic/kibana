@@ -52,7 +52,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                     coreStart,
                     suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
                   });
-                  gridLayoutApi?.addPanel(panelId);
+                  if (panelId) gridLayoutApi?.addPanel(panelId);
                 }}
               >
                 Add a panel
@@ -106,7 +106,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                         coreStart,
                         suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
                       });
-                      gridLayoutApi?.replacePanel(id, newPanelId);
+                      if (newPanelId) gridLayoutApi?.replacePanel(id, newPanelId);
                     }}
                   >
                     Replace this panel
