@@ -129,11 +129,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const {
-    browserFields,
-    indexPattern: indexPatterns,
-    sourcererDataView,
-  } = useSourcererDataView(sourcererScope);
+  const { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
   const license = useLicense();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -167,11 +163,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && indexPatterns != null) {
+    if (browserFields != null && sourcererDataView) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: indexPatterns,
+        indexPattern: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -179,7 +175,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       });
     }
     return null;
-  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+  }, [browserFields, globalQuery, sourcererDataView, uiSettings, allFilters]);
 
   useInvalidFilterQuery({
     id: tableId,
@@ -297,13 +293,13 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onUpdate: onAlertTableUpdate,
       cellContext,
       onLoaded: onLoad,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       toolbarVisibility,
       // if records are too less, we don't want table to be of fixed height.
       // it should shrink to the content height.
       // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
       height: count >= 20 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined,
       initialPageSize: 50,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -317,9 +313,9 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onAlertTableUpdate,
       cellContext,
       onLoad,
-      sourcererDataView?.runtimeFieldMap,
       toolbarVisibility,
       count,
+      sourcererDataView.runtimeFieldMap,
     ]
   );
 
