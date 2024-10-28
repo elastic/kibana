@@ -25,7 +25,7 @@ export enum DataSourceCategory {
 /**
  * The data source profile interface
  */
-export type DataSourceProfile = Profile;
+export type DataSourceProfile = Omit<Profile, 'getRenderAppWrapper'>;
 
 /**
  * Parameters for the data source profile provider `resolve` method
