@@ -7,63 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { forwardRef } from 'react';
+
 import {
   EuiIcon,
   EuiPanel,
   euiFullHeight,
   transparentize,
   useEuiOverflowScroll,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useCallback, useRef } from 'react';
+
 import { GridPanelData, PanelInteractionEvent } from './types';
 
-export const GridPanel = ({
-  activePanelId,
-  panelData,
-  renderPanelContents,
-  setInteractionEvent,
-}: {
-  panelData: GridPanelData;
-  activePanelId: string | undefined;
-  renderPanelContents: (panelId: string) => React.ReactNode;
-  setInteractionEvent: (interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex'>) => void;
-}) => {
-  const panelRef = useRef<HTMLDivElement>(null);
+export const GridPanel = forwardRef<
+  HTMLDivElement,
+  {
+    panelData: GridPanelData;
+    activePanelId: string | undefined;
+    renderPanelContents: (panelId: string) => React.ReactNode;
+    interactionStart: (
+      type: PanelInteractionEvent['type'],
+      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => void;
+  }
+>(({ activePanelId, panelData, renderPanelContents, interactionStart }, panelRef) => {
+  const { euiTheme } = useEuiTheme();
   const thisPanelActive = activePanelId === panelData.id;
 
-  const interactionStart = useCallback(
-    (type: 'drag' | 'resize', e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      if (!panelRef.current) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const panelRect = panelRef.current.getBoundingClientRect();
-      setInteractionEvent({
-        type,
-        id: panelData.id,
-        panelDiv: panelRef.current,
-        mouseOffsets: {
-          top: e.clientY - panelRect.top,
-          left: e.clientX - panelRect.left,
-          right: e.clientX - panelRect.right,
-          bottom: e.clientY - panelRect.bottom,
-        },
-      });
-    },
-    [panelData.id, setInteractionEvent]
-  );
-
   return (
-    <div
-      ref={panelRef}
-      css={css`
-        grid-column-start: ${panelData.column + 1};
-        grid-column-end: ${panelData.column + 1 + panelData.width};
-        grid-row-start: ${panelData.row + 1};
-        grid-row-end: ${panelData.row + 1 + panelData.height};
-      `}
-    >
+    <div ref={panelRef}>
       <EuiPanel
         hasShadow={false}
         hasBorder={true}
@@ -97,11 +72,20 @@ export const GridPanel = ({
             height: ${euiThemeVars.euiSizeL};
             z-index: ${euiThemeVars.euiZLevel3};
             margin-left: ${euiThemeVars.euiSizeS};
-            border: 1px solid ${euiThemeVars.euiBorderColor};
-            background-color: ${euiThemeVars.euiColorEmptyShade};
+            border: 1px solid ${euiTheme.border.color};
+            background-color: ${euiTheme.colors.emptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+            &:hover {
+              cursor: grab;
+              opacity: 1 !important;
+            }
+            &:active {
+              cursor: grabbing;
+              opacity: 1 !important;
+            }
           `}
           onMouseDown={(e) => interactionStart('drag', e)}
+          onMouseUp={(e) => interactionStart('drop', e)}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>
@@ -109,6 +93,7 @@ export const GridPanel = ({
         <div
           className="resizeHandle"
           onMouseDown={(e) => interactionStart('resize', e)}
+          onMouseUp={(e) => interactionStart('drop', e)}
           css={css`
             right: 0;
             bottom: 0;
@@ -139,4 +124,4 @@ export const GridPanel = ({
       </EuiPanel>
     </div>
   );
-};
+});

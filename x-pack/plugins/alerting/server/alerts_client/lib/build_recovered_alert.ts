@@ -26,6 +26,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
@@ -86,12 +87,11 @@ export const buildRecoveredAlert = <
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
   const alertUpdates = {
-    // Set latest rule configuration
-    ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'close',
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
+    [ALERT_RULE_EXECUTION_UUID]: rule[ALERT_RULE_EXECUTION_UUID],
     // Set the recovery action group
     [ALERT_ACTION_GROUP]: recoveryActionGroup,
     // Set latest flapping state
