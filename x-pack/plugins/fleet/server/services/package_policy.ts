@@ -3105,7 +3105,7 @@ function validateReusableIntegrationsAndSpaceAwareness(
   for (const agentPolicy of agentPolicies) {
     if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
       throw new FleetError(
-        'Reusable integration policy could not be used with agent policies belonging to multiple spaces.'
+        'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
       );
     }
   }
