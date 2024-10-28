@@ -38,6 +38,8 @@ interface Props {
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric, guidedOnboardingService } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
+  const onlyReadAccess = !application.capabilities.rulesSettings.writeFlappingSettingsUI;
+
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -122,6 +124,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   data-test-subj="addSampleData"
                   href={addBasePath('#/tutorial_directory/sampleData')}
                   iconType="documents"
+                  disabled={onlyReadAccess}
                 >
                   <FormattedMessage
                     id="home.addData.sampleDataButtonLabel"
@@ -135,6 +138,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   data-test-subj="uploadFile"
                   href={addBasePath('#/tutorial_directory/fileDataViz')}
                   iconType="importAction"
+                  disabled={onlyReadAccess}
                 >
                   <FormattedMessage
                     id="home.addData.uploadFileButtonLabel"

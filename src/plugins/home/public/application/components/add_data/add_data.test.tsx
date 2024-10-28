@@ -29,7 +29,17 @@ beforeEach(() => {
 });
 
 const applicationStartMock = {
-  capabilities: { navLinks: { integrations: true } },
+  capabilities: {
+    navLinks: { integrations: true },
+    rulesSettings: { writeFlappingSettingsUI: true },
+  },
+} as unknown as ApplicationStart;
+
+const applicationStartMockRestricted = {
+  capabilities: {
+    navLinks: { integrations: true },
+    rulesSettings: { writeFlappingSettingsUI: false },
+  },
 } as unknown as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
@@ -40,6 +50,17 @@ describe('AddData', () => {
       <AddData
         addBasePath={addBasePathMock}
         application={applicationStartMock}
+        isDarkMode={false}
+        isCloudEnabled={false}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+  test('disable sample data and upload buttons for a read-only user', () => {
+    const component = shallowWithIntl(
+      <AddData
+        addBasePath={addBasePathMock}
+        application={applicationStartMockRestricted}
         isDarkMode={false}
         isCloudEnabled={false}
       />
