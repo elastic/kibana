@@ -116,14 +116,12 @@ export const PrevalenceOverview: FC = () => {
           uncommonData.map((d) => (
             <InsightsSummaryRow
               text={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.prevalence.rowDescription"
-                  defaultMessage="{field}, {value} is uncommon"
-                  values={{ field: d.field, value: d.values.toString() }}
-                />
+                <>
+                  {d.field}
+                  {','} {d.values.toString()}
+                </>
               }
               value={<EuiBadge color="warning">{UNCOMMON}</EuiBadge>}
-              color={'warning'}
               data-test-subj={`${PREVALENCE_TEST_ID}${d.field}`}
               key={`${PREVALENCE_TEST_ID}${d.field}`}
             />

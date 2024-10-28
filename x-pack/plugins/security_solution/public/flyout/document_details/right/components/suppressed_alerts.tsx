@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiButtonEmpty } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { i18n } from '@kbn/i18n';
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FormattedCount } from '../../../../common/components/formatted_number';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { InsightsSummaryRow } from './insights_summary_row';
 import {
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
-  CORRELATIONS_SUPPRESSED_ALERTS_BUTTON_TEST_ID,
 } from './test_ids';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
@@ -30,10 +24,6 @@ const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
   {
     defaultMessage: 'Technical Preview',
   }
-);
-const BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.right.insights.entities.suppressedAlerts.buttonLabel',
-  { defaultMessage: 'Suppressed alerts' }
 );
 
 export interface SuppressedAlertsProps {
@@ -54,24 +44,6 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
   alertSuppressionCount,
   ruleType,
 }) => {
-  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const onClick = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, indexName, openLeftPanel, scopeId]);
-
   const text = useMemo(
     () => (
       <FormattedMessage
@@ -83,28 +55,13 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
     [alertSuppressionCount]
   );
 
-  const value = useMemo(
-    () => (
-      <EuiButtonEmpty
-        aria-label={BUTTON}
-        onClick={onClick}
-        flush={'both'}
-        size="xs"
-        disabled={isPreviewMode}
-        data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_BUTTON_TEST_ID}
-      >
-        <FormattedCount count={alertSuppressionCount} />
-      </EuiButtonEmpty>
-    ),
-    [alertSuppressionCount, isPreviewMode, onClick]
-  );
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <InsightsSummaryRow
           text={text}
-          value={value}
+          value={alertSuppressionCount}
+          expandedSubTab={CORRELATIONS_TAB_ID}
           data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />

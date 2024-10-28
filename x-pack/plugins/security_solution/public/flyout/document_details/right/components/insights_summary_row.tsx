@@ -6,15 +6,26 @@
  */
 
 import type { ReactElement, VFC } from 'react';
+import { useCallback } from 'react';
+import { useMemo } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 
 const LOADING = i18n.translate(
   'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
   { defaultMessage: 'Loading' }
+);
+const BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.right.insights.insightSummaryButtonAriaLabel',
+  { defaultMessage: 'Click to see more details' }
 );
 
 export interface InsightsSummaryRowProps {
@@ -33,11 +44,11 @@ export interface InsightsSummaryRowProps {
   /**
    * Number of results/entries found
    */
-  value: ReactElement;
+  value: number | ReactElement;
   /**
-   * Decides the color of the badge
+   * Optional parameter used to know which subtab to navigate to when the user clicks on the button
    */
-  color?: EuiBadgeProps['color'];
+  expandedSubTab?: string;
   /**
    *  Prefix data-test-subj because this component will be used in multiple places
    */
@@ -45,7 +56,9 @@ export interface InsightsSummaryRowProps {
 }
 
 /**
- * Panel showing summary information as an icon, a count and text as well as a severity colored dot.
+ * Panel showing summary information.
+ * The default display is a text on the left and a count on the right, displayed with a clickable EuiBadge.
+ * The left and right section can accept a ReactElement to allow for more complex display.
  * Should be used for Entities, Threat intelligence, Prevalence, Correlations and Results components under the Insights section.
  */
 export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
@@ -53,10 +66,53 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   error = false,
   value,
   text,
-  color = 'hollow',
+  expandedSubTab,
   'data-test-subj': dataTestSubj,
 }) => {
-  const loadingDataTestSubj = `${dataTestSubj}Loading`;
+  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
+
+  const onClick = useCallback(() => {
+    openLeftPanel({
+      id: DocumentDetailsLeftPanelKey,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: expandedSubTab,
+      },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
+  }, [eventId, expandedSubTab, indexName, openLeftPanel, scopeId]);
+
+  const buttonDataTestSubj = useMemo(() => `${dataTestSubj}Button`, [dataTestSubj]);
+  const button = useMemo(
+    () => (
+      <>
+        {typeof value === 'number' ? (
+          <EuiBadge color="hollow">
+            <EuiButtonEmpty
+              aria-label={BUTTON}
+              onClick={onClick}
+              flush={'both'}
+              size="xs"
+              disabled={isPreviewMode}
+              data-test-subj={buttonDataTestSubj}
+            >
+              <FormattedCount count={value} />
+            </EuiButtonEmpty>
+          </EuiBadge>
+        ) : (
+          value
+        )}
+      </>
+    ),
+    [buttonDataTestSubj, isPreviewMode, onClick, value]
+  );
+
+  const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
   if (loading) {
     return (
       <EuiSkeletonText
@@ -96,7 +152,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         {text}
       </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj={valueDataTestSubj}>
-        <EuiBadge color={color}>{value}</EuiBadge>
+        {button}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

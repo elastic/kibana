@@ -7,19 +7,16 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '@kbn/security-solution-common';
-import { i18n } from '@kbn/i18n';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
-  INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID,
 } from './test_ids';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
@@ -37,14 +34,6 @@ const TOOLTIP = (
     id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
     defaultMessage="Show all threat intelligence"
   />
-);
-const THREAT_MATCHES_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.right.insights.threatIntelligence.threatMatches.buttonLabel',
-  { defaultMessage: 'Threat matches' }
-);
-const ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.right.insights.threatIntelligence.enrichedWithThreatIntelligence.buttonLabel',
-  { defaultMessage: 'Enriched with threat intelligence' }
 );
 
 /**
@@ -98,22 +87,6 @@ export const ThreatIntelligenceOverview: FC = () => {
     [threatMatchesCount]
   );
 
-  const threatMatchCountValue = useMemo(
-    () => (
-      <EuiButtonEmpty
-        aria-label={THREAT_MATCHES_BUTTON}
-        onClick={goToThreatIntelligenceTab}
-        flush={'both'}
-        size="xs"
-        isDisabled={isPreviewMode}
-        data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID}
-      >
-        {threatMatchesCount}
-      </EuiButtonEmpty>
-    ),
-    [goToThreatIntelligenceTab, isPreviewMode, threatMatchesCount]
-  );
-
   const threatEnrichmentsCountText = useMemo(
     () => (
       <FormattedMessage
@@ -123,24 +96,6 @@ export const ThreatIntelligenceOverview: FC = () => {
       />
     ),
     [threatEnrichmentsCount]
-  );
-
-  const threatEnrichmentsCountValue = useMemo(
-    () => (
-      <EuiButtonEmpty
-        aria-label={ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON}
-        onClick={goToThreatIntelligenceTab}
-        flush={'both'}
-        size="xs"
-        isDisabled={isPreviewMode}
-        data-test-subj={
-          INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID
-        }
-      >
-        {threatEnrichmentsCount}
-      </EuiButtonEmpty>
-    ),
-    [goToThreatIntelligenceTab, isPreviewMode, threatEnrichmentsCount]
   );
 
   return (
@@ -160,12 +115,14 @@ export const ThreatIntelligenceOverview: FC = () => {
       >
         <InsightsSummaryRow
           text={threatMatchCountText}
-          value={threatMatchCountValue}
+          value={threatMatchesCount}
+          expandedSubTab={THREAT_INTELLIGENCE_TAB_ID}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID}
         />
         <InsightsSummaryRow
           text={threatEnrichmentsCountText}
-          value={threatEnrichmentsCountValue}
+          value={threatEnrichmentsCount}
+          expandedSubTab={THREAT_INTELLIGENCE_TAB_ID}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID}
         />
       </EuiFlexGroup>
