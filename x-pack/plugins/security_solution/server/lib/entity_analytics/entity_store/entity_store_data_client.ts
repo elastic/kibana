@@ -98,7 +98,6 @@ export class EntityStoreDataClient {
     this.engineClient = new EngineDescriptorClient({
       soClient,
       namespace,
-      config: options.config,
     });
 
     this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({

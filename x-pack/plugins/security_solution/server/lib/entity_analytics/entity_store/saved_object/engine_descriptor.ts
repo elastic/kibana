@@ -18,12 +18,10 @@ import type {
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
 import { getByEntityTypeQuery } from '../utils';
 import { ENGINE_STATUS } from '../constants';
-import type { EntityStoreConfig } from '../types';
 
 interface EngineDescriptorDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
-  config: EntityStoreConfig;
 }
 
 export class EngineDescriptorClient {
@@ -66,7 +64,6 @@ export class EngineDescriptorClient {
       return update;
     }
 
-    const { syncDelay, frequency } = this.deps.config;
     const { attributes } = await this.deps.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       {
@@ -75,8 +72,6 @@ export class EngineDescriptorClient {
         indexPattern,
         filter,
         fieldHistoryLength,
-        frequency: `${frequency.asSeconds()}s`,
-        syncDelay: `${syncDelay.asSeconds()}s`,
       },
       { id: this.getSavedObjectId(entityType) }
     );
