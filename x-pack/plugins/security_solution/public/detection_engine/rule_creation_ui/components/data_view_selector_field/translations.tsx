@@ -31,7 +31,7 @@ export const DATA_VIEW_NOT_FOUND_WARNING_DESCRIPTION = (dataView: string) =>
     }
   );
 
-export const DDATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL = i18n.translate(
+export const DATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewIncludesAlertsIndexLabel',
   {
     defaultMessage: 'Default Security data view',
@@ -43,5 +43,12 @@ export const DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'The default Security data view includes the alerts index. This could result in redundant alerts being generated from existing alerts.',
+  }
+);
+
+export const DATA_VIEWS_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewFetchError',
+  {
+    defaultMessage: 'Unable to retrieve available data views',
   }
 );
