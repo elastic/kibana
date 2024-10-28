@@ -82,7 +82,7 @@ const DEFAULT_OUTPUT_FORMAT = {
   text: (value: string) =>
     i18n.translate('fieldFormats.duration.outputFormats.humanize.approximate', {
       defaultMessage: 'Human-readable (approximate)',
-  }),
+    }),
   method: 'humanize',
 };
 const outputFormats = [
@@ -91,7 +91,7 @@ const outputFormats = [
     text: (value: string) =>
       i18n.translate('fieldFormats.duration.outputFormats.humanize.precise', {
         defaultMessage: 'Human-readable (precise)',
-    }),
+      }),
     method: 'humanizePrecise',
   },
   {
@@ -99,7 +99,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds', {
         defaultMessage: '{value, plural, one {Millisecond} other {Milliseconds}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds.short', {
       defaultMessage: 'ms',
     }),
@@ -110,7 +110,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asSeconds', {
         defaultMessage: '{value, plural, one {Second} other {Seconds}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asSeconds.short', {
       defaultMessage: 's',
     }),
@@ -121,7 +121,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asMinutes', {
         defaultMessage: '{value, plural, one {minute} other {minutes}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asMinutes.short', {
       defaultMessage: 'min',
     }),
@@ -132,7 +132,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asHours', {
         defaultMessage: '{value, plural, one {Hour} other {Hours}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asHours.short', {
       defaultMessage: 'h',
     }),
@@ -143,7 +143,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asDays', {
         defaultMessage: '{value, plural, one {Day} other {Days}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asDays.short', {
       defaultMessage: 'd',
     }),
@@ -154,7 +154,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asWeeks', {
         defaultMessage: '{value, plural, one {Week} other {Weeks}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asWeeks.short', {
       defaultMessage: 'w',
     }),
@@ -165,7 +165,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asMonths', {
         defaultMessage: '{value, plural, one {Month} other {Months}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asMonths.short', {
       defaultMessage: 'mon',
     }),
@@ -176,7 +176,7 @@ const outputFormats = [
       i18n.translate('fieldFormats.duration.outputFormats.asYears', {
         defaultMessage: '{value, plural, one {Year} other {Years}}',
         values: { value },
-    }),
+      }),
     shortText: i18n.translate('fieldFormats.duration.outputFormats.asYears.short', {
       defaultMessage: 'y',
     }),
