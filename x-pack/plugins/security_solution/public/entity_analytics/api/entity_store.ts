@@ -44,13 +44,11 @@ export const useEntityStoreRoutes = () => {
     };
 
     const deleteEntityEngine = async (entityType: EntityType, deleteData: boolean) => {
-      return http.fetch<DeleteEntityEngineResponse>(
-        `/api/entity_store/engines/${entityType}?data=${deleteData}`,
-        {
-          method: 'DELETE',
-          version: API_VERSIONS.public.v1,
-        }
-      );
+      return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
+        method: 'DELETE',
+        query: { data: deleteData },
+        version: API_VERSIONS.public.v1,
+      });
     };
 
     const listEntityEngines = async () => {
