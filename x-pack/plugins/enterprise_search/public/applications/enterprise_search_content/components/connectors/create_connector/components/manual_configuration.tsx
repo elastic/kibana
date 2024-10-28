@@ -36,6 +36,12 @@ export interface ManualConfigurationProps {
   selfManagePreference: SelfManagePreference;
 }
 
+interface ConnectorConfiguration {
+  [key: string]: {
+    value: string;
+  };
+}
+
 export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   isDisabled,
   selfManagePreference,
@@ -64,9 +70,11 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       return '';
     }
 
-    const dynamicConfigValues = Object.entries(connectorInfo.configuration)
+    const dynamicConfigValues = Object.entries(
+      connectorInfo.configuration as ConnectorConfiguration
+    )
       .map(([key, config]) => {
-        const defaultValue = config.value === null ? 'null' : JSON.stringify(config.value);
+        const defaultValue = config ? JSON.stringify(config.value) : null;
         return `    "${key}": ${defaultValue}`;
       })
       .join(',\n');
