@@ -8,7 +8,10 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
@@ -33,7 +36,6 @@ import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_sc
 
 import { jobServiceProvider } from '../models/job_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service

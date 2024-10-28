@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { MlClient } from '../../lib/ml_client';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { JobValidationMessage } from '@kbn/ml-common-constants/messages';
+import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { JobValidationMessage } from '../../../common/constants/messages';
-import type { DatafeedValidationResponse } from '../../../common/types/job_validation';
+import type { MlClient } from '../../lib/ml_client';
 
 export async function validateDatafeedPreviewWithMessages(
   mlClient: MlClient,

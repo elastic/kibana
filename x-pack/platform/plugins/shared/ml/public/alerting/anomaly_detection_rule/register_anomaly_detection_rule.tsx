@@ -11,10 +11,10 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { lazy } from 'react';
-import type { MlCapabilities } from '../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import type { MlCoreSetup } from '../../plugin';
-import { ML_ALERT_TYPES } from '../../../common';
-import type { MlAnomalyDetectionAlertParams } from '../../../common/types/alerts';
 import { validateLookbackInterval, validateTopNBucket } from '../validators';
 
 export function registerAnomalyDetectionRule(

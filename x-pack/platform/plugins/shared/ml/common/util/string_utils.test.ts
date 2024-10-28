@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderTemplate, getMedianStringLength, getGroupQueryText } from './string_utils';
+import { getMedianStringLength, getGroupQueryText } from './string_utils';
 
 const strings: string[] = [
   'foo',
@@ -18,24 +18,6 @@ const strings: string[] = [
 const noStrings: string[] = [];
 
 describe('ML - string utils', () => {
-  describe('renderTemplate', () => {
-    test('returns plain string', () => {
-      const templateString = 'plain string';
-      const result = renderTemplate(templateString);
-      expect(result).toBe(result);
-    });
-    test('returns rendered template with one replacement', () => {
-      const templateString = 'string with {{one}} replacement';
-      const result = renderTemplate(templateString, { one: '1' });
-      expect(result).toBe('string with 1 replacement');
-    });
-    test('returns rendered template with two replacements', () => {
-      const templateString = 'string with {{one}} replacement, and a {{two}} one.';
-      const result = renderTemplate(templateString, { one: '1', two: '2nd' });
-      expect(result).toBe('string with 1 replacement, and a 2nd one.');
-    });
-  });
-
   describe('getMedianStringLength', () => {
     test('test median for string array', () => {
       const result = getMedianStringLength(strings);

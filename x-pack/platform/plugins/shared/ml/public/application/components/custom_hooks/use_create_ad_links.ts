@@ -6,13 +6,13 @@
  */
 
 import { useCallback } from 'react';
-import { useMlKibana, useUiSettings } from '../../contexts/kibana';
 import {
   ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,
-} from '../../../../common/constants/settings';
+} from '@kbn/ml-common-constants/settings';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { useMlKibana, useUiSettings } from '../../contexts/kibana';
 import { createResultsUrlForJobs } from '../../util/results_url';
-import type { MlSummaryJob } from '../../../../common';
 
 export const useCreateADLinks = () => {
   const {

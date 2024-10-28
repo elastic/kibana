@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils/detector_rule';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { RuleActionPanel } from './rule_action_panel';

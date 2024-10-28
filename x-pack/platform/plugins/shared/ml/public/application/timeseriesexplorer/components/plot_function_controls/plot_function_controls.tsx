@@ -10,11 +10,11 @@ import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { useMlJobService } from '../../../services/job_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { useMlResultsService } from '../../../services/results_service';
-import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import type { MlEntity } from '../../../../embeddables/types';
 
 const plotByFunctionOptions = [

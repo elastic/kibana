@@ -15,7 +15,6 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';

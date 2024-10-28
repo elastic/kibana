@@ -30,14 +30,14 @@ import {
   ALERT_ANOMALY_TIMESTAMP,
   ALERT_TOP_INFLUENCERS,
   ALERT_TOP_RECORDS,
-  ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
-import { PLUGIN_ID } from '../../../common/constants/app';
+} from '@kbn/ml-common-constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import type { InfluencerAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
+import { type RecordAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license/constants';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
-import { type RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 
 /**

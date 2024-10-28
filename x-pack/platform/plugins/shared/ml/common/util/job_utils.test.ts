@@ -19,12 +19,15 @@ import {
   prefixDatafeedId,
   getLatestDataOrBucketTimestamp,
   getEarliestDatafeedStartTime,
-  resolveMaxTimeInterval,
   getFiltersForDSLQuery,
   isKnownEmptyQuery,
   removeNodeInfo,
 } from './job_utils';
-import type { CombinedJob, CombinedJobWithStats, Job } from '../types/anomaly_detection_jobs';
+import type {
+  CombinedJob,
+  CombinedJobWithStats,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { FilterStateStore } from '@kbn/es-query';
 
 import moment from 'moment';
@@ -593,15 +596,6 @@ describe('ML - job utils', () => {
 
     test('returns expected value when job has not run', () => {
       expect(getLatestDataOrBucketTimestamp(undefined, undefined)).toBe(undefined);
-    });
-  });
-
-  describe('resolveBucketSpanInSeconds', () => {
-    test('should resolve maximum bucket interval', () => {
-      expect(resolveMaxTimeInterval(['15m', '1h', '6h', '90s'])).toBe(21600);
-    });
-    test('returns undefined for an empty array', () => {
-      expect(resolveMaxTimeInterval([])).toBe(undefined);
     });
   });
 });

@@ -15,13 +15,13 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
+import { ALL_JOBS_SELECTION } from '@kbn/ml-common-constants/alerts';
 import { JobSelectorControl, type JobSelection } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
-import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;

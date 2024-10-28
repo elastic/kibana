@@ -12,7 +12,7 @@ import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables/constants';
 

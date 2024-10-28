@@ -12,6 +12,7 @@ import {
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '../../../../../contexts/kibana';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
@@ -28,7 +29,6 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
 import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (

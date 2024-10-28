@@ -13,14 +13,9 @@ import {
   ALERT_START,
   ALERT_STATUS,
   AlertConsumers,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import type { JobsHealthTests } from '../types/alerts';
-
-export const ML_ALERT_TYPES = {
-  ANOMALY_DETECTION: ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
-} as const;
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import type { JobsHealthTests } from '@kbn/ml-common-types/alerts';
 
 export const ML_RULE_TYPE_IDS = Object.values(ML_ALERT_TYPES);
 

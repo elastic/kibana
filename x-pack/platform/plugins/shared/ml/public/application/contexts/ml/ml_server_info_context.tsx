@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, type PropsWithChildren, createContext, useContext } from 'react';
-import type { NLPSettings } from '../../../../common/constants/app';
+import type { NLPSettings } from '@kbn/ml-common-constants/app';
 
 export interface MlServerInfoContextValue {
   // TODO add ML server info

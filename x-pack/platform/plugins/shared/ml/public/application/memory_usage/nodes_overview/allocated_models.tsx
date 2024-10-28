@@ -23,7 +23,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
   NodeDeploymentStatsResponse,
-} from '../../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../../contexts/ml';
 

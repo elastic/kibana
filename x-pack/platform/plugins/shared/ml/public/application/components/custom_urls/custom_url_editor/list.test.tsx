@@ -9,15 +9,15 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { CustomUrlListProps } from './list';
-import { CustomUrlList, extractDataViewIdFromCustomUrl } from './list';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
-import type { Job } from '../../../../../common';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import type { CustomUrlListProps } from './list';
+import { CustomUrlList, extractDataViewIdFromCustomUrl } from './list';
 
 jest.mock('@kbn/ml-url-state', () => ({
   parseUrlState: jest.fn(),

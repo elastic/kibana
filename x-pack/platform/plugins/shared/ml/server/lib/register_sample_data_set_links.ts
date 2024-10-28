@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { MlFeatures } from '../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 
 export function registerSampleDataSetLinks(
   home: HomeServerPluginSetup,

@@ -14,9 +14,6 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { MlClient } from '../ml_client';
-import type { JobSelection } from '../../routes/schemas/alerting_schema';
-import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import {
   ALERT_DATAFEED_RESULTS,
   ALERT_DELAYED_DATA_RESULTS,
@@ -24,8 +21,12 @@ import {
   ALERT_MML_RESULTS,
   ALL_JOBS_SELECTION,
   HEALTH_CHECK_NAMES,
-} from '../../../common/constants/alerts';
-import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-constants/alerts';
+import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import type { MlClient } from '../ml_client';
+import type { JobSelection } from '../../routes/schemas/alerting_schema';
+import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import type { GetGuards } from '../../shared_services/shared_services';
 import type {
   AnomalyDetectionJobHealthAlertPayload,
@@ -46,7 +47,6 @@ import {
   jobAuditMessagesProvider,
   type JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 export interface TestResult {
   name: string;
