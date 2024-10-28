@@ -674,7 +674,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
