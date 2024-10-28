@@ -5,102 +5,85 @@
  * 2.0.
  */
 
-import { Config, FtrConfigProviderContext } from '@kbn/test';
-import { UrlObject } from 'url';
-import { ObservabilityAIAssistantFtrConfigName } from '../configs';
-import { getApmSynthtraceEsClient } from './create_synthtrace_client';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { getScopedApiClient } from './observability_ai_assistant_api_client';
-import { editorUser, viewerUser } from './users/users';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
 
-export interface ObservabilityAIAssistantFtrConfig {
-  name: ObservabilityAIAssistantFtrConfigName;
-  license: 'basic' | 'trial';
-  kibanaConfig?: Record<string, any>;
+interface CreateTestConfigOptions {
+  license: string;
+  disabledPlugins?: string[];
+  ssl?: boolean;
+  testFiles?: string[];
+  publicBaseUrl?: boolean;
 }
 
-export type CreateTestConfig = ReturnType<typeof createTestConfig>;
+const enabledActionTypes = ['.bedrock', '.gemini', '.gen-ai'];
 
-export type CreateTest = ReturnType<typeof createObservabilityAIAssistantAPIConfig>;
-
-export type ObservabilityAIAssistantAPIClient = Awaited<
-  ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
->;
-
-export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
-
-export function createObservabilityAIAssistantAPIConfig({
-  config,
-  license,
-  name,
-  kibanaConfig,
-}: {
-  config: Config;
-  license: 'basic' | 'trial';
-  name: string;
-  kibanaConfig?: Record<string, any>;
-}) {
-  const services = config.get('services') as InheritedServices;
-  const servers = config.get('servers');
-  const kibanaServer = servers.kibana as UrlObject;
-  const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
-  const allConfigs = config.getAll() as Record<string, any>;
-
-  return {
-    ...allConfigs,
-    servers,
-    services: {
-      ...services,
-      getScopedApiClientForUsername: () => {
-        return (username: string) => getScopedApiClient(kibanaServer, username);
-      },
-      apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-        getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
-      observabilityAIAssistantAPIClient: async () => {
-        return {
-          adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
-          viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
-          editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
-        };
-      },
-    },
-    junit: {
-      reportName: `Observability AI Assistant API Integration tests (${name})`,
-    },
-    esTestCluster: {
-      ...config.get('esTestCluster'),
-      license,
-    },
-    kbnTestServer: {
-      ...config.get('kbnTestServer'),
-      serverArgs: [
-        ...config.get('kbnTestServer.serverArgs'),
-        ...(kibanaConfig
-          ? Object.entries(kibanaConfig).map(([key, value]) =>
-              Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
-            )
-          : []),
-      ],
-    },
-  };
-}
-
-export function createTestConfig(config: ObservabilityAIAssistantFtrConfig) {
-  const { license, name, kibanaConfig } = config;
+export function createTestConfig(name: string, options: CreateTestConfigOptions) {
+  const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const xPackAPITestsConfig = await readConfigFile(
+    const xPackApiIntegrationTestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
 
+    const servers = {
+      ...xPackApiIntegrationTestsConfig.get('servers'),
+      elasticsearch: {
+        ...xPackApiIntegrationTestsConfig.get('servers.elasticsearch'),
+        protocol: ssl ? 'https' : 'http',
+      },
+    };
+
     return {
-      ...createObservabilityAIAssistantAPIConfig({
-        config: xPackAPITestsConfig,
-        name,
+      testFiles,
+      servers,
+      services,
+      junit: {
+        reportName: 'X-Pack Automatic Import API Integration Tests',
+      },
+      esTestCluster: {
+        ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
-        kibanaConfig,
-      }),
-      testFiles: [require.resolve('../tests')],
+        ssl,
+        serverArgs: [
+          `xpack.license.self_generated.type=${license}`,
+          `xpack.security.enabled=${
+            !disabledPlugins.includes('security') && ['trial', 'basic'].includes(license)
+          }`,
+        ],
+      },
+      kbnTestServer: {
+        ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        serverArgs: [
+          ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
+          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
+          `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          '--xpack.eventLog.logEntries=true',
+          // Configure a bedrock connector as a default
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'preconfigured-bedrock': {
+              name: 'preconfigured-bedrock',
+              actionTypeId: '.bedrock',
+              config: {
+                apiUrl: 'https://example.com',
+              },
+              secrets: {
+                username: 'elastic',
+                password: 'elastic',
+              },
+            },
+          })}`,
+          ...(ssl
+            ? [
+                `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+                `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+              ]
+            : []),
+          '--xpack.integration_assistant.enabled=true',
+        ],
+      },
     };
   };
 }
