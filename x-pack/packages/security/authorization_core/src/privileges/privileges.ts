@@ -251,31 +251,6 @@ export function privilegesFactory(
         }, {}),
       };
     },
-    getFeatureForPrivilege(
-      searchTerm: string,
-      subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator
-    ) {
-      const features = featuresService.getKibanaFeatures();
-      const result: string[] = [];
-
-      features.forEach((feature) => {
-        if (feature.privileges?.all.api?.includes(searchTerm)) {
-          result.push(`${feature.id}.all`);
-        }
-
-        if (feature.privileges?.read && feature.privileges.read.api?.includes(searchTerm)) {
-          result.push(`${feature.id}.read`);
-        }
-
-        for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, () => true)) {
-          if (subFeaturePrivilege.api?.includes(searchTerm)) {
-            result.push(`${feature.id}.${subFeaturePrivilege.id}`);
-          }
-        }
-      });
-
-      return result;
-    },
   };
 }
 
