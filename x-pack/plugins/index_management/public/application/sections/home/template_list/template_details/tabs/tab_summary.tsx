@@ -57,6 +57,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
     allowAutoCreate,
+    template: {
+      settings: { index: indexSettings },
+    },
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
@@ -220,6 +223,17 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListDescription>
               </>
             )}
+
+            {/* Index mode */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                defaultMessage="Index mode"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {indexSettings?.mode ?? 'standard'}
+            </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
             {isLegacy !== true &&
