@@ -16,7 +16,7 @@ import { TextEditor } from './text_editor';
 interface Props {
   field: FieldHook<string>;
   editorProps: { [key: string]: any };
-  useRawValue?: boolean;
+  rawValue?: boolean;
 }
 
 const defaultEditorOptions = {
@@ -24,26 +24,26 @@ const defaultEditorOptions = {
   lineNumbers: 'off',
 };
 
-export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps, useRawValue }) => {
+export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps, rawValue }) => {
   const { value, setValue } = field;
   const { xJson, setXJson, convertToJson } = useXJsonMode(value);
 
   const onChange = useCallback(
     (s: string) => {
-      if (useRawValue) {
+      if (rawValue) {
         setValue(s);
       } else {
         setXJson(s);
         setValue(convertToJson(s));
       }
     },
-    [setValue, setXJson, convertToJson, useRawValue]
+    [setValue, setXJson, convertToJson, rawValue]
   );
   return (
     <TextEditor
       field={field}
       editorProps={{
-        value: useRawValue ? value : xJson,
+        value: rawValue ? value : xJson,
         languageId: XJsonLang.ID,
         options: defaultEditorOptions,
         onChange,

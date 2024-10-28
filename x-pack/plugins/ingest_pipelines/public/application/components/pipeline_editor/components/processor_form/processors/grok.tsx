@@ -161,7 +161,7 @@ export const Grok: FunctionComponent = () => {
               }
             ),
           },
-          useRawValue: true,
+          rawValue: true,
         }}
         path="fields.pattern_definitions"
       />
