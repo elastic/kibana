@@ -114,6 +114,7 @@ export async function mountApp({
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
         expandedPanelId={routeProps.match.params.expandedPanelId}
+        spaceId={spaceId}
       />
     );
   };

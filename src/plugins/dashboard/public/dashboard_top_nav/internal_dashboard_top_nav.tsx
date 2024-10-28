@@ -64,6 +64,7 @@ export interface InternalDashboardTopNavProps {
   setCustomHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
   showBorderBottom?: boolean;
   showResetChange?: boolean;
+  spaceId?: string;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -74,6 +75,7 @@ export function InternalDashboardTopNav({
   forceHideUnifiedSearch,
   redirectTo,
   setCustomHeaderActionMenu,
+  spaceId,
   showBorderBottom = true,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
@@ -133,12 +135,12 @@ export function InternalDashboardTopNav({
       .subscribe((visible) => setIsChromeVisible(visible));
 
     if (lastSavedId && title) {
-      const fullEditPath = getDashboardListItemLink(lastSavedId, true);
+      const fullEditPath = getDashboardListItemLink(lastSavedId, spaceId, true);
       coreServices.chrome.recentlyAccessed.add(fullEditPath, title, lastSavedId);
       getDashboardRecentlyAccessedService().add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
     return () => subscription.unsubscribe();
-  }, [lastSavedId, viewMode, title]);
+  }, [lastSavedId, viewMode, spaceId, title]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
