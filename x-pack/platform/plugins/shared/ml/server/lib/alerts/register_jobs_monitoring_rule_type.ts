@@ -35,7 +35,7 @@ import {
   ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import { MINIMUM_FULL_LICENSE } from '../../../common/license/constants';
 import {
   anomalyDetectionJobsHealthRuleParams,
   type AnomalyDetectionJobsHealthRuleParams,
