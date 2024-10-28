@@ -96,9 +96,9 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
           const filteredInferenceEndpoints = endpoints.filter((endpoint) => {
             return (
-              endpoint.task_type === 'sparse_embedding' || endpoint.task_type === 'text_embedding'
-              // TODO: add this back in when the fix has made it into es in 8.16
-              // && endpoint.service_settings.num_allocations > 0
+              (endpoint.task_type === 'sparse_embedding' ||
+                endpoint.task_type === 'text_embedding') &&
+              endpoint.service_settings.num_allocations >= 0
             );
           });
 
