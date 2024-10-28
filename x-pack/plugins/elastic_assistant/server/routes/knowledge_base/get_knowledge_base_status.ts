@@ -64,11 +64,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
           const isModelDeployed = await kbDataClient.isModelDeployed();
-          const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
-
-          if (securityLabsExists && kbDataClient.isSetupInProgress) {
-            assistantContext.setIsKBSetupInProgress(false);
-          }
+          const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded(); // && !kbDataClient.isSetupInProgress;
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
@@ -79,6 +75,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             security_labs_exists: v2KnowledgeBaseEnabled
               ? isModelDeployed && securityLabsExists
               : true,
+            user_data_exists: await kbDataClient.isUserDataExists(),
           };
 
           return response.ok({ body });

@@ -40,6 +40,7 @@ import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import {
   ESQL_DOCS_LOADED_QUERY,
   SECURITY_LABS_RESOURCE,
+  USER_RESOURCE,
 } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
@@ -47,7 +48,10 @@ import {
   isModelAlreadyExistsError,
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
-import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
+import {
+  loadSecurityLabs,
+  getSecurityLabsDocsCount,
+} from '../../lib/langchain/content_loaders/security_labs_loader';
 import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 
 /**
@@ -286,8 +290,22 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
           );
         }
+        // Delete any existing Security Labs content
+        const securityLabsDocs = await esClient.deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [{ terms: { kb_resource: [SECURITY_LABS_RESOURCE] } }],
+            },
+          },
+        });
+        if (securityLabsDocs?.total) {
+          this.options.logger.info(
+            `Removed ${securityLabsDocs?.total} Security Labs knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
       } catch (e) {
-        this.options.logger.info('No legacy ESQL knowledge base docs to delete');
+        this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
       }
     }
 
@@ -343,7 +361,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
-          loadSecurityLabs(this, this.options.logger);
+          await loadSecurityLabs(this, this.options.logger);
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
@@ -352,6 +370,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       this.options.setIsKBSetupInProgress(false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(`Error setting up Knowledge Base: ${e.message}`);
+    } finally {
+      this.options.setIsKBSetupInProgress(false);
     }
   };
 
@@ -447,15 +467,76 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Returns if Security Labs KB docs have been loaded
+   * Returns if user's KB docs exists
+   */
+
+  public isUserDataExists = async (): Promise<boolean> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    try {
+      const vectorSearchQuery = getKBVectorSearchQuery({
+        kbResource: USER_RESOURCE,
+        query: '',
+        required: false,
+        user,
+        v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
+      });
+
+      const result = await esClient.search<EsDocumentEntry>({
+        index: this.indexTemplateAndPattern.alias,
+        size: 0,
+        query: vectorSearchQuery,
+        track_total_hits: true,
+      });
+
+      return !!result.hits?.total;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  /**
+   * Returns if allSecurity Labs KB docs have been loaded
    */
   public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
-    const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
-      query: '',
-      kbResource: SECURITY_LABS_RESOURCE,
-      required: false,
-    });
-    return securityLabsDocs.length > 0;
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    const expectedDocsCount = await getSecurityLabsDocsCount();
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    try {
+      const vectorSearchQuery = getKBVectorSearchQuery({
+        kbResource: SECURITY_LABS_RESOURCE,
+        query: '',
+        required: false,
+        user,
+        v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
+      });
+
+      const result = await esClient.search<EsDocumentEntry>({
+        index: this.indexTemplateAndPattern.alias,
+        size: 0,
+        query: vectorSearchQuery,
+        track_total_hits: true,
+      });
+
+      return result.hits?.total === expectedDocsCount;
+    } catch (e) {
+      return false;
+    }
   };
 
   /**
@@ -480,12 +561,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
 
     const vectorSearchQuery = getKBVectorSearchQuery({
       filter,
       kbResource,
-      modelId,
       query,
       required,
       user,

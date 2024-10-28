@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiBasicTableColumn,
+  EuiIcon,
+  EuiText,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
@@ -101,11 +108,13 @@ export const useKnowledgeBaseTable = () => {
       isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
+      isKbSetupInProgress,
     }: {
       isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
       onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      isKbSetupInProgress: boolean;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
       return [
         {
@@ -136,11 +145,23 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_ENTRIES,
           render: (entry: KnowledgeBaseEntryResponse) => {
-            return isSystemEntry(entry)
-              ? entry.text
-              : entry.type === DocumentEntryType.value
-              ? '1'
-              : '-';
+            return isSystemEntry(entry) ? (
+              <>
+                {`${entry.text}`}
+                {isKbSetupInProgress && (
+                  <EuiLoadingSpinner
+                    size="s"
+                    css={css`
+                      margin-left: 8px;
+                    `}
+                  />
+                )}
+              </>
+            ) : entry.type === DocumentEntryType.value ? (
+              '1'
+            ) : (
+              '-'
+            );
           },
         },
         {

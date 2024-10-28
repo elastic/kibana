@@ -177,6 +177,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const columns = useMemo(
     () =>
       getColumns({
+        isKbSetupInProgress: kbStatus?.is_setup_in_progress ?? false,
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
           return (
             !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
@@ -197,7 +198,13 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
       }),
-    [entries.data, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
+    [
+      entries.data,
+      getColumns,
+      hasManageGlobalKnowledgeBase,
+      kbStatus?.is_setup_in_progress,
+      openFlyout,
+    ]
   );
 
   // Refresh button
