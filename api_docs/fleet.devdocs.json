@@ -11646,41 +11646,9 @@
             "label": "runExternalCallbacks",
             "description": [],
             "signature": [
-              "<A extends \"packagePolicyCreate\" | \"packagePolicyPostCreate\" | \"packagePolicyDelete\" | \"packagePolicyPostDelete\" | \"packagePolicyUpdate\" | \"agentPolicyCreate\" | \"agentPolicyUpdate\">(externalCallbackType: A, packagePolicy: A extends \"packagePolicyDelete\" ? ",
-              "DeletePackagePoliciesResponse",
-              " : A extends \"packagePolicyPostDelete\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PostDeletePackagePoliciesResponse",
-                "text": "PostDeletePackagePoliciesResponse"
-              },
-              " : A extends \"packagePolicyPostCreate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              " : A extends \"packagePolicyUpdate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.UpdatePackagePolicy",
-                "text": "UpdatePackagePolicy"
-              },
-              " : ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
-              },
-              ", soClient: ",
+              "<A extends \"packagePolicyCreate\" | \"packagePolicyPostCreate\" | \"packagePolicyDelete\" | \"packagePolicyPostDelete\" | \"packagePolicyUpdate\" | \"packagePolicyPostUpdate\" | \"agentPolicyCreate\" | \"agentPolicyUpdate\" | \"agentPolicyPostUpdate\">(externalCallbackType: A, packagePolicy: ",
+              "RunExternalCallbacksPackagePolicyArgument",
+              "<A>, soClient: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -11712,31 +11680,9 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | undefined) => Promise<A extends \"packagePolicyDelete\" ? void : A extends \"packagePolicyPostDelete\" ? void : A extends \"packagePolicyPostCreate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              " : A extends \"packagePolicyUpdate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.UpdatePackagePolicy",
-                "text": "UpdatePackagePolicy"
-              },
-              " : ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
-              },
-              ">"
+              "<unknown, unknown, unknown, any> | undefined) => Promise<",
+              "RunExternalCallbacksPackagePolicyResponse",
+              "<A>>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -11765,40 +11711,8 @@
                 "label": "packagePolicy",
                 "description": [],
                 "signature": [
-                  "A extends \"packagePolicyDelete\" ? ",
-                  "DeletePackagePoliciesResponse",
-                  " : A extends \"packagePolicyPostDelete\" ? ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.PostDeletePackagePoliciesResponse",
-                    "text": "PostDeletePackagePoliciesResponse"
-                  },
-                  " : A extends \"packagePolicyPostCreate\" ? ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.PackagePolicy",
-                    "text": "PackagePolicy"
-                  },
-                  " : A extends \"packagePolicyUpdate\" ? ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.UpdatePackagePolicy",
-                    "text": "UpdatePackagePolicy"
-                  },
-                  " : ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.NewPackagePolicy",
-                    "text": "NewPackagePolicy"
-                  }
+                  "RunExternalCallbacksPackagePolicyArgument",
+                  "<A>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -12633,9 +12547,13 @@
           " | ",
           "ExternalCallbackUpdate",
           " | ",
+          "ExternalCallbackPostUpdate",
+          " | ",
           "ExternalCallbackAgentPolicyCreate",
           " | ",
-          "ExternalCallbackAgentPolicyUpdate"
+          "ExternalCallbackAgentPolicyUpdate",
+          " | ",
+          "ExternalCallbackAgentPolicyPostUpdate"
         ],
         "path": "x-pack/plugins/fleet/server/types/extensions.ts",
         "deprecated": false,
