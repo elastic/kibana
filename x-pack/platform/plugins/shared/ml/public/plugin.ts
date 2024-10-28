@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BehaviorSubject, mergeMap, take } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
@@ -13,9 +15,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject, mergeMap } from 'rxjs';
-import { take } from 'rxjs';
-
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -54,11 +53,10 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSection } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
-import { registerHomeFeature } from './register_home_feature';
-import { isFullLicense, isMlEnabled } from '../common/license';
+import { isFullLicense } from '../common/license/is_full_license';
+import { isMlEnabled } from '../common/license/is_ml_enabled';
 import {
   initEnabledFeatures,
   type MlFeatures,
@@ -77,12 +75,14 @@ import type { MlCapabilities } from '../common/types/capabilities';
 import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 
+import { registerCasesAttachments } from './cases';
 import { registerEmbeddables } from './embeddables';
+import { registerHomeFeature } from './register_home_feature';
+import { registerManagementSection } from './application/management';
+import { registerMapExtension } from './maps/register_map_extension';
+import { registerMlAlerts } from './alerting/register_ml_alerts';
 import { registerMlUiActions } from './ui_actions';
 import { registerSearchLinks } from './register_helper/register_search_links';
-import { registerCasesAttachments } from './cases';
-import { registerMlAlerts } from './alerting/register_ml_alerts';
-import { registerMapExtension } from './maps/register_map_extension';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
