@@ -77,7 +77,7 @@ import { AnomalySwimLane } from './shared_components';
 
 import { registerCasesAttachments } from './cases';
 import { registerEmbeddables } from './embeddables';
-import { registerHomeFeature } from './register_home_feature';
+import { registerHomeFeature } from './register_helper/register_home_feature';
 import { registerManagementSection } from './application/management';
 import { registerMapExtension } from './maps/register_map_extension';
 import { registerMlAlerts } from './alerting/register_ml_alerts';
