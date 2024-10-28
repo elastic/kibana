@@ -23,6 +23,7 @@ export const LABEL_PADDING_X = 15;
 export const LABEL_BORDER_WIDTH = 1;
 export const NODE_WIDTH = 90;
 export const NODE_HEIGHT = 90;
+const NODE_LABEL_WIDTH = 120;
 
 export const LabelNodeContainer = styled.div`
   text-wrap: nowrap;
@@ -79,9 +80,13 @@ export const LabelShapeOnHover = styled.div`
   ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
+
+  .react-flow__node:focus:focus-visible & {
+    opacity: 1; /* Show on hover */
+  }
 `;
 
-export const NodeContainer = styled.div`
+export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
@@ -99,7 +104,11 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
 
-  ${NodeContainer}:hover & {
+  ${NodeShapeContainer}:hover & {
+    opacity: 1; /* Show on hover */
+  }
+
+  .react-flow__node:focus:focus-visible & {
     opacity: 1; /* Show on hover */
   }
 `;
@@ -124,11 +133,8 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
 };
 
 export const NodeLabel = styled(EuiText)`
-  position: absolute;
-  top: 108%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 130%;
+  width: ${NODE_LABEL_WIDTH}px;
+  margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
   text-overflow: ellipsis;
   // white-space: nowrap;
   overflow: hidden;
@@ -167,8 +173,16 @@ export const StyledNodeButton = styled.div<NodeButtonProps>`
   position: absolute;
   z-index: 1;
 
-  ${NodeContainer}:hover & {
+  ${NodeShapeContainer}:hover & {
     opacity: 1; /* Show on hover */
+  }
+
+  &:has(button:focus) {
+    opacity: 1; /* Show when button is active */
+  }
+
+  .react-flow__node:focus:focus-visible & {
+    opacity: 1; /* Show on node focus */
   }
 `;
 

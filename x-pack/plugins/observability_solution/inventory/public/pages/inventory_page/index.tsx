@@ -7,7 +7,7 @@
 import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityColumnIds, EntityType } from '../../../common/entities';
+import { EntityColumnIds } from '../../../common/entities';
 import { EntitiesGrid } from '../../components/entities_grid';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
@@ -82,7 +82,7 @@ export function InventoryPage() {
     });
   }
 
-  function handleTypeFilter(entityType: EntityType) {
+  function handleTypeFilter(entityType: string) {
     inventoryRoute.push('/', {
       path: {},
       query: {

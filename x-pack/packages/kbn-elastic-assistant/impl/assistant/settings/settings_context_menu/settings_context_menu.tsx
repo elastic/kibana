@@ -12,7 +12,6 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiConfirmModal,
-  EuiIcon,
   EuiNotificationBadge,
   EuiPopover,
   EuiButtonIcon,
@@ -70,7 +69,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       () =>
         navigateToApp('management', {
           path: 'kibana/securityAiAssistantManagement',
-          openInNewTab: true,
         }),
       [navigateToApp]
     );
@@ -84,7 +82,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       () =>
         navigateToApp('management', {
           path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
-          openInNewTab: true,
         }),
       [navigateToApp]
     );
@@ -105,13 +102,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           data-test-subj={'ai-assistant-settings'}
         >
           {i18n.AI_ASSISTANT_SETTINGS}
-          <EuiIcon
-            css={css`
-              margin-left: ${euiThemeVars.euiSizeXS};
-            `}
-            size="s"
-            type="popout"
-          />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'knowledge-base'}
@@ -120,13 +110,6 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           data-test-subj={'knowledge-base'}
         >
           {i18n.KNOWLEDGE_BASE}
-          <EuiIcon
-            css={css`
-              margin-left: ${euiThemeVars.euiSizeXS};
-            `}
-            size="s"
-            type="popout"
-          />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
