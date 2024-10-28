@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { JobsListPage } from './jobs_list_page';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const JobsListPage = dynamic(async () => ({
+  default: (await import('./jobs_list_page')).JobsListPage,
+}));
