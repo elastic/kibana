@@ -289,7 +289,7 @@ Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w
 |[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
   | Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
 this is _not_ set or set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
-recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this setting is not set.
+recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this setting is not set for on-prem, and is set to 24 hours on Elastic Cloud.
 
 2+a|
 [TIP]
