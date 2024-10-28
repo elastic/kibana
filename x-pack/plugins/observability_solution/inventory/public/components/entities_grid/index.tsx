@@ -84,12 +84,13 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
+      const entityType = entity[ENTITY_TYPE];
+
       switch (columnEntityTableId) {
         case 'alertsCount':
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case ENTITY_TYPE:
-          const entityType = entity[columnEntityTableId];
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
