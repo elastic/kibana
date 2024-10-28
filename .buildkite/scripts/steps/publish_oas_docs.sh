@@ -4,9 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-## Install the bump CLI for just this step
-npm install -g bump-cli@^2.8.2
-
 echo "--- Publish OAS docs"
 
 deploy_to_bump() {

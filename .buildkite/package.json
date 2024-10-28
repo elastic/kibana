@@ -15,7 +15,8 @@
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
-    "tslib": "*"
+    "tslib": "*",
+    "bump-cli": "^2.8.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.3",
