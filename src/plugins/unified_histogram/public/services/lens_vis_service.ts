@@ -42,7 +42,7 @@ import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
   type QueryParams,
-  assingQueryToLensLayers,
+  injectESQLQueryIntoLensLayers,
 } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
@@ -494,7 +494,7 @@ export class LensVisService {
 
       // here the attributes contain the main query and not the histogram one
       const updatedAttributesWithQuery = preferredVisAttributes
-        ? assingQueryToLensLayers(preferredVisAttributes, {
+        ? injectESQLQueryIntoLensLayers(preferredVisAttributes, {
             esql: esqlQuery,
           })
         : undefined;

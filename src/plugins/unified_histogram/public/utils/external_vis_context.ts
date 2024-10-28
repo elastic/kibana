@@ -103,7 +103,7 @@ export const isSuggestionShapeAndVisContextCompatible = (
   );
 };
 
-export const assingQueryToLensLayers = (
+export const injectESQLQueryIntoLensLayers = (
   visAttributes: UnifiedHistogramVisContext['attributes'],
   query: AggregateQuery
 ) => {

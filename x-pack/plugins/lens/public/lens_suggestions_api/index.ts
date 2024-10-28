@@ -7,10 +7,11 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChartType } from '@kbn/visualization-utils';
-import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from './types';
-import type { DataViewsState } from './state_management';
-import type { TypedLensByValueInput } from './embeddable/embeddable_component';
+import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
+import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
+import type { DataViewsState } from '../state_management';
+import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
+import { mergeSuggestionWithVisContext } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -20,63 +21,6 @@ interface SuggestionsApiProps {
   excludedVisualizations?: string[];
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
-}
-
-// ToDo: Move to a new file
-function mergeSuggestionWithVisContext({
-  suggestion,
-  visAttributes,
-  context,
-}: {
-  suggestion: Suggestion;
-  visAttributes: TypedLensByValueInput['attributes'];
-  context: VisualizeFieldContext | VisualizeEditorContext;
-}): Suggestion {
-  if (
-    visAttributes.visualizationType !== suggestion.visualizationId ||
-    !('textBasedColumns' in context)
-  ) {
-    return suggestion;
-  }
-
-  // it should be one of 'formBased'/'textBased' and have value
-  const datasourceId: 'formBased' | 'textBased' | undefined = [
-    'formBased' as const,
-    'textBased' as const,
-  ].find((key) => Boolean(visAttributes.state.datasourceStates[key]));
-
-  // if the datasource is formBased, we should not merge
-  if (!datasourceId || datasourceId === 'formBased') {
-    return suggestion;
-  }
-  const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
-
-  // should be based on same columns
-  if (
-    !datasourceState?.layers ||
-    Object.values(datasourceState?.layers).some(
-      (layer) =>
-        layer.columns?.some(
-          (c: { fieldName: string }) =>
-            !context?.textBasedColumns?.find((col) => col.name === c.fieldName)
-        ) || layer.columns?.length !== context?.textBasedColumns?.length
-    )
-  ) {
-    return suggestion;
-  }
-  const layerIds = Object.keys(datasourceState.layers);
-  try {
-    return {
-      title: visAttributes.title,
-      visualizationId: visAttributes.visualizationType,
-      visualizationState: visAttributes.state.visualization,
-      keptLayerIds: layerIds,
-      datasourceState,
-      datasourceId,
-    } as Suggestion;
-  } catch {
-    return suggestion;
-  }
 }
 
 export const suggestionsApi = ({
