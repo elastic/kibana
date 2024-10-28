@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Tag, TagAttributes } from '../../../common/types';
-import { ITagInternalClient } from '../../services';
-import { StartServices } from '../../types';
+import type { Tag, TagAttributes } from '../../../common/types';
+import type { ITagInternalClient } from '../../services';
+import type { StartServices } from '../../types';
 
 interface GetModalOpenerOptions extends StartServices {
   tagClient: ITagInternalClient;
