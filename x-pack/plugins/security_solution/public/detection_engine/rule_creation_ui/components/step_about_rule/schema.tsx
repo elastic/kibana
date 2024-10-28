@@ -13,6 +13,7 @@ import type { AboutStepRule } from '../../../../detections/pages/detection_engin
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
+import { validateDefaultRiskScore } from '../risk_score_mapping/default_risk_score';
 
 const { emptyField } = fieldValidators;
 
@@ -129,6 +130,26 @@ export const schema: FormSchema<AboutStepRule> = {
     value: {},
     mapping: {},
     isMappingChecked: {},
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path }] = args;
+          const fieldValue = value as { value: unknown };
+          const defaultRiskScore = fieldValue?.value ?? null;
+
+          const errorMessage = validateDefaultRiskScore(defaultRiskScore);
+
+          if (errorMessage) {
+            return {
+              path,
+              message: errorMessage,
+            };
+          }
+        },
+      },
+    ],
   },
   references: {
     label: i18n.translate(

@@ -49,6 +49,17 @@ import {
   requiredFieldsSerializer,
 } from './fields/required_fields';
 import {
+  RiskScoreEdit,
+  riskScoreDeserializer,
+  riskScoreSchema,
+  riskScoreSerializer,
+} from './fields/risk_score';
+import {
+  RiskScoreMappingEdit,
+  riskScoreMappingDeserializer,
+  riskScoreMappingSerializer,
+} from './fields/risk_score_mapping';
+import {
   RuleNameOverrideEdit,
   ruleNameOverrideDeserializer,
   ruleNameOverrideSerializer,
@@ -148,6 +159,23 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
           fieldFormSchema={requiredFieldsSchema}
           serializer={requiredFieldsSerializer}
           deserializer={requiredFieldsDeserializer}
+        />
+      );
+    case 'risk_score':
+      return (
+        <FieldFormWrapper
+          component={RiskScoreEdit}
+          fieldFormSchema={riskScoreSchema}
+          serializer={riskScoreSerializer}
+          deserializer={riskScoreDeserializer}
+        />
+      );
+    case 'risk_score_mapping':
+      return (
+        <FieldFormWrapper
+          component={RiskScoreMappingEdit}
+          serializer={riskScoreMappingSerializer}
+          deserializer={riskScoreMappingDeserializer}
         />
       );
     case 'rule_name_override':

@@ -25,7 +25,7 @@ type FieldComponent = React.ComponentType<{
 
 interface FieldFormWrapperProps {
   component: FieldComponent;
-  fieldFormSchema: FormSchema;
+  fieldFormSchema?: FormSchema;
   deserializer?: (fieldValue: FormData, finalDiffableRule: DiffableRule) => FormData;
   serializer?: (formData: FormData) => FormData;
 }
