@@ -160,75 +160,80 @@ export const AutoDetectPanel: FunctionComponent = () => {
 
                         switch (integration.pkgName) {
                           case 'system':
-                            actionLinks = [
-                              {
-                                id: 'inventory-host-details',
-                                title: i18n.translate(
-                                  'xpack.observability_onboarding.autoDetectPanel.systemOverviewTitle',
-                                  {
-                                    defaultMessage:
-                                      'Overview your system health within the Hosts Inventory',
-                                  }
-                                ),
-                                label: i18n.translate(
-                                  'xpack.observability_onboarding.autoDetectPanel.systemOverviewLabel',
-                                  {
-                                    defaultMessage: 'Explore metrics data',
-                                  }
-                                ),
-                                href:
-                                  assetDetailsLocator?.getRedirectUrl({
-                                    assetType: 'host',
-                                    assetId: integration.metadata?.hostname,
-                                  }) ?? '',
-                              },
-                            ];
+                            actionLinks =
+                              assetDetailsLocator !== undefined
+                                ? [
+                                    {
+                                      id: 'inventory-host-details',
+                                      title: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewTitle',
+                                        {
+                                          defaultMessage:
+                                            'Overview your system health within the Hosts Inventory',
+                                        }
+                                      ),
+                                      label: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewLabel',
+                                        {
+                                          defaultMessage: 'Explore metrics data',
+                                        }
+                                      ),
+                                      href: assetDetailsLocator.getRedirectUrl({
+                                        assetType: 'host',
+                                        assetId: integration.metadata?.hostname,
+                                      }),
+                                    },
+                                  ]
+                                : [];
                             break;
                           default:
-                            actionLinks = integration.kibanaAssets
-                              .filter((asset) => asset.type === 'dashboard')
-                              .map((asset) => {
-                                const dashboard = DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
-                                const href =
-                                  dashboardLocator?.getRedirectUrl({
-                                    dashboardId: asset.id,
-                                  }) ?? '';
+                            actionLinks =
+                              dashboardLocator !== undefined
+                                ? integration.kibanaAssets
+                                    .filter((asset) => asset.type === 'dashboard')
+                                    .map((asset) => {
+                                      const dashboard =
+                                        DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
+                                      const href = dashboardLocator.getRedirectUrl({
+                                        dashboardId: asset.id,
+                                      });
 
-                                return {
-                                  id: asset.id,
-                                  title:
-                                    dashboard.type === 'metrics'
-                                      ? i18n.translate(
-                                          'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
-                                          {
-                                            defaultMessage:
-                                              'Overview your metrics data with this pre-made dashboard',
-                                          }
-                                        )
-                                      : i18n.translate(
-                                          'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
-                                          {
-                                            defaultMessage:
-                                              'Overview your logs data with this pre-made dashboard',
-                                          }
-                                        ),
-                                  label:
-                                    dashboard.type === 'metrics'
-                                      ? i18n.translate(
-                                          'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
-                                          {
-                                            defaultMessage: 'Explore metrics data',
-                                          }
-                                        )
-                                      : i18n.translate(
-                                          'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
-                                          {
-                                            defaultMessage: 'Explore logs data',
-                                          }
-                                        ),
-                                  href,
-                                };
-                              });
+                                      return {
+                                        id: asset.id,
+                                        title:
+                                          dashboard.type === 'metrics'
+                                            ? i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
+                                                {
+                                                  defaultMessage:
+                                                    'Overview your metrics data with this pre-made dashboard',
+                                                }
+                                              )
+                                            : i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
+                                                {
+                                                  defaultMessage:
+                                                    'Overview your logs data with this pre-made dashboard',
+                                                }
+                                              ),
+                                        label:
+                                          dashboard.type === 'metrics'
+                                            ? i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
+                                                {
+                                                  defaultMessage: 'Explore metrics data',
+                                                }
+                                              )
+                                            : i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
+                                                {
+                                                  defaultMessage: 'Explore logs data',
+                                                }
+                                              ),
+                                        href,
+                                      };
+                                    })
+                                : [];
                         }
 
                         return (
