@@ -6,7 +6,7 @@
  */
 
 import { Pipeline } from '../../common';
-import * as Utils from '../util';
+import { createSync } from '../util';
 import { createPipeline } from './pipeline';
 
 jest.mock('../util');
@@ -50,7 +50,7 @@ processors:
       ignore_missing: true
       if: ctx.event?.original == null
 `;
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${dataStreamPath}/elasticsearch/ingest_pipeline/default.yml`,
       expectYamlContent
     );
@@ -62,7 +62,7 @@ processors:
     const expectYamlContent = `---
 {}
 `;
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${dataStreamPath}/elasticsearch/ingest_pipeline/default.yml`,
       expectYamlContent
     );

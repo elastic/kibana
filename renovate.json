@@ -41,6 +41,7 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": [
         "actions/checkout",
+        "actions/github-script",
         "elastic/github-actions/project-assigner",
         "hmarr/auto-approve-action",
         "octokit/graphql-action",
@@ -57,7 +58,7 @@
       "matchDepNames": ["@elastic/charts"],
       "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:prev-minor", "Team:Visualizations"],
       "enabled": true
     },
     {
@@ -102,7 +103,23 @@
     },
     {
       "groupName": "APM",
-      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react", "@elastic/apm-rum-core"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "RxJS",
+      "matchDepNames": ["rxjs"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "stack traces",
+      "matchDepNames": ["trace", "clarify"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
@@ -111,6 +128,14 @@
     {
       "groupName": "@elastic/ebt",
       "matchDepNames": ["@elastic/ebt"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "lodash",
+      "matchDepNames": ["lodash", "@types/lodash"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
@@ -131,6 +156,15 @@
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "HAPI ecosystem",
+      "matchDepNames": ["@hapi/**", "brok", "joi"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:prev-minor"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -512,6 +546,24 @@
     {
       "groupName": "@mswjs/http-middleware",
       "matchPackageNames": ["@mswjs/http-middleware"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@xyflow/react",
+      "matchPackageNames": ["@xyflow/react"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@dagrejs/dagre",
+      "matchPackageNames": ["@dagrejs/dagre"],
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],

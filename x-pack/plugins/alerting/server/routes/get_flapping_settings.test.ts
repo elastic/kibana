@@ -37,6 +37,7 @@ describe('getFlappingSettingsRoute', () => {
     expect(config).toMatchInlineSnapshot(`
       Object {
         "options": Object {
+          "access": "internal",
           "tags": Array [
             "access:read-flapping-settings",
           ],

@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-import { AlertsSettings } from '../alerts/settings/alerts_settings';
+import { AlertsSettings } from '../assistant/settings/alerts_settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';
@@ -31,32 +31,31 @@ import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_know
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP } from './translations';
 
-const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-(SPACE)';
 
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
+  modalMode?: boolean;
 }
 
 /**
  * Knowledge Base Settings -- set up the Knowledge Base and configure RAG on alerts
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
+  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, modalMode = false }) => {
     const { http, toasts } = useAssistantContext();
-    const {
-      data: kbStatus,
-      isLoading,
-      isFetching,
-    } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+    const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
     // Resource enabled state
     const isElserEnabled = kbStatus?.elser_exists ?? false;
-    const isESQLEnabled = kbStatus?.esql_exists ?? false;
+    const isSecurityLabsEnabled = kbStatus?.security_labs_exists ?? false;
     const isKnowledgeBaseSetup =
-      (isElserEnabled && isESQLEnabled && kbStatus?.index_exists && kbStatus?.pipeline_exists) ??
+      (isElserEnabled &&
+        isSecurityLabsEnabled &&
+        kbStatus?.index_exists &&
+        kbStatus?.pipeline_exists) ??
       false;
     const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
     const isSetupAvailable = kbStatus?.is_setup_available ?? false;
@@ -67,12 +66,11 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     // Calculated health state for EuiHealth component
     const elserHealth = isElserEnabled ? 'success' : 'subdued';
     const knowledgeBaseHealth = isKnowledgeBaseSetup ? 'success' : 'subdued';
-    const esqlHealth = isESQLEnabled ? 'success' : 'subdued';
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Main `Knowledge Base` setup button
     const onSetupKnowledgeBaseButtonClick = useCallback(() => {
-      setupKB(ESQL_RESOURCE);
+      setupKB();
     }, [setupKB]);
 
     const toolTipContent = !isSetupAvailable ? SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP : undefined;
@@ -114,19 +112,9 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
       );
     }, [isKnowledgeBaseSetup]);
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // ESQL Resource
-    const esqlDescription = useMemo(() => {
-      return isESQLEnabled ? (
-        <span data-test-subj="esql-installed">{i18n.ESQL_DESCRIPTION_INSTALLED}</span>
-      ) : (
-        <span data-test-subj="install-esql">{i18n.ESQL_DESCRIPTION}</span>
-      );
-    }, [isESQLEnabled]);
-
     return (
       <>
-        <EuiTitle size={'s'}>
+        <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
           <h2>
             {i18n.SETTINGS_TITLE}{' '}
             <EuiBetaBadge iconType={'beaker'} label={i18n.SETTINGS_BADGE} size="s" color="hollow" />
@@ -203,28 +191,16 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
               </EuiText>
             </div>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span>
-              <EuiHealth color={esqlHealth}>{i18n.ESQL_LABEL}</EuiHealth>
-              <EuiText
-                size={'xs'}
-                color={'subdued'}
-                css={css`
-                  padding-left: 20px;
-                `}
-              >
-                {esqlDescription}
-              </EuiText>
-            </span>
-          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
 
-        <AlertsSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-        />
+        {!modalMode && (
+          <AlertsSettings
+            knowledgeBase={knowledgeBase}
+            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+          />
+        )}
       </>
     );
   }

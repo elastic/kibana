@@ -57,13 +57,9 @@ export function getSaveModalComponent(
       return <LoadingSpinnerWithOverlay />;
     }
 
-    const { ContextProvider: PresentationUtilContext } = lensServices.presentationUtil;
-
     return (
       <EuiOverlayMask>
-        <PresentationUtilContext>
-          <LensSavedModalLazy {...props} lensServices={lensServices} />
-        </PresentationUtilContext>
+        <LensSavedModalLazy {...props} lensServices={lensServices} />
       </EuiOverlayMask>
     );
   };

@@ -168,5 +168,11 @@ AND \`dest\`=="Crete"`
 and \`ip\`::string!="127.0.0.2/32"`
       );
     });
+
+    it('returns undefined for multivalue fields', () => {
+      expect(
+        appendWhereClauseToESQLQuery('from logstash-*', 'dest', ['meow'], '+', 'string')
+      ).toBeUndefined();
+    });
   });
 });

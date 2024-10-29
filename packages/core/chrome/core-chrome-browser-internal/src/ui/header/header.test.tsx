@@ -96,6 +96,7 @@ describe('Header', () => {
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
         helpMenuLinks$={of([])}
+        isServerless={false}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();

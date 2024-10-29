@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { EsqlService } from './esql';
 
 export interface InvestigateAppServices {
   esql: EsqlService;
+  charts: ChartsPluginStart;
 }

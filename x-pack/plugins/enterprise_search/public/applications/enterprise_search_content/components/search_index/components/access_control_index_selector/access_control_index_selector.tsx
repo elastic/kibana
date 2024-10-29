@@ -7,21 +7,36 @@
 
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiSuperSelect, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface AccessControlSelectorOption {
   description: string;
+  error?: boolean;
   title: string;
   value: 'content-index' | 'access-control-index';
 }
 
-const indexSelectorOptions: AccessControlSelectorOption[] = [
+interface IndexSelectorProps {
+  fullWidth?: boolean;
+  indexSelectorOptions?: AccessControlSelectorOption[];
+  onChange(value: AccessControlSelectorOption['value']): void;
+  valueOfSelected?: AccessControlSelectorOption['value'];
+}
+
+export const DEFAULT_INDEX_SELECTOR_OPTIONS: AccessControlSelectorOption[] = [
   {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
       {
-        defaultMessage: 'Browse content fields',
+        defaultMessage: 'Browse documents ingested by content syncs',
       }
     ),
     title: i18n.translate(
@@ -36,7 +51,7 @@ const indexSelectorOptions: AccessControlSelectorOption[] = [
     description: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
       {
-        defaultMessage: 'Browse document level security fields',
+        defaultMessage: 'Browse access control lists ingested by access control syncs',
       }
     ),
     title: i18n.translate(
@@ -49,34 +64,44 @@ const indexSelectorOptions: AccessControlSelectorOption[] = [
   },
 ];
 
-interface IndexSelectorProps {
-  onChange(value: AccessControlSelectorOption['value']): void;
-  valueOfSelected?: AccessControlSelectorOption['value'];
-}
-
 export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
-  valueOfSelected,
+  indexSelectorOptions = DEFAULT_INDEX_SELECTOR_OPTIONS,
   onChange,
+  valueOfSelected,
+  fullWidth,
 }) => {
   return (
     <EuiSuperSelect
+      fullWidth={fullWidth}
       valueOfSelected={valueOfSelected}
       onChange={onChange}
+      prepend={
+        indexSelectorOptions.some((option) => option.error) ? (
+          <EuiIcon type={'warning'} />
+        ) : undefined
+      }
       options={indexSelectorOptions.map((option) => {
         return {
           dropdownDisplay: (
-            <EuiFlexGrid gutterSize="none">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>{option.title}</h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>{option.description}</p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGrid>
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+              {option.error ? (
+                <EuiFlexItem grow={false} align>
+                  <EuiIcon type={'warning'} />{' '}
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h4>{option.title}</h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="xs">
+                    <p>{option.description}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexGroup>
           ),
           inputDisplay: option.title,
           value: option.value,

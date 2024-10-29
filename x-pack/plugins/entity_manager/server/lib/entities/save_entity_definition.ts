@@ -41,5 +41,5 @@ export async function updateEntityDefinition(
   id: string,
   definition: Partial<EntityDefinition>
 ) {
-  await soClient.update<EntityDefinition>(SO_ENTITY_DEFINITION_TYPE, id, definition);
+  return await soClient.update<EntityDefinition>(SO_ENTITY_DEFINITION_TYPE, id, definition);
 }

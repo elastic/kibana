@@ -12,7 +12,7 @@ import type { GetLensAttributes, LensAttributes } from '../visualization_actions
 
 export interface MatrixHistogramOption {
   text: string;
-  value: string;
+  value: string | undefined;
 }
 
 export type GetSubTitle = (count: number) => string;

@@ -29,7 +29,10 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
 
   return {
     id: sourceId ?? so.id,
-    ...attributes,
+    name: attributes.name,
+    host: attributes.host,
+    is_default: attributes.is_default,
+    proxy_id: attributes.proxy_id,
   };
 }
 

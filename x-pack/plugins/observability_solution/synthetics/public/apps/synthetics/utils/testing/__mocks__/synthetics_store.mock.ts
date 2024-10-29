@@ -24,7 +24,7 @@ import { MonitorDetailsState } from '../../../state';
  */
 export const mockState: SyntheticsAppState = {
   ui: {
-    alertFlyoutVisible: null,
+    ruleFlyoutVisible: null,
     basePath: 'yyz',
     esKuery: '',
     integrationsPopoverOpen: null,
@@ -99,14 +99,6 @@ export const mockState: SyntheticsAppState = {
       sortField: 'name.keyword',
     },
     trendStats: {},
-    data: {
-      total: 0,
-      allMonitorIds: [],
-      monitors: [],
-    },
-    error: null,
-    loaded: false,
-    loading: false,
     flyoutConfig: null,
     groupBy: {
       field: 'none',
@@ -446,7 +438,7 @@ function getMonitorDetailsMockSlice() {
       tags: [],
       timeout: null,
       name: 'One pixel monitor',
-      locations: [{ isServiceManaged: true, id: 'us_central' }],
+      locations: [{ isServiceManaged: true, id: 'us_central', label: 'US Central' }],
       namespace: 'default',
       origin: SourceType.UI,
       max_attempts: 2,

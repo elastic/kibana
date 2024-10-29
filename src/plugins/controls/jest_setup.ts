@@ -8,8 +8,5 @@
  */
 
 // Start the services with stubs
-import { pluginServices } from './public/services';
-import { registry } from './public/services/plugin_services.stub';
-
-registry.start({});
-pluginServices.setRegistry(registry);
+import { setStubKibanaServices } from './public/services/mocks';
+setStubKibanaServices();

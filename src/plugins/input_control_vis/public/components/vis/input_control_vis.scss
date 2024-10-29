@@ -1,9 +1,9 @@
 .icvContainer__wrapper {
-  @include euiScrollBar;
   min-height: 0;
   flex: 1 1 0;
   display: flex;
   overflow: auto;
+  @include euiScrollBar;
 }
 
 .icvContainer {

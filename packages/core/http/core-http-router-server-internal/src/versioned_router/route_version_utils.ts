@@ -54,6 +54,11 @@ type KibanaRequestWithQueryVersion = KibanaRequest<
   { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: unknown }
 >;
 
+export interface RequestLike {
+  headers: KibanaRequest['headers'];
+  query?: KibanaRequest['query'];
+}
+
 export function hasQueryVersion(
   request: Mutable<KibanaRequest>
 ): request is Mutable<KibanaRequestWithQueryVersion> {
@@ -63,13 +68,13 @@ export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersio
   delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
 }
 
-function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
+function readQueryVersion(request: RequestLike): undefined | ApiVersion {
   const version = get(request.query, ELASTIC_HTTP_VERSION_QUERY_PARAM);
   if (typeof version === 'string') return version;
 }
 /** Reading from header takes precedence over query param */
 export function readVersion(
-  request: KibanaRequest,
+  request: RequestLike,
   isQueryVersionEnabled?: boolean
 ): undefined | ApiVersion {
   const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];

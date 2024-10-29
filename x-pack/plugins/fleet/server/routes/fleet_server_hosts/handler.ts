@@ -135,7 +135,7 @@ export const putFleetServerHostHandler: RequestHandler<
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const coreContext = await await context.core;
+    const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = coreContext.savedObjects.client;
 

@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
+import {
+  RuleNotifyWhenType,
+  RuleNotifyWhen,
+  RuleAction,
+  RuleActionFrequency,
+} from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -29,10 +35,15 @@ import {
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { RuleNotifyWhenType, RuleNotifyWhen } from '@kbn/alerting-types';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { getTimeOptions } from '../utils';
-import { RuleAction } from '../../common';
+
+const FOR_EACH_ALERT = i18n.translate('alertsUIShared.actiActionsonNotifyWhen.forEachOption', {
+  defaultMessage: 'For each alert',
+});
+const SUMMARY_OF_ALERTS = i18n.translate('alertsUIShared.actiActionsonNotifyWhen.summaryOption', {
+  defaultMessage: 'Summary of alerts',
+});
 
 export interface NotifyWhenSelectOptions {
   isSummaryOption?: boolean;
@@ -46,23 +57,26 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onActionGroupChange',
-      inputDisplay: i18n.translate('alertsUIShared.ruleForm.onActionGroupChange.display', {
-        defaultMessage: 'On status changes',
-      }),
+      inputDisplay: i18n.translate(
+        'alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.display',
+        {
+          defaultMessage: 'On status changes',
+        }
+      ),
       'data-test-subj': 'onActionGroupChange',
       dropdownDisplay: (
         <>
           <strong>
             <FormattedMessage
               defaultMessage="On status changes"
-              id="alertsUIShared.ruleForm.onActionGroupChange.label"
+              id="alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if the alert status changes."
-                id="alertsUIShared.ruleForm.onActionGroupChange.description"
+                id="alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.description"
               />
             </p>
           </EuiText>
@@ -75,7 +89,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onActiveAlert',
-      inputDisplay: i18n.translate('alertsUIShared.ruleForm.onActiveAlert.display', {
+      inputDisplay: i18n.translate('alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.display', {
         defaultMessage: 'On check intervals',
       }),
       'data-test-subj': 'onActiveAlert',
@@ -84,14 +98,14 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
           <strong>
             <FormattedMessage
               defaultMessage="On check intervals"
-              id="alertsUIShared.ruleForm.onActiveAlert.label"
+              id="alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="alertsUIShared.ruleForm.onActiveAlert.description"
+                id="alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.description"
               />
             </p>
           </EuiText>
@@ -104,23 +118,26 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onThrottleInterval',
-      inputDisplay: i18n.translate('alertsUIShared.ruleForm.onThrottleInterval.display', {
-        defaultMessage: 'On custom action intervals',
-      }),
+      inputDisplay: i18n.translate(
+        'alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.display',
+        {
+          defaultMessage: 'On custom action intervals',
+        }
+      ),
       'data-test-subj': 'onThrottleInterval',
       dropdownDisplay: (
         <>
           <strong>
             <FormattedMessage
               defaultMessage="On custom action intervals"
-              id="alertsUIShared.ruleForm.onThrottleInterval.label"
+              id="alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="alertsUIShared.ruleForm.onThrottleInterval.description"
+                id="alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.description"
               />
             </p>
           </EuiText>
@@ -130,18 +147,16 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   },
 ];
 
-interface RuleActionsNotifyWhenProps {
+export interface RuleActionsNotifyWhenProps {
   frequency: RuleAction['frequency'];
   throttle: number | null;
   throttleUnit: string;
-  onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
-  onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
-  onSummaryChange: (summary: boolean) => void;
   hasAlertsMappings?: boolean;
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  defaultNotifyWhenValue?: RuleNotifyWhenType;
+  onChange: (frequency: RuleActionFrequency) => void;
+  onUseDefaultMessage: () => void;
 }
 
 export const RuleActionsNotifyWhen = ({
@@ -149,49 +164,26 @@ export const RuleActionsNotifyWhen = ({
   frequency = DEFAULT_FREQUENCY,
   throttle,
   throttleUnit,
-  onNotifyWhenChange,
-  onThrottleChange,
-  onSummaryChange,
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
-  defaultNotifyWhenValue = DEFAULT_FREQUENCY.notifyWhen,
+  onChange,
+  onUseDefaultMessage,
 }: RuleActionsNotifyWhenProps) => {
-  const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
-  const [notifyWhenValue, setNotifyWhenValue] =
-    useState<RuleNotifyWhenType>(defaultNotifyWhenValue);
-
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (frequency.notifyWhen) {
-      setNotifyWhenValue(frequency.notifyWhen);
-    } else {
-      // If 'notifyWhen' is not set, derive value from existence of throttle value
-      setNotifyWhenValue(frequency.throttle ? RuleNotifyWhen.THROTTLE : RuleNotifyWhen.ACTIVE);
-    }
-  }, [frequency]);
-
-  useEffect(() => {
-    setShowCustomThrottleOpts(notifyWhenValue === RuleNotifyWhen.THROTTLE);
-  }, [notifyWhenValue]);
+  const showCustomThrottleOpts = frequency?.notifyWhen === RuleNotifyWhen.THROTTLE;
 
   const onNotifyWhenValueChange = useCallback(
     (newValue: RuleNotifyWhenType) => {
-      onNotifyWhenChange(newValue);
-      setNotifyWhenValue(newValue);
-      // Calling onNotifyWhenChange and onThrottleChange at the same time interferes with the React state lifecycle
-      // so wait for onNotifyWhenChange to process before calling onThrottleChange
-      setTimeout(
-        () =>
-          onThrottleChange(
-            newValue === RuleNotifyWhen.THROTTLE ? throttle ?? 1 : null,
-            throttleUnit
-          ),
-        100
-      );
+      const newThrottle = newValue === RuleNotifyWhen.THROTTLE ? throttle ?? 1 : null;
+      onChange({
+        ...frequency,
+        notifyWhen: newValue,
+        throttle: newThrottle ? `${newThrottle}${throttleUnit}` : null,
+      });
     },
-    [onNotifyWhenChange, onThrottleChange, throttle, throttleUnit]
+    [onChange, throttle, throttleUnit, frequency]
   );
 
   const summaryNotifyWhenOptions = useMemo(
@@ -234,13 +226,23 @@ export const RuleActionsNotifyWhen = ({
 
   const selectSummaryOption = useCallback(
     (summary: boolean) => {
-      onSummaryChange(summary);
+      onChange({
+        summary,
+        notifyWhen: selectedOptionDoesNotExist(summary)
+          ? getDefaultNotifyWhenOption(summary)
+          : frequency.notifyWhen,
+        throttle: frequency.throttle,
+      });
+      onUseDefaultMessage();
       setSummaryMenuOpen(false);
-      if (selectedOptionDoesNotExist(summary)) {
-        onNotifyWhenChange(getDefaultNotifyWhenOption(summary));
-      }
     },
-    [onSummaryChange, selectedOptionDoesNotExist, onNotifyWhenChange, getDefaultNotifyWhenOption]
+    [
+      frequency,
+      onUseDefaultMessage,
+      selectedOptionDoesNotExist,
+      getDefaultNotifyWhenOption,
+      onChange,
+    ]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -320,7 +322,7 @@ export const RuleActionsNotifyWhen = ({
             prepend={hasAlertsMappings ? summaryOrPerRuleSelect : <></>}
             data-test-subj="notifyWhenSelect"
             options={notifyWhenOptions}
-            valueOfSelected={notifyWhenValue}
+            valueOfSelected={frequency.notifyWhen}
             onChange={onNotifyWhenValueChange}
           />
           {showCustomThrottleOpts && (
@@ -328,7 +330,6 @@ export const RuleActionsNotifyWhen = ({
               <EuiSpacer size="s" />
               <EuiFormRow fullWidth>
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem style={{ flexGrow: 0.1 }} />
                   <EuiFlexItem grow={2}>
                     <EuiFieldNumber
                       isInvalid={showMinimumThrottleWarning}
@@ -349,7 +350,10 @@ export const RuleActionsNotifyWhen = ({
                           map((value) => parseInt(value, 10)),
                           filter((value) => !isNaN(value)),
                           map((value) => {
-                            onThrottleChange(value, throttleUnit);
+                            onChange({
+                              ...frequency,
+                              throttle: `${value}${throttleUnit}`,
+                            });
                           })
                         );
                       }}
@@ -362,7 +366,10 @@ export const RuleActionsNotifyWhen = ({
                       value={throttleUnit}
                       options={getTimeOptions(throttle ?? 1)}
                       onChange={(e) => {
-                        onThrottleChange(throttle, e.target.value);
+                        onChange({
+                          ...frequency,
+                          throttle: `${throttle}${e.target.value}`,
+                        });
                       }}
                     />
                   </EuiFlexItem>
@@ -389,10 +396,3 @@ export const RuleActionsNotifyWhen = ({
     </EuiFormRow>
   );
 };
-
-const FOR_EACH_ALERT = i18n.translate('alertsUIShared.ruleActionsNotifyWhen.forEachOption', {
-  defaultMessage: 'For each alert',
-});
-const SUMMARY_OF_ALERTS = i18n.translate('alertsUIShared.ruleActionsNotifyWhen.summaryOption', {
-  defaultMessage: 'Summary of alerts',
-});

@@ -29,6 +29,7 @@ interface Config {
   mappingsString: string;
   pipelineString: string;
   pipelineId: string | null;
+  createPipeline: boolean;
 }
 
 export async function importData(props: Props, config: Config, setState: (state: unknown) => void) {
@@ -41,6 +42,7 @@ export async function importData(props: Props, config: Config, setState: (state:
     mappingsString,
     pipelineString,
     pipelineId,
+    createPipeline,
   } = config;
   const { format } = results;
 
@@ -86,7 +88,7 @@ export async function importData(props: Props, config: Config, setState: (state:
 
   let settings = {};
   let mappings = {};
-  let pipeline = {};
+  let pipeline;
 
   try {
     settings = JSON.parse(indexSettingsString);
@@ -109,7 +111,9 @@ export async function importData(props: Props, config: Config, setState: (state:
   }
 
   try {
-    pipeline = JSON.parse(pipelineString);
+    if (createPipeline) {
+      pipeline = JSON.parse(pipelineString) as IngestPipeline;
+    }
   } catch (error) {
     success = false;
     const parseError = i18n.translate('xpack.dataVisualizer.file.importView.parsePipelineError', {
@@ -143,12 +147,7 @@ export async function importData(props: Props, config: Config, setState: (state:
     return;
   }
 
-  const initializeImportResp = await importer.initializeImport(
-    index,
-    settings,
-    mappings,
-    pipeline as IngestPipeline
-  );
+  const initializeImportResp = await importer.initializeImport(index, settings, mappings, pipeline);
 
   const timeFieldName = importer.getTimeField();
   setState({ timeFieldName });
@@ -158,14 +157,20 @@ export async function importData(props: Props, config: Config, setState: (state:
     indexCreatedStatus: getSuccess(indexCreated),
   });
 
-  const pipelineCreated = initializeImportResp.pipelineId !== undefined;
-  if (indexCreated) {
-    setState({
-      ingestPipelineCreatedStatus: pipelineCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-      pipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
-    });
+  if (createPipeline) {
+    const pipelineCreated = initializeImportResp.pipelineId !== undefined;
+    if (indexCreated) {
+      setState({
+        ingestPipelineCreatedStatus: pipelineCreated
+          ? IMPORT_STATUS.COMPLETE
+          : IMPORT_STATUS.FAILED,
+        pipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
+      });
+    }
+    success = indexCreated && pipelineCreated;
+  } else {
+    success = indexCreated;
   }
-  success = indexCreated && pipelineCreated;
 
   if (success === false) {
     errors.push(initializeImportResp.error);

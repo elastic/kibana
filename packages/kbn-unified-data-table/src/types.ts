@@ -12,7 +12,7 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elast
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-export type { DataTableColumnsMeta } from '@kbn/discover-utils/src/types';
+export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
 /**

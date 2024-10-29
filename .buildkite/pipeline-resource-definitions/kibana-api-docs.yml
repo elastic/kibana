@@ -49,3 +49,5 @@ spec:
           cronline: 0 0 * * * America/New_York
           message: Daily build
           branch: main
+      tags:
+        - kibana

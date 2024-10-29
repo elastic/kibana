@@ -84,8 +84,14 @@ export function registerRoutes({
     maxImportPayloadBytes: config.maxImportPayloadBytes,
     coreUsageData,
     logger,
+    access: internalOnServerless,
   });
-  registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData, logger });
+  registerLegacyExportRoute(legacyRouter, {
+    kibanaVersion,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+  });
 
   const internalRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>(
     '/internal/saved_objects/'

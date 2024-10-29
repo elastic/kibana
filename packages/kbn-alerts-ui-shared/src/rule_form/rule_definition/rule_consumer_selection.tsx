@@ -91,10 +91,6 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
     [dispatch]
   );
 
-  if (validConsumers.length <= 1 || validConsumers.includes(AlertConsumers.OBSERVABILITY)) {
-    return null;
-  }
-
   return (
     <EuiFormRow
       fullWidth

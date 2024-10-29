@@ -10,7 +10,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 
 import {
-  DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_LABEL_POSITION,
   type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
   type ControlPanelState,
@@ -19,7 +19,7 @@ import {
 
 export const getDefaultControlGroupState = (): SerializableControlGroupState => ({
   panels: {},
-  labelPosition: DEFAULT_CONTROL_STYLE,
+  labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
   chainingSystem: 'HIERARCHICAL',
   autoApplySelections: true,
   ignoreParentSettings: {

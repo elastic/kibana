@@ -344,6 +344,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {
@@ -564,6 +565,7 @@ export interface DocLinks {
     roleAndPrivileges: string;
     proxiesSettings: string;
     unprivilegedMode: string;
+    httpMonitoring: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

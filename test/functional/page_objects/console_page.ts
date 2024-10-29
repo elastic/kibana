@@ -51,6 +51,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.clearValueWithKeyboard();
   }
 
+  public async focusOutputEditor() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    // Simply clicking on the output editor doesn't focus it, so we need to click
+    // on the margin view overlays
+    await (await outputEditor.findByClassName('margin-view-overlays')).click();
+  }
+
   public async getOutputText() {
     const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
     const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');

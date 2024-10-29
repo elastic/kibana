@@ -107,6 +107,8 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
                   indices={props.indices}
                   shouldUpdate={props.shouldUpdate}
                   filters={props.filters}
+                  isSplitPanel={props.isSplitPanel}
+                  showPanelOnClick={props.showPanelOnClick}
                 />
               </Provider>
             </SideEffectContext.Provider>

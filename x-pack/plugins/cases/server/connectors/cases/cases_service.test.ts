@@ -8,7 +8,8 @@
 import { createHash } from 'node:crypto';
 import stringify from 'json-stable-stringify';
 
-import { isEmpty, set } from 'lodash';
+import { isEmpty } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { CasesService } from './cases_service';
 
 describe('CasesService', () => {

@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -16,9 +16,12 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { renderGroupPanel } from './grouping/render_group_panel';
 import { rulesLocatorID } from '../../../common';
 import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
+import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
+import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
+import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
+import { DEFAULT_GROUPING_OPTIONS } from '../../components/alerts_table/grouping/constants';
 import { AlertsByGroupingAgg } from '../../components/alerts_table/types';
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
@@ -37,13 +40,10 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
-import { getGroupStats } from './grouping/get_group_stats';
-import { getAggregationsByGroupingField } from './grouping/get_aggregations_by_grouping_field';
-import { DEFAULT_GROUPING_OPTIONS } from './grouping/constants';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
@@ -52,6 +52,7 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+const DEFAULT_FILTERS: Filter[] = [];
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -255,10 +256,12 @@ function InternalAlertsPage() {
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 featureIds={observabilityAlertFeatureIds}
-                defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? []}
+                defaultFilters={
+                  ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
+                }
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
-                globalFilters={alertSearchBarStateProps.filters}
+                globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}

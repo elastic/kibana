@@ -18,7 +18,6 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -28,17 +27,18 @@ import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const backfillClient = backfillClientMock.create();
 const rulesSettingsService = rulesSettingsServiceMock.create();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -100,7 +100,6 @@ describe('Task Runner Factory', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
-  const rulesClient = rulesClientMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
@@ -117,12 +116,9 @@ describe('Task Runner Factory', () => {
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     eventLogger: eventLoggerMock.create(),
     executionContext,
-    getMaintenanceWindowClientWithRequest: jest
-      .fn()
-      .mockReturnValue(maintenanceWindowClientMock.create()),
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger: loggingSystemMock.create().get(),
+    maintenanceWindowsService,
     maxAlerts: 1000,
     maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry: ruleTypeRegistryMock.create(),

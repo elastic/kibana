@@ -164,6 +164,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
+            include_ccs_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
@@ -271,9 +272,25 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
                     },
+                    ...(rawResponse?.took && {
+                      queryTime: {
+                        label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                          defaultMessage: 'Query time',
+                        }),
+                        value: i18n.translate('data.search.es_search.queryTimeValue', {
+                          defaultMessage: '{queryTime}ms',
+                          values: { queryTime: rawResponse.took },
+                        }),
+                        description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                          defaultMessage:
+                            'The time it took to process the query. ' +
+                            'Does not include the time to send the request or parse it in the browser.',
+                        }),
+                      },
+                    }),
                   })
                   .json(params)
-                  .ok({ json: rawResponse, requestParams });
+                  .ok({ json: { rawResponse }, requestParams });
               },
               error(error) {
                 logInspectorRequest()

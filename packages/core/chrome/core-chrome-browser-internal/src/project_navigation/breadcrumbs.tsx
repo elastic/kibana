@@ -11,7 +11,6 @@ import React from 'react';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
 import type {
   AppDeepLinkId,
-  ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
@@ -30,14 +29,14 @@ export function buildBreadcrumbs({
 }: {
   projectName?: string;
   projectBreadcrumbs: {
-    breadcrumbs: ChromeProjectBreadcrumb[];
+    breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
   cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
   isServerless: boolean;
-}): ChromeProjectBreadcrumb[] {
+}): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
     projectName,
     cloudLinks,
@@ -54,7 +53,7 @@ export function buildBreadcrumbs({
     (n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden'
   );
   const navBreadcrumbs = navBreadcrumbPath.map(
-    (node): ChromeProjectBreadcrumb => ({
+    (node): ChromeBreadcrumb => ({
       href: node.deepLink?.url ?? node.href,
       deepLinkId: node.deepLink?.id as AppDeepLinkId,
       text: node.title,
@@ -99,7 +98,7 @@ function buildRootCrumb({
   projectName?: string;
   cloudLinks: CloudLinks;
   isServerless: boolean;
-}): ChromeProjectBreadcrumb {
+}): ChromeBreadcrumb {
   if (isServerless) {
     return {
       text:

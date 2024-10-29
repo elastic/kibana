@@ -27,9 +27,12 @@ const OverlayRootContainer = styled.div`
   top: var(--euiFixedHeadersOffset, 0);
   bottom: 0;
   right: 0;
+  left: var(--euiCollapsibleNavOffset, 0);
 
+  width: calc(100% - var(--euiCollapsibleNavOffset, 0));
   height: calc(100% - var(--euiFixedHeadersOffset, 0));
-  width: 100%;
+
+  border-left: 1px solid ${({ theme: { eui } }) => eui.euiColorLightestShade};
 
   z-index: ${({ theme: { eui } }) =>
     eui.euiZFlyout +

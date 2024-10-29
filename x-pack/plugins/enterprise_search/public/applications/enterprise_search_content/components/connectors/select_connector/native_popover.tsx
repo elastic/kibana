@@ -64,7 +64,7 @@ export const NativePopover: React.FC<NativePopoverProps> = ({
             'xpack.enterpriseSearch.content.newIndex.selectConnectore.nativePopover.description',
             {
               defaultMessage:
-                'Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial.',
+                'Elastic managed connectors are hosted on Elastic Cloud. Get started with a free 14-day trial.',
             }
           )}
         </p>

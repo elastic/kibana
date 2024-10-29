@@ -823,7 +823,7 @@ const maxDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1035,7 +1035,7 @@ const minDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1434,7 +1434,7 @@ const topDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'keyword',
           optional: false,
         },
         {
@@ -1451,7 +1451,47 @@ const topDefinition: FunctionDefinition = {
           acceptedValues: ['asc', 'desc'],
         },
       ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics'],
@@ -1550,7 +1590,7 @@ const valuesDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [

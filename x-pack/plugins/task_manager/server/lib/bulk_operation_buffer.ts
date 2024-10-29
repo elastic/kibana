@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { map } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Subject, race, from } from 'rxjs';
 import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -25,7 +26,8 @@ export interface Entity {
 export interface ErrorOutput {
   type: string;
   id: string;
-  error: SavedObjectError;
+  status?: number;
+  error: SavedObjectError | estypes.ErrorCause;
 }
 
 export type OperationResult<T> = Result<T, ErrorOutput>;

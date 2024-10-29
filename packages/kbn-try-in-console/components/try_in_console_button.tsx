@@ -29,6 +29,8 @@ export interface TryInConsoleButtonProps {
   content?: string | React.ReactElement;
   showIcon?: boolean;
   type?: 'link' | 'button' | 'emptyButton';
+  telemetryId?: string;
+  onClick?: () => void;
 }
 export const TryInConsoleButton = ({
   request,
@@ -38,6 +40,8 @@ export const TryInConsoleButton = ({
   content = RUN_IN_CONSOLE,
   showIcon = true,
   type = 'emptyButton',
+  telemetryId,
+  onClick: onClickProp,
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -65,6 +69,7 @@ export const TryInConsoleButton = ({
     } else {
       window.open(consolePreviewLink, '_blank', 'noreferrer');
     }
+    onClickProp?.();
   };
 
   const getAriaLabel = () => {
@@ -84,6 +89,7 @@ export const TryInConsoleButton = ({
   const commonProps = {
     'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
+    'data-telemetry-id': telemetryId,
     onClick,
   };
   const iconType = showIcon ? 'play' : undefined;

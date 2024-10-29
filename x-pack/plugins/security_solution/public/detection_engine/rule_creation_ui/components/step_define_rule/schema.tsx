@@ -44,6 +44,8 @@ import {
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
+import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
+import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -59,27 +61,18 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+        validator: (...args: Parameters<ValidationFunc>) => {
           const [{ formData }] = args;
-          const skipValidation =
+
+          if (
             isMlRule(formData.ruleType) ||
             isEsqlRule(formData.ruleType) ||
-            formData.dataSourceType !== DataSourceType.IndexPatterns;
-
-          if (skipValidation) {
+            formData.dataSourceType !== DataSourceType.IndexPatterns
+          ) {
             return;
           }
 
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
-              {
-                defaultMessage: 'A minimum of one index pattern is required.',
-              }
-            )
-          )(...args);
+          return indexPatternValidatorFactory()(...args);
         },
       },
     ],
@@ -94,32 +87,14 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ path, formData }] = args;
-          // the dropdown defaults the dataViewId to an empty string somehow on render..
-          // need to figure this out.
-          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+        validator: (...args: Parameters<ValidationFunc>) => {
+          const [{ formData }] = args;
 
-          const skipValidation =
-            isMlRule(formData.ruleType) ||
-            notEmptyDataViewId ||
-            formData.dataSourceType !== DataSourceType.DataView;
-
-          if (skipValidation) {
+          if (isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.DataView) {
             return;
           }
 
-          return {
-            path,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
-              {
-                defaultMessage: 'Please select an available Data View or Index Pattern.',
-              }
-            ),
-          };
+          return dataViewIdValidatorFactory()(...args);
         },
       },
     ],
@@ -643,6 +618,35 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
       }
     ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+
+          const filterTimeVal = formData.historyWindowSize.match(/\d+/g);
+
+          if (filterTimeVal <= 0) {
+            return {
+              code: 'ERR_MIN_LENGTH',
+              path,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.stepDefineRule.historyWindowSize.errMin',
+                {
+                  defaultMessage: 'History window size must be greater than 0.',
+                }
+              ),
+            };
+          }
+        },
+      },
+    ],
   },
   groupByFields: {
     type: FIELD_TYPES.COMBO_BOX,

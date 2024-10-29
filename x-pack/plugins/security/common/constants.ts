@@ -111,3 +111,30 @@ export const SESSION_ROUTE = '/internal/security/session';
  * Allowed image file types for uploading an image as avatar
  */
 export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
+
+/**
+ * Prefix for API actions.
+ */
+export const API_OPERATION_PREFIX = 'api:';
+
+/**
+ * The API version numbers used with the versioned router.
+ */
+export const API_VERSIONS = {
+  roles: {
+    public: {
+      v1: '2023-10-31',
+    },
+  },
+};
+
+/**
+ * Privileges that define the superuser role or the role equivalent to the superuser role.
+ */
+export const SUPERUSER_PRIVILEGES = {
+  kibana: ['*'],
+  elasticsearch: {
+    cluster: ['all'],
+    index: { '*': ['all'] },
+  },
+};

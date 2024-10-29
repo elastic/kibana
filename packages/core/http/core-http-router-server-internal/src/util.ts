@@ -11,10 +11,13 @@ import { once } from 'lodash';
 import {
   isFullValidatorContainer,
   type RouteValidatorFullConfigResponse,
-  type RouteConfig,
   type RouteMethod,
   type RouteValidator,
 } from '@kbn/core-http-server';
+import type { Mutable } from 'utility-types';
+import type { IKibanaResponse, ResponseHeaders } from '@kbn/core-http-server';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { InternalRouteConfig } from './route';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
@@ -45,8 +48,8 @@ function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
 
 // Integration tested in ./routes.test.ts
 export function prepareRouteConfigValidation<P, Q, B>(
-  config: RouteConfig<P, Q, B, RouteMethod>
-): RouteConfig<P, Q, B, RouteMethod> {
+  config: InternalRouteConfig<P, Q, B, RouteMethod>
+): InternalRouteConfig<P, Q, B, RouteMethod> {
   // Calculating schema validation can be expensive so when it is provided lazily
   // we only want to instantiate it once. This also provides idempotency guarantees
   if (typeof config.validate === 'function') {
@@ -62,4 +65,30 @@ export function prepareRouteConfigValidation<P, Q, B>(
     };
   }
   return config;
+}
+
+/**
+ * @note mutates the response object
+ * @internal
+ */
+export function injectResponseHeaders(
+  headers: ResponseHeaders,
+  response: IKibanaResponse
+): IKibanaResponse {
+  const mutableResponse = response as Mutable<IKibanaResponse>;
+  mutableResponse.options.headers = {
+    ...mutableResponse.options.headers,
+    ...headers,
+  };
+  return mutableResponse;
+}
+
+export function getVersionHeader(version: string): ResponseHeaders {
+  return {
+    [ELASTIC_HTTP_VERSION_HEADER]: version,
+  };
+}
+
+export function injectVersionHeader(version: string, response: IKibanaResponse): IKibanaResponse {
+  return injectResponseHeaders(getVersionHeader(version), response);
 }

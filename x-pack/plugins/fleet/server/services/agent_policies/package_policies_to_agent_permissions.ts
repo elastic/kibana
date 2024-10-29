@@ -49,6 +49,7 @@ export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
   'create_index',
   'auto_configure',
   'maintenance',
+  'view_index_metadata',
 ];
 
 export function storedPackagePoliciesToAgentPermissions(
@@ -275,6 +276,10 @@ function connectorServicePermissions(packagePolicyId: string): [string, Security
         {
           names: ['content-*', '.search-acl-filter-*'],
           privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+        },
+        {
+          names: ['logs-elastic_agent*'],
+          privileges: ['auto_configure', 'create_doc'],
         },
       ],
     },

@@ -85,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
+
       describe('Service Name Cell', () => {
         it('should render service.name cell', async () => {
           const state = kbnRison.encode({
@@ -104,8 +105,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 0);
-          const firstServiceNameCell = await firstCell.findByTestSubject('serviceNameCell-java');
-          const lastServiceNameCell = await lastCell.findByTestSubject('serviceNameCell-unknown');
+          const firstServiceNameCell = await firstCell.findByTestSubject(
+            'dataTableCellActionsPopover_service.name'
+          );
+          const lastServiceNameCell = await lastCell.findByTestSubject(
+            'dataTableCellActionsPopover_service.name'
+          );
           expect(await firstServiceNameCell.getVisibleText()).to.be('product');
           expect(await lastServiceNameCell.getVisibleText()).to.be('accounting');
         });
@@ -129,8 +134,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             expect(await firstCell.getVisibleText()).to.be('product');
-            await testSubjects.missingOrFail('*serviceNameCell*');
+            await testSubjects.missingOrFail('dataTableCellActionsPopover_service.name');
           });
+        });
+      });
+
+      describe('Summary column', () => {
+        it('should render a summary of the log entry replacing the original document', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: {
+              esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `message` is not null',
+            },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+
+          await testSubjects.existOrFail('discoverDataTableMessageValue');
+        });
+
+        it('should NOT render the summary column if the source does not match logs', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: {
+              esql: 'from my-example-*',
+            },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+
+          await testSubjects.missingOrFail('discoverDataTableMessageValue');
         });
       });
     });
@@ -243,8 +282,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 1);
-            const firstServiceNameCell = await firstCell.findByTestSubject('serviceNameCell-java');
-            const lastServiceNameCell = await lastCell.findByTestSubject('serviceNameCell-unknown');
+            const firstServiceNameCell = await firstCell.findByTestSubject(
+              'dataTableCellActionsPopover_service.name'
+            );
+            const lastServiceNameCell = await lastCell.findByTestSubject(
+              'dataTableCellActionsPopover_service.name'
+            );
             expect(await firstServiceNameCell.getVisibleText()).to.be('product');
             expect(await lastServiceNameCell.getVisibleText()).to.be('accounting');
           });
@@ -274,7 +317,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await firstCell.getVisibleText()).to.be('product');
             expect(await lastCell.getVisibleText()).to.be('accounting');
-            await testSubjects.missingOrFail('*serviceNameCell*');
+            await testSubjects.missingOrFail('dataTableCellActionsPopover_service.name');
+          });
+        });
+      });
+
+      describe('Summary column', () => {
+        it('should render a summary of the log entry replacing the original document', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await dataViews.switchToAndValidate('my-example-logs,logstash*');
+
+          await retry.try(async () => {
+            await testSubjects.existOrFail('discoverDataTableMessageValue');
+          });
+        });
+
+        it('should NOT render the summary column if the source does not match logs', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await dataViews.switchToAndValidate('my-example-*');
+
+          await retry.try(async () => {
+            await testSubjects.missingOrFail('discoverDataTableMessageValue');
           });
         });
       });

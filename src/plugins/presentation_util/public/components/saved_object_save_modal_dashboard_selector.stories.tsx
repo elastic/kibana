@@ -10,7 +10,6 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { StorybookParams } from '../services/plugin_services.story';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 
 export default {
@@ -49,7 +48,7 @@ export function Example({
   copyOnSave: boolean;
   hasDocumentId: boolean;
   canSaveVisualizations: boolean;
-} & StorybookParams) {
+}) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>('existing');
   const [isAddToLibrarySelected, setAddToLibrary] = useState(false);
 

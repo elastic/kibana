@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { merge } from 'lodash';
+import { coreMock } from '@kbn/core/public/mocks';
 import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
 
 import { AppContextProvider } from '../management_app/management_context';
@@ -45,6 +46,7 @@ export const WithAppDependencies =
       kibanaVersion: '8.10.0',
       cardsNavigationConfig: { enabled: true },
       sections: sectionsMock,
+      chromeStyle: 'classic',
     };
 
     return (
@@ -86,6 +88,34 @@ describe('Landing Page', () => {
 
       expect(exists('cards-navigation-page')).toBe(false);
       expect(exists('managementHome')).toBe(true);
+    });
+  });
+
+  describe('Empty prompt', () => {
+    test('Renders the default empty prompt when chromeStyle is "classic"', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('managementHome')).toBe(true);
+    });
+
+    test('Renders the solution empty prompt when chromeStyle is "project"', async () => {
+      const coreStart = coreMock.createStart();
+
+      testBed = await setupLandingPage({
+        chromeStyle: 'project',
+        cardsNavigationConfig: { enabled: false },
+        coreStart,
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('managementHome')).toBe(false);
+      expect(exists('managementHomeSolution')).toBe(true);
     });
   });
 });

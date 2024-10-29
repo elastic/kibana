@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
+import { ArtifactsClientInterface } from '@kbn/fleet-plugin/server/services';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { CoreStart, Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
@@ -141,7 +141,7 @@ async function getArtifactsForPage({
   kuery,
 }: {
   page: number;
-  apmArtifactClient: FleetArtifactsClient;
+  apmArtifactClient: ArtifactsClientInterface;
   kuery: string;
 }) {
   return await apmArtifactClient.listArtifacts({
@@ -163,7 +163,7 @@ async function paginateArtifacts({
 }: {
   taskState?: TaskState;
   page: number;
-  apmArtifactClient: FleetArtifactsClient;
+  apmArtifactClient: ArtifactsClientInterface;
   kuery: string;
   logger: Logger;
   internalESClient: ElasticsearchClient;

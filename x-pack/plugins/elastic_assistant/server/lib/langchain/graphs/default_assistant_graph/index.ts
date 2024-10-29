@@ -6,7 +6,6 @@
  */
 
 import { StructuredTool } from '@langchain/core/tools';
-import { RetrievalQAChain } from 'langchain/chains';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import {
   createOpenAIFunctionsAgent,
@@ -24,23 +23,19 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 
-/**
- * Drop in replacement for the existing `callAgentExecutor` that uses LangGraph
- */
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
-  bedrockChatEnabled,
   connectorId,
   conversationId,
   dataClients,
   esClient,
-  esStore,
   inference,
   langChainMessages,
   llmType,
+  isOssModel,
   logger: parentLogger,
   isStream = false,
   onLlmResponse,
@@ -53,8 +48,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai';
-  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
+  const isOpenAI = llmType === 'openai' && !isOssModel;
+  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -95,11 +90,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const latestMessage = langChainMessages.slice(-1); // the last message
 
-  const modelExists = await esStore.isModelInstalled();
-
-  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(createLlmInstance(), esStore.asRetriever(10));
-
   // Check if KB is available
   const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
 
@@ -107,14 +97,12 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
     anonymizationFields,
-    chain,
     connectorId,
     esClient,
     inference,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     logger,
-    modelExists,
     onNewReplacements,
     replacements,
     request,
@@ -122,7 +110,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance(), isOssModel }) ?? []
   );
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
@@ -143,7 +131,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         prompt: formatPrompt(systemPrompts.openai, systemPrompt),
         streamRunnable: isStream,
       })
-    : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
+    : llmType && ['bedrock', 'gemini'].includes(llmType)
     ? await createToolCallingAgent({
         llm: createLlmInstance(),
         tools,
@@ -153,7 +141,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             : formatPrompt(systemPrompts.gemini, systemPrompt),
         streamRunnable: isStream,
       })
-    : await createStructuredChatAgent({
+    : // used with OSS models
+      await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
         prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
@@ -172,11 +161,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
   });
   const inputs: GraphInputs = {
-    bedrockChatEnabled,
     responseLanguage,
     conversationId,
     llmType,
     isStream,
+    isOssModel,
     input: latestMessage[0]?.content as string,
   };
 

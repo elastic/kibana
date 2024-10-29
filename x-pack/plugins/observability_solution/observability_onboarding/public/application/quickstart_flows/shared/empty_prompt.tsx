@@ -5,16 +5,41 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
+  OnboardingFlowEventContext,
+} from '../../../../common/telemetry_events';
+import { ObservabilityOnboardingAppServices } from '../../..';
 
 interface EmptyPromptProps {
+  onboardingFlowType: string;
   error: IHttpFetchError<ResponseErrorBody>;
+  telemetryEventContext?: OnboardingFlowEventContext;
   onRetryClick(): void;
 }
-export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({ error, onRetryClick }) => {
+export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
+  onboardingFlowType,
+  error,
+  telemetryEventContext,
+  onRetryClick,
+}) => {
+  const {
+    services: { analytics },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  useEffect(() => {
+    analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT.eventType, {
+      onboardingFlowType,
+      error: error.body?.message ?? error.message,
+      context: telemetryEventContext,
+    });
+  }, [analytics, error, onboardingFlowType, telemetryEventContext]);
+
   if (error.response?.status === 403) {
     return (
       <EuiEmptyPrompt

@@ -231,7 +231,7 @@ export class SavedObjectFinderUi extends React.Component<
             name: i18n.translate('savedObjectsFinder.typeName', {
               defaultMessage: 'Type',
             }),
-            width: '50px',
+            width: '70px',
             align: 'center',
             description: i18n.translate('savedObjectsFinder.typeDescription', {
               defaultMessage: 'Type of the saved object',
@@ -349,6 +349,9 @@ export class SavedObjectFinderUi extends React.Component<
       box: {
         incremental: true,
         'data-test-subj': 'savedObjectFinderSearchInput',
+        schema: {
+          recognizedFields: ['type', 'tag'],
+        },
       },
       filters: this.props.showFilter
         ? [

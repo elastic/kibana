@@ -12,6 +12,12 @@ import { alertsClientMock } from '../../../alerts_client/alerts_client.mock';
 import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
+import { Alert } from '../../../alert';
+import {
+  ActionsCompletion,
+  AlertInstanceContext,
+  AlertInstanceState,
+} from '@kbn/alerting-state-types';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
 import { SystemActionScheduler } from './system_action_scheduler';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
@@ -19,6 +25,8 @@ import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
+import { CombinedSummarizedAlerts } from '../../../types';
+import { schema } from '@kbn/config-schema';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -28,12 +36,13 @@ const logger = loggingSystemMock.create().get();
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
 const rule = getRule({
+  id: 'rule-id-1',
   systemActions: [
     {
-      id: '1',
+      id: 'system-action-1',
       actionTypeId: '.test-system-action',
       params: { myParams: 'test' },
-      uui: 'test',
+      uuid: 'xxx-xxx',
     },
   ],
 });
@@ -46,10 +55,42 @@ const defaultSchedulerContext = getDefaultSchedulerContext(
   alertsClient
 );
 
+const actionsParams = { myParams: 'test' };
+const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+defaultSchedulerContext.taskRunnerContext.connectorAdapterRegistry.register({
+  connectorTypeId: '.test-system-action',
+  ruleActionParamsSchema: schema.object({}),
+  buildActionParams,
+});
+
 // @ts-ignore
 const getSchedulerContext = (params = {}) => {
   return { ...defaultSchedulerContext, rule, ...params, ruleRunMetricsStore };
 };
+
+const getResult = (actionId: string, actionUuid: string, summary: CombinedSummarizedAlerts) => ({
+  actionToEnqueue: {
+    actionTypeId: '.test-system-action',
+    apiKey: 'MTIzOmFiYw==',
+    consumer: 'rule-consumer',
+    executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    id: actionId,
+    uuid: actionUuid,
+    relatedSavedObjects: [{ id: 'rule-id-1', namespace: 'test1', type: 'alert', typeId: 'test' }],
+    source: { source: { id: 'rule-id-1', type: 'alert' }, type: 'SAVED_OBJECT' },
+    spaceId: 'test1',
+  },
+  actionToLog: {
+    alertSummary: {
+      new: summary.new.count,
+      ongoing: summary.ongoing.count,
+      recovered: summary.recovered.count,
+    },
+    id: actionId,
+    uuid: actionUuid,
+    typeId: '.test-system-action',
+  },
+});
 
 let clock: sinon.SinonFakeTimers;
 
@@ -88,13 +129,29 @@ describe('System Action Scheduler', () => {
     expect(scheduler.actions).toHaveLength(0);
   });
 
-  describe('generateExecutables', () => {
-    const newAlert1 = generateAlert({ id: 1 });
-    const newAlert2 = generateAlert({ id: 2 });
-    const alerts = { ...newAlert1, ...newAlert2 };
+  describe('getActionsToSchedule', () => {
+    let newAlert1: Record<
+      string,
+      Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+    >;
+    let newAlert2: Record<
+      string,
+      Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+    >;
+    let alerts: Record<
+      string,
+      Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+    >;
 
-    test('should generate executable for each system action', async () => {
+    beforeEach(() => {
+      newAlert1 = generateAlert({ id: 1 });
+      newAlert2 = generateAlert({ id: 2 });
+      alerts = { ...newAlert1, ...newAlert2 };
+    });
+
+    test('should create actions to schedule for each system action', async () => {
       alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
       const summarizedAlerts = {
         new: { count: 2, data: [mockAAD, mockAAD] },
         ongoing: { count: 0, data: [] },
@@ -103,25 +160,27 @@ describe('System Action Scheduler', () => {
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
 
       const scheduler = new SystemActionScheduler(getSchedulerContext());
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
-      });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
       });
 
-      expect(executables).toHaveLength(1);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('.test-system-action')).toEqual({
+        numberOfGeneratedActions: 1,
+        numberOfTriggeredActions: 1,
+      });
+
+      expect(results).toHaveLength(1);
 
       const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
-      expect(executables).toEqual([
-        { action: rule.systemActions?.[0], summarizedAlerts: finalSummary },
-      ]);
+      expect(results).toEqual([getResult('system-action-1', 'xxx-xxx', finalSummary)]);
     });
 
     test('should remove new alerts from summary if suppressed by maintenance window', async () => {
@@ -141,22 +200,26 @@ describe('System Action Scheduler', () => {
         recovered: { count: 0, data: [] },
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
-      const scheduler = new SystemActionScheduler(getSchedulerContext());
 
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
-      });
+      const scheduler = new SystemActionScheduler(getSchedulerContext());
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
       });
 
-      expect(executables).toHaveLength(1);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('.test-system-action')).toEqual({
+        numberOfGeneratedActions: 1,
+        numberOfTriggeredActions: 1,
+      });
+
+      expect(results).toHaveLength(1);
 
       const finalSummary = {
         all: { count: 1, data: [newAADAlerts[1]] },
@@ -164,12 +227,10 @@ describe('System Action Scheduler', () => {
         ongoing: { count: 0, data: [] },
         recovered: { count: 0, data: [] },
       };
-      expect(executables).toEqual([
-        { action: rule.systemActions?.[0], summarizedAlerts: finalSummary },
-      ]);
+      expect(results).toEqual([getResult('system-action-1', 'xxx-xxx', finalSummary)]);
     });
 
-    test('should skip generating executable for summary action when no alerts found', async () => {
+    test('should skip creating actions to schedule for summary action when no alerts found', async () => {
       alertsClient.getProcessedAlerts.mockReturnValue(alerts);
       const summarizedAlerts = {
         new: { count: 0, data: [] },
@@ -179,21 +240,20 @@ describe('System Action Scheduler', () => {
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
 
       const scheduler = new SystemActionScheduler(getSchedulerContext());
-
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
-      });
+      const results = await scheduler.getActionsToSchedule({});
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
       });
 
-      expect(executables).toHaveLength(0);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(0);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(0);
+
+      expect(results).toHaveLength(0);
     });
 
     test('should throw framework error if getSummarizedAlerts throws error', async () => {
@@ -205,14 +265,175 @@ describe('System Action Scheduler', () => {
       const scheduler = new SystemActionScheduler(getSchedulerContext());
 
       try {
-        await scheduler.generateExecutables({
-          alerts,
-          throttledSummaryActions: {},
-        });
+        await scheduler.getActionsToSchedule({});
       } catch (err) {
         expect(err.message).toEqual(`no alerts for you`);
         expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
       }
+    });
+
+    test('should skip creating actions to schedule if overall max actions limit exceeded', async () => {
+      const anotherSystemAction = {
+        id: 'system-action-1',
+        actionTypeId: '.test-system-action',
+        params: { myParams: 'foo' },
+        uuid: 'yyy-yyy',
+      };
+
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const defaultContext = getSchedulerContext();
+      const scheduler = new SystemActionScheduler({
+        ...defaultContext,
+        rule: { ...rule, systemActions: [rule.systemActions?.[0]!, anotherSystemAction] },
+        taskRunnerContext: {
+          ...defaultContext.taskRunnerContext,
+          actionsConfigMap: {
+            default: { max: 1 },
+          },
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({});
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(2, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('.test-system-action')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 1,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Rule "rule-id-1" skipped scheduling action "system-action-1" because the maximum number of allowed actions has been reached.`
+      );
+
+      expect(results).toHaveLength(1);
+
+      const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+      expect(results).toEqual([getResult('system-action-1', 'xxx-xxx', finalSummary)]);
+    });
+
+    test('should skip creating actions to schedule if connector type max actions limit exceeded', async () => {
+      const anotherSystemAction = {
+        id: 'system-action-1',
+        actionTypeId: '.test-system-action',
+        params: { myParams: 'foo' },
+        uuid: 'yyy-yyy',
+      };
+
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const defaultContext = getSchedulerContext();
+      const scheduler = new SystemActionScheduler({
+        ...defaultContext,
+        rule: { ...rule, systemActions: [rule.systemActions?.[0]!, anotherSystemAction] },
+        taskRunnerContext: {
+          ...defaultContext.taskRunnerContext,
+          actionsConfigMap: {
+            default: { max: 1000 },
+            '.test-system-action': { max: 1 },
+          },
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({});
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(2, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('.test-system-action')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 1,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Rule "rule-id-1" skipped scheduling action "system-action-1" because the maximum number of allowed actions for connector type .test-system-action has been reached.`
+      );
+
+      expect(results).toHaveLength(1);
+
+      const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+      expect(results).toEqual([getResult('system-action-1', 'xxx-xxx', finalSummary)]);
+    });
+
+    test('should skip creating actions to schedule if no connector adapter exists for connector type', async () => {
+      const differentSystemAction = {
+        id: 'different-action-1',
+        actionTypeId: '.test-bad-system-action',
+        params: { myParams: 'foo' },
+        uuid: 'zzz-zzz',
+      };
+
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const defaultContext = getSchedulerContext();
+      const scheduler = new SystemActionScheduler({
+        ...defaultContext,
+        rule: { ...rule, systemActions: [differentSystemAction] },
+      });
+      const results = await scheduler.getActionsToSchedule({});
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(0);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Rule "rule-id-1" skipped scheduling system action "different-action-1" because no connector adapter is configured`
+      );
+
+      expect(results).toHaveLength(0);
     });
   });
 });

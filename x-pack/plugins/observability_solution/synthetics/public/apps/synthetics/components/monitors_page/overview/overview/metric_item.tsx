@@ -15,6 +15,7 @@ import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { FlyoutParamProps } from './types';
 import { MetricItemBody } from './metric_item/metric_item_body';
 import {
   selectErrorPopoverState,
@@ -23,7 +24,7 @@ import {
 } from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import {
   hideTestNowFlyoutAction,
@@ -60,17 +61,17 @@ export const MetricItem = ({
   onClick,
   style,
 }: {
-  monitor: MonitorOverviewItem;
+  monitor: OverviewStatusMetaData;
   style?: React.CSSProperties;
-  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
+  onClick: (params: FlyoutParamProps) => void;
 }) => {
-  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: monitor.locationId,
   });
   const theme = useTheme();
 
@@ -80,7 +81,7 @@ export const MetricItem = ({
 
   return (
     <div
-      data-test-subj={`${monitor.name}-${monitor.location.id}-metric-item`}
+      data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel
@@ -124,9 +125,10 @@ export const MetricItem = ({
               if (!testInProgress && locationName) {
                 onClick({
                   configId: monitor.configId,
-                  id: monitor.id,
+                  id: monitor.configId,
                   location: locationName,
-                  locationId: monitor.location.id,
+                  locationId: monitor.locationId,
+                  spaceId: monitor.spaceId,
                 });
               }
             }}
@@ -135,7 +137,7 @@ export const MetricItem = ({
             locale={i18n.getLocale()}
           />
           <Metric
-            id={`${monitor.configId}-${monitor.location?.id}`}
+            id={`${monitor.configId}-${monitor.locationId}`}
             data={[
               [
                 {
@@ -176,7 +178,7 @@ export const MetricItem = ({
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             position="relative"
-            locationId={monitor.location.id}
+            locationId={monitor.locationId}
           />
         </div>
         {configIdByLocation && (

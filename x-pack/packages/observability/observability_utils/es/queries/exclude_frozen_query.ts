@@ -5,19 +5,8 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { excludeTiersQuery } from './exclude_tiers_query';
 
 export function excludeFrozenQuery(): estypes.QueryDslQueryContainer[] {
-  return [
-    {
-      bool: {
-        must_not: [
-          {
-            term: {
-              _tier: 'data_frozen',
-            },
-          },
-        ],
-      },
-    },
-  ];
+  return excludeTiersQuery(['data_frozen']);
 }

@@ -143,7 +143,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         const documentTitle = await browser.getTitle();
-        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+        expect(documentTitle).to.contain(
+          'Infrastructure Inventory - Infrastructure - Observability - Elastic'
+        );
       });
 
       it('renders the inventory survey link', async () => {
@@ -457,7 +459,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.tryForTime(5000, async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'host-5 - Inventory - Infrastructure - Observability - Elastic'
+              'host-5 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -474,7 +476,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -492,7 +494,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'container-id-4 - Inventory - Infrastructure - Observability - Elastic'
+                'container-id-4 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
               );
             });
 

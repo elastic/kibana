@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
@@ -17,9 +18,9 @@ import {
   getInheritedViewMode,
   hasEditCapabilities,
 } from '@kbn/presentation-publishing';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+
 import { CONTROL_GROUP_TYPE } from '../../common';
-import { DataControlApi } from '../react_controls/controls/data_controls/types';
+import { DataControlApi } from '../controls/data_controls/types';
 
 export const compatibilityCheck = (api: unknown): api is DataControlApi => {
   return Boolean(

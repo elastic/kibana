@@ -11,7 +11,8 @@ import { GetTrendPayload, TrendKey, TrendRequest, TrendTable } from '../../../..
 import { TRENDS_CHUNK_SIZE, fetchTrendEffect, refreshTrends } from './effects';
 import { trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
-import { selectOverviewState, selectOverviewTrends } from '.';
+import { selectOverviewTrends } from '.';
+import { selectOverviewStatus } from '../overview_status';
 
 const TEST_TRENDS_LENGTH = 80;
 
@@ -78,8 +79,8 @@ describe('overview effects', () => {
     });
 
     it('selects the overview state', (selectResult) => {
-      expect(selectResult).toEqual(select(selectOverviewState));
-      return { data: { monitors: [] } };
+      expect(selectResult).toEqual(select(selectOverviewStatus));
+      return { allConfigs: {} };
     });
 
     it('skips the API if the data is null', (result) => {
@@ -162,13 +163,11 @@ describe('overview effects', () => {
     });
 
     it('selects the overview state', (selectResults) => {
-      expect(selectResults).toEqual(select(selectOverviewState));
+      expect(selectResults).toEqual(select(selectOverviewStatus));
       return {
-        data: {
-          monitors: [
-            { configId: 'monitor1', schedule: '3' },
-            { configId: 'monitor3', schedule: '3' },
-          ],
+        allConfigs: {
+          monitor1: { configId: 'monitor1', schedule: '3' },
+          monitor3: { configId: 'monitor3', schedule: '3' },
         },
       };
     });

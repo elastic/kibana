@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -79,7 +80,7 @@ export const MetricDetailPage = () => {
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (
-      <InfraPageTemplate>
+      <InfraPageTemplate onboardingFlow={OnboardingFlow.Infra}>
         <InfraLoadingPanel
           height="100vh"
           width="100%"

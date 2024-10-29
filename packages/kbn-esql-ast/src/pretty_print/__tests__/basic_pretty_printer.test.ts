@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
+import { parse } from '../../parser';
 import { ESQLFunction } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
 const reprint = (src: string) => {
-  const { ast } = getAstAndSyntaxErrors(src);
-  const text = BasicPrettyPrinter.print(ast);
+  const { root } = parse(src);
+  const text = BasicPrettyPrinter.print(root);
 
-  // console.log(JSON.stringify(ast, null, 2));
+  // console.log(JSON.stringify(root, null, 2));
 
   return { text };
 };
@@ -84,15 +84,6 @@ describe('single line query', () => {
         const { text } = reprint('SHOW info');
 
         expect(text).toBe('SHOW info');
-      });
-    });
-
-    describe('META', () => {
-      /** @todo Enable once show command args are parsed as columns.  */
-      test.skip('functions page', () => {
-        const { text } = reprint('META functions');
-
-        expect(text).toBe('META functions');
       });
     });
 
@@ -202,6 +193,66 @@ describe('single line query', () => {
           const { text } = reprint('ROW NOT a');
 
           expect(text).toBe('ROW NOT a');
+        });
+
+        test('negative numbers', () => {
+          const { text } = reprint('ROW -1');
+
+          expect(text).toBe('ROW -1');
+        });
+
+        test('negative numbers in brackets', () => {
+          const { text } = reprint('ROW -(1)');
+
+          expect(text).toBe('ROW -1');
+        });
+
+        test('negative column names', () => {
+          const { text } = reprint('ROW -col');
+
+          expect(text).toBe('ROW -col');
+        });
+
+        test('plus unary expression', () => {
+          const { text } = reprint('ROW +(23)');
+
+          expect(text).toBe('ROW 23');
+        });
+
+        test('chained multiple unary expressions', () => {
+          const { text } = reprint('ROW ----+-+(23)');
+
+          expect(text).toBe('ROW -23');
+        });
+
+        test('before another expression', () => {
+          const { text } = reprint('ROW ----+-+(1 + 1)');
+
+          expect(text).toBe('ROW -(1 + 1)');
+        });
+
+        test('negative one from the right side', () => {
+          const { text } = reprint('ROW 2 * -1');
+
+          expect(text).toBe('ROW -2');
+        });
+
+        test('two minuses is plus', () => {
+          const { text } = reprint('ROW --123');
+
+          expect(text).toBe('ROW 123');
+        });
+
+        test('two minuses is plus (float)', () => {
+          const { text } = reprint('ROW --1.23');
+
+          expect(text).toBe('ROW 1.23');
+        });
+
+        test('two minuses is plus (with brackets)', () => {
+          const { text } = reprint('ROW --(123)');
+
+          expect(text).toBe('ROW 123');
         });
       });
 
@@ -372,17 +423,17 @@ describe('single line query', () => {
 
     describe('cast expressions', () => {
       test('various', () => {
-        expect(reprint('ROW a::string').text).toBe('ROW a::string');
-        expect(reprint('ROW 123::string').text).toBe('ROW 123::string');
-        expect(reprint('ROW "asdf"::number').text).toBe('ROW "asdf"::number');
+        expect(reprint('ROW a::string').text).toBe('ROW a::STRING');
+        expect(reprint('ROW 123::string').text).toBe('ROW 123::STRING');
+        expect(reprint('ROW "asdf"::number').text).toBe('ROW "asdf"::NUMBER');
       });
 
       test('wraps into rackets complex cast expressions', () => {
-        expect(reprint('ROW (1 + 2)::string').text).toBe('ROW (1 + 2)::string');
+        expect(reprint('ROW (1 + 2)::string').text).toBe('ROW (1 + 2)::STRING');
       });
 
       test('does not wrap function call', () => {
-        expect(reprint('ROW fn()::string').text).toBe('ROW FN()::string');
+        expect(reprint('ROW fn()::string').text).toBe('ROW FN()::STRING');
       });
     });
 
@@ -404,8 +455,8 @@ describe('single line query', () => {
 
 describe('multiline query', () => {
   const multiline = (src: string, opts?: BasicPrettyPrinterMultilineOptions) => {
-    const { ast } = getAstAndSyntaxErrors(src);
-    const text = BasicPrettyPrinter.multiline(ast, opts);
+    const { root } = parse(src);
+    const text = BasicPrettyPrinter.multiline(root, opts);
 
     // console.log(JSON.stringify(ast, null, 2));
 
@@ -478,7 +529,9 @@ describe('single line command', () => {
   | EVAL avg_salary = ROUND(avg_salary)
   | SORT hired, languages
   | LIMIT 100`;
-    const { ast: commands } = getAstAndSyntaxErrors(query);
+    const {
+      root: { commands },
+    } = parse(query);
     const line1 = BasicPrettyPrinter.command(commands[0]);
     const line2 = BasicPrettyPrinter.command(commands[1]);
     const line3 = BasicPrettyPrinter.command(commands[2]);
@@ -496,9 +549,9 @@ describe('single line command', () => {
 describe('single line expression', () => {
   test('can print a single expression', () => {
     const query = `FROM a | STATS a != 1, avg(1, 2, 3)`;
-    const { ast } = getAstAndSyntaxErrors(query);
-    const comparison = Walker.match(ast, { type: 'function', name: '!=' })! as ESQLFunction;
-    const func = Walker.match(ast, { type: 'function', name: 'avg' })! as ESQLFunction;
+    const { root } = parse(query);
+    const comparison = Walker.match(root, { type: 'function', name: '!=' })! as ESQLFunction;
+    const func = Walker.match(root, { type: 'function', name: 'avg' })! as ESQLFunction;
 
     const text1 = BasicPrettyPrinter.expression(comparison);
     const text2 = BasicPrettyPrinter.expression(func);
@@ -507,3 +560,5 @@ describe('single line expression', () => {
     expect(text2).toBe('AVG(1, 2, 3)');
   });
 });
+
+it.todo('test for NOT unary expression');

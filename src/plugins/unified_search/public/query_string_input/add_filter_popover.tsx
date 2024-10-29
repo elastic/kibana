@@ -93,7 +93,6 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
-        hasDragDrop
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

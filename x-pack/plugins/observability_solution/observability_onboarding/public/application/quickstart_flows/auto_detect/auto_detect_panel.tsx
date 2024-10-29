@@ -13,9 +13,6 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiSkeletonText,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   useGeneratedHtmlId,
   EuiIcon,
@@ -38,6 +35,7 @@ import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
+import { SupportedIntegrationsList } from './supported_integrations_list';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
@@ -58,7 +56,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   );
 
   if (error) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;
   }
 
   const registryIntegrations = installedIntegrations.filter(
@@ -92,28 +90,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s">
-                  {[
-                    'Apache',
-                    'Docker',
-                    'Nginx',
-                    'System',
-                    'MySQL',
-                    'PostgreSQL',
-                    'Redis',
-                    'HAProxy',
-                    'Kafka',
-                    'RabbitMQ',
-                    'Prometheus',
-                    'Tomcat',
-                    'MongoDB',
-                    'Custom .log files',
-                  ].map((item) => (
-                    <EuiFlexItem key={item} grow={false}>
-                      <EuiBadge color="hollow">{item}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
+                <SupportedIntegrationsList />
                 <EuiSpacer />
                 {/* Bash syntax highlighting only highlights a few random numbers (badly) so it looks less messy to go with plain text */}
                 <EuiCodeBlock paddingSize="m" language="text">
@@ -192,6 +169,16 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         initialIsOpen
                       >
                         <GetStartedPanel
+                          onboardingFlowType="auto-detect"
+                          dataset={integration.pkgName}
+                          onboardingId={data?.onboardingFlow?.id}
+                          telemetryEventContext={{
+                            autoDetect: {
+                              installSource: integration.installSource,
+                              pkgVersion: integration.pkgVersion,
+                              title: integration.title,
+                            },
+                          }}
                           integration={integration.pkgName}
                           newTab
                           isLoading={status !== 'dataReceived'}

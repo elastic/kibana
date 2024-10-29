@@ -187,7 +187,7 @@ describe('ProductFeaturesService', () => {
         url: { pathname: '', search: '' },
       } as unknown as KibanaRequest);
     const res = { notFound: jest.fn() } as unknown as LifecycleResponseFactory;
-    const toolkit = { next: jest.fn() };
+    const toolkit = httpServiceMock.createOnPostAuthToolkit();
 
     beforeEach(() => {
       jest.clearAllMocks();

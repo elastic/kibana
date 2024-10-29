@@ -12,6 +12,7 @@ import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
+import { EnrollmentAPIKeySchema } from '../models';
 
 export const GetEnrollmentAPIKeysRequestSchema = {
   query: schema.object({
@@ -41,11 +42,19 @@ export const GetOneEnrollmentAPIKeyRequestSchema = {
   }),
 };
 
+export const EnrollmentAPIKeyResponseSchema = schema.object({
+  item: EnrollmentAPIKeySchema,
+});
+
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
     keyId: schema.string(),
   }),
 };
+
+export const DeleteEnrollmentAPIKeyResponseSchema = schema.object({
+  action: schema.literal('deleted'),
+});
 
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object({

@@ -9,14 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  EuiFormRow,
-  EuiSwitch,
-  EuiText,
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiDatePicker,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker } from '@elastic/eui';
 import moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
@@ -107,36 +100,23 @@ export const ConfigPanelRangeDatePicker = ({
   dataTestSubj?: string;
 }) => {
   return (
-    <EuiFormRow display="rowCompressed" fullWidth label={label} className="lnsRowCompressedMargin">
-      {prependLabel ? (
-        <EuiFormControlLayout
-          fullWidth
-          className="lnsConfigPanelNoPadding"
-          prepend={
-            <EuiFormLabel className="lnsConfigPanelDate__label">{prependLabel}</EuiFormLabel>
-          }
-        >
-          <EuiDatePicker
-            calendarClassName={calendarClassName}
-            fullWidth
-            showTimeSelect
-            selected={value}
-            onChange={onChange}
-            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-            data-test-subj={dataTestSubj}
-          />
-        </EuiFormControlLayout>
-      ) : (
-        <EuiDatePicker
-          calendarClassName={calendarClassName}
-          fullWidth
-          showTimeSelect
-          selected={value}
-          onChange={onChange}
-          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-          data-test-subj={dataTestSubj}
-        />
-      )}
+    <EuiFormRow
+      display="rowCompressed"
+      fullWidth
+      label={label}
+      className="lnsConfigPanelAnnotations__date lnsRowCompressedMargin"
+    >
+      <EuiDatePicker
+        compressed
+        calendarClassName={calendarClassName}
+        fullWidth
+        showTimeSelect
+        selected={value}
+        onChange={onChange}
+        dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+        data-test-subj={dataTestSubj}
+        prepend={prependLabel}
+      />
     </EuiFormRow>
   );
 };

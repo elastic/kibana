@@ -61,5 +61,13 @@
     "@kbn/observability-plugin",
     "@kbn/licensing-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/entities-schema",
+    "@kbn/inference-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/calculate-auto",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/charts-plugin",
+    "@kbn/observability-utils",
+    "@kbn/observability-alerting-rule-utils",
   ],
 }

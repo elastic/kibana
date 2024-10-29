@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext, useEffect } from 'react';
 
 export interface DeploymentDetailsContextValue {
   cloudId?: string;
@@ -58,7 +57,7 @@ export interface DeploymentDetailsKibanaDependencies {
   cloud: {
     isCloudEnabled: boolean;
     cloudId?: string;
-    elasticsearchUrl?: string;
+    fetchElasticsearchConfig: () => Promise<{ elasticsearchUrl?: string }>;
   };
   /** DocLinksStart contract */
   docLinks: {
@@ -79,11 +78,19 @@ export interface DeploymentDetailsKibanaDependencies {
 export const DeploymentDetailsKibanaProvider: FC<
   PropsWithChildren<DeploymentDetailsKibanaDependencies>
 > = ({ children, ...services }) => {
+  const [elasticsearchUrl, setElasticsearchUrl] = React.useState<string>('');
+
+  useEffect(() => {
+    services.cloud.fetchElasticsearchConfig().then((config) => {
+      setElasticsearchUrl(config.elasticsearchUrl || '');
+    });
+  }, [services.cloud]);
+
   const {
     core: {
       application: { navigateToUrl },
     },
-    cloud: { isCloudEnabled, cloudId, elasticsearchUrl },
+    cloud: { isCloudEnabled, cloudId },
     share: {
       url: { locators },
     },

@@ -44,28 +44,4 @@ module.exports = {
    * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
    */
   publicPathLoader,
-
-  /**
-   * Filename of the light-theme css file in the distributable directory
-   * @param {ThemeVersion} themeVersion
-   */
-  lightCssDistFilename(themeVersion) {
-    if (themeVersion !== 'v8') {
-      throw new Error(`unsupported theme version [${themeVersion}]`);
-    }
-
-    return 'kbn-ui-shared-deps-npm.v8.light.css';
-  },
-
-  /**
-   * Filename of the dark-theme css file in the distributable directory
-   * @param {ThemeVersion} themeVersion
-   */
-  darkCssDistFilename(themeVersion) {
-    if (themeVersion !== 'v8') {
-      throw new Error(`unsupported theme version [${themeVersion}]`);
-    }
-
-    return 'kbn-ui-shared-deps-npm.v8.dark.css';
-  },
 };

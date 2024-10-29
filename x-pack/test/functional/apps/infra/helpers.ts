@@ -77,7 +77,7 @@ export function generateHostData({
 }: {
   from: string;
   to: string;
-  hosts: Array<{ hostName: string; cpuValue: number }>;
+  hosts: Array<{ hostName: string; cpuValue?: number }>;
 }) {
   const range = timerange(from, to);
 

@@ -39,6 +39,7 @@ describe('muteAlertInstanceRoute', () => {
     expect(config.path).toMatchInlineSnapshot(
       `"/api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute"`
     );
+    expect(config.options?.access).toBe('public');
 
     rulesClient.muteInstance.mockResolvedValueOnce();
 
@@ -66,6 +67,20 @@ describe('muteAlertInstanceRoute', () => {
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    muteAlertInstanceRoute(router, licenseState, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(
+      `"/api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute"`
+    );
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the alert type gets validated for the license', async () => {

@@ -315,7 +315,11 @@ export function useOnSubmit({
       if (
         (agentCount !== 0 ||
           (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
-        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
+        !(
+          isAgentlessIntegration(packageInfo) ||
+          isAgentlessPackagePolicy(packagePolicy) ||
+          isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
+        ) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
@@ -339,10 +343,18 @@ export function useOnSubmit({
           }
         } catch (e) {
           setFormState('VALID');
+          const agentlessPolicy = agentPolicies.find(
+            (policy) => policy?.supports_agentless === true
+          );
+
           notifications.toasts.addError(e, {
-            title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-              defaultMessage: 'Unable to create agent policy',
-            }),
+            title: agentlessPolicy?.supports_agentless
+              ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to create integration',
+                })
+              : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to create agent policy',
+                }),
           });
           return;
         }
@@ -379,7 +391,7 @@ export function useOnSubmit({
 
       // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
       const isAgentlessConfigured =
-        isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
+        isAgentlessAgentPolicy(createdPolicy) || (data && isAgentlessPackagePolicy(data.item));
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
       if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {

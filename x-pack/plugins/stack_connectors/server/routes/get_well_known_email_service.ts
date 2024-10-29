@@ -29,6 +29,9 @@ export const getWellKnownEmailServiceRoute = (router: IRouter) => {
       validate: {
         params: paramSchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );

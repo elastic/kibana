@@ -30,29 +30,51 @@ export class MonacoEditorOutputActionsProvider {
     private setEditorActionsCss: (css: CSSProperties) => void
   ) {
     this.highlightedLines = this.editor.createDecorationsCollection();
-    this.editor.focus();
 
     const debouncedHighlightRequests = debounce(
-      () => this.highlightRequests(),
+      async () => {
+        if (editor.hasTextFocus()) {
+          await this.highlightRequests();
+        } else {
+          this.clearEditorDecorations();
+        }
+      },
       DEBOUNCE_HIGHLIGHT_WAIT_MS,
       {
         leading: true,
       }
     );
-    debouncedHighlightRequests();
 
     // init all listeners
-    editor.onDidChangeCursorPosition(async (event) => {
+    editor.onDidChangeCursorPosition(async () => {
       await debouncedHighlightRequests();
     });
-    editor.onDidScrollChange(async (event) => {
+    editor.onDidScrollChange(async () => {
       await debouncedHighlightRequests();
     });
-    editor.onDidChangeCursorSelection(async (event) => {
+    editor.onDidChangeCursorSelection(async () => {
       await debouncedHighlightRequests();
     });
-    editor.onDidContentSizeChange(async (event) => {
+    editor.onDidContentSizeChange(async () => {
       await debouncedHighlightRequests();
+    });
+
+    editor.onDidBlurEditorText(() => {
+      // Since the actions buttons are placed outside of the editor, we need to delay
+      // the clearing of the editor decorations to ensure that the actions buttons
+      // are not hidden.
+      setTimeout(() => {
+        this.clearEditorDecorations();
+      }, 100);
+    });
+  }
+
+  private clearEditorDecorations() {
+    // remove the highlighted lines
+    this.highlightedLines.clear();
+    // hide action buttons
+    this.setEditorActionsCss({
+      visibility: 'hidden',
     });
   }
 

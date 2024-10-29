@@ -9,10 +9,6 @@
 
 // TODO: implement this on the server
 
-// TODO(jbudz): should be removed when upgrading to TS@4.8
-// this is a skip for the errors created when typechecking with isolatedModules
-export {};
-
 // import { StartServicesAccessor } from '@kbn/core/server';
 // import { EventAnnotationStartDependencies } from '../plugin';
 
