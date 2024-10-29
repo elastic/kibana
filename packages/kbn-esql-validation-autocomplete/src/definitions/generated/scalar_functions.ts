@@ -3213,6 +3213,7 @@ const ltrimDefinition: FunctionDefinition = {
 const matchDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'match',
+  ignoreAsSuggestion: true,
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
     defaultMessage:
       'Performs a match query on the specified field. Returns true if the provided query matches the row.',
@@ -5845,6 +5846,7 @@ const powDefinition: FunctionDefinition = {
 const qstrDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'qstr',
+  ignoreAsSuggestion: true,
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.qstr', {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
