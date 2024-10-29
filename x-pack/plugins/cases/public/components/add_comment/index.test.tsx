@@ -102,6 +102,7 @@ describe('AddComment ', () => {
     );
 
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('add-comment-form-wrapper')).not.toBeInTheDocument();
   });
 
   it('should show the component when the user does not have create permissions, but has createComment permissions', () => {
@@ -117,6 +118,7 @@ describe('AddComment ', () => {
     );
 
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('add-comment-form-wrapper')).toBeInTheDocument();
   });
 
   it('should post comment on submit click', async () => {

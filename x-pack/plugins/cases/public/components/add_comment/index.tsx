@@ -192,7 +192,7 @@ export const AddComment = React.memo(
             />
           )}
           {permissions.createComment && (
-            <Form form={form}>
+            <Form form={form} data-test-subj="add-comment-form-wrapper">
               <UseField
                 path={fieldName}
                 component={MarkdownEditorForm}
