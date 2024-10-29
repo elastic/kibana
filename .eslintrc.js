@@ -1981,12 +1981,11 @@ module.exports = {
     {
       files: [
         // the following dependencies on AI-assistant will be solved when a proper Kibana AI assistant (platform) is created
-        'x-pack/plugins/observability_solution/infra/**',
         'x-pack/plugins/observability_solution/investigate_app/**',
         'x-pack/plugins/observability_solution/logs_shared/**',
         'x-pack/plugins/observability_solution/observability_ai_assistant_management/**',
 
-        // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is gonna be removed
+        // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
         'x-pack/plugins/observability_solution/infra/**',
 
         // TODO @kibana/operations
