@@ -1208,7 +1208,7 @@ describe('Cases API', () => {
         pageSize: 10,
         pageIndex: 0,
       });
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_similar`, {
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_similar`, {
         method: 'POST',
         body: JSON.stringify({
           case_id: mockCase.id,
@@ -1259,7 +1259,7 @@ describe('Cases API', () => {
         abortCtrl.signal
       );
 
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${mockCase.id}/observable`, {
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/observables`, {
         method: 'POST',
         body: JSON.stringify({
           version: mockCase.version,

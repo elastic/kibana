@@ -638,7 +638,7 @@ export const getSimilarCases = async ({
   };
 
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
-    `${CASES_URL}/_similar`,
+    `${CASES_INTERNAL_URL}/_similar`,
     {
       method: 'POST',
       body: JSON.stringify({ ...body, pageSize, pageIndex }),
