@@ -31,6 +31,7 @@ import {
   optionsSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
+import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
@@ -67,3 +68,23 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
 export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+
+export type SavedObjectToItemReturn<T> =
+  | {
+      item: T;
+      error: null;
+    }
+  | {
+      item: null;
+      error: Error;
+    };
+
+export type ItemAttrsToSavedObjectAttrsReturn =
+  | {
+      attributes: DashboardSavedObjectAttributes;
+      error: null;
+    }
+  | {
+      attributes: null;
+      error: Error;
+    };

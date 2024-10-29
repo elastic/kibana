@@ -32,7 +32,9 @@ import type {
   DashboardGetOut,
   DashboardItem,
   DashboardOptions,
+  ItemAttrsToSavedObjectAttrsReturn,
   PartialDashboardItem,
+  SavedObjectToItemReturn,
 } from './types';
 import type {
   DashboardSavedObjectAttributes,
@@ -274,24 +276,28 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
 
 export const itemAttrsToSavedObjectAttrs = (
   attributes: DashboardAttributes
-): DashboardSavedObjectAttributes => {
-  const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
-  const soAttributes = {
-    ...rest,
-    ...(controlGroupInput && {
-      controlGroupInput: controlGroupInputIn(controlGroupInput),
-    }),
-    ...(options && {
-      optionsJSON: JSON.stringify(options),
-    }),
-    ...(panels && {
-      panelsJSON: panelsIn(panels),
-    }),
-    ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
-    }),
-  };
-  return soAttributes;
+): ItemAttrsToSavedObjectAttrsReturn => {
+  try {
+    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
+    const soAttributes = {
+      ...rest,
+      ...(controlGroupInput && {
+        controlGroupInput: controlGroupInputIn(controlGroupInput),
+      }),
+      ...(options && {
+        optionsJSON: JSON.stringify(options),
+      }),
+      ...(panels && {
+        panelsJSON: panelsIn(panels),
+      }),
+      ...(kibanaSavedObjectMeta && {
+        kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
+      }),
+    };
+    return { attributes: soAttributes, error: null };
+  } catch (e) {
+    return { attributes: null, error: e };
+  }
 };
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
@@ -302,13 +308,13 @@ export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
   partial: false,
   allowedAttributes?: string[]
-): DashboardItem;
+): SavedObjectToItemReturn<DashboardItem>;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
   partial: true,
   allowedAttributes?: string[]
-): PartialDashboardItem;
+): SavedObjectToItemReturn<PartialDashboardItem>;
 
 export function savedObjectToItem(
   savedObject:
@@ -316,7 +322,7 @@ export function savedObjectToItem(
     | PartialSavedObject<DashboardSavedObjectAttributes>,
   partial: boolean,
   allowedAttributes?: string[]
-): DashboardItem | PartialDashboardItem {
+): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
     type,
@@ -332,20 +338,28 @@ export function savedObjectToItem(
     managed,
   } = savedObject;
 
-  return {
-    id,
-    type,
-    updatedAt,
-    updatedBy,
-    createdAt,
-    createdBy,
-    attributes: allowedAttributes
+  try {
+    const attributesOut = allowedAttributes
       ? pick(dashboardAttributesOut(attributes), allowedAttributes)
-      : dashboardAttributesOut(attributes),
-    error,
-    namespaces,
-    references,
-    version,
-    managed,
-  };
+      : dashboardAttributesOut(attributes);
+    return {
+      item: {
+        id,
+        type,
+        updatedAt,
+        updatedBy,
+        createdAt,
+        createdBy,
+        attributes: attributesOut,
+        error,
+        namespaces,
+        references,
+        version,
+        managed,
+      },
+      error: null,
+    };
+  } catch (e) {
+    return { item: null, error: e };
+  }
 }

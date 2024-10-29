@@ -12,7 +12,7 @@ import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardItem, PartialDashboardItem } from './types';
+import type { DashboardAttributes, DashboardItem } from './types';
 import {
   dashboardAttributesOut,
   getResultV3ToV2,
@@ -260,27 +260,30 @@ describe('itemAttrsToSavedObjectAttrs', () => {
     const output = itemAttrsToSavedObjectAttrs(input);
     expect(output).toMatchInlineSnapshot(`
       Object {
-        "controlGroupInput": Object {
-          "chainingSystem": "NONE",
-          "controlStyle": "twoLine",
-          "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-          "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\",\\"id\\":\\"foo\\"}}}",
-          "showApplySelections": true,
+        "attributes": Object {
+          "controlGroupInput": Object {
+            "chainingSystem": "NONE",
+            "controlStyle": "twoLine",
+            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
+            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\",\\"id\\":\\"foo\\"}}}",
+            "showApplySelections": true,
+          },
+          "description": "description",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
+          },
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
+          "panelsJSON": "[{\\"id\\":\\"1\\",\\"panelRefName\\":\\"ref1\\",\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{}},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "refreshInterval": Object {
+            "pause": true,
+            "value": 1000,
+          },
+          "timeFrom": "now-15m",
+          "timeRestore": true,
+          "timeTo": "now",
+          "title": "title",
         },
-        "description": "description",
-        "kibanaSavedObjectMeta": Object {
-          "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
-        },
-        "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
-        "panelsJSON": "[{\\"id\\":\\"1\\",\\"panelRefName\\":\\"ref1\\",\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{}},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
-        "refreshInterval": Object {
-          "pause": true,
-          "value": 1000,
-        },
-        "timeFrom": "now-15m",
-        "timeRestore": true,
-        "timeTo": "now",
-        "title": "title",
+        "error": null,
       }
     `);
   });
@@ -298,14 +301,17 @@ describe('itemAttrsToSavedObjectAttrs', () => {
     const output = itemAttrsToSavedObjectAttrs(input);
     expect(output).toMatchInlineSnapshot(`
       Object {
-        "description": "my description",
-        "kibanaSavedObjectMeta": Object {
-          "searchSourceJSON": "{}",
+        "attributes": Object {
+          "description": "my description",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{}",
+          },
+          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
+          "panelsJSON": "[]",
+          "timeRestore": false,
+          "title": "title",
         },
-        "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
-        "panelsJSON": "[]",
-        "timeRestore": false,
-        "title": "title",
+        "error": null,
       }
     `);
   });
@@ -356,8 +362,9 @@ describe('savedObjectToItem', () => {
       },
     });
 
-    const output = savedObjectToItem(input, false);
-    expect(output).toEqual<DashboardItem>({
+    const { item, error } = savedObjectToItem(input, false);
+    expect(error).toBeNull();
+    expect(item).toEqual<DashboardItem>({
       ...commonSavedObject,
       attributes: {
         title: 'title',
@@ -399,8 +406,9 @@ describe('savedObjectToItem', () => {
       kibanaSavedObjectMeta: {},
     });
 
-    const output = savedObjectToItem(input, false);
-    expect(output).toEqual<DashboardItem>({
+    const { item, error } = savedObjectToItem(input, false);
+    expect(error).toBeNull();
+    expect(item).toEqual<DashboardItem>({
       ...commonSavedObject,
       attributes: {
         title: 'title',
@@ -424,8 +432,9 @@ describe('savedObjectToItem', () => {
       },
     };
 
-    const output = savedObjectToItem(input, true, ['title', 'description']);
-    expect<PartialDashboardItem>(output).toEqual({
+    const { item, error } = savedObjectToItem(input, true, ['title', 'description']);
+    expect(error).toBeNull();
+    expect(item).toEqual({
       ...commonSavedObject,
       references: undefined,
       attributes: {
@@ -433,6 +442,20 @@ describe('savedObjectToItem', () => {
         description: 'my description',
       },
     });
+  });
+
+  it('should return an error if attributes can not be parsed', () => {
+    const input = {
+      ...commonSavedObject,
+      references: undefined,
+      attributes: {
+        title: 'title',
+        panelsJSON: 'not stringified json',
+      },
+    };
+    const { item, error } = savedObjectToItem(input, true);
+    expect(item).toBeNull();
+    expect(error).not.toBe(null);
   });
 });
 

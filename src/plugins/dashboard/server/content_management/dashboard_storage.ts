@@ -74,12 +74,15 @@ export class DashboardStorage {
       toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): DashboardItem => {
         const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
-        const contentItem = savedObjectToItem(
+        const { item, error: itemError } = savedObjectToItem(
           savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>,
           false
         );
+        if (itemError) {
+          throw Boom.badRequest(`Invalid response. ${itemError.message}`);
+        }
 
-        const validationError = transforms.mSearch.out.result.validate(contentItem);
+        const validationError = transforms.mSearch.out.result.validate(item);
         if (validationError) {
           if (this.throwOnResultValidationError) {
             throw Boom.badRequest(`Invalid response. ${validationError.message}`);
@@ -93,7 +96,7 @@ export class DashboardStorage {
           DashboardItem,
           DashboardItem
         >(
-          contentItem,
+          item,
           undefined, // do not override version
           { validate: false } // validation is done above
         );
@@ -128,14 +131,12 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_ID, id);
 
-    const response = {
-      item: savedObjectToItem(savedObject, false),
-      meta: {
-        aliasPurpose,
-        aliasTargetId,
-        outcome,
-      },
-    };
+    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    if (itemError) {
+      throw Boom.badRequest(`Invalid response. ${itemError.message}`);
+    }
+
+    const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
 
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
@@ -146,7 +147,7 @@ export class DashboardStorage {
       }
     }
 
-    // Validate DB response and DOWN transform to the request version
+    // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
       DashboardGetOut,
       DashboardGetOut
@@ -193,7 +194,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const soAttributes = itemAttrsToSavedObjectAttrs(dataToLatest);
+    const { attributes: soAttributes, error: attributesError } =
+      itemAttrsToSavedObjectAttrs(dataToLatest);
+    if (attributesError) {
+      throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
+    }
 
     // Save data in DB
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
@@ -202,11 +207,12 @@ export class DashboardStorage {
       optionsToLatest
     );
 
-    const result = {
-      item: savedObjectToItem(savedObject, false),
-    };
+    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    if (itemError) {
+      throw Boom.badRequest(`Invalid response. ${itemError.message}`);
+    }
 
-    const validationError = transforms.create.out.result.validate(result);
+    const validationError = transforms.create.out.result.validate({ item });
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
@@ -219,7 +225,7 @@ export class DashboardStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<DashboardItem>
     >(
-      result,
+      { item },
       undefined, // do not override version
       { validate: false } // validation is done above
     );
@@ -257,7 +263,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const soAttributes = itemAttrsToSavedObjectAttrs(dataToLatest);
+    const { attributes: soAttributes, error: attributesError } =
+      itemAttrsToSavedObjectAttrs(dataToLatest);
+    if (attributesError) {
+      throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
+    }
 
     // Save data in DB
     const partialSavedObject = await soClient.update<DashboardSavedObjectAttributes>(
@@ -267,11 +277,12 @@ export class DashboardStorage {
       optionsToLatest
     );
 
-    const result = {
-      item: savedObjectToItem(partialSavedObject, true),
-    };
+    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true);
+    if (itemError) {
+      throw Boom.badRequest(`Invalid response. ${itemError.message}`);
+    }
 
-    const validationError = transforms.update.out.result.validate(result);
+    const validationError = transforms.update.out.result.validate({ item });
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
@@ -285,7 +296,7 @@ export class DashboardStorage {
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
-      result,
+      { item },
       undefined, // do not override version
       { validate: false } // validation is done above
     );
@@ -328,8 +339,15 @@ export class DashboardStorage {
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
+    const hits = soResponse.saved_objects
+      .map((so) => {
+        const { item } = savedObjectToItem(so, false, soQuery.fields);
+        return item;
+      })
+      // Ignore any saved objects that failed to convert to items.
+      .filter((item) => item !== null);
     const response = {
-      hits: soResponse.saved_objects.map((so) => savedObjectToItem(so, false, soQuery.fields)),
+      hits,
       pagination: {
         total: soResponse.total,
       },

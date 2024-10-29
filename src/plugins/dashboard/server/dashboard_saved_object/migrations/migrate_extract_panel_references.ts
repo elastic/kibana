@@ -39,11 +39,14 @@ export function createExtractPanelReferencesMigration(
 
     // Use Content Management to convert the saved object to the DashboardAttributes
     // expected by injectReferences
-    const { attributes: parsedAttributes } = savedObjectToItem(
+    const { item, error: itemError } = savedObjectToItem(
       doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
       false
     );
 
+    if (itemError) throw itemError;
+
+    const parsedAttributes = item.attributes;
     const injectedAttributes = injectReferences(
       {
         attributes: parsedAttributes,
@@ -57,7 +60,8 @@ export function createExtractPanelReferencesMigration(
       { embeddablePersistableStateService: deps.embeddable }
     );
 
-    const attributes = itemAttrsToSavedObjectAttrs(extractedAttributes);
+    const { attributes, error: attributesError } = itemAttrsToSavedObjectAttrs(extractedAttributes);
+    if (attributesError) throw attributesError;
 
     return {
       ...doc,
