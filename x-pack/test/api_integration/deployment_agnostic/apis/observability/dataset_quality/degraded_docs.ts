@@ -9,12 +9,13 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import {
+  DatasetQualitySupertestUser,
+  getDatasetQualityMonitorSupertestUser,
+  getDatasetQualityNoAccessSuperTestUser,
+} from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const samlAuth = getService('samlAuth');
-  const roleScopedSupertest = getService('roleScopedSupertest');
-  const config = getService('config');
-  const isServerless = config.get('serverless');
   const synthtrace = getService('logsSynthtraceEsClient');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
@@ -31,64 +32,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Degraded docs', function () {
     describe('Authorization', function () {
-      let supertestNoAccessUserWithCookieCredentials: SupertestWithRoleScopeType;
+      let supertestNoAccessUser: DatasetQualitySupertestUser;
       before(async function () {
-        if (isServerless) {
-          this.skip(); // Custom roles are not supported on Serverless
-        }
-
-        await samlAuth.setCustomRole({
-          elasticsearch: {},
-          kibana: [],
+        supertestNoAccessUser = await getDatasetQualityNoAccessSuperTestUser({
+          getService,
         });
-        supertestNoAccessUserWithCookieCredentials =
-          await roleScopedSupertest.getSupertestWithRoleScope(samlAuth.getCustomRole(), {
-            useCookieHeader: true,
-            withInternalHeaders: true,
-          });
+
+        if (!supertestNoAccessUser.isCustomRoleEnabled) {
+          this.skip(); // The test is only relevant when custom roles are enabled
+        }
       });
 
       after(async function () {
-        if (isServerless) {
-          return; // Custom roles are not supported on Serverless
-        }
-
-        await supertestNoAccessUserWithCookieCredentials.destroy();
-        await samlAuth.deleteCustomRole();
+        await supertestNoAccessUser.clean();
       });
 
       it('should return a 403 when the user does not have sufficient privileges', async () => {
-        const response = await callApiAs(supertestNoAccessUserWithCookieCredentials);
+        const response = await callApiAs(supertestNoAccessUser.user);
         expect(response.status).to.be(403);
       });
     });
 
     describe('Querying', function () {
-      let supertestDatasetQualityMonitorUserWithCookieCredentials: SupertestWithRoleScopeType;
+      let supertestDatasetQualityMonitorUser: DatasetQualitySupertestUser;
 
       before(async () => {
-        // TODO: Use the custom role instead of `admin` when supported in Serverless
-        // await samlAuth.setCustomRole({
-        //   elasticsearch: {
-        //     indices: [
-        //       {
-        //         names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
-        //         privileges: ['monitor', 'view_index_metadata'],
-        //       },
-        //     ],
-        //   },
-        // });
-
-        supertestDatasetQualityMonitorUserWithCookieCredentials =
-          await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-            useCookieHeader: true,
-            withInternalHeaders: true,
-          });
+        supertestDatasetQualityMonitorUser = await getDatasetQualityMonitorSupertestUser({
+          getService,
+        });
       });
 
       after(async () => {
-        await supertestDatasetQualityMonitorUserWithCookieCredentials.destroy();
-        // await samlAuth.deleteCustomRole(); // Use when supported in Serverless
+        await supertestDatasetQualityMonitorUser.clean();
       });
 
       describe('and there are log documents', () => {
@@ -125,7 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('returns stats correctly', async () => {
-          const stats = await callApiAs(supertestDatasetQualityMonitorUserWithCookieCredentials);
+          const stats = await callApiAs(supertestDatasetQualityMonitorUser.user);
           expect(stats.body.degradedDocs.length).to.be(2);
 
           const degradedDocsStats = stats.body.degradedDocs.reduce(
@@ -156,7 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('and there are not log documents', () => {
         it('returns stats correctly', async () => {
-          const stats = await callApiAs(supertestDatasetQualityMonitorUserWithCookieCredentials);
+          const stats = await callApiAs(supertestDatasetQualityMonitorUser.user);
 
           expect(stats.body.degradedDocs.length).to.be(0);
         });
@@ -205,7 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('returns counts and list of datasets correctly', async () => {
-          const stats = await callApiAs(supertestDatasetQualityMonitorUserWithCookieCredentials);
+          const stats = await callApiAs(supertestDatasetQualityMonitorUser.user);
           expect(stats.body.degradedDocs.length).to.be(18);
 
           const expected = {
