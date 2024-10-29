@@ -33,7 +33,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async ({ savedObjectsClient, request, response }) => {
-    const { ids } = request.body;
+    const { ids } = request.body ?? {};
     const { id: paramId } = request.params ?? {};
 
     if (ids && paramId) {

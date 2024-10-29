@@ -355,6 +355,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should handle bulk deleting params', async () => {
+      await kServer.savedObjects.clean({ types: [syntheticsParamType] });
+
       const params = [
         { key: 'param1', value: 'value1' },
         { key: 'param2', value: 'value2' },
