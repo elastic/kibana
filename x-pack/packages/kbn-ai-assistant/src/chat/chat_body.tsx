@@ -136,7 +136,7 @@ export function ChatBody({
 
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
-    ...(!initialConversationId ? { initialMessages } : {}),
+    initialMessages,
     initialTitle,
     chatService,
     connectorId: connectors.selectedConnector,

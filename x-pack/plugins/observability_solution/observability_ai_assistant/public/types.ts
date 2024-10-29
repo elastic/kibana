@@ -91,8 +91,16 @@ export interface ObservabilityAIAssistantChatService {
 }
 
 export interface ObservabilityAIAssistantConversationService {
-  openNewConversation: ({}: { messages: Message[]; title?: string }) => void;
-  predefinedConversation$: Observable<{ messages: Message[]; title?: string }>;
+  openNewConversation: ({}: {
+    messages: Message[];
+    title?: string;
+    hidePreviousConversations?: boolean;
+  }) => void;
+  predefinedConversation$: Observable<{
+    messages: Message[];
+    title?: string;
+    hidePreviousConversations?: boolean;
+  }>;
 }
 
 export interface ObservabilityAIAssistantService {
