@@ -151,7 +151,7 @@ export const CreateConnector: React.FC = () => {
     cancelButtonText: i18n.translate(
       'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
       {
-        defaultMessage: 'Keep creating',
+        defaultMessage: 'Continue setup',
       }
     ),
     confirmButtonText: i18n.translate(
