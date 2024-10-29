@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { splitSizeAndUnits } from '../../../../../../common';
+import { deserializeGlobalMaxRetention } from '../../../../lib/data_streams';
 
 const convertToMinutes = (value: string) => {
   const { size, unit } = splitSizeAndUnits(value);
@@ -46,14 +47,19 @@ export const isBiggerThanGlobalMaxRetention = (
     return undefined;
   }
 
+  const { size, unitText } = deserializeGlobalMaxRetention(globalMaxRetention);
   return isRetentionBiggerThan(`${retentionValue}${retentionTimeUnit}`, globalMaxRetention)
     ? {
         message: i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
           {
-            defaultMessage: 'Maximum data retention period on this project is {maxRetention} days.',
+            defaultMessage:
+              'Maximum data retention period on this project is {maxRetention} {unitText}.',
             // Remove the unit from the globalMaxRetention value
-            values: { maxRetention: globalMaxRetention.slice(0, -1) },
+            values: {
+              maxRetention: size,
+              unitText,
+            },
           }
         ),
       }

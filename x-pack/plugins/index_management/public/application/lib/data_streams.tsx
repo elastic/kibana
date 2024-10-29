@@ -121,3 +121,18 @@ export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
 
   return;
 };
+
+export const deserializeGlobalMaxRetention = (globalMaxRetention?: string) => {
+  if (!globalMaxRetention) {
+    return {};
+  }
+
+  const { size, unit } = splitSizeAndUnits(globalMaxRetention);
+  const unitText = timeUnits.find((item) => item.value === unit)?.text;
+
+  return {
+    size,
+    unit,
+    unitText,
+  };
+};
