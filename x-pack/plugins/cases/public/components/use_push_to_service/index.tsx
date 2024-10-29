@@ -44,7 +44,6 @@ export interface ReturnUsePushToService {
 
 export const usePushToService = ({
   caseId,
-  caseStatus,
   caseConnectors,
   connector,
   isValidConnector,
@@ -108,14 +107,9 @@ export const usePushToService = ({
       return [getDeletedConnectorError()];
     }
 
-    if (caseStatus === CaseStatuses.closed) {
-      return [getCaseClosedInfo()];
-    }
-
     return errors;
   }, [
     actionLicense,
-    caseStatus,
     connector.id,
     hasLicenseError,
     isValidConnector,
