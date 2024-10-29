@@ -21,8 +21,10 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .delete({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
       },
       path: LIST_ITEM_URL,
     })

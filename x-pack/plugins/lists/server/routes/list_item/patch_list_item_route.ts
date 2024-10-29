@@ -21,8 +21,10 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .patch({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
       },
       path: LIST_ITEM_URL,
     })

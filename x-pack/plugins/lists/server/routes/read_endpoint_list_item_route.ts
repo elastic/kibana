@@ -25,8 +25,10 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
       },
       path: ENDPOINT_LIST_ITEM_URL,
     })
