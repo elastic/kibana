@@ -51,7 +51,7 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectTitle',
             {
-              defaultMessage: 'Auto-detect Integrations with Elastic Agent',
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
             }
           ),
           description: i18n.translate(
@@ -79,7 +79,6 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
-          release: 'preview',
         },
         {
           id: 'otel-logs',
@@ -88,7 +87,7 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle',
             {
-              defaultMessage: 'Host monitoring with EDOT Collector',
+              defaultMessage: 'OpenTelemetry: Logs & Metrics',
             }
           ),
           description: i18n.translate(
@@ -130,14 +129,13 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with Elastic Agent',
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesDescription',
             {
-              defaultMessage:
-                'Monitor your Kubernetes cluster with Elastic Agent, collect container logs',
+              defaultMessage: 'Collect logs and metrics from Kubernetes using Elastic Agent',
             }
           ),
           extraLabelsBadges: [
@@ -156,7 +154,6 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
-          release: 'preview',
         },
         {
           id: 'otel-kubernetes',
@@ -165,14 +162,14 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with EDOT Collector',
+              defaultMessage: 'OpenTelemetry: Full Observability',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage:
-                'Unified Kubernetes observability with Elastic Distro for OTel Collector',
+                'Collect logs, traces and metrics with the Elastic Distro for OTel Collector',
             }
           ),
           extraLabelsBadges: [
