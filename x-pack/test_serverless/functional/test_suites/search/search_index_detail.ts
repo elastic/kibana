@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-  describe('Search index detail page', () => {
+  describe('Search index detail page', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlApiKeys.deleteAPIKeys();
@@ -33,8 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esDeleteAllIndices(indexName);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/194704
-    describe.skip('index details page overview', () => {
+    describe('index details page overview', () => {
       before(async () => {
         await es.indices.create({ index: indexName });
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
@@ -46,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
         await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
         await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkMissingInMoreOptions();
       });
       it('should have embedded dev console', async () => {
         await testHasEmbeddedConsole(pageObjects);
@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
 
-      it('should show api key', async () => {
+      it.skip('should show api key', async () => {
         await pageObjects.svlApiKeys.deleteAPIKeys();
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
@@ -80,6 +80,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
       });
 
+      it('should have breadcrumb navigation', async () => {
+        await pageObjects.svlSearchIndexDetailPage.expectBreadcrumbNavigationWithIndexName(
+          indexName
+        );
+        await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
+        await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+      });
+
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
         await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
@@ -98,7 +107,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
       });
 
-      describe('With data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/197144
+      describe.skip('With data', () => {
         before(async () => {
           await es.index({
             index: indexName,
@@ -108,15 +118,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
-        it('menu action item should be replaced with playground', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectUseInPlaygroundLinkExists();
-        });
         it('should have index documents', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
         });
+        it('menu action item should be replaced with playground', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
+        });
+        it('should have link to API reference doc link in options menu', async () => {
+          await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
+          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
+        });
+        it('should have one document in quick stats', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
+        });
         it('should have with data tabs', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
-          await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
         });
         it('should be able to change tabs to mappings and mappings is shown', async () => {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
@@ -132,6 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
           await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
           await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
         });
       });
 
@@ -159,12 +177,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
         });
-        it('should have link to API reference doc link', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
-        });
-        it('should have link to playground', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectPlaygroundButtonExistsInMoreOptions();
-        });
         it('should delete index', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
@@ -176,10 +188,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await es.indices.create({ index: indexName });
         await security.testUser.setRoles(['index_management_user']);
+      });
+      beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the indices tab
         await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+      after(async () => {
+        await esDeleteAllIndices(indexName);
+      });
+      describe('manage index action', () => {
+        beforeEach(async () => {
+          await pageObjects.indexManagement.manageIndex(indexName);
+          await pageObjects.indexManagement.manageIndexContextMenuExists();
+        });
+        it('navigates to overview tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
+        });
+
+        it('navigates to settings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
+        });
+        it('navigates to mappings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
+        });
       });
       describe('can view search index details', function () {
         it('renders search index details with no documents', async () => {

@@ -32,3 +32,10 @@ export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTable
   filterOptions: DEFAULT_FILTER_OPTIONS,
   queryParams: DEFAULT_QUERY_PARAMS,
 };
+
+export const PIPELINE_URL = 'ingest/ingest_pipelines';
+
+export const PRECONFIGURED_ENDPOINTS = {
+  ELSER: '.elser-2-elasticsearch',
+  E5: '.multilingual-e5-small-elasticsearch',
+};
