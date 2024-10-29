@@ -27,7 +27,7 @@ export interface ProfileProviderServices extends DiscoverServices {
    * A service containing methods used for logs profiles
    */
   logsContextService: LogsContextService;
-  discoverFeaturesRegistry: DiscoverFeaturesService['registry'];
+  discoverFeaturesRegistry?: DiscoverFeaturesService['registry'];
 }
 
 /**
@@ -43,6 +43,6 @@ export const createProfileProviderServices = async (
     logsContextService: await createLogsContextService({
       logsDataAccess: discoverServices.logsDataAccess,
     }),
-    discoverFeaturesRegistry: discoverServices?.discoverShared.features.registry,
+    discoverFeaturesRegistry: discoverServices?.discoverFeaturesServiceRegistry,
   };
 };

@@ -257,16 +257,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
-
-    if (plugins.discoverShared) {
-      const discoverFeatureRegistry = plugins.discoverShared.features.registry;
-      const cellRendererFeature: SecuritySolutionCellRenderFeature = {
-        id: 'security-solution-cell-render',
-        getRender: getCellRendererForGivenRecord,
-      };
-      discoverFeatureRegistry.register(cellRendererFeature);
-    }
-
     return this.contract.getStartContract(core);
   }
 

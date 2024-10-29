@@ -54,9 +54,7 @@ export const registerProfileProviders = async ({
   enabledExperimentalProfileIds: string[];
   services: DiscoverServices;
 }) => {
-  const providerServices = await createProfileProviderServices({
-    plugins,
-  });
+  const providerServices = await createProfileProviderServices(services);
 
   const rootProfileProviders = await createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
