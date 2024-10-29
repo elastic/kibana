@@ -36,7 +36,7 @@ export const REQUIRED_PRIVILEGES_CONNECTORS_ALL = i18n.translate(
 );
 
 export const CONTACT_ADMINISTRATOR = i18n.translate(
-  'xpack.integrationAssistant.missingPrivileges.contactAdministrator',
+  'xpack.securitySolution.onboarding.assistantCard.missingPrivileges.contactAdministrator',
   {
     defaultMessage: 'Contact your administrator for assistance.',
   }
