@@ -47,8 +47,8 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   },
 });
 
-export const createExampleFallbackRootProfileProvider = (): RootProfileProvider => ({
-  profileId: 'example-fallback-root-profile',
+export const createExampleSolutionViewRootProfileProvider = (): RootProfileProvider => ({
+  profileId: 'example-solution-view-root-profile',
   isExperimental: true,
   profile: { getRenderAppWrapper },
   resolve: (params) => ({

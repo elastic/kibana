@@ -16,7 +16,7 @@ import type { BaseProfileProvider, BaseProfileService } from '../profile_service
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
 import {
-  createExampleFallbackRootProfileProvider,
+  createExampleSolutionViewRootProfileProvider,
   createExampleRootProfileProvider,
 } from './example/example_root_profile';
 import { createLogsDataSourceProfileProviders } from './common/logs_data_source_profile';
@@ -120,7 +120,7 @@ export const registerEnabledProfileProviders = <
  */
 const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleRootProfileProvider(),
-  createExampleFallbackRootProfileProvider(),
+  createExampleSolutionViewRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
 ];
 

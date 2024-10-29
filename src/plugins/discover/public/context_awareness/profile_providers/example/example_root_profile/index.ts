@@ -9,5 +9,5 @@
 
 export {
   createExampleRootProfileProvider,
-  createExampleFallbackRootProfileProvider,
+  createExampleSolutionViewRootProfileProvider,
 } from './profile';

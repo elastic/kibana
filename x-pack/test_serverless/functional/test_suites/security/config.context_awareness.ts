@@ -16,7 +16,7 @@ export default createTestConfig({
   kbnServerArgs: [
     `--discover.experimental.enabledProfiles=${JSON.stringify([
       'example-root-profile',
-      'example-fallback-root-profile',
+      'example-solution-view-root-profile',
       'example-data-source-profile',
       'example-document-profile',
     ])}`,
