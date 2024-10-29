@@ -23,7 +23,6 @@
       "usageCollection",
       "cloud",
       "security",
-      "infra",
       "logsShared"
     ],
     "requiredBundles": [

@@ -65,10 +65,6 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
-              // Infra plugin doesnt export anything as a public interface. So the only
-              // way we have at this stage for checking if the plugin is available or not
-              // is by checking if the startServices has the `infra` key.
-              infra: Object.hasOwn(plugins, 'infra') ? {} : undefined,
             },
             services: {
               core: coreStart,

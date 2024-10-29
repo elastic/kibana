@@ -108,7 +108,6 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
   },
   plugins: {
     share: shareMock,
-    infra: undefined,
     cloud: {
       ...cloudMock.createSetup(),
       isCloudEnabled: false,
