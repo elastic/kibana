@@ -31,7 +31,6 @@ interface Props {
   dataTimeRange: TimeRange;
   alertTimeRange?: TimeRange;
   annotations?: AlertAnnotation[];
-  showErrorRateAsLine?: boolean;
 }
 
 export function useLensDefinition({
@@ -40,7 +39,6 @@ export function useLensDefinition({
   dataTimeRange,
   alertTimeRange,
   annotations,
-  showErrorRateAsLine,
 }: Props): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
@@ -87,14 +85,14 @@ export function useLensDefinition({
             layerId: '8730e8af-7dac-430e-9cef-3b9989ff0866',
             accessors: ['9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14'],
             position: 'top',
-            seriesType: !!showErrorRateAsLine ? 'line' : 'area',
+            seriesType: 'line',
             showGridlines: false,
             layerType: 'data',
             xAccessor: '627ded04-eae0-4437-83a1-bbb6138d2c3b',
             yConfig: [
               {
                 forAccessor: '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14',
-                color: !!showErrorRateAsLine ? euiTheme.colors.primary : euiTheme.colors.danger,
+                color: euiTheme.colors.primary,
               },
             ],
           },

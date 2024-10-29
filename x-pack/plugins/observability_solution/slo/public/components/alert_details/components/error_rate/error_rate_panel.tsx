@@ -153,7 +153,6 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               dataTimeRange={dataTimeRange}
               alertTimeRange={alertTimeRange}
               threshold={actionGroupWindow!.burnRateThreshold}
-              showErrorRateAsLine
             />
           </EuiFlexItem>
         </EuiFlexGroup>

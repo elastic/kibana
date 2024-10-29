@@ -19,7 +19,6 @@ interface Props {
   dataTimeRange: TimeRange;
   threshold?: number;
   alertTimeRange?: TimeRange;
-  showErrorRateAsLine?: boolean;
   annotations?: AlertAnnotation[];
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
@@ -29,7 +28,6 @@ export function ErrorRateChart({
   dataTimeRange,
   threshold,
   alertTimeRange,
-  showErrorRateAsLine,
   annotations,
   onBrushed,
 }: Props) {
@@ -42,7 +40,6 @@ export function ErrorRateChart({
     alertTimeRange,
     dataTimeRange,
     annotations,
-    showErrorRateAsLine,
   });
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 
