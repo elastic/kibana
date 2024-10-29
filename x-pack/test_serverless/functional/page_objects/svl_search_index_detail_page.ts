@@ -100,6 +100,11 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectAPIReferenceDocLinkMissingInMoreOptions() {
       await testSubjects.missingOrFail('moreOptionsApiReference', { timeout: 2000 });
     },
+    async expectDeleteIndexButtonToDisabled() {
+      await testSubjects.existOrFail('moreOptionsDeleteIndex');
+      const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
+      expect(deleteIndexButton).to.be(false);
+    },
     async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
     },
@@ -132,11 +137,11 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         await testSubjects.click('reloadButton', 2000);
       });
     },
-    async expectWithDataTabsExists() {
+    async expectTabsExists() {
       await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
       await testSubjects.existOrFail('dataTab', { timeout: 2000 });
     },
-    async withDataChangeTabs(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
+    async changeTab(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
       await testSubjects.click(tab);
     },
     async expectUrlShouldChangeTo(tab: 'data' | 'mappings' | 'settings') {
@@ -147,6 +152,13 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     },
     async expectSettingsComponentIsVisible() {
       await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+    },
+    async expectEditSettingsIsDisabled() {
+      await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+      const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
+        'indexDetailsSettingsEditModeSwitch'
+      );
+      expect(isEditSettingsButtonDisabled).to.be(false);
     },
     async expectSelectedLanguage(language: string) {
       await testSubjects.existOrFail('codeExampleLanguageSelect');
@@ -186,11 +198,17 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('deleteDocumentButton');
       await testSubjects.click('deleteDocumentButton');
     },
-
     async expectDeleteDocumentActionNotVisible() {
       await testSubjects.existOrFail('documentMetadataButton');
       await testSubjects.click('documentMetadataButton');
       await testSubjects.missingOrFail('deleteDocumentButton');
+    },
+    async expectDeleteDocumentActionIsDisabled() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
+      expect(isDeleteDocumentEnabled).to.be(false);
     },
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -218,6 +236,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
           return;
         }
       }
+    },
+
+    async expectIndexDetailsMappingsAddFieldToExist() {
+      await testSubjects.existOrFail('indexDetailsMappingsAddField');
+      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+      expect(isMappingsFieldEnabled).to.be(false);
     },
   };
 }
