@@ -75,7 +75,7 @@ export interface AddMetricsCalloutEventParams {
 
 export interface AnomalyDetectionSetupParams {
   job_type: string;
-  configured_fields: { start_date: string; partition_field: string | null; filter_field: string };
+  configured_fields: { start_date: string; partition_field?: string; filter_field?: string };
 }
 
 export interface AnomalyDetectionDateFieldChangeParams {
@@ -85,12 +85,12 @@ export interface AnomalyDetectionDateFieldChangeParams {
 
 export interface AnomalyDetectionPartitionFieldChangeParams {
   job_type: string;
-  partition_field: string | null;
+  partition_field?: string;
 }
 
 export interface AnomalyDetectionFilterFieldChangeParams {
   job_type: string;
-  filter_field: string;
+  filter_field?: string;
 }
 
 export type InfraTelemetryEventParams =

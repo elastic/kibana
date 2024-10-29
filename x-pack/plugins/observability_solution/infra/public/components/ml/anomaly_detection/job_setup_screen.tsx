@@ -114,8 +114,8 @@ export const JobSetupScreen = (props: Props) => {
         job_type: props.jobType,
         configured_fields: {
           start_date: date.toISOString(),
-          partition_field: partitionField ? partitionField[0] : null,
-          filter_field: filter,
+          partition_field: partitionField ? partitionField[0] : undefined,
+          filter_field: filter ? filter : undefined,
         },
       });
       cleanUpAndSetUpModule(
@@ -130,7 +130,7 @@ export const JobSetupScreen = (props: Props) => {
         job_type: props.jobType,
         configured_fields: {
           start_date: date.toISOString(),
-          partition_field: partitionField ? partitionField[0] : null,
+          partition_field: partitionField ? partitionField[0] : undefined,
           filter_field: filter,
         },
       });
@@ -161,7 +161,7 @@ export const JobSetupScreen = (props: Props) => {
       setFilterQuery(convertKueryToElasticSearchQuery(f, metricsView?.dataViewReference) || '');
       telemetry.reportAnomalyDetectionFilterFieldChange({
         job_type: props.jobType,
-        filter_field: f,
+        filter_field: f ? f : undefined,
       });
     },
     [metricsView?.dataViewReference, telemetry, props.jobType]
@@ -175,7 +175,7 @@ export const JobSetupScreen = (props: Props) => {
       setPartitionField(value.map((v) => v.label));
       telemetry.reportAnomalyDetectionPartitionFieldChange({
         job_type: props.jobType,
-        partition_field: value.length > 0 ? value[0].label : null,
+        partition_field: value.length > 0 ? value[0].label : undefined,
       });
     },
     [telemetry, props.jobType]

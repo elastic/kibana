@@ -285,12 +285,14 @@ const anomalyDetectionSetup: InfraTelemetryEvent = {
           type: 'text',
           _meta: {
             description: 'Partition field for the anomaly detection job',
+            optional: true,
           },
         },
         filter_field: {
           type: 'text',
           _meta: {
             description: 'Filter field for the anomaly detection job',
+            optional: true,
           },
         },
       },
@@ -329,6 +331,7 @@ const anomalyDetectionPartitionFieldChange: InfraTelemetryEvent = {
       type: 'text',
       _meta: {
         description: 'Partition field for the anomaly detection job',
+        optional: true,
       },
     },
   },
@@ -347,6 +350,7 @@ const anomalyDetectionFilterFieldChange: InfraTelemetryEvent = {
       type: 'text',
       _meta: {
         description: 'Filter field for the anomaly detection job',
+        optional: true,
       },
     },
   },
