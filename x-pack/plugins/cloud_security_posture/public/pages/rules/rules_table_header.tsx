@@ -27,9 +27,8 @@ import {
   RuleStateAttributesWithoutStates,
   useChangeCspRuleState,
 } from './use_change_csp_rule_state';
-import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
-import { useRules } from './rules_context';
+import { CspBenchmarkRulesWithStates, useRules } from './rules_context';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -40,41 +39,16 @@ export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
 interface RulesTableToolbarProps {
-  sectionSelectOptions: string[];
-  ruleNumberSelectOptions: string[];
-  totalRulesCount: number;
-  searchValue: string;
   isSearching: boolean;
-  pageSize: number;
-  selectedRules: CspBenchmarkRulesWithStates[];
-  setEnabledDisabledItemsFilter: (filterState: string) => void;
-  enabledDisabledItemsFilterState: string;
-  setSelectAllRules: () => void;
-  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
-
-interface RuleTableCount {
-  pageSize: number;
-  total: number;
-  selectedRules: CspBenchmarkRulesWithStates[];
-  setSelectAllRules: () => void;
-  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-}
-
-export const RulesTableHeader = ({
-  searchValue,
-  isSearching,
-  totalRulesCount,
-  pageSize,
-  sectionSelectOptions,
-  ruleNumberSelectOptions,
-  selectedRules,
-  setEnabledDisabledItemsFilter,
-  enabledDisabledItemsFilterState,
-  setSelectAllRules,
-  setSelectedRules,
-}: RulesTableToolbarProps) => {
-  const { setRulesQuery } = useRules();
+export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
+  const {
+    setRulesQuery,
+    sectionSelectOptions,
+    ruleNumberSelectOptions,
+    setEnabledDisabledItemsFilter,
+    enabledDisabledItemsFilter,
+  } = useRules();
   const [selectedSection, setSelectedSection] = useState<string[]>([]);
   const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
   const sectionOptions = sectionSelectOptions.map((option) => ({
@@ -87,12 +61,12 @@ export const RulesTableHeader = ({
   }));
 
   const toggleEnabledRulesFilter = () => {
-    if (enabledDisabledItemsFilterState === 'enabled') setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilter === 'enabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('enabled');
   };
 
   const toggleDisabledRulesFilter = () => {
-    if (enabledDisabledItemsFilterState === 'disabled') setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilter === 'disabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('disabled');
   };
 
@@ -100,7 +74,7 @@ export const RulesTableHeader = ({
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
-          <SearchField isSearching={isSearching} searchValue={searchValue} />
+          <SearchField isSearching={isSearching} />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiFlexGroup gutterSize="s" direction="row">
@@ -160,7 +134,7 @@ export const RulesTableHeader = ({
               <EuiFilterGroup>
                 <EuiFilterButton
                   withNext
-                  hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
+                  hasActiveFilters={enabledDisabledItemsFilter === 'enabled'}
                   onClick={toggleEnabledRulesFilter}
                   data-test-subj={RULES_ENABLED_FILTER}
                 >
@@ -170,7 +144,7 @@ export const RulesTableHeader = ({
                   />
                 </EuiFilterButton>
                 <EuiFilterButton
-                  hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
+                  hasActiveFilters={enabledDisabledItemsFilter === 'disabled'}
                   onClick={toggleDisabledRulesFilter}
                   data-test-subj={RULES_DISABLED_FILTER}
                 >
@@ -185,13 +159,7 @@ export const RulesTableHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        <CurrentPageOfTotal
-          pageSize={pageSize}
-          total={totalRulesCount}
-          selectedRules={selectedRules}
-          setSelectAllRules={setSelectAllRules}
-          setSelectedRules={setSelectedRules}
-        />
+        <CurrentPageOfTotal />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -199,11 +167,9 @@ export const RulesTableHeader = ({
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-const SearchField = ({
-  isSearching,
-  searchValue,
-}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue'>) => {
-  const [localValue, setLocalValue] = useState(searchValue);
+const SearchField = ({ isSearching }: Pick<RulesTableToolbarProps, 'isSearching'>) => {
+  const { rulesQuery } = useRules();
+  const [localValue, setLocalValue] = useState(rulesQuery.search);
   const { setRulesQuery } = useRules();
 
   useDebounce(
@@ -233,13 +199,8 @@ const SearchField = ({
   );
 };
 
-const CurrentPageOfTotal = ({
-  pageSize,
-  total,
-  selectedRules,
-  setSelectAllRules,
-  setSelectedRules,
-}: RuleTableCount) => {
+const CurrentPageOfTotal = () => {
+  const { selectedRules, setSelectedRules, rulesPageData, setSelectAllRules } = useRules();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onPopoverClick = () => {
     setIsPopoverOpen((e) => !e);
@@ -308,6 +269,9 @@ const CurrentPageOfTotal = ({
       </EuiText>
     </EuiContextMenuItem>,
   ];
+
+  const pageSize = rulesPageData.rules_page.length;
+  const total = rulesPageData.all_rules.length;
 
   return (
     <EuiFlexItem grow={false}>

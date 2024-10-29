@@ -26,28 +26,21 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { uniqBy } from 'lodash';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
-import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
-import { useRules } from './rules_context';
+import { CspBenchmarkRulesWithStates, useRules } from './rules_context';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
 
-type RulesTableProps = Pick<
-  RulesState,
-  'loading' | 'error' | 'rules_page' | 'total' | 'perPage'
-> & {
+interface RulesTableProps {
   onRuleClick: (ruleID: string) => void;
   selectedRuleId?: string;
+}
+
+type GetColumnProps = Pick<RulesTableProps, 'onRuleClick'> & {
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-};
-
-type GetColumnProps = Pick<
-  RulesTableProps,
-  'onRuleClick' | 'selectedRules' | 'setSelectedRules'
-> & {
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -57,22 +50,18 @@ type GetColumnProps = Pick<
   ) => boolean;
 };
 
-export const RulesTable = ({
-  perPage: pageSize,
-  rules_page: items,
-  total,
-  loading,
-  error,
-  selectedRuleId,
-  selectedRules,
-  setSelectedRules,
-  onRuleClick,
-}: RulesTableProps) => {
+export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const { setRulesQuery, setPageSize, page } = useRules();
+  const { setRulesQuery, setPageSize, page, setSelectedRules, selectedRules } = useRules();
+  const { pageSize, rulesQuery, rulesPageData } = useRules();
+  const items = rulesPageData.rules_page;
+  const total = rulesPageData.total;
+  const error = rulesPageData.error;
+  const loading = rulesPageData.loading;
+
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
-    pageSize,
+    pageSize: pageSize || rulesQuery.perPage,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
