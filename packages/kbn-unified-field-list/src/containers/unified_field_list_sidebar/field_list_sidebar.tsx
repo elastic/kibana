@@ -220,6 +220,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const { fieldListFiltersProps, fieldListGroupedProps, allFieldsModified } =
     useGroupedFields<DataViewField>({
       dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
+      esqlSourceName: dataView?.name,
       allFields,
       popularFieldsLimit:
         searchMode !== 'documents' || stateService.creationOptions.disablePopularFields
