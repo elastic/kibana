@@ -96,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         internalReqHeader
       );
       await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
+
       generatedReports.add(job.id);
     });
 
