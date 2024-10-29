@@ -201,8 +201,6 @@ export const getOpId = ({ path, method }: { path: string; method: string }): str
   return `${method.toLocaleLowerCase()}-${path
     .replace(/^\//, '')
     .replace(/\/$/, '')
-    .replace(/\{/g, '')
-    .replace(/\}/g, '')
-    .replace(/\?/g, '')
+    .replace(/[\{\}\?\*]/g, '')
     .replace(/\//g, '-')}`;
 };

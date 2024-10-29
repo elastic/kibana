@@ -305,6 +305,13 @@ describe('getOpId', () => {
       },
       output: 'get-my-resource-id',
     },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{path*}',
+      },
+      output: 'get-my-resource-path',
+    },
   ])('$input.method $input.path -> $output', ({ input, output }) => {
     expect(getOpId(input)).toBe(output);
   });
