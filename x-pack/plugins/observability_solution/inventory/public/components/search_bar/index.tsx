@@ -9,8 +9,8 @@ import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar'
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EntityType } from '../../../common/entities';
 import { Query } from '@kbn/es-query';
+import { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
