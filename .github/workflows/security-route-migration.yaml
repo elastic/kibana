@@ -1,9 +1,9 @@
 name: ESLint no_deprecated_authz_config
 
 on:
-  # push:
-  #   branches:
-  #     - authz-migration-workflow
+  push:
+    branches:
+      - authz-migration-workflow
   workflow_dispatch:
     inputs:
       route_type:
@@ -25,7 +25,7 @@ jobs:
       security-events: write
 
     env:
-      ROUTE_TYPE: ${{ github.event.inputs.route_type }}
+      DRY_RUN: true
       GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
 
     steps:

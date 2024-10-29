@@ -300,7 +300,6 @@ function processChangesByOwners(ownerFilesMap) {
               : PR_DESCRIPTION_TEXT_UNAUTHORIZED,
             '--label',
             labels.join(','),
-            '--draft',
           ],
           { stdio: 'inherit' }
         );
