@@ -78,7 +78,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
     onGroupingsChange,
   } = props;
   const { dataViews, notifications, http } = services;
-  const { grouping, updateGrouping } = useAlertsGroupingState(groupingId, initialGroupings);
+  const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
   const { dataView } = useAlertsDataView({
     featureIds,
@@ -121,10 +121,13 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
   });
 
   useEffect(() => {
-    if (initialGroupings) {
+    if (initialGroupings?.activeGroups?.length) {
       updateGrouping(initialGroupings);
+      setSelectedGroups(initialGroupings.activeGroups);
     }
-  }, [initialGroupings, updateGrouping]);
+    // we only want on first render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     onGroupingsChange?.({

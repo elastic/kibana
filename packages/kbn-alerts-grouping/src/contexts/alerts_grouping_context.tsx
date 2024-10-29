@@ -40,7 +40,7 @@ export const AlertsGroupingContextProvider = ({ children }: PropsWithChildren<{}
   );
 };
 
-export const useAlertsGroupingState = (groupingId: string, initialGroupings?: GroupModel) => {
+export const useAlertsGroupingState = (groupingId: string) => {
   const { groupingState, setGroupingState } = useContext(AlertsGroupingContext);
   const updateGrouping = useCallback(
     (groupModel: Partial<GroupModel> | null) => {
@@ -69,8 +69,9 @@ export const useAlertsGroupingState = (groupingId: string, initialGroupings?: Gr
     () => groupingState[groupingId] ?? { activeGroups: ['none'] },
     [groupingState, groupingId]
   );
+
   return {
-    grouping: initialGroupings ? { ...grouping, ...initialGroupings } : grouping,
+    grouping,
     updateGrouping,
   };
 };
