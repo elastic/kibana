@@ -39,8 +39,6 @@ describe('MaintenanceWindowClient - find', () => {
   });
 
   it('throws an error if page is string', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
-
     savedObjectsClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -57,7 +55,8 @@ describe('MaintenanceWindowClient - find', () => {
     } as unknown as SavedObjectsFindResponse);
 
     await expect(
-      findMaintenanceWindows(mockContext, { page: 'dfsd' as unknown as number, perPage: 10 })
+      // @ts-expect-error: testing validation of strings
+      findMaintenanceWindows(mockContext, { page: 'dfsd', perPage: 10 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Error validating find maintenance windows data - [page]: expected value of type [number] but got [string]"'
     );
