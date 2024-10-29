@@ -11,6 +11,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
+  IndicesGetIndexTemplateIndexTemplateItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
@@ -18,7 +19,7 @@ import {
   deserializeDataStream,
   deserializeDataStreamList,
 } from '../../../lib/data_stream_serialization';
-import { EnhancedDataStreamFromEs, TemplateSerialized } from '../../../../common/types';
+import { EnhancedDataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
@@ -38,7 +39,7 @@ const enhanceDataStreams = ({
   meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
   globalMaxRetention?: string;
-  indexTemplates?: Array<{ name: string; index_template: TemplateSerialized }>;
+  indexTemplates?: IndicesGetIndexTemplateIndexTemplateItem[];
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
     const enhancedDataStream: EnhancedDataStreamFromEs = {
