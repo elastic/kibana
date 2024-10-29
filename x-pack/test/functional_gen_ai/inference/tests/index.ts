@@ -7,19 +7,14 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { getAvailableConnectors } from '../../common/connectors';
+import { chatCompleteSuite } from './chat_complete';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   describe('Inference plugin - API integration tests', async () => {
-    const currentConnector = getService('currentConnector');
-
     getAvailableConnectors().forEach((connector) => {
       describe(`Connector ${connector.id}`, () => {
-        before(() => {
-          currentConnector.set(connector.id);
-        });
-
-        loadTestFile(require.resolve('./chat_complete'));
+        chatCompleteSuite(connector.id, providerContext);
       });
     });
   });

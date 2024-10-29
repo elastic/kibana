@@ -6,14 +6,8 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { services as baseServices } from '../../functional/services';
+import { services } from '../../functional/services';
 import { pageObjects } from '../../functional/page_objects';
-import { CurrentConnectorService } from '../common/services/connectors';
-
-const services = {
-  ...baseServices,
-  currentConnector: CurrentConnectorService,
-};
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
 

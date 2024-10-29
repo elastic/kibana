@@ -10,20 +10,10 @@ import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const currentConnector = getService('currentConnector');
+export const chatCompleteSuite = (connectorId: string, { getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   describe('chatComplete API', () => {
-    let connectorId: string;
-
-    before(() => {
-      connectorId = currentConnector.get();
-    });
-
-    afterEach(async () => {});
-
     it('returns a chat completion message for a simple prompt', async () => {
       const response = supertest
         .post(`/internal/inference/chat_complete`)
@@ -46,4 +36,4 @@ export default function ({ getService }: FtrProviderContext) {
       expect(message.content).to.contain('4');
     });
   });
-}
+};
