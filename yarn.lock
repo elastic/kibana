@@ -23862,16 +23862,17 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@^2.4.12:
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.5.2.tgz#dfce10b68dbabc2d5dafeb6d7fb82c3c7073a4d1"
-  integrity sha512-eBsFgU30NYtrfC62XzS1rdAzFK+Br0zKU4ORqD9Qliq86362DWZyPiD6FLfMgy0Ktik83DPTXmqPMz2bqwmJdA==
+msw@^2.5.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.6.0.tgz#ab50752feb5c63de90d70e8165746e2ea84580dd"
+  integrity sha512-n3tx2w0MZ3H4pxY0ozrQ4sNPzK/dGtlr2cIIyuEsgq2Bhy4wvcW6ZH2w/gXM9+MEUY6HC1fWhqtcXDxVZr5Jxw==
   dependencies:
     "@bundled-es-modules/cookie" "^2.0.0"
     "@bundled-es-modules/statuses" "^1.0.1"
     "@bundled-es-modules/tough-cookie" "^0.1.6"
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.36.5"
+    "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/until" "^2.1.0"
     "@types/cookie" "^0.6.0"
     "@types/statuses" "^2.0.4"
