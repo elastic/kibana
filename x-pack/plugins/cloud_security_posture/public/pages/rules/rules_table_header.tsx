@@ -29,6 +29,7 @@ import {
 } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
+import { useRules } from './rules_context';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -39,9 +40,6 @@ export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
 interface RulesTableToolbarProps {
-  search: (value: string) => void;
-  onSectionChange: (value: string[] | undefined) => void;
-  onRuleNumberChange: (value: string[] | undefined) => void;
   sectionSelectOptions: string[];
   ruleNumberSelectOptions: string[];
   totalRulesCount: number;
@@ -64,13 +62,10 @@ interface RuleTableCount {
 }
 
 export const RulesTableHeader = ({
-  search,
   searchValue,
   isSearching,
   totalRulesCount,
   pageSize,
-  onSectionChange,
-  onRuleNumberChange,
   sectionSelectOptions,
   ruleNumberSelectOptions,
   selectedRules,
@@ -79,6 +74,7 @@ export const RulesTableHeader = ({
   setSelectAllRules,
   setSelectedRules,
 }: RulesTableToolbarProps) => {
+  const { setRulesQuery } = useRules();
   const [selectedSection, setSelectedSection] = useState<string[]>([]);
   const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
   const sectionOptions = sectionSelectOptions.map((option) => ({
@@ -104,7 +100,7 @@ export const RulesTableHeader = ({
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
-          <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+          <SearchField isSearching={isSearching} searchValue={searchValue} />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiFlexGroup gutterSize="s" direction="row">
@@ -123,9 +119,9 @@ export const RulesTableHeader = ({
                 id={'cis-section-multi-select-filter'}
                 onChange={(section) => {
                   setSelectedSection([...section?.selectedOptionKeys]);
-                  onSectionChange(
-                    section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined
-                  );
+                  setRulesQuery({
+                    section: section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined,
+                  });
                 }}
                 options={sectionOptions}
                 selectedOptionKeys={selectedSection}
@@ -146,9 +142,11 @@ export const RulesTableHeader = ({
                 id={'rule-number-multi-select-filter'}
                 onChange={(ruleNumber) => {
                   setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
-                  onRuleNumberChange(
-                    ruleNumber?.selectedOptionKeys ? ruleNumber?.selectedOptionKeys : undefined
-                  );
+                  setRulesQuery({
+                    ruleNumber: ruleNumber?.selectedOptionKeys
+                      ? ruleNumber?.selectedOptionKeys
+                      : undefined,
+                  });
                 }}
                 options={ruleNumberOptions}
                 selectedOptionKeys={selectedRuleNumber}
@@ -202,13 +200,20 @@ export const RulesTableHeader = ({
 const SEARCH_DEBOUNCE_MS = 300;
 
 const SearchField = ({
-  search,
   isSearching,
   searchValue,
-}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
+}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue'>) => {
   const [localValue, setLocalValue] = useState(searchValue);
+  const { setRulesQuery } = useRules();
 
-  useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
+  useDebounce(
+    () =>
+      setRulesQuery({
+        search: localValue,
+      }),
+    SEARCH_DEBOUNCE_MS,
+    [localValue]
+  );
 
   return (
     <div>

@@ -29,20 +29,19 @@ import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
+import { useRules } from './rules_context';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
 
 type RulesTableProps = Pick<
   RulesState,
-  'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
+  'loading' | 'error' | 'rules_page' | 'total' | 'perPage'
 > & {
-  setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   onRuleClick: (ruleID: string) => void;
   selectedRuleId?: string;
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-  onSortChange: (value: 'asc' | 'desc') => void;
 };
 
 type GetColumnProps = Pick<
@@ -59,10 +58,8 @@ type GetColumnProps = Pick<
 };
 
 export const RulesTable = ({
-  setPagination,
   perPage: pageSize,
   rules_page: items,
-  page,
   total,
   loading,
   error,
@@ -70,9 +67,9 @@ export const RulesTable = ({
   selectedRules,
   setSelectedRules,
   onRuleClick,
-  onSortChange,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
+  const { setRulesQuery, setPageSize, page } = useRules();
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
     pageSize,
@@ -91,10 +88,13 @@ export const RulesTable = ({
     sort: sortOrder,
   }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
-    if (pagination) setPagination({ page: pagination.index, perPage: pagination.size });
+    if (pagination) {
+      setPageSize(pagination.size);
+      setRulesQuery({ page: pagination.index, perPage: pagination.size });
+    }
     if (sortOrder) {
       setSortDirection(sortOrder.direction);
-      onSortChange(sortOrder.direction);
+      setRulesQuery({ sortOrder: sortOrder.direction });
     }
   };
 

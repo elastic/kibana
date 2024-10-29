@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useParams, useHistory, generatePath } from 'react-router-dom';
 import type {
@@ -22,10 +22,9 @@ import { RulesTableHeader } from './rules_table_header';
 import { useFindCspBenchmarkRule, type RulesQuery } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
-import { usePageSize } from '../../common/hooks/use_page_size';
 import { useCspGetRulesStates } from './use_csp_rules_state';
 import { RulesCounters } from './rules_counters';
+import { useRules } from './rules_context';
 
 export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];
@@ -70,7 +69,7 @@ export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const history = useHistory();
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
-  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+  const { allRules, rulesQuery, pageSize } = useRules();
 
   const navToRuleFlyout = (ruleId: string) => {
     history.push(
@@ -90,52 +89,6 @@ export const RulesContainer = () => {
       })
     );
   };
-
-  // We need to make this call without filters. this way the section list is always full
-  const allRules = useFindCspBenchmarkRule(
-    {
-      page: 1,
-      perPage: MAX_ITEMS_PER_PAGE,
-      sortField: 'metadata.benchmark.rule_number',
-      sortOrder: 'asc',
-    },
-    params.benchmarkId,
-    params.benchmarkVersion
-  );
-
-  const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    section: undefined,
-    ruleNumber: undefined,
-    search: '',
-    page: 0,
-    perPage: pageSize || 10,
-    sortField: 'metadata.benchmark.rule_number',
-    sortOrder: 'asc',
-  });
-
-  // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
-  useEffect(() => {
-    const getPageByRuleId = () => {
-      if (params.ruleId && allRules.data?.items) {
-        const ruleIndex = allRules.data.items.findIndex(
-          (rule) => rule.metadata.id === params.ruleId
-        );
-
-        if (ruleIndex !== -1) {
-          // Calculate the page based on the rule index and page size
-          const rulePage = Math.floor(ruleIndex / pageSize);
-          return rulePage;
-        }
-      }
-      return 0;
-    };
-
-    setRulesQuery({
-      ...rulesQuery,
-      page: getPageByRuleId(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRules.data?.items]);
 
   const { data, status, error } = useFindCspBenchmarkRule(
     {
@@ -185,13 +138,13 @@ export const RulesContainer = () => {
   }, [rulesWithStates, enabledDisabledItemsFilter]);
 
   const sectionList = useMemo(
-    () => allRules.data?.items.map((rule) => rule.metadata.section),
-    [allRules.data]
+    () => allRules?.items.map((rule) => rule.metadata.section),
+    [allRules]
   );
 
   const ruleNumberList = useMemo(
-    () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
-    [allRules.data]
+    () => allRules?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
+    [allRules]
   );
 
   const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
@@ -222,7 +175,7 @@ export const RulesContainer = () => {
           : 'unmuted',
     },
     ...{
-      metadata: allRules.data?.items.find((rule) => rule.metadata.id === params.ruleId)?.metadata!,
+      metadata: allRules?.items.find((rule) => rule.metadata.id === params.ruleId)?.metadata!,
     },
   };
 
@@ -234,15 +187,8 @@ export const RulesContainer = () => {
       />
       <EuiSpacer />
       <RulesTableHeader
-        onSectionChange={(value) =>
-          setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
-        }
-        onRuleNumberChange={(value) =>
-          setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
-        }
         sectionSelectOptions={cleanedSectionList}
         ruleNumberSelectOptions={cleanedRuleNumberList}
-        search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
         searchValue={rulesQuery.search || ''}
         totalRulesCount={rulesPageData.all_rules.length}
         pageSize={rulesPageData.rules_page.length}
@@ -255,19 +201,11 @@ export const RulesContainer = () => {
       />
       <EuiSpacer />
       <RulesTable
-        onSortChange={(value) =>
-          setRulesQuery((currentQuery) => ({ ...currentQuery, sortOrder: value }))
-        }
         rules_page={rulesPageData.rules_page}
         total={rulesPageData.total}
         error={rulesPageData.error}
         loading={rulesPageData.loading}
         perPage={pageSize || rulesQuery.perPage}
-        page={rulesQuery.page}
-        setPagination={(paginationQuery) => {
-          setPageSize(paginationQuery.perPage);
-          setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
-        }}
         selectedRuleId={params.ruleId}
         onRuleClick={navToRuleFlyout}
         selectedRules={selectedRules}
