@@ -52,7 +52,7 @@ export const deleteKnowledgeBaseRoute = (
 
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient({});
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
