@@ -137,6 +137,7 @@ export const GridRow = forwardRef<
             if (oldRowData.isCollapsed !== newRowData.isCollapsed)
               setIsCollapsed(newRowData.isCollapsed);
             if (
+              oldRowData.panelIds.length !== newRowData.panelIds.length ||
               !(
                 oldRowData.panelIds.every((p) => newRowData.panelIds.includes(p)) &&
                 newRowData.panelIds.every((p) => oldRowData.panelIds.includes(p))
