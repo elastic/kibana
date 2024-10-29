@@ -11,7 +11,6 @@ import { schema } from '@kbn/config-schema';
 import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
 import { OasConverter } from './oas_converter';
-import { createOperationIdCounter } from './operation_id_counter';
 import {
   processVersionedRouter,
   extractVersionedResponses,
@@ -125,7 +124,6 @@ describe('processVersionedRouter', () => {
     const baseCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
-      createOperationIdCounter(),
       {}
     );
 
@@ -137,7 +135,6 @@ describe('processVersionedRouter', () => {
     const filteredCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
-      createOperationIdCounter(),
       { version: '2023-10-31' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
@@ -149,7 +146,6 @@ describe('processVersionedRouter', () => {
     const results = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
-      createOperationIdCounter(),
       {}
     );
     expect(results.paths['/foo']).toBeDefined();

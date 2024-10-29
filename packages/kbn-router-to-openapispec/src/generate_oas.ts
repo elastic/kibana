@@ -10,7 +10,6 @@
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import { OasConverter } from './oas_converter';
-import { createOperationIdCounter } from './operation_id_counter';
 import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
 import { buildGlobalTags } from './util';
@@ -40,14 +39,13 @@ export const generateOpenApiDocument = (
 ): OpenAPIV3.Document => {
   const { filters } = opts;
   const converter = new OasConverter();
-  const getOpId = createOperationIdCounter();
   const paths: OpenAPIV3.PathsObject = {};
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, getOpId, filters);
+    const result = processRouter(router, converter, filters);
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
-    const result = processVersionedRouter(router, converter, getOpId, filters);
+    const result = processVersionedRouter(router, converter, filters);
     Object.assign(paths, result.paths);
   }
   const tags = buildGlobalTags(paths, opts.tags);
