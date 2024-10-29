@@ -136,8 +136,14 @@ export const GridRow = forwardRef<
             if (oldRowData.title !== newRowData.title) setRowTitle(newRowData.title);
             if (oldRowData.isCollapsed !== newRowData.isCollapsed)
               setIsCollapsed(newRowData.isCollapsed);
-            if (JSON.stringify(oldRowData.panelIds) !== JSON.stringify(newRowData.panelIds))
+            if (
+              !(
+                oldRowData.panelIds.every((p) => newRowData.panelIds.includes(p)) &&
+                newRowData.panelIds.every((p) => oldRowData.panelIds.includes(p))
+              )
+            ) {
               setPanelIds(newRowData.panelIds);
+            }
           });
 
         return () => {
