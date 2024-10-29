@@ -85,18 +85,21 @@ describe('processRouter', () => {
   const testRouter = {
     getRoutes: () => [
       {
+        method: 'get',
         path: '/foo',
         options: { access: 'internal', deprecated: true, discontinued: 'discontinued router' },
         handler: jest.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
       },
       {
+        method: 'get',
         path: '/bar',
         options: {},
         handler: jest.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
       },
       {
+        method: 'get',
         path: '/baz',
         options: {},
         handler: jest.fn(),
