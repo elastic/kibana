@@ -221,7 +221,7 @@ describe('ConnectorUsageReportingTask', () => {
     );
   });
 
-  it('returns the existin state and logs warning when project id is missing', async () => {
+  it('returns the existing state and logs a warning when project id is missing', async () => {
     const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
     const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
 
@@ -241,7 +241,7 @@ describe('ConnectorUsageReportingTask', () => {
     });
   });
 
-  it('returns the existin state and logs error when the CA Certificate is missing', async () => {
+  it('returns the existing state and logs an error when the CA Certificate is missing', async () => {
     const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
     const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
     readFileSpy.mockImplementationOnce((func) => {
