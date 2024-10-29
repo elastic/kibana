@@ -99,6 +99,7 @@ export function buildMockDashboard({
       lastSavedInput: initialInput,
       lastSavedId: savedObjectId,
       managed: false,
+      fullScreenMode: false,
     }
   );
   dashboardContainer?.setControlGroupApi(mockControlGroupApi);
