@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -116,14 +116,20 @@ export const injectESQLQueryIntoLensLayers = (
   if (!datasourceId || datasourceId === 'formBased') {
     return visAttributes;
   }
-  const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
 
-  Object.values(datasourceState.layers).forEach((layer) => {
-    if (!isEqual(layer.query, query)) {
-      layer.query = query;
-    }
-  });
+  if (!visAttributes.state.datasourceStates[datasourceId]) {
+    return visAttributes;
+  }
 
+  const datasourceState = cloneDeep(visAttributes.state.datasourceStates[datasourceId]);
+
+  if (datasourceState && datasourceState.layers) {
+    Object.values(datasourceState.layers).forEach((layer) => {
+      if (!isEqual(layer.query, query)) {
+        layer.query = query;
+      }
+    });
+  }
   return {
     ...visAttributes,
     state: {
