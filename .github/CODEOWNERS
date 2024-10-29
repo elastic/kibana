@@ -1568,7 +1568,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
-/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/test/functional/services/grok_debugger.js @elastic/kibana-management
 /x-pack/test/functional/apps/grok_debugger @elastic/kibana-management
