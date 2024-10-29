@@ -16,7 +16,10 @@ import { PreviewPanelFooter } from './footer';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {

@@ -34,7 +34,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
 
 const ruleUuid = {
   category: 'kibana',

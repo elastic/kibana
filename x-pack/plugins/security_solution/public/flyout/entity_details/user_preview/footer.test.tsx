@@ -12,7 +12,10 @@ import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_c
 import type { UserPreviewPanelFooterProps } from './footer';
 import { UserPreviewPanelFooter } from './footer';
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const mockProps: UserPreviewPanelFooterProps = {
   userName: 'test',

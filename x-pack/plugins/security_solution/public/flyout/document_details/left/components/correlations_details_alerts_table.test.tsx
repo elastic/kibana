@@ -23,7 +23,10 @@ jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];

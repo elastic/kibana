@@ -12,7 +12,10 @@ import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_c
 import type { HostPreviewPanelFooterProps } from './footer';
 import { HostPreviewPanelFooter } from './footer';
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const mockProps: HostPreviewPanelFooterProps = {
   hostName: 'test',

@@ -39,8 +39,6 @@ import type {
 } from '@hello-pangea/dnd';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { createExpandableFlyoutApiMock } from '../../../../common/mock/expandable_flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
@@ -101,7 +99,11 @@ jest.mock('react-redux', () => {
 });
 
 const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+  };
+});
 
 const mockedTelemetry = createTelemetryServiceMock();
 
@@ -234,11 +236,6 @@ describe('Body', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
-
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
     mockUseKibana.mockReturnValue({
       services: {

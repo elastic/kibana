@@ -11,9 +11,10 @@ import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
 import { getFieldMarkdownRenderer } from '.';
-import { createExpandableFlyoutApiMock } from '../../../common/mock/expandable_flyout';
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+}));
 
 describe('getFieldMarkdownRenderer', () => {
   const mockOpenRightPanel = jest.fn();
@@ -25,7 +26,14 @@ describe('getFieldMarkdownRenderer', () => {
     jest.clearAllMocks();
 
     mockUseExpandableFlyoutApi.mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
+      closeFlyout: jest.fn(),
+      closeLeftPanel: jest.fn(),
+      closePreviewPanel: jest.fn(),
+      closeRightPanel: jest.fn(),
+      previousPreviewPanel: jest.fn(),
+      openFlyout: jest.fn(),
+      openLeftPanel: jest.fn(),
+      openPreviewPanel: jest.fn(),
       openRightPanel: mockOpenRightPanel,
     });
   });
