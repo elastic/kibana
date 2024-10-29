@@ -9,10 +9,7 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  getCreateRulesSchemaMock,
-  getRulesSchemaMock,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -20,6 +17,7 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
+import { getValidatedRuleToImportMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -33,14 +31,12 @@ describe('DetectionRulesClient.importRule', () => {
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   let actionsClient: jest.Mocked<ActionsClient>;
 
-  const immutable = false as const; // Can only take value of false
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
-    ...getCreateRulesSchemaMock(),
+    ...getValidatedRuleToImportMock(),
     tags: ['import-tag'],
     rule_id: 'rule-id',
     version: 1,
-    immutable,
   };
   const existingRule = getRulesSchemaMock();
   existingRule.rule_id = ruleToImport.rule_id;
@@ -72,9 +68,10 @@ describe('DetectionRulesClient.importRule', () => {
           name: ruleToImport.name,
           tags: ruleToImport.tags,
           params: expect.objectContaining({
-            immutable,
+            immutable: ruleToImport.immutable,
             ruleId: ruleToImport.rule_id,
             version: ruleToImport.version,
+            ruleSource: { type: 'internal' },
           }),
         }),
         allowMissingConnectorSecrets,
@@ -115,8 +112,11 @@ describe('DetectionRulesClient.importRule', () => {
             name: ruleToImport.name,
             tags: ruleToImport.tags,
             params: expect.objectContaining({
-              index: ruleToImport.index,
               description: ruleToImport.description,
+              immutable: ruleToImport.immutable,
+              ruleId: ruleToImport.rule_id,
+              version: ruleToImport.version,
+              ruleSource: { type: 'internal' },
             }),
           }),
           id: existingRule.id,
@@ -227,6 +227,39 @@ describe('DetectionRulesClient.importRule', () => {
       );
     });
 
+    it('preserves the passed "rule_source" and "immutable" values', async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        overrideFields: {
+          immutable: true,
+          rule_source: {
+            type: 'external' as const,
+            is_customized: true,
+          },
+        },
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              immutable: true,
+              ruleSource: {
+                isCustomized: true,
+                type: 'external',
+              },
+            }),
+          }),
+        })
+      );
+    });
+
     it('rejects when overwriteRules is false', async () => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(existingRule);
       await expect(
@@ -237,11 +270,159 @@ describe('DetectionRulesClient.importRule', () => {
         })
       ).rejects.toMatchObject({
         error: {
-          status_code: 409,
+          ruleId: ruleToImport.rule_id,
+          type: 'conflict',
           message: `rule_id: "${ruleToImport.rule_id}" already exists`,
         },
-        rule_id: ruleToImport.rule_id,
       });
+    });
+
+    it("always uses the existing rule's 'id' value", async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+        id: 'some-id',
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+        })
+      );
+    });
+
+    it("uses the existing rule's 'version' value if not unspecified", async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+        version: undefined,
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              version: existingRule.version,
+            }),
+          }),
+        })
+      );
+    });
+
+    it("uses the specified 'version' value", async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+        version: 42,
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              version: rule.version,
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('when importing a new rule', () => {
+    beforeEach(() => {
+      (getRuleByRuleId as jest.Mock).mockReset().mockResolvedValueOnce(null);
+    });
+
+    it('preserves the passed "rule_source" and "immutable" values', async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        overrideFields: {
+          immutable: true,
+          rule_source: {
+            type: 'external' as const,
+            is_customized: true,
+          },
+        },
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              immutable: true,
+              ruleSource: {
+                isCustomized: true,
+                type: 'external',
+              },
+            }),
+          }),
+        })
+      );
+    });
+
+    it('preserves the passed "enabled" value', async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+        enabled: true,
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            enabled: true,
+          }),
+        })
+      );
+    });
+
+    it('defaults defaultable values', async () => {
+      const rule = {
+        ...getValidatedRuleToImportMock(),
+      };
+
+      await detectionRulesClient.importRule({
+        ruleToImport: rule,
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            actions: [],
+          }),
+        })
+      );
     });
   });
 });

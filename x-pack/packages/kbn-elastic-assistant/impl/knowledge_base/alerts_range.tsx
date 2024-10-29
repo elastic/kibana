@@ -66,6 +66,7 @@ export const AlertsRange: React.FC<Props> = React.memo(
     return (
       <EuiRange
         aria-label={ALERTS_RANGE}
+        fullWidth
         compressed={compressed}
         css={css`
           max-inline-size: ${MAX_ALERTS_RANGE_WIDTH}px;

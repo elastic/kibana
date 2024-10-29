@@ -324,10 +324,16 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
 function workoutBuiltinOptions(
   nodeArg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): { skipAssign: boolean } {
+): { skipAssign: boolean; commandsToInclude?: string[] } {
+  const commandsToInclude =
+    (isSingleItem(nodeArg) && nodeArg.text?.toLowerCase().trim().endsWith('null')) ?? false
+      ? ['and', 'or']
+      : undefined;
+
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
     skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references)),
+    commandsToInclude,
   };
 }
 
@@ -447,7 +453,10 @@ function isFunctionArgComplete(
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return arg.args.every((a, index) => {
-      return def.params[index].type === extractTypeFromASTArg(a, references);
+      return (
+        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        def.params[index].type === extractTypeFromASTArg(a, references)
+      );
     });
   });
   if (!hasCorrectTypes) {
@@ -587,6 +596,17 @@ async function getExpressionSuggestionsByType(
 
   const suggestions: SuggestionRawDefinition[] = [];
 
+  // When user types and accepts autocomplete suggestion, and cursor is placed at the end of a valid field
+  // we should not show irrelevant functions that might have words matching
+  const columnWithActiveCursor = commands.find(
+    (c) =>
+      c.name === command.name &&
+      command.name === 'eval' &&
+      c.args.some((arg) => isColumnItem(arg) && arg.name.includes(EDITOR_MARKER))
+  );
+
+  const shouldShowFunctions = !columnWithActiveCursor;
+
   // in this flow there's a clear plan here from argument definitions so try to follow it
   if (argDef) {
     if (argDef.type === 'column' || argDef.type === 'any' || argDef.type === 'function') {
@@ -713,7 +733,7 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: true,
+              functions: shouldShowFunctions,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
               literals: argDef.constantOnly,
@@ -1140,11 +1160,12 @@ async function getBuiltinFunctionNextArgument(
   }
   return suggestions.map<SuggestionRawDefinition>((s) => {
     const overlap = getOverlapRange(queryText, s.text);
+    const offset = overlap.start === overlap.end ? 1 : 0;
     return {
       ...s,
       rangeToReplace: {
-        start: overlap.start,
-        end: overlap.end,
+        start: overlap.start + offset,
+        end: overlap.end + offset,
       },
     };
   });
@@ -1770,10 +1791,15 @@ async function getOptionArgsSuggestions(
             innerText,
             command,
             option,
-            { type: argDef?.type || 'any' },
+            { type: argDef?.type || 'unknown' },
             nodeArg,
             nodeArgType as string,
-            references,
+            {
+              fields: references.fields,
+              // you can't use a variable defined
+              // in the stats command in the by clause
+              variables: new Map(),
+            },
             getFieldsByType
           ))
         );

@@ -79,6 +79,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution\/inventory/,
+        /^packages\/kbn-apm-synthtrace/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/inventory_cypress.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/observability_onboarding/,
         /^x-pack\/plugins\/fleet/,
       ])) ||
@@ -295,6 +305,22 @@ const getPipeline = (filename: string, removeSteps = true) => {
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml')
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/packages\/kbn-cloud-security-posture/,
+        /^x-pack\/plugins\/cloud_security_posture/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/test\/security_solution_cypress/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
+        )
       );
     }
 

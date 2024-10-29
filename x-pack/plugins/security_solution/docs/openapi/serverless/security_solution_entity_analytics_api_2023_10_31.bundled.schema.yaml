@@ -806,6 +806,7 @@ components:
         - started
         - stopped
         - updating
+        - error
       type: string
     Entity:
       oneOf:
@@ -924,9 +925,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -1076,9 +1075,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source

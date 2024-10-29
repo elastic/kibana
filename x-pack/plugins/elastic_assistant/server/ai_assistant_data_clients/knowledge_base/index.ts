@@ -54,6 +54,7 @@ import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_l
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
   modelIdOverride?: string;
   v2KnowledgeBaseEnabled?: boolean;
+  manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
@@ -63,6 +64,7 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   v2KnowledgeBaseEnabled: boolean;
+  manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -307,12 +309,16 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
     const authenticatedUser = this.options.currentUser;
-    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
+
+    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+      throw new Error('User lacks privileges to create global knowledge base entries');
+    }
+
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
         // v1 schema has metadata nested in a `metadata` object
@@ -521,12 +527,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
-    // TODO: KB-RBAC check for when `global:true`
+
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
+
+    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
+      throw new Error('User lacks privileges to create global knowledge base entries');
+    }
+
     this.options.logger.debug(
       () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );

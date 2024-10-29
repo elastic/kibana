@@ -21,13 +21,13 @@ import { EntityType } from '../../../../common/api/entity_analytics/entity_store
 import type { Criteria } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 import { SeverityFilter } from '../severity/severity_filter';
-import type { EntitySource } from './components/entity_source_filter';
 import { EntitySourceFilter } from './components/entity_source_filter';
 import { useEntitiesListFilters } from './hooks/use_entities_list_filters';
 import { AssetCriticalityFilter } from '../asset_criticality/asset_criticality_filter';
 import { useEntitiesListQuery } from './hooks/use_entities_list_query';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
+import type { EntitySourceTag } from './types';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -41,7 +41,7 @@ export const EntitiesList: React.FC = () => {
 
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
-  const [selectedSources, setSelectedSources] = useState<EntitySource[]>([]);
+  const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,

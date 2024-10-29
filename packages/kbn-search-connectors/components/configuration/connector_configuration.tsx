@@ -43,6 +43,7 @@ function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; 
 interface ConnectorConfigurationProps {
   connector: Connector;
   hasPlatinumLicense: boolean;
+  isDisabled?: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
   saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
@@ -89,6 +90,7 @@ export const ConnectorConfigurationComponent: FC<
   children,
   connector,
   hasPlatinumLicense,
+  isDisabled,
   isLoading,
   saveConfig,
   saveAndSync,
@@ -207,6 +209,7 @@ export const ConnectorConfigurationComponent: FC<
                         data-test-subj="entSearchContent-connector-configuration-editConfiguration"
                         data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
                         onClick={() => setIsEditing(!isEditing)}
+                        isDisabled={isDisabled}
                       >
                         {i18n.translate(
                           'searchConnectors.configurationConnector.config.editButton.title',

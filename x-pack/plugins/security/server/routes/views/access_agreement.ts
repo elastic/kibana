@@ -24,7 +24,7 @@ export function defineAccessAgreementRoutes({
   const canHandleRequest = () => license.getFeatures().allowAccessAgreement;
 
   httpResources.register(
-    { path: '/security/access_agreement', validate: false },
+    { path: '/security/access_agreement', validate: false, options: { excludeFromOAS: true } },
     createLicensedRouteHandler(async (context, request, response) =>
       canHandleRequest()
         ? response.renderCoreApp()

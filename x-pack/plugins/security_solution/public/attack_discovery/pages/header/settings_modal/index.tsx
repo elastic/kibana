@@ -24,7 +24,7 @@ import {
   SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
 } from '@kbn/elastic-assistant';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { AlertsSettings } from './alerts_settings';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
