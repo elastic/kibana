@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import supertestLib from 'supertest';
 import url from 'url';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
