@@ -310,6 +310,7 @@ export class DashboardContainer
             isEmbeddedExternally: false,
             lastSavedInput: initialInput,
             lastSavedId: undefined,
+            fullScreenMode: false,
             managed: false,
           },
       (id: string) => this.untilEmbeddableLoaded(id)
