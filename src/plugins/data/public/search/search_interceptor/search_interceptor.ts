@@ -474,7 +474,7 @@ export class SearchInterceptor {
           const warning = rawResponse.response?.headers.get('warning');
           const requestParams =
             response.requestParams ??
-            JSON.parse(rawResponse.response?.headers.get('requestParams') || '{}');
+            JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
           const isRestored =
             response.isRestored ?? rawResponse.response?.headers.get('kbn-is-restored') === '?1';
           const error = (response as unknown as Record<string, unknown>).error;
