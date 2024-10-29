@@ -284,6 +284,27 @@ describe('getOpId', () => {
       },
       output: 'delete-my-really-cool-domain-resource',
     },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{id}',
+      },
+      output: 'get-my-resource-id',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{id}/{type?}',
+      },
+      output: 'get-my-resource-id-type',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{id?}',
+      },
+      output: 'get-my-resource-id',
+    },
   ])('$input.method $input.path -> $output', ({ input, output }) => {
     expect(getOpId(input)).toBe(output);
   });
