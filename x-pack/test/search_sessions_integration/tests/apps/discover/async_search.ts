@@ -126,7 +126,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
       // navigate to Discover
-      await searchSessionListBeforeRestore[0].view();
+      await browser.navigateTo(searchSessionListBeforeRestore[0].mainUrl); // await searchSessionListBeforeRestore[0].view();
       await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await discover.hasNoResults()).to.be(true);
