@@ -164,7 +164,7 @@ export function NavControl() {
             onClose={() => {
               setIsOpen(false);
             }}
-            navigateToConversation={(conversationId: string) => {
+            navigateToConversation={(conversationId?: string) => {
               application.navigateToUrl(
                 http.basePath.prepend(
                   `/app/observabilityAIAssistant/conversations/${conversationId || ''}`

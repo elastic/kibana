@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { type FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedObjectReference } from '@kbn/core/types';
-import { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { Tag, TagWithOptionalId } from '../../../common/types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { Tag, TagWithOptionalId } from '../../../common/types';
 import { getObjectTags } from '../../utils';
 import { TagList } from '../base';
-import { ITagsCache } from '../../services';
+import type { ITagsCache } from '../../services';
 import { byNameTagSorter } from '../../utils';
 
 interface SavedObjectTagListProps {
