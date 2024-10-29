@@ -13,7 +13,6 @@ import * as i18n from './translations';
 
 const EmptyWrapper = styled.span`
   color: ${(props) => {
-    console.log({ props });
     return props.theme.eui.euiTextSubduedColor;
   }}};
 `;

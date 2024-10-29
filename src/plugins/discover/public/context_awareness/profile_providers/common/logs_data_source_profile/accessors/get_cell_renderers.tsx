@@ -40,8 +40,8 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
       {}
     ),
     [SOURCE_COLUMN]: getSummaryColumn(params),
-    'error.message': function ErrorMessage(params) {
-      const errorMessage = getFieldValue(params.row, 'error.message');
+    'error.message': function ErrorMessage(props) {
+      const errorMessage = getFieldValue(props.row, 'error.message');
       const test = useContext(testContext);
       return (
         <>

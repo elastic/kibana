@@ -31,7 +31,6 @@ export const useRiskScoreFeatureStatus = (
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
-  console.log({ isPlatinumOrTrialLicense, hasEntityAnalyticsCapability, isAuthorized });
   const { getRiskScoreIndexStatus } = useEntityAnalyticsRoutes();
 
   const { fetch, data, isLoading, error } = useFetch(
