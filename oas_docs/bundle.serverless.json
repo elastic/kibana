@@ -347,7 +347,7 @@
     "/api/actions": {
       "get": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions#0",
+        "operationId": "get-actions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -372,7 +372,7 @@
     "/api/actions/action": {
       "post": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction#0",
+        "operationId": "post-actions-action",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -496,7 +496,7 @@
       "delete": {
         "deprecated": true,
         "description": "WARNING: When you delete a connector, it cannot be recovered.",
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#0",
+        "operationId": "delete-actions-action-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -542,7 +542,7 @@
       },
       "get": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#1",
+        "operationId": "get-actions-action-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -628,7 +628,7 @@
       },
       "put": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#2",
+        "operationId": "put-actions-action-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -754,7 +754,7 @@
     "/api/actions/action/{id}/_execute": {
       "post": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0",
+        "operationId": "post-actions-action-id-_execute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -871,7 +871,7 @@
     "/api/actions/connector/{id}": {
       "delete": {
         "description": "WARNING: When you delete a connector, it cannot be recovered.",
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0",
+        "operationId": "delete-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -916,7 +916,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1",
+        "operationId": "get-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1001,7 +1001,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0",
+        "operationId": "post-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1130,7 +1130,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2",
+        "operationId": "put-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1257,7 +1257,7 @@
     "/api/actions/connector/{id}/_execute": {
       "post": {
         "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.",
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0",
+        "operationId": "post-actions-connector-id-_execute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1374,7 +1374,7 @@
     "/api/actions/connector_types": {
       "get": {
         "description": "You do not need any Kibana feature privileges to run this API.",
-        "operationId": "%2Fapi%2Factions%2Fconnector_types#0",
+        "operationId": "get-actions-connector_types",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1407,7 +1407,7 @@
     },
     "/api/actions/connectors": {
       "get": {
-        "operationId": "%2Fapi%2Factions%2Fconnectors#0",
+        "operationId": "get-actions-connectors",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1432,7 +1432,7 @@
     "/api/actions/list_action_types": {
       "get": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Flist_action_types#0",
+        "operationId": "get-actions-list_action_types",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1456,7 +1456,7 @@
     },
     "/api/alerting/rule/{id}": {
       "delete": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2",
+        "operationId": "delete-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1510,7 +1510,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#0",
+        "operationId": "get-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -2388,7 +2388,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%3F%7D#0",
+        "operationId": "post-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -3568,7 +3568,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#1",
+        "operationId": "put-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4736,7 +4736,7 @@
     },
     "/api/alerting/rule/{id}/_disable": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0",
+        "operationId": "post-alerting-rule-id-_disable",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4810,7 +4810,7 @@
     },
     "/api/alerting/rule/{id}/_enable": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0",
+        "operationId": "post-alerting-rule-id-_enable",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4866,7 +4866,7 @@
     },
     "/api/alerting/rule/{id}/_mute_all": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0",
+        "operationId": "post-alerting-rule-id-_mute_all",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4922,7 +4922,7 @@
     },
     "/api/alerting/rule/{id}/_unmute_all": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0",
+        "operationId": "post-alerting-rule-id-_unmute_all",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4978,7 +4978,7 @@
     },
     "/api/alerting/rule/{id}/_update_api_key": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0",
+        "operationId": "post-alerting-rule-id-_update_api_key",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5037,7 +5037,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0",
+        "operationId": "post-alerting-rule-rule_id-alert-alert_id-_mute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5102,7 +5102,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0",
+        "operationId": "post-alerting-rule-rule_id-alert-alert_id-_unmute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5167,7 +5167,7 @@
     },
     "/api/alerting/rules/_find": {
       "get": {
-        "operationId": "%2Fapi%2Falerting%2Frules%2F_find#0",
+        "operationId": "get-alerting-rules-_find",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6177,7 +6177,7 @@
     },
     "/api/fleet/agent-status": {
       "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
+        "operationId": "get-fleet-agent-status",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6235,7 +6235,7 @@
     "/api/fleet/agent_download_sources": {
       "get": {
         "description": "List agent binary download sources",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources#0",
+        "operationId": "get-fleet-agent_download_sources",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6344,7 +6344,7 @@
       },
       "post": {
         "description": "Create agent binary download source",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources#1",
+        "operationId": "post-fleet-agent_download_sources",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6485,7 +6485,7 @@
     "/api/fleet/agent_download_sources/{sourceId}": {
       "delete": {
         "description": "Delete agent binary download source by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#2",
+        "operationId": "delete-fleet-agent_download_sources-sourceid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6570,7 +6570,7 @@
       },
       "get": {
         "description": "Get agent binary download source by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#0",
+        "operationId": "get-fleet-agent_download_sources-sourceid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6672,7 +6672,7 @@
       },
       "put": {
         "description": "Update agent binary download source by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#1",
+        "operationId": "put-fleet-agent_download_sources-sourceid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6821,7 +6821,7 @@
     "/api/fleet/agent_policies": {
       "get": {
         "description": "List agent policies",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies#0",
+        "operationId": "get-fleet-agent_policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7659,7 +7659,7 @@
       },
       "post": {
         "description": "Create an agent policy",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies#1",
+        "operationId": "post-fleet-agent_policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -8654,7 +8654,7 @@
     "/api/fleet/agent_policies/_bulk_get": {
       "post": {
         "description": "Bulk get agent policies",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F_bulk_get#0",
+        "operationId": "post-fleet-agent_policies-_bulk_get",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -9441,7 +9441,7 @@
     "/api/fleet/agent_policies/delete": {
       "post": {
         "description": "Delete agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Fdelete#0",
+        "operationId": "post-fleet-agent_policies-delete",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -9546,7 +9546,7 @@
     "/api/fleet/agent_policies/outputs": {
       "post": {
         "description": "Get list of outputs associated with agent policies",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0",
+        "operationId": "post-fleet-agent_policies-outputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -9731,7 +9731,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
         "description": "Get an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#0",
+        "operationId": "get-fleet-agent_policies-agentpolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -10482,7 +10482,7 @@
       },
       "put": {
         "description": "Update an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#1",
+        "operationId": "put-fleet-agent_policies-agentpolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -11489,7 +11489,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/copy": {
       "post": {
         "description": "Copy an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fcopy#0",
+        "operationId": "post-fleet-agent_policies-agentpolicyid-copy",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12274,7 +12274,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
         "description": "Download an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fdownload#0",
+        "operationId": "get-fleet-agent_policies-agentpolicyid-download",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12391,7 +12391,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/full": {
       "get": {
         "description": "Get a full agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Ffull#0",
+        "operationId": "get-fleet-agent_policies-agentpolicyid-full",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12893,7 +12893,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
       "get": {
         "description": "Get list of outputs associated with agent policy by policy id",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Foutputs#0",
+        "operationId": "get-fleet-agent_policies-agentpolicyid-outputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -13051,7 +13051,7 @@
     "/api/fleet/agent_status": {
       "get": {
         "description": "Get agent status summary",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_status#0",
+        "operationId": "get-fleet-agent_status",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -13205,7 +13205,7 @@
     "/api/fleet/agent_status/data": {
       "get": {
         "description": "Get incoming agent data",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_status%2Fdata#0",
+        "operationId": "get-fleet-agent_status-data",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -13321,7 +13321,7 @@
     "/api/fleet/agents": {
       "get": {
         "description": "List agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents#0",
+        "operationId": "get-fleet-agents",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14260,7 +14260,7 @@
       },
       "post": {
         "description": "List agents by action ids",
-        "operationId": "%2Fapi%2Ffleet%2Fagents#1",
+        "operationId": "post-fleet-agents",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14363,7 +14363,7 @@
     "/api/fleet/agents/action_status": {
       "get": {
         "description": "Get agent action status",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Faction_status#0",
+        "operationId": "get-fleet-agents-action_status",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14599,7 +14599,7 @@
     "/api/fleet/agents/actions/{actionId}/cancel": {
       "post": {
         "description": "Cancel agent action",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Factions%2F%7BactionId%7D%2Fcancel#0",
+        "operationId": "post-fleet-agents-actions-actionid-cancel",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14741,7 +14741,7 @@
     "/api/fleet/agents/available_versions": {
       "get": {
         "description": "Get available agent versions",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Favailable_versions#0",
+        "operationId": "get-fleet-agents-available_versions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14813,7 +14813,7 @@
     "/api/fleet/agents/bulk_reassign": {
       "post": {
         "description": "Bulk reassign agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_reassign#0",
+        "operationId": "post-fleet-agents-bulk_reassign",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14931,7 +14931,7 @@
     "/api/fleet/agents/bulk_request_diagnostics": {
       "post": {
         "description": "Bulk request diagnostics from agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_request_diagnostics#0",
+        "operationId": "post-fleet-agents-bulk_request_diagnostics",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15050,7 +15050,7 @@
     "/api/fleet/agents/bulk_unenroll": {
       "post": {
         "description": "Bulk unenroll agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_unenroll#0",
+        "operationId": "post-fleet-agents-bulk_unenroll",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15174,7 +15174,7 @@
     "/api/fleet/agents/bulk_update_agent_tags": {
       "post": {
         "description": "Bulk update agent tags",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_update_agent_tags#0",
+        "operationId": "post-fleet-agents-bulk_update_agent_tags",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15300,7 +15300,7 @@
     "/api/fleet/agents/bulk_upgrade": {
       "post": {
         "description": "Bulk upgrade agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_upgrade#0",
+        "operationId": "post-fleet-agents-bulk_upgrade",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15434,7 +15434,7 @@
     "/api/fleet/agents/files/{fileId}": {
       "delete": {
         "description": "Delete file uploaded by agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D#0",
+        "operationId": "delete-fleet-agents-files-fileid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15525,7 +15525,7 @@
     "/api/fleet/agents/files/{fileId}/{fileName}": {
       "get": {
         "description": "Get file uploaded by agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D%2F%7BfileName%7D#0",
+        "operationId": "get-fleet-agents-files-fileid-filename",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15601,7 +15601,7 @@
     "/api/fleet/agents/setup": {
       "get": {
         "description": "Get agent setup info",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fsetup#0",
+        "operationId": "get-fleet-agents-setup",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15702,7 +15702,7 @@
       },
       "post": {
         "description": "Initiate agent setup",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fsetup#1",
+        "operationId": "post-fleet-agents-setup",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15802,7 +15802,7 @@
     "/api/fleet/agents/tags": {
       "get": {
         "description": "List agent tags",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Ftags#0",
+        "operationId": "get-fleet-agents-tags",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15891,7 +15891,7 @@
     "/api/fleet/agents/{agentId}": {
       "delete": {
         "description": "Delete agent by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#2",
+        "operationId": "delete-fleet-agents-agentid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15979,7 +15979,7 @@
       },
       "get": {
         "description": "Get agent by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#0",
+        "operationId": "get-fleet-agents-agentid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -16444,7 +16444,7 @@
       },
       "put": {
         "description": "Update agent by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#1",
+        "operationId": "put-fleet-agents-agentid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -16934,7 +16934,7 @@
     "/api/fleet/agents/{agentId}/actions": {
       "post": {
         "description": "Create agent action",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Factions#0",
+        "operationId": "post-fleet-agents-agentid-actions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17151,7 +17151,7 @@
     "/api/fleet/agents/{agentId}/reassign": {
       "post": {
         "description": "Reassign agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#1",
+        "operationId": "post-fleet-agents-agentid-reassign",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17246,7 +17246,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
+        "operationId": "put-fleet-agents-agentid-reassign",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17305,7 +17305,7 @@
     "/api/fleet/agents/{agentId}/request_diagnostics": {
       "post": {
         "description": "Request agent diagnostics",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Frequest_diagnostics#0",
+        "operationId": "post-fleet-agents-agentid-request_diagnostics",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17414,7 +17414,7 @@
     "/api/fleet/agents/{agentId}/unenroll": {
       "post": {
         "description": "Unenroll agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Funenroll#0",
+        "operationId": "post-fleet-agents-agentid-unenroll",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17476,7 +17476,7 @@
     "/api/fleet/agents/{agentId}/upgrade": {
       "post": {
         "description": "Upgrade agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fupgrade#0",
+        "operationId": "post-fleet-agents-agentid-upgrade",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17583,7 +17583,7 @@
     "/api/fleet/agents/{agentId}/uploads": {
       "get": {
         "description": "List agent uploads",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fuploads#0",
+        "operationId": "get-fleet-agents-agentid-uploads",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17703,7 +17703,7 @@
     "/api/fleet/check-permissions": {
       "get": {
         "description": "Check permissions",
-        "operationId": "%2Fapi%2Ffleet%2Fcheck-permissions#0",
+        "operationId": "get-fleet-check-permissions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17788,7 +17788,7 @@
     "/api/fleet/data_streams": {
       "get": {
         "description": "List data streams",
-        "operationId": "%2Fapi%2Ffleet%2Fdata_streams#0",
+        "operationId": "get-fleet-data_streams",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17945,7 +17945,7 @@
     },
     "/api/fleet/enrollment-api-keys": {
       "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#0",
+        "operationId": "get-fleet-enrollment-api-keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17991,7 +17991,7 @@
         "tags": []
       },
       "post": {
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#1",
+        "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18047,7 +18047,7 @@
     },
     "/api/fleet/enrollment-api-keys/{keyId}": {
       "delete": {
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1",
+        "operationId": "delete-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18085,7 +18085,7 @@
         "tags": []
       },
       "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0",
+        "operationId": "get-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18116,7 +18116,7 @@
     "/api/fleet/enrollment_api_keys": {
       "get": {
         "description": "List enrollment API keys",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys#0",
+        "operationId": "get-fleet-enrollment_api_keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18304,7 +18304,7 @@
       },
       "post": {
         "description": "Create enrollment API key",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys#1",
+        "operationId": "post-fleet-enrollment_api_keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18450,7 +18450,7 @@
     "/api/fleet/enrollment_api_keys/{keyId}": {
       "delete": {
         "description": "Revoke enrollment API key by ID by marking it as inactive",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#1",
+        "operationId": "delete-fleet-enrollment_api_keys-keyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18538,7 +18538,7 @@
       },
       "get": {
         "description": "Get enrollment API key by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#0",
+        "operationId": "get-fleet-enrollment_api_keys-keyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18651,7 +18651,7 @@
     "/api/fleet/epm/bulk_assets": {
       "post": {
         "description": "Bulk get assets",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fbulk_assets#0",
+        "operationId": "post-fleet-epm-bulk_assets",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18802,7 +18802,7 @@
     "/api/fleet/epm/categories": {
       "get": {
         "description": "List package categories",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fcategories#0",
+        "operationId": "get-fleet-epm-categories",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18951,7 +18951,7 @@
     "/api/fleet/epm/custom_integrations": {
       "post": {
         "description": "Create custom integration",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fcustom_integrations#0",
+        "operationId": "post-fleet-epm-custom_integrations",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -19233,7 +19233,7 @@
     "/api/fleet/epm/data_streams": {
       "get": {
         "description": "List data streams",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fdata_streams#0",
+        "operationId": "get-fleet-epm-data_streams",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -19359,7 +19359,7 @@
     "/api/fleet/epm/packages": {
       "get": {
         "description": "List packages",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages#0",
+        "operationId": "get-fleet-epm-packages",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -20428,7 +20428,7 @@
       },
       "post": {
         "description": "Install package by upload",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages#1",
+        "operationId": "post-fleet-epm-packages",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -20690,7 +20690,7 @@
     "/api/fleet/epm/packages/_bulk": {
       "post": {
         "description": "Bulk install packages",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F_bulk#0",
+        "operationId": "post-fleet-epm-packages-_bulk",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21114,7 +21114,7 @@
     "/api/fleet/epm/packages/installed": {
       "get": {
         "description": "Get installed packages",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2Finstalled#0",
+        "operationId": "get-fleet-epm-packages-installed",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21355,7 +21355,7 @@
     "/api/fleet/epm/packages/limited": {
       "get": {
         "description": "Get limited package list",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2Flimited#0",
+        "operationId": "get-fleet-epm-packages-limited",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21434,7 +21434,7 @@
     "/api/fleet/epm/packages/{pkgName}/stats": {
       "get": {
         "description": "Get package stats",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2Fstats#0",
+        "operationId": "get-fleet-epm-packages-pkgname-stats",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21520,7 +21520,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "delete": {
         "description": "Delete package",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#3",
+        "operationId": "delete-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21782,7 +21782,7 @@
       },
       "get": {
         "description": "Get package",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#0",
+        "operationId": "get-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -23046,7 +23046,7 @@
       },
       "post": {
         "description": "Install package from registry",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#2",
+        "operationId": "post-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -23341,7 +23341,7 @@
       },
       "put": {
         "description": "Update package settings",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#1",
+        "operationId": "put-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24590,7 +24590,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
       "post": {
         "description": "Authorize transforms",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Ftransforms%2Fauthorize#0",
+        "operationId": "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24734,7 +24734,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
       "get": {
         "description": "Get package file",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2F%7BfilePath*%7D#0",
+        "operationId": "get-fleet-epm-packages-pkgname-pkgversion-filepath",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24815,7 +24815,7 @@
     },
     "/api/fleet/epm/packages/{pkgkey}": {
       "delete": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
+        "operationId": "delete-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24872,7 +24872,7 @@
         "tags": []
       },
       "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
+        "operationId": "get-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24933,7 +24933,7 @@
         "tags": []
       },
       "post": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
+        "operationId": "post-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25016,7 +25016,7 @@
         "tags": []
       },
       "put": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
+        "operationId": "put-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25075,7 +25075,7 @@
     "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
         "description": "Get inputs template",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Ftemplates%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Finputs#0",
+        "operationId": "get-fleet-epm-templates-pkgname-pkgversion-inputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25244,7 +25244,7 @@
     "/api/fleet/epm/verification_key_id": {
       "get": {
         "description": "Get a package signature verification key ID",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fverification_key_id#0",
+        "operationId": "get-fleet-epm-verification_key_id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25314,7 +25314,7 @@
     "/api/fleet/fleet_server_hosts": {
       "get": {
         "description": "List Fleet Server hosts",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts#0",
+        "operationId": "get-fleet-fleet_server_hosts",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25432,7 +25432,7 @@
       },
       "post": {
         "description": "Create Fleet Server host",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts#1",
+        "operationId": "post-fleet-fleet_server_hosts",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25591,7 +25591,7 @@
     "/api/fleet/fleet_server_hosts/{itemId}": {
       "delete": {
         "description": "Delete Fleet Server host by ID",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#1",
+        "operationId": "delete-fleet-fleet_server_hosts-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25676,7 +25676,7 @@
       },
       "get": {
         "description": "Get Fleet Server host by ID",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#0",
+        "operationId": "get-fleet-fleet_server_hosts-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25787,7 +25787,7 @@
       },
       "put": {
         "description": "Update Fleet Server host by ID",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#2",
+        "operationId": "put-fleet-fleet_server_hosts-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25945,7 +25945,7 @@
     "/api/fleet/health_check": {
       "post": {
         "description": "Check Fleet Server health",
-        "operationId": "%2Fapi%2Ffleet%2Fhealth_check#0",
+        "operationId": "post-fleet-health_check",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26081,7 +26081,7 @@
     "/api/fleet/kubernetes": {
       "get": {
         "description": "Get full K8s agent manifest",
-        "operationId": "%2Fapi%2Ffleet%2Fkubernetes#0",
+        "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26173,7 +26173,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fkubernetes%2Fdownload#0",
+        "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26282,7 +26282,7 @@
     "/api/fleet/logstash_api_keys": {
       "post": {
         "description": "Generate Logstash API key",
-        "operationId": "%2Fapi%2Ffleet%2Flogstash_api_keys#0",
+        "operationId": "post-fleet-logstash_api_keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26361,7 +26361,7 @@
     "/api/fleet/message_signing_service/rotate_key_pair": {
       "post": {
         "description": "Rotate fleet message signing key pair",
-        "operationId": "%2Fapi%2Ffleet%2Fmessage_signing_service%2Frotate_key_pair#0",
+        "operationId": "post-fleet-message_signing_service-rotate_key_pair",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26474,7 +26474,7 @@
     "/api/fleet/outputs": {
       "get": {
         "description": "List outputs",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs#0",
+        "operationId": "get-fleet-outputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -27604,7 +27604,7 @@
       },
       "post": {
         "description": "Create output",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs#1",
+        "operationId": "post-fleet-outputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -29788,7 +29788,7 @@
     "/api/fleet/outputs/{outputId}": {
       "delete": {
         "description": "Delete output by ID",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#2",
+        "operationId": "delete-fleet-outputs-outputid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -29898,7 +29898,7 @@
       },
       "get": {
         "description": "Get output by ID",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#0",
+        "operationId": "get-fleet-outputs-outputid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -31021,7 +31021,7 @@
       },
       "put": {
         "description": "Update output by ID",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#1",
+        "operationId": "put-fleet-outputs-outputid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -33189,7 +33189,7 @@
     "/api/fleet/outputs/{outputId}/health": {
       "get": {
         "description": "Get latest output health",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D%2Fhealth#0",
+        "operationId": "get-fleet-outputs-outputid-health",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -33277,7 +33277,7 @@
     "/api/fleet/package_policies": {
       "get": {
         "description": "List package policies",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies#0",
+        "operationId": "get-fleet-package_policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -33992,7 +33992,7 @@
       },
       "post": {
         "description": "Create package policy",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies#1",
+        "operationId": "post-fleet-package_policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -35266,7 +35266,7 @@
     "/api/fleet/package_policies/_bulk_get": {
       "post": {
         "description": "Bulk get package policies",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F_bulk_get#0",
+        "operationId": "post-fleet-package_policies-_bulk_get",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -35964,7 +35964,7 @@
     "/api/fleet/package_policies/delete": {
       "post": {
         "description": "Bulk delete package policies",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fdelete#0",
+        "operationId": "post-fleet-package_policies-delete",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -36168,7 +36168,7 @@
     "/api/fleet/package_policies/upgrade": {
       "post": {
         "description": "Upgrade package policy to a newer package version",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade#0",
+        "operationId": "post-fleet-package_policies-upgrade",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -36293,7 +36293,7 @@
     "/api/fleet/package_policies/upgrade/dryrun": {
       "post": {
         "description": "Dry run package policy upgrade",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade%2Fdryrun#0",
+        "operationId": "post-fleet-package_policies-upgrade-dryrun",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -37479,7 +37479,7 @@
     "/api/fleet/package_policies/{packagePolicyId}": {
       "delete": {
         "description": "Delete package policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#2",
+        "operationId": "delete-fleet-package_policies-packagepolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -37572,7 +37572,7 @@
       },
       "get": {
         "description": "Get package policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#0",
+        "operationId": "get-fleet-package_policies-packagepolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -38238,7 +38238,7 @@
       },
       "put": {
         "description": "Update package policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#1",
+        "operationId": "put-fleet-package_policies-packagepolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39512,7 +39512,7 @@
     "/api/fleet/proxies": {
       "get": {
         "description": "List proxies",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies#0",
+        "operationId": "get-fleet-proxies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39644,7 +39644,7 @@
       },
       "post": {
         "description": "Create proxy",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies#1",
+        "operationId": "post-fleet-proxies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39831,7 +39831,7 @@
     "/api/fleet/proxies/{itemId}": {
       "delete": {
         "description": "Delete proxy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#2",
+        "operationId": "delete-fleet-proxies-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39916,7 +39916,7 @@
       },
       "get": {
         "description": "Get proxy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#1",
+        "operationId": "get-fleet-proxies-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40041,7 +40041,7 @@
       },
       "put": {
         "description": "Update proxy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#0",
+        "operationId": "put-fleet-proxies-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40231,7 +40231,7 @@
     "/api/fleet/service-tokens": {
       "post": {
         "description": "Create a service token",
-        "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
+        "operationId": "post-fleet-service-tokens",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40264,7 +40264,7 @@
     "/api/fleet/service_tokens": {
       "post": {
         "description": "Create a service token",
-        "operationId": "%2Fapi%2Ffleet%2Fservice_tokens#0",
+        "operationId": "post-fleet-service_tokens",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40364,7 +40364,7 @@
     "/api/fleet/settings": {
       "get": {
         "description": "Get settings",
-        "operationId": "%2Fapi%2Ffleet%2Fsettings#0",
+        "operationId": "get-fleet-settings",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40515,7 +40515,7 @@
       },
       "put": {
         "description": "Update settings",
-        "operationId": "%2Fapi%2Ffleet%2Fsettings#1",
+        "operationId": "put-fleet-settings",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40732,7 +40732,7 @@
     "/api/fleet/setup": {
       "post": {
         "description": "Initiate Fleet setup",
-        "operationId": "%2Fapi%2Ffleet%2Fsetup#0",
+        "operationId": "post-fleet-setup",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40851,7 +40851,7 @@
     "/api/fleet/uninstall_tokens": {
       "get": {
         "description": "List metadata for latest uninstall tokens per agent policy",
-        "operationId": "%2Fapi%2Ffleet%2Funinstall_tokens#0",
+        "operationId": "get-fleet-uninstall_tokens",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41000,7 +41000,7 @@
     "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
       "get": {
         "description": "Get one decrypted uninstall token by its ID",
-        "operationId": "%2Fapi%2Ffleet%2Funinstall_tokens%2F%7BuninstallTokenId%7D#0",
+        "operationId": "get-fleet-uninstall_tokens-uninstalltokenid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41107,7 +41107,7 @@
     },
     "/api/security/role": {
       "get": {
-        "operationId": "%2Fapi%2Fsecurity%2Frole#0",
+        "operationId": "get-security-role",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41144,7 +41144,7 @@
     },
     "/api/security/role/{name}": {
       "delete": {
-        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1",
+        "operationId": "delete-security-role-name",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41189,7 +41189,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0",
+        "operationId": "get-security-role-name",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41235,7 +41235,7 @@
       },
       "put": {
         "description": "Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.",
-        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2",
+        "operationId": "put-security-role-name",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41554,7 +41554,7 @@
     },
     "/api/security/roles": {
       "post": {
-        "operationId": "%2Fapi%2Fsecurity%2Froles#0",
+        "operationId": "post-security-roles",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41864,7 +41864,7 @@
     },
     "/api/spaces/space": {
       "get": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace#0",
+        "operationId": "get-spaces-space",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41944,7 +41944,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace#1",
+        "operationId": "post-spaces-space",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -42036,7 +42036,7 @@
     "/api/spaces/space/{id}": {
       "delete": {
         "description": "When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.",
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
+        "operationId": "delete-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -42084,7 +42084,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
+        "operationId": "get-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -42119,7 +42119,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
+        "operationId": "put-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -42219,7 +42219,7 @@
     },
     "/api/status": {
       "get": {
-        "operationId": "%2Fapi%2Fstatus#0",
+        "operationId": "get-status",
         "parameters": [
           {
             "description": "The version of the API to use",
