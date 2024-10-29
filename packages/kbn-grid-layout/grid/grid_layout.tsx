@@ -59,7 +59,7 @@ export const GridLayout = ({
             setDimensionsRef(divElement);
           }}
         >
-          {Array.from({ length: rowCount }).map((_, rowIndex) => {
+          {Array.from({ length: rowCount }, (_, rowIndex) => {
             return (
               <GridRow
                 key={uuidv4()}
