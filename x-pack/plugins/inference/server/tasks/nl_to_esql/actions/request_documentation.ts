@@ -6,12 +6,32 @@
  */
 
 import { lastValueFrom, tap, map } from 'rxjs';
-import { InferenceClient, withoutOutputUpdateEvents } from '../../..';
-import { Message } from '../../../../common';
+import { withoutOutputUpdateEvents } from '../../..';
+import { Message, ToolSchema } from '../../../../common';
 import { EsqlDocumentBase } from '../doc_base';
-import type { FunctionCallingMode } from '../../../../common/chat_complete';
-import { requestDocumentationSchema } from './shared';
 import type { ActionsOptionsBase } from './types';
+
+export const requestDocumentationSchema = {
+  type: 'object',
+  properties: {
+    commands: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      description:
+        'ES|QL source and processing commands you want to analyze before generating the query.',
+    },
+    functions: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      description: 'ES|QL functions you want to analyze before generating the query.',
+    },
+  },
+  required: ['commands', 'functions'] as const,
+} satisfies ToolSchema;
 
 export const requestDocumentationFn = ({
   client,
@@ -19,7 +39,6 @@ export const requestDocumentationFn = ({
   connectorId,
   functionCalling,
   docBase,
-  logger,
   output$,
 }: ActionsOptionsBase & {
   docBase: EsqlDocumentBase;

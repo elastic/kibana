@@ -19,11 +19,10 @@ import { InferenceClient, withoutTokenCountEvents, withoutChunkEvents } from '..
 import { OutputCompleteEvent, OutputEventType } from '../../../../common/output';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import { EsqlDocumentBase } from '../doc_base';
-import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
 import type { ActionsOptionsBase } from './types';
 
-export const generateEsqlTask = <TToolOptions extends ToolOptions>({
+export const generateEsqlTaskFn = <TToolOptions extends ToolOptions>({
   client,
   connectorId,
   systemMessage,
