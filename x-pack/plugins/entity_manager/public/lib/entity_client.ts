@@ -25,10 +25,7 @@ type EntityManagerRepositoryClient = RouteRepositoryClient<EntityManagerRouteRep
 type QueryParamOf<T extends { params?: any }> = Exclude<T['params'], undefined>['query'];
 
 type DeleteEntityDefinitionQuery = QueryParamOf<
-  ClientRequestParamsOf<
-    EntityManagerRouteRepository,
-    'DELETE /api/entities/managed/enablement'
-  >
+  ClientRequestParamsOf<EntityManagerRouteRepository, 'DELETE /api/entities/managed/enablement'>
 >;
 
 type CreateEntityDefinitionQuery = QueryParamOf<
