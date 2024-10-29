@@ -22,6 +22,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'securitySolution:maxUnassociatedNotes': {
+    type: 'integer',
+    _meta: { description: 'The maximum number of allowed unassociated notes' },
+  },
   'securitySolution:defaultThreatIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -635,14 +639,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableCriticalPath': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureHostsView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureContainerAssetView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

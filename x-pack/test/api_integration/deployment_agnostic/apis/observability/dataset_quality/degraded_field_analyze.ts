@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './es_utils';
+import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils/es_utils';
+import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 
 const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
@@ -26,6 +27,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const serviceName = 'my-service';
   const hostName = 'synth-host';
   const dataStreamName = `${type}-${dataset}-${namespace}`;
+
+  const customComponentTemplateName = 'logs-synth@mappings';
 
   async function callApiAs({
     roleScopedSupertestWithCookieCredentials,
@@ -46,8 +49,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('Degraded field analyze', function () {
-    // see details: https://github.com/elastic/kibana/issues/195466
-    this.tags(['failsOnMKI']);
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {
@@ -62,6 +63,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('gets limit analysis for a given datastream and degraded field', () => {
       before(async () => {
+        await synthtrace.createComponentTemplate(
+          customComponentTemplateName,
+          logsSynthMappings(dataset)
+        );
+        await esClient.indices.putIndexTemplate({
+          name: dataStreamName,
+          _meta: {
+            managed: false,
+            description: 'custom synth template created by synthtrace tool.',
+          },
+          priority: 500,
+          index_patterns: [dataStreamName],
+          composed_of: [
+            customComponentTemplateName,
+            'logs@mappings',
+            'logs@settings',
+            'ecs@mappings',
+          ],
+          allow_auto_create: true,
+          data_stream: {
+            hidden: false,
+          },
+        });
         await synthtrace.index([
           timerange(start, end)
             .interval('1m')
@@ -153,6 +177,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await synthtrace.clean();
+        await esClient.indices.deleteIndexTemplate({ name: dataStreamName });
+        await synthtrace.deleteComponentTemplate(customComponentTemplateName);
       });
     });
   });

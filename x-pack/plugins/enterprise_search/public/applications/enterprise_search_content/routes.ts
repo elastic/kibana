@@ -21,6 +21,7 @@ export const NEW_ES_INDEX_PATH = `${NEW_INDEX_PATH}/elasticsearch`;
 export const NEW_DIRECT_UPLOAD_PATH = `${NEW_INDEX_PATH}/upload`;
 export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${CONNECTORS_PATH}/select_connector`;
 export const NEW_CONNECTOR_PATH = `${CONNECTORS_PATH}/new_connector`;
+export const NEW_CONNECTOR_FLOW_PATH = `${CONNECTORS_PATH}/new_connector_flow`;
 export const NEW_CRAWLER_PATH = `${CRAWLERS_PATH}/new_crawler`;
 export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${CONNECTORS_PATH}/select_connector?filter=native`;
 export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${CONNECTORS_PATH}/select_connector?filter=connector_clients`;

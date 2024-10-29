@@ -8,10 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreVersionedRouter,
-  VersionedRouterRoute,
-} from '@kbn/core-http-router-server-internal';
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
 import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
@@ -20,6 +17,7 @@ import {
   extractVersionedResponses,
   extractVersionedRequestBodies,
 } from './process_versioned_router';
+import { VersionedRouterRoute } from '@kbn/core-http-server';
 
 let oasConverter: OasConverter;
 beforeEach(() => {
@@ -131,7 +129,7 @@ describe('processVersionedRouter', () => {
       {}
     );
 
-    expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
+    expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json; Elastic-Api-Version=2023-10-31',
       'application/test+json; Elastic-Api-Version=2024-12-31',
     ]);
@@ -142,20 +140,42 @@ describe('processVersionedRouter', () => {
       createOperationIdCounter(),
       { version: '2023-10-31' }
     );
-    expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
+    expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json; Elastic-Api-Version=2023-10-31',
     ]);
+  });
+
+  it('correctly updates the authz description for routes that require privileges', () => {
+    const results = processVersionedRouter(
+      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      new OasConverter(),
+      createOperationIdCounter(),
+      {}
+    );
+    expect(results.paths['/foo']).toBeDefined();
+
+    expect(results.paths['/foo']!.get).toBeDefined();
+
+    expect(results.paths['/foo']!.get!.description).toBe(
+      '[Authz] Route required privileges: ALL of [manage_spaces].'
+    );
   });
 });
 
 const createTestRoute: () => VersionedRouterRoute = () => ({
   path: '/foo',
   method: 'get',
+  isVersioned: true,
   options: {
     access: 'public',
     deprecated: true,
     discontinued: 'discontinued versioned router',
     options: { body: { access: ['application/test+json'] } as any },
+    security: {
+      authz: {
+        requiredPrivileges: ['manage_spaces'],
+      },
+    },
   },
   handlers: [
     {

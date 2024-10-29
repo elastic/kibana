@@ -5,27 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AppDeepLinkId,
-  NavigationTreeDefinition,
-  NodeDefinition,
-} from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-const gettingStartedItem: NodeDefinition<AppDeepLinkId, string, string> = {
-  id: 'gettingStarted',
-  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-    defaultMessage: 'Getting Started',
-  }),
-  link: 'serverlessElasticsearch',
-  spaceBefore: 'm',
-};
-
-export const navigationTree = (
-  homeLink: AppDeepLinkId = 'serverlessElasticsearch' as AppDeepLinkId,
-  showGettingStarted: boolean
-): NavigationTreeDefinition => ({
+export const navigationTree = (): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
@@ -41,41 +25,13 @@ export const navigationTree = (
           title: i18n.translate('xpack.serverlessSearch.nav.home', {
             defaultMessage: 'Home',
           }),
-          link: homeLink,
+          link: 'elasticsearchStart',
           spaceBefore: 'm',
         },
         {
-          id: 'dev_tools',
-          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-            defaultMessage: 'Dev Tools',
-          }),
-          link: 'dev_tools',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-          },
-        },
-        {
-          id: 'kibana',
-          title: i18n.translate('xpack.serverlessSearch.nav.kibana', {
-            defaultMessage: 'Kibana',
-          }),
-          spaceBefore: 'm',
-          children: [
-            {
-              link: 'discover',
-            },
-            {
-              link: 'dashboards',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-              },
-            },
-          ],
-        },
-        {
-          id: 'content',
-          title: i18n.translate('xpack.serverlessSearch.nav.content', {
-            defaultMessage: 'Content',
+          id: 'data',
+          title: i18n.translate('xpack.serverlessSearch.nav.data', {
+            defaultMessage: 'Data',
           }),
           spaceBefore: 'm',
           children: [
@@ -111,6 +67,16 @@ export const navigationTree = (
           spaceBefore: 'm',
           children: [
             {
+              id: 'dev_tools',
+              title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+                defaultMessage: 'Dev Tools',
+              }),
+              link: 'dev_tools',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+              },
+            },
+            {
               id: 'searchPlayground',
               title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
                 defaultMessage: 'Playground',
@@ -138,11 +104,45 @@ export const navigationTree = (
             },
           ],
         },
-        ...(showGettingStarted ? [gettingStartedItem] : []),
+        {
+          id: 'analyze',
+          title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
+            defaultMessage: 'Analyze',
+          }),
+          spaceBefore: 'm',
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+          ],
+        },
+        {
+          id: 'otherTools',
+          title: i18n.translate('xpack.serverlessSearch.nav.otherTools', {
+            defaultMessage: 'Other tools',
+          }),
+          spaceBefore: 'm',
+          children: [{ link: 'maps' }],
+        },
       ],
     },
   ],
   footer: [
+    {
+      id: 'gettingStarted',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Getting Started',
+      }),
+      link: 'serverlessElasticsearch',
+      icon: 'launch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
@@ -153,10 +153,20 @@ export const navigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'ml:modelManagement',
+          title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
+            defaultMessage: 'Trained models',
+          }),
+        },
+        {
           link: 'management',
           title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
             defaultMessage: 'Management',
           }),
+        },
+        {
+          id: 'cloudLinkUserAndRoles',
+          cloudLink: 'userAndRoles',
         },
         {
           id: 'cloudLinkDeployment',
@@ -164,10 +174,6 @@ export const navigationTree = (
           title: i18n.translate('xpack.serverlessSearch.nav.performance', {
             defaultMessage: 'Performance',
           }),
-        },
-        {
-          id: 'cloudLinkUserAndRoles',
-          cloudLink: 'userAndRoles',
         },
         {
           id: 'cloudLinkBilling',

@@ -37,7 +37,7 @@ export function handleResponse(
       cluster,
       'elasticsearch.cluster.stats.state.master_node',
       get(cluster, 'cluster_state.master_node')
-    );
+    ) as string;
     nodes = resp.aggregations?.nodes.buckets.reduce(normalizeNodeShards(masterNode), {}) ?? [];
   }
 

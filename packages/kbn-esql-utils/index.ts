@@ -30,6 +30,7 @@ export {
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   isESQLColumnSortable,
+  isESQLColumnGroupable,
   TextBasedLanguages,
 } from './src';
 

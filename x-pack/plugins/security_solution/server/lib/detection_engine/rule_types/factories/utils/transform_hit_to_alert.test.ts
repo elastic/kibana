@@ -5,9 +5,11 @@
  * 2.0.
  */
 import {
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TYPE,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_PARAMETERS,
   ALERT_SEVERITY,
@@ -80,6 +82,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
 
     expect(alert['kibana.alert.original_event.action']).toEqual('process');
@@ -112,6 +115,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
 
     expect(get(alert.event, 'kind')).toEqual(undefined);
@@ -142,6 +146,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
 
     expect(get(alert.event, 'kind')).toEqual(undefined);
@@ -172,6 +177,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
 
     expect(alert.event).toEqual(undefined);
@@ -202,6 +208,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
 
     expect(alert['kibana.alert.original_event.action']).toEqual(['process']);
@@ -224,6 +231,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
     delete doc._source.event;
 
@@ -392,6 +400,8 @@ describe('transformHitToAlert', () => {
       source: {
         ip: '127.0.0.1',
       },
+      [ALERT_RULE_EXECUTION_TYPE]: 'scheduled',
+      [ALERT_INTENDED_TIMESTAMP]: timestamp,
     };
     expect(alert).toEqual(expected);
   });
@@ -423,6 +433,7 @@ describe('transformHitToAlert', () => {
       ruleExecutionLogger,
       alertUuid,
       publicBaseUrl,
+      intendedTimestamp: undefined,
     });
     const expected = {
       ...alert,
@@ -432,6 +443,43 @@ describe('transformHitToAlert', () => {
         kind: 'event',
         module: 'system',
       }),
+    };
+    expect(alert).toEqual(expected);
+  });
+
+  it('build alert with manual execution type if intendedTimestamp is provided', () => {
+    const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    const doc = {
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        [EVENT_ACTION]: 'socket_opened',
+        [EVENT_DATASET]: 'socket',
+        [EVENT_KIND]: 'event',
+        [EVENT_MODULE]: 'system',
+      },
+    };
+    const completeRule = getCompleteRuleMock(getQueryRuleParams());
+    const alert = transformHitToAlert({
+      spaceId: SPACE_ID,
+      completeRule,
+      doc,
+      mergeStrategy: 'missingFields',
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageStub,
+      indicesToQuery: [],
+      alertTimestampOverride: undefined,
+      ruleExecutionLogger,
+      alertUuid,
+      publicBaseUrl,
+      intendedTimestamp: new Date('2019-01-01T00:00:00.000Z'),
+    });
+    const expected = {
+      ...alert,
+      [ALERT_RULE_EXECUTION_TYPE]: 'manual',
+      [ALERT_INTENDED_TIMESTAMP]: new Date('2019-01-01T00:00:00.000Z').toISOString(),
     };
     expect(alert).toEqual(expected);
   });

@@ -28,16 +28,20 @@ export interface Pipeline {
   deprecated?: boolean;
 }
 
-export interface PipelinesByName {
-  [key: string]: {
-    description: string;
-    version?: number;
-    processors: Processor[];
-    on_failure?: Processor[];
-  };
-}
-
 export enum FieldCopyAction {
   Copy = 'copy',
   Rename = 'rename',
+}
+
+export type DatabaseType = 'maxmind' | 'ipinfo' | 'web' | 'local' | 'unknown';
+
+export interface DatabaseNameOption {
+  value: string;
+  text: string;
+}
+
+export interface GeoipDatabase {
+  name: string;
+  id: string;
+  type: DatabaseType;
 }

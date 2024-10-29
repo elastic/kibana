@@ -17,7 +17,7 @@ import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guid
 jest.mock('../../shared/hooks/use_investigation_guide');
 
 const NO_DATA_TEXT =
-  "There's no investigation guide for this rule. Edit the rule's settingsExternal link(opens in a new tab or window) to add one.";
+  "There's no investigation guide for this rule. Edit the rule's settings(external, opens in a new tab or window) to add one.";
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
 
 const renderInvestigationGuide = (context: DocumentDetailsContext = mockContextValue) => (

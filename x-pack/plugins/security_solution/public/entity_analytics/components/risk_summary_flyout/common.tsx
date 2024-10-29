@@ -24,9 +24,7 @@ interface EntityData {
   risk: RiskStats;
 }
 
-export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<TableItem>> = (
-  showFooter
-) => [
+export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   {
     field: 'category',
     name: (
@@ -38,12 +36,12 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
-    footer: showFooter ? (
+    footer: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.entityDetails.categoryColumnFooterLabel"
         defaultMessage="Result"
       />
-    ) : undefined,
+    ),
   },
   {
     field: 'score',
@@ -59,12 +57,11 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     dataType: 'number',
     align: 'right',
     render: formatRiskScore,
-    footer: (props) =>
-      showFooter ? (
-        <span data-test-subj="risk-summary-result-score">
-          {formatRiskScore(sumBy((i) => i.score, props.items))}
-        </span>
-      ) : undefined,
+    footer: (props) => (
+      <span data-test-subj="risk-summary-result-score">
+        {formatRiskScore(sumBy((i) => i.score, props.items))}
+      </span>
+    ),
   },
   {
     field: 'count',
@@ -79,19 +76,15 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     sortable: true,
     dataType: 'number',
     align: 'right',
-    footer: (props) =>
-      showFooter ? (
-        <span data-test-subj="risk-summary-result-count">
-          {sumBy((i) => i.count ?? 0, props.items)}
-        </span>
-      ) : undefined,
+    footer: (props) => (
+      <span data-test-subj="risk-summary-result-count">
+        {sumBy((i) => i.count ?? 0, props.items)}
+      </span>
+    ),
   },
 ];
 
-export const getItems: (
-  entityData: EntityData | undefined,
-  isAssetCriticalityEnabled: boolean
-) => TableItem[] = (entityData, isAssetCriticalityEnabled) => {
+export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -100,20 +93,17 @@ export const getItems: (
       score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
     },
-    ...(isAssetCriticalityEnabled
-      ? [
-          {
-            category: i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
-              {
-                defaultMessage: 'Asset Criticality',
-              }
-            ),
-            score: entityData?.risk.category_2_score ?? 0,
-            count: undefined,
-          },
-        ]
-      : []),
+
+    {
+      category: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
+        {
+          defaultMessage: 'Asset Criticality',
+        }
+      ),
+      score: entityData?.risk.category_2_score ?? 0,
+      count: undefined,
+    },
   ];
 };
 

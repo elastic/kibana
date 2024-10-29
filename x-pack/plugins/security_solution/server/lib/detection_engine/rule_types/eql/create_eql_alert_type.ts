@@ -79,6 +79,7 @@ export const createEqlAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         state,
@@ -101,6 +102,7 @@ export const createEqlAlertType = (
           publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
       const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,

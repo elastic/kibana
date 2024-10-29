@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EntityManagerUnauthorizedError } from '@kbn/entityManager-plugin/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { Unauthorized } from './unauthorized_modal';
 
@@ -57,6 +58,8 @@ export function EnableEntityModelButton({ onSuccess }: { onSuccess: () => void }
         data-test-subj="inventoryInventoryPageTemplateFilledButton"
         fill
         onClick={handleEnablement}
+        iconType={() => <TechnicalPreviewBadge />}
+        iconSide="right"
       >
         {i18n.translate('xpack.inventory.noData.card.button', {
           defaultMessage: 'Enable',

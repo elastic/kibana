@@ -193,10 +193,33 @@ export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
 export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
 
+// from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
+export type InlineCastingType =
+  | 'bool'
+  | 'boolean'
+  | 'cartesian_point'
+  | 'cartesian_shape'
+  | 'date_nanos'
+  | 'date_period'
+  | 'datetime'
+  | 'double'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'int'
+  | 'integer'
+  | 'ip'
+  | 'keyword'
+  | 'long'
+  | 'string'
+  | 'text'
+  | 'time_duration'
+  | 'unsigned_long'
+  | 'version';
+
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
   value: ValueType;
-  castType: string;
+  castType: InlineCastingType;
 }
 
 /**
@@ -270,7 +293,7 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export type ESQLNumericLiteralType = 'decimal' | 'integer';
+export type ESQLNumericLiteralType = 'double' | 'integer';
 
 export type ESQLLiteral =
   | ESQLDecimalLiteral
@@ -290,7 +313,7 @@ export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ES
 }
 // We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
 // @internal
-export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'double'>;
 
 // @internal
 export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
@@ -312,7 +335,7 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 // @internal
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'string';
+  literalType: 'keyword';
   value: string;
 }
 

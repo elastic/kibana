@@ -35,8 +35,10 @@ import { CreateIndexFormState } from './types';
 import { useKibana } from '../../hooks/use_kibana';
 
 function initCreateIndexState(): CreateIndexFormState {
+  const defaultIndexName = generateRandomIndexName();
   return {
-    indexName: generateRandomIndexName(),
+    indexName: defaultIndexName,
+    defaultIndexName,
     codingLanguage: getDefaultCodingLanguage(),
   };
 }

@@ -112,6 +112,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -122,6 +123,7 @@ import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
+import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -134,6 +136,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly siemMigrationsService: SiemMigrationsService;
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
@@ -158,6 +161,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
       this.config.experimentalFeatures
+    );
+    this.siemMigrationsService = new SiemMigrationsService(
+      this.config,
+      this.logger,
+      this.pluginContext.env.packageInfo.version
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
@@ -220,6 +228,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
+    if (!experimentalFeatures.entityStoreDisabled) {
+      registerEntityStoreFieldRetentionEnrichTask({
+        getStartServices: core.getStartServices,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
+    }
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -227,6 +243,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins,
       endpointAppContextService: this.endpointAppContextService,
       ruleMonitoringService: this.ruleMonitoringService,
+      siemMigrationsService: this.siemMigrationsService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
@@ -418,7 +435,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     core
       .getStartServices()
-      .then(async ([_, depsStart]) => {
+      .then(async ([coreStart, depsStart]) => {
         appClientFactory.setup({
           getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
           config,
@@ -468,6 +485,8 @@ export class Plugin implements ISecuritySolutionPlugin {
          * Register a config for the security guide
          */
         plugins.guidedOnboarding?.registerGuideConfig(siemGuideId, getSiemGuideConfig());
+
+        this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -706,6 +725,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
+    this.siemMigrationsService.stop();
     licenseService.stop();
   }
 }

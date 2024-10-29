@@ -241,7 +241,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
         // Install base prebuilt detection rule
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
           createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),

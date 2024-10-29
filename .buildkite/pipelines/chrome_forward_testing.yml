@@ -300,7 +300,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-    label: 'Serverless Osquery Cypress Tests'
+    label: 'Osquery Cypress Tests on Serverless'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -344,17 +344,6 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
-
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      machineType: n2-standard-2
-      preemptible: true
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
 
   - wait: ~
     continue_on_failure: true

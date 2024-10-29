@@ -46,9 +46,12 @@ const defaultProps: CustomTimelineDataGridBodyProps = {
   enabledRowRenderers: [],
   setCustomGridBodyProps: jest.fn(),
   visibleColumns: mockVisibleColumns,
+  headerRow: <></>,
+  footerRow: null,
+  gridWidth: 1000,
 };
 
-const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {
+const renderTestComponents = (props?: Partial<CustomTimelineDataGridBodyProps>) => {
   const finalProps = props ? { ...defaultProps, ...props } : defaultProps;
 
   return render(
@@ -85,8 +88,15 @@ describe('CustomTimelineDataGridBody', () => {
     (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
       canShowRowRenderer: true,
     });
-    const { getByText, queryByText } = renderTestComponents();
+    const { getByTestId, getByText, queryByText } = renderTestComponents();
+
+    expect(getByTestId('customGridRowsContainer')).toBeVisible();
     expect(queryByText('Cell-0-3')).toBeFalsy();
     expect(getByText('Cell-1-3')).toBeInTheDocument();
+  });
+
+  it('should not render grid if gridWidth is 0', () => {
+    const { queryByTestId } = renderTestComponents({ gridWidth: 0 });
+    expect(queryByTestId('customGridRowsContainer')).not.toBeInTheDocument();
   });
 });

@@ -12,10 +12,17 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
+  const browser = getService('browser');
   return {
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
     },
+
+    async expectToBeOnIndicesManagement() {
+      const headingText = await testSubjects.getVisibleText('appTitle');
+      expect(headingText).to.be('Index Management');
+    },
+
     async reloadIndices() {
       await testSubjects.click('reloadIndicesButton');
     },
@@ -148,6 +155,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         await testSubjects.existOrFail('indexDetailsContent');
         await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
       },
+      async expectUrlShouldChangeTo(tabId: string) {
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`tab=${tabId}`);
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
@@ -175,23 +186,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       expect(indexNames.some((i) => i === indexName)).to.be(true);
     },
 
-    async selectIndex(indexName: string) {
-      const id = `checkboxSelectIndex-${indexName}`;
-      const checkbox = await find.byCssSelector(`input[id="${id}"]`);
-      if (!(await checkbox.isSelected())) {
-        await find.clickByCssSelector(`input[id="${id}"]`);
-      }
-    },
-    async clickManageButton() {
-      await testSubjects.existOrFail('indexActionsContextMenuButton');
-      await testSubjects.click('indexActionsContextMenuButton');
-    },
-    async contextMenuIsVisible() {
-      await testSubjects.existOrFail('indexContextMenu');
+    async confirmDeleteModalIsVisible() {
       await testSubjects.existOrFail('deleteIndexMenuButton');
       await testSubjects.click('deleteIndexMenuButton');
-    },
-    async confirmDeleteModalIsVisible() {
       await testSubjects.existOrFail('confirmModalTitleText');
       const modalText: string = await testSubjects.getVisibleText('confirmModalTitleText');
       expect(modalText).to.be('Delete index');
@@ -210,6 +207,38 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         })
       );
       expect(indexNames.includes(indexName)).to.be(false);
+    },
+    async manageIndex(indexName: string) {
+      const id = `checkboxSelectIndex-${indexName}`;
+      const checkbox = await find.byCssSelector(`input[id="${id}"]`);
+      if (!(await checkbox.isSelected())) {
+        await find.clickByCssSelector(`input[id="${id}"]`);
+      }
+      await retry.waitFor('manage index to show up ', async () => {
+        return (await testSubjects.isDisplayed('indexActionsContextMenuButton')) === true;
+      });
+      const contextMenuButton = await testSubjects.find('indexActionsContextMenuButton');
+      await contextMenuButton.click();
+      await retry.waitFor('manage index context menu to show ', async () => {
+        return (await testSubjects.isDisplayed('indexContextMenu')) === true;
+      });
+    },
+    async manageIndexContextMenuExists() {
+      await testSubjects.existOrFail('showOverviewIndexMenuButton');
+      await testSubjects.existOrFail('showSettingsIndexMenuButton');
+      await testSubjects.existOrFail('showMappingsIndexMenuButton');
+      await testSubjects.existOrFail('deleteIndexMenuButton');
+    },
+    async changeManageIndexTab(
+      manageIndexTab:
+        | 'showOverviewIndexMenuButton'
+        | 'showSettingsIndexMenuButton'
+        | 'showMappingsIndexMenuButton'
+        | 'deleteIndexMenuButton'
+    ) {
+      await testSubjects.existOrFail(manageIndexTab);
+      const manageIndexComponent = await testSubjects.find(manageIndexTab);
+      await manageIndexComponent.click();
     },
   };
 }
