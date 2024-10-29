@@ -9,6 +9,7 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type {
   DeleteEntityEngineResponse,
   InitEntityEngineResponse,
@@ -21,6 +22,7 @@ const ENTITY_STORE_ENABLEMENT_INIT = 'ENTITY_STORE_ENABLEMENT_INIT';
 
 export const useEntityStoreEnablement = () => {
   const [polling, setPolling] = useState(false);
+  const { telemetry } = useKibana().services;
 
   useEntityEngineStatus({
     disabled: !polling,
@@ -47,8 +49,11 @@ export const useEntityStoreEnablement = () => {
   });
 
   const enable = useCallback(() => {
+    telemetry?.reportEntityStoreInit({
+      timestamp: new Date().toISOString(),
+    });
     initialize().then(() => setPolling(true));
-  }, [initialize]);
+  }, [initialize, telemetry]);
 
   return { enable };
 };
@@ -66,11 +71,19 @@ export const useInvalidateEntityEngineStatusQuery = () => {
 };
 
 export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+  const { telemetry } = useKibana().services;
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { initEntityStore } = useEntityStoreRoutes();
   return useMutation<InitEntityEngineResponse[]>(
-    () =>
-      initEntityStore('user').then((usr) => initEntityStore('host').then((host) => [usr, host])),
+    () => {
+      telemetry?.reportEntityStoreEnablement({
+        timestamp: new Date().toISOString(),
+        action: 'start',
+      });
+      return initEntityStore('user').then((usr) =>
+        initEntityStore('host').then((host) => [usr, host])
+      );
+    },
     {
       ...options,
       mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
@@ -88,11 +101,20 @@ export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
 export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
 
 export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+  const { telemetry } = useKibana().services;
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { stopEntityStore } = useEntityStoreRoutes();
   return useMutation<StopEntityEngineResponse[]>(
-    () =>
-      stopEntityStore('user').then((usr) => stopEntityStore('host').then((host) => [usr, host])),
+    () => {
+      telemetry?.reportEntityStoreEnablement({
+        timestamp: new Date().toISOString(),
+        action: 'stop',
+      });
+      return stopEntityStore('user').then((usr) =>
+        stopEntityStore('host').then((host) => [usr, host])
+      );
+    },
+
     {
       ...options,
       mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
