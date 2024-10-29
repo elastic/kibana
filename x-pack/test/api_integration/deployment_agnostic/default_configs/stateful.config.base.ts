@@ -22,6 +22,10 @@ import {
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import {
+  mockIdPMetadataPath as idpPath,
+  pluginPath as samlIdPPlugin,
+} from '@kbn/saml-provider-plugin';
 import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
@@ -60,15 +64,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
-
-    // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
-    const idpPath = require.resolve(
-      '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
-    );
-    const samlIdPPlugin = path.resolve(
-      __dirname,
-      '../../../security_api_integration/plugins/saml_provider'
-    );
 
     const servers = {
       kibana: {

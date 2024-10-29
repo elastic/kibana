@@ -7,6 +7,10 @@
 
 import { resolve } from 'path';
 
+import {
+  pluginMetadataPath as idpPath,
+  pluginPath as samlIdPPlugin,
+} from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
@@ -23,11 +27,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(
-    __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 

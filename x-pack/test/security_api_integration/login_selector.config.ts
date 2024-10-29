@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { saml1IdPMetadataPath, saml2IdPMetadataPath } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -30,13 +31,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const pkiKibanaCAPath = require.resolve(
     '@kbn/security-api-integration-helpers/pki/kibana_ca.crt'
-  );
-
-  const saml1IdPMetadataPath = require.resolve(
-    '@kbn/security-api-integration-helpers/saml/idp_metadata.xml'
-  );
-  const saml2IdPMetadataPath = require.resolve(
-    '@kbn/security-api-integration-helpers/saml/idp_metadata_2.xml'
   );
 
   const servers = {

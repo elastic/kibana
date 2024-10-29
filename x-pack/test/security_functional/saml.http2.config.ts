@@ -11,9 +11,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { pluginMetadataPath as idpPath } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { configureHTTP2 } from '@kbn/test-suites-src/common/configure_http2';
 
@@ -26,10 +25,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(
-    __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
-  );
 
   return configureHTTP2({
     ...functionalConfig.getAll(),

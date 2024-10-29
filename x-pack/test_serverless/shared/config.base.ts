@@ -22,6 +22,10 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';
 import { defineDockerServersConfig } from '@kbn/test';
 import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
+import {
+  pluginMetadataPath as idpPath,
+  pluginPath as samlIdPPlugin,
+} from '@kbn/saml-provider-plugin';
 import { services } from './services';
 
 export default async () => {
@@ -48,16 +52,6 @@ export default async () => {
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
-
-  // "Fake" SAML provider
-  const idpPath = resolve(
-    __dirname,
-    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(
-    __dirname,
-    '../../test/security_api_integration/plugins/saml_provider'
-  );
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 

@@ -2,6 +2,7 @@
   "type": "plugin",
   "id": "@kbn/saml-provider-plugin",
   "owner": "@elastic/kibana-security",
+  "devOnly": true,
   "plugin": {
     "id": "samlProviderPlugin",
     "server": true,
@@ -9,5 +10,5 @@
     "optionalPlugins": [
       "cloud"
     ]
-  }
+  },
 }

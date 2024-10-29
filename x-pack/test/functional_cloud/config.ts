@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { resolve } from 'path';
+
 import { FtrConfigProviderContext } from '@kbn/test';
+import {
+  pluginMetadataPath as idpPath,
+  pluginPath as samlIdPPlugin,
+} from '@kbn/saml-provider-plugin';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   const kibanaPort = functionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(
-    __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   return {
     ...functionalConfig.getAll(),

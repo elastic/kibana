@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { saml1IdPMetadataPath as idpPath } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -17,7 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
   return {
     testFiles: [resolve(__dirname, './tests/session_lifespan')],
