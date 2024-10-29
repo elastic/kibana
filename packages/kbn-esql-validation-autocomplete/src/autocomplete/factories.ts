@@ -28,7 +28,7 @@ import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 
-const allFunctions = memoize(
+export const allFunctions = memoize(
   () =>
     aggregationFunctionDefinitions
       .concat(scalarFunctionDefinitions)
@@ -38,10 +38,6 @@ const allFunctions = memoize(
 );
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
-
-export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
-  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
-};
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -61,7 +57,7 @@ function getSafeInsertSourceText(text: string) {
   return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
-export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
+export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
     label: fn.name.toUpperCase(),
@@ -110,7 +106,7 @@ export const getCompatibleFunctionDefinition = (
     )
     .sort((a, b) => a.name.localeCompare(b.name));
   if (!returnTypes) {
-    return fnSupportedByCommand.map(getSuggestionFunctionDefinition);
+    return fnSupportedByCommand.map(getFunctionSuggestion);
   }
   return fnSupportedByCommand
     .filter((mathDefinition) =>
@@ -119,7 +115,7 @@ export const getCompatibleFunctionDefinition = (
           returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
       )
     )
-    .map(getSuggestionFunctionDefinition);
+    .map(getFunctionSuggestion);
 };
 
 export function getSuggestionCommandDefinition(

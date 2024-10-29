@@ -24,7 +24,7 @@ import {
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
-  getLastCharFromTrimmed,
+  getLastNonWhitespaceChar,
   isArrayType,
   isAssignment,
   isAssignmentComplete,
@@ -1485,7 +1485,7 @@ async function getSettingArgsSuggestions(
   const settingDefs = getCommandDefinition(command.name).modes || [];
 
   if (settingDefs.length) {
-    const lastChar = getLastCharFromTrimmed(innerText);
+    const lastChar = getLastNonWhitespaceChar(innerText);
     const matchingSettingDefs = settingDefs.filter(({ prefix }) => lastChar === prefix);
     if (matchingSettingDefs.length) {
       // COMMAND _<here>

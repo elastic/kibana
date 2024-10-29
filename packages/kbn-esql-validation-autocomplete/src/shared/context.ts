@@ -167,10 +167,6 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         return { type: 'function' as const, command, node, option, setting };
       }
     }
-    if (node.type === 'option' || option) {
-      // command ... by <here>
-      return { type: 'option' as const, command, node, option, setting };
-    }
     // for now it's only an enrich thing
     if (node.type === 'source' && node.text === ENRICH_MODES.prefix) {
       // command _<here>
@@ -182,7 +178,8 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
-  if (command && isOptionItem(command.args[command.args.length - 1])) {
+  // TODO — remove this option branch once https://github.com/elastic/kibana/issues/195418 is complete
+  if (command && isOptionItem(command.args[command.args.length - 1]) && command.name !== 'stats') {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
     }
