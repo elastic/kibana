@@ -3,7 +3,6 @@
     outline: none !important;
     background: none;
     border-radius: 0 !important;
-    box-shadow: none;
 
     .embPanel__title {
       margin-bottom: $euiSizeXS;
@@ -23,15 +22,6 @@
         opacity: 1;
       }
     }
-  }
-
-  .embPanel__hoverActionsLeft, .embPanel__hoverActions > .embPanel--dragHandle {
-    visibility: hidden;
-  }
-
-  .embPanel--dragHandle:hover {
-    background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
-    cursor: move;
   }
 
   .euiTable {

@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('New Lens from Modal', false, false, false, 'new');
 
       await dashboard.waitForRenderComplete();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();
 
       log.debug('Adds a secondary dimension');
@@ -87,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPanelActions.legacySaveToLibrary('My by reference visualization');
 
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();
 
       log.debug('Removes breakdown dimension');
@@ -106,6 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('New Lens from Modal', false, false, false, 'new');
 
       await dashboard.waitForRenderComplete();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();
 
       log.debug('Adds a secondary dimension');
@@ -145,6 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag(true);
 
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();
 
       log.debug('Adds annotation');
@@ -171,6 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag(true);
 
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();
 
       log.debug('Adds reference line');

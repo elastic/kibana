@@ -15,7 +15,6 @@ import { css } from '@emotion/react';
 import { EmbeddablePanel, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 import { DashboardPanelState } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
@@ -92,21 +91,12 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTopOffset =
-      (document.querySelector('.dashboardContainer') as HTMLDivElement)?.offsetTop || 0;
-    const globalNavTopOffset =
-      (document.querySelector('#app-fixed-viewport') as HTMLDivElement)?.offsetTop || 0;
-
     const focusStyles = blurPanel
       ? css`
           pointer-events: none;
           opacity: 0.25;
         `
-      : css`
-          scroll-margin-top: ${dashboardContainerTopOffset +
-          globalNavTopOffset +
-          DASHBOARD_MARGIN_SIZE}px;
-        `;
+      : undefined;
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {

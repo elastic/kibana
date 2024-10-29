@@ -54,7 +54,6 @@ export const DashboardViewport = () => {
     viewMode,
     useMargins,
     uuid,
-    fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -64,8 +63,7 @@ export const DashboardViewport = () => {
     dashboardApi.panels$,
     dashboardApi.viewMode,
     dashboardApi.useMargins$,
-    dashboardApi.uuid$,
-    dashboardApi.fullScreenMode$
+    dashboardApi.uuid$
   );
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
@@ -116,7 +114,6 @@ export const DashboardViewport = () => {
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
-        'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
       {viewMode !== ViewMode.PRINT ? (

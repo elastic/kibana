@@ -90,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('retains its saved object tags after save and return', async () => {
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await lens.saveAndReturn();
       await header.waitUntilLoadingHasFinished();

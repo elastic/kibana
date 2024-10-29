@@ -27,7 +27,6 @@ import {
   PublishesSavedObjectId,
   HasLegacyLibraryTransforms,
   EmbeddableAppContext,
-  CanLockHoverActions,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -59,8 +58,7 @@ export type LegacyEmbeddableAPI = HasType &
   Partial<HasLegacyLibraryTransforms> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
   EmbeddableHasTimeRange &
-  PublishesSavedObjectId &
-  CanLockHoverActions;
+  PublishesSavedObjectId;
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
