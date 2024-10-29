@@ -764,19 +764,18 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Embeddable.canViewUnderlyingData",
-            "type": "Function",
+            "id": "def-public.Embeddable.canViewUnderlyingData$",
+            "type": "Object",
             "tags": [],
-            "label": "canViewUnderlyingData",
+            "label": "canViewUnderlyingData$",
             "description": [],
             "signature": [
-              "() => Promise<boolean>"
+              "BehaviorSubject",
+              "<boolean>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "lens",
@@ -9198,12 +9197,12 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.getSortedColumns",
+            "id": "def-public.Visualization.getExportDatatables",
             "type": "Function",
             "tags": [],
-            "label": "getSortedColumns",
+            "label": "getExportDatatables",
             "description": [
-              "\nA visualization can share how columns are visually sorted"
+              "\nGet all datatables to be exported as csv"
             ],
             "signature": [
               "((state: T, datasourceLayers?: Partial<Record<string, ",
@@ -9214,7 +9213,17 @@
                 "section": "def-public.DatasourcePublicAPI",
                 "text": "DatasourcePublicAPI"
               },
-              ">> | undefined) => string[]) | undefined"
+              ">> | undefined, activeData?: ",
+              "TableInspectorAdapter",
+              " | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -9222,7 +9231,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getSortedColumns.$1",
+                "id": "def-public.Visualization.getExportDatatables.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9237,7 +9246,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getSortedColumns.$2",
+                "id": "def-public.Visualization.getExportDatatables.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "datasourceLayers",
@@ -9252,6 +9261,22 @@
                     "text": "DatasourcePublicAPI"
                   },
                   ">> | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getExportDatatables.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "activeData",
+                "description": [],
+                "signature": [
+                  "TableInspectorAdapter",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -11201,7 +11226,7 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\""
+          "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -11375,7 +11400,15 @@
             "section": "def-public.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          " | undefined>; canViewUnderlyingData$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; getViewUnderlyingDataArgs: () => ",
           "ViewUnderlyingDataArgs",
           "; getFullAttributes: () => ",
           {

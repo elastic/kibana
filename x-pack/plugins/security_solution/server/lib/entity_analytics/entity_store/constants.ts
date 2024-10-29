@@ -9,7 +9,7 @@ import type { EngineStatus } from '../../../../common/api/entity_analytics';
 
 export const DEFAULT_LOOKBACK_PERIOD = '24h';
 
-export const DEFAULT_INTERVAL = '15s';
+export const DEFAULT_INTERVAL = '30s';
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
