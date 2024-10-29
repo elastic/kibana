@@ -200,7 +200,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         );
       }
     } catch (e) {
-      this.options.logger.error(`Error checking if ELSER model '${elserId}' is deployed: ${e}`);
+      this.options.logger.debug(`Error checking if ELSER model '${elserId}' is deployed: ${e}`);
       // Returns 404 if it doesn't exist
       return false;
     }
@@ -215,7 +215,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         task_type: 'sparse_embedding',
       }));
     } catch (error) {
-      this.options.logger.error(
+      this.options.logger.debug(
         `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
       );
       return false;
@@ -504,9 +504,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         track_total_hits: true,
       });
 
-      return !!result.hits?.total;
+      return !!(result.hits?.total as SearchTotalHits).value;
     } catch (e) {
-      this.options.logger.error(`Error checking if user's KB docs exist: ${e.message}`);
+      this.options.logger.debug(`Error checking if user's KB docs exist: ${e.message}`);
       return false;
     }
   };

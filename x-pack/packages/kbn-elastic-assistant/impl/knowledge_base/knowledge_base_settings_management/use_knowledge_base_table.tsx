@@ -199,7 +199,9 @@ export const useKnowledgeBaseTable = () => {
                     `}
                   />
                 ) : (
-                  <SetupKnowledgeBaseButton display="refresh" />
+                  <EuiToolTip content={i18n.SECURITY_LABS_NOT_FULLY_LOADED}>
+                    <SetupKnowledgeBaseButton display="refresh" />
+                  </EuiToolTip>
                 )}
               </>
             ) : entry.type === DocumentEntryType.value ? (

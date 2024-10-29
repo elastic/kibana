@@ -142,8 +142,7 @@ describe('Assistant', () => {
   });
 
   describe('persistent storage', () => {
-    // Settings Modal is not available when `v2KnowledgeBaseEnabled` is true
-    it.skip('should refetchCurrentUserConversations after settings save button click', async () => {
+    it('should refetchCurrentUserConversations after settings save button click', async () => {
       const chatSendSpy = jest.spyOn(all, 'useChatSend');
       await renderAssistant();
 
@@ -189,8 +188,7 @@ describe('Assistant', () => {
       );
     });
 
-    // Settings Modal is not available when `v2KnowledgeBaseEnabled` is true
-    it.skip('should refetchCurrentUserConversations after settings save button click, but do not update convos when refetch returns bad results', async () => {
+    it('should refetchCurrentUserConversations after settings save button click, but do not update convos when refetch returns bad results', async () => {
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: mockData,
         isLoading: false,
