@@ -65,7 +65,6 @@ export const InventoryMetricRT = rt.keyof({
   podLogUsage: null,
   podNetworkTraffic: null,
   containerOverview: null,
-  containerCpuKernel: null,
   containerCpuUsage: null,
   containerDiskIOOps: null,
   containerDiskIOBytes: null,
