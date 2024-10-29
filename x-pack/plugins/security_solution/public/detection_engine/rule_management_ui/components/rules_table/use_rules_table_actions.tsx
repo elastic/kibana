@@ -8,6 +8,7 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -45,6 +46,9 @@ export const useRulesTableActions = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
 
   return [
     {
@@ -115,7 +119,7 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => !rule.immutable,
+      enabled: (rule: Rule) => isPrebuiltRulesCustomizationEnabled || !rule.immutable,
     },
     {
       type: 'icon',

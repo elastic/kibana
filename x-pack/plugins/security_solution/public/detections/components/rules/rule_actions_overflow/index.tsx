@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -71,6 +72,9 @@ const RuleActionsOverflowComponent = ({
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -136,7 +140,10 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"
-              disabled={!userHasPermissions || rule.immutable}
+              disabled={
+                !userHasPermissions ||
+                (isPrebuiltRulesCustomizationEnabled === false && rule.immutable)
+              }
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -202,21 +209,22 @@ const RuleActionsOverflowComponent = ({
           ]
         : [],
     [
-      bulkExport,
+      rule,
       canDuplicateRuleWithActions,
+      userHasPermissions,
+      isPrebuiltRulesCustomizationEnabled,
+      startTransaction,
       closePopover,
+      showBulkDuplicateExceptionsConfirmation,
       executeBulkAction,
       navigateToApp,
-      onRuleDeletedCallback,
-      rule,
-      showBulkDuplicateExceptionsConfirmation,
-      showManualRuleRunConfirmation,
-      startTransaction,
-      userHasPermissions,
+      bulkExport,
       downloadExportedRules,
-      confirmDeletion,
-      scheduleRuleRun,
+      showManualRuleRunConfirmation,
       telemetry,
+      scheduleRuleRun,
+      confirmDeletion,
+      onRuleDeletedCallback,
     ]
   );
 
