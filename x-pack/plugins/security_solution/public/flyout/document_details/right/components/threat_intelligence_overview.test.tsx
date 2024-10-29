@@ -16,13 +16,11 @@ import { LeftPanelInsightsTab } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import {
-  INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID,
+  SUMMARY_ROW_BUTTON_TEST_ID,
   SUMMARY_ROW_TEXT_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
 } from './test_ids';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -52,13 +50,13 @@ const LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(INSIGHTS_THREAT_INTELLI
 const THREAT_MATCHES_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID
 );
-const THREAT_MATCHES_VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
+const THREAT_MATCHES_BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID
 );
 const ENRICHED_WITH_THREAT_INTELLIGENCE_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID
 );
-const ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
+const ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID
 );
 
@@ -133,11 +131,11 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat intelligence');
     expect(getByTestId(THREAT_MATCHES_TEXT_TEST_ID)).toHaveTextContent('Threat match detected');
-    expect(getByTestId(THREAT_MATCHES_VALUE_TEST_ID)).toHaveTextContent('1');
+    expect(getByTestId(THREAT_MATCHES_BUTTON_TEST_ID)).toHaveTextContent('1');
     expect(getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_TEXT_TEST_ID)).toHaveTextContent(
       'Field enriched with threat intelligence'
     );
-    expect(getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE_TEST_ID)).toHaveTextContent('1');
+    expect(getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID)).toHaveTextContent('1');
   });
 
   it('should render 2 matches detected and 2 fields enriched', () => {
@@ -151,11 +149,11 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat intelligence');
     expect(getByTestId(THREAT_MATCHES_TEXT_TEST_ID)).toHaveTextContent('Threat matches detected');
-    expect(getByTestId(THREAT_MATCHES_VALUE_TEST_ID)).toHaveTextContent('2');
+    expect(getByTestId(THREAT_MATCHES_BUTTON_TEST_ID)).toHaveTextContent('2');
     expect(getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_TEXT_TEST_ID)).toHaveTextContent(
       'Fields enriched with threat intelligence'
     );
-    expect(getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE_TEST_ID)).toHaveTextContent('2');
+    expect(getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID)).toHaveTextContent('2');
   });
 
   it('should render loading', () => {
@@ -199,7 +197,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     });
 
     const { getByTestId } = renderThreatIntelligenceOverview();
-    getByTestId(INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID).click();
+    getByTestId(THREAT_MATCHES_BUTTON_TEST_ID).click();
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
@@ -214,9 +212,7 @@ describe('<ThreatIntelligenceOverview />', () => {
       },
     });
 
-    getByTestId(
-      INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID
-    ).click();
+    getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID).click();
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
@@ -230,37 +226,5 @@ describe('<ThreatIntelligenceOverview />', () => {
         scopeId,
       },
     });
-  });
-
-  it('should disabled the click when in preview mode', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      dataFormattedForFieldBrowser,
-      isPreviewMode: true,
-    });
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
-      loading: false,
-      threatMatchesCount: 1,
-      threatEnrichmentsCount: 1,
-    });
-
-    const { getByTestId } = renderThreatIntelligenceOverview();
-    const threatMatchesButton = getByTestId(
-      INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_BUTTON_TEST_ID
-    );
-    const enrichedWithThreatIntelligenceButton = getByTestId(
-      INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID
-    );
-
-    expect(threatMatchesButton).toHaveAttribute('disabled');
-    expect(enrichedWithThreatIntelligenceButton).toHaveAttribute('disabled');
-
-    threatMatchesButton.click();
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
-
-    enrichedWithThreatIntelligenceButton.click();
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 });

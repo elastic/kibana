@@ -6,13 +6,10 @@
  */
 
 import type { ReactElement, VFC } from 'react';
-import { useCallback } from 'react';
-import { useMemo } from 'react';
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
@@ -87,9 +84,14 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
     });
   }, [eventId, expandedSubTab, indexName, openLeftPanel, scopeId]);
 
-  const buttonDataTestSubj = useMemo(() => `${dataTestSubj}Button`, [dataTestSubj]);
-  const button = useMemo(
-    () => (
+  const textDataTestSubj = useMemo(() => `${dataTestSubj}Text`, [dataTestSubj]);
+  const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
+
+  const button = useMemo(() => {
+    const buttonDataTestSubj = `${dataTestSubj}Button`;
+    const valueDataTestSubj = `${dataTestSubj}Value`;
+
+    return (
       <>
         {typeof value === 'number' ? (
           <EuiBadge color="hollow">
@@ -105,14 +107,12 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
             </EuiButtonEmpty>
           </EuiBadge>
         ) : (
-          value
+          <div data-test-subj={valueDataTestSubj}>{value}</div>
         )}
       </>
-    ),
-    [buttonDataTestSubj, isPreviewMode, onClick, value]
-  );
+    );
+  }, [dataTestSubj, isPreviewMode, onClick, value]);
 
-  const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
   if (loading) {
     return (
       <EuiSkeletonText
@@ -128,9 +128,6 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   if (error) {
     return null;
   }
-
-  const textDataTestSubj = `${dataTestSubj}Text`;
-  const valueDataTestSubj = `${dataTestSubj}Value`;
 
   return (
     <EuiFlexGroup
@@ -151,9 +148,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
       >
         {text}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj={valueDataTestSubj}>
-        {button}
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{button}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

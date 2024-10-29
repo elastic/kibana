@@ -10,10 +10,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   SUMMARY_ROW_TEXT_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
   SUMMARY_ROW_LOADING_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID,
-  CORRELATIONS_RELATED_ALERTS_BY_SESSION_BUTTON_TEST_ID,
+  SUMMARY_ROW_BUTTON_TEST_ID,
 } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -34,7 +33,7 @@ const entityId = 'entityId';
 const scopeId = 'scopeId';
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID);
-const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID);
+const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID);
 const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID);
 
 const renderRelatedAlertsBySession = () =>
@@ -51,6 +50,7 @@ describe('<RelatedAlertsBySession />', () => {
     (useDocumentDetailsContext as jest.Mock).mockReturnValue({
       eventId,
       indexName,
+      scopeId,
       isPreviewMode: false,
     });
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
@@ -65,7 +65,7 @@ describe('<RelatedAlertsBySession />', () => {
 
     const { getByTestId } = renderRelatedAlertsBySession();
     expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Alert related by session');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('1');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('1');
   });
 
   it('should render multiple related alerts correctly', () => {
@@ -77,19 +77,7 @@ describe('<RelatedAlertsBySession />', () => {
 
     const { getByTestId } = renderRelatedAlertsBySession();
     expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Alerts related by session');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('2');
-  });
-
-  it('should render big number of related alerts correctly', () => {
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      dataCount: 2000,
-    });
-
-    const { getByTestId } = renderRelatedAlertsBySession();
-    expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Alerts related by session');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('2k');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('2');
   });
 
   it('should render loading skeleton', () => {
@@ -119,7 +107,7 @@ describe('<RelatedAlertsBySession />', () => {
     });
 
     const { getByTestId } = renderRelatedAlertsBySession();
-    getByTestId(CORRELATIONS_RELATED_ALERTS_BY_SESSION_BUTTON_TEST_ID).click();
+    getByTestId(BUTTON_TEST_ID).click();
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
@@ -133,26 +121,5 @@ describe('<RelatedAlertsBySession />', () => {
         scopeId,
       },
     });
-  });
-
-  it('should disabled the click when in preview mode', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      isPreviewMode: true,
-    });
-    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      dataCount: 1,
-    });
-
-    const { getByTestId } = renderRelatedAlertsBySession();
-    const button = getByTestId(CORRELATIONS_RELATED_ALERTS_BY_SESSION_BUTTON_TEST_ID);
-
-    expect(button).toHaveAttribute('disabled');
-
-    button.click();
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 });

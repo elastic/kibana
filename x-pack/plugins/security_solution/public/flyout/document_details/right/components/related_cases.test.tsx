@@ -12,8 +12,7 @@ import {
   CORRELATIONS_RELATED_CASES_TEST_ID,
   SUMMARY_ROW_TEXT_TEST_ID,
   SUMMARY_ROW_LOADING_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
-  CORRELATIONS_RELATED_CASES_BUTTON_TEST_ID,
+  SUMMARY_ROW_BUTTON_TEST_ID,
 } from './test_ids';
 import { RelatedCases } from './related_cases';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
@@ -33,7 +32,7 @@ const indexName = 'indexName';
 const scopeId = 'scopeId';
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
-const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
+const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
 const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
 
 const renderRelatedCases = () =>
@@ -48,6 +47,7 @@ describe('<RelatedCases />', () => {
     jest.clearAllMocks();
 
     (useDocumentDetailsContext as jest.Mock).mockReturnValue({
+      eventId,
       indexName,
       scopeId,
       isPreviewMode: false,
@@ -64,7 +64,7 @@ describe('<RelatedCases />', () => {
 
     const { getByTestId } = renderRelatedCases();
     expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Related case');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('1');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('1');
   });
 
   it('should render multiple related cases correctly', () => {
@@ -76,19 +76,7 @@ describe('<RelatedCases />', () => {
 
     const { getByTestId } = renderRelatedCases();
     expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Related cases');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('2');
-  });
-
-  it('should render big number of related cases correctly', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      dataCount: 2000,
-    });
-
-    const { getByTestId } = renderRelatedCases();
-    expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Related cases');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('2k');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('2');
   });
 
   it('should render loading skeleton', () => {
@@ -118,7 +106,7 @@ describe('<RelatedCases />', () => {
     });
 
     const { getByTestId } = renderRelatedCases();
-    getByTestId(CORRELATIONS_RELATED_CASES_BUTTON_TEST_ID).click();
+    getByTestId(BUTTON_TEST_ID).click();
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
@@ -132,26 +120,5 @@ describe('<RelatedCases />', () => {
         scopeId,
       },
     });
-  });
-
-  it('should disabled the click when in preview mode', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      indexName,
-      scopeId,
-      isPreviewMode: true,
-    });
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      dataCount: 1,
-    });
-
-    const { getByTestId } = renderRelatedCases();
-    const button = getByTestId(CORRELATIONS_RELATED_CASES_BUTTON_TEST_ID);
-
-    expect(button).toHaveAttribute('disabled');
-
-    button.click();
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 });

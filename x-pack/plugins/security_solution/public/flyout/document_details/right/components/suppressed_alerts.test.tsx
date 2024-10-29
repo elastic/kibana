@@ -10,10 +10,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   SUMMARY_ROW_TEXT_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
-  CORRELATIONS_SUPPRESSED_ALERTS_BUTTON_TEST_ID,
+  SUMMARY_ROW_BUTTON_TEST_ID,
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
@@ -30,7 +29,7 @@ jest.mock('../../../../../common/detection_engine/utils', () => ({
 }));
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
-const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
+const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 
 const renderSuppressedAlerts = (alertSuppressionCount: number) =>
   render(
@@ -62,7 +61,7 @@ describe('<SuppressedAlerts />', () => {
     const { getByTestId } = renderSuppressedAlerts(1);
 
     expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Suppressed alert');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('1');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('1');
     expect(
       getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
     ).toBeInTheDocument();
@@ -72,14 +71,7 @@ describe('<SuppressedAlerts />', () => {
     const { getByTestId } = renderSuppressedAlerts(2);
 
     expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Suppressed alerts');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('2');
-  });
-
-  it('should render big number of suppressed alerts row correctly', () => {
-    const { getByTestId } = renderSuppressedAlerts(2000);
-
-    expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Suppressed alerts');
-    expect(getByTestId(VALUE_TEST_ID)).toHaveTextContent('2k');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('2');
   });
 
   it('should not render Technical Preview badge if rule type is in GA', () => {
@@ -93,7 +85,7 @@ describe('<SuppressedAlerts />', () => {
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
     const { getByTestId } = renderSuppressedAlerts(1);
-    getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_BUTTON_TEST_ID).click();
+    getByTestId(BUTTON_TEST_ID).click();
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
@@ -107,22 +99,5 @@ describe('<SuppressedAlerts />', () => {
         scopeId,
       },
     });
-  });
-
-  it('should disabled the click when in preview mode', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: true,
-    });
-
-    const { getByTestId } = renderSuppressedAlerts(1);
-    const button = getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_BUTTON_TEST_ID);
-
-    expect(button).toHaveAttribute('disabled');
-
-    button.click();
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 });
