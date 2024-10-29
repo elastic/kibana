@@ -25,9 +25,13 @@ export const findMaintenanceWindowsRoute = (
     {
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_find`,
       validate: {},
+      security: {
+        authz: {
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+        },
+      },
       options: {
         access: 'internal',
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
       },
     },
     router.handleLegacyErrors(
