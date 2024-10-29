@@ -16,7 +16,6 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import {
   METRICS_EXPLORER_LOCATOR_ID,
   MetricsExplorerLocatorParams,
@@ -133,17 +132,14 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndHostViewFlag$ = combineLatest([
-      from(core.getStartServices()),
-      core.settings.client.get$<boolean>(enableInfrastructureHostsView),
-    ]);
+    const startDep$AndHostViewFlag$ = combineLatest([from(core.getStartServices())]);
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
-        map(([[{ application }], isInfrastructureHostsViewEnabled]) => {
+        map(([[{ application }]]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -179,15 +175,11 @@ export class Plugin implements InfraClientPluginClass {
                             },
                           ]
                         : []),
-                      ...(isInfrastructureHostsViewEnabled
-                        ? [
-                            {
-                              label: hostsTitle,
-                              app: 'metrics',
-                              path: '/hosts',
-                            },
-                          ]
-                        : []),
+                      {
+                        label: hostsTitle,
+                        app: 'metrics',
+                        path: '/hosts',
+                      },
                     ],
                   },
                 ]
@@ -236,10 +228,8 @@ export class Plugin implements InfraClientPluginClass {
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
-      hostsEnabled,
       metricsExplorerEnabled,
     }: {
-      hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
@@ -251,18 +241,14 @@ export class Plugin implements InfraClientPluginClass {
           path: '/inventory',
           visibleIn,
         },
-        ...(hostsEnabled
-          ? [
-              {
-                id: 'hosts',
-                title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-                  defaultMessage: 'Hosts',
-                }),
-                path: '/hosts',
-                visibleIn,
-              },
-            ]
-          : []),
+        {
+          id: 'hosts',
+          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+            defaultMessage: 'Hosts',
+          }),
+          path: '/hosts',
+          visibleIn,
+        },
         ...(metricsExplorerEnabled
           ? [
               {
@@ -301,7 +287,6 @@ export class Plugin implements InfraClientPluginClass {
       category: DEFAULT_APP_CATEGORIES.observability,
       updater$: this.appUpdater$,
       deepLinks: getInfraDeepLinks({
-        hostsEnabled: core.settings.client.get<boolean>(enableInfrastructureHostsView),
         metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
       }),
       mount: async (params: AppMountParameters) => {
@@ -327,13 +312,9 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     startDep$AndHostViewFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled]: [
-        [CoreStart, InfraClientStartDeps, InfraClientStartExports],
-        boolean
-      ]) => {
+      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports]]) => {
         this.appUpdater$.next(() => ({
           deepLinks: getInfraDeepLinks({
-            hostsEnabled: isInfrastructureHostsViewEnabled,
             metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
           }),
         }));
