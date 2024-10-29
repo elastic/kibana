@@ -225,6 +225,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           taskManager: startPlugins.taskManager,
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
+          telemetry: core.analytics,
         });
       }),
     };
