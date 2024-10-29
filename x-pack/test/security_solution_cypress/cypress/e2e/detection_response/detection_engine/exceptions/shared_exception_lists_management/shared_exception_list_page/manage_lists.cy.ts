@@ -6,6 +6,7 @@
  */
 
 import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getUsername } from '../../../../../../tasks/common';
 import {
   expectedExportedExceptionList,
   getExceptionList,
@@ -97,11 +98,12 @@ describe(
         exportExceptionList(getExceptionList1().list_id);
 
         cy.wait('@export').then(({ response }) => {
-          cy.wrap(response?.body).should(
-            'eql',
-            expectedExportedExceptionList(exceptionListResponse)
-          );
-
+          getUsername('admin').then((username) => {
+            cy.wrap(response?.body).should(
+              'eql',
+              expectedExportedExceptionList(exceptionListResponse, username as string)
+            );
+          });
           cy.get(TOASTER).should(
             'have.text',
             `Exception list "${EXCEPTION_LIST_NAME}" exported successfully`

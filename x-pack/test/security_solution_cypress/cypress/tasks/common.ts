@@ -8,7 +8,6 @@
 import { recurse } from 'cypress-recurse';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
-import { IS_SERVERLESS, ELASTICSEARCH_USERNAME } from '../env_var_names_constants';
 
 const primaryButton = 0;
 
@@ -57,12 +56,20 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-export const getUsername = (role: string = 'admin') => {
-  if (Cypress.env(IS_SERVERLESS)) {
-    return cy.task('getFullname', role);
+const getUserValue = (taskName: string, role: string = 'admin') => {
+  if (Cypress.env('IS_SERVERLESS')) {
+    return cy.task(taskName, role);
   } else {
-    return cy.wrap(Cypress.env(ELASTICSEARCH_USERNAME));
+    return cy.wrap(Cypress.env('ELASTICSEARCH_USERNAME'));
   }
+};
+
+export const getFullname = (role: string = 'admin') => {
+  return getUserValue('getFullname', role);
+};
+
+export const getUsername = (role: string = 'admin') => {
+  return getUserValue('getUsername', role);
 };
 
 export const reload = () => {

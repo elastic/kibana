@@ -23,7 +23,7 @@ import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timeli
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
 import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
-import { getUsername } from '../../../tasks/common';
+import { getFullname } from '../../../tasks/common';
 
 const author = Cypress.env('ELASTICSEARCH_USERNAME');
 const link = 'https://www.elastic.co/';
@@ -67,7 +67,7 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should render the right author', () => {
-    getUsername('admin').then((username) => {
+    getFullname('admin').then((username) => {
       addNotesToTimeline(getTimelineNonValidQuery().notes);
       cy.get(NOTES_AUTHOR).first().should('have.text', username);
     });

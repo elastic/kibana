@@ -53,7 +53,7 @@ import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 import { deleteCases } from '../../../tasks/api_calls/cases';
 import { login } from '../../../tasks/login';
-import { getUsername } from '../../../tasks/common';
+import { getFullname } from '../../../tasks/common';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
@@ -111,7 +111,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
 
-    getUsername('admin').then((username) => {
+    getFullname('admin').then((username) => {
       cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('contain', username);
       cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
     });
