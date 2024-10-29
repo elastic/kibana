@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext, useMemo, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useMemo, useEffect, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -32,56 +32,65 @@ interface RulesContextValue {
 const RulesContext = createContext<RulesContextValue | undefined>(undefined);
 const MAX_ITEMS_PER_PAGE = 10000;
 
-interface State {
-  rulesQuery: RulesQuery;
-  pageSize?: number;
-  page: number;
-}
+// interface State {
+//   rulesQuery: RulesQuery;
+//   pageSize?: number;
+//   page: number;
+// }
 
-type Action =
-  | {
-      type: 'setRulesQuery';
-      value: Partial<RulesQuery>;
-    }
-  | { type: 'setPageSize'; value: number }
-  | { type: 'setPage'; value: number };
+// type Action =
+//   | {
+//       type: 'setRulesQuery';
+//       value: Partial<RulesQuery>;
+//     }
+//   | { type: 'setPageSize'; value: number }
+//   | { type: 'setPage'; value: number };
 
-function rulesReducer(state: State, action: Action) {
-  switch (action.type) {
-    case 'setRulesQuery': {
-      return { ...state, rulesQuery: { ...state.rulesQuery, ...action.value } };
-    }
-    case 'setPage': {
-      return { ...state, page: action.value };
-    }
-    case 'setPageSize': {
-      return { ...state, pageSize: action.value };
-    }
-    default: {
-      throw new Error(`Unhandled action type: ${action}`);
-    }
-  }
-}
+// function rulesReducer(state: State, action: Action) {
+//   switch (action.type) {
+//     case 'setRulesQuery': {
+//       return { ...state, rulesQuery: { ...state.rulesQuery, ...action.value } };
+//     }
+//     case 'setPage': {
+//       return { ...state, page: action.value };
+//     }
+//     case 'setPageSize': {
+//       return { ...state, pageSize: action.value };
+//     }
+//     default: {
+//       throw new Error(`Unhandled action type: ${action}`);
+//     }
+//   }
+// }
 
-const initialState: State = {
-  page: 1,
-  pageSize: 10,
-  rulesQuery: {
+// const initialState: State = {
+//   page: 1,
+//   pageSize: 10,
+//   rulesQuery: {
+//     section: undefined,
+//     ruleNumber: undefined,
+//     search: '',
+//     page: 0,
+//     perPage: 10,
+//     sortField: 'metadata.benchmark.rule_number',
+//     sortOrder: 'asc',
+//   },
+// };
+
+export function RulesProvider({ children }: RulesProviderProps) {
+  const params = useParams<PageUrlParams>();
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+  const [page, setPage] = useState(1);
+  const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
     ruleNumber: undefined,
     search: '',
     page: 0,
-    perPage: 10,
+    perPage: pageSize || 10,
     sortField: 'metadata.benchmark.rule_number',
     sortOrder: 'asc',
-  },
-};
+  });
 
-export function RulesProvider({ children }: RulesProviderProps) {
-  const params = useParams<PageUrlParams>();
-  const { pageSize: localStoragePageSize, setPageSize: setLocalStoragePageSize } = usePageSize(
-    LOCAL_STORAGE_PAGE_SIZE_RULES_KEY
-  );
   const allRules = useFindCspBenchmarkRule(
     {
       page: 1,
@@ -93,8 +102,6 @@ export function RulesProvider({ children }: RulesProviderProps) {
     params.benchmarkVersion
   );
 
-  const [state, dispatch] = React.useReducer(rulesReducer, initialState);
-
   // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
   useEffect(() => {
     const getPageByRuleId = () => {
@@ -105,49 +112,62 @@ export function RulesProvider({ children }: RulesProviderProps) {
 
         if (ruleIndex !== -1) {
           // Calculate the page based on the rule index and page size
-          const rulePage = Math.floor(ruleIndex / localStoragePageSize);
+          const rulePage = Math.floor(ruleIndex / pageSize);
           return rulePage;
         }
       }
       return 0;
     };
 
-    dispatch({ type: 'setPageSize', value: getPageByRuleId() });
-  }, [allRules?.data?.items, params.ruleId, localStoragePageSize]);
+    setRulesQuery({
+      ...rulesQuery,
+      page: getPageByRuleId(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRules?.data?.items]);
 
-  const setRulesQuery = useCallback(
+  const setRulesQueryCallback = useCallback(
     () => (query: Partial<RulesQuery>) => {
-      dispatch({ type: 'setRulesQuery', value: query });
+      setRulesQuery({ ...rulesQuery, ...query });
     },
-    []
+    [rulesQuery, setRulesQuery]
   );
 
-  const setPageSize = useCallback(
-    () => (value: number) => {
-      setLocalStoragePageSize(value);
-      dispatch({ type: 'setPageSize', value });
+  const setPageSizeCallback = useCallback(
+    (value: number) => {
+      if (value === pageSize) return;
+
+      setPageSize(value);
+      setRulesQuery({ ...rulesQuery, ...{ perPage: value } });
     },
-    [setLocalStoragePageSize]
+    [rulesQuery, setPageSize, pageSize]
+  );
+
+  const setPageCallback = useCallback(
+    (value: number) => {
+      setPage(value);
+    },
+    [setPage]
   );
 
   const initialContextValue = useMemo(
     () => ({
       allRules: allRules.data,
-      rulesQuery: state.rulesQuery,
-      setRulesQuery,
-      pageSize: state.pageSize || localStoragePageSize,
-      setPageSize,
-      page: state.page,
-      setPage: (value: number) => dispatch({ type: 'setPage', value }),
+      rulesQuery,
+      setRulesQuery: setRulesQueryCallback,
+      pageSize,
+      setPageSize: setPageSizeCallback,
+      page,
+      setPage: setPageCallback,
     }),
     [
       allRules,
-      state.rulesQuery,
-      state.pageSize,
-      state.page,
-      localStoragePageSize,
-      setRulesQuery,
-      setPageSize,
+      rulesQuery,
+      setRulesQueryCallback,
+      pageSize,
+      setPageSizeCallback,
+      page,
+      setPageCallback,
     ]
   );
 
