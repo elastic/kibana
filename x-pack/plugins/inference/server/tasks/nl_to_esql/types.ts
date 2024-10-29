@@ -31,5 +31,6 @@ export type NlToEsqlTaskParams<TToolOptions extends ToolOptions> = {
   connectorId: string;
   logger: Logger;
   functionCalling?: FunctionCallingMode;
+  summarizeInput?: boolean;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] });

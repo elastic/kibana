@@ -26,7 +26,6 @@ export const summarizeDiscussionFn = ({
   client,
   connectorId,
   functionCalling,
-  logger,
   output$,
 }: ActionsOptionsBase) => {
   return async function summarizeDiscussion({ messages }: { messages: Message[] }) {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Message, FunctionCallingMode } from '.';
+import type { FunctionCallingMode } from './api';
+import type { Message } from './messages';
 import type { ToolOptions } from './tools';
 
 export type ChatCompleteRequestBody = {

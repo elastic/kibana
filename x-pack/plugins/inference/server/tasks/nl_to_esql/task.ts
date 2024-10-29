@@ -27,6 +27,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   toolChoice,
   logger,
   functionCalling,
+  summarizeInput = false,
   ...rest
 }: NlToEsqlTaskParams<TToolOptions>): Observable<NlToEsqlTaskEvent<TToolOptions>> {
   const output$ = new Subject<NlToEsqlTaskEvent<TToolOptions>>();
@@ -41,7 +42,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
 
   loadDocBase()
     .then(async (docBase) => {
-      const messages: Message[] =
+      let messages: Message[] =
         'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 
       const summarizeDiscussion = summarizeDiscussionFn({
@@ -57,27 +58,23 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         systemMessage: docBase.getSystemMessage(),
       });
 
-      //// actual workflow
-
-      const discussionSummary = await summarizeDiscussion({ messages });
-
-      console.log('discussion summary:', discussionSummary);
+      if (summarizeInput) {
+        const discussionSummary = await summarizeDiscussion({ messages });
+        messages = discussionFromSummary(discussionSummary.summary);
+      }
 
       const documentationRequest = await requestDocumentation({
-        messages: discussionFromSummary(discussionSummary.summary),
+        messages,
       });
-
-      console.log('**** requested keywords:', documentationRequest.keywords);
 
       await generateEsql({
         documentationRequest,
-        messages: discussionFromSummary(discussionSummary.summary),
+        messages,
       });
 
       output$.complete();
     })
     .catch((err) => {
-      // TODO: throw inference error
       output$.error(err);
     });
 

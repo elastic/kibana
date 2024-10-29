@@ -10,22 +10,21 @@ export {
   splitIntoCommands,
 } from './tasks/nl_to_esql/correct_common_esql_mistakes';
 
-export { isChatCompletionChunkEvent } from './chat_complete/is_chat_completion_chunk_event';
-export { isChatCompletionMessageEvent } from './chat_complete/is_chat_completion_message_event';
-export { isChatCompletionEvent } from './chat_complete/is_chat_completion_event';
+export {
+  isChatCompletionChunkEvent,
+  isChatCompletionMessageEvent,
+  isChatCompletionEvent,
+} from './chat_complete/event_utils';
 
-export { isOutputUpdateEvent } from './output/is_output_update_event';
-export { isOutputCompleteEvent } from './output/is_output_complete_event';
-export { isOutputEvent } from './output/is_output_event';
-
-export type { ToolSchema } from './chat_complete/tool_schema';
+export { isOutputUpdateEvent, isOutputCompleteEvent, isOutputEvent } from './output/event_utils';
 
 export {
-  type Message,
   MessageRole,
+  type Message,
   type ToolMessage,
   type AssistantMessage,
   type UserMessage,
+  type ToolSchema,
 } from './chat_complete';
 
-export { generateFakeToolCallId } from './chat_complete/generate_fake_tool_call_id';
+export { generateFakeToolCallId } from './utils/generate_fake_tool_call_id';

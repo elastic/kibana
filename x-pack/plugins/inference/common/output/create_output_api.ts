@@ -7,7 +7,7 @@
 
 import { map } from 'rxjs';
 import { ChatCompleteAPI, ChatCompletionEventType, MessageRole } from '../chat_complete';
-import { withoutTokenCountEvents } from '../chat_complete/without_token_count_events';
+import { withoutTokenCountEvents } from '../chat_complete/event_utils';
 import { OutputAPI, OutputEvent, OutputEventType } from '.';
 import { ensureMultiTurn } from '../ensure_multi_turn';
 
