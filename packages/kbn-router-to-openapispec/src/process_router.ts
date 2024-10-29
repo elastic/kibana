@@ -68,7 +68,7 @@ export const processRouter = (
       if (route.security) {
         const authzDescription = extractAuthzDescription(route.security);
 
-        description = `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
+        description += `${route.options.description && authzDescription ? `<br/><br/>` : ''}${
           authzDescription ?? ''
         }`;
       }
