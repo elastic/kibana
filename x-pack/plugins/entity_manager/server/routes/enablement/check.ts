@@ -22,7 +22,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
 
 /**
  * @openapi
- * /internal/entities/managed/enablement:
+ * /api/entities/managed/enablement:
  *   get:
  *     description: Check if managed (built-in) entity discovery is enabled. Enabled entity discovery requires a valid api key and the latest version of the builtin definitions installed and running.
  *     tags:
@@ -44,7 +44,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *                  example: api_key_not_found
  */
 export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
-  endpoint: 'GET /internal/entities/managed/enablement',
+  endpoint: 'GET /api/entities/managed/enablement',
   handler: async ({ response, logger, server }) => {
     try {
       logger.debug('reading entity discovery API key from saved object');

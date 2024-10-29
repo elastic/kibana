@@ -27,7 +27,7 @@ describe('Home page', () => {
   describe('When EEM is enabled', () => {
     describe('When there is no entities', () => {
       it('Shows inventory page with empty message', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.visitKibana('/app/inventory');
@@ -60,7 +60,7 @@ describe('Home page', () => {
       });
 
       it('Shows inventory page with entities', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.visitKibana('/app/inventory');
@@ -74,7 +74,7 @@ describe('Home page', () => {
       });
 
       it('Navigates to apm when clicking on a service type entity', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.visitKibana('/app/inventory');
@@ -84,7 +84,7 @@ describe('Home page', () => {
       });
 
       it('Navigates to hosts when clicking on a host type entity', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.visitKibana('/app/inventory');
@@ -94,7 +94,7 @@ describe('Home page', () => {
       });
 
       it('Navigates to infra when clicking on a container type entity', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.visitKibana('/app/inventory');
@@ -104,7 +104,7 @@ describe('Home page', () => {
       });
 
       it('Filters entities by service type', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities*').as('getEntitites');
@@ -121,7 +121,7 @@ describe('Home page', () => {
       });
 
       it('Filters entities by host type', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities*').as('getEntitites');
@@ -138,7 +138,7 @@ describe('Home page', () => {
       });
 
       it('Filters entities by container type', () => {
-        cy.intercept('GET', '/internal/entities/managed/enablement', {
+        cy.intercept('GET', '/api/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
         cy.intercept('GET', '/internal/inventory/entities*').as('getEntitites');

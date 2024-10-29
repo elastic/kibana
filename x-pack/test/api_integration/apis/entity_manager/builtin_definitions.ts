@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const enablementRequest =
     (method: 'get' | 'put' | 'delete') =>
     async (auth: Auth, expectedCode: number, query: { [key: string]: any } = {}) => {
-      const response = await supertestWithoutAuth[method]('/internal/entities/managed/enablement')
+      const response = await supertestWithoutAuth[method]('/api/entities/managed/enablement')
         .auth(auth.username, auth.password)
         .query(query)
         .set('kbn-xsrf', 'xxx')

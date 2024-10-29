@@ -42,7 +42,7 @@ export class EntitiesSynthtraceKibanaClient {
       this.logger.debug('Entity definitions are already defined');
     } else {
       this.logger.debug('Installing Entity definitions');
-      const entityEnablementUrl = `${this.target}/internal/entities/managed/enablement?installOnly=true`;
+      const entityEnablementUrl = `${this.target}/api/entities/managed/enablement?installOnly=true`;
       await fetch(entityEnablementUrl, {
         method: 'PUT',
         headers: kibanaHeaders(),
@@ -52,7 +52,7 @@ export class EntitiesSynthtraceKibanaClient {
   }
 
   async uninstallEntityIndexPatterns() {
-    const url = `${this.target}/internal/entities/managed/enablement`;
+    const url = `${this.target}/api/entities/managed/enablement`;
     await fetch(url, {
       method: 'DELETE',
       headers: kibanaHeaders(),
