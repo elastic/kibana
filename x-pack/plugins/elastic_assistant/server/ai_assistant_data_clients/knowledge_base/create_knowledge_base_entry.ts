@@ -204,8 +204,6 @@ export const transformToCreateSchema = ({
     source: entry.source,
     text: entry.text,
     semantic_text: entry.text,
-    // deprecated
-    vector: undefined,
   };
 };
 
@@ -247,7 +245,6 @@ export const transformToLegacyCreateSchema = ({
           },
         ],
     ...entry,
-    // deprecated
     vector: undefined,
   };
 };

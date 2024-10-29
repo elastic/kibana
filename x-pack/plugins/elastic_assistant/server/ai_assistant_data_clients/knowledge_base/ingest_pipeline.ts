@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// TODO: Ensure old pipeline is updated/replaced
 export const knowledgeBaseIngestPipeline = ({
   id,
   modelId,
