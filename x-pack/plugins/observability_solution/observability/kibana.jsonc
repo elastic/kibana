@@ -1,12 +1,19 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/obs-ux-management-team",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "observability",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "observability"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observability"
+    ],
     "requiredPlugins": [
       "aiops",
       "alerting",
@@ -59,6 +66,8 @@
       "stackAlerts",
       "spaces"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }
