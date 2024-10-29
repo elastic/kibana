@@ -15,6 +15,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { ComponentTemplateDeserialized } from '../shared_imports';
+import { useKibana } from '../../..';
 
 export interface ManageAction {
   name: string;
@@ -34,6 +35,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
 }) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
+  const { services } = useKibana();
 
   const items: EuiContextMenuPanelItemDescriptor[] = actions.map(
     ({ name, icon, getIsDisabled, closePopoverOnClick, handleActionClick }) => {
@@ -61,23 +63,25 @@ export const ManageButton: React.FunctionComponent<Props> = ({
     }
   );
 
+  const button = services.application.capabilities.index_management.manageIndexTemplate ? (
+    <EuiButton
+      fill
+      data-test-subj="manageComponentTemplateButton"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={() => setIsPopOverOpen((prevBoolean) => !prevBoolean)}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.componentTemplateDetails.manageButtonLabel"
+        defaultMessage="Manage"
+      />
+    </EuiButton>
+  ) : undefined;
+
   return (
     <EuiPopover
       id="manageComponentTemplatePanel"
-      button={
-        <EuiButton
-          fill
-          data-test-subj="manageComponentTemplateButton"
-          iconType="arrowDown"
-          iconSide="right"
-          onClick={() => setIsPopOverOpen((prevBoolean) => !prevBoolean)}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.componentTemplateDetails.manageButtonLabel"
-            defaultMessage="Manage"
-          />
-        </EuiButton>
-      }
+      button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"

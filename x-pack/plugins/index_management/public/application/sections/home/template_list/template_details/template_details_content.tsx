@@ -33,7 +33,7 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
+import { SectionLoading, UseRequestResponse, useKibana } from '../../../../../shared_imports';
 import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
@@ -104,6 +104,7 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
+  const { services } = useKibana();
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
   const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const [templateToDelete, setTemplateToDelete] = useState<
@@ -248,73 +249,77 @@ export const TemplateDetailsContent = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {templateDetails && (
-            <EuiFlexItem grow={false}>
-              {/* Manage templates context menu */}
-              <EuiPopover
-                id="manageTemplatePanel"
-                button={
-                  <EuiButton
-                    fill
-                    data-test-subj="manageTemplateButton"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={() => setIsPopOverOpen((prev) => !prev)}
-                  >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.templateDetails.manageButtonLabel"
-                      defaultMessage="Manage"
-                    />
-                  </EuiButton>
-                }
-                isOpen={isPopoverOpen}
-                closePopover={() => setIsPopOverOpen(false)}
-                panelPaddingSize="none"
-                anchorPosition="rightUp"
-                repositionOnScroll
-              >
-                <EuiContextMenu
-                  initialPanelId={0}
-                  panels={[
-                    {
-                      id: 0,
-                      title: i18n.translate(
-                        'xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle',
-                        {
-                          defaultMessage: 'Template options',
-                        }
-                      ),
-                      items: [
-                        {
-                          name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
-                            defaultMessage: 'Edit',
-                          }),
-                          icon: 'pencil',
-                          onClick: () => editTemplate(templateName, isLegacy),
-                          disabled: isCloudManaged,
-                        },
-                        {
-                          name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
-                            defaultMessage: 'Clone',
-                          }),
-                          icon: 'copy',
-                          onClick: () => cloneTemplate(templateName, isLegacy),
-                        },
-                        {
-                          name: i18n.translate('xpack.idxMgmt.templateDetails.deleteButtonLabel', {
-                            defaultMessage: 'Delete',
-                          }),
-                          icon: 'trash',
-                          onClick: () => setTemplateToDelete([{ name: templateName, isLegacy }]),
-                          disabled: isCloudManaged,
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
-          )}
+          {templateDetails &&
+            services.application?.capabilities.index_management.manageIndexTemplate && (
+              <EuiFlexItem grow={false}>
+                {/* Manage templates context menu */}
+                <EuiPopover
+                  id="manageTemplatePanel"
+                  button={
+                    <EuiButton
+                      fill
+                      data-test-subj="manageTemplateButton"
+                      iconType="arrowDown"
+                      iconSide="right"
+                      onClick={() => setIsPopOverOpen((prev) => !prev)}
+                    >
+                      <FormattedMessage
+                        id="xpack.idxMgmt.templateDetails.manageButtonLabel"
+                        defaultMessage="Manage"
+                      />
+                    </EuiButton>
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={() => setIsPopOverOpen(false)}
+                  panelPaddingSize="none"
+                  anchorPosition="rightUp"
+                  repositionOnScroll
+                >
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={[
+                      {
+                        id: 0,
+                        title: i18n.translate(
+                          'xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle',
+                          {
+                            defaultMessage: 'Template options',
+                          }
+                        ),
+                        items: [
+                          {
+                            name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
+                              defaultMessage: 'Edit',
+                            }),
+                            icon: 'pencil',
+                            onClick: () => editTemplate(templateName, isLegacy),
+                            disabled: isCloudManaged,
+                          },
+                          {
+                            name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
+                              defaultMessage: 'Clone',
+                            }),
+                            icon: 'copy',
+                            onClick: () => cloneTemplate(templateName, isLegacy),
+                          },
+                          {
+                            name: i18n.translate(
+                              'xpack.idxMgmt.templateDetails.deleteButtonLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            ),
+                            icon: 'trash',
+                            onClick: () => setTemplateToDelete([{ name: templateName, isLegacy }]),
+                            disabled: isCloudManaged,
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     );
