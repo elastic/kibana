@@ -630,7 +630,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)
-          ensureIndicesExistsForPolicies(this.endpointAppContextService);
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
         })
         .catch(() => {});
 
