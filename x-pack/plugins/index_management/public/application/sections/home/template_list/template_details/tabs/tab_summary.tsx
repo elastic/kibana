@@ -58,9 +58,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
     allowAutoCreate,
-    template: {
-      settings: { index: indexSettings },
-    },
+    template,
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
@@ -233,7 +231,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {getIndexModeLabel(indexSettings?.mode)}
+              {getIndexModeLabel(template?.settings?.index?.mode)}
             </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
