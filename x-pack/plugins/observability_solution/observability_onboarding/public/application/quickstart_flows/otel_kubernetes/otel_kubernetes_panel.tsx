@@ -187,7 +187,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                     {
                       defaultMessage:
-                        'Enable automatic instrumentation for your applications by annotating the resource that manages their pods, such as a deployment, or by annotating the entire namespace.',
+                        'Enable automatic instrumentation for your applications by annotating the pods template (spec.template.metadata.annotations) in your Deployment or relevant workload object (StatefulSet, Job, CronJob, etc.)',
                     }
                   )}
                 </p>
@@ -225,18 +225,24 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   ]}
                 />
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="bash">
-                  {`# To annotate a specific deployment
-kubectl annotate deployment my-deployment -n my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
-
-# To annotate all resources in a namespace
-kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
-
-# Restart your deployment
-kubectl rollout restart deployment my-deployment -n my-namespace
-
-# Check whether annotations have been applied correctly
-kubectl describe deployment my-deployment -n my-namespace`}
+                <EuiCodeBlock paddingSize="m" language="yaml">
+                  {`apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  ...
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+      ...
+    spec:
+      containers:
+      - image: myapplication-image
+        name: app
+      ...
+`}
                 </EuiCodeBlock>
                 <EuiSpacer />
                 <CopyToClipboardButton
