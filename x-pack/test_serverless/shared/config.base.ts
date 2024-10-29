@@ -95,9 +95,9 @@ export default async () => {
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
         // controller cluster-settings
-        `--cluster.service.slow_task_logging_threshold=15s`,
-        `--cluster.service.slow_task_thread_dump_timeout=5s`,
-        `--serverless.search.enable_replicas_for_instant_failover=true`,
+        `cluster.service.slow_task_logging_threshold=15s`,
+        `cluster.service.slow_task_thread_dump_timeout=5s`,
+        `serverless.search.enable_replicas_for_instant_failover=true`,
       ],
       ssl: true, // SSL is required for SAML realm
     },
