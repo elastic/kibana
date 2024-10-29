@@ -12,12 +12,14 @@ import type {
   AuditLogger,
   IScopedClusterClient,
   AuditEvent,
+  AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
+import moment from 'moment';
 import type { AppClient } from '../../..';
 import type {
   Entity,
@@ -59,6 +61,11 @@ import { EntityEngineActions } from './auditing/actions';
 import { EntityStoreResource } from './auditing/resources';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
+import {
+  ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+} from '../../telemetry/event_based/events';
+
 import type { EntityRecord } from './types';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 
@@ -72,6 +79,7 @@ interface EntityStoreClientOpts {
   kibanaVersion: string;
   dataViewsService: DataViewsService;
   appClient: AppClient;
+  telemetry?: AnalyticsServiceSetup;
 }
 
 interface SearchEntitiesParams {
@@ -178,6 +186,7 @@ export class EntityStoreDataClient {
     filter: string,
     pipelineDebugMode: boolean
   ) {
+    const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
@@ -255,6 +264,12 @@ export class EntityStoreDataClient {
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
       this.log(`info`, entityType, `Entity store initialized`);
 
+      const setupEndTime = moment().utc().toISOString();
+      const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
+        duration,
+      });
+
       return updated;
     } catch (err) {
       this.log(`error`, entityType, `Error initializing entity store: ${err.message}`);
@@ -266,6 +281,10 @@ export class EntityStoreDataClient {
         'Failed to initialize entity engine resources',
         err
       );
+
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
+        error: err.message,
+      });
 
       await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
 
