@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
+      // generate a report that will initialize the Reporting data stream
       const { job, path } = await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
