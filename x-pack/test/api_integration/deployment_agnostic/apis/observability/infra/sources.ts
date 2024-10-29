@@ -6,43 +6,53 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
   metricsSourceConfigurationResponseRT,
 } from '@kbn/infra-plugin/common/metrics_sources';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+const SOURCE_API_URL = '/api/metrics/source';
+const SOURCE_ID = 'default';
+
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const SOURCE_API_URL = '/api/metrics/source';
-  const SOURCE_ID = 'default';
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('sources', () => {
+  describe('API /api/metrics/source', () => {
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    const patchRequest = async (
+      body: PartialMetricsSourceConfigurationProperties,
+      expectedHttpStatusCode = 200
+    ): Promise<MetricsSourceConfigurationResponse | undefined> => {
+      const response = await supertestWithAdminScope
+        .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
+        .send(body)
+        .expect(expectedHttpStatusCode);
+      return response.body;
+    };
+
     before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await supertestWithAdminScope.destroy();
+    });
+
+    beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    const patchRequest = async (
-      body: PartialMetricsSourceConfigurationProperties
-    ): Promise<MetricsSourceConfigurationResponse | undefined> => {
-      const response = await supertest
-        .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
-        .set('kbn-xsrf', 'xxx')
-        .send(body)
-        .expect(200);
-      return response.body;
-    };
-
-    describe('patch request', () => {
+    describe('PATCH /api/metrics/source/{sourceId}', () => {
       it('applies all top-level field updates to an existing source', async () => {
         const creationResponse = await patchRequest({
           name: 'NAME',
@@ -108,41 +118,50 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('validates anomalyThreshold is between range 1-100', async () => {
         // create config with bad request
-        await supertest
-          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .send({ name: 'NAME', anomalyThreshold: -20 })
-          .expect(400);
-        // create config with good request
-        await supertest
-          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .send({ name: 'NAME', anomalyThreshold: 20 })
-          .expect(200);
+        await patchRequest({ name: 'NAME', anomalyThreshold: -20 }, 400);
 
-        await supertest
-          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .send({ anomalyThreshold: -2 })
-          .expect(400);
-        await supertest
-          .patch(`${SOURCE_API_URL}/${SOURCE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .send({ anomalyThreshold: 101 })
-          .expect(400);
+        // create config with good request
+        await patchRequest({ name: 'NAME', anomalyThreshold: 20 });
+        await patchRequest({ anomalyThreshold: -2 }, 400);
+        await patchRequest({ anomalyThreshold: 101 }, 400);
       });
     });
 
-    describe('has data', () => {
+    describe('GET /api/metrics/source/{sourceId}', () => {
+      it('should just work', async () => {
+        const { body } = await supertestWithAdminScope
+          .get('/api/metrics/source/default')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.have.property('source');
+        expect(body?.source.configuration.metricAlias).to.equal('metrics-*,metricbeat-*');
+        expect(body?.source).to.have.property('status');
+        expect(body?.source.status?.metricIndicesExist).to.equal(true);
+      });
+    });
+
+    describe('GET /api/metrics/source/{sourceId}/hasData', () => {
+      it('should just work', async () => {
+        const { body } = await supertestWithAdminScope
+          .get(`/api/metrics/source/default/hasData`)
+
+          .expect(200);
+
+        expect(body).to.have.property('hasData');
+        expect(body?.hasData).to.be(true);
+      });
+    });
+
+    describe('GET /api/metrics/source/hasData', () => {
       const makeRequest = async (params?: {
         modules?: string[];
         expectedHttpStatusCode?: number;
       }) => {
         const { modules, expectedHttpStatusCode = 200 } = params ?? {};
-        return supertest
+        return supertestWithAdminScope
           .get(`${SOURCE_API_URL}/hasData`)
           .query(modules ? { modules } : '')
-          .set('kbn-xsrf', 'xxx')
           .expect(expectedHttpStatusCode);
       };
 

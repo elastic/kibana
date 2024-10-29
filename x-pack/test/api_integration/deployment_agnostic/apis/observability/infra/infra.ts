@@ -6,22 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';
-import { DATES } from './constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import { DATES } from './utils/constants';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const ENDPOINT = '/api/metrics/infra/host';
 
 const normalizeNewLine = (text: string) => {
   return text.replaceAll(/(\s{2,}|\\n\\s)/g, ' ');
 };
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
   const basePayload: GetInfraMetricsRequestBodyPayloadClient = {
     limit: 10,
@@ -40,29 +40,34 @@ export default function ({ getService }: FtrProviderContext) {
     query: { bool: { must_not: [], filter: [], should: [], must: [] } },
   };
 
-  const makeRequest = async ({
-    body,
-    invalidBody,
-    expectedHTTPCode,
-  }: {
-    body?: GetInfraMetricsRequestBodyPayloadClient;
-    invalidBody?: any;
-    expectedHTTPCode: number;
-  }) => {
-    return supertest
-      .post(ENDPOINT)
-      .set('kbn-xsrf', 'xxx')
-      .send(body ?? invalidBody)
-      .expect(expectedHTTPCode);
-  };
-
   describe('Hosts', () => {
-    before(() =>
-      esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
-    );
-    after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
-    );
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    const makeRequest = async ({
+      body,
+      invalidBody,
+      expectedHTTPCode,
+    }: {
+      body?: GetInfraMetricsRequestBodyPayloadClient;
+      invalidBody?: any;
+      expectedHTTPCode: number;
+    }) => {
+      return supertestWithAdminScope
+        .post(ENDPOINT)
+        .send(body ?? invalidBody)
+        .expect(expectedHTTPCode);
+    };
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+      await supertestWithAdminScope.destroy();
+    });
 
     describe('fetch hosts', () => {
       it('should return metrics for a host', async () => {

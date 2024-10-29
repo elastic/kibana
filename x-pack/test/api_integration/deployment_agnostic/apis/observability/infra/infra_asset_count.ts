@@ -11,10 +11,10 @@ import type {
   GetInfraAssetCountResponsePayload,
   GetInfraAssetCountRequestParamsPayload,
 } from '@kbn/infra-plugin/common/http_api';
-import type { RoleCredentials } from '../../../../shared/services';
+import type { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES, ARCHIVE_NAME } from './constants';
+import { DATES, ARCHIVE_NAME } from './utils/constants';
 
 const timeRange = {
   from: DATES.serverlessTestingHostDateString.min,
@@ -23,40 +23,39 @@ const timeRange = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
-  const fetchHostsCount = async ({
-    params,
-    body,
-    roleAuthc,
-  }: {
-    params: GetInfraAssetCountRequestParamsPayload;
-    body: GetInfraAssetCountRequestBodyPayloadClient;
-    roleAuthc: RoleCredentials;
-  }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
-    const { assetType } = params;
-    const response = await supertestWithoutAuth
-      .post(`/api/infra/${assetType}/count`)
-      .set(svlCommonApi.getInternalRequestHeader())
-      .set(roleAuthc.apiKeyHeader)
-      .send(body)
-      .expect(200);
-    return response.body;
-  };
-
   describe('API /api/infra/{assetType}/count', () => {
-    let roleAuthc: RoleCredentials;
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    const fetchHostsCount = async ({
+      params,
+      body,
+    }: {
+      params: GetInfraAssetCountRequestParamsPayload;
+      body: GetInfraAssetCountRequestBodyPayloadClient;
+    }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
+      const { assetType } = params;
+      const response = await supertestWithAdminScope
+        .post(`/api/infra/${assetType}/count`)
+        .send(body)
+        .expect(200);
+      return response.body;
+    };
+
     describe('works', () => {
       describe('with host', () => {
         before(async () => {
-          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-          return esArchiver.load(ARCHIVE_NAME);
+          supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+            withInternalHeaders: true,
+          });
+          await esArchiver.load(ARCHIVE_NAME);
         });
         after(async () => {
-          await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-          return esArchiver.unload(ARCHIVE_NAME);
+          await esArchiver.unload(ARCHIVE_NAME);
+          await supertestWithAdminScope.destroy();
         });
 
         it('received data', async () => {

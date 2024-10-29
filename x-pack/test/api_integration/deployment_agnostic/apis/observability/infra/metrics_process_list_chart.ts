@@ -11,24 +11,31 @@ import {
   ProcessListAPIChartResponseRT,
 } from '@kbn/infra-plugin/common/http_api/host_details/process_list';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
   describe('API /metrics/process_list/chart', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm'));
-    after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm')
-    );
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+      await supertestWithAdminScope.destroy();
+    });
 
     it('works', async () => {
-      const response = await supertest
+      const response = await supertestWithAdminScope
         .post('/api/metrics/process_list/chart')
-        .set({
-          'kbn-xsrf': 'some-xsrf-token',
-        })
         .send(
           ProcessListAPIChartRequestRT.encode({
             hostTerm: {

@@ -266,10 +266,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": ".alerts-ilm-policy",
-          "rollover_alias": ".alerts-observability.apm.alerts-default"
-        },
         "number_of_replicas": "1",
         "number_of_shards": "1"
       }
@@ -521,10 +517,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": ".alerts-ilm-policy",
-          "rollover_alias": ".alerts-observability.logs.alerts-default"
-        },
         "number_of_replicas": "1",
         "number_of_shards": "1"
       }
@@ -776,10 +768,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": ".alerts-ilm-policy",
-          "rollover_alias": ".alerts-observability.metrics.alerts-default"
-        },
         "number_of_replicas": "1",
         "number_of_shards": "1"
       }

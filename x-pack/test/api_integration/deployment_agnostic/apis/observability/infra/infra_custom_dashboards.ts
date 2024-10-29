@@ -10,18 +10,31 @@ import { InfraCustomDashboard } from '@kbn/infra-plugin/common/custom_dashboards
 import { InfraSaveCustomDashboardsRequestPayload } from '@kbn/infra-plugin/common/http_api/custom_dashboards_api';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '@kbn/infra-plugin/server/saved_objects';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const getCustomDashboardsUrl = (assetType: string, dashboardSavedObjectId?: string) =>
   dashboardSavedObjectId
     ? `/api/infra/${assetType}/custom-dashboards/${dashboardSavedObjectId}`
     : `/api/infra/${assetType}/custom-dashboards`;
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
 
   describe('Infra Custom Dashboards API', () => {
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+    });
+
+    after(async () => {
+      await supertestWithAdminScope.destroy();
+    });
+
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
@@ -34,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest.get(getCustomDashboardsUrl('host')).expect(403);
+        await supertestWithAdminScope.get(getCustomDashboardsUrl('host')).expect(403);
       });
 
       it('responds with an error when trying to request a custom dashboard for unsupported asset type', async () => {
@@ -42,7 +55,9 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest.get(getCustomDashboardsUrl('unsupported-asset-type')).expect(400);
+        await supertestWithAdminScope
+          .get(getCustomDashboardsUrl('unsupported-asset-type'))
+          .expect(400);
       });
 
       it('responds with an empty configuration if custom dashboard saved object does not exist', async () => {
@@ -53,7 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
           types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
         });
 
-        const response = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
+        const response = await supertestWithAdminScope
+          .get(getCustomDashboardsUrl('host'))
+
+          .expect(200);
 
         expect(response.body).to.be.eql([]);
       });
@@ -73,7 +91,9 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite: true,
         });
 
-        const response = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
+        const response = await supertestWithAdminScope
+          .get(getCustomDashboardsUrl('host'))
+          .expect(200);
 
         expect(response.body).to.have.length(1);
         expect(response.body[0]).to.have.property('dashboardFilterAssetIdEnabled', true);
@@ -92,9 +112,8 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest
+        await supertestWithAdminScope
           .post(getCustomDashboardsUrl('host'))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(403);
       });
@@ -108,9 +127,8 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: true,
         });
 
-        await supertest
+        await supertestWithAdminScope
           .post(getCustomDashboardsUrl('unsupported-asset-type'))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(400);
       });
@@ -127,9 +145,8 @@ export default function ({ getService }: FtrProviderContext) {
           types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
         });
 
-        const response = await supertest
+        const response = await supertestWithAdminScope
           .post(getCustomDashboardsUrl('host'))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(200);
 
@@ -161,9 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite: true,
         });
 
-        const response = await supertest
+        const response = await supertestWithAdminScope
           .post(getCustomDashboardsUrl('host'))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(400);
 
@@ -184,9 +200,8 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest
+        await supertestWithAdminScope
           .put(getCustomDashboardsUrl('host', '123'))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(403);
       });
@@ -201,9 +216,8 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: true,
         });
 
-        await supertest
+        await supertestWithAdminScope
           .put(getCustomDashboardsUrl('host', '000'))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(404);
       });
@@ -238,12 +252,13 @@ export default function ({ getService }: FtrProviderContext) {
           dashboardSavedObjectId: '123',
           dashboardFilterAssetIdEnabled: false,
         };
-        const updateResponse = await supertest
+        const updateResponse = await supertestWithAdminScope
           .put(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
-          .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(200);
-        const getResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
+        const getResponse = await supertestWithAdminScope
+          .get(getCustomDashboardsUrl('host'))
+          .expect(200);
 
         expect(updateResponse.body).to.be.eql({
           ...payload,
@@ -267,10 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: false,
         });
 
-        await supertest
-          .delete(getCustomDashboardsUrl('host', '123'))
-          .set('kbn-xsrf', 'xxx')
-          .expect(403);
+        await supertestWithAdminScope.delete(getCustomDashboardsUrl('host', '123')).expect(403);
       });
 
       it('responds with an error when trying to delete not existing dashboard', async () => {
@@ -278,10 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
           [enableInfrastructureAssetCustomDashboards]: true,
         });
 
-        await supertest
-          .delete(getCustomDashboardsUrl('host', '000'))
-          .set('kbn-xsrf', 'xxx')
-          .expect(404);
+        await supertestWithAdminScope.delete(getCustomDashboardsUrl('host', '000')).expect(404);
       });
 
       it('deletes an existing dashboard', async () => {
@@ -301,12 +310,13 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite: true,
         });
 
-        await supertest
+        await supertestWithAdminScope
           .delete(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
-          .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        const afterDeleteResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
+        const afterDeleteResponse = await supertestWithAdminScope
+          .get(getCustomDashboardsUrl('host'))
+          .expect(200);
 
         expect(afterDeleteResponse.body).to.be.eql([]);
       });

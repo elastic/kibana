@@ -11,11 +11,11 @@ import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-
 import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
-import { createFakeLogger } from './create_fake_logger';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DATES } from './utils/constants';
+import { createFakeLogger } from './utils/create_fake_logger';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const log = getService('log');

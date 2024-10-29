@@ -7,31 +7,42 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-
 import {
   SnapshotNodeResponse,
   SnapshotMetricInput,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DATES } from './utils/constants';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const fetchSnapshot = async (
-    body: SnapshotRequest,
-    expectedStatusCode = 200
-  ): Promise<SnapshotNodeResponse | undefined> => {
-    const response = await supertest
-      .post('/api/metrics/snapshot')
-      .set('kbn-xsrf', 'xxx')
-      .send(body)
-      .expect(expectedStatusCode);
-    return response.body;
-  };
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
-  describe('waffle nodes', () => {
+  describe('POST /api/metrics/snapshot', () => {
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    const fetchSnapshot = async (
+      body: SnapshotRequest,
+      expectedStatusCode = 200
+    ): Promise<SnapshotNodeResponse | undefined> => {
+      const response = await supertestWithAdminScope
+        .post('/api/metrics/snapshot')
+        .send(body)
+        .expect(expectedStatusCode);
+      return response.body;
+    };
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+    });
+    after(async () => {
+      await supertestWithAdminScope.destroy();
+    });
+
     describe('6.6.0', () => {
       const { min, max } = DATES['6.6.0'].docker;
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));

@@ -11,7 +11,6 @@ import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-servic
 import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 import { BsearchSecureService } from './bsearch_secure';
-import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
 import { InfraSynthtraceKibanaClientProvider } from './infra_synthtrace_kibana_client';
 
 export const services = {
@@ -21,6 +20,5 @@ export const services = {
   supertest: kibanaApiIntegrationServices.supertest,
   spaces: SpacesServiceProvider,
   secureBsearch: BsearchSecureService,
-  apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
   infraSynthtraceKibanaClient: InfraSynthtraceKibanaClientProvider,
 };

@@ -10,6 +10,7 @@ import { createServerlessTestConfig } from '../../default_configs/serverless.con
 export default createServerlessTestConfig({
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.index.ts')],
+  suiteTags: { exclude: ['skipSvlOblt'] },
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },
