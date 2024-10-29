@@ -1,8 +1,0 @@
-type: string
-title: Agent status
-enum:
-  - offline
-  - error
-  - online
-  - inactive
-  - warning

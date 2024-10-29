@@ -9,9 +9,9 @@
     "configPath": ["xpack", "investigateApp"],
     "requiredPlugins": [
       "investigate",
-      "observabilityAIAssistant",
       "observabilityShared",
       "lens",
+      "charts",
       "dataViews",
       "data",
       "embeddable",
@@ -19,14 +19,16 @@
       "datasetQuality",
       "unifiedSearch",
       "security",
+      "observability",
+      "licensing",
+      "ruleRegistry"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils",
       "esql",
-      "esqlDataGrid",
+      "kibanaReact",
+      "kibanaUtils"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["observabilityAIAssistant"],
     "extraPublicDirs": []
   }
 }

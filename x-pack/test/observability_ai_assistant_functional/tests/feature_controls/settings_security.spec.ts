@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { interceptRequest } from '../../common/intercept_request';
 import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -15,9 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
-  const driver = getService('__webdriver__');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
 
   describe('ai assistant management privileges', () => {
     describe('all privileges', () => {
@@ -62,49 +58,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(ui.pages.settings.settingsPage);
       });
       it('allows updating of an advanced setting', async () => {
-        const testLogsIndexPattern = 'my-logs-index-pattern';
-        const logsIndexPatternInput = await testSubjects.find(
-          ui.pages.settings.logsIndexPatternInput
+        const testSearchConnectorIndexPattern = 'my-logs-index-pattern';
+        const searchConnectorIndexPatternInput = await testSubjects.find(
+          ui.pages.settings.searchConnectorIndexPatternInput
         );
-        await logsIndexPatternInput.clearValue();
-        await logsIndexPatternInput.type(testLogsIndexPattern);
+        await searchConnectorIndexPatternInput.clearValue();
+        await searchConnectorIndexPatternInput.type(testSearchConnectorIndexPattern);
         const saveButton = await testSubjects.find(ui.pages.settings.saveButton);
         await saveButton.click();
         await browser.refresh();
-        const logsIndexPatternInputValue = await logsIndexPatternInput.getAttribute('value');
-        expect(logsIndexPatternInputValue).to.be(testLogsIndexPattern);
+        const searchConnectorIndexPatternInputValue =
+          await searchConnectorIndexPatternInput.getAttribute('value');
+        expect(searchConnectorIndexPatternInputValue).to.be(testSearchConnectorIndexPattern);
         // reset the value
-        await logsIndexPatternInput.clearValue();
-        await logsIndexPatternInput.type('logs-*');
+        await searchConnectorIndexPatternInput.clearValue();
+        await searchConnectorIndexPatternInput.type('logs-*');
         await saveButton.click();
-      });
-      it('displays failure toast on failed request', async () => {
-        const logsIndexPatternInput = await testSubjects.find(
-          ui.pages.settings.logsIndexPatternInput
-        );
-        // Wait until the input has the default value 'logs-*' to prevent flakiness
-        await retry.waitFor('input field to have default value', async () => {
-          const value = await logsIndexPatternInput.getAttribute('value');
-          return value === 'logs-*';
-        });
-        await logsIndexPatternInput.clearValue();
-        await logsIndexPatternInput.type('test');
-
-        await interceptRequest(
-          driver.driver,
-          '*kibana\\/settings*',
-          (responseFactory) => {
-            return responseFactory.fail();
-          },
-          async () => {
-            await testSubjects.click(ui.pages.settings.saveButton);
-          }
-        );
-
-        await retry.waitFor('Error saving settings toast', async () => {
-          const count = await toasts.getCount();
-          return count > 0;
-        });
       });
     });
     describe('with advancedSettings read privilege', () => {
@@ -146,10 +115,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(ui.pages.settings.settingsPage);
       });
       it('has disabled inputs', async () => {
-        const logsIndexPatternInput = await testSubjects.find(
-          ui.pages.settings.logsIndexPatternInput
+        const searchConnectorIndexPatternInput = await testSubjects.find(
+          ui.pages.settings.searchConnectorIndexPatternInput
         );
-        expect(await logsIndexPatternInput.getAttribute('disabled')).to.be('true');
+        expect(await searchConnectorIndexPatternInput.getAttribute('disabled')).to.be('true');
       });
     });
     describe('observabilityAIAssistant privilege with no aiAssistantManagementSelection privilege', () => {

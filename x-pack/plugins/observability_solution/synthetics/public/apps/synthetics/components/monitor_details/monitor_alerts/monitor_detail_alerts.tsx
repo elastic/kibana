@@ -9,6 +9,8 @@ import React from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
+import { useRefreshedRangeFromUrl } from '../../../hooks';
+import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ClientPluginsStart } from '../../../../../plugin';
 
@@ -23,6 +25,7 @@ export function MonitorDetailsAlerts() {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
 
   const selectedLocation = useSelectedLocation();
+  const { from, to } = useRefreshedRangeFromUrl();
 
   if (!selectedLocation) {
     return <EuiLoadingSpinner size="xl" />;
@@ -30,18 +33,25 @@ export function MonitorDetailsAlerts() {
 
   return (
     <>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" gutterSize="xl">
+        <EuiFlexItem>
+          <SyntheticsDatePicker fullWidth={true} />
+        </EuiFlexItem>
         <EuiFlexItem>
           <AlertsStateTable
             alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
             configurationId={AlertConsumers.OBSERVABILITY}
             id={MONITOR_ALERTS_TABLE_ID}
             data-test-subj="monitorAlertsTable"
-            featureIds={[AlertConsumers.UPTIME, AlertConsumers.OBSERVABILITY]}
+            featureIds={[AlertConsumers.UPTIME]}
             query={{
               bool: {
-                filter: [{ term: { configId } }, { term: { 'location.id': selectedLocation?.id } }],
+                filter: [
+                  { term: { configId } },
+                  { term: { 'location.id': selectedLocation?.id } },
+                  { range: { '@timestamp': { gte: from, lte: to } } },
+                ],
               },
             }}
             showAlertStatusWithFlapping

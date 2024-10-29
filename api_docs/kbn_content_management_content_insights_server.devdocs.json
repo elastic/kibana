@@ -1,0 +1,171 @@
+{
+  "id": "@kbn/content-management-content-insights-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-server",
+        "id": "def-server.registerContentInsights",
+        "type": "Function",
+        "tags": [],
+        "label": "registerContentInsights",
+        "description": [],
+        "signature": [
+          "({ usageCollection, http, getStartServices }: ",
+          "ContentInsightsDependencies",
+          ", config: ",
+          "ContentInsightsConfig",
+          ") => void"
+        ],
+        "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-server",
+            "id": "def-server.registerContentInsights.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ usageCollection, http, getStartServices }",
+            "description": [],
+            "signature": [
+              "ContentInsightsDependencies"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-server",
+            "id": "def-server.registerContentInsights.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "ContentInsightsConfig"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-server",
+        "id": "def-server.ContentInsightsStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentInsightsStats",
+        "description": [],
+        "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-server",
+            "id": "def-server.ContentInsightsStats.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [
+              "\nThe date from which the data is counted"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-server",
+            "id": "def-server.ContentInsightsStats.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\nTotal count of events"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-server",
+            "id": "def-server.ContentInsightsStats.daily",
+            "type": "Array",
+            "tags": [],
+            "label": "daily",
+            "description": [
+              "\nDaily counts of events"
+            ],
+            "signature": [
+              "{ date: string; count: number; }[]"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-server",
+        "id": "def-server.ContentInsightsStatsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentInsightsStatsResponse",
+        "description": [],
+        "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-server",
+            "id": "def-server.ContentInsightsStatsResponse.result",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-server",
+                "scope": "server",
+                "docId": "kibKbnContentManagementContentInsightsServerPluginApi",
+                "section": "def-server.ContentInsightsStats",
+                "text": "ContentInsightsStats"
+              }
+            ],
+            "path": "packages/content-management/content_insights/content_insights_server/src/register.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

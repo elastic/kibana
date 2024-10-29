@@ -78,7 +78,7 @@ interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, Dow
   readonlyEnabled: boolean;
 }
 
-interface FrozenPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
+interface FrozenPhaseMetaFields extends MinAgeField {
   enabled: boolean;
 }
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PostTransformsPreviewRequestSchema } from '../../../../common/api_schemas/transforms';
-import { postTransformsPreviewRequestSchema } from '../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../api_schemas/transforms';
+import { postTransformsPreviewRequestSchema } from '../../api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

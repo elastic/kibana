@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RedirectToProps } from '@kbn/dashboard-plugin/public/dashboard_container/types';
 import { useMemo, useCallback } from 'react';
 import { SecurityPageName } from '../../../../common';
 import { useNavigateTo } from '../../lib/kibana';
@@ -39,11 +40,11 @@ export const useRedirectToDashboardFromLens = ({
   );
 
   const redirectTo = useCallback(
-    (props) => {
-      if (props.destination === 'listing') {
+    (props?: RedirectToProps) => {
+      if (props?.destination === 'listing') {
         navigateTo({ url: dashboardListingUrl });
       }
-      if (props.destination === 'dashboard') {
+      if (props?.destination === 'dashboard') {
         navigateTo({ url: getEditOrCreateDashboardUrl(props.id) });
       }
     },

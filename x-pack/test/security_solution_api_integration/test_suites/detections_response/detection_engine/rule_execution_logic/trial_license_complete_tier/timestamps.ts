@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
      * If no timestamp override field exists in the indices but one was provided to the rule,
      * the rule's query will additionally search for events using the `@timestamp` field
      */
-    describe('alerts generated from events with timestamp override field', async () => {
+    describe('alerts generated from events with timestamp override field', () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await createAlertsIndex(supertest, log);

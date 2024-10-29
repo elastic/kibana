@@ -11,4 +11,4 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new Plugin(initializerContext);
 };
 
-export { config } from '../common/config';
+export { config } from './config';

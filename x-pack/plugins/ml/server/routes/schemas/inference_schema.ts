@@ -7,29 +7,24 @@
 
 import { schema } from '@kbn/config-schema';
 
+const modelIdSchemaBasic = {
+  modelId: schema.string({ meta: { description: 'Model ID' } }),
+};
+
 export const modelIdSchema = schema.object({
-  /**
-   * Model ID
-   */
-  modelId: schema.string(),
+  ...modelIdSchemaBasic,
 });
 
 export const modelAndDeploymentIdSchema = schema.object({
-  /**
-   * Model ID
-   */
-  modelId: schema.string(),
-  /**
-   * Deployment ID
-   */
-  deploymentId: schema.string(),
+  ...modelIdSchemaBasic,
+  deploymentId: schema.string({ meta: { description: 'Deployment ID' } }),
 });
 export const createInferenceSchema = schema.object({
   taskType: schema.oneOf([schema.literal('sparse_embedding'), schema.literal('text_embedding')]),
   inferenceId: schema.string(),
 });
 
-export const threadingParamsSchema = schema.maybe(
+export const threadingParamsQuerySchema = schema.maybe(
   schema.object({
     number_of_allocations: schema.maybe(schema.number()),
     threads_per_allocation: schema.maybe(schema.number()),
@@ -38,8 +33,27 @@ export const threadingParamsSchema = schema.maybe(
   })
 );
 
+export const threadingParamsBodySchema = schema.nullable(
+  schema.object({
+    adaptive_allocations: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        min_number_of_allocations: schema.maybe(schema.number()),
+        max_number_of_allocations: schema.maybe(schema.number()),
+      })
+    ),
+  })
+);
+
 export const updateDeploymentParamsSchema = schema.object({
-  number_of_allocations: schema.number(),
+  number_of_allocations: schema.maybe(schema.number()),
+  adaptive_allocations: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      min_number_of_allocations: schema.maybe(schema.number()),
+      max_number_of_allocations: schema.maybe(schema.number()),
+    })
+  ),
 });
 
 export const optionalModelIdSchema = schema.object({
@@ -73,9 +87,8 @@ export const pipelineSimulateBody = schema.object({
 export const pipelineDocs = schema.arrayOf(schema.string());
 
 export const stopDeploymentSchema = schema.object({
-  modelId: schema.string(),
-  /** force stop */
-  force: schema.maybe(schema.boolean()),
+  ...modelIdSchemaBasic,
+  force: schema.maybe(schema.boolean({ meta: { description: 'Force stop' } })),
 });
 
 export const deleteTrainedModelQuerySchema = schema.object({

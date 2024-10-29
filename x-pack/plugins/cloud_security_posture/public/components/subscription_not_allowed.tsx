@@ -8,20 +8,25 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT } from './test_subjects';
 import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const SubscriptionNotAllowed = () => {
   const handleNavigateToLicenseManagement = useLicenseManagementLocatorApi();
 
   return (
-    <EuiPageSection color="danger" alignment="center">
+    <EuiPageSection
+      color="danger"
+      alignment="center"
+      data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}
+    >
       <EuiEmptyPrompt
         iconType="warning"
         title={
           <h2>
             <FormattedMessage
               id="xpack.csp.subscriptionNotAllowed.promptTitle"
-              defaultMessage="Upgrade for subscription features"
+              defaultMessage="Upgrade your subscription to an Enterprise license"
             />
           </h2>
         }

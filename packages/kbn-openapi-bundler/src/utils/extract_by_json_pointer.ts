@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -32,7 +33,9 @@ export function extractByJsonPointer(document: unknown, pointer: string): unknow
       throw new Error(
         `JSON Pointer ${chalk.bold(pointer)} resolution failure. Expected ${chalk.magenta(
           path.join('/')
-        )} to be a plain object but it has type "${typeof target}" in \n\n${dump(document)}`
+        )} to be a plain object but it has type "${typeof target}" in \n\n${dump(document, {
+          skipInvalid: true,
+        })}`
       );
     }
 
@@ -66,7 +69,7 @@ export function extractObjectByJsonPointer(
     throw new Error(
       `JSON Pointer resolution failure. Expected ${chalk.magenta(
         pointer
-      )} to be a plain object in \n\n${dump(document)}`
+      )} to be a plain object in \n\n${dump(document, { skipInvalid: true })}`
     );
   }
 

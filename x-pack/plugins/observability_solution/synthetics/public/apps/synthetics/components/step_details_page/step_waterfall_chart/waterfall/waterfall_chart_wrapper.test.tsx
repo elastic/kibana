@@ -53,7 +53,7 @@ describe('WaterfallChartWrapper', () => {
 
     const filterInput = getByLabelText(FILTER_REQUESTS_LABEL);
 
-    const searchText = '.js';
+    const searchText = '*.js';
 
     fireEvent.change(filterInput, { target: { value: searchText } });
 

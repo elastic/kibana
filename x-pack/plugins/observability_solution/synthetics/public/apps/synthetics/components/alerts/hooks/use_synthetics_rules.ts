@@ -8,6 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../../../state/settings';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
@@ -21,19 +22,19 @@ import {
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
-  selectIsNewrule,
+  selectIsNewRule,
   selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const useSyntheticsAlert = (isOpen: boolean) => {
+export const useSyntheticsRules = (isOpen: boolean) => {
   const dispatch = useDispatch();
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
-  const isNewRule = useSelector(selectIsNewrule);
+  const isNewRule = useSelector(selectIsNewRule);
   const { settings } = useSelector(selectDynamicSettings);
 
   const { canSave } = useSyntheticsSettingsContext();
@@ -41,7 +42,8 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
-  const defaultRulesEnabled = settings && (settings?.defaultRulesEnabled ?? true);
+  const defaultRulesEnabled =
+    settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
 
   const getOrCreateAlerts = useCallback(() => {
     if (canSave) {
@@ -69,15 +71,23 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
 
   const EditAlertFlyout = useMemo(() => {
-    if (!defaultRules || isNewRule) {
+    const initialRule =
+      alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules?.tlsRule : defaultRules?.statusRule;
+    if (!initialRule || isNewRule) {
       return null;
     }
     return triggersActionsUi.getEditRuleFlyout({
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
-      initialRule:
-        alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.tlsRule : defaultRules.statusRule,
+      initialRule,
     });
-  }, [defaultRules, isNewRule, triggersActionsUi, alertFlyoutVisible, dispatch]);
+  }, [
+    alertFlyoutVisible,
+    defaultRules?.tlsRule,
+    defaultRules?.statusRule,
+    isNewRule,
+    triggersActionsUi,
+    dispatch,
+  ]);
 
   const NewRuleFlyout = useMemo(() => {
     if (!isNewRule || !alertFlyoutVisible) {
@@ -87,6 +97,16 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
       consumer: 'uptime',
       ruleTypeId: alertFlyoutVisible,
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
+      initialValues: {
+        name:
+          alertFlyoutVisible === SYNTHETICS_TLS_RULE
+            ? i18n.translate('xpack.synthetics.alerting.defaultRuleName.tls', {
+                defaultMessage: 'Synthetics monitor TLS rule',
+              })
+            : i18n.translate('xpack.synthetics.alerting.defaultRuleName', {
+                defaultMessage: 'Synthetics monitor status rule',
+              }),
+      },
     });
   }, [isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);
 

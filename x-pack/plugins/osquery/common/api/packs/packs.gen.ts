@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { FindPacksRequestQuery } from './find_packs.gen';
 import { DefaultSuccessResponse, PackId } from '../model/schema/common_attributes.gen';

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,6 +13,7 @@ import classNames from 'classnames';
 import { EuiButtonIcon, euiCanAnimate, EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFavorites, useRemoveFavorite, useAddFavorite } from '../favorites_query';
+import { useFavoritesClient } from '../favorites_context';
 
 export interface FavoriteButtonProps {
   id: string;
@@ -23,6 +25,8 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
 
   const removeFavorite = useRemoveFavorite();
   const addFavorite = useAddFavorite();
+
+  const favoritesClient = useFavoritesClient();
 
   if (!data) return null;
 
@@ -40,6 +44,7 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
         aria-label={title}
         iconType={'starFilled'}
         onClick={() => {
+          favoritesClient?.reportRemoveFavoriteClick();
           removeFavorite.mutate({ id });
         }}
         className={classNames(className, 'cm-favorite-button', {
@@ -59,6 +64,7 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
         aria-label={title}
         iconType={'starEmpty'}
         onClick={() => {
+          favoritesClient?.reportAddFavoriteClick();
           addFavorite.mutate({ id });
         }}
         className={classNames(className, 'cm-favorite-button', {

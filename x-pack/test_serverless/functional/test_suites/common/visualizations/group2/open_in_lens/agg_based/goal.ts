@@ -40,14 +40,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Goal - Basic');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Goal - Basic')).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Goal - Basic');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Goal - Basic');
       await lens.waitForVisualization('mtrVis');
+
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -65,8 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Goal - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Goal - Agg with params');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -76,6 +76,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -93,8 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert sibling pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Goal - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Goal - Sibling pipeline agg');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -105,6 +106,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
       expect(await dimensions[2].getVisibleText()).to.be('@timestamp');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -122,8 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Goal - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Goal - Color ranges');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -134,6 +136,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 13300000000');
       expect(await dimensions[2].getVisibleText()).to.be('machine.os.raw: Descending');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(6);
       expect(data).to.eql([

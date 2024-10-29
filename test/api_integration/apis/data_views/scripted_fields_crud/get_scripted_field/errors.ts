@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -66,13 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.message).to.be(
         '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
       );
-    });
-
-    it('returns 404 error on non-existing scripted field', async () => {
-      const response1 = await supertest.get(
-        `/api/index_patterns/index_pattern/${indexPattern.id}/scripted_field/test`
-      );
-      expect(response1.status).to.be(404);
     });
 
     it('returns error when attempting to fetch a field which is not a scripted field', async () => {

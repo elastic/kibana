@@ -105,14 +105,17 @@ export const useFetchIndex = (
   const { addError } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
-    (iNames) => {
+    (iNames: string[]) => {
       const asyncSearch = async () => {
         try {
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
           const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
+          const { browserFields } = getDataViewStateFromIndexFields(
+            iNames.join(','),
+            dataView.fields
+          );
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 

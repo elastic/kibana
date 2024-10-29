@@ -5,27 +5,37 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { arrayOfStringsSchema } from './common';
 
-const entitySchema = z.object({
-  entity: z.object({
-    id: z.string(),
-    identityFields: arrayOfStringsSchema,
-    displayName: z.string(),
-    metrics: z.record(z.string(), z.number()),
-  }),
+export const entityBaseSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  identity_fields: arrayOfStringsSchema,
+  display_name: z.string(),
+  metrics: z.record(z.string(), z.number()),
+  definition_version: z.string(),
+  schema_version: z.string(),
+  definition_id: z.string(),
 });
 
-export const entitySummarySchema = z.intersection(
-  entitySchema.extend({
-    lastSeenTimestamp: z.string(),
-    firstSeenTimestamp: z.string(),
-  }),
-  z.record(z.string(), z.string().or(z.number()))
+export interface MetadataRecord {
+  [key: string]: string[] | MetadataRecord | string;
+}
+
+const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type Literal = z.infer<typeof literalSchema>;
+type Metadata = Literal | { [key: string]: Metadata } | Metadata[];
+export const entityMetadataSchema: z.ZodType<Metadata> = z.lazy(() =>
+  z.union([literalSchema, z.array(entityMetadataSchema), z.record(entityMetadataSchema)])
 );
 
-export const entityHistorySchema = z.intersection(
-  entitySchema.extend({ ['@timestamp']: z.string() }),
-  z.record(z.string(), z.string().or(z.number()))
-);
+export const entityLatestSchema = z
+  .object({
+    entity: entityBaseSchema.merge(
+      z.object({
+        last_seen_timestamp: z.string(),
+      })
+    ),
+  })
+  .and(entityMetadataSchema);

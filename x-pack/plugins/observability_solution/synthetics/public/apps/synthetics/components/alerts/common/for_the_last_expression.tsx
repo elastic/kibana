@@ -15,28 +15,31 @@ interface Props {
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
 }
 
-export const FROM_LAST_CHECKS = i18n.translate(
-  'xpack.synthetics.fromLastExpression.whenPopoverTitleLabel',
+export const WITHIN_TOTAL_CHECKS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTotalChecks.label',
   {
-    defaultMessage: 'From last',
+    defaultMessage: 'Within total checks',
   }
 );
 
-export const FOR_LAST_TIME = i18n.translate('xpack.synthetics.forTheLastExpression.label', {
-  defaultMessage: 'For last time',
-});
-
-export const FROM_LOCATIONS = i18n.translate(
-  'xpack.synthetics.forTheLastExpression.fromLocationsPopoverTitleLabel',
+export const WITHIN_TOTAL_CHECKS_EXPRESSION = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTotalChecks.expression',
   {
-    defaultMessage: 'From locations',
+    defaultMessage: 'Within the last',
   }
 );
 
-export const FROM_LOCATIONS_TITLE = i18n.translate(
-  'xpack.synthetics.forTheLastExpression.fromLocationsPopoverLabel',
+export const WITHIN_TIMERANGE_EXPRESSION = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTimerange.expression',
   {
-    defaultMessage: 'From',
+    defaultMessage: 'Within the last',
+  }
+);
+
+export const WITHIN_TIMERANGE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatusRule.withinTimerange.label',
+  {
+    defaultMessage: 'Within timerange',
   }
 );
 
@@ -47,35 +50,32 @@ interface Option {
 
 const OPTIONS: Option[] = [
   {
-    label: FROM_LAST_CHECKS,
+    label: WITHIN_TOTAL_CHECKS_LABEL,
     key: 'checksWindow',
   },
   {
-    label: FOR_LAST_TIME,
+    label: WITHIN_TIMERANGE_LABEL,
     key: 'timeWindow',
-  },
-  {
-    label: FROM_LOCATIONS,
-    key: 'locations',
   },
 ];
 
-export const DEFAULT_CONDITION: StatusRuleCondition = {
+export const DEFAULT_CONDITION = {
   window: { numberOfChecks: 5 },
-  groupByLocation: true,
-  downThreshold: 5,
+  groupBy: 'locationId',
+  downThreshold: 3,
+  locationsThreshold: 1,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
-  const { isTimeWindow, isLocationBased } = getConditionType(condition);
+  const { useTimeWindow, isLocationBased } = getConditionType(condition);
 
   if (isLocationBased && option.key === 'locations') {
     return 'on';
   }
 
-  if (option.key === 'timeWindow' && isTimeWindow && !isLocationBased) {
+  if (option.key === 'timeWindow' && useTimeWindow && !isLocationBased) {
     return 'on';
   }
-  if (option.key === 'checksWindow' && !isTimeWindow && !isLocationBased) {
+  if (option.key === 'checksWindow' && !useTimeWindow && !isLocationBased) {
     return 'on';
   }
 
@@ -85,7 +85,7 @@ const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
 export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
   const { condition } = ruleParams;
 
-  const { isTimeWindow, isLocationBased } = getConditionType(condition);
+  const { useTimeWindow } = getConditionType(condition);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -105,17 +105,22 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
         checked: getCheckedOption(option, condition),
       }))
     );
-  }, [condition, isTimeWindow]);
+  }, [condition, useTimeWindow]);
+
+  const getDescriptiveText = () => {
+    if (useTimeWindow) {
+      return WITHIN_TIMERANGE_EXPRESSION;
+    }
+    return WITHIN_TOTAL_CHECKS_EXPRESSION;
+  };
 
   return (
     <EuiPopover
-      id="cehckPopover"
+      id="checkPopover"
       panelPaddingSize="s"
       button={
         <EuiExpression
-          description={
-            isLocationBased ? FROM_LOCATIONS_TITLE : isTimeWindow ? FOR_LAST_TIME : FROM_LAST_CHECKS
-          }
+          description={getDescriptiveText()}
           isActive={isOpen}
           onClick={() => setIsOpen(!isOpen)}
         />
@@ -134,6 +139,7 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 5,
+                locationsThreshold: 1,
                 window: { numberOfChecks: 5 },
               });
               break;
@@ -141,14 +147,8 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 5,
+                locationsThreshold: 1,
                 window: { time: { unit: 'm', size: 5 } },
-              });
-              break;
-            case 'locations':
-              setRuleParams('condition', {
-                ...ruleParams.condition,
-                downThreshold: 1,
-                window: { percentOfLocations: 100 },
               });
               break;
             default:

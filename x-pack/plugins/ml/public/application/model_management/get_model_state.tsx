@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { DEPLOYMENT_STATE, MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
-import type { EuiHealthProps } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiHealth,
+  EuiLoadingSpinner,
+  type EuiHealthProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ModelItem } from './models_list';
 
@@ -33,11 +42,11 @@ export const getModelDeploymentState = (model: ModelItem): ModelState | undefine
 
 export const getModelStateColor = (
   state: ModelState | undefined
-): { color: EuiHealthProps['color']; name: string } | null => {
+): { color: EuiHealthProps['color']; name: string; component?: React.ReactNode } | null => {
   switch (state) {
     case MODEL_STATE.DOWNLOADED:
       return {
-        color: 'subdued',
+        color: 'success',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadedName', {
           defaultMessage: 'Ready to deploy',
         }),
@@ -46,37 +55,64 @@ export const getModelStateColor = (
       return {
         color: 'primary',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
-          defaultMessage: 'Downloading...',
+          defaultMessage: 'Downloading',
         }),
       };
     case MODEL_STATE.STARTED:
       return {
-        color: 'success',
+        color: '#E6F9F7',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startedName', {
           defaultMessage: 'Deployed',
         }),
+        get component() {
+          return (
+            <EuiBadge color={this.color}>
+              <EuiHealth color={'success'} textSize="xs" css={{ display: 'inline' }}>
+                {this.name}
+              </EuiHealth>
+            </EuiBadge>
+          );
+        },
       };
     case MODEL_STATE.STARTING:
       return {
         color: 'success',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startingName', {
-          defaultMessage: 'Starting deployment...',
+          defaultMessage: 'Deploying',
         }),
+        get component() {
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{this.name}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       };
     case MODEL_STATE.STOPPING:
       return {
         color: 'accent',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.stoppingName', {
-          defaultMessage: 'Stopping deployment...',
+          defaultMessage: 'Stopping',
         }),
+        get component() {
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{this.name}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       };
     case MODEL_STATE.NOT_DOWNLOADED:
-      return {
-        color: '#d4dae5',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.notDownloadedName', {
-          defaultMessage: 'Not downloaded',
-        }),
-      };
     default:
       return null;
   }

@@ -29,10 +29,16 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   before(async () => {
     await services.cleaUp();
+  });
+
+  after(async () => {
+    await services.cleaUp();
+  });
+
+  step('setup monitor', async () => {
     const connectorId = await services.setupTestConnector();
     await services.setupSettings(connectorId.id);
 
-    await services.enableMonitorManagedViaApi();
     configId = await services.addTestMonitor('Test Monitor', {
       type: 'http',
       urls: 'https://www.google.com',
@@ -44,10 +50,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       timestamp: firstCheckTime,
       configId,
     });
-  });
-
-  after(async () => {
-    await services.cleaUp();
   });
 
   step('Go to monitors page', async () => {
@@ -80,6 +82,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('Disable default alert for monitor', async () => {
     await page.click('text=Disable status alert');
     await page.waitForSelector(`text=Alerts are now disabled for the monitor "Test Monitor".`);
+    await page.getByTestId('Test Monitor-us_central-metric-item').hover();
+    await page.click('[aria-label="Open actions menu"]');
     await page.click('text=Enable status alert');
   });
 
@@ -107,8 +111,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      timestamp: downCheckTime,
       status: 'down',
+      checks: {
+        downWithinXChecks: 1,
+        down: 1,
+      },
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
@@ -168,8 +175,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      timestamp: downCheckTime,
       status: 'down',
+      checks: {
+        downWithinXChecks: 1,
+        down: 1,
+      },
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {

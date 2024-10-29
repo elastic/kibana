@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/grid-example-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Temporary example app used to build out the new Dashboard layout system",
+  "plugin": {
+    "id": "gridExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"],
+    "requiredBundles": []
+  }
+}

@@ -41,7 +41,7 @@ export type SimplifiedInputs = Record<
 
 export interface SimplifiedPackagePolicy {
   id?: string;
-  policy_id?: string;
+  policy_id?: string | null;
   policy_ids: string[];
   output_id?: string;
   namespace: string;

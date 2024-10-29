@@ -34,13 +34,16 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
   const numberOfChecks =
     condition && 'numberOfChecks' in condition.window ? condition.window.numberOfChecks : null;
 
-  const { isTimeWindow, isLocationBased } = getConditionType(ruleParams.condition);
+  const { useTimeWindow } = getConditionType(ruleParams.condition);
 
   const onTimeWindowChange = useCallback(
     (value: TimeWindow) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: { time: value },
+        window: {
+          ...ruleParams.condition?.window,
+          time: value,
+        },
       });
     },
     [ruleParams.condition, setRuleParams]
@@ -50,52 +53,16 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
     (value: number) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: { numberOfChecks: value },
+        window: {
+          ...ruleParams.condition?.window,
+          numberOfChecks: value,
+        },
       });
     },
     [ruleParams.condition, setRuleParams]
   );
 
-  const onPercentageChange = useCallback(
-    (value: number) => {
-      setRuleParams('condition', {
-        ...ruleParams.condition,
-        window: { percentOfLocations: value },
-      });
-    },
-    [ruleParams.condition, setRuleParams]
-  );
-
-  if (isLocationBased) {
-    const percentOfLocations =
-      condition && 'percentOfLocations' in condition.window
-        ? condition.window.percentOfLocations ?? 100
-        : 100;
-    return (
-      <PopoverExpression
-        value={i18n.translate('xpack.synthetics.windowValueExpression.percentLabel', {
-          defaultMessage: '{percentOfLocations}% of locations',
-          values: { percentOfLocations: percentOfLocations ?? 100 },
-        })}
-      >
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.synthetics.windowValueExpression.percentOfLocPopoverTitleLabel', {
-            defaultMessage: 'Percentage of locations',
-          })}
-        </EuiPopoverTitle>
-        <EuiFieldNumber
-          data-test-subj="syntheticsWindowValueExpressionFieldNumber"
-          min={1}
-          max={100}
-          compressed
-          value={percentOfLocations}
-          onChange={(evt) => onPercentageChange(Number(evt.target.value))}
-        />
-      </PopoverExpression>
-    );
-  }
-
-  if (!isTimeWindow) {
+  if (!useTimeWindow) {
     return (
       <PopoverExpression
         value={

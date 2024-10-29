@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await nameInput1.click();
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '420000');
+      await testSubjects.setValue('alertThresholdInput0', '420000');
       await testSubjects.click('forLastExpression');
       await testSubjects.setValue('timeWindowSizeNumber', '24');
       await testSubjects.setValue('timeWindowUnitSelect', 'hours');

@@ -10,13 +10,12 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
-import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
-  getEnabledRiskEngineAmount,
   deleteSavedObjects,
 } from './utils/saved_object_configuration';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
@@ -24,6 +23,7 @@ import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
 import { RiskEngineAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { getRiskScoringTaskStatus, scheduleNow } from '../risk_score/tasks/risk_scoring_task';
 
 interface InitOpts {
   namespace: string;
@@ -109,10 +109,20 @@ export class RiskEngineDataClient {
       savedObjectsClient: this.options.soClient,
     });
 
-  public async getStatus({ namespace }: { namespace: string }) {
+  public async getStatus({
+    namespace,
+    taskManager,
+  }: {
+    namespace: string;
+    taskManager?: TaskManagerStartContract;
+  }) {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-    const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+
+    const taskStatus =
+      riskEngineStatus === 'ENABLED' && taskManager
+        ? await getRiskScoringTaskStatus({ namespace, taskManager })
+        : undefined;
 
     this.options.auditLogger?.log({
       message: 'User checked if the risk engine is enabled',
@@ -124,7 +134,11 @@ export class RiskEngineDataClient {
       },
     });
 
-    return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
+    return {
+      riskEngineStatus,
+      legacyRiskEngineStatus,
+      taskStatus,
+    };
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
@@ -199,6 +213,32 @@ export class RiskEngineDataClient {
     });
   }
 
+  public async scheduleNow({ taskManager }: { taskManager: TaskManagerStartContract }) {
+    const riskEngineStatus = await this.getCurrentStatus();
+
+    if (riskEngineStatus !== 'ENABLED') {
+      throw new Error(
+        `The risk engine must be enable to schedule a run. Current status: ${riskEngineStatus}`
+      );
+    }
+
+    this.options.auditLogger?.log({
+      message: 'User scheduled a risk engine run',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.ACCESS,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+
+    return scheduleNow({
+      taskManager,
+      namespace: this.options.namespace,
+      logger: this.options.logger,
+    });
+  }
+
   /**
    * Delete all risk engine resources.
    *
@@ -258,29 +298,6 @@ export class RiskEngineDataClient {
     }
 
     return RiskEngineStatusEnum.NOT_INSTALLED;
-  }
-
-  private async getIsMaxAmountOfRiskEnginesReached() {
-    try {
-      const amountOfEnabledConfigurations = await getEnabledRiskEngineAmount({
-        savedObjectsClient: this.options.soClient,
-      });
-
-      this.options.auditLogger?.log({
-        message: 'System checked if the risk engine is enabled in each space',
-        event: {
-          action: RiskEngineAuditActions.RISK_ENGINE_STATUS_FOR_ALL_SPACES_GET,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.ACCESS,
-          outcome: AUDIT_OUTCOME.SUCCESS,
-        },
-      });
-
-      return amountOfEnabledConfigurations >= MAX_SPACES_COUNT;
-    } catch (e) {
-      this.options.logger.error(`Error while getting amount of enabled risk engines: ${e.message}`);
-      return false;
-    }
   }
 
   private async getLegacyStatus({ namespace }: { namespace: string }) {

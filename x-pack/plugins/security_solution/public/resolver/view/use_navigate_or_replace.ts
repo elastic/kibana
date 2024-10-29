@@ -10,15 +10,13 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { LocationDescriptorObject } from 'history';
 
-type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
-
 export function useNavigateOrReplace(
   to: LocationDescriptorObject<unknown>,
   /** Additional onClick callback */
-  additionalOnClick?: EventHandlerCallback
-): { href: string; onClick: EventHandlerCallback } {
+  additionalOnClick?: MouseEventHandler
+): { href: string; onClick: MouseEventHandler } {
   const history = useHistory();
-  const onClick = useCallback(
+  const onClick = useCallback<MouseEventHandler>(
     (event) => {
       try {
         if (additionalOnClick) {

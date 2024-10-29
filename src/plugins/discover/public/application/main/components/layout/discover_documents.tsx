@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
@@ -27,6 +29,11 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
+  DataGridDensity,
+  UnifiedDataTableProps,
+  UseColumnsProps,
+  getDataGridDensity,
+  getRowHeight,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -40,6 +47,9 @@ import {
 } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -50,11 +60,6 @@ import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
-import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
-import {
-  DISCOVER_TOUR_STEP_ANCHOR_IDS,
-  DiscoverTourProvider,
-} from '../../../../components/discover_tour';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -68,7 +73,12 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  CellRenderersExtensionParams,
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -78,14 +88,12 @@ const progressStyle = css`
   z-index: 2;
 `;
 
-const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
-
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
-  colSettings: { columnId: string; width: number },
+  colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
@@ -109,20 +117,32 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState] =
-    useAppStateSelector((state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.headerRowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.sampleSize,
-      ];
-    });
+  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const [
+    dataSource,
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    sampleSizeState,
+    density,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.dataSource,
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.sampleSize,
+      state.density,
+    ];
+  });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -155,6 +175,13 @@ function DiscoverDocumentsComponent({
     stateContainer,
   });
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -166,11 +193,28 @@ function DiscoverDocumentsComponent({
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState,
     useNewFieldsApi,
     columns,
     sort,
+    settings: grid,
   });
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
+  );
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
@@ -179,7 +223,7 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const onResizeDataGrid = useCallback(
+  const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => onResize(colSettings, stateContainer),
     [stateContainer]
   );
@@ -219,6 +263,13 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateDensity = useCallback(
+    (newDensity: DataGridDensity) => {
+      stateContainer.appState.update({ density: newDensity });
+    },
+    [stateContainer]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
@@ -232,6 +283,21 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
+
+  const { filters } = useQuerySubscriber({ data: services.data });
+
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
 
   const renderDocumentView = useCallback(
     (
@@ -249,26 +315,50 @@ function DiscoverDocumentsComponent({
         columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumn}
-        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddColumn={onAddColumnWithTracking}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={query}
       />
     ),
-    [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
+    [
+      dataView,
+      onAddColumnWithTracking,
+      onAddFilter,
+      onRemoveColumnWithTracking,
+      query,
+      savedSearch.id,
+      setExpandedDoc,
+    ]
+  );
+
+  const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+  const cellRendererParams: CellRenderersExtensionParams = useMemo(
+    () => ({
+      actions: { addFilter: onAddFilter },
+      dataView,
+      density: density ?? getDataGridDensity(services.storage, 'discover'),
+      rowHeight: getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight,
+        configRowHeight,
+      }),
+    }),
+    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations() || {};
+    useContextualGridCustomisations(cellRendererParams) || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    return getCellRenderers();
-  }, [customCellRenderer, getCellRenderersAccessor]);
+    return getCellRenderers(cellRendererParams);
+  }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -285,18 +375,6 @@ function DiscoverDocumentsComponent({
     ),
     [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
   );
-
-  const gridAnnouncementCallout = useMemo(() => {
-    if (hideAnnouncements || isLegacy) {
-      return null;
-    }
-
-    return !isEsqlMode ? (
-      <DiscoverTourProvider>
-        <DocumentExplorerUpdateCallout />
-      </DiscoverTourProvider>
-    ) : null;
-  }, [hideAnnouncements, isLegacy, isEsqlMode]);
 
   const loadingIndicator = useMemo(
     () =>
@@ -319,12 +397,11 @@ function DiscoverDocumentsComponent({
         bottomSection: (
           <>
             {callouts}
-            {gridAnnouncementCallout}
             {loadingIndicator}
           </>
         ),
       }),
-    [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -424,7 +501,7 @@ function DiscoverDocumentsComponent({
                 sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
                 onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
                 onFieldEdited={onFieldEdited}
-                configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                configRowHeight={configRowHeight}
                 showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
                 maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                 renderDocumentView={renderDocumentView}
@@ -432,11 +509,17 @@ function DiscoverDocumentsComponent({
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
-                componentsTourSteps={TOUR_STEPS}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
+                dataGridDensityState={density}
+                onUpdateDataGridDensity={onUpdateDensity}
+                onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+                query={query}
+                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+                cellActionsMetadata={cellActionsMetadata}
+                cellActionsHandling="append"
               />
             </CellActionsProvider>
           </div>

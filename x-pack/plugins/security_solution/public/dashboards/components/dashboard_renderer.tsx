@@ -8,13 +8,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
-import type { DashboardAPI, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardLocatorParams,
+} from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public/dashboard_container/external_api/dashboard_renderer';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -38,11 +43,11 @@ const DashboardRendererComponent = ({
   viewMode = ViewMode.VIEW,
 }: {
   canReadDashboard: boolean;
-  dashboardContainer?: DashboardAPI;
+  dashboardContainer?: DashboardApi;
   filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
-  onDashboardContainerLoaded?: (dashboardContainer: DashboardAPI) => void;
+  onDashboardContainerLoaded?: (dashboardContainer: DashboardApi) => void;
   query?: Query;
   savedObjectId: string | undefined;
   timeRange: {
@@ -64,7 +69,7 @@ const DashboardRendererComponent = ({
   const isCreateDashboard = !savedObjectId;
 
   const getSecuritySolutionDashboardUrl = useCallback(
-    ({ dashboardId }) => {
+    ({ dashboardId }: DashboardLocatorParams) => {
       return getSecuritySolutionUrl({
         deepLinkId: SecurityPageName.dashboards,
         path: dashboardId,
@@ -73,7 +78,7 @@ const DashboardRendererComponent = ({
     [getSecuritySolutionUrl]
   );
 
-  const goToDashboard = useCallback(
+  const goToDashboard = useCallback<NonNullable<DashboardRendererProps['locator']>['navigate']>(
     /**
      * Note: Due to the query bar being separate from the portable dashboard, the "Use filters and query from origin
      * dashboard" and "Use date range from origin dashboard" Link embeddable settings do not make sense in this context.
@@ -103,7 +108,6 @@ const DashboardRendererComponent = ({
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(() => {
     return Promise.resolve({
       useSessionStorageIntegration: true,
-      useControlGroupIntegration: true,
       getInitialInput: () => {
         return initialInput.value;
       },
@@ -137,12 +141,19 @@ const DashboardRendererComponent = ({
   }, [dispatch, id, inputId, refetchByForceRefresh]);
 
   useEffect(() => {
-    dashboardContainer?.updateInput({ timeRange, query, filters });
-  }, [dashboardContainer, filters, query, timeRange]);
+    dashboardContainer?.setFilters(filters);
+  }, [dashboardContainer, filters]);
 
   useEffect(() => {
-    if (isCreateDashboard && firstSecurityTagId)
-      dashboardContainer?.updateInput({ tags: [firstSecurityTagId] });
+    dashboardContainer?.setQuery(query);
+  }, [dashboardContainer, query]);
+
+  useEffect(() => {
+    dashboardContainer?.setTimeRange(timeRange);
+  }, [dashboardContainer, timeRange]);
+
+  useEffect(() => {
+    if (isCreateDashboard && firstSecurityTagId) dashboardContainer?.setTags([firstSecurityTagId]);
   }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
 
   useEffect(() => {
@@ -161,7 +172,7 @@ const DashboardRendererComponent = ({
     setDashboardContainerRenderer(
       <DashboardContainerRenderer
         locator={locator}
-        ref={onDashboardContainerLoaded}
+        onApiAvailable={onDashboardContainerLoaded}
         savedObjectId={savedObjectId}
         getCreationOptions={getCreationOptions}
       />

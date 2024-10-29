@@ -35,8 +35,8 @@ import { isEmpty, partition, some } from 'lodash';
 import {
   ActionVariable,
   RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
   RuleActionParam,
-  RuleNotifyWhenType,
 } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
@@ -46,6 +46,8 @@ import {
 import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
+import { RuleActionsAlertsFilter } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter';
+import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
 import { RuleActionsAlertsFilterTimeframe } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter_timeframe';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
@@ -60,13 +62,11 @@ import {
   ActionConnectorMode,
   NotifyWhenSelectOptions,
 } from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
@@ -94,7 +94,6 @@ export type ActionTypeFormProps = {
   hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  defaultNotifyWhenValue?: RuleNotifyWhenType;
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
@@ -146,7 +145,6 @@ export const ActionTypeForm = ({
   hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
-  defaultNotifyWhenValue,
   producerId,
   featureId,
   ruleTypeId,
@@ -157,6 +155,9 @@ export const ActionTypeForm = ({
     application: { capabilities },
     settings,
     http,
+    notifications,
+    unifiedSearch,
+    data,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -369,44 +370,32 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const onActionFrequencyChange = (frequency: RuleActionFrequency | undefined) => {
+    const { notifyWhen, throttle, summary } = frequency || {};
+
+    setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+
+    if (throttle) {
+      setActionThrottle(getDurationNumberInItsUnit(throttle));
+      setActionThrottleUnit(getDurationUnitValue(throttle));
+    }
+
+    setActionFrequencyProperty('throttle', throttle ? throttle : null, index);
+
+    setActionFrequencyProperty('summary', summary, index);
+  };
+
   const actionNotifyWhen = (
     <RuleActionsNotifyWhen
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
-      onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
-          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onThrottleChange={useCallback(
-        (throttle: number | null, throttleUnit: string) => {
-          if (throttle) {
-            setActionThrottle(throttle);
-            setActionThrottleUnit(throttleUnit);
-          }
-          setActionFrequencyProperty(
-            'throttle',
-            throttle ? `${throttle}${throttleUnit}` : null,
-            index
-          );
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onSummaryChange={useCallback(
-        (summary: boolean) => {
-          // use the default message when a user toggles between action frequencies
-          setUseDefaultMessage(true);
-          setActionFrequencyProperty('summary', summary, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
+      onChange={onActionFrequencyChange}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
-      defaultNotifyWhenValue={defaultNotifyWhenValue}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
     />
   );
 
@@ -515,17 +504,23 @@ export const ActionTypeForm = ({
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
-              <ActionAlertsFilterQuery
-                state={actionItem.alertsFilter?.query}
+              <RuleActionsAlertsFilter
+                action={actionItem}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
                 featureIds={[producerId as ValidFeatureId]}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
+                plugins={{
+                  http,
+                  unifiedSearch,
+                  data,
+                  notifications,
+                }}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
             <RuleActionsAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe}
+              action={actionItem}
               settings={settings}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />

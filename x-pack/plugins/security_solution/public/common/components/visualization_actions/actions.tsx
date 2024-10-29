@@ -10,7 +10,7 @@ import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { InputsModelId } from '../../store/inputs/constants';
 import { ModalInspectQuery } from '../inspect/modal';
 

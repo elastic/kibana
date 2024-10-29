@@ -125,17 +125,23 @@ const getMonitorSummaryHeader = (
   const search = history.location.search;
   const monitorId = match.params.monitorId;
 
+  const rightSideItems = [
+    <RefreshButton />,
+    <EditMonitorLink />,
+    <RunTestManually />,
+    <MonitorDetailsLastRun />,
+    <MonitorDetailsStatus />,
+    <MonitorDetailsLocation />,
+  ];
+  if (selectedTab === 'alerts' || selectedTab === 'history' || selectedTab === 'errors') {
+    // remove first item refresh button
+    rightSideItems.shift();
+  }
+
   return {
     pageTitle: <MonitorDetailsPageTitle />,
     breadcrumbs: [getMonitorsBreadcrumb(syntheticsPath)],
-    rightSideItems: [
-      <RefreshButton />,
-      <EditMonitorLink />,
-      <RunTestManually />,
-      <MonitorDetailsLastRun />,
-      <MonitorDetailsStatus />,
-      <MonitorDetailsLocation />,
-    ],
+    rightSideItems,
     tabs: [
       {
         label: i18n.translate('xpack.synthetics.monitorOverviewTab.title', {

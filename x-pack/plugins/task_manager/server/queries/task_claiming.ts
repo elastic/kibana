@@ -8,8 +8,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { Subject, Observable, of } from 'rxjs';
-import { map } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
@@ -28,6 +27,7 @@ import {
   getTaskClaimer,
 } from '../task_claimers';
 import { TaskPartitioner } from '../lib/task_partitioner';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 
 export type { ClaimOwnershipResult } from '../task_claimers';
 export interface TaskClaimingOpts {
@@ -107,7 +107,7 @@ export class TaskClaiming {
     this.maxAttempts = opts.maxAttempts;
     this.taskStore = opts.taskStore;
     this.getAvailableCapacity = opts.getAvailableCapacity;
-    this.logger = opts.logger.get('taskClaiming');
+    this.logger = createWrappedLogger({ logger: opts.logger, tags: ['taskClaiming'] });
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
@@ -167,29 +167,34 @@ export class TaskClaiming {
     return this.events$;
   }
 
-  public claimAvailableTasksIfCapacityIsAvailable(
+  public async claimAvailableTasksIfCapacityIsAvailable(
     claimingOptions: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>
-  ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
+  ): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
     if (this.getAvailableCapacity()) {
-      const opts: TaskClaimerOpts = {
-        batches: this.getClaimingBatches(),
-        claimOwnershipUntil: claimingOptions.claimOwnershipUntil,
-        taskStore: this.taskStore,
-        events$: this.events$,
-        getCapacity: this.getAvailableCapacity,
-        unusedTypes: this.unusedTypes,
-        definitions: this.definitions,
-        taskMaxAttempts: this.taskMaxAttempts,
-        excludedTaskTypes: this.excludedTaskTypes,
-        logger: this.logger,
-        taskPartitioner: this.taskPartitioner,
-      };
-      return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
+      try {
+        const opts: TaskClaimerOpts = {
+          batches: this.getClaimingBatches(),
+          claimOwnershipUntil: claimingOptions.claimOwnershipUntil,
+          taskStore: this.taskStore,
+          events$: this.events$,
+          getCapacity: this.getAvailableCapacity,
+          unusedTypes: this.unusedTypes,
+          definitions: this.definitions,
+          taskMaxAttempts: this.taskMaxAttempts,
+          excludedTaskTypes: this.excludedTaskTypes,
+          logger: this.logger,
+          taskPartitioner: this.taskPartitioner,
+        };
+        const result = await this.taskClaimer(opts);
+        return asOk(result);
+      } catch (err) {
+        throw err;
+      }
     }
     this.logger.debug(
       `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
-    return of(asErr(FillPoolResult.NoAvailableWorkers));
+    return asErr(FillPoolResult.NoAvailableWorkers);
   }
 }
 

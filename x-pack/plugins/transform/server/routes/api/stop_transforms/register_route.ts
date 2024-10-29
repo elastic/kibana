@@ -8,7 +8,7 @@
 import {
   stopTransformsRequestSchema,
   type StopTransformsRequestSchema,
-} from '../../../../common/api_schemas/stop_transforms';
+} from '../../api_schemas/stop_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

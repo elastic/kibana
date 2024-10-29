@@ -13,6 +13,8 @@ const TARGET_TAGS = [
   '@serverless',
   '@skipInServerless',
   '@brokenInServerless',
+  '@serverlessQA',
+  'esGate',
 ] as const;
 
 export type TargetTags = (typeof TARGET_TAGS)[number];

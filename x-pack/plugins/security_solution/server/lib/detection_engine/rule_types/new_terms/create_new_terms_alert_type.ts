@@ -48,7 +48,8 @@ import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppre
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { logger, licensing, experimentalFeatures } = createOptions;
+  const { logger, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -109,8 +110,8 @@ export const createNewTermsAlertType = (
           unprocessedExceptions,
           alertTimestampOverride,
           publicBaseUrl,
-          inputIndexFields,
           alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         params,
@@ -134,7 +135,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
-        fields: inputIndexFields,
+        loadFields: true,
       };
       const esFilter = await getFilter(filterArgs);
 
@@ -212,6 +213,7 @@ export const createNewTermsAlertType = (
               alertTimestampOverride,
               ruleExecutionLogger,
               publicBaseUrl,
+              intendedTimestamp,
             });
 
           const wrapSuppressedHits = (eventsAndTerms: EventsAndTerms[]) =>
@@ -226,6 +228,7 @@ export const createNewTermsAlertType = (
               publicBaseUrl,
               primaryTimestamp,
               secondaryTimestamp,
+              intendedTimestamp,
             });
 
           const eventsAndTerms: EventsAndTerms[] = (
@@ -414,6 +417,13 @@ export const createNewTermsAlertType = (
 
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
       }
+
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: completeRule.ruleParams.responseActions,
+      });
+
       return { ...result, state };
     },
   };

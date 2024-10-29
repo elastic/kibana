@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
 import { xor } from 'lodash';
+import { EuiSelectProps } from '@elastic/eui';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import {
@@ -56,7 +57,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     }),
   };
 
-  const handleChange = useCallback(
+  const handleChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const aggregation =
         (metricsExplorerAggregationRT.is(e.target.value) && e.target.value) || 'avg';
@@ -65,7 +66,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     [onChange]
   );
 
-  const placeholder = i18n.translate('xpack.infra.metricsExplorer.aggregationSelectLabel', {
+  const label = i18n.translate('xpack.infra.metricsExplorer.aggregationSelectLabel', {
     defaultMessage: 'Select an aggregation',
   });
 
@@ -76,8 +77,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
   return (
     <EuiSelect
       data-test-subj="infraMetricsExplorerAggregationPickerSelect"
-      aria-label={placeholder}
-      placeholder={placeholder}
+      aria-label={label}
       fullWidth
       value={options.aggregation}
       options={METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM.map((k) => ({

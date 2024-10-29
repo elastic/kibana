@@ -30,6 +30,7 @@ export function registerFieldsRoute(
   router.post(
     {
       path: '/internal/rules/saved_objects/fields',
+      options: { access: 'internal' },
       validate: {
         body: schema.nullable(
           schema.object({

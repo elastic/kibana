@@ -21,13 +21,15 @@ const customRulesSchema = schema.maybe(
       conditions: schema.maybe(schema.arrayOf(schema.any())),
       scope: schema.maybe(schema.any()),
       params: schema.maybe(schema.any()),
-    })
+    }),
+    { meta: { description: 'Custom rules' } }
   )
 );
 
 const AnalysisLimits = schema.object({
-  /** Limit of categorization examples */
-  categorization_examples_limit: schema.maybe(schema.number()),
+  categorization_examples_limit: schema.maybe(
+    schema.number({ meta: { description: 'Limit of categorization examples' } })
+  ),
   model_memory_limit: schema.string(),
 });
 
@@ -48,7 +50,6 @@ const detectorSchema = schema.object({
     ])
   ),
   use_null: schema.maybe(schema.boolean()),
-  /** Custom rules */
   custom_rules: customRulesSchema,
   detector_index: schema.maybe(schema.number()),
 });
@@ -61,8 +62,9 @@ const customUrlSchema = {
 
 const customSettingsSchema = schema.object(
   {
-    /** Indicates the creator entity */
-    created_by: schema.maybe(schema.string()),
+    created_by: schema.maybe(
+      schema.string({ meta: { description: 'Indicates the creator entity' } })
+    ),
     custom_urls: schema.maybe(schema.arrayOf(schema.maybe(schema.object(customUrlSchema)))),
   },
   { unknowns: 'allow' } // Create / Update job API allows other fields to be added to custom_settings.
@@ -119,7 +121,6 @@ export const anomalyDetectionJobSchema = {
   allow_lazy_open: schema.maybe(schema.any()),
   data_counts: schema.maybe(schema.any()),
   data_description: schema.object({
-    /** Format */
     format: schema.maybe(schema.string()),
     time_field: schema.string(),
     time_format: schema.maybe(schema.string()),
@@ -145,9 +146,17 @@ export const anomalyDetectionJobSchema = {
   datafeed_config: schema.maybe(datafeedConfigSchema),
 };
 
+export const jobIdSchemaBasic = {
+  jobId: schema.string({ meta: { description: 'Job ID' } }),
+};
+
 export const jobIdSchema = schema.object({
-  /** Job ID. */
-  jobId: schema.string(),
+  ...jobIdSchemaBasic,
+});
+
+export const deleteForecastSchema = schema.object({
+  ...jobIdSchemaBasic,
+  forecastId: schema.string(),
 });
 
 export const getBucketsSchema = schema.object({
@@ -156,14 +165,14 @@ export const getBucketsSchema = schema.object({
   end: schema.maybe(schema.string()),
   exclude_interim: schema.maybe(schema.boolean()),
   expand: schema.maybe(schema.boolean()),
-  /** Page definition */
   page: schema.maybe(
-    schema.object({
-      /** Page offset */
-      from: schema.number(),
-      /** Size of the page */
-      size: schema.number(),
-    })
+    schema.object(
+      {
+        from: schema.number({ meta: { description: 'Page offset' } }),
+        size: schema.number({ meta: { description: 'Size of the page' } }),
+      },
+      { meta: { description: 'Page definition' } }
+    )
   ),
   sort: schema.maybe(schema.string()),
   start: schema.maybe(schema.string()),
@@ -183,43 +192,44 @@ export const getOverallBucketsSchema = schema.object({
 });
 
 export const getCategoriesSchema = schema.object({
-  /** Category ID */
-  categoryId: schema.string(),
-  /** Job ID */
-  jobId: schema.string(),
+  categoryId: schema.string({ meta: { description: 'Category ID' } }),
+  ...jobIdSchemaBasic,
 });
 
 export const getModelSnapshotsSchema = schema.object({
-  /** Snapshot ID */
-  snapshotId: schema.maybe(schema.string()),
-  /** Job ID */
-  jobId: schema.string(),
+  snapshotId: schema.maybe(schema.string({ meta: { description: 'Snapshot ID' } })),
+  ...jobIdSchemaBasic,
 });
 
 export const updateModelSnapshotsSchema = schema.object({
-  /** Snapshot ID */
-  snapshotId: schema.string(),
-  /** Job ID */
-  jobId: schema.string(),
+  snapshotId: schema.string({ meta: { description: 'Snapshot ID' } }),
+  ...jobIdSchemaBasic,
 });
 
 export const updateModelSnapshotBodySchema = schema.object({
-  /** description */
   description: schema.maybe(schema.string()),
-  /** retain */
   retain: schema.maybe(schema.boolean()),
 });
 
-export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
+export const forecastAnomalyDetector = schema.object({
+  duration: schema.any(),
+  expires_in: schema.maybe(schema.any()),
+});
 
 export const forceQuerySchema = schema.object({
-  /** force close */
   force: schema.maybe(schema.boolean()),
 });
 
 export const jobForCloningSchema = schema.object({
-  /** Whether to retain the created_by custom setting. */
-  retainCreatedBy: schema.maybe(schema.boolean()),
-  /** Job ID */
-  jobId: schema.string(),
+  retainCreatedBy: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to retain the created_by custom setting.' } })
+  ),
+  ...jobIdSchemaBasic,
 });
+
+export const getAnomalyDetectorsResponse = () => {
+  return schema.object({
+    count: schema.number(),
+    jobs: schema.arrayOf(schema.any()),
+  });
+};

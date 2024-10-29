@@ -17,7 +17,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -38,7 +37,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { useStorage } from '@kbn/ml-local-storage';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import {
@@ -54,6 +54,11 @@ import {
   commonColumns,
   significantItemColumns,
 } from '../log_rate_analysis_results_table/use_columns';
+import {
+  AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+} from '../../types/storage';
 
 import {
   getGroupTableItems,
@@ -63,7 +68,7 @@ import {
 
 import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
 import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
-import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
+import { LogRateAnalysisInfoPopover } from './log_rate_analysis_info_popover';
 import type { ColumnNames } from '../log_rate_analysis_results_table';
 
 const groupResultsMessage = i18n.translate(
@@ -148,8 +153,6 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -157,9 +160,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
-  embeddingOrigin,
 }) => {
-  const { analytics, http } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
@@ -188,11 +190,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
-  const [skippedColumns, setSkippedColumns] = useState<ColumnNames[]>([
-    'p-value',
-    'Baseline rate',
-    'Deviation rate',
-  ]);
+  const [skippedColumns, setSkippedColumns] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS>
+  >(AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS, ['p-value', 'Baseline rate', 'Deviation rate']);
   // null is used as the uninitialized state to identify the first load.
   const [skippedFields, setSkippedFields] = useState<string[] | null>(null);
 
@@ -347,7 +348,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         overrides,
         sampleProbability,
       },
-      headers: { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
+      headers: { [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
     };
   }, [
     analysisType,
@@ -426,28 +427,25 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onCancel={cancelHandler}
         onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
+        analysisInfo={<LogRateAnalysisInfoPopover />}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="columnCompressedSwitch">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{groupResultsMessage}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  data-test-subj={`aiopsLogRateAnalysisGroupSwitch${
-                    groupResults ? ' checked' : ''
-                  }`}
-                  buttonSize="s"
-                  isDisabled={disabledGroupResultsSwitch}
-                  legend="Smart grouping"
-                  options={toggleButtons}
-                  idSelected={toggleIdSelected}
-                  onChange={onGroupResultsToggle}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{groupResultsMessage}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                data-test-subj={`aiopsLogRateAnalysisGroupSwitch${groupResults ? ' checked' : ''}`}
+                buttonSize="s"
+                isDisabled={disabledGroupResultsSwitch}
+                legend="Smart grouping"
+                options={toggleButtons}
+                idSelected={toggleIdSelected}
+                onChange={onGroupResultsToggle}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FieldFilterPopover
@@ -484,8 +482,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
-
-      <LogRateAnalysisTypeCallOut />
 
       {errors.length > 0 ? (
         <>
@@ -535,7 +531,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
         </>
       )}
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {!isRunning && !showLogRateAnalysisResultsTable && (
         <EuiEmptyPrompt
           data-test-subj="aiopsNoResultsFoundEmptyPrompt"

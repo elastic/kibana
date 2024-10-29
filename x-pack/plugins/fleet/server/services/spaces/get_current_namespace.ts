@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 /*
  * soClient.getCurrentNamespace() returns undefined in the default space.
  * This helper returns the name of the current space and 'default' in the default space.
+ * Note: this refers to the current Kibana space, not to be confused with datastream namespaces.
  */
 export function getCurrentNamespace(soClient: SavedObjectsClientContract) {
   return soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;

@@ -16,10 +16,12 @@ import { ConfiguredLimits, Account, Role } from './types';
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
-  configuredLimits: ConfiguredLimits;
   account: Account;
+  showGateForm: boolean;
+  configuredLimits: ConfiguredLimits;
   myRole: Role;
 }
+
 interface AppActions {
   setOnboardingComplete(): boolean;
 }
@@ -41,6 +43,10 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
       },
     ],
     configuredLimits: [props.configuredLimits.appSearch, {}],
+    showGateForm: [
+      props.appSearch.kibanaUIsEnabled === false && props.appSearch.role.roleType === 'owner',
+      {},
+    ],
   }),
   selectors: {
     myRole: [

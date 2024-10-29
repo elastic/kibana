@@ -24,7 +24,6 @@
     "@kbn/core-execution-context-browser",
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core",
     "@kbn/data-plugin",
@@ -78,6 +77,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/ui-theme",
     "@kbn/apm-utils",
   ],
   "exclude": [

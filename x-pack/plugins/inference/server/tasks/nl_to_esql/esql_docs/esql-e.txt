@@ -1,0 +1,23 @@
+# E
+
+The E function returns Euler's number.
+
+## Syntax
+
+`E()`
+
+### Parameters
+
+This function does not require any parameters.
+
+## Examples
+
+```esql
+ROW E()
+```
+
+```esql
+FROM employees
+| EVAL euler_number = E()
+| KEEP euler_number
+```

@@ -8,11 +8,14 @@
 import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { cloneDeep, intersection } from 'lodash';
-import moment from 'moment';
-import { getIntervalFromTimespan } from '../utils';
-import { FINAL_SUMMARY_FILTER, getRangeFilter } from '../../../../common/constants/client_defaults';
-import { OverviewPendingStatusMetaData, OverviewPing } from '../../../../common/runtime_types';
+import { intersection } from 'lodash';
+import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
+import {
+  FINAL_SUMMARY_FILTER,
+  getTimespanFilter,
+  SUMMARY_FILTER,
+} from '../../../../common/constants/client_defaults';
+import { OverviewPing } from '../../../../common/runtime_types';
 import { createEsParams, SyntheticsEsClient } from '../../../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
@@ -27,46 +30,38 @@ const fields = [
   'agent',
   'url',
   'state',
+  'tags',
+  'service',
+  'labels',
 ];
-
-export interface AlertStatusMetaDataCodec {
-  monitorQueryId: string;
-  configId: string;
-  status?: string;
-  locationId: string;
-  timestamp: string;
-  ping: OverviewPing;
-  checks: {
-    total: number;
-    down: number;
-  };
-}
-
-export type StatusConfigs = Record<string, AlertStatusMetaDataCodec>;
+type StatusConfigs = Record<string, AlertStatusMetaData>;
 
 export interface AlertStatusResponse {
-  up: number;
-  down: number;
-  pending: number;
   upConfigs: StatusConfigs;
   downConfigs: StatusConfigs;
   pendingConfigs: Record<string, OverviewPendingStatusMetaData>;
   enabledMonitorQueryIds: string[];
 }
 
-export async function queryMonitorStatusAlert(
-  esClient: SyntheticsEsClient,
-  monitorLocationIds: string[],
-  range: { from: string; to: string },
-  monitorQueryIds: string[],
-  monitorLocationsMap: Record<string, string[]>,
-  monitorQueryIdToConfigIdMap: Record<string, string>,
-  numberOfChecks: number
-): Promise<AlertStatusResponse> {
+export async function queryMonitorStatusAlert({
+  esClient,
+  monitorLocationIds,
+  range,
+  monitorQueryIds,
+  monitorLocationsMap,
+  numberOfChecks,
+  includeRetests = true,
+}: {
+  esClient: SyntheticsEsClient;
+  monitorLocationIds: string[];
+  range: { from: string; to: string };
+  monitorQueryIds: string[];
+  monitorLocationsMap: Record<string, string[]>;
+  numberOfChecks: number;
+  includeRetests?: boolean;
+}): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
-  let up = 0;
-  let down = 0;
   const upConfigs: StatusConfigs = {};
   const downConfigs: StatusConfigs = {};
   const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
@@ -82,8 +77,8 @@ export async function queryMonitorStatusAlert(
           query: {
             bool: {
               filter: [
-                FINAL_SUMMARY_FILTER,
-                getRangeFilter({ from: range.from, to: range.to }),
+                ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
+                getTimespanFilter({ from: range.from, to: range.to }),
                 {
                   terms: {
                     'monitor.id': idsToQuery,
@@ -105,22 +100,16 @@ export async function queryMonitorStatusAlert(
                     size: monitorLocationIds.length || 100,
                   },
                   aggs: {
-                    summaryDoc: {
-                      top_hits: {
-                        size: 1,
-                        sort: [
-                          {
-                            '@timestamp': {
-                              order: 'desc',
-                            },
+                    downChecks: {
+                      filter: {
+                        range: {
+                          'summary.down': {
+                            gte: '1',
                           },
-                        ],
-                        _source: {
-                          includes: fields,
                         },
                       },
                     },
-                    downChecks: {
+                    totalChecks: {
                       top_hits: {
                         size: numberOfChecks,
                         sort: [
@@ -131,7 +120,7 @@ export async function queryMonitorStatusAlert(
                           },
                         ],
                         _source: {
-                          includes: ['summary', '@timestamp'],
+                          includes: fields,
                         },
                       },
                     },
@@ -155,9 +144,8 @@ export async function queryMonitorStatusAlert(
 
       result.aggregations?.id.buckets.forEach(({ location, key: queryId }) => {
         const locationSummaries = location.buckets.map(
-          ({ summaryDoc, key: locationId, downChecks }) => {
-            const ping = summaryDoc.hits.hits?.[0]?._source;
-            return { locationId, ping, downChecks };
+          ({ key: locationId, totalChecks, downChecks }) => {
+            return { locationId, totalChecks, downChecks };
           }
         );
 
@@ -171,16 +159,18 @@ export async function queryMonitorStatusAlert(
           );
 
           if (locationSummary) {
-            const { ping, downChecks } = locationSummary;
-            const downCount = ping.summary?.down ?? 0;
-            const upCount = ping.summary?.up ?? 0;
-            const configId = ping.config_id;
-            const monitorQueryId = ping.monitor.id;
+            const { totalChecks, downChecks } = locationSummary;
+            const latestPing = totalChecks.hits.hits[0]._source;
+            const downCount = downChecks.doc_count;
+            const isLatestPingUp = (latestPing.summary?.up ?? 0) > 0;
+            const configId = latestPing.config_id;
+            const monitorQueryId = latestPing.monitor.id;
 
             const interval = getIntervalFromTimespan(ping.monitor.timespan);
             const hasMissedSchedule = moment(ping['@timestamp']).isBefore(
               moment().subtract(interval, 'seconds').subtract(1, 'minute')
             );
+
             if (hasMissedSchedule) {
               pendingConfigs[`${configId}-${monLocationId}`] = {
                 monitorQueryId,
@@ -190,43 +180,36 @@ export async function queryMonitorStatusAlert(
                 status: 'pending',
                 ping,
               };
-            } else {
-              const meta: AlertStatusMetaDataCodec = {
-                ping,
-                configId,
-                monitorQueryId,
-                locationId: monLocationId,
-                timestamp: ping['@timestamp'],
-                checks: {
-                  total: numberOfChecks,
-                  down: downChecks.hits.hits.reduce(
-                    (acc, curr) => acc + ((curr._source.summary.down ?? 0) > 0 ? 1 : 0),
-                    0
-                  ),
-                },
-              };
-
-              if (downCount > 0) {
-                down += 1;
-                downConfigs[`${configId}-${monLocationId}`] = {
-                  ...meta,
-                  status: 'down',
-                };
-              } else if (upCount > 0) {
-                up += 1;
-                upConfigs[`${configId}-${monLocationId}`] = {
-                  ...meta,
-                  status: 'up',
-                };
-              }
             }
-            const monitorsMissingData = monitorsWithoutData.get(monitorQueryId) || [];
-            monitorsWithoutData.set(
+
+
+            const meta: AlertStatusMetaData = {
+              ping: latestPing,
+              configId,
               monitorQueryId,
-              monitorsMissingData?.filter((loc) => loc !== monLocationId)
-            );
-            if (!monitorsWithoutData.get(monitorQueryId)?.length) {
-              monitorsWithoutData.delete(monitorQueryId);
+              locationId: monLocationId,
+              timestamp: latestPing['@timestamp'],
+              checks: {
+                downWithinXChecks: totalChecks.hits.hits.reduce(
+                  (acc, curr) => acc + ((curr._source.summary.down ?? 0) > 0 ? 1 : 0),
+                  0
+                ),
+                down: downCount,
+              },
+              status: 'up',
+            };
+
+            if (downCount > 0) {
+              downConfigs[`${configId}-${monLocationId}`] = {
+                ...meta,
+                status: 'down',
+              };
+            }
+            if (isLatestPingUp) {
+              upConfigs[`${configId}-${monLocationId}`] = {
+                ...meta,
+                status: 'up',
+              };
             }
           }
         });
@@ -235,22 +218,7 @@ export async function queryMonitorStatusAlert(
     { concurrency: 5 }
   );
 
-  // identify the remaining monitors without data, to determine pending monitors
-  for (const [queryId, locs] of monitorsWithoutData) {
-    locs.forEach((loc) => {
-      pendingConfigs[`${monitorQueryIdToConfigIdMap[queryId]}-${loc}`] = {
-        configId: `${monitorQueryIdToConfigIdMap[queryId]}`,
-        monitorQueryId: queryId,
-        status: 'unknown',
-        locationId: loc,
-      };
-    });
-  }
-
   return {
-    up,
-    down,
-    pending: Object.values(pendingConfigs).length,
     upConfigs,
     downConfigs,
     pendingConfigs,

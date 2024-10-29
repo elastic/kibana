@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -53,6 +54,7 @@ export const LinkContent = ({
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getUrlWithUpdatedParams = useCallback(
     (tempUrl: string): string => {
@@ -98,6 +100,7 @@ export const LinkContent = ({
   }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
 
   const copyUrlHelper = useCallback(async () => {
+    setIsLoading(true);
     let urlToCopy = url;
 
     if (!urlToCopy || delegatedShareUrlHandler) {
@@ -111,6 +114,7 @@ export const LinkContent = ({
     copyToClipboard(urlToCopy);
     setUrl(urlToCopy);
     setTextCopied(true);
+    setIsLoading(false);
     return urlToCopy;
   }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl, getSnapshotUrl]);
 
@@ -134,6 +138,7 @@ export const LinkContent = ({
             <EuiSpacer size="m" />
             <EuiCallOut
               color="warning"
+              iconType="warning"
               title={
                 <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
               }
@@ -163,6 +168,7 @@ export const LinkContent = ({
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
+              isLoading={isLoading}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>

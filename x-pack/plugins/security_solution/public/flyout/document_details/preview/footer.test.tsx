@@ -14,18 +14,27 @@ import { mockContextValue } from '../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../shared/context';
 import { PreviewPanelFooter } from './footer';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 describe('<PreviewPanelFooter />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
-  it('should render footer', () => {
+  it('should render footer for alert', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -34,6 +43,20 @@ describe('<PreviewPanelFooter />', () => {
       </TestProviders>
     );
     expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toHaveTextContent('Show full alert details');
+  });
+
+  it('should render footer for event', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider
+          value={{ ...mockContextValue, getFieldsData: () => 'event' }}
+        >
+          <PreviewPanelFooter />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toHaveTextContent('Show full event details');
   });
 
   it('should open document details flyout when clicked', () => {

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
 import type { SavedObjectResult, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../../common/types/saved_objects';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
@@ -42,7 +42,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
 }) => {
   const {
     savedObjects: { updateJobsSpaces, updateModelsSpaces },
-  } = useMlApiContext();
+  } = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
 
   const [showFlyout, setShowFlyout] = useState(false);

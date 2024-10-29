@@ -7,12 +7,12 @@
 
 import { sendGetAgentPolicies, sendGetAgents } from '../../../../../hooks';
 import type { DownloadSource } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 
 export async function getCountsForDownloadSource(downloadSource: DownloadSource) {
-  let kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:"${downloadSource.id}"`;
+  let kuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:"${downloadSource.id}"`;
   if (downloadSource.is_default) {
-    kuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`;
+    kuery += ` or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`;
   }
   const agentPolicies = await sendGetAgentPolicies({
     kuery,

@@ -6,14 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const usageAPI = getService('usageAPI');
 
-  describe('Verify disabledFeatures telemetry payloads', async () => {
+  describe('Verify disabledFeatures telemetry payloads', () => {
     before(async () => {
       await spacesService.create({
         id: 'space-1',
@@ -75,10 +76,12 @@ export default function ({ getService }: FtrProviderContext) {
         uptime: 0,
         slo: 0,
         infrastructure: 0,
+        inventory: 0,
         logs: 0,
         monitoring: 0,
         apm: 0,
         enterpriseSearch: 0,
+        searchInferenceEndpoints: 0,
         siem: 0,
         securitySolutionCases: 0,
         securitySolutionAssistant: 0,
@@ -93,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         filesSharedImage: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
+        dataQuality: 0,
       });
     });
 

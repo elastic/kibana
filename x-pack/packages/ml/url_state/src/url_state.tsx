@@ -67,7 +67,7 @@ export function isRisonSerializationRequired(queryParam: string): boolean {
 }
 
 export function parseUrlState(search: string): Dictionary<any> {
-  const urlState: Dictionary<any> = {};
+  const urlState: Dictionary<any> = Object.create(null);
   const parsedQueryString = parse(search, { sort: false });
 
   try {
@@ -125,7 +125,7 @@ export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) =
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
       if (!Object.hasOwn(urlState, accessor)) {
-        urlState[accessor] = {};
+        urlState[accessor] = Object.create(null);
       }
 
       if (typeof attribute === 'string') {

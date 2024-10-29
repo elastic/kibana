@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/edit_space/enabled_features';
+import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/components/enabled_features';
 import {
   ResponseActionTypes,
   ResponseActionTypesEnum,

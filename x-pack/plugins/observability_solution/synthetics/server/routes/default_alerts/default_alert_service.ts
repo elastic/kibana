@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { savedObjectsAdapter } from '../../saved_objects';
@@ -20,8 +21,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-
-type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
+import { DefaultRuleType } from '../../../common/types/default_alerts';
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
@@ -38,15 +38,15 @@ export class DefaultAlertService {
     this.soClient = soClient;
   }
 
-  async setupDefaultAlerts() {
-    this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
-    if (
-      (this.settings?.defaultConnectors ?? []).length === 0 ||
-      !(this.settings?.defaultRulesEnabled ?? true)
-    ) {
-      // we skip created default rules if user hasn't configured it
-      return;
+  async getSettings() {
+    if (!this.settings) {
+      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
     }
+    return this.settings;
+  }
+
+  async setupDefaultAlerts() {
+    this.settings = await this.getSettings();
 
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),
@@ -61,24 +61,40 @@ export class DefaultAlertService {
     }
 
     return {
-      statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
-      tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
+      statusRule: statusRule.status === 'fulfilled' && statusRule.value ? statusRule.value : null,
+      tlsRule: tlsRule.status === 'fulfilled' && tlsRule.value ? tlsRule.value : null,
     };
   }
 
+  getMinimumRuleInterval() {
+    const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
+    const minimumIntervalInMs = parseDuration(minimumInterval.value);
+    const defaultIntervalInMs = parseDuration('1m');
+    const interval = minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
+    return interval;
+  }
+
   setupStatusRule() {
-    return this.createDefaultAlertIfNotExist(
+    const minimumRuleInterval = this.getMinimumRuleInterval();
+    if (this.settings?.defaultStatusRuleEnabled === false) {
+      return;
+    }
+    return this.createDefaultRuleIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      '1m'
+      minimumRuleInterval
     );
   }
 
   setupTlsRule() {
-    return this.createDefaultAlertIfNotExist(
+    const minimumRuleInterval = this.getMinimumRuleInterval();
+    if (this.settings?.defaultTLSRuleEnabled === false) {
+      return;
+    }
+    return this.createDefaultRuleIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      '1m'
+      minimumRuleInterval
     );
   }
 
@@ -89,7 +105,7 @@ export class DefaultAlertService {
       options: {
         page: 1,
         perPage: 1,
-        filter: `alert.attributes.alertTypeId:(${ruleType})`,
+        filter: `alert.attributes.alertTypeId:(${ruleType}) AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       },
     });
 
@@ -99,7 +115,8 @@ export class DefaultAlertService {
     const { actions = [], systemActions = [], ...alert } = data[0];
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
-  async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+
+  async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       return alert;
@@ -132,18 +149,45 @@ export class DefaultAlertService {
     };
   }
 
-  updateStatusRule() {
-    return this.updateDefaultAlert(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`, '1m');
-  }
-  updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+  async updateStatusRule(enabled?: boolean) {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
+    if (enabled) {
+      return this.upsertDefaultAlert(
+        SYNTHETICS_STATUS_RULE,
+        `Synthetics status internal rule`,
+        minimumRuleInterval
+      );
+    } else {
+      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      await rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+      });
+    }
   }
 
-  async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
+  async updateTlsRule(enabled?: boolean) {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
+    if (enabled) {
+      return this.upsertDefaultAlert(
+        SYNTHETICS_TLS_RULE,
+        `Synthetics internal TLS rule`,
+        minimumRuleInterval
+      );
+    } else {
+      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      await rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+      });
+    }
+  }
+
+  async upsertDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
     const rulesClient = (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
+      const currentIntervalInMs = parseDuration(alert.schedule.interval);
+      const minimumIntervalInMs = parseDuration(interval);
       const actions = await this.getAlertActions(ruleType);
       const {
         actions: actionsFromRules = [],
@@ -155,7 +199,10 @@ export class DefaultAlertService {
           actions,
           name: alert.name,
           tags: alert.tags,
-          schedule: alert.schedule,
+          schedule: {
+            interval:
+              currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
+          },
           params: alert.params,
         },
       });
@@ -166,7 +213,7 @@ export class DefaultAlertService {
       };
     }
 
-    return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
+    return await this.createDefaultRuleIfNotExist(ruleType, name, interval);
   }
 
   async getAlertActions(ruleType: DefaultRuleType) {

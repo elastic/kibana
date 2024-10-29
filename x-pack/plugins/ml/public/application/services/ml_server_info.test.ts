@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MlApi } from './ml_api_service';
 import {
   loadMlServerInfo,
   getCloudDeploymentId,
@@ -16,11 +17,9 @@ import {
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
-jest.mock('./ml_api_service', () => ({
-  ml: {
-    mlInfo: jest.fn(() => Promise.resolve(mockMlInfoResponse)),
-  },
-}));
+const mlApiServicesMock = {
+  mlInfo: jest.fn(() => Promise.resolve(mockMlInfoResponse)),
+} as unknown as MlApi;
 
 describe('ml_server_info initial state', () => {
   it('should fail to get server info ', () => {
@@ -31,7 +30,7 @@ describe('ml_server_info initial state', () => {
 
 describe('ml_server_info', () => {
   beforeEach(async () => {
-    await loadMlServerInfo();
+    await loadMlServerInfo(mlApiServicesMock);
   });
 
   describe('cloud information', () => {

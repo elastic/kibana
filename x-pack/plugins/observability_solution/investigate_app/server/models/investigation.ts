@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import { investigationSchema, statusSchema } from '@kbn/investigation-shared';
 
-export const investigationSchema = t.type({
-  id: t.string,
-  title: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
-  parameters: t.type({
-    timeRange: t.type({ from: t.number, to: t.number }),
-  }),
-});
-
-export type Investigation = t.TypeOf<typeof investigationSchema>;
-export type StoredInvestigation = t.OutputOf<typeof investigationSchema>;
+export type Investigation = z.infer<typeof investigationSchema>;
+export type InvestigationStatus = z.infer<typeof statusSchema>;
+export type StoredInvestigation = z.infer<typeof investigationSchema>;

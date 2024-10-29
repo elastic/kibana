@@ -10,10 +10,10 @@
 }
 
 .kbnSolutionNav {
-  @include euiYScroll;
-
   display: flex;
   flex-direction: column;
+
+  @include euiYScroll;
 
   @include euiBreakpoint('m', 'l', 'xl') {
     width: $solutionNavWidth;

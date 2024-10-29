@@ -28,16 +28,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-service';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../application/url_state/log_pattern_analysis';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -46,13 +47,13 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CreateCategorizationJobButton } from './create_categorization_job';
 import { TableHeader } from './category_table/table_header';
-import { useOpenInDiscover } from './category_table/use_open_in_discover';
+import { useActions } from './category_table/use_actions';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -64,8 +65,6 @@ export interface LogCategorizationPageProps {
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
   onClose: () => void;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
   additionalFilter?: CategorizationAdditionalFilter;
 }
 
@@ -76,7 +75,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   savedSearch,
   selectedField,
   onClose,
-  embeddingOrigin,
   additionalFilter,
 }) => {
   const {
@@ -85,6 +83,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       query: { getState },
     },
     uiSettings,
+    embeddingOrigin,
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -93,23 +92,26 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
-      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+      searchQuery: buildEsQuery(
+        dataView,
+        query ?? [],
+        filters ?? [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      ),
     })
   );
-  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
-  const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
     categoriesInBucket: Category[] | null;
@@ -139,7 +141,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
-    { dataView, savedSearch: selectedSavedSearch },
+    { dataView, savedSearch },
     stateFromUrl,
     true
   );
@@ -154,13 +156,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     BAR_TARGET
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    true,
     undefined,
     undefined
   );
@@ -201,7 +202,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           searchQuery,
           runtimeMappings,
           {
-            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
         ),
         runCategorizeRequest(
@@ -292,6 +293,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  const actions = getActions(true);
   const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   return (
@@ -417,15 +419,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                   : data.categories
               }
               eventRate={eventRate}
-              pinnedCategory={pinnedCategory}
-              setPinnedCategory={setPinnedCategory}
-              highlightedCategory={highlightedCategory}
-              setHighlightedCategory={setHighlightedCategory}
               enableRowActions={false}
               displayExamples={data.displayExamples}
               setSelectedCategories={setSelectedCategories}
-              openInDiscover={openInDiscover}
               tableState={tableState}
+              actions={actions}
             />
           </>
         ) : null}

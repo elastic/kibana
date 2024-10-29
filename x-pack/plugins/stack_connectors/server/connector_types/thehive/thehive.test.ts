@@ -18,17 +18,20 @@ import {
   PushToServiceIncidentSchema,
 } from '../../../common/thehive/schema';
 import type { ExecutorSubActionCreateAlertParams, Incident } from '../../../common/thehive/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const mockTime = new Date('2024-04-03T09:10:30.000');
 
 describe('TheHiveConnector', () => {
+  const logger = loggingSystemMock.createLogger();
+
   const connector = new TheHiveConnector(
     {
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
       config: { url: 'https://example.com', organisation: null },
       secrets: { apiKey: 'test123' },
-      logger: loggingSystemMock.createLogger(),
+      logger,
       services: actionsMock.createServices(),
     },
     PushToServiceIncidentSchema
@@ -36,6 +39,7 @@ describe('TheHiveConnector', () => {
 
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -51,6 +55,10 @@ describe('TheHiveConnector', () => {
       throw new Error('API Error');
     });
     jest.clearAllMocks();
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('createIncident', () => {
@@ -124,18 +132,21 @@ describe('TheHiveConnector', () => {
     };
 
     it('TheHive API call is successful with correct parameters', async () => {
-      const response = await connector.createIncident(incident);
+      const response = await connector.createIncident(incident, connectorUsageCollector);
       expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://example.com/api/v1/case',
-        method: 'post',
-        responseSchema: TheHiveIncidentResponseSchema,
-        data: incident,
-        headers: {
-          Authorization: 'Bearer test123',
-          'X-Organisation': null,
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          url: 'https://example.com/api/v1/case',
+          method: 'post',
+          responseSchema: TheHiveIncidentResponseSchema,
+          data: incident,
+          headers: {
+            Authorization: 'Bearer test123',
+            'X-Organisation': null,
+          },
         },
-      });
+        connectorUsageCollector
+      );
       expect(response).toEqual({
         id: '~172064',
         url: 'https://example.com/cases/~172064/details',
@@ -148,7 +159,9 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.createIncident(incident)).rejects.toThrow('API Error');
+      await expect(connector.createIncident(incident, connectorUsageCollector)).rejects.toThrow(
+        'API Error'
+      );
     });
   });
 
@@ -173,18 +186,24 @@ describe('TheHiveConnector', () => {
     };
 
     it('TheHive API call is successful with correct parameters', async () => {
-      const response = await connector.updateIncident({ incidentId: '~172064', incident });
+      const response = await connector.updateIncident(
+        { incidentId: '~172064', incident },
+        connectorUsageCollector
+      );
       expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://example.com/api/v1/case/~172064',
-        method: 'patch',
-        responseSchema: TheHiveUpdateIncidentResponseSchema,
-        data: incident,
-        headers: {
-          Authorization: 'Bearer test123',
-          'X-Organisation': null,
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          url: 'https://example.com/api/v1/case/~172064',
+          method: 'patch',
+          responseSchema: TheHiveUpdateIncidentResponseSchema,
+          data: incident,
+          headers: {
+            Authorization: 'Bearer test123',
+            'X-Organisation': null,
+          },
         },
-      });
+        connectorUsageCollector
+      );
       expect(response).toEqual({
         id: '~172064',
         url: 'https://example.com/cases/~172064/details',
@@ -197,9 +216,9 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.updateIncident({ incidentId: '~172064', incident })).rejects.toThrow(
-        'API Error'
-      );
+      await expect(
+        connector.updateIncident({ incidentId: '~172064', incident }, connectorUsageCollector)
+      ).rejects.toThrow('API Error');
     });
   });
 
@@ -224,21 +243,27 @@ describe('TheHiveConnector', () => {
     });
 
     it('TheHive API call is successful with correct parameters', async () => {
-      await connector.addComment({
-        incidentId: '~172064',
-        comment: 'test comment',
-      });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://example.com/api/v1/case/~172064/comment',
-        method: 'post',
-        responseSchema: TheHiveAddCommentResponseSchema,
-        data: { message: 'test comment' },
-        headers: {
-          Authorization: 'Bearer test123',
-          'X-Organisation': null,
+      await connector.addComment(
+        {
+          incidentId: '~172064',
+          comment: 'test comment',
         },
-      });
+        connectorUsageCollector
+      );
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          url: 'https://example.com/api/v1/case/~172064/comment',
+          method: 'post',
+          responseSchema: TheHiveAddCommentResponseSchema,
+          data: { message: 'test comment' },
+          headers: {
+            Authorization: 'Bearer test123',
+            'X-Organisation': null,
+          },
+        },
+        connectorUsageCollector
+      );
     });
 
     it('errors during API calls are properly handled', async () => {
@@ -246,7 +271,10 @@ describe('TheHiveConnector', () => {
       connector.request = mockError;
 
       await expect(
-        connector.addComment({ incidentId: '~172064', comment: 'test comment' })
+        connector.addComment(
+          { incidentId: '~172064', comment: 'test comment' },
+          connectorUsageCollector
+        )
       ).rejects.toThrow('API Error');
     });
   });
@@ -314,16 +342,19 @@ describe('TheHiveConnector', () => {
     });
 
     it('TheHive API call is successful with correct parameters', async () => {
-      const response = await connector.getIncident({ id: '~172064' });
+      const response = await connector.getIncident({ id: '~172064' }, connectorUsageCollector);
       expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://example.com/api/v1/case/~172064',
-        responseSchema: TheHiveIncidentResponseSchema,
-        headers: {
-          Authorization: 'Bearer test123',
-          'X-Organisation': null,
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          url: 'https://example.com/api/v1/case/~172064',
+          responseSchema: TheHiveIncidentResponseSchema,
+          headers: {
+            Authorization: 'Bearer test123',
+            'X-Organisation': null,
+          },
         },
-      });
+        connectorUsageCollector
+      );
       expect(response).toEqual(mockResponse.data);
     });
 
@@ -331,7 +362,9 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.getIncident({ id: '~172064' })).rejects.toThrow('API Error');
+      await expect(
+        connector.getIncident({ id: '~172064' }, connectorUsageCollector)
+      ).rejects.toThrow('API Error');
     });
   });
 
@@ -385,25 +418,30 @@ describe('TheHiveConnector', () => {
     };
 
     it('TheHive API call is successful with correct parameters', async () => {
-      await connector.createAlert(alert);
+      await connector.createAlert(alert, connectorUsageCollector);
       expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://example.com/api/v1/alert',
-        method: 'post',
-        responseSchema: TheHiveCreateAlertResponseSchema,
-        data: alert,
-        headers: {
-          Authorization: 'Bearer test123',
-          'X-Organisation': null,
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          url: 'https://example.com/api/v1/alert',
+          method: 'post',
+          responseSchema: TheHiveCreateAlertResponseSchema,
+          data: alert,
+          headers: {
+            Authorization: 'Bearer test123',
+            'X-Organisation': null,
+          },
         },
-      });
+        connectorUsageCollector
+      );
     });
 
     it('errors during API calls are properly handled', async () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.createAlert(alert)).rejects.toThrow('API Error');
+      await expect(connector.createAlert(alert, connectorUsageCollector)).rejects.toThrow(
+        'API Error'
+      );
     });
   });
 });

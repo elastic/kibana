@@ -11,6 +11,7 @@ import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import { actions, createMachine, InterpreterFrom } from 'xstate';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   ObservabilityLogsExplorerContext,
@@ -25,6 +26,7 @@ import {
 } from './controller_service';
 import { initializeFromTimeFilterService } from './time_filter_service';
 import { createDataReceivedTelemetryEventEmitter } from './telemetry_events';
+import { initializeAllSelection } from './all_selection_service';
 
 export const createPureObservabilityLogsExplorerStateMachine = (
   initialContext: ObservabilityLogsExplorerContext
@@ -42,7 +44,17 @@ export const createPureObservabilityLogsExplorerStateMachine = (
       initial: 'uninitialized',
       states: {
         uninitialized: {
-          always: 'initializingFromTimeFilterService',
+          always: 'initializeAllSelection',
+        },
+        initializeAllSelection: {
+          invoke: {
+            src: 'initializeAllSelection',
+            onDone: {
+              target: 'initializingFromTimeFilterService',
+              actions: ['storeAllSelection'],
+            },
+            onError: 'initializingFromTimeFilterService',
+          },
         },
         initializingFromTimeFilterService: {
           invoke: {
@@ -119,6 +131,13 @@ export const createPureObservabilityLogsExplorerStateMachine = (
             ? { controller: event.controller }
             : {};
         }),
+        storeAllSelection: actions.assign((context, event) => {
+          return 'data' in event
+            ? {
+                allSelection: event.data,
+              }
+            : {};
+        }),
         storeInitialTimeFilter: actions.assign((context, event) => {
           return 'time' in event &&
             'refreshInterval' in event &&
@@ -162,6 +181,7 @@ export interface ObservabilityLogsExplorerStateMachineDependencies {
   toasts: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
   analytics: AnalyticsServiceStart;
+  logSourcesService: LogSourcesService;
 }
 
 export const createObservabilityLogsExplorerStateMachine = ({
@@ -171,6 +191,7 @@ export const createObservabilityLogsExplorerStateMachine = ({
   createLogsExplorerController,
   timeFilterService,
   analytics,
+  logSourcesService,
 }: ObservabilityLogsExplorerStateMachineDependencies) =>
   createPureObservabilityLogsExplorerStateMachine(initialContext).withConfig({
     actions: {
@@ -181,6 +202,7 @@ export const createObservabilityLogsExplorerStateMachine = ({
       createController: createController({ createLogsExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
+      initializeAllSelection: initializeAllSelection({ logSourcesService }),
       subscribeToLogsExplorerState,
       subscribeToLogsExplorerPublicEvents,
     },

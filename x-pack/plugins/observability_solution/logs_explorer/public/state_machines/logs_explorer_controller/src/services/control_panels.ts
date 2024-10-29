@@ -35,18 +35,18 @@ export const subscribeControlGroup =
     if (!('discoverStateContainer' in context)) return;
     const { discoverStateContainer } = context;
 
-    const filtersSubscription = context.controlGroupAPI.onFiltersPublished$.subscribe(
-      (newFilters) => {
-        discoverStateContainer.internalState.transitions.setCustomFilters(newFilters);
-        discoverStateContainer.actions.fetchData();
-      }
-    );
-
-    const inputSubscription = context.controlGroupAPI.getInput$().subscribe(({ panels }) => {
-      if (!deepEqual(panels, context.controlPanels)) {
-        send({ type: 'UPDATE_CONTROL_PANELS', controlPanels: panels });
-      }
+    const filtersSubscription = context.controlGroupAPI.filters$.subscribe((newFilters = []) => {
+      discoverStateContainer.internalState.transitions.setCustomFilters(newFilters);
+      discoverStateContainer.actions.fetchData();
     });
+
+    const inputSubscription = context.controlGroupAPI
+      .getInput$()
+      .subscribe(({ initialChildControlState: panels }) => {
+        if (!deepEqual(panels, context.controlPanels)) {
+          send({ type: 'UPDATE_CONTROL_PANELS', controlPanels: panels });
+        }
+      });
 
     return () => {
       filtersSubscription.unsubscribe();
@@ -71,7 +71,7 @@ export const updateControlPanels =
       newControlPanels!
     );
 
-    context.controlGroupAPI.updateInput({ panels: controlPanelsWithId });
+    context.controlGroupAPI.updateInput({ initialChildControlState: controlPanelsWithId });
 
     return controlPanelsWithId;
   };
@@ -114,7 +114,7 @@ export const getVisibleControlPanelsConfig = (dataView?: DataView) => {
 const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {
   return mapValues(controlPanels, (controlPanelConfig) => ({
     ...controlPanelConfig,
-    explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
+    dataViewId,
   }));
 };
 

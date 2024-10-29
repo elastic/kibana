@@ -16,7 +16,7 @@ import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../common/endpoint/models/policy_config';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;

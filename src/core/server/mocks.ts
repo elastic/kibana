@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of } from 'rxjs';
@@ -22,6 +23,7 @@ import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycl
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -45,6 +47,7 @@ export { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 export { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+export { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 export { securityServiceMock } from '@kbn/core-security-server-mocks';
@@ -119,6 +122,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
 
 function createCoreRequestHandlerContextMock() {
   return {
+    featureFlags: coreFeatureFlagsMock.createRequestHandlerContext(),
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),

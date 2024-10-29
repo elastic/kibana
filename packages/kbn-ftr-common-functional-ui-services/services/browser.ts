@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { modifyUrl } from '@kbn/std';
@@ -588,6 +589,27 @@ class BrowserService extends FtrService {
    */
   public async clearLocalStorage(): Promise<void> {
     await this.driver.executeScript('return window.localStorage.clear();');
+  }
+
+  /**
+   * Adds a value in session storage for the focused window/frame.
+   *
+   * @return {Promise<void>}
+   */
+  public async getSessionStorageItem(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(
+      `return window.sessionStorage.getItem("${key}");`
+    );
+  }
+
+  /**
+   * Removes a value in session storage for the focused window/frame.
+   *
+   * @param {string} key
+   * @return {Promise<void>}
+   */
+  public async removeSessionStorageItem(key: string): Promise<void> {
+    await this.driver.executeScript('return window.sessionStorage.removeItem(arguments[0]);', key);
   }
 
   /**

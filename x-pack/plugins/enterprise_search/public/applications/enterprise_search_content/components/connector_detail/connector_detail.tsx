@@ -10,6 +10,8 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiTabProps } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -119,7 +121,7 @@ export const ConnectorDetail: React.FC = () => {
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
         {
-          defaultMessage: 'Index mappings',
+          defaultMessage: 'Mappings',
         }
       ),
       onClick: () =>
@@ -251,7 +253,7 @@ export const ConnectorDetail: React.FC = () => {
           wrap: false,
         },
         rightSideItems: getHeaderActions(index, connector),
-        tabs,
+        tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
       }}
     >
       {selectedTab?.content || null}

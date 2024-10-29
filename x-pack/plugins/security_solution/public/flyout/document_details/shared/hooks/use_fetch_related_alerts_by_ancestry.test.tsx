@@ -12,9 +12,9 @@ import type {
   UseFetchRelatedAlertsByAncestryResult,
 } from './use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from './use_fetch_related_alerts_by_ancestry';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree');
+jest.mock('./use_alert_prevalence_from_process_tree');
 
 const documentId = 'documentId';
 const indices = ['index1'];

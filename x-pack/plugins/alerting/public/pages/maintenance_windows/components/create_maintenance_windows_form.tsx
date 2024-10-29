@@ -9,6 +9,7 @@ import moment from 'moment';
 import {
   FIELD_TYPES,
   Form,
+  FormSubmitHandler,
   getUseField,
   useForm,
   useFormData,
@@ -63,7 +64,6 @@ export interface CreateMaintenanceWindowFormProps {
   onSuccess: () => void;
   initialValue?: FormProps;
   maintenanceWindowId?: string;
-  scopedQueryFeatureFlag?: boolean;
 }
 
 const useDefaultTimezone = () => {
@@ -76,13 +76,7 @@ const useDefaultTimezone = () => {
 const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>((props) => {
-  const {
-    onCancel,
-    onSuccess,
-    initialValue,
-    maintenanceWindowId,
-    scopedQueryFeatureFlag = true,
-  } = props;
+  const { onCancel, onSuccess, initialValue, maintenanceWindowId } = props;
 
   const [defaultStartDateValue] = useState<string>(moment().toISOString());
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
@@ -123,20 +117,35 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
+  const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
+    return filtersToTransform.map((filter) => {
+      const { $state, meta, ...rest } = filter;
+      return {
+        $state,
+        meta,
+        query: filter?.query ? { ...filter.query } : { ...rest },
+      };
+    });
+  };
+
   const scopedQueryPayload = useMemo(() => {
-    if (!isScopedQueryEnabled || !scopedQueryFeatureFlag) {
+    if (!isScopedQueryEnabled) {
       return null;
     }
     if (!query && !filters.length) {
       return null;
     }
+
+    // Wrapping filters in query object here to avoid schema validation failure
+    const transformedFilters = transformQueryFilters(filters);
+
     return {
       kql: query,
-      filters,
+      filters: transformedFilters,
     };
-  }, [isScopedQueryEnabled, scopedQueryFeatureFlag, query, filters]);
+  }, [isScopedQueryEnabled, query, filters]);
 
-  const submitMaintenanceWindow = useCallback(
+  const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
         return;
@@ -335,7 +344,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   }, [categoryIds, isScopedQueryEnabled]);
 
   return (
-    <Form form={form}>
+    <Form form={form} data-test-subj="createMaintenanceWindowForm">
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField
@@ -343,6 +352,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             componentProps={{
               'data-test-subj': 'title-field',
               euiFieldProps: {
+                'data-test-subj': 'createMaintenanceWindowFormNameInput',
                 autoFocus: true,
               },
             }}
@@ -425,6 +435,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             path="recurring"
             componentProps={{
               'data-test-subj': 'recurring-field',
+              euiFieldProps: {
+                'data-test-subj': 'createMaintenanceWindowRepeatSwitch',
+              },
             }}
           />
         </EuiFlexItem>
@@ -433,19 +446,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <RecurringSchedule data-test-subj="recurring-form" />
           </EuiFlexItem>
         )}
-        {scopedQueryFeatureFlag && (
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="xl" />
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuerySwitch
-                  checked={isScopedQueryEnabled}
-                  onEnabledChange={onScopeQueryToggle}
-                />
-              )}
-            </UseField>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="xl" />
+          <UseField path="scopedQuery">
+            {() => (
+              <MaintenanceWindowScopedQuerySwitch
+                checked={isScopedQueryEnabled}
+                onEnabledChange={onScopeQueryToggle}
+              />
+            )}
+          </UseField>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule margin="xl" />
           <UseField path="categoryIds">
@@ -461,24 +472,22 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             )}
           </UseField>
         </EuiFlexItem>
-        {scopedQueryFeatureFlag && (
-          <EuiFlexItem>
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuery
-                  featureIds={featureIds}
-                  query={query}
-                  filters={filters}
-                  isLoading={isLoadingRuleTypes}
-                  isEnabled={isScopedQueryEnabled}
-                  errors={scopedQueryErrors}
-                  onQueryChange={onQueryChange}
-                  onFiltersChange={setFilters}
-                />
-              )}
-            </UseField>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <UseField path="scopedQuery">
+            {() => (
+              <MaintenanceWindowScopedQuery
+                featureIds={featureIds}
+                query={query}
+                filters={filters}
+                isLoading={isLoadingRuleTypes}
+                isEnabled={isScopedQueryEnabled}
+                errors={scopedQueryErrors}
+                onQueryChange={onQueryChange}
+                onFiltersChange={setFilters}
+              />
+            )}
+          </UseField>
+        </EuiFlexItem>
         <EuiHorizontalRule margin="xl" />
       </EuiFlexGroup>
       {isEditMode && (

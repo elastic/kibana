@@ -59,9 +59,9 @@ describe('Exceptions List Api Client', () => {
       );
   });
 
-  describe('Wen getting an instance', () => {
+  describe('When getting an instance', () => {
     /**
-     * ATENTION: Skipping or modifying this test may cause the other test fails because it's creating the initial Singleton instance.
+     * ATTENTION: Skipping or modifying this test may cause the other test fails because it's creating the initial Singleton instance.
      * If you want to run tests individually, add this one to the execution with the .only method
      */
     it('New instance is created the first time and the create list method is called', () => {

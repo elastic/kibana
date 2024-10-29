@@ -31,5 +31,14 @@ describe('determineAlertsToReturn', () => {
       const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
       expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
     });
+
+    test('should return all recovered alerts if the optimization flag is set to false', () => {
+      const recoveredAlerts = {
+        '1': new Alert('1', { meta: { flappingHistory: flapping } }),
+        '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
+      };
+      const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts, false);
+      expect(keys(recoveredAlertsToReturn)).toEqual(['1', '2']);
+    });
   });
 });

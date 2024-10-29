@@ -156,8 +156,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
               data-test-subj={`aiopsFieldSelectorFieldNameListItem${
                 !skippedItems.includes(fieldName) ? ' checked' : ''
               }`}
-              className="euiSwitch--mini"
-              compressed
+              mini
               label={fieldName}
               onChange={(e) => setItemsFilter([fieldName], e.target.checked)}
               checked={!skippedItems.includes(fieldName)}

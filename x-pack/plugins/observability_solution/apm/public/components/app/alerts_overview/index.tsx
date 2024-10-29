@@ -71,7 +71,7 @@ export function AlertsOverview() {
   }, [serviceName, environment]);
 
   const onKueryChange = useCallback(
-    (value) => push(history, { query: { kuery: value } }),
+    (value: any) => push(history, { query: { kuery: value } }),
     [history]
   );
 

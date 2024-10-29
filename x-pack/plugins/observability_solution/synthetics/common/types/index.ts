@@ -7,3 +7,5 @@
 
 export * from './synthetics_monitor';
 export * from './monitor_validation';
+export * from './default_alerts';
+export * from './overview';

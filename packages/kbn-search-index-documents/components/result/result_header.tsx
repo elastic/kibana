@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -16,8 +17,8 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiText,
   EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -94,18 +95,18 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
 export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
   return (
     <div className="resultHeader">
-      <EuiText size="s">
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem>
-            <strong>{title}</strong>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{title}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        {!!metaData && (
+          <EuiFlexItem grow={false}>
+            <MetadataPopover {...metaData} />
           </EuiFlexItem>
-          {!!metaData && (
-            <EuiFlexItem grow={false}>
-              <MetadataPopover {...metaData} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiText>
+        )}
+      </EuiFlexGroup>
     </div>
   );
 };

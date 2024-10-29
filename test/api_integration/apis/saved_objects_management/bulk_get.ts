@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -52,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 for object that exists and inject metadata', async () =>
       await supertest
         .post(URL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([validObject])
         .expect(200)
         .then((response: Response) => {
@@ -62,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return error for invalid object type', async () =>
       await supertest
         .post(URL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([invalidObject])
         .expect(200)
         .then((response: Response) => {
@@ -72,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return mix of successes and errors', async () =>
       await supertest
         .post(URL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([validObject, invalidObject])
         .expect(200)
         .then((response: Response) => {

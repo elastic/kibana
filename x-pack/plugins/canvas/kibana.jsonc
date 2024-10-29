@@ -1,18 +1,21 @@
 {
   "type": "plugin",
   "id": "@kbn/canvas-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Adds Canvas application to Kibana",
   "plugin": {
     "id": "canvas",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "canvas"
     ],
     "requiredPlugins": [
-      "bfetch",
       "charts",
       "data",
       "dataViews",
@@ -37,7 +40,7 @@
       "home",
       "reporting",
       "spaces",
-      "usageCollection",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -46,6 +49,6 @@
       "maps",
       "visualizations",
       "fieldFormats"
-    ],
+    ]
   }
 }

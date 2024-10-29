@@ -35,6 +35,8 @@ function toMonitorManagementListQueryArgs(
     schedules: pageState.schedules,
     monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
+    internal: true,
+    showFromAllSpaces: pageState.showFromAllSpaces,
   };
 }
 
@@ -49,13 +51,29 @@ export const fetchMonitorManagementList = async (
   });
 };
 
-export const fetchDeleteMonitor = async ({ configId }: { configId: string }): Promise<void> => {
-  return await apiService.delete(
-    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-    { version: INITIAL_REST_VERSION },
+export const fetchDeleteMonitor = async ({
+  configIds,
+  spaceId,
+}: {
+  configIds: string[];
+  spaceId?: string;
+}): Promise<void> => {
+  const baseUrl = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
+
+  if (configIds.length === 1) {
+    return await apiService.delete(`${baseUrl}/${configIds[0]}`, {
+      spaceId,
+      version: INITIAL_REST_VERSION,
+    });
+  }
+
+  return await apiService.post(
+    baseUrl + '/_bulk_delete',
     {
-      ids: [configId],
-    }
+      ids: configIds,
+    },
+    undefined,
+    { version: INITIAL_REST_VERSION, spaceId }
   );
 };
 
@@ -70,7 +88,7 @@ export const fetchUpsertMonitor = async ({
       null,
       {
         version: INITIAL_REST_VERSION,
-        ui: true,
+        internal: true,
       }
     );
   } else {
@@ -91,6 +109,10 @@ export const createGettingStartedMonitor = async ({
   });
 };
 
-export const fetchMonitorFilters = async (): Promise<MonitorFiltersResult> => {
-  return await apiService.get(SYNTHETICS_API_URLS.FILTERS);
+export const fetchMonitorFilters = async ({
+  showFromAllSpaces = false,
+}: {
+  showFromAllSpaces?: boolean;
+}): Promise<MonitorFiltersResult> => {
+  return await apiService.get(SYNTHETICS_API_URLS.FILTERS, { showFromAllSpaces });
 };

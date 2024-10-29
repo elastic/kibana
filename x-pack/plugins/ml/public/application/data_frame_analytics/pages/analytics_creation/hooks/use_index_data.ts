@@ -34,9 +34,8 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
+import { useMlApi } from '../../../../contexts/kibana';
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
-
-import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = estypes.SearchResponse;
 
@@ -82,6 +81,7 @@ export const useIndexData = (
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
+  const mlApi = useMlApi();
   // Fetch 500 random documents to determine populated fields.
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
   // (for example, as part of filebeat/metricbeat/ECS based indices)
@@ -110,7 +110,7 @@ export const useIndexData = (
       };
 
       try {
-        const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+        const resp: IndexSearchResponse = await mlApi.esSearch(esSearchRequest);
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
         // Get all field names for each returned doc and flatten it
@@ -216,7 +216,7 @@ export const useIndexData = (
       };
 
       try {
-        const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+        const resp: IndexSearchResponse = await mlApi.esSearch(esSearchRequest);
 
         if (
           resp.aggregations &&
@@ -258,7 +258,7 @@ export const useIndexData = (
   ]);
 
   const dataLoader = useMemo(
-    () => new DataLoader(dataView, toastNotifications),
+    () => new DataLoader(dataView, mlApi),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]
   );

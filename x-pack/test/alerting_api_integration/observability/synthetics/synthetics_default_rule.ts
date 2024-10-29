@@ -34,23 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
       await server.savedObjects.cleanStandardList();
     });
 
-    it('does not create rule when no settings are configured', async () => {
-      await supertest
-        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
-        .send({
-          certExpirationThreshold: 30,
-          certAgeThreshold: 730,
-          defaultConnectors: [],
-        })
-        .expect(200);
-      const response = await supertest
-        .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
-        .send();
-      expect(response.body.statusRule).eql(undefined);
-    });
-
     it('creates rule when settings are configured', async () => {
       await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)

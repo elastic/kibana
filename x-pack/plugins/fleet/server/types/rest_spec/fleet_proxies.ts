@@ -15,24 +15,36 @@ function validateUrl(value: string) {
   }
 }
 
-export const PostFleetProxyRequestSchema = {
-  body: schema.object({
-    id: schema.maybe(schema.string()),
-    url: schema.string({
-      validate: validateUrl,
-    }),
-    name: schema.string(),
-    proxy_headers: schema.maybe(
+export const FleetProxySchema = schema.object({
+  id: schema.string(),
+  url: schema.string({
+    validate: validateUrl,
+  }),
+  name: schema.string(),
+  proxy_headers: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
       schema.recordOf(
         schema.string(),
         schema.oneOf([schema.string(), schema.boolean(), schema.number()])
-      )
-    ),
-    certificate_authorities: schema.maybe(schema.string()),
-    certificate: schema.maybe(schema.string()),
-    certificate_key: schema.maybe(schema.string()),
+      ),
+    ])
+  ),
+  certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  is_preconfigured: schema.boolean({ defaultValue: false }),
+});
+
+export const PostFleetProxyRequestSchema = {
+  body: FleetProxySchema.extends({
+    id: schema.maybe(schema.string()),
   }),
 };
+
+export const FleetProxyResponseSchema = schema.object({
+  item: FleetProxySchema,
+});
 
 export const PutFleetProxyRequestSchema = {
   params: schema.object({ itemId: schema.string() }),

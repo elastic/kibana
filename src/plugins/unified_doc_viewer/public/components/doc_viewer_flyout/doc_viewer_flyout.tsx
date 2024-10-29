@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useCallback, type ComponentType } from 'react';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -28,12 +28,12 @@ import {
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
 } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
+import { useFlyoutA11y } from './use_flyout_a11y';
 
 export interface UnifiedDocViewerFlyoutProps {
   'data-test-subj'?: string;
@@ -71,6 +71,7 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
 }
 
 export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
+
 /**
  * Flyout displaying an expanded row details
  */
@@ -129,24 +130,29 @@ export function UnifiedDocViewerFlyout({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
-      const nodeClasses = get(ev, 'target.className', '');
-      if (typeof nodeClasses === 'string' && nodeClasses.includes('euiDataGrid')) {
+      if (ev.target instanceof HTMLElement && ev.target.closest('.euiDataGrid__content')) {
         // ignore events triggered from the data grid
         return;
       }
 
-      const nodeName = get(ev, 'target.nodeName', null);
-      if (typeof nodeName === 'string' && nodeName.toLowerCase() === 'input') {
+      if (ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        onClose();
+      }
+
+      if (ev.target instanceof HTMLInputElement) {
         // ignore events triggered from the search input
         return;
       }
+
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();
         setPage(activePage + (ev.key === keys.ARROW_RIGHT ? 1 : -1));
       }
     },
-    [activePage, setPage]
+    [activePage, onClose, setPage]
   );
 
   const addColumn = useCallback(
@@ -231,6 +237,7 @@ export function UnifiedDocViewerFlyout({
         defaultMessage: 'Document',
       });
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
+  const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
   return (
     <EuiPortal>
@@ -250,7 +257,9 @@ export function UnifiedDocViewerFlyout({
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}
         paddingSize="m"
+        {...a11yProps}
       >
+        {screenReaderDescription}
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
             direction="row"

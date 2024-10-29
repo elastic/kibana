@@ -5,7 +5,8 @@ info:
 paths:
   /api/osquery/packs:
     get:
-      summary: Find packs
+      summary: Get packs
+      description: Get a list of all query packs.
       operationId: OsqueryFindPacks
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -23,7 +24,8 @@ paths:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     post:
-      summary: Create a packs
+      summary: Create a pack
+      description: Create a query pack.
       operationId: OsqueryCreatePacks
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -42,7 +44,8 @@ paths:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
   /api/osquery/packs/{id}:
     get:
-      summary: Get packs details
+      summary: Get pack details
+      description: Get the details of a query pack using the pack ID.
       operationId: OsqueryGetPacksDetails
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -60,7 +63,8 @@ paths:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     delete:
-      summary: Delete packs
+      summary: Delete a pack
+      description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -78,7 +82,11 @@ paths:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     put:
-      summary: Update packs
+      summary: Update a pack
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
       operationId: OsqueryUpdatePacks
       x-codegen-enabled: true
       x-labels: [serverless, ess]

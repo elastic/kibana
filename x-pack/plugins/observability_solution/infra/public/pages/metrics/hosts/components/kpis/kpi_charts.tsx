@@ -19,7 +19,7 @@ export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { searchSessionId } = useSearchSessionContext();
   const { hostNodes, loading: hostsLoading } = useHostsViewContext();
-  const { isRequestRunning: hostCountLoading, data: hostCountData } = useHostCountContext();
+  const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
@@ -37,7 +37,7 @@ export const KpiCharts = () => {
 
   const getSubtitle = (formulaValue: string) => {
     if (formulaValue.startsWith('max')) {
-      return searchCriteria.limit < (hostCountData?.count.value ?? 0)
+      return searchCriteria.limit < hostCount
         ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
             defaultMessage: 'Max (of {limit} hosts)',
             values: {
@@ -48,7 +48,7 @@ export const KpiCharts = () => {
             defaultMessage: 'Max',
           });
     }
-    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
+    return searchCriteria.limit < hostCount
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {

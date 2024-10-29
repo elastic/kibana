@@ -22,8 +22,9 @@ const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
 
 export interface AppTestBed extends TestBed {
   actions: {
-    clickPolicyNameLink: () => void;
-    clickCreatePolicyButton: () => void;
+    clickPolicyNameLink: () => Promise<void>;
+    clickCreatePolicyButton: () => Promise<void>;
+    clickEditPolicyButton: () => Promise<void>;
   };
 }
 
@@ -53,9 +54,17 @@ export const setup = async (
     component.update();
   };
 
+  const clickEditPolicyButton = async () => {
+    const { component, find } = testBed;
+    await act(async () => {
+      find('editPolicy').simulate('click', { button: 0 });
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
-    actions: { clickPolicyNameLink, clickCreatePolicyButton },
+    actions: { clickPolicyNameLink, clickCreatePolicyButton, clickEditPolicyButton },
   };
 };
 

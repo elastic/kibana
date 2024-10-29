@@ -255,7 +255,7 @@ export function registerAnomalyDetectionAlertType({
       spaceId,
       rule,
     }: ExecutorOptions<MlAnomalyDetectionAlertParams>) => {
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const alertingService = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest

@@ -35,7 +35,7 @@
             "section": "def-common.FieldButtonProps",
             "text": "FieldButtonProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
@@ -84,7 +84,7 @@
             "section": "def-common.FieldIconProps",
             "text": "FieldIconProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
         "deprecated": false,
@@ -148,7 +148,7 @@
               "\nLabel for the button"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
@@ -164,7 +164,7 @@
               "\nIcon representing the field type.\nRecommend using FieldIcon"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
@@ -180,7 +180,7 @@
               "\nAn optional node to place inside and at the end of the <button>"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
@@ -196,7 +196,7 @@
               "\nAn optional node to place outside of and to the right of the <button>"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,

@@ -8,7 +8,10 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
+import {
+  getInsightsInputTab,
+  getRiskInputTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import type {
@@ -26,7 +29,8 @@ export const useTabs = (
   managedUser: ManagedUserHits,
   name: string,
   isRiskScoreExist: boolean,
-  scopeId: string
+  scopeId: string,
+  hasMisconfigurationFindings?: boolean
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -51,8 +55,12 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
+    if (hasMisconfigurationFindings) {
+      tabs.push(getInsightsInputTab({ name, fieldName: 'user.name' }));
+    }
+
     return tabs;
-  }, [isRiskScoreExist, managedUser, name, scopeId]);
+  }, [hasMisconfigurationFindings, isRiskScoreExist, managedUser, name, scopeId]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,

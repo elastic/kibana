@@ -8,6 +8,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { AgentPolicy } from '../../common';
+
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
@@ -32,7 +34,7 @@ export async function agentPolicyUpdateEventHandler(
   esClient: ElasticsearchClient,
   action: string,
   agentPolicyId: string,
-  options?: { skipDeploy?: boolean; spaceId?: string }
+  options?: { skipDeploy?: boolean; spaceId?: string; agentPolicy?: AgentPolicy | null }
 ) {
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
@@ -47,12 +49,12 @@ export async function agentPolicyUpdateEventHandler(
       forceRecreate: true,
     });
     if (!options?.skipDeploy) {
-      await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+      await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId, options?.agentPolicy);
     }
   }
 
   if (action === 'updated') {
-    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId, options?.agentPolicy);
   }
 
   if (action === 'deleted') {

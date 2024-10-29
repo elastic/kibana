@@ -43,7 +43,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const currentModel = useConfigModel(configuration);
 
   // not all validations can be done via json-schema
-  const validateAdditional = useCallback((value) => {
+  const validateAdditional = useCallback((value: any) => {
     const errors: string[] = [];
 
     const { selectors, responses } = getSelectorsAndResponsesFromYaml(value);
@@ -125,7 +125,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   ]);
 
   const onYamlChange = useCallback(
-    (value) => {
+    (value: any) => {
       if (show && input?.vars) {
         input.vars.configuration.value = value;
 

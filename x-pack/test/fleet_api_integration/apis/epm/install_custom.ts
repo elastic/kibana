@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('Installing custom integrations', async () => {
+  describe('Installing custom integrations', () => {
     afterEach(async () => {
       await uninstallPackage();
     });

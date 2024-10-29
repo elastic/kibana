@@ -6,11 +6,10 @@
  */
 
 import { Rule } from '@kbn/alerting-plugin/common';
-import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
+import { TopAlert } from '@kbn/observability-plugin/public';
 import { PartialRuleParams } from '../../../../../common/alerting/logs/log_threshold';
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<PartialRuleParams>;
   alert: TopAlert<Record<string, any>>;
-  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }

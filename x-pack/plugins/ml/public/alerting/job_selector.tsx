@@ -14,7 +14,7 @@ import { EuiButton, EuiComboBox, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui
 import useMountedState from 'react-use/lib/useMountedState';
 import { useMlKibana } from '../application/contexts/kibana';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 import { LoadingIndicator } from '../application/components/loading_indicator';
 
@@ -26,7 +26,7 @@ interface JobSelection {
 export interface JobSelectorControlProps {
   jobsAndGroupIds?: string[];
   onChange: (jobSelection: JobSelection) => void;
-  adJobsApiService: MlApiServices['jobs'];
+  adJobsApiService: MlApi['jobs'];
   /**
    * Validation is handled by alerting framework
    */

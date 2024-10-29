@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         // This should be swallowed and not kill the Kibana server
         await new Promise((resolve) =>
           setTimeout(() => {
-            req.abort();
+            void req.abort(); // Explicitly ignore any potential promise
             resolve(null);
           }, 2000)
         );

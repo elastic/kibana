@@ -12,10 +12,10 @@ import type {
 
 import { API_VERSIONS, CREATE_STANDALONE_AGENT_API_KEY_ROUTE } from '../../../common/constants';
 
-import { sendRequest } from './use_request';
+import { sendRequestForRq } from './use_request';
 
 export function sendCreateStandaloneAgentAPIKey(body: PostStandaloneAgentAPIKeyRequest['body']) {
-  return sendRequest<PostStandaloneAgentAPIKeyResponse>({
+  return sendRequestForRq<PostStandaloneAgentAPIKeyResponse>({
     method: 'post',
     path: CREATE_STANDALONE_AGENT_API_KEY_ROUTE,
     version: API_VERSIONS.internal.v1,

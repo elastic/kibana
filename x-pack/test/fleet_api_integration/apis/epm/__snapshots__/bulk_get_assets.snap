@@ -63,6 +63,12 @@ Array [
     "type": "component_template",
   },
   Object {
+    "appLink": "/app/management/data/index_management/component_templates/logs@custom",
+    "attributes": Object {},
+    "id": "logs@custom",
+    "type": "component_template",
+  },
+  Object {
     "appLink": "/app/management/data/index_management/component_templates/logs-all_assets.test_logs@custom",
     "attributes": Object {},
     "id": "logs-all_assets.test_logs@custom",
@@ -78,6 +84,12 @@ Array [
     "appLink": "/app/management/data/index_management/component_templates/metrics-all_assets.test_metrics@package",
     "attributes": Object {},
     "id": "metrics-all_assets.test_metrics@package",
+    "type": "component_template",
+  },
+  Object {
+    "appLink": "/app/management/data/index_management/component_templates/metrics@custom",
+    "attributes": Object {},
+    "id": "metrics@custom",
     "type": "component_template",
   },
   Object {
@@ -140,7 +152,7 @@ Array [
     "type": "index-pattern",
   },
   Object {
-    "appLink": "",
+    "appLink": "/app/ml/supplied_configurations/?_a=(supplied_configurations%3A(queryText%3A'Nginx%20access%20logs'))",
     "attributes": Object {
       "description": "Find unusual activity in HTTP access logs from filebeat (ECS).",
       "title": "Nginx access logs",

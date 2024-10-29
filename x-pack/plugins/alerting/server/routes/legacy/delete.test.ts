@@ -38,6 +38,7 @@ describe('deleteAlertRoute', () => {
     const [config, handler] = router.delete.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.delete.mockResolvedValueOnce({});
 
@@ -63,6 +64,18 @@ describe('deleteAlertRoute', () => {
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteAlertRoute(router, licenseState, undefined, true);
+
+    const [config] = router.delete.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the license allows deleting alerts', async () => {

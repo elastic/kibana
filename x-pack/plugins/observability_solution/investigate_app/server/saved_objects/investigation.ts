@@ -15,12 +15,19 @@ export const investigation: SavedObjectsType = {
   name: SO_INVESTIGATION_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  switchToModelVersionAt: '8.10.0',
   mappings: {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
       title: { type: 'text' },
+      origin: {
+        properties: {
+          type: { type: 'keyword' },
+          id: { type: 'keyword' },
+        },
+      },
+      status: { type: 'keyword' },
+      tags: { type: 'keyword' },
     },
   },
   management: {

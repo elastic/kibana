@@ -8,13 +8,13 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
+import { ALERT_RULE_EXECUTION_TYPE, ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import {
   getPreviewAlerts,
   previewRule,
@@ -26,6 +26,7 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import {
   deleteAllRules,
@@ -40,7 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const utils = getService('securitySolutionUtils');
 
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
@@ -167,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_assignee_ids': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
+        'kibana.alert.rule.execution.type': 'scheduled',
       });
     });
 
@@ -611,7 +612,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with exceptions', async () => {
+    describe('with exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
@@ -912,12 +913,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-        await kibanaServer.uiSettings.update({
-          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-        });
       });
 
       after(async () => {
@@ -1189,6 +1187,7 @@ export default ({ getService }: FtrProviderContext) => {
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
         expect(alerts.hits.hits).toHaveLength(1);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1198,6 +1197,8 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
         expect(allNewAlerts.hits.hits).toHaveLength(2);
+
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toEqual('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1406,6 +1407,98 @@ export default ({ getService }: FtrProviderContext) => {
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
+      });
+    });
+
+    describe('preview logged requests', () => {
+      let rule: EsqlRuleCreateProps;
+      let id: string;
+      beforeEach(async () => {
+        id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        rule = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+      });
+
+      afterEach(async () => {
+        await setAdvancedSettings(supertest, {
+          [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0]).not.toHaveProperty('requests');
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+        expect(requests).toHaveLength(2);
+
+        expect(requests).toHaveProperty('0.description', 'ES|QL request to find all matches');
+        expect(requests).toHaveProperty('0.duration', expect.any(Number));
+        expect(requests![0].request).toContain(
+          `"query": "from ecs_compliant metadata _id | where id==\\\"${id}\\\" | where agent.name==\\\"test-1\\\" | limit 101",`
+        );
+
+        expect(requests).toHaveProperty(
+          '1.description',
+          'Retrieve source documents when ES|QL query is not aggregable'
+        );
+        expect(requests).toHaveProperty('1.duration', expect.any(Number));
+        expect(requests![1].request).toContain(
+          'POST /ecs_compliant/_search?ignore_unavailable=true'
+        );
+      });
+      it('should not return requests with any data tier filter', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests![0].request).not.toContain('data_frozen');
+      });
+      it('should return requests with included data tiers filters from advanced settings', async () => {
+        await setAdvancedSettings(supertest, {
+          [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: ['data_frozen'],
+        });
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests![0].request).toMatch(
+          /"must_not":\s*\[\s*{\s*"terms":\s*{\s*"_tier":\s*\[\s*"data_frozen"\s*\]/
+        );
       });
     });
   });

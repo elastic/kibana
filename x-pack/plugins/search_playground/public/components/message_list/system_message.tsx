@@ -32,7 +32,7 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
       timelineAvatar="dot"
       eventColor="subdued"
       css={{
-        '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+        '.euiAvatar': { backgroundColor: euiTheme.colors.emptyShade },
         '.euiCommentEvent': {
           border: euiTheme.border.thin,
           borderRadius: euiTheme.border.radius.medium,

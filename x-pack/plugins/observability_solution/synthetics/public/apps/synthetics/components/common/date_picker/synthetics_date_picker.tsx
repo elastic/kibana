@@ -63,6 +63,9 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
         refreshApp();
       }}
       onRefresh={refreshApp}
+      updateButtonProps={{
+        fill: false,
+      }}
     />
   );
 };

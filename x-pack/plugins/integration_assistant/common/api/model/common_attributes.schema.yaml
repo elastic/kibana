@@ -4,7 +4,7 @@ info:
   version: "not applicable"
 paths: {}
 components:
-  x-codegen-enabled: false
+  x-codegen-enabled: true
   schemas:
     PackageName:
       type: string
@@ -16,6 +16,22 @@ components:
       minLength: 1
       description: DataStream name for the integration to be built.
 
+    PackageTitle:
+      type: string
+      minLength: 1
+      description: Package title for the integration to be built.
+
+    DataStreamTitle:
+      type: string
+      minLength: 1
+      description: DataStream title for the integration to be built.
+
+    LogSamples:
+      type: array
+      items:
+        type: string
+      description:  String form of the input logsamples.
+
     RawSamples:
       type: array
       items:
@@ -25,6 +41,7 @@ components:
     Mapping:
       type: object
       description: mapping object to ECS Mapping Request.
+      additionalProperties: true
 
     Connector:
       type: string
@@ -35,6 +52,43 @@ components:
       description: An array of processed documents.
       items:
         type: object
+        additionalProperties: true
+
+    SamplesFormatName:
+      type: string
+      description: The name of the log samples format.
+      enum:
+        - ndjson
+        - json
+        - csv
+        - structured
+        - unstructured
+        - unsupported
+
+    SamplesFormat:
+      type: object
+      description: Format of the provided log samples.
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/SamplesFormatName"
+        multiline:
+          type: boolean
+          description: For some formats, specifies whether the samples can be multiline.
+        header: 
+          type: boolean
+          description: For CSV format, specifies whether the samples have a header row. For other formats, specifies the presence of header in each row.
+        columns:
+          type: array
+          description: For CSV format, specifies the column names proposed by the LLM.
+          items:
+            type: string
+        json_path:
+          type: array
+          description: For a JSON format, describes how to get to the sample array from the root of the JSON.
+          items:
+            type: string
 
     Pipeline:
       type: object
@@ -75,7 +129,7 @@ components:
         - filestream
         - gcp-pubsub
         - gcs
-        - http-endpoint
+        - http_endpoint
         - journald
         - kafka
         - tcp
@@ -92,6 +146,7 @@ components:
         - rawSamples
         - pipeline
         - docs
+        - samplesFormat
       properties:
         name:
           type: string
@@ -116,6 +171,12 @@ components:
         docs:
           $ref: "#/components/schemas/Docs"
           description: The documents of the dataStream.
+        samplesFormat:
+          $ref: "#/components/schemas/SamplesFormat"
+          description: The format of log samples in this dataStream.
+        celInput:
+          $ref: "./cel_input_attributes.schema.yaml#/components/schemas/CelInput"
+          description: The optional CEL input configuration for the dataStream.
 
     Integration:
       type: object

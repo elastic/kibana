@@ -26,7 +26,7 @@ const overrideDefaults = {
   linesToSample: undefined,
 };
 
-export function readFile(file: File) {
+export function readFile(file: File): Promise<{ fileContents: string; data: ArrayBuffer }> {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();

@@ -26,7 +26,7 @@ import {
 import { AttachmentType } from '../../../common/types/domain';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
-import type { EuiMarkdownEditorRef } from '../markdown_editor';
+import type { MarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { removeItemFromSessionStorage } from '../utils';
@@ -45,7 +45,7 @@ const initialCommentValue: AddCommentFormSchema = {
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
   setComment: (newComment: string) => void;
-  editor: EuiMarkdownEditorRef | null;
+  editor: MarkdownEditorRef | null;
 }
 
 /* eslint-disable react/no-unused-prop-types */
@@ -65,7 +65,7 @@ export const AddComment = React.memo(
       { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
-      const editorRef = useRef<EuiMarkdownEditorRef>(null);
+      const editorRef = useRef<MarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner } = useCasesContext();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
@@ -85,7 +85,7 @@ export const AddComment = React.memo(
       const { setFieldValue, reset, submit } = form;
       const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
 
-      const addQuote = useCallback(
+      const addQuote = useCallback<AddCommentRefObject['addQuote']>(
         (quote) => {
           const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '\n> ');
           const val = `> ${addCarrots} \n\n`;
@@ -95,7 +95,7 @@ export const AddComment = React.memo(
         [comment, setFieldValue]
       );
 
-      const setComment = useCallback(
+      const setComment = useCallback<AddCommentRefObject['setComment']>(
         (newComment) => {
           setFieldValue(fieldName, newComment);
         },

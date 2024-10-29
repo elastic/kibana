@@ -9,13 +9,13 @@ import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 const testSpaceId = 'fleet_test_space';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
   const pkgName = 'only_dashboard';
   const pkgVersion = '0.1.0';
 
@@ -67,16 +67,16 @@ export default function (providerContext: FtrProviderContext) {
   };
   describe('Assets tagging', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await createSpace(testSpaceId);
     });
 
     after(async () => {
       await deleteSpace(testSpaceId);
     });
-    describe('creates correct tags when installing a package in non default space after installing in default space', async () => {
+    describe('creates correct tags when installing a package in non default space after installing in default space', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace('all_assets', pkgVersion, 'default');
@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Handles presence of legacy tags', async () => {
+    describe('Handles presence of legacy tags', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
@@ -152,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Handles presence of tags inside integration package', async () => {
+    describe('Handles presence of tags inside integration package', () => {
       const testPackage = 'assets_with_tags';
       const testPackageVersion = '0.1.1';
       // tag corresponding to `OnlySomeAssets`

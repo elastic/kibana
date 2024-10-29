@@ -11,6 +11,7 @@ import {
   MonitorManagementListResult,
   MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
@@ -34,7 +35,7 @@ export const fetchUpsertFailureAction = createAction<UpsertMonitorError>(
 
 export const enableMonitorAlertAction = createAsyncAction<
   UpsertMonitorRequest,
-  EncryptedSyntheticsSavedMonitor,
+  SyntheticsMonitorWithId,
   UpsertMonitorError
 >('enableMonitorAlertAction');
 
@@ -46,6 +47,9 @@ export const updateManagementPageStateAction = createAction<Partial<MonitorListP
 
 export const cleanMonitorListState = createAction('cleanMonitorListState');
 
-export const fetchMonitorFiltersAction = createAsyncAction<void, MonitorFiltersResult>(
-  'fetchMonitorFiltersAction'
-);
+export const fetchMonitorFiltersAction = createAsyncAction<
+  {
+    showFromAllSpaces?: boolean;
+  },
+  MonitorFiltersResult
+>('fetchMonitorFiltersAction');

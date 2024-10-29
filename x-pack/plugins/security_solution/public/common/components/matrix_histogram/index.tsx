@@ -28,6 +28,7 @@ import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/uti
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { NO_BREAKDOWN_STACK_BY_VALUE } from '../events_tab/histogram_configurations';
 
 export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
   MatrixHistogramConfigs & {
@@ -165,6 +166,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [isPtrIncluded, filterQuery]
   );
 
+  // If the user selected the `No breakdown` option, we shouldn't perform the aggregation
+  const stackByField = useMemo(() => {
+    return selectedStackByOption.value === NO_BREAKDOWN_STACK_BY_VALUE
+      ? undefined
+      : selectedStackByOption.value;
+  }, [selectedStackByOption.value]);
+
   if (hideHistogram) {
     return null;
   }
@@ -216,7 +224,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               id={visualizationId}
               inspectTitle={title as string}
               lensAttributes={lensAttributes}
-              stackByField={selectedStackByOption.value}
+              stackByField={stackByField}
               timerange={timerange}
             />
           ) : null}

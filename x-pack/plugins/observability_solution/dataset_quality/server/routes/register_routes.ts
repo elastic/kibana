@@ -8,10 +8,12 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
+  IoTsParamsObject,
   ServerRouteRepository,
   decodeRequestParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { DatasetQualityRequestHandlerContext } from '../types';
@@ -43,18 +45,18 @@ export function registerRoutes({
     (router[method] as RouteRegistrar<typeof method, DatasetQualityRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = (await handler({

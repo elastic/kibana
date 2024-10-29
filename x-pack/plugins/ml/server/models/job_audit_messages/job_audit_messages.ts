@@ -89,7 +89,7 @@ export function jobAuditMessagesProvider(
       gte = `now-${from}`;
     }
 
-    let timeFilter = {};
+    let timeFilter = Object.create(null);
     if (from !== null) {
       timeFilter = {
         range: {

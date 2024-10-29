@@ -85,7 +85,7 @@ export const ValueExpression = ({
             <EuiFormRow
               data-test-subj="valueFieldNumberForm"
               isInvalid={Number(errors.length) > 0 && value !== undefined}
-              error={errors}
+              error={errors as string[]}
             >
               <EuiFieldNumber
                 data-test-subj="valueFieldNumber"

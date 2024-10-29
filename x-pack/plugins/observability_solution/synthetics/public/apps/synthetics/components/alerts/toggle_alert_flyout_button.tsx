@@ -23,7 +23,7 @@ import {
 import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
 import { STATUS_RULE_NAME, TLS_RULE_NAME, ToggleFlyoutTranslations } from './hooks/translations';
-import { useSyntheticsAlert } from './hooks/use_synthetics_rules';
+import { useSyntheticsRules } from './hooks/use_synthetics_rules';
 import {
   selectAlertFlyoutVisibility,
   selectMonitorListState,
@@ -37,7 +37,7 @@ export const ToggleAlertFlyoutButton = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
 
-  const { EditAlertFlyout, loading, NewRuleFlyout } = useSyntheticsAlert(isOpen);
+  const { EditAlertFlyout, loading, NewRuleFlyout } = useSyntheticsRules(isOpen);
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
@@ -72,7 +72,7 @@ export const ToggleAlertFlyoutButton = () => {
           'data-test-subj': 'createNewStatusRule',
           icon: 'plusInCircle',
           onClick: () => {
-            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNew: true }));
+            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
           },
         },
@@ -81,7 +81,7 @@ export const ToggleAlertFlyoutButton = () => {
           'data-test-subj': 'editDefaultStatusRule',
           name: <RuleNameWithLoading ruleName={EDIT_STATUS_RULE} isLoading={loading} />,
           onClick: () => {
-            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNew: false }));
+            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
           toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
@@ -98,7 +98,7 @@ export const ToggleAlertFlyoutButton = () => {
           'data-test-subj': 'createNewTLSRule',
           icon: 'plusInCircle',
           onClick: () => {
-            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNew: true }));
+            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
           },
         },
@@ -107,7 +107,7 @@ export const ToggleAlertFlyoutButton = () => {
           'data-test-subj': 'editDefaultTlsRule',
           name: <RuleNameWithLoading ruleName={EDIT_TLS_RULE_NAME} isLoading={loading} />,
           onClick: () => {
-            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNew: false }));
+            dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
           toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,

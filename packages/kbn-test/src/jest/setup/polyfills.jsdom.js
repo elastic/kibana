@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const MutationObserver = require('mutation-observer');
@@ -52,22 +53,16 @@ if (!Object.hasOwn(global, 'Worker')) {
   if (!Object.hasOwn(global, 'matchMedia')) {
     Object.defineProperty(global, 'matchMedia', {
       writable: true,
-      // eslint-disable-next-line no-undef
-      value: jest.fn().mockImplementation((query) => ({
+      value: (query) => ({
         matches: false,
         media: query,
         onchange: null,
-        // eslint-disable-next-line no-undef
-        addListener: jest.fn(), // deprecated
-        // eslint-disable-next-line no-undef
-        removeListener: jest.fn(), // deprecated
-        // eslint-disable-next-line no-undef
-        addEventListener: jest.fn(),
-        // eslint-disable-next-line no-undef
-        removeEventListener: jest.fn(),
-        // eslint-disable-next-line no-undef
-        dispatchEvent: jest.fn(),
-      })),
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => {},
+      }),
     });
   }
 }

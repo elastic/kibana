@@ -8,10 +8,10 @@
 import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import { usageReportingService } from '../common/services';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+
 import type {
   MeteringCallback,
   SecurityUsageReportingTaskStartContract,
@@ -19,6 +19,7 @@ import type {
   UsageRecord,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
+import type { UsageReportingService } from '../common/services/usage_reporting_service';
 
 import { stateSchemaByVersion, emptyState } from './task_state';
 
@@ -34,6 +35,7 @@ export class SecurityUsageReportingTask {
   private readonly version: string;
   private readonly logger: Logger;
   private readonly config: ServerlessSecurityConfig;
+  private readonly usageReportingService: UsageReportingService;
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -46,6 +48,7 @@ export class SecurityUsageReportingTask {
       taskTitle,
       version,
       meteringCallback,
+      usageReportingService,
     } = setupContract;
 
     this.cloudSetup = cloudSetup;
@@ -53,6 +56,7 @@ export class SecurityUsageReportingTask {
     this.version = version;
     this.logger = logFactory.get(this.taskId);
     this.config = config;
+    this.usageReportingService = usageReportingService;
 
     try {
       taskManager.registerTaskDefinitions({
@@ -163,10 +167,7 @@ export class SecurityUsageReportingTask {
       try {
         this.logger.debug(`Sending ${usageRecords.length} usage records to the API`);
 
-        usageReportResponse = await usageReportingService.reportUsage(
-          usageRecords,
-          this.config.usageReportingApiUrl
-        );
+        usageReportResponse = await this.usageReportingService.reportUsage(usageRecords);
 
         if (!usageReportResponse.ok) {
           const errorResponse = await usageReportResponse.json();
@@ -187,7 +188,6 @@ export class SecurityUsageReportingTask {
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
         );
-        shouldRunAgain = true;
       }
     }
 

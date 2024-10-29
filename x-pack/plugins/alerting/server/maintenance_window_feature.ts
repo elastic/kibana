@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   MAINTENANCE_WINDOW_FEATURE_ID,
   MAINTENANCE_WINDOW_API_PRIVILEGES,
@@ -20,6 +21,7 @@ export const maintenanceWindowFeature: KibanaFeatureConfig = {
     defaultMessage: 'Maintenance Windows',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [],
   management: {
     insightsAndAlerting: ['maintenanceWindows'],

@@ -72,9 +72,9 @@ export class Dataset {
     return new Dataset({ ...dataset, title: datasetTitle }, parentIntegration);
   }
 
-  public static createAllLogsDataset() {
+  public static createAllLogsDataset({ indices }: { indices: string }) {
     return new Dataset({
-      name: 'logs-*-*' as IndexPattern,
+      name: indices as IndexPattern,
       title: 'All logs',
       iconType: 'pagesSelect',
     });

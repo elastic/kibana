@@ -27,9 +27,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { type HostsLocatorParams, HOSTS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { FetcherOptions } from '../../../../hooks/use_fetcher';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { useSorting } from '../../../../hooks/use_sorting';
@@ -43,7 +47,7 @@ import type {
 import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useMetricsDataViewContext, useSourceContext } from '../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import {
   useWaffleViewState,
@@ -66,19 +70,28 @@ const AnomalyActionMenu = ({
   influencerField,
   influencers,
   disableShowInInventory,
+  hostName,
+  timeRange,
 }: {
   jobId: string;
   type: string;
   startTime: number;
-  closeFlyout: () => void;
+  closeFlyout?: () => void;
   influencerField: string;
   influencers: string[];
   disableShowInInventory?: boolean;
+  hostName?: string;
+  timeRange: { start: string; end: string };
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const { onViewChange } = useWaffleViewState();
+  const { metricsView } = useMetricsDataViewContext();
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
+  const hostsLocator = share.url.locators.get<HostsLocatorParams>(HOSTS_LOCATOR_ID);
 
   const showInInventory = useCallback(() => {
     const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
@@ -116,7 +129,7 @@ const AnomalyActionMenu = ({
       time: startTime,
     };
     onViewChange({ attributes: anomalyViewParams });
-    closeFlyout();
+    if (closeFlyout) closeFlyout();
   }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
   const anomaliesUrl = useLinkProps({
@@ -125,7 +138,12 @@ const AnomalyActionMenu = ({
   });
 
   const items = [
-    <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
+    <EuiContextMenuItem
+      key="openInAnomalyExplorer"
+      icon="popout"
+      data-test-subj="infraAnomalyFlyoutOpenInAnomalyExplorer"
+      {...anomaliesUrl}
+    >
       <FormattedMessage
         id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
         defaultMessage="Open in Anomaly Explorer"
@@ -134,13 +152,54 @@ const AnomalyActionMenu = ({
   ];
 
   if (!disableShowInInventory) {
-    items.push(
-      <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
+    const buildFilter = buildCombinedAssetFilter({
+      field: HOST_NAME_FIELD,
+      values: influencers,
+      dataView: metricsView?.dataViewReference,
+    });
+
+    let newFilter: Filter[] = [];
+    if (!Array.isArray(buildFilter)) {
+      newFilter = [buildFilter];
+    }
+
+    const showInHostsItem = !hostName ? (
+      <EuiContextMenuItem
+        key="showAffectedHosts"
+        icon="search"
+        data-test-subj="infraAnomalyFlyoutShowAffectedHosts"
+        href={hostsLocator?.getRedirectUrl({
+          dateRange: {
+            from: timeRange.start,
+            to: timeRange.end,
+          },
+          filters: newFilter,
+        })}
+      >
         <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
-          defaultMessage="Show in Inventory"
+          id="xpack.infra.ml.anomalyFlyout.actions.showAffectedHosts"
+          defaultMessage="Show affected Hosts"
         />
       </EuiContextMenuItem>
+    ) : (
+      <></>
+    );
+
+    items.push(
+      influencerField === HOST_NAME_FIELD ? (
+        showInHostsItem
+      ) : (
+        <EuiContextMenuItem
+          icon="search"
+          data-test-subj="infraAnomalyFlyoutShowInInventory"
+          onClick={showInInventory}
+        >
+          <FormattedMessage
+            id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+            defaultMessage="Show in Inventory"
+          />
+        </EuiContextMenuItem>
+      )
     );
   }
 
@@ -195,7 +254,7 @@ export const NoAnomaliesFound = () => {
   );
 };
 export interface Props {
-  closeFlyout(): void;
+  closeFlyout?(): void;
   hostName?: string;
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
@@ -357,7 +416,7 @@ export const AnomaliesTable = ({
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback((selectedOptions) => {
+  const changeJobType = useCallback((selectedOptions: any) => {
     setSelectedJobType(selectedOptions);
     setJobType(selectedOptions[0].id);
   }, []);
@@ -440,6 +499,7 @@ export const AnomaliesTable = ({
       textOnly: true,
       truncateText: true,
       render: (influencers: string[]) => influencers.join(','),
+      'data-test-subj': 'nodeNameRow',
     },
     {
       name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnActionsName', {
@@ -460,6 +520,8 @@ export const AnomaliesTable = ({
                 influencers={anomaly.influencers}
                 startTime={anomaly.startTime}
                 closeFlyout={closeFlyout}
+                hostName={hostName}
+                timeRange={timeRange}
               />
             );
           },

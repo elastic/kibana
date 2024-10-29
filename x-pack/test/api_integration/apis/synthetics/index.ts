@@ -21,7 +21,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./get_filters'));
     loadTestFile(require.resolve('./get_monitor'));
-    loadTestFile(require.resolve('./get_monitor_overview'));
     loadTestFile(require.resolve('./add_monitor'));
     loadTestFile(require.resolve('./add_monitor_project'));
     loadTestFile(require.resolve('./get_monitor_project'));

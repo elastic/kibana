@@ -98,15 +98,29 @@ export const AlertDefaultsForm = () => {
           />
         }
       >
+        <EuiSpacer size="s" />
         <EuiSwitch
-          label={i18n.translate('xpack.synthetics.alertDefaultsForm.euiSwitch.enabledLabel', {
-            defaultMessage: 'Enabled',
+          label={i18n.translate('xpack.synthetics.ruleStatusDefaultsForm.euiSwitch.enabledLabel', {
+            defaultMessage: 'Status rule enabled',
           })}
-          checked={formFields?.defaultRulesEnabled ?? true}
+          checked={formFields?.defaultStatusRuleEnabled ?? true}
           onChange={() => {
             setFormFields({
               ...formFields,
-              defaultRulesEnabled: !(formFields.defaultRulesEnabled ?? true),
+              defaultStatusRuleEnabled: !(formFields.defaultStatusRuleEnabled ?? true),
+            });
+          }}
+        />
+        <EuiSpacer size="m" />
+        <EuiSwitch
+          label={i18n.translate('xpack.synthetics.ruleTLSDefaultsForm.euiSwitch.enabledLabel', {
+            defaultMessage: 'TLS rule enabled',
+          })}
+          checked={formFields?.defaultTLSRuleEnabled ?? true}
+          onChange={() => {
+            setFormFields({
+              ...formFields,
+              defaultTLSRuleEnabled: !(formFields.defaultTLSRuleEnabled ?? true),
             });
           }}
         />

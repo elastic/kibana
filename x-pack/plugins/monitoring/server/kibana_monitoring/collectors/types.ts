@@ -12,7 +12,7 @@ export interface MonitoringUsage {
 
 export interface MonitoringClusterStackProductUsage {
   clusterUuid: string;
-  license: string;
+  license?: string;
   metricbeatUsed: boolean;
   elasticsearch: StackProductUsage;
   logstash: StackProductUsage;

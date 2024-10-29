@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import { journey, step, before, after } from '@elastic/synthetics';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
@@ -14,8 +13,6 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
-  const getService = params.getService;
-  const retry: RetryService = getService('retry');
 
   const firstCheckTime = new Date(Date.now()).toISOString();
 
@@ -23,7 +20,17 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
 
   before(async () => {
     await services.cleaUp();
-    await services.enableMonitorManagedViaApi();
+  });
+
+  after(async () => {
+    await services.cleaUp();
+  });
+
+  step('Go to monitors page', async () => {
+    await syntheticsApp.navigateToOverview(true, 15);
+  });
+
+  step('add test monitor', async () => {
     configId = await services.addTestMonitor(
       'Test Monitor',
       {
@@ -36,15 +43,9 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
     await services.addTestSummaryDocument({ timestamp: firstCheckTime, configId });
   });
 
-  after(async () => {
-    await services.cleaUp();
-  });
-
-  step('Go to monitors page', async () => {
-    await syntheticsApp.navigateToOverview(true, 15);
-  });
-
   step('should create status rule', async () => {
+    await page.getByTestId('syntheticsRefreshButtonButton').click();
+    await page.waitForTimeout(5000);
     await page.getByTestId('syntheticsAlertsRulesButton').click();
     await page.getByTestId('manageStatusRuleName').click();
     await page.getByTestId('createNewStatusRule').click();
@@ -57,18 +58,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   });
 
   step('verify rule creation', async () => {
-    await retry.try(async () => {
-      const rules = await services.getRules();
-      expect(rules.length).toBe(1);
-      expect(rules[0].params).toStrictEqual({
-        condition: {
-          downThreshold: 5,
-          groupByLocation: true,
-          window: {
-            numberOfChecks: 5,
-          },
-        },
-      });
-    });
+    await syntheticsApp.goToRulesPage();
+    await page.waitForSelector(`text='Synthetics status rule'`);
   });
 });

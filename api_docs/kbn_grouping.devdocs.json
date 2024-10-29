@@ -108,7 +108,9 @@
           "\nHook to configure grouping component"
         ],
         "signature": [
-          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: GroupingArgs<T>) => ",
+          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: ",
+          "GroupingArgs",
+          "<T>) => ",
           "UseGrouping",
           "<T>"
         ],
@@ -124,7 +126,8 @@
             "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n}",
             "description": [],
             "signature": [
-              "GroupingArgs<T>"
+              "GroupingArgs",
+              "<T>"
             ],
             "path": "packages/kbn-grouping/src/hooks/use_grouping.tsx",
             "deprecated": false,

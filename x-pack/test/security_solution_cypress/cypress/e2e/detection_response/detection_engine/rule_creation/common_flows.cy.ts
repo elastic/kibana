@@ -8,7 +8,6 @@
 import { ruleFields } from '../../../../data/detection_engine';
 import {
   ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_BUTTON,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
@@ -100,7 +99,6 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
 
     // expect about step to populate
-    cy.get(ABOUT_EDIT_BUTTON).click();
     cy.get(RULE_NAME_INPUT).invoke('val').should('eql', ruleFields.ruleName);
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();

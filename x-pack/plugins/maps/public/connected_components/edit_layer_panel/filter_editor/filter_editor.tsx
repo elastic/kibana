@@ -178,7 +178,7 @@ export class FilterEditor extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiCodeBlock paddingSize="s">{query.query}</EuiCodeBlock>
+        <EuiCodeBlock paddingSize="s">{query.query as string}</EuiCodeBlock>
         <EuiSpacer size="m" />
       </Fragment>
     );

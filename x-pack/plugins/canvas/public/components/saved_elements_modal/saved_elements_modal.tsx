@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { camelCase } from 'lodash';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { useNotifyService, useCustomElementService } from '../../services';
+import { useNotifyService } from '../../services';
 // @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
 // @ts-expect-error untyped local
@@ -21,6 +21,7 @@ import {
   Props as ComponentProps,
 } from './saved_elements_modal.component';
 import { PositionedElement, CustomElement } from '../../../types';
+import { getCustomElementService } from '../../services/canvas_custom_element_service';
 
 const customElementAdded = 'elements-custom-added';
 
@@ -28,7 +29,7 @@ export type Props = Pick<ComponentProps, 'onClose'>;
 
 export const SavedElementsModal = ({ onClose }: Props) => {
   const notifyService = useNotifyService();
-  const customElementService = useCustomElementService();
+  const customElementService = useMemo(() => getCustomElementService(), []);
   const dispatch = useDispatch();
   const pageId = useSelector(getSelectedPage);
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);

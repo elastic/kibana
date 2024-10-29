@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { StatusRuleExecutor } from './status_rule_executor';
+import { getDoesMonitorMeetLocationThreshold, StatusRuleExecutor } from './status_rule_executor';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -17,8 +16,12 @@ import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_mo
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
+import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
 
 describe('StatusRuleExecutor', () => {
+  // @ts-ignore
+  Date.now = jest.fn(() => new Date('2024-05-13T12:33:37.000Z'));
+
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const soClient = savedObjectsClientMock.create();
@@ -63,261 +66,608 @@ describe('StatusRuleExecutor', () => {
   const mockStart = coreMock.createStart();
   const uiSettingsClient = mockStart.uiSettings.asScopedToClient(soClient);
 
-  const statusRule = new StatusRuleExecutor(
-    moment().toDate(),
-    {},
-    soClient,
-    mockEsClient,
-    serverMock,
-    monitorClient,
-    {
-      spaceId: 'default',
-      services: {
-        uiSettingsClient,
-      },
-    } as any
-  );
+  const statusRule = new StatusRuleExecutor(serverMock, monitorClient, {
+    params: {},
+    services: {
+      uiSettingsClient,
+      savedObjectsClient: soClient,
+      scopedClusterClient: { asCurrentUser: mockEsClient },
+    },
+    rule: {
+      name: 'test',
+    },
+  } as any);
 
-  it('should only query enabled monitors', async () => {
-    const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+  describe('DefaultRule', () => {
+    it('should only query enabled monitors', async () => {
+      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
 
-    const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
+      const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
 
-    expect(downConfigs).toEqual({});
-    expect(staleDownConfigs).toEqual({});
+      expect(downConfigs).toEqual({});
+      expect(staleDownConfigs).toEqual({});
 
-    expect(spy).toHaveBeenCalledWith({
-      filter: 'synthetics-monitor.attributes.alert.status.enabled: true',
-      soClient,
-    });
-  });
-
-  it('marks deleted configs as expected', async () => {
-    jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
-
-    const { downConfigs } = await statusRule.getDownChecks({});
-
-    expect(downConfigs).toEqual({});
-
-    const staleDownConfigs = await statusRule.markDeletedConfigs({
-      id2: {
-        locationId: 'us-east-1',
-        configId: 'id2',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-      'id1-us_central_dev': {
-        locationId: 'us_central_dev',
-        configId: 'id1',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-      'id1-us_central_qa': {
-        locationId: 'us_central_qa',
-        configId: 'id1',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
+      expect(spy).toHaveBeenCalledWith({
+        filter: 'synthetics-monitor.attributes.alert.status.enabled: true',
+        soClient,
+      });
     });
 
-    expect(staleDownConfigs).toEqual({
-      id2: {
-        configId: 'id2',
-        isDeleted: true,
-        locationId: 'us-east-1',
-        monitorQueryId: 'test',
-        ping: {},
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-      'id1-us_central_dev': {
-        configId: 'id1',
-        isLocationRemoved: true,
-        locationId: 'us_central_dev',
-        monitorQueryId: 'test',
-        ping: {},
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-    });
-  });
+    it('marks deleted configs as expected', async () => {
+      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
 
-  it('does not mark deleted config when monitor does not contain location label', async () => {
-    jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
-      {
-        ...testMonitors[0],
-        attributes: {
-          ...testMonitors[0].attributes,
-          locations: [
-            {
-              geo: { lon: -95.86, lat: 41.25 },
-              isServiceManaged: true,
-              id: 'us_central_qa',
-            },
-          ],
-        },
-      },
-    ]);
+      const { downConfigs } = await statusRule.getDownChecks({});
 
-    const { downConfigs } = await statusRule.getDownChecks({});
+      expect(downConfigs).toEqual({});
 
-    expect(downConfigs).toEqual({});
-
-    const staleDownConfigs = await statusRule.markDeletedConfigs({
-      id2: {
-        locationId: 'us-east-1',
-        configId: 'id2',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-      'id1-us_central_dev': {
-        locationId: 'us_central_dev',
-        configId: 'id1',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-      'id1-us_central_qa': {
-        locationId: 'us_central_qa',
-        configId: 'id1',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-    });
-
-    expect(staleDownConfigs).toEqual({
-      id2: {
-        configId: 'id2',
-        isDeleted: true,
-        locationId: 'us-east-1',
-        monitorQueryId: 'test',
-        ping: {},
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-      'id1-us_central_dev': {
-        configId: 'id1',
-        isLocationRemoved: true,
-        locationId: 'us_central_dev',
-        monitorQueryId: 'test',
-        ping: {},
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        checks: {
-          total: 1,
-          down: 1,
-        },
-      },
-    });
-  });
-
-  describe('CustomRule', () => {
-    it('tests getLastRunForPendingMonitors', async () => {
-      await statusRule.getDownChecks();
-      const { pendingConfigs } = await statusRule.getLastRunForPendingMonitors({
-        id1: {
+      const staleDownConfigs = await statusRule.markDeletedConfigs({
+        id2: {
           locationId: 'us-east-1',
+          configId: 'id2',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+          ping: {} as any,
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+        'id1-us_central_dev': {
+          locationId: 'us_central_dev',
           configId: 'id1',
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
+          ping: {} as any,
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
         },
-      });
-      expect(pendingConfigs).toEqual({
-        id1: {
-          locationId: 'us-east-1',
+        'id1-us_central_qa': {
+          locationId: 'us_central_qa',
           configId: 'id1',
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
+          ping: {} as any,
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+      });
+
+      expect(staleDownConfigs).toEqual({
+        id2: {
+          configId: 'id2',
+          isDeleted: true,
+          locationId: 'us-east-1',
+          monitorQueryId: 'test',
+          ping: {},
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+        'id1-us_central_dev': {
+          configId: 'id1',
+          isLocationRemoved: true,
+          locationId: 'us_central_dev',
+          monitorQueryId: 'test',
+          ping: {},
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
         },
       });
     });
 
-    it('tests findEarliestMonitorCreatedAt', async () => {
-      const fiveMinutesAgo = moment().subtract(5, 'minutes').toISOString();
-      const tenMinutesAgo = moment().subtract(10, 'minutes').toISOString();
-      const fifteenMinutesAgo = moment().subtract(15, 'minutes').toISOString();
+    it('does not mark deleted config when monitor does not contain location label', async () => {
       jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
         {
           ...testMonitors[0],
-          created_at: fiveMinutesAgo,
-        },
-        {
-          ...testMonitors[0],
-          id: 'id2',
           attributes: {
             ...testMonitors[0].attributes,
-            config_id: 'id2',
+            locations: [
+              {
+                geo: { lon: -95.86, lat: 41.25 },
+                isServiceManaged: true,
+                id: 'us_central_qa',
+              },
+            ],
           },
-          created_at: tenMinutesAgo,
-        },
-        {
-          ...testMonitors[0],
-          id: 'id4',
-          attributes: {
-            ...testMonitors[0].attributes,
-            config_id: 'id4',
-          },
-          created_at: fifteenMinutesAgo,
         },
       ]);
 
-      await statusRule.getDownChecks();
+      const { downConfigs } = await statusRule.getDownChecks({});
 
-      const earliestMonitorCreatedAt = await statusRule.findEarliestMonitorCreatedAt([
-        'id1',
-        'id2',
-        'id3',
-      ]);
-      expect(earliestMonitorCreatedAt.toISOString()).toEqual(tenMinutesAgo);
+      expect(downConfigs).toEqual({});
+
+      const staleDownConfigs = await statusRule.markDeletedConfigs({
+        id2: {
+          locationId: 'us-east-1',
+          configId: 'id2',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+          ping: {} as any,
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+        'id1-us_central_dev': {
+          locationId: 'us_central_dev',
+          configId: 'id1',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+          ping: {} as any,
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+        'id1-us_central_qa': {
+          locationId: 'us_central_qa',
+          configId: 'id1',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+          ping: {} as any,
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+      });
+
+      expect(staleDownConfigs).toEqual({
+        id2: {
+          configId: 'id2',
+          isDeleted: true,
+          locationId: 'us-east-1',
+          monitorQueryId: 'test',
+          ping: {},
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+        'id1-us_central_dev': {
+          configId: 'id1',
+          isLocationRemoved: true,
+          locationId: 'us_central_dev',
+          monitorQueryId: 'test',
+          ping: {},
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          checks: {
+            downWithinXChecks: 1,
+            down: 1,
+          },
+        },
+      });
+    });
+  });
+
+  describe('handleDownMonitorThresholdAlert', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should alert if monitor meet location threshold', async () => {
+      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      statusRule.handleDownMonitorThresholdAlert({
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+        },
+      });
+      expect(spy).toHaveBeenCalledWith({
+        alertId: 'id1-us_central_qa',
+        downThreshold: 1,
+        idWithLocation: 'id1-us_central_qa',
+        locationNames: ['Test location'],
+        locationIds: ['test'],
+        monitorSummary: {
+          checkedAt: '2024-05-13T12:33:37Z',
+          checks: { down: 1, downWithinXChecks: 1 },
+          configId: 'id1',
+          downThreshold: 1,
+          hostName: undefined,
+          lastErrorMessage: undefined,
+          locationId: 'us_central_qa',
+          locationName: 'Test location',
+          locationNames: 'Test location',
+          monitorId: 'test',
+          monitorName: 'test monitor',
+          monitorTags: ['dev'],
+          monitorType: 'browser',
+          monitorUrl: 'https://www.google.com',
+          monitorUrlLabel: 'URL',
+          reason:
+            'Monitor "test monitor" from Test location is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+          stateId: undefined,
+          status: 'down',
+          timestamp: '2024-05-13T12:33:37.000Z',
+        },
+        statusConfig: {
+          checks: { down: 1, downWithinXChecks: 1 },
+          configId: 'id1',
+          locationId: 'us_central_qa',
+          monitorQueryId: 'test',
+          ping: testPing,
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+        useLatestChecks: true,
+      });
+    });
+
+    it('should not alert if monitor do not meet location threshold', async () => {
+      statusRule.params = {
+        condition: {
+          window: {
+            numberOfChecks: 1,
+          },
+          downThreshold: 1,
+          locationsThreshold: 2,
+        },
+      };
+
+      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      statusRule.handleDownMonitorThresholdAlert({
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+        },
+      });
+      expect(spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should send 2 alerts', async () => {
+      statusRule.params = {
+        condition: {
+          window: {
+            numberOfChecks: 1,
+          },
+          downThreshold: 1,
+          locationsThreshold: 1,
+        },
+      };
+      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      statusRule.handleDownMonitorThresholdAlert({
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+          'id1-us_central_dev': {
+            locationId: 'us_central_dev',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+        },
+      });
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should send 1 alert for un-grouped', async () => {
+      statusRule.params = {
+        condition: {
+          groupBy: 'none',
+          window: {
+            numberOfChecks: 1,
+          },
+          downThreshold: 1,
+          locationsThreshold: 1,
+        },
+      };
+      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      statusRule.handleDownMonitorThresholdAlert({
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+          'id1-us_central_dev': {
+            locationId: 'us_central_dev',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+        },
+      });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith({
+        alertId: 'id1',
+        downThreshold: 1,
+        idWithLocation: 'id1',
+        locationIds: ['test', 'test'],
+        locationNames: ['Test location', 'Test location'],
+        monitorSummary: {
+          checkedAt: '2024-05-13T12:33:37Z',
+          checks: { down: 1, downWithinXChecks: 1 },
+          configId: 'id1',
+          downThreshold: 1,
+          hostName: undefined,
+          lastErrorMessage: undefined,
+          locationId: 'test and test',
+          locationName: 'Test location',
+          locationNames: 'Test location and Test location',
+          monitorId: 'test',
+          monitorName: 'test monitor',
+          monitorTags: ['dev'],
+          monitorType: 'browser',
+          monitorUrl: 'https://www.google.com',
+          monitorUrlLabel: 'URL',
+          reason:
+            'Monitor "test monitor" is down 1 time from Test location and 1 time from Test location. Alert when down 1 time out of the last 1 checks from at least 1 location.',
+          status: 'down',
+          timestamp: '2024-05-13T12:33:37.000Z',
+        },
+        statusConfig: {
+          checks: { down: 1, downWithinXChecks: 1 },
+          configId: 'id1',
+          locationId: 'us_central_qa',
+          monitorQueryId: 'test',
+          ping: testPing,
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+        useLatestChecks: true,
+      });
+    });
+  });
+});
+
+describe('getDoesMonitorMeetLocationThreshold', () => {
+  describe('when useTimeWindow is false', () => {
+    it('should return false if monitor does not meets location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 0, downWithinXChecks: 0 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 1,
+        downThreshold: 1,
+        useTimeWindow: false,
+      });
+      expect(res).toBe(false);
+    });
+
+    it('should return true if monitor meets location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 1, downWithinXChecks: 1 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 1,
+        downThreshold: 1,
+        useTimeWindow: false,
+      });
+      expect(res).toBe(true);
+    });
+
+    it('should return false if monitor does not meets 2 location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 1, downWithinXChecks: 1 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 2,
+        downThreshold: 1,
+        useTimeWindow: false,
+      });
+      expect(res).toBe(false);
+    });
+
+    it('should return true if monitor meets 2 location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 1, downWithinXChecks: 1 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+        {
+          checks: { down: 1, downWithinXChecks: 1 },
+          locationId: 'us_central',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 2,
+        downThreshold: 1,
+        useTimeWindow: false,
+      });
+      expect(res).toBe(true);
+    });
+  });
+
+  describe('when useTimeWindow is true', () => {
+    it('should return false if monitor does not meets location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 0, downWithinXChecks: 0 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 1,
+        downThreshold: 1,
+        useTimeWindow: true,
+      });
+      expect(res).toBe(false);
+    });
+
+    it('should return true if monitor meets location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 1, downWithinXChecks: 0 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 1,
+        downThreshold: 1,
+        useTimeWindow: true,
+      });
+      expect(res).toBe(true);
+    });
+
+    it('should return false if monitor does not meets 2 location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 1, downWithinXChecks: 0 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 2,
+        downThreshold: 1,
+        useTimeWindow: true,
+      });
+      expect(res).toBe(false);
+    });
+
+    it('should return true if monitor meets 2 location threshold', () => {
+      const matchesByLocation: AlertStatusMetaData[] = [
+        {
+          checks: { down: 1, downWithinXChecks: 0 },
+          locationId: 'us_central_qa',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+        {
+          checks: { down: 1, downWithinXChecks: 1 },
+          locationId: 'us_central',
+          ping: testPing,
+          configId: 'id1',
+          monitorQueryId: 'test',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+        },
+      ];
+      const res = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation,
+        locationsThreshold: 2,
+        downThreshold: 1,
+        useTimeWindow: true,
+      });
+      expect(res).toBe(true);
     });
   });
 });
@@ -388,3 +738,22 @@ const testMonitors = [
     sort: ['https://www.google.com', 1889],
   },
 ] as any;
+
+const testPing = {
+  '@timestamp': '2024-05-13T12:33:37.000Z',
+  monitor: {
+    id: 'test',
+    name: 'test monitor',
+    type: 'browser',
+  },
+  tags: ['dev'],
+  url: {
+    full: 'https://www.google.com',
+  },
+  observer: {
+    name: 'test',
+    geo: {
+      name: 'Test location',
+    },
+  },
+} as any;

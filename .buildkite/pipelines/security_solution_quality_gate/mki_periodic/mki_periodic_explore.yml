@@ -13,10 +13,6 @@ steps:
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 4
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
 
   - group: "API MKI - Explore"
     key: api_test_explore

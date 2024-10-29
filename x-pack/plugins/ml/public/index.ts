@@ -41,15 +41,5 @@ export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
 export type { MlLocator } from './locator';
 export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 
-// Bundled shared exports
-// Exported this way so the code doesn't end up in ML's page load bundle
-export const getMlSharedImports = async () => {
-  return await import('./shared');
-};
-
-// Helper to get Type returned by getMlSharedImports.
-type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
-export type GetMlSharedImportsReturnType = AwaitReturnType<ReturnType<typeof getMlSharedImports>>;
-
 export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';
 export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';

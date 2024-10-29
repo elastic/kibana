@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { isValidDateMath } from '@kbn/zod-helpers';
 
 import { UUID, NonEmptyString } from '../../../model/primitives.gen';

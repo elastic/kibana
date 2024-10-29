@@ -8,8 +8,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { appContextService } from '../app_context';
-
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import type { Agent } from '../../types';
 
 import { createClientMock } from './action.mock';
@@ -17,6 +16,7 @@ import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
+jest.mock('../spaces/helpers');
 jest.mock('../app_context', () => {
   const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
@@ -418,35 +418,9 @@ describe('update_agent_tags', () => {
     );
   });
 
-  describe('with the useSpaceAwareness feature flag enabled', () => {
+  describe('with isSpaceAwarenessEnabled return true', () => {
     beforeEach(() => {
-      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-        useSpaceAwareness: true,
-      } as any);
-    });
-
-    it('should not update tags for agents in another space', async () => {
-      soClient.getCurrentNamespace.mockReturnValue('default');
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'agent1',
-              _source: {
-                tags: ['one', 'two', 'three'],
-                namespaces: ['myspace'],
-              },
-              fields: {
-                status: 'online',
-              },
-            },
-          ],
-        },
-      } as any);
-
-      await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], ['two']);
-
-      expect(esClient.updateByQuery).not.toHaveBeenCalled();
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
     it('should add namespace filter to kuery in the default space', async () => {

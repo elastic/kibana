@@ -15,7 +15,7 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
 
   return {
     async openNewConnectorForm(name: string) {
-      const createBtn = await testSubjects.find('createActionButton');
+      const createBtn = await testSubjects.find('createConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();

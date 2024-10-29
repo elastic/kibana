@@ -14,12 +14,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
 
   const findResultsWithApi = async (t: string): Promise<GlobalSearchResult[]> => {
     return browser.executeAsync(async (term, cb) => {
       const { start } = window._coreProvider;
       const globalSearchTestApi: GlobalSearchTestApi = start.plugins.globalSearchTest;
-      globalSearchTestApi.find(term).then(cb);
+      globalSearchTestApi
+        .find(term)
+        .then(cb)
+        .catch((err) => log.error(err));
     }, t);
   };
 

@@ -15,6 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  EuiSwitchProps,
 } from '@elastic/eui';
 import {
   MetricsExplorerChartOptions as ChartOptions,
@@ -111,7 +112,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
     [chartOptions, onChange]
   );
 
-  const handleStackChange = useCallback(
+  const handleStackChange = useCallback<EuiSwitchProps['onChange']>(
     (e) => {
       onChange({
         ...chartOptions,

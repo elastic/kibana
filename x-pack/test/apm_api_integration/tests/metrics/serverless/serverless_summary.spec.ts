@@ -54,6 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const { billedDurationMs, pythonServerlessFunctionNames, faasDuration, serverlessId } = config;
     const { expectedMemoryUsedRate } = expectedValues;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       await generateData({ start, end, apmSynthtraceEsClient });
     });

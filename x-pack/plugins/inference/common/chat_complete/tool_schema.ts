@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Required, ValuesType, UnionToIntersection } from 'utility-types';
+import { Required, ValuesType } from 'utility-types';
 
 interface ToolSchemaFragmentBase {
   description?: string;
@@ -13,7 +13,7 @@ interface ToolSchemaFragmentBase {
 
 interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
-  properties: Record<string, ToolSchemaFragment>;
+  properties?: Record<string, ToolSchemaType>;
   required?: string[] | readonly string[];
 }
 
@@ -35,38 +35,31 @@ interface ToolSchemaTypeNumber extends ToolSchemaFragmentBase {
   enum?: string[] | readonly string[];
 }
 
-interface ToolSchemaAnyOf extends ToolSchemaFragmentBase {
-  anyOf: ToolSchemaType[];
-}
-
-interface ToolSchemaAllOf extends ToolSchemaFragmentBase {
-  allOf: ToolSchemaType[];
-}
-
 interface ToolSchemaTypeArray extends ToolSchemaFragmentBase {
   type: 'array';
   items: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
 }
 
-type ToolSchemaType =
+export type ToolSchemaType =
   | ToolSchemaTypeObject
   | ToolSchemaTypeString
   | ToolSchemaTypeBoolean
   | ToolSchemaTypeNumber
   | ToolSchemaTypeArray;
 
-type ToolSchemaFragment = ToolSchemaType | ToolSchemaAnyOf | ToolSchemaAllOf;
-
-type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> = Required<
-  {
-    [key in keyof TToolSchemaObject['properties']]?: FromToolSchema<
-      TToolSchemaObject['properties'][key]
-    >;
-  },
-  TToolSchemaObject['required'] extends string[] | readonly string[]
-    ? ValuesType<TToolSchemaObject['required']>
-    : never
->;
+type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
+  TToolSchemaObject extends { properties: Record<string, any> }
+    ? Required<
+        {
+          [key in keyof TToolSchemaObject['properties']]?: FromToolSchema<
+            TToolSchemaObject['properties'][key]
+          >;
+        },
+        TToolSchemaObject['required'] extends string[] | readonly string[]
+          ? ValuesType<TToolSchemaObject['required']>
+          : never
+      >
+    : never;
 
 type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> = Array<
   FromToolSchema<TToolSchemaObject['items']>
@@ -79,17 +72,9 @@ type FromToolSchemaString<TToolSchemaString extends ToolSchemaTypeString> =
     ? ValuesType<TToolSchemaString['enum']>
     : string;
 
-type FromToolSchemaAnyOf<TToolSchemaAnyOf extends ToolSchemaAnyOf> = FromToolSchema<
-  ValuesType<TToolSchemaAnyOf['anyOf']>
->;
-
-type FromToolSchemaAllOf<TToolSchemaAllOf extends ToolSchemaAllOf> = UnionToIntersection<
-  FromToolSchema<ValuesType<TToolSchemaAllOf['allOf']>>
->;
-
 export type ToolSchema = ToolSchemaTypeObject;
 
-export type FromToolSchema<TToolSchema extends ToolSchemaFragment> =
+export type FromToolSchema<TToolSchema extends ToolSchemaType> =
   TToolSchema extends ToolSchemaTypeObject
     ? FromToolSchemaObject<TToolSchema>
     : TToolSchema extends ToolSchemaTypeArray
@@ -100,8 +85,4 @@ export type FromToolSchema<TToolSchema extends ToolSchemaFragment> =
     ? number
     : TToolSchema extends ToolSchemaTypeString
     ? FromToolSchemaString<TToolSchema>
-    : TToolSchema extends ToolSchemaAnyOf
-    ? FromToolSchemaAnyOf<TToolSchema>
-    : TToolSchema extends ToolSchemaAllOf
-    ? FromToolSchemaAllOf<TToolSchema>
     : never;

@@ -13,9 +13,9 @@
           "\nA service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`\npure component.\n"
         ],
         "signature": [
-          "({ children, ...props }: React.PropsWithChildren<Omit<",
+          "({ children, ...props }: Omit<",
           "RedirectAppLinksComponentProps",
-          ", \"navigateToUrl\">>) => JSX.Element"
+          ", \"navigateToUrl\">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.container.tsx",
         "deprecated": false,
@@ -24,14 +24,14 @@
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
             "id": "def-public.RedirectAppLinks.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  children,\n  ...props\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Omit<",
+              "Omit<",
               "RedirectAppLinksComponentProps",
-              ", \"navigateToUrl\">>"
+              ", \"navigateToUrl\">"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.container.tsx",
             "deprecated": false,
@@ -52,9 +52,9 @@
           "\nUtility component that will intercept click events on children anchor (`<a>`) elements to call\n`navigateToUrl` with the link's href. This will trigger SPA friendly navigation when the link points\nto a valid Kibana app.\n"
         ],
         "signature": [
-          "({ children, navigateToUrl, currentAppId, ...containerProps }: React.PropsWithChildren<",
+          "({ children, navigateToUrl, currentAppId, ...containerProps }: ",
           "RedirectAppLinksComponentProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.component.tsx",
         "deprecated": false,
@@ -63,14 +63,12 @@
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
             "id": "def-public.RedirectAppLinks.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  children,\n  navigateToUrl,\n  currentAppId,\n  ...containerProps\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "RedirectAppLinksComponentProps",
-              ">"
+              "RedirectAppLinksComponentProps"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.component.tsx",
             "deprecated": false,
@@ -91,9 +89,9 @@
           "\nThis component composes `RedirectAppLinksContainer` with either `RedirectAppLinksProvider` or\n`RedirectAppLinksKibanaProvider` based on the services provided, creating a single component\nwith which consumers can wrap their components or solutions."
         ],
         "signature": [
-          "({ children, ...props }: React.PropsWithChildren<",
+          "({ children, ...props }: ",
           "RedirectAppLinksProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx",
         "deprecated": false,
@@ -107,9 +105,7 @@
             "label": "{ children, ...props }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "RedirectAppLinksProps",
-              ">"
+              "RedirectAppLinksProps"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx",
             "deprecated": false,
@@ -130,9 +126,9 @@
           "\nKibana-specific contextual services Provider."
         ],
         "signature": [
-          "({ children, coreStart }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, coreStart }: React.PropsWithChildren<",
           "RedirectAppLinksKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
         "deprecated": false,
@@ -146,9 +142,9 @@
             "label": "{ children, coreStart }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "RedirectAppLinksKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
             "deprecated": false,
@@ -169,9 +165,9 @@
           "\nContextual services Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "RedirectAppLinksServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
         "deprecated": false,
@@ -185,9 +181,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "RedirectAppLinksServices",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
             "deprecated": false,

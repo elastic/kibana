@@ -5,99 +5,51 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-
-interface Option {
-  label: string;
-  key: 'groupByLocation' | 'ungrouped';
-}
-
-const OPTIONS: Option[] = [
-  {
-    label: i18n.translate('xpack.synthetics.forTheLastExpression.groupByLocation', {
-      defaultMessage: 'Location',
-    }),
-    key: 'groupByLocation',
-  },
-  {
-    label: i18n.translate('xpack.synthetics.forTheLastExpression.ungrouped', {
-      defaultMessage: 'Ungrouped',
-    }),
-    key: 'ungrouped',
-  },
-];
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch } from '@elastic/eui';
 
 export const GroupByExpression = ({
-  groupByLocation,
   onChange,
+  groupByLocation,
+  locationsThreshold,
 }: {
+  locationsThreshold: number;
   groupByLocation: boolean;
   onChange: (val: boolean) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [options, setOptions] = useState<Option[]>(OPTIONS);
-
-  useEffect(() => {
-    setOptions(
-      OPTIONS.map((option) => ({
-        key: option.key as 'groupByLocation' | 'ungrouped',
-        label: option.label,
-        checked:
-          groupByLocation && option.key === 'groupByLocation'
-            ? 'on'
-            : option.key === 'ungrouped' && !groupByLocation
-            ? 'on'
-            : undefined,
-      }))
-    );
-  }, [groupByLocation]);
+  const disabledGroupBy = locationsThreshold > 1;
 
   return (
-    <EuiPopover
-      id="groupByPopover"
-      panelPaddingSize="s"
-      button={
-        <EuiExpression
-          description={'Group by'}
-          isActive={isOpen}
-          onClick={() => setIsOpen(!isOpen)}
-          value={groupByLocation ? 'Location' : 'Ungrouped'}
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          compressed
+          disabled={disabledGroupBy}
+          label={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.groupByLabel', {
+            defaultMessage: 'Receive distinct alerts for each location',
+          })}
+          checked={groupByLocation}
+          onChange={(e) => onChange(e.target.checked)}
         />
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      anchorPosition="downLeft"
-    >
-      <EuiSelectable<Option>
-        singleSelection="always"
-        options={options}
-        onChange={(selectedValues) => {
-          const selectedValue = selectedValues.filter((v) => v.checked === 'on')?.[0];
-          switch (selectedValue?.key) {
-            case 'groupByLocation':
-              onChange(true);
-              break;
-            case 'ungrouped':
-              onChange(false);
-              break;
-            default:
-              break;
-          }
-        }}
-      >
-        {(list) => (
-          <div style={{ width: 240 }}>
-            <EuiPopoverTitle>
-              {i18n.translate('xpack.synthetics.forTheLastExpression.groupBy', {
-                defaultMessage: 'When',
-              })}
-            </EuiPopoverTitle>
-            {list}
-          </div>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {disabledGroupBy ? (
+          <EuiIconTip
+            content={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.tooltip', {
+              defaultMessage:
+                'When locations threshold is greater than 1, group by location is disabled.',
+            })}
+          />
+        ) : (
+          <EuiIconTip
+            content={i18n.translate('xpack.synthetics.groupByExpression.euiSwitch.tooltip', {
+              defaultMessage:
+                'When the monitor detects a failure on one or more locations, you receive an alert for each of these locations, instead of a single alert.',
+            })}
+          />
         )}
-      </EuiSelectable>
-    </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

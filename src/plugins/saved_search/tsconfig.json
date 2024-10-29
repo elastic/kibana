@@ -28,6 +28,7 @@
     "@kbn/utility-types",
     "@kbn/search-types",
     "@kbn/discover-utils",
+    "@kbn/unified-data-table",
   ],
   "exclude": ["target/**/*"]
 }

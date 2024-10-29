@@ -279,7 +279,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
-            embeddingOrigin="observability_slo_burn_rate_alert_details"
             dataView={dataView}
             esSearchQuery={esSearchQuery}
             timeRange={timeRange}
@@ -287,23 +286,26 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
             barColorOverride={colorTransformer('color0')}
             barHighlightColorOverride={colorTransformer('color1')}
             onAnalysisCompleted={onAnalysisCompleted}
-            appDependencies={pick(services, [
-              'analytics',
-              'application',
-              'data',
-              'executionContext',
-              'charts',
-              'fieldFormats',
-              'http',
-              'notifications',
-              'share',
-              'storage',
-              'uiSettings',
-              'unifiedSearch',
-              'theme',
-              'lens',
-              'i18n',
-            ])}
+            appContextValue={{
+              embeddingOrigin: 'observability_slo_burn_rate_alert_details',
+              ...pick(services, [
+                'analytics',
+                'application',
+                'data',
+                'executionContext',
+                'charts',
+                'fieldFormats',
+                'http',
+                'notifications',
+                'share',
+                'storage',
+                'uiSettings',
+                'unifiedSearch',
+                'theme',
+                'lens',
+                'i18n',
+              ]),
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

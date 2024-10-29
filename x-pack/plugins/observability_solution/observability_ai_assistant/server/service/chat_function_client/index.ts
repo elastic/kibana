@@ -16,7 +16,7 @@ import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
-  RegisteredInstruction,
+  InstructionOrCallback,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -34,7 +34,7 @@ const ajv = new Ajv({
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
-  private readonly instructions: RegisteredInstruction[] = [];
+  private readonly instructions: InstructionOrCallback[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -88,7 +88,7 @@ export class ChatFunctionClient {
     if (definition.parameters) {
       this.validators.set(definition.name, ajv.compile(definition.parameters));
     }
-    this.functionRegistry.set(definition.name, { definition, respond });
+    this.functionRegistry.set(definition.name, { handler: { definition, respond } });
   };
 
   registerInstruction: RegisterInstruction = (instruction) => {
@@ -107,7 +107,7 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(): RegisteredInstruction[] {
+  getInstructions(): InstructionOrCallback[] {
     return this.instructions;
   }
 
@@ -120,7 +120,7 @@ export class ChatFunctionClient {
   }: {
     filter?: string;
   } = {}): FunctionHandler[] {
-    const allFunctions = Array.from(this.functionRegistry.values());
+    const allFunctions = Array.from(this.functionRegistry.values()).map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 
@@ -132,7 +132,7 @@ export class ChatFunctionClient {
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
   }
 
-  getActions() {
+  getActions(): Required<ObservabilityAIAssistantScreenContextRequest>['actions'] {
     return this.actions;
   }
 
@@ -146,12 +146,16 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
+    connectorId,
+    useSimulatedFunctionCalling,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -163,12 +167,14 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.respond(
+    return await fn.handler.respond(
       {
         arguments: parsedArguments,
         messages,
         screenContexts: this.screenContexts,
         chat,
+        connectorId,
+        useSimulatedFunctionCalling,
       },
       signal
     );

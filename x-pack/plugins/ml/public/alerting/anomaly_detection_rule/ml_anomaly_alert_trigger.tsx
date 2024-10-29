@@ -14,6 +14,7 @@ import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plu
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import type { MlCapabilities } from '../../../common/types/capabilities';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlCoreSetup } from '../../plugin';
@@ -34,7 +35,6 @@ import { ConfigValidator } from './config_validator';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
@@ -199,7 +199,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
         shouldUseDropdownJobCreate
       />
-
       <ConfigValidator
         jobConfigs={jobConfigs}
         alertInterval={ruleInterval}
@@ -207,7 +206,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         alertParams={resultParams}
         maxNumberOfBuckets={maxNumberOfBuckets}
       />
-
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
@@ -226,21 +224,17 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
       <EuiSpacer size="m" />
-
       <AdvancedSettings
         value={advancedSettings}
-        onChange={useCallback((update) => {
+        onChange={useCallback((update: any) => {
           Object.keys(update).forEach((k) => {
             setRuleParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
           });
           // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])}
       />
-
       <EuiSpacer size="m" />
-
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={ruleParams} />
-
       <EuiSpacer size="m" />
     </EuiForm>
   );

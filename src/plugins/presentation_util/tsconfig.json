@@ -36,6 +36,7 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/field-utils",
     "@kbn/presentation-publishing",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": ["target/**/*"]
 }

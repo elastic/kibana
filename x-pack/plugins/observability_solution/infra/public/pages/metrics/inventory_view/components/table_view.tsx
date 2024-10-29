@@ -82,6 +82,7 @@ export const TableView = (props: Props) => {
             isOpen={openPopoverId === uniqueID}
             closePopover={closePopover}
             anchorPosition="rightCenter"
+            zIndex={0}
           >
             <NodeContextMenu
               node={item.node}

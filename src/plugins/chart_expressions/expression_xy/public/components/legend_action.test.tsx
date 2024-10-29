@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,7 +12,7 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ComponentType, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
@@ -179,7 +180,7 @@ const sampleLayer: DataLayerConfig = {
 
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
-  const Component: ComponentType<LegendActionProps> = getLegendAction(
+  const Component: React.ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
     [legendCellValueActions],

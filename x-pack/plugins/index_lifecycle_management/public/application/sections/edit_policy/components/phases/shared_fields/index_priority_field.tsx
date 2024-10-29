@@ -10,8 +10,6 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { PhaseExceptDelete } from '../../../../../../../common/types';
-
 import { NumericField } from '../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -20,7 +18,7 @@ import { LearnMoreLink, DescribedFormRow } from '../..';
 import { useKibana } from '../../../../../../shared_imports';
 
 interface Props {
-  phase: PhaseExceptDelete;
+  phase: 'hot' | 'warm' | 'cold';
 }
 
 export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {

@@ -6,6 +6,7 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
@@ -108,12 +109,16 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
 
   private async tinesApiRequest<R extends TinesBaseApiResponse, T>(
     req: SubActionRequestParams<R>,
-    reducer: (response: R) => T
+    reducer: (response: R) => T,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<T & { incompleteResponse: boolean }> {
-    const response = await this.request<R>({
-      ...req,
-      params: { ...req.params, per_page: API_MAX_RESULTS },
-    });
+    const response = await this.request<R>(
+      {
+        ...req,
+        params: { ...req.params, per_page: API_MAX_RESULTS },
+      },
+      connectorUsageCollector
+    );
     return {
       ...reducer(response.data),
       incompleteResponse: response.data.meta.pages > 1,
@@ -121,29 +126,31 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
-    if (!error.response?.status) {
-      return 'Unknown API Error';
+    if (error.response?.statusText) {
+      return `API Error: ${error.response?.statusText}`;
     }
-    if (error.response.status === 401) {
-      return 'Unauthorized API Error';
-    }
-    return `API Error: ${error.response?.statusText}`;
+    return error.toString();
   }
 
-  public async getStories(): Promise<TinesStoriesActionResponse> {
+  public async getStories(
+    params: unknown,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<TinesStoriesActionResponse> {
     return this.tinesApiRequest(
       {
         url: this.urls.stories,
         headers: this.getAuthHeaders(),
         responseSchema: TinesStoriesApiResponseSchema,
       },
-      storiesReducer
+      storiesReducer,
+      connectorUsageCollector
     );
   }
 
-  public async getWebhooks({
-    storyId,
-  }: TinesWebhooksActionParams): Promise<TinesWebhooksActionResponse> {
+  public async getWebhooks(
+    { storyId }: TinesWebhooksActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<TinesWebhooksActionResponse> {
     return this.tinesApiRequest(
       {
         url: this.urls.agents,
@@ -151,24 +158,27 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
         headers: this.getAuthHeaders(),
         responseSchema: TinesWebhooksApiResponseSchema,
       },
-      webhooksReducer
+      webhooksReducer,
+      connectorUsageCollector
     );
   }
 
-  public async runWebhook({
-    webhook,
-    webhookUrl,
-    body,
-  }: TinesRunActionParams): Promise<TinesRunActionResponse> {
+  public async runWebhook(
+    { webhook, webhookUrl, body }: TinesRunActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<TinesRunActionResponse> {
     if (!webhook && !webhookUrl) {
       throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
     }
-    const response = await this.request({
-      url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
-      method: 'post',
-      responseSchema: TinesRunApiResponseSchema,
-      data: body,
-    });
+    const response = await this.request(
+      {
+        url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
+        method: 'post',
+        responseSchema: TinesRunApiResponseSchema,
+        data: body,
+      },
+      connectorUsageCollector
+    );
     return response.data;
   }
 }

@@ -25,7 +25,7 @@ export const createCase = async (
 ): Promise<Case> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')

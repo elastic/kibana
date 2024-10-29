@@ -144,7 +144,6 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             numFilters={showActiveOptionsNumber ? options.length : undefined}
             hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
             numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
-            aria-label={buttonLabel}
           >
             <EuiText size="s" className="eui-textTruncate">
               {buttonLabel}

@@ -17,17 +17,6 @@ export interface FieldsData {
   isObjectArray: boolean;
 }
 
-export interface EnrichedFieldInfo {
-  data: FieldsData | EventFieldsData;
-  eventId: string;
-  fieldFromBrowserField?: Partial<FieldSpec>;
-  scopeId: string;
-  values: string[] | null | undefined;
-  linkValue?: string;
-}
-
-export type EnrichedFieldInfoWithValues = EnrichedFieldInfo & { values: string[] };
-
 export interface EventSummaryField {
   id: string;
   legacyId?: string;

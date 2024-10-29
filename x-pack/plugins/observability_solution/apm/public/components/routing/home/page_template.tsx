@@ -38,7 +38,7 @@ export function page<
   return {
     [path]: {
       element: (
-        <Breadcrumb title={title} href={path}>
+        <Breadcrumb title={title} href={path} omitOnServerless>
           <ApmMainTemplate
             pageTitle={title}
             showServiceGroupSaveButton={showServiceGroupSaveButton}

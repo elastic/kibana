@@ -45,6 +45,8 @@
     "@kbn/core-i18n-server-internal",
     "@kbn/core-i18n-server-mocks",
     "@kbn/apm-config-loader",
+    "@kbn/core-feature-flags-server-internal",
+    "@kbn/core-feature-flags-server-mocks",
   ],
   "exclude": [
     "target/**/*",

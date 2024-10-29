@@ -72,7 +72,7 @@ const UpgradeStep = () => {
           data-test-subj="upgradeStatusErrorCallout"
         >
           <p>
-            {error.statusCode} - {error.message}
+            {error.statusCode} - {error.message as string}
           </p>
           <EuiButton
             color="danger"

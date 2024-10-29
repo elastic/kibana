@@ -1,0 +1,5 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/security-authorization-core",
+  "owner": "@elastic/kibana-security"
+}

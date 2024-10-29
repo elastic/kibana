@@ -69,7 +69,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   }, [pageIndex, pageSize, significantTerms]);
 
   const onChange = useCallback(
-    (tableSettings) => {
+    (tableSettings: any) => {
       const { index, size } = tableSettings.page;
 
       setPageIndex(index);

@@ -19,8 +19,6 @@ import {
   SortOrder,
   ServiceProviderKeys,
 } from '../components/all_inference_endpoints/types';
-import { DeploymentStatusEnum } from '../components/all_inference_endpoints/types';
-import { useTrainedModelStats } from './use_trained_model_stats';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];
@@ -36,18 +34,6 @@ export const useTableData = (
   filterOptions: FilterOptions,
   searchKey: string
 ): UseTableDataReturn => {
-  const { data: trainedModelStats } = useTrainedModelStats();
-
-  const deploymentStatus = trainedModelStats?.trained_model_stats.reduce((acc, modelStat) => {
-    if (modelStat.model_id) {
-      acc[modelStat.model_id] =
-        modelStat?.deployment_stats?.state === 'started'
-          ? DeploymentStatusEnum.deployed
-          : DeploymentStatusEnum.notDeployed;
-    }
-    return acc;
-  }, {} as Record<string, DeploymentStatusEnum>);
-
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
 
@@ -64,29 +50,13 @@ export const useTableData = (
     }
 
     return filteredEndpoints
-      .filter((endpoint) => endpoint.model_id.includes(searchKey))
-      .map((endpoint) => {
-        const isElasticService =
-          endpoint.service === ServiceProviderKeys.elasticsearch ||
-          endpoint.service === ServiceProviderKeys.elser;
-
-        let deploymentStatusValue = DeploymentStatusEnum.notApplicable;
-        if (isElasticService) {
-          const modelId = endpoint.service_settings?.model_id;
-          deploymentStatusValue =
-            modelId && deploymentStatus?.[modelId]
-              ? deploymentStatus[modelId]
-              : DeploymentStatusEnum.notDeployable;
-        }
-
-        return {
-          deployment: deploymentStatusValue,
-          endpoint,
-          provider: endpoint.service,
-          type: endpoint.task_type,
-        };
-      });
-  }, [inferenceEndpoints, searchKey, filterOptions, deploymentStatus]);
+      .filter((endpoint) => endpoint.inference_id.includes(searchKey))
+      .map((endpoint) => ({
+        endpoint: endpoint.inference_id,
+        provider: endpoint,
+        type: endpoint.task_type,
+      }));
+  }, [inferenceEndpoints, searchKey, filterOptions]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
@@ -94,9 +64,9 @@ export const useTableData = (
       const bValue = b[queryParams.sortField];
 
       if (queryParams.sortOrder === SortOrder.asc) {
-        return aValue.model_id.localeCompare(bValue.model_id);
+        return aValue.localeCompare(bValue);
       } else {
-        return bValue.model_id.localeCompare(aValue.model_id);
+        return bValue.localeCompare(aValue);
       }
     });
   }, [tableData, queryParams]);

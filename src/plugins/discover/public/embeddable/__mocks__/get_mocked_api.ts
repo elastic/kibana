@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -17,7 +18,7 @@ import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { FetchContext } from '@kbn/presentation-publishing';
 import { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { SortOrder } from '@kbn/unified-data-table';
+import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 
 export const getMockedSearchApi = ({
   searchSource,
@@ -52,6 +53,7 @@ export const getMockedSearchApi = ({
       headerRowHeight: new BehaviorSubject<number | undefined>(savedSearch.headerRowHeight),
       rowsPerPage: new BehaviorSubject<number | undefined>(savedSearch.rowsPerPage),
       sampleSize: new BehaviorSubject<number | undefined>(savedSearch.sampleSize),
+      density: new BehaviorSubject<DataGridDensity | undefined>(savedSearch.density),
       grid: new BehaviorSubject<DiscoverGridSettings | undefined>(savedSearch.grid),
       rows: new BehaviorSubject<DataTableRecord[]>([]),
       totalHitCount: new BehaviorSubject<number | undefined>(0),

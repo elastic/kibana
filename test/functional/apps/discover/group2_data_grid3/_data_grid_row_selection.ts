@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -17,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects([
+  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -38,13 +39,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     after(async function () {
@@ -80,6 +81,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
         expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(1);
         expect(await dataGrid.getNumberOfSelectedRows()).to.be(1);
+      });
+    });
+
+    it('should be able to select multiple rows holding Shift key', async () => {
+      expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(false);
+
+      // select 1 row
+      await dataGrid.selectRow(1);
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(1);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(1);
+      });
+
+      // select 3 more
+      await dataGrid.selectRow(4, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(4);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(4);
+      });
+
+      // deselect index 3 and 4
+      await dataGrid.selectRow(3, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(2);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(2);
+      });
+
+      // select from index 3 to 0
+      await dataGrid.selectRow(0, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(4);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(4);
+      });
+
+      // select from both pages
+      await testSubjects.click('pagination-button-1');
+      await retry.try(async () => {
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(0);
+      });
+
+      await dataGrid.selectRow(2, { pressShiftKey: true });
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(true);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(3);
+        expect(await dataGrid.getNumberOfSelectedRows()).to.be(8);
       });
     });
 
@@ -210,8 +265,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can copy columns for selected rows as text', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
       });

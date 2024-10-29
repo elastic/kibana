@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { createContext, useMemo } from 'react';
@@ -14,14 +15,11 @@ import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  apiPublishesPanelDescription,
-  apiPublishesPanelTitle,
-  apiPublishesSavedObjectId,
   initializeTitles,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { apiIsPresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import {
   CONTENT_ID,
@@ -52,14 +50,9 @@ import {
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { isParentApiCompatible } from '../actions/compatibility_check';
 
 export const LinksContext = createContext<LinksApi | null>(null);
-
-const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
-  apiIsPresentationContainer(parentApi) &&
-  apiPublishesSavedObjectId(parentApi) &&
-  apiPublishesPanelTitle(parentApi) &&
-  apiPublishesPanelDescription(parentApi);
 
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<
@@ -255,6 +248,7 @@ export const getLinksEmbeddableFactory = () => {
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
+            borderRadius="none"
           >
             <EuiListGroup
               maxWidth={false}

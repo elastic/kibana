@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from './config';
+import { configSchema, CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -13,7 +13,12 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "auto_calculate_default_ech_capacity": false,
+        "claim_strategy": "mget",
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -22,6 +27,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -39,7 +45,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 3000,
+        "poll_interval": 500,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -61,7 +67,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (3000)"`
+      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"`
     );
   });
 
@@ -70,7 +76,12 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "auto_calculate_default_ech_capacity": false,
+        "claim_strategy": "mget",
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -79,6 +90,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -96,7 +108,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 3000,
+        "poll_interval": 500,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -125,7 +137,12 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "auto_calculate_default_ech_capacity": false,
+        "claim_strategy": "mget",
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -134,6 +151,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -156,7 +174,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 3000,
+        "poll_interval": 500,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -244,12 +262,38 @@ describe('config validation', () => {
   });
 
   test('default claim strategy defaults poll interval to 3000ms', () => {
-    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_DEFAULT });
+    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY });
     expect(result.poll_interval).toEqual(3000);
   });
 
   test('mget claim strategy defaults poll interval to 500ms', () => {
     const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_MGET });
     expect(result.poll_interval).toEqual(500);
+  });
+
+  test('discovery active_nodes_lookback must be a valid duration', () => {
+    const config: Record<string, unknown> = {
+      discovery: {
+        active_nodes_lookback: 'foo',
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string"`
+    );
+  });
+
+  test('discovery active_nodes_lookback must be less than 5m', () => {
+    const config: Record<string, unknown> = {
+      discovery: {
+        active_nodes_lookback: '301s',
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
+    );
   });
 });

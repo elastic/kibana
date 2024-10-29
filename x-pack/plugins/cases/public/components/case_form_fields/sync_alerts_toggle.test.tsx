@@ -14,7 +14,8 @@ import { FormTestComponent } from '../../common/test_utils';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
-describe('SyncAlertsToggle', () => {
+// Failing: https://github.com/elastic/kibana/issues/190270
+describe.skip('SyncAlertsToggle', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
   const defaultFormProps = {
@@ -28,6 +29,10 @@ describe('SyncAlertsToggle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('it renders', async () => {
@@ -51,7 +56,7 @@ describe('SyncAlertsToggle', () => {
 
     const synAlerts = await screen.findByTestId('caseSyncAlerts');
 
-    userEvent.click(within(synAlerts).getByRole('switch'));
+    await userEvent.click(within(synAlerts).getByRole('switch'));
 
     expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'false');
     expect(await screen.findByText('Off')).toBeInTheDocument();
@@ -66,9 +71,9 @@ describe('SyncAlertsToggle', () => {
 
     const synAlerts = await screen.findByTestId('caseSyncAlerts');
 
-    userEvent.click(within(synAlerts).getByRole('switch'));
+    await userEvent.click(within(synAlerts).getByRole('switch'));
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

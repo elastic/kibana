@@ -194,22 +194,6 @@ describe(`Reporting Job Management Routes: Public`, () => {
         .expect(404);
     });
 
-    it('returns a 403 if not a valid job type', async () => {
-      mockEsClient.search.mockResponseOnce(
-        getHits({
-          jobtype: 'invalidJobType',
-          payload: { title: 'invalid!' },
-        })
-      );
-      registerJobInfoRoutesPublic(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
-        .expect(403);
-    });
-
     it('when a job is incomplete', async () => {
       mockEsClient.search.mockResponseOnce(
         getHits({

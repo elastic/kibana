@@ -42,17 +42,17 @@ jest.mock('../quick_prompt_selector/quick_prompt_selector', () => ({
       <button
         type="button"
         data-test-subj="delete-qp"
-        onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION')}
+        onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION', '#D36086')}
       />
       <button
         type="button"
         data-test-subj="change-qp"
-        onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3])}
+        onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3], '#D36086')}
       />
       <button
         type="button"
         data-test-subj="change-qp-custom"
-        onClick={() => onQuickPromptSelectionChange('sooper custom prompt')}
+        onClick={() => onQuickPromptSelectionChange('sooper custom prompt', '#D36086')}
       />
     </>
   ),

@@ -725,6 +725,65 @@ paths:
                 type: object
 ```
 
+### Root level tags with `x-displayName`
+
+OpenAPI documents may have root level tags referenced by name in operations. Some platforms including Bump.sh used for API reference documentation support `x-displayName`. Value specified in that custom property used instead of `tag.name` to display a name.
+
+OpenAPI bundler supports `x-displayName` as well.
+
+#### Examples
+
+To specify a custom tag with `x-displayName` to assign that tag to all operations in the document the following configuration should be specified
+
+```bash
+const { bundle } = require('@kbn/openapi-bundler');
+const { join, resolve } = require('path');
+
+const ROOT = resolve(__dirname, '../..');
+
+(async () => {
+  await bundle({
+    // ...
+    options: {
+      prototypeDocument: {
+        tags: [
+          {
+            name: 'My tag name',
+            description: 'My tag description',
+            x-displayName: 'My Custom Name',
+          },
+        ],
+      },
+    },
+  });
+})();
+```
+
+It will produce a document containing the specified tag assigned to all operations like below
+
+```yaml
+openapi: 3.0.3
+info: ...
+servers: ...
+paths:
+  /api/some/operation:
+    delete:
+      operationId: SomeOperation
+      ...
+      tags:
+        - My tag name
+        - Tag existing before bundling
+components:
+  schemas: ...
+security: ...
+tags:
+  - description: My tag description
+    name: My tag name
+    x-displayName: My Custom Name
+```
+
+When merging OpenAPI specs together tags will be sorted by `x-displayName` or `name` in ascending order depending on whether `x-displayName` is specified.
+
 ## Contribution
 
 In case you decide to contribute to the `kbn-openapi-bundler` package please make sure to add and/or update existing e2e test in `kbn-openapi-bundler/tests` folder.

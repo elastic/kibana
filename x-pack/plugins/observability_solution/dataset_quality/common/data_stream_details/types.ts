@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { DataStreamType } from '../types';
-
 export interface GetDataStreamIntegrationParams {
-  type: DataStreamType;
   integrationName: string;
+}
+
+export interface AnalyzeDegradedFieldsParams {
+  dataStream: string;
+  lastBackingIndex: string;
+  degradedField: string;
+}
+
+export interface UpdateFieldLimitParams {
+  dataStream: string;
+  newFieldLimit: number;
 }

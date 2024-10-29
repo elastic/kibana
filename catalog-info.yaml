@@ -119,10 +119,6 @@ spec:
       repository: elastic/kibana
       provider_settings:
         trigger_mode: none
-      schedules:
-        daily:
-          branch: main
-          cronline: "@daily"
       pipeline_file: ".buildkite/pipelines/sonarqube.yml"
       teams:
         kibana-operations:

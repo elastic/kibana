@@ -20,6 +20,8 @@ import {
   validateParams,
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
+
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import {
   ActionParamsType,
@@ -514,6 +516,10 @@ describe('execute()', () => {
       text: 'Go to Elastic',
     },
   };
+  const connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 
   const actionId = 'some-id';
   const executorOptions: EmailConnectorTypeExecutorOptions = {
@@ -524,6 +530,7 @@ describe('execute()', () => {
     services,
     configurationUtilities: actionsConfigMock.create(),
     logger: mockedLogger,
+    connectorUsageCollector,
   };
 
   beforeEach(() => {

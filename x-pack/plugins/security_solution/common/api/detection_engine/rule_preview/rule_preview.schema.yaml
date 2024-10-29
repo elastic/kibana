@@ -11,6 +11,13 @@ paths:
       summary: Preview rule alerts generated on specified time range
       tags:
         - Rule preview API
+      parameters:
+        - name: enable_logged_requests
+          in: query
+          description: Enables logging and returning in response ES queries, performed during rule execution
+          required: false
+          schema:
+            type: boolean
       requestBody:
         description: An object containing tags to add or remove and alert ids the changes will be applied
         required: true
@@ -94,6 +101,18 @@ components:
           format: date-time
       required: [invocationCount, timeframeEnd]
 
+    RulePreviewLoggedRequest:
+      type: object  
+      properties:
+        request:
+          $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        description:
+          $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        duration:
+          type: integer
+      required:
+        - request
+
     RulePreviewLogs:
       type: object
       properties:
@@ -110,6 +129,10 @@ components:
           description: Execution duration in milliseconds
         startedAt:
           $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulePreviewLoggedRequest'
       required:
         - errors
         - warnings

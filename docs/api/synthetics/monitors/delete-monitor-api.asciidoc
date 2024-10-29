@@ -37,7 +37,7 @@ DELETE /api/synthetics/monitors/monitor1-id
 
 ==== Bulk Delete Monitors
 
-You can delete multiple monitors by sending a list of config ids to a DELETE request to the `/api/synthetics/monitors` endpoint.
+You can delete multiple monitors by sending a list of config ids to a POST request to the `/api/synthetics/monitors/_bulk_delete` endpoint.
 
 
 [[monitors-delete-request-body]]

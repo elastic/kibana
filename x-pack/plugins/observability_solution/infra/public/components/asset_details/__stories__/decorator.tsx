@@ -87,13 +87,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     dataViews: {
       create: () => Promise.resolve(mockDataView),
     },
-    locators: {
-      nodeLogsLocator: {
-        getRedirectUrl: () => {
-          return '';
-        },
-      },
-    },
+
     uiActions: {
       getTriggerCompatibleActions: () => {
         return Promise.resolve([]);

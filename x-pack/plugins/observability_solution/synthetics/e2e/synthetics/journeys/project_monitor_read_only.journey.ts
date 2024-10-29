@@ -6,9 +6,10 @@
  */
 
 import { after, before, expect, journey, step } from '@elastic/synthetics';
+import { omit } from 'lodash';
 import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SyntheticsServices } from './services/synthetics_services';
-import { cleanTestMonitors, enableMonitorManagedViaApi } from './services/add_monitor';
+import { cleanTestMonitors } from './services/add_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
@@ -23,14 +24,13 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
 
   before(async () => {
     await cleanTestMonitors(params);
-    await enableMonitorManagedViaApi(params.kibanaUrl);
-
-    await addTestMonitorProject(params.kibanaUrl, monitorName);
-
-    await syntheticsApp.waitForLoadingToFinish();
   });
 
   step('Go to monitor-management', async () => {
+    await addTestMonitorProject(params.kibanaUrl, monitorName);
+
+    await syntheticsApp.waitForLoadingToFinish();
+
     await syntheticsApp.navigateToMonitorManagement();
   });
 
@@ -62,11 +62,16 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
     // config in the process takes precedence
-    expect(newConfiguration).toEqual({
-      ...originalMonitorConfiguration,
-      hash: '',
-      revision: 2,
-    });
+    expect(omit(newConfiguration, ['updated_at'])).toEqual(
+      omit(
+        {
+          ...originalMonitorConfiguration,
+          hash: '',
+          revision: 2,
+        },
+        ['updated_at']
+      )
+    );
   });
 
   step('Navigate to edit monitor', async () => {
@@ -83,29 +88,39 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
     // config in the process takes precedence
-    expect(newConfiguration).toEqual({
-      ...originalMonitorConfiguration,
-      hash: '',
-      revision: 3,
-      alert: {
-        status: {
-          enabled: !(originalMonitorConfiguration?.alert?.status?.enabled as boolean),
+    expect(omit(newConfiguration, ['updated_at'])).toEqual(
+      omit(
+        {
+          ...originalMonitorConfiguration,
+          hash: '',
+          revision: 3,
+          alert: {
+            status: {
+              enabled: !(originalMonitorConfiguration?.alert?.status?.enabled as boolean),
+            },
+            tls: {
+              enabled: originalMonitorConfiguration?.alert?.tls?.enabled as boolean,
+            },
+          },
+          enabled: !originalMonitorConfiguration?.enabled,
         },
-        tls: {
-          enabled: originalMonitorConfiguration?.alert?.tls?.enabled as boolean,
-        },
-      },
-      enabled: !originalMonitorConfiguration?.enabled,
-    });
+        ['updated_at']
+      )
+    );
   });
 
   step('Monitor can be re-pushed and overwrite any changes', async () => {
     await addTestMonitorProject(params.kibanaUrl, monitorName);
     const repushedConfiguration = await services.getMonitor(monitorId);
-    expect(repushedConfiguration).toEqual({
-      ...originalMonitorConfiguration,
-      revision: 4,
-    });
+    expect(omit(repushedConfiguration, ['updated_at'])).toEqual(
+      omit(
+        {
+          ...originalMonitorConfiguration,
+          revision: 4,
+        },
+        ['updated_at']
+      )
+    );
   });
 
   step('Navigate to edit monitor', async () => {
@@ -115,7 +130,7 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   step('Monitor can be deleted', async () => {
     await page.click('text="Delete monitor"');
     await page.click('[data-test-subj="confirmModalConfirmButton"]');
-    await page.waitForSelector(`text='Deleted "${monitorName}"'`);
+    await page.waitForSelector(`text='Deleted "${monitorName}" monitor successfully.'`);
   });
 
   after(async () => {

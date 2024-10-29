@@ -13,7 +13,7 @@ import { sourcererActions } from '../../../../sourcerer/store';
 import {
   getDataProvider,
   getDataProviderAnd,
-} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+} from '../../../../common/components/event_details/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';

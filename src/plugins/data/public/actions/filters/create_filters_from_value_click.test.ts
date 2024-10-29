@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -170,6 +171,24 @@ describe('createFiltersFromClickEvent', () => {
 
       expect(queryString).toEqual(`from meow
 | WHERE \`columnA\`=="2048"`);
+    });
+
+    test('should return the update query string for negated action', async () => {
+      dataPoints[0].table.columns[0] = {
+        name: 'columnA',
+        id: 'columnA',
+        meta: {
+          type: 'string',
+        },
+      };
+      const queryString = await appendFilterToESQLQueryFromValueClickAction({
+        data: dataPoints,
+        query: { esql: 'from meow' },
+        negate: true,
+      });
+
+      expect(queryString).toEqual(`from meow
+| WHERE \`columnA\`!="2048"`);
     });
   });
 });

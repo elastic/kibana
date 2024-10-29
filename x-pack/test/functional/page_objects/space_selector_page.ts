@@ -204,6 +204,10 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.click(`featureCategoryButton_${categoryName}`);
   }
 
+  async toggleFeatureCategoryCheckbox(categoryName: string) {
+    await this.testSubjects.click(`featureCategoryCheckbox_${categoryName}`);
+  }
+
   async clickOnDescriptionOfSpace() {
     await this.testSubjects.click('descriptionSpaceText');
   }
@@ -272,8 +276,8 @@ export class SpaceSelectorPageObject extends FtrService {
 
   async setSearchBoxInSpacesSelector(searchText: string) {
     const searchBox = await this.find.byCssSelector('div[role="dialog"] input[type="search"]');
-    searchBox.clearValue();
-    searchBox.type(searchText);
+    await searchBox.clearValue();
+    await searchBox.type(searchText);
     await this.common.sleep(1000);
   }
 
@@ -287,5 +291,10 @@ export class SpaceSelectorPageObject extends FtrService {
       'div[role="dialog"] div[data-test-subj="euiSelectableMessage"]'
     );
     expect(await msgElem.getVisibleText()).to.be('no spaces found');
+  }
+
+  async currentSelectedSpaceTitle() {
+    const spacesNavSelector = await this.testSubjects.find('spacesNavSelector');
+    return spacesNavSelector.getAttribute('title');
   }
 }

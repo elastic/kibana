@@ -54,6 +54,9 @@ export function AddCisIntegrationFormPageProvider({
     getPostInstallCloudFormationModal: async () => {
       return await testSubjects.find('postInstallCloudFormationModal');
     },
+    showPostInstallCloudFormationModal: async () => {
+      return await testSubjects.exists('postInstallCloudFormationModal');
+    },
     showLaunchCloudFormationAgentlessButton: async () => {
       return await testSubjects.exists('launchCloudFormationAgentlessButton');
     },
@@ -146,6 +149,27 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/cspm',
+      options
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const navigateToAddIntegrationWithVersionPage = async (
+    packageVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -282,6 +306,11 @@ export function AddCisIntegrationFormPageProvider({
     );
     await agentOption.click();
   };
+
+  const showSetupTechnologyComponent = async () => {
+    return await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+  };
+
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
     await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
@@ -473,6 +502,10 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const showSuccessfulToast = async (testSubjectId: string) => {
+    return await testSubjects.exists(testSubjectId);
+  };
+
   const getFirstCspmIntegrationPageIntegration = async () => {
     const integration = await testSubjects.find('integrationNameLink');
     return await integration.getVisibleText();
@@ -493,6 +526,7 @@ export function AddCisIntegrationFormPageProvider({
     cisAzure,
     cisAws,
     cisGcp,
+    navigateToAddIntegrationWithVersionPage,
     navigateToAddIntegrationCspmPage,
     navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,
@@ -536,5 +570,8 @@ export function AddCisIntegrationFormPageProvider({
     getFirstCspmIntegrationPageIntegration,
     getFirstCspmIntegrationPageAgent,
     getAgentBasedPolicyValue,
+    showSuccessfulToast,
+    showSetupTechnologyComponent,
+    navigateToEditIntegrationPage,
   };
 }

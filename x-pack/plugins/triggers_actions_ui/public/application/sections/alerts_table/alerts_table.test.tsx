@@ -231,10 +231,9 @@ describe('AlertsTable', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
-      jest.fn().mockImplementation((props) => {
-        return `${props.colIndex}:${props.rowIndex}`;
-      }),
+    getRenderCellValue: jest.fn().mockImplementation((props) => {
+      return `${props.colIndex}:${props.rowIndex}`;
+    }),
     useBulkActions: () => [
       {
         id: 0,
@@ -371,27 +370,19 @@ describe('AlertsTable', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(
+      await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
-      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), { pointerEventsCheck: 0 });
 
       expect(tableProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
@@ -402,8 +393,8 @@ describe('AlertsTable', () => {
       const renderResult = render(
         <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
       );
-      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), {
+        pointerEventsCheck: 0,
       });
 
       expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
@@ -703,6 +694,42 @@ describe('AlertsTable', () => {
 
         expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
       });
+
+      it('The column state is synced correctly between the column selector and the field selector', async () => {
+        const columnToHide = tableProps.columns[0];
+        render(
+          <AlertsTableWithProviders
+            {...tableProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            initialBulkActionsState={{
+              ...defaultBulkActionsState,
+              rowSelection: new Map(),
+            }}
+          />
+        );
+
+        const fieldBrowserBtn = await screen.findByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
+
+        // Open the column visibility selector and hide the column
+        fireEvent.click(columnSelectorBtn);
+        const columnVisibilityToggle = await screen.findByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToHide.id}`
+        );
+        fireEvent.click(columnVisibilityToggle);
+
+        // Open the field browser
+        fireEvent.click(fieldBrowserBtn);
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+
+        // The column should be checked in the field browser, independent of its visibility status
+        const columnCheckbox: HTMLInputElement = await screen.findByTestId(
+          `field-${columnToHide.id}-checkbox`
+        );
+        expect(columnCheckbox).toBeChecked();
+      });
     });
 
     describe('cases column', () => {
@@ -739,7 +766,7 @@ describe('AlertsTable', () => {
         render(<AlertsTableWithProviders {...props} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
 
-        userEvent.hover(screen.getByText('Test case'));
+        await userEvent.hover(screen.getByText('Test case'));
 
         expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });

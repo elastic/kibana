@@ -29,6 +29,6 @@ export const SUPPORTED_MODELS_INFO = i18n.translate(
   'xpack.integrationAssistant.steps.connector.supportedModelsInfo',
   {
     defaultMessage:
-      "Automatic Import currently supports Anthropic models via Elastic's connector for Amazon Bedrock. Support for additional LLMs will be introduced soon",
+      "We currently recommend using a provider that supports the newer Claude models for the best experience. We're currently working on adding better support for GPT-4 and similar models",
   }
 );

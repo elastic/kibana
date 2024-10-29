@@ -54,17 +54,14 @@ export function setTimeScaling(
   };
 }
 
-export function TimeScaling({
-  selectedColumn,
-  columnId,
-  layer,
-  updateLayer,
-}: {
+export interface TimeScalingProps {
   selectedColumn: GenericIndexPatternColumn;
   columnId: string;
   layer: FormBasedLayer;
   updateLayer: (newLayer: FormBasedLayer) => void;
-}) {
+}
+
+export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: TimeScalingProps) {
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 
   if (!selectedOperation.timeScalingMode || selectedOperation.timeScalingMode === 'disabled') {

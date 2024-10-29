@@ -31,10 +31,10 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultSubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
-      defaultMessage: 'Monitor "{monitorName}" ({locationName}) is down - Elastic Synthetics',
+      defaultMessage: 'Monitor "{monitorName}" ({locationNames}) is down - Elastic Synthetics',
       values: {
         monitorName: '{{context.monitorName}}',
-        locationName: '{{context.locationName}}',
+        locationNames: '{{context.locationNames}}',
       },
     }
   ),
@@ -42,10 +42,10 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoverySubjectMessage',
     {
       defaultMessage:
-        'Monitor "{monitorName}" ({locationName}) {recoveryStatus} - Elastic Synthetics',
+        'Monitor "{monitorName}" ({locationNames}) {recoveryStatus} - Elastic Synthetics',
       values: {
         recoveryStatus: '{{context.recoveryStatus}}',
-        locationName: '{{context.locationName}}',
+        locationNames: '{{context.locationNames}}',
         monitorName: '{{context.monitorName}}',
       },
     }
@@ -55,13 +55,13 @@ export const SyntheticsMonitorStatusTranslations = {
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
-        'The alert for monitor "{monitorName}" from {locationName} is no longer active: {recoveryReason}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}  \n- Last error received: {lastErrorMessage}  \n{linkMessage}',
+        'The alert for monitor "{monitorName}" from {locationNames} is no longer active: {recoveryReason}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationNames}  \n- Last error received: {lastErrorMessage}  \n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrlLabel: '{{context.monitorUrlLabel}}',
         monitorUrl: '{{{context.monitorUrl}}}',
         monitorType: '{{context.monitorType}}',
-        locationName: '{{context.locationName}}',
+        locationNames: '{{context.locationNames}}',
         recoveryReason: '{{context.recoveryReason}}',
         lastErrorMessage: '{{{context.lastErrorMessage}}}',
         linkMessage: '{{{context.linkMessage}}}',
@@ -78,7 +78,7 @@ export const SyntheticsMonitorStatusTranslations = {
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.synthetics.rules.tls.defaultActionMessage', {
-    defaultMessage: `TLS certificate {commonName} {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    defaultMessage: `TLS certificate {commonName} {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationNames}`,
     values: {
       commonName: '{{context.commonName}}',
       issuer: '{{context.issuer}}',
@@ -87,11 +87,11 @@ export const TlsTranslations = {
       monitorName: '{{context.monitorName}}',
       monitorUrl: '{{{context.monitorUrl}}}',
       monitorType: '{{context.monitorType}}',
-      locationName: '{{context.locationName}}',
+      locationNames: '{{context.locationNames}}',
     },
   }),
   defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
-    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newStatus}\n- Previous status: {previousStatus}\n- Monitor: {monitorName}  \n- URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newStatus}\n- Previous status: {previousStatus}\n- Monitor: {monitorName}  \n- URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationNames}`,
     values: {
       summary: '{{context.summary}}',
       previousStatus: '{{context.previousStatus}}',
@@ -99,7 +99,7 @@ export const TlsTranslations = {
       monitorName: '{{context.monitorName}}',
       monitorUrl: '{{{context.monitorUrl}}}',
       monitorType: '{{context.monitorType}}',
-      locationName: '{{context.locationName}}',
+      locationNames: '{{context.locationNames}}',
     },
   }),
   name: i18n.translate('xpack.synthetics.rules.tls.clientName', {

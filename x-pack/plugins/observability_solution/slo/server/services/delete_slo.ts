@@ -6,7 +6,7 @@
  */
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -25,6 +25,7 @@ export class DeleteSLO {
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi
   ) {}
 
@@ -40,14 +41,14 @@ export class DeleteSLO {
     await this.transformManager.uninstall(rollupTransformId);
 
     await retryTransientEsErrors(() =>
-      this.esClient.ingest.deletePipeline(
+      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       )
     );
 
     await retryTransientEsErrors(() =>
-      this.esClient.ingest.deletePipeline(
+      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       )

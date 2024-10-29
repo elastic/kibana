@@ -16,9 +16,13 @@ function isTaskType(type?: string): type is InferenceTaskType {
 export const deleteInferenceEndpoint = async (
   client: ElasticsearchClient,
   type: string,
-  id: string
+  id: string,
+  scanUsage?: boolean
 ) => {
   if (isTaskType(type)) {
-    return await client.inference.deleteModel({ inference_id: id, task_type: type });
+    if (scanUsage) {
+      return await client.inference.delete({ inference_id: id, task_type: type, dry_run: true });
+    }
+    return await client.inference.delete({ inference_id: id, task_type: type, force: true });
   }
 };

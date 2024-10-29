@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, ClientMessage } from '@kbn/elastic-assistant';
+import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
@@ -14,7 +13,7 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
-import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
@@ -52,7 +51,7 @@ const transformMessageWithReplacements = ({
   };
 };
 
-export const getComments = ({
+export const getComments: GetAssistantMessages = ({
   abortStream,
   currentConversation,
   isFetchingResponse,
@@ -61,16 +60,8 @@ export const getComments = ({
   showAnonymizedValues,
   currentUserAvatar,
   setIsStreaming,
-}: {
-  abortStream: () => void;
-  currentConversation?: Conversation;
-  isFetchingResponse: boolean;
-  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
-  regenerateMessage: (conversationId: string) => void;
-  showAnonymizedValues: boolean;
-  currentUserAvatar?: UserAvatar;
-  setIsStreaming: (isStreaming: boolean) => void;
-}): EuiCommentProps[] => {
+  systemPromptContent,
+}) => {
   if (!currentConversation) return [];
 
   const regenerateMessageOfConversation = () => {
@@ -122,6 +113,32 @@ export const getComments = ({
   };
 
   return [
+    ...(systemPromptContent && currentConversation.messages.length
+      ? [
+          {
+            username: i18n.SYSTEM,
+            timelineAvatar: (
+              <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
+            ),
+            timestamp:
+              currentConversation.messages[0].timestamp.length === 0
+                ? new Date().toLocaleString()
+                : new Date(currentConversation.messages[0].timestamp).toLocaleString(),
+            children: (
+              <StreamComment
+                abortStream={abortStream}
+                content={systemPromptContent}
+                refetchCurrentConversation={refetchCurrentConversation}
+                regenerateMessage={regenerateMessageOfConversation}
+                setIsStreaming={setIsStreaming}
+                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                // we never need to append to a code block in the system comment, which is what this index is used for
+                index={999}
+              />
+            ),
+          },
+        ]
+      : []),
     ...currentConversation.messages.map((message, index) => {
       const isLastComment = index === currentConversation.messages.length - 1;
       const isUser = message.role === 'user';
@@ -139,7 +156,7 @@ export const getComments = ({
             : new Date(message.timestamp).toLocaleString()
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
-        eventColor: message.isError ? 'danger' : undefined,
+        eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
       };
 
       const isControlsEnabled = isLastComment && !isUser;
@@ -184,6 +201,7 @@ export const getComments = ({
             content={transformedMessage.content}
             index={index}
             isControlsEnabled={isControlsEnabled}
+            isError={message.isError}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}

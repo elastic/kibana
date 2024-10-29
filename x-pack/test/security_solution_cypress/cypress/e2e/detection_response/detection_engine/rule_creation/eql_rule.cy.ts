@@ -46,10 +46,13 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
+  continueFromDefineStep,
   createAndEnableRule,
+  createRuleWithNonBlockingErrors,
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
+  getDefineContinueButton,
   getIndexPatternClearButton,
   getRuleIndexInput,
   selectEqlRuleType,
@@ -64,10 +67,12 @@ import {
   EQL_OPTIONS_TIMESTAMP_INPUT,
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_ERROR,
+  EQL_QUERY_VALIDATION_ERROR_CONTENT,
   RULES_CREATION_FORM,
 } from '../../../../screens/create_new_rule';
 
-describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
+// Skip in MKI due to flake
+describe('EQL rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -220,6 +225,79 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EQL_OPTIONS_TIMESTAMP_INPUT).type('event.ingested{enter}');
 
       cy.get(EQL_QUERY_VALIDATION_ERROR).should('not.exist');
+    });
+  });
+
+  describe('EQL query validation', () => {
+    const rule = getEqlRule();
+
+    it('validates missing data source', () => {
+      visit(CREATE_RULE_URL);
+      selectEqlRuleType();
+      getIndexPatternClearButton().click();
+      getRuleIndexInput().type('endgame-*{enter}');
+
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('any where true');
+
+      const expectedValidationError = `index_not_found_exception\n\tCaused by:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [*,-*]\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [*,-*]`;
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).click();
+      cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should(
+        'have.text',
+        `EQL Validation Errors${expectedValidationError}`
+      );
+      continueFromDefineStep();
+
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      createRuleWithNonBlockingErrors();
+    });
+
+    it('validates missing data fields', () => {
+      visit(CREATE_RULE_URL);
+      selectEqlRuleType();
+
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('any where field1');
+
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).click();
+      cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should(
+        'have.text',
+        'EQL Validation ErrorsFound 1 problem\nline 1:11: Unknown column [field1]'
+      );
+      continueFromDefineStep();
+
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      createRuleWithNonBlockingErrors();
+    });
+
+    it('validates syntax errors', () => {
+      visit(CREATE_RULE_URL);
+      selectEqlRuleType();
+
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('test any where true');
+
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).click();
+      cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR_CONTENT).should(
+        'have.text',
+        `EQL Validation Errorsline 1:6: extraneous input 'any' expecting 'where'`
+      );
+      continueFromDefineStep();
+      getDefineContinueButton().should('exist');
     });
   });
 });

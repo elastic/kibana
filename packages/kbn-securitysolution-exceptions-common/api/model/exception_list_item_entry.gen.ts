@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /*
@@ -15,7 +16,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ListId, ListType } from '@kbn/securitysolution-lists-common/api/model/list_common.gen';
@@ -59,14 +60,17 @@ export const ExceptionListItemEntryExists = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntryNestedEntryItem = z.infer<
-  typeof ExceptionListItemEntryNestedEntryItem
->;
-export const ExceptionListItemEntryNestedEntryItem = z.union([
+export const ExceptionListItemEntryNestedEntryItemInternal = z.union([
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryExists,
 ]);
+
+export type ExceptionListItemEntryNestedEntryItem = z.infer<
+  typeof ExceptionListItemEntryNestedEntryItemInternal
+>;
+export const ExceptionListItemEntryNestedEntryItem =
+  ExceptionListItemEntryNestedEntryItemInternal as z.ZodType<ExceptionListItemEntryNestedEntryItem>;
 
 export type ExceptionListItemEntryNested = z.infer<typeof ExceptionListItemEntryNested>;
 export const ExceptionListItemEntryNested = z.object({
@@ -85,8 +89,7 @@ export const ExceptionListItemEntryMatchWildcard = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntry>;
-export const ExceptionListItemEntry = z.discriminatedUnion('type', [
+export const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryList,
@@ -94,6 +97,10 @@ export const ExceptionListItemEntry = z.discriminatedUnion('type', [
   ExceptionListItemEntryNested,
   ExceptionListItemEntryMatchWildcard,
 ]);
+
+export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntryInternal>;
+export const ExceptionListItemEntry =
+  ExceptionListItemEntryInternal as z.ZodType<ExceptionListItemEntry>;
 
 export type ExceptionListItemEntryArray = z.infer<typeof ExceptionListItemEntryArray>;
 export const ExceptionListItemEntryArray = z.array(ExceptionListItemEntry);

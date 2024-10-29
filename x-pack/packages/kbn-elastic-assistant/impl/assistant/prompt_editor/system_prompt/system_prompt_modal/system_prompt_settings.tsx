@@ -33,7 +33,7 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
     return (
       <>
         <EuiTitle size={'s'}>
-          <h2>{i18n.SETTINGS_TITLE}</h2>
+          <h2 data-test-subj={`systemPromptSettingsTitle`}>{i18n.SETTINGS_TITLE}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>

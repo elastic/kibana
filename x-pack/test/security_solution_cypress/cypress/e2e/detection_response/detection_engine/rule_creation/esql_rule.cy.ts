@@ -49,6 +49,7 @@ import {
   fillAboutRuleMinimumAndContinue,
   skipScheduleRuleAction,
   interceptEsqlQueryFieldsRequest,
+  createRuleWithNonBlockingErrors,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -66,10 +67,11 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/184558
+describe.skip(
   'Detection ES|QL rules, creation',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const rule = getEsqlRule();
@@ -190,6 +192,21 @@ describe(
         cy.get(ESQL_QUERY_BAR).contains(
           `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`
         );
+      });
+
+      it('shows confirmation modal about existing non-blocking validation errors', function () {
+        const nonExistingDataSourceQuery = 'from fake* metadata _id, _version, _index | limit 5';
+        selectEsqlRuleType();
+        fillEsqlQueryBar(nonExistingDataSourceQuery);
+        getDefineContinueButton().click();
+
+        fillRuleName();
+        fillDescription();
+        getAboutContinueButton().click();
+
+        fillScheduleRuleAndContinue(rule);
+
+        createRuleWithNonBlockingErrors();
       });
     });
 

@@ -9,6 +9,7 @@ import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/
 import type {
   DataSourceSelectionChangeHandler,
   DataSourceSelection,
+  AllDatasetSelection,
 } from '../../../common/data_source_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
@@ -39,6 +40,8 @@ import { DataViewsFilterParams } from '../../state_machines/data_views';
 export interface DataSourceSelectorProps {
   /* The generic data stream list */
   datasets: Dataset[] | null;
+  /* Class to represent the current "All logs" selection */
+  allSelection: AllDatasetSelection;
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError: Error | null;
   /* The current selection instance */

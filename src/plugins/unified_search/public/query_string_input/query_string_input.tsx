@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { PureComponent } from 'react';
@@ -14,7 +15,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiFormControlLayoutIcons,
   EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
@@ -791,14 +792,15 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       ) : undefined;
 
     const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
-    const inputClassName = classNames('kbnQueryBar__textarea', {
+    const inputClassName = classNames('kbnQueryBar__textarea', 'eui-scrollBar', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
       'kbnQueryBar__textarea--withPrepend': prependElement,
-      'kbnQueryBar__textarea--isSuggestionsVisible':
+    });
+    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap', {
+      'kbnQueryBar__textareaWrap--withSuggestionVisible':
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
-    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {prependElement}
@@ -829,6 +831,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 disabled={this.props.isDisabled}
                 className={inputClassName}
                 fullWidth
+                resize="none"
                 rows={1}
                 id={this.textareaId}
                 autoFocus={
@@ -851,32 +854,28 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
-              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
-                  <EuiIcon
-                    className="euiFormControlLayoutCustomIcon__icon"
-                    aria-hidden="true"
-                    type={this.props.iconType}
-                  />
-                </div>
+                <EuiFormControlLayoutIcons
+                  side="left"
+                  iconsPosition="absolute"
+                  icon={{ type: this.props.iconType }}
+                  isDisabled={this.props.isDisabled}
+                />
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
-                  <button
-                    type="button"
-                    className="euiFormControlLayoutClearButton"
-                    title={strings.getQueryBarClearInputLabel()}
-                    onClick={() => {
+                <EuiFormControlLayoutIcons
+                  side="right"
+                  iconsPosition="absolute"
+                  clear={{
+                    onClick: () => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {
                         this.onSubmit({ query: '', language: this.props.query.language });
                       }
-                    }}
-                  >
-                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
-                  </button>
-                </div>
+                    },
+                    title: strings.getQueryBarClearInputLabel(),
+                  }}
+                />
               ) : null}
             </div>
             <EuiPortal>

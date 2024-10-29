@@ -49,9 +49,9 @@ const CREATE_INDEX_SNIPPET = `PUT /my-index
 }`;
 
 const INGEST_SNIPPET = `POST /my-index/_doc
-{ 
-  "vector": [1, 5, -20], 
-  "text": "hello world" 
+{
+  "vector": [1, 5, -20],
+  "text": "hello world"
 }`;
 
 const QUERY_SNIPPET = `POST /my-index/_search
@@ -74,7 +74,7 @@ export const VectorSearchGuide: React.FC = () => {
       restrictWidth
       pageHeader={{
         description: (
-          <p>
+          <>
             <FormattedMessage
               id="xpack.enterpriseSearch.vectorSearch.guide.description"
               defaultMessage="Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases."
@@ -89,7 +89,7 @@ export const VectorSearchGuide: React.FC = () => {
                 defaultMessage="Learn more about vector search."
               />
             </EuiLink>
-          </p>
+          </>
         ),
         pageTitle: (
           <FormattedMessage

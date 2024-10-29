@@ -6,9 +6,9 @@
  */
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { mlJobService } from './job_service';
+import type { MlJobService } from './job_service';
 import type { MlIndexUtils } from '../util/index_service';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
@@ -19,7 +19,11 @@ export class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
-  constructor(private mlApiServices: MlApiServices, private mlIndexUtils: MlIndexUtils) {}
+  constructor(
+    private mlApi: MlApi,
+    private mlIndexUtils: MlIndexUtils,
+    private mlJobService: MlJobService
+  ) {}
 
   // Populate the service with the FieldFormats for the list of jobs with the
   // specified IDs. List of Kibana data views is passed, with a title
@@ -36,11 +40,11 @@ export class FieldFormatService {
       await Promise.all(
         jobIds.map(async (jobId) => {
           let jobObj;
-          if (this.mlApiServices) {
-            const { jobs } = await this.mlApiServices.getJobs({ jobId });
+          if (this.mlApi) {
+            const { jobs } = await this.mlApi.getJobs({ jobId });
             jobObj = jobs[0];
           } else {
-            jobObj = mlJobService.getJob(jobId);
+            jobObj = this.mlJobService.getJob(jobId);
           }
           return {
             jobId,
@@ -81,11 +85,11 @@ export class FieldFormatService {
 
   async getFormatsForJob(jobId: string): Promise<any[]> {
     let jobObj;
-    if (this.mlApiServices) {
-      const { jobs } = await this.mlApiServices.getJobs({ jobId });
+    if (this.mlApi) {
+      const { jobs } = await this.mlApi.getJobs({ jobId });
       jobObj = jobs[0];
     } else {
-      jobObj = mlJobService.getJob(jobId);
+      jobObj = this.mlJobService.getJob(jobId);
     }
     const detectors = jobObj.analysis_config.detectors || [];
     const formatsByDetector: any[] = [];

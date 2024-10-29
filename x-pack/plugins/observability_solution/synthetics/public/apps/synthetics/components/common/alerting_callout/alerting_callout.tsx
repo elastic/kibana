@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useSessionStorage } from 'react-use';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -34,6 +34,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const { settings } = useSelector(selectDynamicSettings);
 
   const hasDefaultConnector = !settings || !isEmpty(settings?.defaultConnectors);
+  const defaultRuleEnabled = settings?.defaultTLSRuleEnabled || settings?.defaultStatusRuleEnabled;
 
   const { canSave } = useSyntheticsSettingsContext();
 
@@ -55,7 +56,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     (monitorsLoaded &&
       monitors.some((monitor) => monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
-  const showCallout = !hasDefaultConnector && hasAlertingConfigured;
+  const showCallout = !hasDefaultConnector && hasAlertingConfigured && defaultRuleEnabled;
   const hasDefaultRules =
     !rulesLoaded || Boolean(defaultRules?.statusRule && defaultRules?.tlsRule);
   const missingRules = !hasDefaultRules && !canSave;
@@ -111,21 +112,22 @@ const MissingRulesCallout = ({
       color="warning"
       iconType="warning"
     >
-      <p>
-        {configCallout}
-        {rulesCallout}
-      </p>
+      {configCallout}
+      {rulesCallout}
       {missingConfig && (
-        <EuiButton
-          data-test-subj="syntheticsAlertingCalloutLinkButtonButton"
-          href={url}
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.synthetics.alerting.noConnectorsCallout.button"
-            defaultMessage="Configure now"
-          />
-        </EuiButton>
+        <>
+          <EuiSpacer size="m" />
+          <EuiButton
+            data-test-subj="syntheticsAlertingCalloutLinkButtonButton"
+            href={url}
+            color="warning"
+          >
+            <FormattedMessage
+              id="xpack.synthetics.alerting.noConnectorsCallout.button"
+              defaultMessage="Configure now"
+            />
+          </EuiButton>
+        </>
       )}
       <EuiButtonEmpty
         data-test-subj="syntheticsMissingRulesCalloutRemindMeLaterButton"

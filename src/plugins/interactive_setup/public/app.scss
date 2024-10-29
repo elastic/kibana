@@ -9,10 +9,10 @@
 }
 
 .interactiveSetup__logo {
+  margin-bottom: $euiSizeXL;
+
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
-
-  margin-bottom: $euiSizeXL;
 }
 
 .interactiveSetup__content {

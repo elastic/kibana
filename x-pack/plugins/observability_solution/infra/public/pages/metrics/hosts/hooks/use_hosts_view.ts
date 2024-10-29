@@ -19,20 +19,20 @@ import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
 import {
-  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
 import { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
-  { type: 'cpuV2' },
-  { type: 'diskSpaceUsage' },
-  { type: 'memory' },
-  { type: 'memoryFree' },
-  { type: 'normalizedLoad1m' },
-  { type: 'rxV2' },
-  { type: 'txV2' },
+const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
+  'cpuV2',
+  'diskSpaceUsage',
+  'memory',
+  'memoryFree',
+  'normalizedLoad1m',
+  'rxV2',
+  'txV2',
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
@@ -59,14 +59,14 @@ export const useHostsView = () => {
     async (callApi) => {
       const start = performance.now();
       const metricsResponse = await callApi<GetInfraMetricsResponsePayload>(
-        BASE_INFRA_METRICS_PATH,
+        `${BASE_INFRA_METRICS_PATH}/host`,
         {
           method: 'POST',
           body: payload,
         }
       );
       const duration = performance.now() - start;
-      telemetry?.reportPerformanceMetricEvent(
+      telemetry.reportPerformanceMetricEvent(
         'infra_hosts_table_load',
         duration,
         { key1: 'data_load', value1: duration },
@@ -99,13 +99,10 @@ const createInfraMetricsRequest = ({
   esQuery: { bool: BoolQuery };
   dateRange: StringDateRange;
   limit: number;
-}): GetInfraMetricsRequestBodyPayload => ({
-  type: 'host',
+}): GetInfraMetricsRequestBodyPayloadClient => ({
   query: esQuery,
-  range: {
-    from: dateRange.from,
-    to: dateRange.to,
-  },
+  from: dateRange.from,
+  to: dateRange.to,
   metrics: HOST_TABLE_METRICS,
   limit,
 });

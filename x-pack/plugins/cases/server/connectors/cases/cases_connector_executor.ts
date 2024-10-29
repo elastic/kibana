@@ -13,7 +13,10 @@ import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type {
+  CustomFieldsConfiguration,
+  TemplatesConfiguration,
+} from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
@@ -34,7 +37,7 @@ import {
   convertValueToString,
   partitionByNonFoundErrors,
   partitionRecordsByError,
-  buildRequiredCustomFieldsForRequest,
+  buildCustomFieldsForRequest,
 } from './utils';
 import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
@@ -693,14 +696,20 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
-    const customFieldsConfigurationMap = await this.getCustomFieldsConfiguration();
+    const { customFieldsConfigurationMap, templatesConfigurationMap } =
+      await this.getCustomFieldsAndTemplatesConfiguration();
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
 
         bulkCreateReq.push(
-          this.getCreateCaseRequest(params, data, customFieldsConfigurationMap.get(params.owner))
+          this.getCreateCaseRequest(
+            params,
+            data,
+            customFieldsConfigurationMap.get(params.owner),
+            templatesConfigurationMap.get(params.owner)
+          )
         );
       }
     }
@@ -742,18 +751,28 @@ export class CasesConnectorExecutor {
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId,
-    customFieldsConfigurations?: CustomFieldsConfiguration
+    customFieldsConfigurations?: CustomFieldsConfiguration,
+    templatesConfigurations?: TemplatesConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
-    const requiredCustomFields = buildRequiredCustomFieldsForRequest(customFieldsConfigurations);
+    const selectedTemplate = templatesConfigurations?.find(
+      (template) => template.key === params.templateId
+    );
+    const caseFieldsFromTemplate = selectedTemplate ? selectedTemplate.caseFields : null;
+
+    const builtCustomFields = buildCustomFieldsForRequest(
+      customFieldsConfigurations,
+      caseFieldsFromTemplate?.customFields
+    );
+
     this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][getCreateCaseRequest] Built ${requiredCustomFields.length} required custom fields for case with id ${caseId}`,
+      `[CasesConnector][CasesConnectorExecutor][getCreateCaseRequest] Built ${builtCustomFields.length} required custom fields for case with id ${caseId}`,
       this.getLogMetadata(params, {
         labels: {
           caseId,
-          totalCreatedCustomFields: requiredCustomFields.length,
+          totalCreatedCustomFields: builtCustomFields.length,
         },
         tags: ['case-connector:getCreateCaseRequest'],
       })
@@ -761,16 +780,29 @@ export class CasesConnectorExecutor {
 
     return {
       id: caseId,
-      description: this.getCaseDescription(params, flattenGrouping),
-      tags: this.getCaseTags(params, flattenGrouping),
-      title: this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
-      connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+      description:
+        caseFieldsFromTemplate?.description ?? this.getCaseDescription(params, flattenGrouping),
+      tags: this.getCaseTags(params, flattenGrouping, caseFieldsFromTemplate?.tags),
+      title:
+        caseFieldsFromTemplate?.title ??
+        this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
+      connector: caseFieldsFromTemplate?.connector ?? {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
       /**
        * TODO: Turn on for Security solution
        */
-      settings: { syncAlerts: false },
+      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts: false },
+      ...(caseFieldsFromTemplate?.assignees
+        ? { assignees: caseFieldsFromTemplate?.assignees }
+        : {}),
+      ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
+      ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
       owner: params.owner,
-      customFields: requiredCustomFields,
+      customFields: builtCustomFields,
     };
   }
 
@@ -826,7 +858,11 @@ export class CasesConnectorExecutor {
     return description;
   }
 
-  private getCaseTags(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+  private getCaseTags(
+    params: CasesConnectorRunParams,
+    grouping: GroupedAlerts['grouping'],
+    templateCaseTags?: string[]
+  ) {
     const ruleTags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
 
     return [
@@ -834,6 +870,7 @@ export class CasesConnectorExecutor {
       `rule:${params.rule.id}`,
       ...this.getGroupingAsTags(grouping),
       ...ruleTags,
+      ...(templateCaseTags ?? []),
     ]
       .splice(0, MAX_TAGS_PER_CASE)
       .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
@@ -989,10 +1026,16 @@ export class CasesConnectorExecutor {
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
-    const customFieldsConfigurationMap = await this.getCustomFieldsConfiguration();
+    const { customFieldsConfigurationMap, templatesConfigurationMap } =
+      await this.getCustomFieldsAndTemplatesConfiguration();
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
-      this.getCreateCaseRequest(params, record, customFieldsConfigurationMap.get(params.owner))
+      this.getCreateCaseRequest(
+        params,
+        record,
+        customFieldsConfigurationMap.get(params.owner),
+        templatesConfigurationMap.get(params.owner)
+      )
     );
 
     const idsToCreate = bulkCreateReq.map(({ id }) => id);
@@ -1143,12 +1186,21 @@ export class CasesConnectorExecutor {
     return { tags: ['cases-connector', `rule:${params.rule.id}`, ...tags], labels };
   }
 
-  private async getCustomFieldsConfiguration(): Promise<Map<string, CustomFieldsConfiguration>> {
+  private async getCustomFieldsAndTemplatesConfiguration(): Promise<{
+    customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+    templatesConfigurationMap: Map<string, TemplatesConfiguration>;
+  }> {
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][getCustomFieldsConfiguration] Getting case configurations`,
       { tags: ['case-connector:getCustomFieldsConfiguration'] }
     );
     const configurations = await this.casesClient.configure.get();
-    return new Map(configurations.map((conf) => [conf.owner, conf.customFields]));
+    const customFieldsConfigurationMap = new Map(
+      configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+    const templatesConfigurationMap = new Map(
+      configurations.map((config) => [config.owner, config.templates])
+    );
+    return { customFieldsConfigurationMap, templatesConfigurationMap };
   }
 }

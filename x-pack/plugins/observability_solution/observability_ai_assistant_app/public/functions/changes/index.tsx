@@ -53,7 +53,7 @@ function toChangeListItem(
   item: LogChangeWithTimeseries | MetricChangeWithTimeseries
 ): ChangeListItem {
   return {
-    label: 'regex' in item ? item.regex : item.key,
+    label: 'regex' in item ? (item.regex as string) : item.key,
     timeseries: item.over_time,
     change:
       item.changes && item.changes.p_value !== undefined && item.changes.time !== undefined

@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 
 export const TimeWindowSchema = schema.object({
   unit: schema.oneOf(
@@ -22,21 +23,34 @@ export const TimeWindowSchema = schema.object({
 export const NumberOfChecksSchema = schema.object({
   numberOfChecks: schema.number({
     defaultValue: 5,
+    min: 1,
+    max: 100,
   }),
 });
 
 export const StatusRuleConditionSchema = schema.object({
-  groupByLocation: schema.maybe(schema.boolean()),
-  downThreshold: schema.maybe(schema.number()),
+  groupBy: schema.maybe(
+    schema.string({
+      defaultValue: 'locationId',
+    })
+  ),
+  downThreshold: schema.maybe(
+    schema.number({
+      defaultValue: 3,
+    })
+  ),
+  locationsThreshold: schema.maybe(
+    schema.number({
+      defaultValue: 1,
+    })
+  ),
   window: schema.oneOf([
-    schema.object({
-      percentOfLocations: schema.number(),
-    }),
     schema.object({
       time: TimeWindowSchema,
     }),
     NumberOfChecksSchema,
   ]),
+  includeRetests: schema.maybe(schema.boolean()),
 });
 
 export const StatusRulePramsSchema = schema.object({
@@ -55,30 +69,39 @@ export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;
 
 export const getConditionType = (condition?: StatusRuleCondition) => {
   let numberOfChecks = 1;
-  const isLocationBased = condition && 'percentOfLocations' in condition.window;
-  const isTimeWindow = condition && 'time' in condition.window;
-  const isChecksBased = condition && 'numberOfChecks' in condition.window;
+  let timeWindow: TimeWindow = { unit: 'm', size: 1 };
+  if (isEmpty(condition) || !condition?.window) {
+    return {
+      isLocationBased: false,
+      useTimeWindow: false,
+      timeWindow,
+      useLatestChecks: true,
+      numberOfChecks,
+      downThreshold: 1,
+      locationsThreshold: 1,
+      isDefaultRule: true,
+    };
+  }
+  const useTimeWindow = condition.window && 'time' in condition.window;
+  const useLatestChecks = condition.window && 'numberOfChecks' in condition.window;
 
-  if (isChecksBased) {
+  if (useLatestChecks) {
     numberOfChecks =
-      condition && 'numberOfChecks' in condition?.window ? condition.window.numberOfChecks : 1;
+      condition && 'numberOfChecks' in condition.window ? condition.window.numberOfChecks : 1;
   }
 
-  if (isTimeWindow || isLocationBased) {
+  if (useTimeWindow) {
+    timeWindow = condition.window.time;
     numberOfChecks = condition?.downThreshold ?? 1;
   }
 
-  const percentOfLocations =
-    condition && 'percentOfLocations' in condition.window
-      ? condition.window.percentOfLocations ?? 100
-      : 100;
-
   return {
-    isLocationBased,
-    isTimeWindow,
-    isChecksBased,
+    useTimeWindow,
+    timeWindow,
+    useLatestChecks,
     numberOfChecks,
-    percentOfLocations,
+    locationsThreshold: condition?.locationsThreshold ?? 1,
     downThreshold: condition?.downThreshold ?? 1,
+    isDefaultRule: isEmpty(condition),
   };
 };

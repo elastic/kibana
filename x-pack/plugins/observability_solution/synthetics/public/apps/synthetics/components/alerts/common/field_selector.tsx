@@ -34,7 +34,7 @@ const ALL_OPTION = {
   label: i18n.translate('xpack.synthetics.filter.alert.allLabel', {
     defaultMessage: 'All',
   }),
-  value: 'All',
+  value: ALL_VALUE,
 };
 
 export function FieldSelector({
@@ -61,30 +61,47 @@ export function FieldSelector({
         fullWidth
         isLoading={isLoading}
         onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
-          // removes ALL value option if a specific value is selected
-          if (selected.length && selected.at(-1)?.value !== ALL_VALUE) {
-            onChange(selected.filter((val) => val.value !== ALL_VALUE).map((val) => val.value!));
-            return;
-          }
-          // removes specific value if ALL value is selected
-          if (selected.length && selected.at(-1)?.value === ALL_VALUE) {
-            onChange([]);
-            return;
-          }
-
-          onChange([]);
+          onFieldChange(selected, onChange);
         }}
         onSearchChange={(val: string) => debouncedSearch(val)}
         options={options}
-        selectedOptions={value?.map((val) => ({
-          value: val,
-          label: val,
-          'data-test-subj': `${dataTestSubj}SelectedValue`,
-        }))}
+        selectedOptions={value?.map((val) => {
+          const option = options.find((opt) => opt.value === val);
+          if (option) {
+            return {
+              value: val,
+              label: option.label,
+              'data-test-subj': `${dataTestSubj}SelectedValue`,
+            };
+          }
+          return {
+            value: val,
+            label: val,
+            'data-test-subj': `${dataTestSubj}SelectedValue`,
+          };
+        })}
       />
     </EuiFormRow>
   );
 }
+
+export const onFieldChange = (
+  selected: Array<EuiComboBoxOptionOption<string>>,
+  onChange: (selected: string[]) => void
+) => {
+  // removes ALL value option if a specific value is selected
+  if (selected.length && selected.at(-1)?.value !== ALL_VALUE) {
+    onChange(selected.filter((val) => val.value !== ALL_VALUE).map((val) => val.value!));
+    return;
+  }
+  // removes specific value if ALL value is selected
+  if (selected.length && selected.at(-1)?.value === ALL_VALUE) {
+    onChange([]);
+    return;
+  }
+
+  onChange([]);
+};
 
 function createOptions(suggestions: Suggestion[] = []): Option[] {
   return suggestions
