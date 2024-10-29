@@ -174,6 +174,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
+      getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
+
       getExceptionListClient: () => {
         if (!lists) {
           return null;

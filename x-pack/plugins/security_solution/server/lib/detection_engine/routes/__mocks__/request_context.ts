@@ -80,6 +80,7 @@ export const createMockClients = () => {
       packages: packageServiceMock.createClient(),
     },
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
+    getInferenceClient: jest.fn(),
   };
 };
 
@@ -166,6 +167,7 @@ const createSecuritySolutionRequestContextMock = (
     getAuditLogger: jest.fn(() => mockAuditLogger),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
+    getInferenceClient: jest.fn(() => clients.getInferenceClient()),
   };
 };
 

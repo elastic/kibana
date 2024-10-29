@@ -19,22 +19,6 @@ import { z } from '@kbn/zod';
 import { OriginalRule, RuleMigration, RuleMigrationTaskStats } from '../../rule_migration.gen';
 import { ConnectorId, LangSmithOptions } from '../common.gen';
 
-export type CancelRuleMigrationRequestParams = z.infer<typeof CancelRuleMigrationRequestParams>;
-export const CancelRuleMigrationRequestParams = z.object({
-  migration_id: z.string(),
-});
-export type CancelRuleMigrationRequestParamsInput = z.input<
-  typeof CancelRuleMigrationRequestParams
->;
-
-export type CancelRuleMigrationResponse = z.infer<typeof CancelRuleMigrationResponse>;
-export const CancelRuleMigrationResponse = z.object({
-  /**
-   * Indicates the migration has been cancelled.
-   */
-  cancelled: z.boolean(),
-});
-
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.array(OriginalRule);
 export type CreateRuleMigrationRequestBodyInput = z.input<typeof CreateRuleMigrationRequestBody>;
@@ -80,4 +64,18 @@ export const StartRuleMigrationResponse = z.object({
    * Indicates the migration has been started. `false` means the migration does not need to be started.
    */
   started: z.boolean(),
+});
+
+export type StopRuleMigrationRequestParams = z.infer<typeof StopRuleMigrationRequestParams>;
+export const StopRuleMigrationRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type StopRuleMigrationRequestParamsInput = z.input<typeof StopRuleMigrationRequestParams>;
+
+export type StopRuleMigrationResponse = z.infer<typeof StopRuleMigrationResponse>;
+export const StopRuleMigrationResponse = z.object({
+  /**
+   * Indicates the migration has been stopped.
+   */
+  stopped: z.boolean(),
 });

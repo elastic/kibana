@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { naturalLanguageToEsql, type InferenceClient } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import { naturalLanguageToEsql, type InferenceClient } from '@kbn/inference-plugin/server';
 import { lastValueFrom } from 'rxjs';
 
 export type EsqlKnowledgeBaseCaller = (input: string) => Promise<string>;

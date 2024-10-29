@@ -48,8 +48,6 @@ components:
       description: The migrated elastic rule.
       required:
         - title
-        - query
-        - query_language
       properties:
         title:
           type: string
@@ -68,7 +66,6 @@ components:
           description: The translated elastic query language.
           enum:
             - esql
-          default: esql
         prebuilt_rule_id:
           type: string
           description: The Elastic prebuilt rule id matched.
@@ -86,7 +83,7 @@ components:
         - status
         - created_by
       properties:
-        "@timestamp":
+        '@timestamp':
           type: string
           description: The moment of creation
         migration_id:
@@ -113,7 +110,7 @@ components:
             - pending
             - processing
             - finished
-            - error
+            - failed
           default: pending
         comments:
           type: array
@@ -132,35 +129,41 @@ components:
       description: The rule migration task stats object.
       required:
         - status
-        - total_rules
-        - finished
-        - processing
-        - pending
-        - failed
+        - rules
       properties:
-        status:  
+        status:
           type: string
           description: Indicates if the migration task status.
           enum:
-            - not_started
-            - processing
+            - ready
+            - running
+            - stopped
             - done
-            - cancelled
-        total:
-          type: integer
-          description: The total number of rules to migrate.
-        finished:
-          type: integer
-          description: The number of rules that have been migrated.
-        processing:
-          type: integer
-          description: The number of rules that are being migrated.
-        pending:
-          type: integer
-          description: The number of rules that are pending migration.
-        failed:
-          type: integer
-          description: The number of rules that have failed migration.
-        last_iteration_at:
+        rules:
+          type: object
+          description: The rules migration stats.
+          required:
+            - total
+            - finished
+            - processing
+            - pending
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of rules to migrate.
+            finished:
+              type: integer
+              description: The number of rules that have been migrated.
+            processing:
+              type: integer
+              description: The number of rules that are being migrated.
+            pending:
+              type: integer
+              description: The number of rules that are pending migration.
+            failed:
+              type: integer
+              description: The number of rules that have failed migration.
+        last_updated_at:
           type: string
-          description: The moment of the last execution.
+          description: The moment of the last update.

@@ -6,44 +6,39 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { AIMessage } from '@langchain/core/messages';
 import { migrateRuleState } from './state';
 import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
-import { getEsqlTranslationPrompt } from './prompts';
-import { getEsqlKnowledgeBase, type EsqlKnowledgeBaseCaller } from './esql_knowledge_base_caller';
+import { processResponseNode } from './nodes/process_response';
+import { getTranslateQueryNode } from './nodes/translate_query';
+import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 
-type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
-
-const createTranslationNode = (esqlKnowledgeBaseCaller: EsqlKnowledgeBaseCaller): GraphNode => {
-  return async (state) => {
-    const input = getEsqlTranslationPrompt(state);
-    const response = await esqlKnowledgeBaseCaller(input);
-    return { messages: [new AIMessage(response)] };
-  };
-};
-
-const responseNode: GraphNode = async (state) => {
-  const messages = state.messages;
-  const lastMessage = messages[messages.length - 1] as AIMessage;
-  return { response: lastMessage.content as string };
-};
-
-export function getMigrateRuleGraph({
+export function getRuleMigrationAgent({
+  model,
   inferenceClient,
+  prebuiltRulesMap,
   connectorId,
   logger,
 }: MigrateRuleGraphParams) {
-  const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
-  const translationNode = createTranslationNode(esqlKnowledgeBaseCaller);
+  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap, logger });
+  const translationNode = getTranslateQueryNode({ inferenceClient, connectorId, logger });
 
   const translateRuleGraph = new StateGraph(migrateRuleState)
     // Nodes
+    .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translation', translationNode)
-    .addNode('processResponse', responseNode)
+    .addNode('processResponse', processResponseNode)
     // Edges
-    .addEdge(START, 'translation')
+    .addEdge(START, 'matchPrebuiltRule')
+    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
     .addEdge('translation', 'processResponse')
     .addEdge('processResponse', END);
 
   return translateRuleGraph.compile();
 }
+
+const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
+  if (state.elastic_rule?.prebuilt_rule_id) {
+    return END;
+  }
+  return 'translation';
+};

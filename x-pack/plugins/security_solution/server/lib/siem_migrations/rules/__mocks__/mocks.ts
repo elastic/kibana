@@ -13,8 +13,18 @@ export const createRuleMigrationDataClient = () => ({
   finish: jest.fn(),
 });
 export const createRuleMigrationTaskClient = () => ({
-  run: jest.fn().mockResolvedValue({ processed: 0 }),
-  cancel: jest.fn(),
+  start: jest.fn().mockResolvedValue({ started: true }),
+  stop: jest.fn().mockResolvedValue({ stopped: true }),
+  stats: jest.fn().mockResolvedValue({
+    status: 'done',
+    rules: {
+      total: 1,
+      finished: 1,
+      processing: 0,
+      pending: 0,
+      failed: 0,
+    },
+  }),
 });
 
 export const createRuleMigrationClient = () => ({

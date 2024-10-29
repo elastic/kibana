@@ -71,11 +71,11 @@ export const ElasticRule = z.object({
   /**
    * The translated elastic query.
    */
-  query: z.string(),
+  query: z.string().optional(),
   /**
    * The translated elastic query language.
    */
-  query_language: z.literal('esql').default('esql'),
+  query_language: z.literal('esql').optional(),
   /**
    * The Elastic prebuilt rule id matched.
    */
@@ -135,29 +135,34 @@ export const RuleMigrationTaskStats = z.object({
   /**
    * Indicates if the migration task status.
    */
-  status: z.enum(['not_started', 'processing', 'done', 'cancelled']),
+  status: z.enum(['ready', 'running', 'stopped', 'done']),
   /**
-   * The total number of rules to migrate.
+   * The rules migration stats.
    */
-  total: z.number().int().optional(),
+  rules: z.object({
+    /**
+     * The total number of rules to migrate.
+     */
+    total: z.number().int(),
+    /**
+     * The number of rules that have been migrated.
+     */
+    finished: z.number().int(),
+    /**
+     * The number of rules that are being migrated.
+     */
+    processing: z.number().int(),
+    /**
+     * The number of rules that are pending migration.
+     */
+    pending: z.number().int(),
+    /**
+     * The number of rules that have failed migration.
+     */
+    failed: z.number().int(),
+  }),
   /**
-   * The number of rules that have been migrated.
+   * The moment of the last update.
    */
-  finished: z.number().int(),
-  /**
-   * The number of rules that are being migrated.
-   */
-  processing: z.number().int(),
-  /**
-   * The number of rules that are pending migration.
-   */
-  pending: z.number().int(),
-  /**
-   * The number of rules that have failed migration.
-   */
-  failed: z.number().int(),
-  /**
-   * The moment of the last execution.
-   */
-  last_iteration_at: z.string().optional(),
+  last_updated_at: z.string().optional(),
 });

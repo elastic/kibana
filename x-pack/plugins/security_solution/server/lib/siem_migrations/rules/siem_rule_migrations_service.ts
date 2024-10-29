@@ -49,20 +49,20 @@ export class SiemRuleMigrationsService {
     return {
       data: dataClient,
       task: {
-        start: (migrationId: string) => {
-          return this.taskRunner.start({ migrationId, request, currentUser, dataClient });
+        start: (params) => {
+          return this.taskRunner.start({ ...params, currentUser, dataClient });
         },
-        stats: async (migrationId: string) => {
+        stats: async (migrationId) => {
           return this.taskRunner.stats({ migrationId, dataClient });
         },
-        cancel: (migrationId: string) => {
-          return this.taskRunner.cancel({ migrationId, dataClient });
+        stop: (migrationId) => {
+          return this.taskRunner.stop({ migrationId, dataClient });
         },
       },
     };
   }
 
   stop() {
-    this.taskRunner.stop();
+    this.taskRunner.stopAll();
   }
 }

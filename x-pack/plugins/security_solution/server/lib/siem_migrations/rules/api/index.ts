@@ -10,7 +10,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { registerSiemRuleMigrationsCreateRoute } from './create';
 import { registerSiemRuleMigrationsStartRoute } from './start';
 import { registerSiemRuleMigrationsStatsRoute } from './stats';
-import { registerSiemRuleMigrationsCancelRoute } from './cancel';
+import { registerSiemRuleMigrationsStopRoute } from './stop';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -19,5 +19,5 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsCreateRoute(router, logger);
   registerSiemRuleMigrationsStartRoute(router, logger);
   registerSiemRuleMigrationsStatsRoute(router, logger);
-  registerSiemRuleMigrationsCancelRoute(router, logger);
+  registerSiemRuleMigrationsStopRoute(router, logger);
 };

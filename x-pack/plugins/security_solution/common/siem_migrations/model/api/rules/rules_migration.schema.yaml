@@ -118,12 +118,12 @@ paths:
         204:
           description: Indicates the migration id was not found.
 
-  /internal/siem_migrations/rules/{migration_id}/cancel:
+  /internal/siem_migrations/rules/{migration_id}/stop:
     put:
-      summary: Cancels an existing rule migration
-      operationId: CancelRuleMigration
+      summary: Stops an existing rule migration
+      operationId: StopRuleMigration
       x-codegen-enabled: true
-      description: Cancels a running SIEM rules migration using the migration id provided
+      description: Stops a running SIEM rules migration using the migration id provided
       tags:
         - SIEM Rule Migrations
       parameters:
@@ -132,19 +132,19 @@ paths:
           required: true
           schema:
             type: string
-            description: The migration id to cancel
+            description: The migration id to stop
       responses:
         200:
-          description: Indicates migration task cancellation has been processed successfully.
+          description: Indicates migration task stop has been processed successfully.
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - cancelled
+                  - stopped
                 properties:
-                  cancelled:
+                  stopped:
                     type: boolean
-                    description: Indicates the migration has been cancelled.
+                    description: Indicates the migration has been stopped.
         204:
           description: Indicates the migration id was not found running.

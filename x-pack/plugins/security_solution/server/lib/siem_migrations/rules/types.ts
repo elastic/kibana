@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  IClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { Subject } from 'rxjs';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleMigration,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from './data_stream/rule_migrations_data_client';
-import type { RuleMigrationTaskCancelResult, RuleMigrationTaskStartResult } from './task/types';
+import type { RuleMigrationTaskStopResult, RuleMigrationTaskStartResult } from './task/types';
 
 export interface StoredRuleMigration extends RuleMigration {
   _id: string;
@@ -31,11 +40,21 @@ export interface SiemRuleMigrationsCreateClientParams {
   spaceId: string;
 }
 
+export interface SiemRuleMigrationsStartTaskParams {
+  migrationId: string;
+  connectorId: string;
+  invocationConfig: RunnableConfig;
+  inferenceClient: InferenceClient;
+  actionsClient: ActionsClient;
+  rulesClient: RulesClient;
+  soClient: SavedObjectsClientContract;
+}
+
 export interface SiemRuleMigrationsClient {
   data: RuleMigrationsDataClient;
   task: {
-    start: (migrationId: string) => Promise<RuleMigrationTaskStartResult>;
+    start: (params: SiemRuleMigrationsStartTaskParams) => Promise<RuleMigrationTaskStartResult>;
     stats: (migrationId: string) => Promise<RuleMigrationTaskStats>;
-    cancel: (migrationId: string) => Promise<RuleMigrationTaskCancelResult>;
+    stop: (migrationId: string) => Promise<RuleMigrationTaskStopResult>;
   };
 }

@@ -7,6 +7,8 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { StartRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
 import {
   StartRuleMigrationRequestBody,
@@ -37,14 +39,46 @@ export const registerSiemRuleMigrationsStartRoute = (
       },
       async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
         const migrationId = req.params.migration_id;
-        // const { langSmithOptions, connectorId } = req.body;
+        const { langSmithOptions, connectorId } = req.body;
+
         try {
-          const ctx = await context.resolve(['core', 'actions', 'securitySolution']);
+          const ctx = await context.resolve([
+            'core',
+            'actions',
+            'alerting',
+            'securitySolution',
+            'licensing',
+          ]);
+          if (!ctx.licensing.license.hasAtLeast('enterprise')) {
+            return res.forbidden({
+              body: 'You must have a trial or enterprise license to use this feature',
+            });
+          }
+
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+          const inferenceClient = ctx.securitySolution.getInferenceClient();
+          const actionsClient = ctx.actions.getActionsClient();
+          const soClient = ctx.core.savedObjects.client;
+          const rulesClient = ctx.alerting.getRulesClient();
 
-          const { found, started } = await ruleMigrationsClient.task.start(migrationId);
+          const invocationConfig = {
+            callbacks: [
+              new APMTracer({ projectName: langSmithOptions?.project_name ?? 'default' }, logger),
+              ...getLangSmithTracer({ ...langSmithOptions, logger }),
+            ],
+          };
 
-          if (!found) {
+          const { exists, started } = await ruleMigrationsClient.task.start({
+            migrationId,
+            connectorId,
+            invocationConfig,
+            inferenceClient,
+            actionsClient,
+            soClient,
+            rulesClient,
+          });
+
+          if (!exists) {
             return res.noContent();
           }
           return res.ok({ body: { started } });

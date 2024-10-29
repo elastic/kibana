@@ -6,17 +6,18 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { StructuredTool } from '@langchain/core/tools';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import type { ChatModel } from './actions_client_chat';
 import type { migrateRuleState } from './state';
+import type { ChatModel } from '../util/actions_client_chat';
+import type { PrebuiltRulesMapByName } from '../util/prebuilt_rules';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
+export type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
 
 export interface MigrateRuleGraphParams {
-  model: ChatModel;
-  tools: StructuredTool[];
   inferenceClient: InferenceClient;
+  model: ChatModel;
   connectorId: string;
+  prebuiltRulesMap: PrebuiltRulesMapByName;
   logger: Logger;
 }

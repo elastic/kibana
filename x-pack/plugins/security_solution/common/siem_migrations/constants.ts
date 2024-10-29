@@ -12,12 +12,12 @@ export const SIEM_RULE_MIGRATIONS_START_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}/start` as const;
 export const SIEM_RULE_MIGRATIONS_STATS_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}/stats` as const;
-export const SIEM_RULE_MIGRATIONS_CANCEL_PATH =
-  `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}/cancel` as const;
+export const SIEM_RULE_MIGRATIONS_STOP_PATH =
+  `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}/stop` as const;
 
 export enum SiemMigrationsStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
   FINISHED = 'finished',
-  ERROR = 'error',
+  FAILED = 'failed',
 }

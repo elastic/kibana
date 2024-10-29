@@ -7,18 +7,18 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { CancelRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { CancelRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { SIEM_RULE_MIGRATIONS_CANCEL_PATH } from '../../../../../common/siem_migrations/constants';
+import type { StopRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import { StopRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import { SIEM_RULE_MIGRATIONS_STOP_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-export const registerSiemRuleMigrationsCancelRoute = (
+export const registerSiemRuleMigrationsStopRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .put({
-      path: SIEM_RULE_MIGRATIONS_CANCEL_PATH,
+      path: SIEM_RULE_MIGRATIONS_STOP_PATH,
       access: 'internal',
       options: { tags: ['access:securitySolution'] },
     })
@@ -26,20 +26,20 @@ export const registerSiemRuleMigrationsCancelRoute = (
       {
         version: '1',
         validate: {
-          request: { params: buildRouteValidationWithZod(CancelRuleMigrationRequestParams) },
+          request: { params: buildRouteValidationWithZod(StopRuleMigrationRequestParams) },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<CancelRuleMigrationResponse>> => {
+      async (context, req, res): Promise<IKibanaResponse<StopRuleMigrationResponse>> => {
         const migrationId = req.params.migration_id;
         try {
           const ctx = await context.resolve(['core', 'actions', 'securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-          const { found, cancelled } = await ruleMigrationsClient.task.cancel(migrationId);
+          const { exists, stopped } = await ruleMigrationsClient.task.stop(migrationId);
 
-          if (!found) {
+          if (!exists) {
             return res.noContent();
           }
-          return res.ok({ body: { cancelled } });
+          return res.ok({ body: { stopped } });
         } catch (err) {
           logger.error(err);
           return res.badRequest({

@@ -10,6 +10,7 @@ import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type {
   ElasticRule,
   OriginalRule,
+  RuleMigration,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export const migrateRuleState = Annotation.Root({
@@ -21,7 +22,10 @@ export const migrateRuleState = Annotation.Root({
   elastic_rule: Annotation<ElasticRule>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
-  translation_state: Annotation<string>(),
-  prebuilt_rule_id: Annotation<string>(),
+  translation_state: Annotation<RuleMigration['translation_state']>(),
+  comments: Annotation<RuleMigration['comments']>({
+    reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
+    default: () => [],
+  }),
   response: Annotation<string>(),
 });

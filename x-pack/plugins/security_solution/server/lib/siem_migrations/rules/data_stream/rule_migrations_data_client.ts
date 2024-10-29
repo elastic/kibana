@@ -58,7 +58,12 @@ export class RuleMigrationsDataClient {
       });
   }
 
-  /** Retrieves "pending" rule migrations with the provided id and updates their status to "processing" */
+  /**
+   * Retrieves `pending` rule migrations with the provided id and updates their status to `processing`.
+   * This operation is not atomic at migration level:
+   * - Multiple tasks can process different migrations simultaneously.
+   * - Multiple tasks should not process the same migration simultaneously.
+   */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
     const index = await this.dataStreamNamePromise;
     const query = this.getFilterQuery(migrationId, SiemMigrationsStatus.PENDING);
@@ -97,7 +102,7 @@ export class RuleMigrationsDataClient {
     return storedRuleMigrations;
   }
 
-  /** Updates one rule migration with the provided data and sets the status to "finished" */
+  /** Updates one rule migration with the provided data and sets the status to `finished` */
   async saveFinished({ _id, _index, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const doc = {
       ...ruleMigration,
@@ -113,12 +118,42 @@ export class RuleMigrationsDataClient {
       });
   }
 
-  /** Updates all the rule migration with the provided id with status "processing" back to "pending" */
+  /** Updates one rule migration with the provided data and sets the status to `failed` */
+  async saveError({ _id, _index, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+    const doc = {
+      ...ruleMigration,
+      status: SiemMigrationsStatus.FAILED,
+      updated_by: this.currentUser.username,
+      updated_at: new Date().toISOString(),
+    };
+    await this.esClient
+      .update({ index: _index, id: _id, doc, refresh: 'wait_for' })
+      .catch((error) => {
+        this.logger.error(`Error updating rule migration status to finished: ${error.message}`);
+        throw error;
+      });
+  }
+
+  /** Updates all the rule migration with the provided id with status `processing` back to `pending` */
   async releaseProcessing(migrationId: string): Promise<void> {
     const index = await this.dataStreamNamePromise;
     const query = this.getFilterQuery(migrationId, SiemMigrationsStatus.PROCESSING);
     const script = { source: `ctx._source['status'] = '${SiemMigrationsStatus.PENDING}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh: false }).catch((error) => {
+      this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
+      throw error;
+    });
+  }
+
+  /** Updates all the rule migration with the provided id with status `processing` or `failed` back to `pending` */
+  async releaseProcessable(migrationId: string): Promise<void> {
+    const index = await this.dataStreamNamePromise;
+    const query = this.getFilterQuery(migrationId, [
+      SiemMigrationsStatus.PROCESSING,
+      SiemMigrationsStatus.FAILED,
+    ]);
+    const script = { source: `ctx._source['status'] = '${SiemMigrationsStatus.PENDING}'` };
+    await this.esClient.updateByQuery({ index, query, script, refresh: true }).catch((error) => {
       this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
       throw error;
     });
@@ -132,7 +167,7 @@ export class RuleMigrationsDataClient {
       pending: { filter: { term: { status: SiemMigrationsStatus.PENDING } } },
       processing: { filter: { term: { status: SiemMigrationsStatus.PROCESSING } } },
       finished: { filter: { term: { status: SiemMigrationsStatus.FINISHED } } },
-      failed: { filter: { term: { status: SiemMigrationsStatus.ERROR } } },
+      failed: { filter: { term: { status: SiemMigrationsStatus.FAILED } } },
       lastUpdatedAt: { max: { field: 'updated_at' } },
     };
     const result = await this.esClient
@@ -164,11 +199,15 @@ export class RuleMigrationsDataClient {
 
   private getFilterQuery(
     migrationId: string,
-    status?: SiemMigrationsStatus
+    status?: SiemMigrationsStatus | SiemMigrationsStatus[]
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {
-      filter.push({ term: { status } });
+      if (Array.isArray(status)) {
+        filter.push({ terms: { status } });
+      } else {
+        filter.push({ term: { status } });
+      }
     }
     return { bool: { filter } };
   }
