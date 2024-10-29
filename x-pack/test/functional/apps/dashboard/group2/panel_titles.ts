@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const { dashboard, lens } = getPageObjects(['dashboard', 'lens']);
 
-  const EMPTY_TITLE = '[No Title]';
+  const EMPTY_TITLE = undefined;
 
   describe('panel titles', () => {
     before(async () => {
@@ -112,7 +112,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('resetting description on a by reference panel sets it to the library title', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.navigateToEditorFromFlyout();
         // legacySaveToLibrary UI cannot set description
         await lens.save(
