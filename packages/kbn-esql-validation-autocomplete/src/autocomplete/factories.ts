@@ -123,7 +123,7 @@ export const getCompatibleFunctionDefinition = (
 };
 
 export function getSuggestionCommandDefinition(
-  command: CommandDefinition
+  command: CommandDefinition<string>
 ): SuggestionRawDefinition {
   const commandDefinition = getCommandDefinition(command.name);
   const commandSignature = getCommandSignature(commandDefinition);
