@@ -16,6 +16,8 @@ const path = require('path');
 process.env.ROUTE_TYPE = 'authorized';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
+console.log('DRY_RUN:', DRY_RUN);
+
 const teamLabels = {
   '@elastic/kibana-core': 'Team:Core',
   '@elastic/appex-ai-infra': 'Team:AI Infra',
@@ -211,9 +213,6 @@ function processChangesByOwners(ownerFilesMap) {
     const currentBranch = runCommand('git rev-parse --abbrev-ref HEAD');
     console.log(`Current branch (PR branch): ${currentBranch}`);
 
-    console.log(`Fetching the latest changes from 'main'`);
-    // runCommand('git fetch origin main');
-
     for (const [owner, files] of Object.entries(ownerFilesMap)) {
       const rawOwner = owner.replace('@elastic/', '');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
@@ -236,6 +235,10 @@ function processChangesByOwners(ownerFilesMap) {
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
       const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
 
+      const teamLabel = teamLabels[owner];
+
+      console.log('Team label:', teamLabel);
+
       console.log(`Checking out 'main' branch`);
       runCommand(`git checkout main`);
 
@@ -244,20 +247,10 @@ function processChangesByOwners(ownerFilesMap) {
 
       console.log(`Cherry-picking changes from ${tempBranch} into ${targetBranch}`);
       try {
-        runCommand(`git cherry-pick ${tempBranch}`);
+        runCommand(`git cherry-pick ${tempBranch}~0`);
       } catch (error) {
         console.error(
           `Cherry-pick conflict! Please resolve conflicts manually for branch ${targetBranch}.`
-        );
-        return;
-      }
-
-      console.log('Created the following branches:');
-      console.log(runCommand("git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/'"));
-
-      if (DRY_RUN) {
-        runCommand(
-          "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
         );
       }
 
@@ -266,10 +259,7 @@ function processChangesByOwners(ownerFilesMap) {
           process.env.ROUTE_TYPE === 'authorized'
             ? `Authorized route migration for routes owned by ${owner}`
             : `Unauthorized route migration for routes owned by ${owner}`;
-        const routeLabel =
-          process.env.ROUTE_TYPE === 'authorized'
-            ? '[Authz API migration] authorized'
-            : '[Authz API migration] unauthorized';
+        const routeLabel = 'Authz: API migration';
         const teamLabel = teamLabels[owner];
         console.log(`Pushing the new branch: ${targetBranch} to remote`);
         runCommand(`git push origin ${targetBranch}`);
@@ -278,7 +268,7 @@ function processChangesByOwners(ownerFilesMap) {
         runCommand(`git branch -D ${tempBranch}`);
 
         const labels = [
-          // routeLabel,
+          routeLabel,
           'enhancement',
           'release_note:skip',
           'backport:prev-minor',
@@ -316,6 +306,9 @@ function processChangesByOwners(ownerFilesMap) {
         );
       }
     }
+    console.log('Created the following branches:');
+    console.log(runCommand("git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/'"));
+    runCommand(`git checkout main`);
   } catch (error) {
     console.error('Error processing changes:', error);
   } finally {
@@ -338,8 +331,8 @@ function runESLint() {
     // runCommand(
     //   `grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/ ./x-pack/packages/ | xargs env ${eslintRuleFlag} npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     // );
-    // const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
-    const directories = ['./x-pack/plugins/security', './x-pack/plugins/spaces']; // For testing purposes
+    const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
+    // const directories = ['./x-pack/plugins/security', './x-pack/plugins/spaces']; // For testing purposes
 
     for (const directory of directories) {
       console.log(`Running ESLint autofix for ${directory}`);
