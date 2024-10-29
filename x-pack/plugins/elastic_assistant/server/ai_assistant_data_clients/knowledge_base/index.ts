@@ -733,7 +733,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     try {
-      const elserId = await this.options.getElserId();
+      const elserId = this.isV2KnowledgeBaseEnabled
+        ? ASSISTANT_ELSER_INFERENCE_ID
+        : await this.options.getElserId();
       const userFilter = getKBUserFilter(user);
       const results = await this.findDocuments<EsIndexEntry>({
         // Note: This is a magic number to set some upward bound as to not blow the context with too

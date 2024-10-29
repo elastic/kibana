@@ -191,7 +191,8 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         indices.push(entry.index);
       }
     });
-    return dataViews.getExistingIndices(indices);
+
+    return indices.length ? dataViews.getExistingIndices(indices) : Promise.resolve([]);
   }, [entries.data]);
 
   const { getColumns } = useKnowledgeBaseTable();
