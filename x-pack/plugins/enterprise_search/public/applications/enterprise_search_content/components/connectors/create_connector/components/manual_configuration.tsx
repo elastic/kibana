@@ -83,7 +83,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
 # This is an alternative to using the UI creation flow.
 
 # 1. Create an index
-PUT /connector-${rawName}
+PUT connector-${rawName}
 {
   "settings": {
     "index": {
