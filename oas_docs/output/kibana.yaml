@@ -60,6 +60,10 @@ info:
 
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0
     International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+
+    This documentation contains work-in-progress information for future Elastic
+    Stack releases.
   title: Kibana APIs
   version: 1.0.2
   x-doc-license:
@@ -1776,73 +1780,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -1990,11 +1935,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -2002,16 +1949,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -2022,6 +1972,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -2035,11 +1986,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -2047,6 +2000,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -2949,73 +2903,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -3163,11 +3058,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -3175,16 +3072,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -3195,6 +3095,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -3208,11 +3109,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -3220,6 +3123,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -4093,73 +3997,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -4307,11 +4152,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -4319,16 +4166,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -4339,6 +4189,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -4352,11 +4203,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -4364,6 +4217,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -5331,73 +5185,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -5545,11 +5340,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -5557,16 +5354,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -5577,6 +5377,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -5590,11 +5391,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -5602,6 +5405,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -38917,7 +38721,7 @@ paths:
             nullable: true
             type: string
         - in: query
-          name: userFilter
+          name: createdByFilter
           schema:
             nullable: true
             type: string
@@ -40882,12 +40686,18 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: query
+        - description: >-
+            If `true` and the response contains any privileges that are
+            associated with deprecated features, they are omitted in favor of
+            details about the appropriate replacement feature privileges.
+          in: query
           name: replaceDeprecatedPrivileges
           required: false
           schema:
             type: boolean
-      responses: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
       summary: Get all roles
       tags:
         - roles
@@ -40916,7 +40726,9 @@ paths:
           schema:
             minLength: 1
             type: string
-      responses: {}
+      responses:
+        '204':
+          description: Indicates a successful call.
       summary: Delete a role
       tags:
         - roles
@@ -40931,22 +40743,32 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: path
+        - description: The role name.
+          in: path
           name: name
           required: true
           schema:
             minLength: 1
             type: string
-        - in: query
+        - description: >-
+            If `true` and the response contains any privileges that are
+            associated with deprecated features, they are omitted in favor of
+            details about the appropriate replacement feature privileges.
+          in: query
           name: replaceDeprecatedPrivileges
           required: false
           schema:
             type: boolean
-      responses: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
       summary: Get a role
       tags:
         - roles
     put:
+      description: >-
+        Create a new Kibana role or update the attributes of an existing role.
+        Kibana roles are stored in the Elasticsearch native realm.
       operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
       parameters:
         - description: The version of the API to use
@@ -40964,14 +40786,16 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The role name.
+          in: path
           name: name
           required: true
           schema:
             maxLength: 1024
             minLength: 1
             type: string
-        - in: query
+        - description: When true, a role is not overwritten if it already exists.
+          in: query
           name: createOnly
           required: false
           schema:
@@ -40985,6 +40809,7 @@ paths:
               type: object
               properties:
                 description:
+                  description: A description for the role.
                   maxLength: 2048
                   type: string
                 elasticsearch:
@@ -40993,6 +40818,9 @@ paths:
                   properties:
                     cluster:
                       items:
+                        description: >-
+                          Cluster privileges that define the cluster level
+                          actions that users can perform.
                         type: string
                       type: array
                     indices:
@@ -41001,24 +40829,55 @@ paths:
                         type: object
                         properties:
                           allow_restricted_indices:
+                            description: >-
+                              Restricted indices are a special category of
+                              indices that are used internally to store
+                              configuration data and should not be directly
+                              accessed. Only internal system roles should
+                              normally grant privileges over the restricted
+                              indices. Toggling this flag is very strongly
+                              discouraged because it could effectively grant
+                              unrestricted operations on critical data, making
+                              the entire system unstable or leaking sensitive
+                              information. If for administrative purposes you
+                              need to create a role with privileges covering
+                              restricted indices, however, you can set this
+                              property to true. In that case, the names field
+                              covers the restricted indices too.
                             type: boolean
                           field_security:
                             additionalProperties:
                               items:
+                                description: >-
+                                  The document fields that the role members have
+                                  read access to.
                                 type: string
                               type: array
                             type: object
                           names:
                             items:
+                              description: >-
+                                The data streams, indices, and aliases to which
+                                the permissions in this entry apply. It supports
+                                wildcards (*).
                               type: string
                             minItems: 1
                             type: array
                           privileges:
                             items:
+                              description: >-
+                                The index level privileges that the role members
+                                have for the data streams and indices.
                               type: string
                             minItems: 1
                             type: array
                           query:
+                            description: >-
+                              A search query that defines the documents the role
+                              members have read access to. A document within the
+                              specified data streams and indices must match this
+                              query in order for it to be accessible by the role
+                              members.
                             type: string
                         required:
                           - names
@@ -41031,11 +40890,19 @@ paths:
                         properties:
                           clusters:
                             items:
+                              description: >-
+                                A list of remote cluster aliases. It supports
+                                literal strings as well as wildcards and regular
+                                expressions.
                               type: string
                             minItems: 1
                             type: array
                           privileges:
                             items:
+                              description: >-
+                                The cluster level privileges for the remote
+                                cluster. The allowed values are a subset of the
+                                cluster privileges.
                               type: string
                             minItems: 1
                             type: array
@@ -41049,29 +40916,64 @@ paths:
                         type: object
                         properties:
                           allow_restricted_indices:
+                            description: >-
+                              Restricted indices are a special category of
+                              indices that are used internally to store
+                              configuration data and should not be directly
+                              accessed. Only internal system roles should
+                              normally grant privileges over the restricted
+                              indices. Toggling this flag is very strongly
+                              discouraged because it could effectively grant
+                              unrestricted operations on critical data, making
+                              the entire system unstable or leaking sensitive
+                              information. If for administrative purposes you
+                              need to create a role with privileges covering
+                              restricted indices, however, you can set this
+                              property to true. In that case, the names field
+                              will cover the restricted indices too.
                             type: boolean
                           clusters:
                             items:
+                              description: >-
+                                A list of remote cluster aliases. It supports
+                                literal strings as well as wildcards and regular
+                                expressions.
                               type: string
                             minItems: 1
                             type: array
                           field_security:
                             additionalProperties:
                               items:
+                                description: >-
+                                  The document fields that the role members have
+                                  read access to.
                                 type: string
                               type: array
                             type: object
                           names:
                             items:
+                              description: >-
+                                A list of remote aliases, data streams, or
+                                indices to which the permissions apply. It
+                                supports wildcards (*).
                               type: string
                             minItems: 1
                             type: array
                           privileges:
                             items:
+                              description: >-
+                                The index level privileges that role members
+                                have for the specified indices.
                               type: string
                             minItems: 1
                             type: array
                           query:
+                            description: >-
+                              A search query that defines the documents the role
+                              members have read access to. A document within the
+                              specified data streams and indices must match this
+                              query in order for it to be accessible by the role
+                              members. 
                             type: string
                         required:
                           - clusters
@@ -41080,6 +40982,7 @@ paths:
                       type: array
                     run_as:
                       items:
+                        description: A user name that the role member can impersonate.
                         type: string
                       type: array
                 kibana:
@@ -41098,14 +41001,23 @@ paths:
                         nullable: true
                         oneOf:
                           - items:
+                              description: >-
+                                A base privilege that grants applies to all
+                                spaces.
                               type: string
                             type: array
                           - items:
+                              description: >-
+                                A base privilege that applies to specific
+                                spaces.
                               type: string
                             type: array
                       feature:
                         additionalProperties:
                           items:
+                            description: >-
+                              The privileges that the role member has for the
+                              feature.
                             type: string
                           type: array
                         type: object
@@ -41119,6 +41031,7 @@ paths:
                             minItems: 1
                             type: array
                           - items:
+                              description: A space that the privilege applies to.
                               type: string
                             type: array
                         default:
@@ -41131,7 +41044,9 @@ paths:
                   type: object
               required:
                 - elasticsearch
-      responses: {}
+      responses:
+        '204':
+          description: Indicates a successful call.
       summary: Create or update a role
       tags:
         - roles
@@ -41167,6 +41082,7 @@ paths:
                     type: object
                     properties:
                       description:
+                        description: A description for the role.
                         maxLength: 2048
                         type: string
                       elasticsearch:
@@ -41175,6 +41091,9 @@ paths:
                         properties:
                           cluster:
                             items:
+                              description: >-
+                                Cluster privileges that define the cluster level
+                                actions that users can perform.
                               type: string
                             type: array
                           indices:
@@ -41183,24 +41102,58 @@ paths:
                               type: object
                               properties:
                                 allow_restricted_indices:
+                                  description: >-
+                                    Restricted indices are a special category of
+                                    indices that are used internally to store
+                                    configuration data and should not be
+                                    directly accessed. Only internal system
+                                    roles should normally grant privileges over
+                                    the restricted indices. Toggling this flag
+                                    is very strongly discouraged because it
+                                    could effectively grant unrestricted
+                                    operations on critical data, making the
+                                    entire system unstable or leaking sensitive
+                                    information. If for administrative purposes
+                                    you need to create a role with privileges
+                                    covering restricted indices, however, you
+                                    can set this property to true. In that case,
+                                    the names field covers the restricted
+                                    indices too.
                                   type: boolean
                                 field_security:
                                   additionalProperties:
                                     items:
+                                      description: >-
+                                        The document fields that the role
+                                        members have read access to.
                                       type: string
                                     type: array
                                   type: object
                                 names:
                                   items:
+                                    description: >-
+                                      The data streams, indices, and aliases to
+                                      which the permissions in this entry apply.
+                                      It supports wildcards (*).
                                     type: string
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
+                                    description: >-
+                                      The index level privileges that the role
+                                      members have for the data streams and
+                                      indices.
                                     type: string
                                   minItems: 1
                                   type: array
                                 query:
+                                  description: >-
+                                    A search query that defines the documents
+                                    the role members have read access to. A
+                                    document within the specified data streams
+                                    and indices must match this query in order
+                                    for it to be accessible by the role members.
                                   type: string
                               required:
                                 - names
@@ -41213,11 +41166,19 @@ paths:
                               properties:
                                 clusters:
                                   items:
+                                    description: >-
+                                      A list of remote cluster aliases. It
+                                      supports literal strings as well as
+                                      wildcards and regular expressions.
                                     type: string
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
+                                    description: >-
+                                      The cluster level privileges for the
+                                      remote cluster. The allowed values are a
+                                      subset of the cluster privileges.
                                     type: string
                                   minItems: 1
                                   type: array
@@ -41231,29 +41192,67 @@ paths:
                               type: object
                               properties:
                                 allow_restricted_indices:
+                                  description: >-
+                                    Restricted indices are a special category of
+                                    indices that are used internally to store
+                                    configuration data and should not be
+                                    directly accessed. Only internal system
+                                    roles should normally grant privileges over
+                                    the restricted indices. Toggling this flag
+                                    is very strongly discouraged because it
+                                    could effectively grant unrestricted
+                                    operations on critical data, making the
+                                    entire system unstable or leaking sensitive
+                                    information. If for administrative purposes
+                                    you need to create a role with privileges
+                                    covering restricted indices, however, you
+                                    can set this property to true. In that case,
+                                    the names field will cover the restricted
+                                    indices too.
                                   type: boolean
                                 clusters:
                                   items:
+                                    description: >-
+                                      A list of remote cluster aliases. It
+                                      supports literal strings as well as
+                                      wildcards and regular expressions.
                                     type: string
                                   minItems: 1
                                   type: array
                                 field_security:
                                   additionalProperties:
                                     items:
+                                      description: >-
+                                        The document fields that the role
+                                        members have read access to.
                                       type: string
                                     type: array
                                   type: object
                                 names:
                                   items:
+                                    description: >-
+                                      A list of remote aliases, data streams, or
+                                      indices to which the permissions apply. It
+                                      supports wildcards (*).
                                     type: string
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
+                                    description: >-
+                                      The index level privileges that role
+                                      members have for the specified indices.
                                     type: string
                                   minItems: 1
                                   type: array
                                 query:
+                                  description: >-
+                                    A search query that defines the documents
+                                    the role members have read access to. A
+                                    document within the specified data streams
+                                    and indices must match this query in order
+                                    for it to be accessible by the role
+                                    members. 
                                   type: string
                               required:
                                 - clusters
@@ -41262,6 +41261,9 @@ paths:
                             type: array
                           run_as:
                             items:
+                              description: >-
+                                A user name that the role member can
+                                impersonate.
                               type: string
                             type: array
                       kibana:
@@ -41280,14 +41282,23 @@ paths:
                               nullable: true
                               oneOf:
                                 - items:
+                                    description: >-
+                                      A base privilege that grants applies to
+                                      all spaces.
                                     type: string
                                   type: array
                                 - items:
+                                    description: >-
+                                      A base privilege that applies to specific
+                                      spaces.
                                     type: string
                                   type: array
                             feature:
                               additionalProperties:
                                 items:
+                                  description: >-
+                                    The privileges that the role member has for
+                                    the feature.
                                   type: string
                                 type: array
                               type: object
@@ -41301,6 +41312,7 @@ paths:
                                   minItems: 1
                                   type: array
                                 - items:
+                                    description: A space that the privilege applies to.
                                     type: string
                                   type: array
                               default:
@@ -41316,7 +41328,9 @@ paths:
                   type: object
               required:
                 - roles
-      responses: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
       summary: Create or update roles
       tags:
         - roles
@@ -57266,9 +57280,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -57420,9 +57432,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
