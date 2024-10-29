@@ -1947,10 +1947,6 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ## These rules are always last so they take ultimate priority over everything else
 ####
 
-####
-## These rules are always last so they take ultimate priority over everything else
-####
-
 # CODEOWNERS reviews are not required on backports
 # Assign kibanamachine to avoid notifications
 * @kibanamachine
