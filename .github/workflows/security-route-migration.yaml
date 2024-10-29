@@ -1,9 +1,9 @@
 name: ESLint no_deprecated_authz_config
 
 on:
-  push:
-    branches:
-      - authz-migration-workflow
+  # push:
+  #   branches:
+  #     - authz-migration-workflow
   workflow_dispatch:
     inputs:
       route_type:
