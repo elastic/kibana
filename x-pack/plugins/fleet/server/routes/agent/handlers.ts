@@ -13,7 +13,6 @@ import type {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetAgentStatusResponse,
-  PutAgentReassignResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
@@ -30,7 +29,6 @@ import type {
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
@@ -237,29 +235,6 @@ export const getAgentTagsHandler: RequestHandler<
     const body: GetAgentTagsResponse = {
       items: tags,
     };
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const putAgentsReassignHandlerDeprecated: RequestHandler<
-  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.params>,
-  undefined,
-  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.body>
-> = async (context, request, response) => {
-  const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  try {
-    await AgentService.reassignAgent(
-      soClient,
-      esClient,
-      request.params.agentId,
-      request.body.policy_id
-    );
-
-    const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

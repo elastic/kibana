@@ -23,7 +23,6 @@ import {
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
@@ -68,7 +67,6 @@ import {
   updateAgentHandler,
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandlerDeprecated,
   postBulkAgentReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
@@ -389,23 +387,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         validate: { request: PostAgentUnenrollRequestSchema, response: {} },
       },
       postAgentUnenrollHandler
-    );
-
-  router.versioned
-    .put({
-      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: PutAgentReassignRequestSchemaDeprecated },
-      },
-      putAgentsReassignHandlerDeprecated
     );
 
   router.versioned

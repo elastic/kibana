@@ -377,15 +377,6 @@ export const PostBulkAgentUpgradeRequestSchema = {
   }),
 };
 
-export const PutAgentReassignRequestSchemaDeprecated = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-  body: schema.object({
-    policy_id: schema.string(),
-  }),
-};
-
 export const PostAgentReassignRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
