@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          indexMode: 'standard',
         });
       });
 
