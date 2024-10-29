@@ -39,3 +39,17 @@ export const useNavigateFindings = () => {
 
 export const useNavigateVulnerabilities = () =>
   useNavigate(findingsNavigation.vulnerabilities.path);
+
+export const useNavigateNativeVulnerabilities = () => {
+  const navToVulnerabilities = useNavigateVulnerabilities();
+
+  return useCallback(
+    (filterParams: NavFilter = {}, groupBy?: string[]) => {
+      navToVulnerabilities(
+        { ...filterParams, 'data_stream.dataset': 'cloud_security_posture.vulnerabilities' },
+        groupBy
+      );
+    },
+    [navToVulnerabilities]
+  );
+};
