@@ -137,7 +137,7 @@ describe('Create ', () => {
 
     expect(
       await screen.findByText(
-        'The value of the My test label 5 should be an integer between -(2^53 - 1) to 2^53 - 1, inclusive.'
+        'The value of the My test label 5 should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
       )
     ).toBeInTheDocument();
 
@@ -168,7 +168,7 @@ describe('Create ', () => {
 
     expect(
       await screen.findByText(
-        'The value of the My test label 5 should be an integer between -(2^53 - 1) to 2^53 - 1, inclusive.'
+        'The value of the My test label 5 should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
       )
     ).toBeInTheDocument();
 

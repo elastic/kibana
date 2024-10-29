@@ -338,7 +338,7 @@ describe('schema', () => {
         )
       ).toMatchInlineSnapshot(`
         Array [
-          "The foo field should be a safe integer number.",
+          "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
         ]
       `);
     });
@@ -350,7 +350,7 @@ describe('schema', () => {
         )
       ).toMatchInlineSnapshot(`
         Array [
-          "The foo field should be a safe integer number.",
+          "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
         ]
       `);
     });
@@ -380,7 +380,7 @@ describe('schema', () => {
       expect(PathReporter.report(limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(1.2)))
         .toMatchInlineSnapshot(`
           Array [
-            "The foo field should be a safe integer number.",
+            "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
           ]
         `);
     });

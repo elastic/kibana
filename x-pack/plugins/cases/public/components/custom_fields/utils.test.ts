@@ -126,7 +126,6 @@ describe('utils ', () => {
 
       expect(customFieldSerializer(customField)).toMatchInlineSnapshot(`
         Object {
-          "defaultValue": null,
           "key": "my_test_key",
           "required": true,
           "type": "number",
