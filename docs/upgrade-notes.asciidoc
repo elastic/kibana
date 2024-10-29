@@ -1484,11 +1484,11 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 [discrete]
 [[kibana-150267]]
-.[Saved Objects] Deprecated APIs. (8.7)
+.[Saved objects] Deprecated APIs. (8.7)
 [%collapsible]
 ====
 *Details* +
-The following Saved Objects APIs have been deprecated.
+The following saved objects APIs have been deprecated.
 
 [source,text]
 --
