@@ -32,6 +32,8 @@ import type {
   ReportAssetCriticalityCsvPreviewGeneratedParams,
   ReportAssetCriticalityFileSelectedParams,
   ReportAssetCriticalityCsvImportedParams,
+  ReportEntityStoreEnablementParams,
+  ReportEntityStoreInitParams,
 } from './events/entity_analytics/types';
 import type {
   AssistantTelemetryEvent,
@@ -78,17 +80,7 @@ export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
-export type {
-  ReportEntityAlertsClickedParams,
-  ReportEntityDetailsClickedParams,
-  ReportEntityRiskFilteredParams,
-  ReportRiskInputsExpandedFlyoutOpenedParams,
-  ReportToggleRiskSummaryClickedParams,
-  ReportAddRiskInputToTimelineClickedParams,
-  ReportAssetCriticalityCsvPreviewGeneratedParams,
-  ReportAssetCriticalityFileSelectedParams,
-  ReportAssetCriticalityCsvImportedParams,
-} from './events/entity_analytics/types';
+export * from './events/entity_analytics/types';
 export * from './events/document_details/types';
 export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
@@ -168,6 +160,9 @@ export interface TelemetryClientStart {
   ): void;
   reportAssetCriticalityCsvImported(params: ReportAssetCriticalityCsvImportedParams): void;
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
+  // Entity Analytics Entity Store
+  reportEntityStoreEnablement(params: ReportEntityStoreEnablementParams): void;
+  reportEntityStoreInit(params: ReportEntityStoreInitParams): void;
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
