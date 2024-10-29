@@ -6,18 +6,16 @@
  */
 
 import Dagre from '@dagrejs/dagre';
-import type {
-  EdgeDataModel,
-  NodeDataModel,
-} from '@kbn/cloud-security-posture-common/types/graph/latest';
-import type { NodeViewModel, Size } from '../types';
+import type { Node, Edge } from '@xyflow/react';
+import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { calcLabelSize } from './utils';
+import { GroupStyleOverride, NODE_HEIGHT, NODE_WIDTH } from '../node/styles';
 
 export const layoutGraph = (
-  nodes: NodeDataModel[],
-  edges: EdgeDataModel[]
-): { nodes: NodeViewModel[] } => {
-  const nodesById: { [key: string]: NodeViewModel } = {};
+  nodes: Array<Node<NodeViewModel>>,
+  edges: Array<Edge<EdgeViewModel>>
+): { nodes: Array<Node<NodeViewModel>> } => {
+  const nodesById: { [key: string]: Node<NodeViewModel> } = {};
   const graphOpts = {
     compound: true,
   };
@@ -29,28 +27,27 @@ export const layoutGraph = (
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
 
   nodes.forEach((node) => {
-    let size = { width: 90, height: 90 };
-    const position = { x: 0, y: 0 };
+    let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
 
-    if (node.shape === 'label') {
-      size = calcLabelSize(node.label);
+    if (node.data.shape === 'label') {
+      size = calcLabelSize(node.data.label);
 
       // TODO: waiting for a fix: https://github.com/dagrejs/dagre/issues/238
       // if (node.parentId) {
       //   g.setParent(node.id, node.parentId);
       // }
-    } else if (node.shape === 'group') {
+    } else if (node.data.shape === 'group') {
       const res = layoutGroupChildren(node, nodes);
 
       size = res.size;
 
       res.children.forEach((child) => {
-        nodesById[child.id] = { ...child };
+        nodesById[child.data.id] = child;
       });
     }
 
     if (!nodesById[node.id]) {
-      nodesById[node.id] = { ...node, position };
+      nodesById[node.id] = node;
     }
 
     g.setNode(node.id, {
@@ -61,8 +58,8 @@ export const layoutGraph = (
 
   Dagre.layout(g);
 
-  const nodesViewModel: NodeViewModel[] = nodes.map((nodeData) => {
-    const dagreNode = g.node(nodeData.id);
+  const layoutedNodes = nodes.map((node) => {
+    const dagreNode = g.node(node.data.id);
 
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
@@ -70,37 +67,43 @@ export const layoutGraph = (
     const y = dagreNode.y - (dagreNode.height ?? 0) / 2;
 
     // For grouped nodes, we want to keep the original position relative to the parent
-    if (nodeData.shape === 'label' && nodeData.parentId) {
+    if (node.data.shape === 'label' && node.data.parentId) {
       return {
-        ...nodeData,
-        position: nodesById[nodeData.id].position,
+        ...node,
+        position: nodesById[node.data.id].position,
       };
-    } else if (nodeData.shape === 'group') {
+    } else if (node.data.shape === 'group') {
       return {
-        ...nodeData,
+        ...node,
         position: { x, y },
-        size: {
+        style: GroupStyleOverride({
           width: dagreNode.width,
           height: dagreNode.height,
-        },
+        }),
+      };
+    } else if (node.data.shape === 'label') {
+      return {
+        ...node,
+        position: { x, y },
+      };
+    } else {
+      // Align nodes to labels by shifting the node position by it's label height
+      return {
+        ...node,
+        position: { x, y: y + (dagreNode.height - NODE_HEIGHT) / 2 },
       };
     }
-
-    return {
-      ...nodeData,
-      position: { x, y },
-    };
   });
 
-  return { nodes: nodesViewModel };
+  return { nodes: layoutedNodes };
 };
 
 const layoutGroupChildren = (
-  groupNode: NodeDataModel,
-  nodes: NodeDataModel[]
-): { size: Size; children: NodeViewModel[] } => {
+  groupNode: Node<NodeViewModel>,
+  nodes: Array<Node<NodeViewModel>>
+): { size: Size; children: Array<Node<NodeViewModel>> } => {
   const children = nodes.filter(
-    (child) => child.shape === 'label' && child.parentId === groupNode.id
+    (child) => child.data.shape === 'label' && child.parentId === groupNode.id
   );
 
   const STACK_VERTICAL_PADDING = 20;
@@ -108,7 +111,7 @@ const layoutGroupChildren = (
   const PADDING = 20;
   const stackSize = children.length;
   const allChildrenHeight = children.reduce(
-    (prevHeight, node) => prevHeight + calcLabelSize(node.label).height,
+    (prevHeight, node) => prevHeight + calcLabelSize(node.data.label).height,
     0
   );
   const stackHeight = Math.max(
@@ -118,23 +121,21 @@ const layoutGroupChildren = (
 
   const space = (stackHeight - allChildrenHeight) / (stackSize - 1);
   const groupNodeWidth = children.reduce((acc, child) => {
-    const currLblWidth = PADDING * 2 + calcLabelSize(child.label).width;
+    const currLblWidth = PADDING * 2 + calcLabelSize(child.data.label).width;
     return Math.max(acc, currLblWidth);
   }, 0);
 
   // Layout children relative to parent
-  const positionedChildren: NodeViewModel[] = children.map((child, index) => {
-    const childSize = calcLabelSize(child.label);
-    const childPosition = {
+  children.forEach((child, index) => {
+    const childSize = calcLabelSize(child.data.label);
+    child.position = {
       x: groupNodeWidth / 2 - childSize.width / 2,
       y: index * (childSize.height * 2 + space),
     };
-
-    return { ...child, position: childPosition };
   });
 
   return {
     size: { width: groupNodeWidth, height: stackHeight },
-    children: positionedChildren,
+    children,
   };
 };

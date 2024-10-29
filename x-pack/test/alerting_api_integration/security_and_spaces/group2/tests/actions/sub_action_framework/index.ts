@@ -218,7 +218,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             connector_id: res.body.id,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
           });
         }
       });
