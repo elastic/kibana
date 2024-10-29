@@ -30,9 +30,9 @@ interface Props {
 }
 
 /**
- * Gear button that opens the assistant settings modal
+ * Assistant settings modal
  */
-export const AssistantSettingsButton: React.FC<Props> = React.memo(
+export const AssistantSettingsModal: React.FC<Props> = React.memo(
   ({
     defaultConnector,
     isSettingsModalVisible,
@@ -73,21 +73,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     );
 
     return (
-      <>
-        {isSettingsModalVisible && (
-          <AssistantSettings
-            defaultConnector={defaultConnector}
-            selectedConversationId={selectedConversationId}
-            onConversationSelected={onConversationSelected}
-            onClose={handleCloseModal}
-            onSave={handleSave}
-            conversations={conversations}
-            conversationsLoaded={conversationsLoaded}
-          />
-        )}
-      </>
+      isSettingsModalVisible && (
+        <AssistantSettings
+          defaultConnector={defaultConnector}
+          selectedConversationId={selectedConversationId}
+          onConversationSelected={onConversationSelected}
+          onClose={handleCloseModal}
+          onSave={handleSave}
+          conversations={conversations}
+          conversationsLoaded={conversationsLoaded}
+        />
+      )
     );
   }
 );
 
-AssistantSettingsButton.displayName = 'AssistantSettingsButton';
+AssistantSettingsModal.displayName = 'AssistantSettingsModal';

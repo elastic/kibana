@@ -91,6 +91,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       () => [
         <EuiContextMenuItem
           aria-label={'ai-assistant-settings'}
+          key={'ai-assistant-settings'}
           onClick={handleNavigateToSettings}
           icon={'gear'}
           data-test-subj={'ai-assistant-settings'}
@@ -99,6 +100,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'knowledge-base'}
+          key={'knowledge-base'}
           onClick={handleNavigateToKnowledgeBase}
           icon={'documents'}
           data-test-subj={'knowledge-base'}
@@ -107,6 +109,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
+          key={'anonymization'}
           onClick={handleNavigateToAnonymization}
           icon={'eye'}
           data-test-subj={'anonymization'}
@@ -115,6 +118,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'alerts-to-analyze'}
+          key={'alerts-to-analyze'}
           onClick={handleShowAlertsModal}
           icon={'magnifyWithExclamation'}
           data-test-subj={'alerts-to-analyze'}
@@ -130,6 +134,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'clear-chat'}
+          key={'clear-chat'}
           onClick={showDestroyModal}
           icon={'refresh'}
           data-test-subj={'clear-chat'}

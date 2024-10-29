@@ -336,7 +336,7 @@ export class AIAssistantService {
     opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
-    if (opts.modelIdOverride != null) {
+    if (opts?.modelIdOverride != null) {
       const modelIdOverride = opts.modelIdOverride;
       this.getElserId = async () => modelIdOverride;
     }
@@ -345,7 +345,7 @@ export class AIAssistantService {
     // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
     // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
     // Added hasInitializedV2KnowledgeBase to prevent the console noise from re-init on each KB request
-    if (!this.hasInitializedV2KnowledgeBase || opts.modelIdOverride != null) {
+    if (!this.hasInitializedV2KnowledgeBase || opts?.modelIdOverride != null) {
       await this.initializeResources();
       this.hasInitializedV2KnowledgeBase = true;
     }
