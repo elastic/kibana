@@ -10,11 +10,6 @@ import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 
-export const generateFakeAssignees = (num: number) =>
-  Array.from(Array(num).keys()).map((uid) => {
-    return { uid: `${uid}` };
-  });
-
 export const loginUsers = async ({
   supertest,
   users = [superUser],

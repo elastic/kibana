@@ -20,7 +20,6 @@ export const postEcsMapping = async ({
   auth = { user: superUser },
 }: {
   supertest: SuperTest.Agent;
-  caseId: string;
   req: EcsMappingRequestBody;
   expectedHttpCode?: number;
   auth: { user: User };
