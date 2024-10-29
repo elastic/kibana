@@ -14,8 +14,7 @@
 # permission is obtained from Elasticsearch B.V.
 
 .PHONY: api-docs
-api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
-	@node scripts/merge_serverless_oas.js
+api-docs: ## Generate ESS Kibana OpenAPI bundles with kbn-openapi-bundler
 	@node scripts/merge_ess_oas.js
 
 .PHONY: api-docs-stateful

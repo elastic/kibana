@@ -30,7 +30,7 @@ actions:
         Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
       externalDocs:
         description: Alerting documentation
-        url: https://www.elastic.co/docs/current/serverless/rules
+        url: https://www.elastic.co/docs/8.x/serverless/rules
       x-displayName: "Alerting"
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
@@ -40,7 +40,7 @@ actions:
         Alerting rules can use connectors to run actions when rule conditions are met.
       externalDocs:
         description: Connector documentation
-        url: https://www.elastic.co/docs/current/serverless/action-connectors
+        url: https://www.elastic.co/docs/8.x/serverless/action-connectors
       x-displayName: "Connectors"
   - target: '$.tags[?(@.name=="data views")]'
     description: Change displayName
