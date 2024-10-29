@@ -264,6 +264,10 @@ export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
 
+export const TIMELINE_TAB_CONTENT_QUERY = '[data-test-subj="timeline-tab-content-query"]';
+
+export const TIMELINE_TAB_CONTENT_ESQL = '[data-test-subj="timeline-tab-content-esql"]';
+
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
 

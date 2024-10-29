@@ -30,6 +30,7 @@ import {
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { getTimeline } from '../../../../objects/timeline';
 import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
+import { TIMELINE_TAB_CONTENT_ESQL } from '../../../../screens/timeline';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
@@ -88,8 +89,8 @@ describe.skip(
     });
     it('should remember columns when navigating away and back to discover ', () => {
       submitDiscoverSearchBar();
-      addFieldToTable('host.name');
-      addFieldToTable('user.name');
+      addFieldToTable('host.name', TIMELINE_TAB_CONTENT_ESQL);
+      addFieldToTable('user.name', TIMELINE_TAB_CONTENT_ESQL);
       addNameAndDescriptionToTimeline(mockTimeline);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);

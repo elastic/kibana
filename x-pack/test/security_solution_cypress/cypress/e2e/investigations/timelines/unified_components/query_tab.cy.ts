@@ -22,6 +22,7 @@ import {
   TIMELINE_DETAILS_FLYOUT,
   USER_DETAILS_FLYOUT,
 } from '../../../../screens/unified_timeline';
+import { TIMELINE_TAB_CONTENT_QUERY } from '../../../../screens/timeline';
 import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import { addFieldToTable, removeFieldFromTable } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
@@ -78,7 +79,7 @@ describe(
 
     it('should be able to add/remove columns correctly', () => {
       cy.get(GET_UNIFIED_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
-      addFieldToTable('agent.type');
+      addFieldToTable('agent.type', TIMELINE_TAB_CONTENT_QUERY);
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('be.visible');
       removeFieldFromTable('agent.type');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');

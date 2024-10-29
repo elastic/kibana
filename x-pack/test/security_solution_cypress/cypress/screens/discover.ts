@@ -79,9 +79,17 @@ export const GET_DISCOVER_COLUMN = (columnId: string) =>
 export const GET_DISCOVER_COLUMN_TOGGLE_BTN = (columnId: string) =>
   `${getDataTestSubjectSelector(`fieldToggle-${columnId}`)}`;
 
-export const DISCOVER_FIELD_SEARCH = `${getDataTestSubjectSelector(
-  'fieldList'
-)} ${getDataTestSubjectSelector('fieldListFiltersFieldSearch')}`;
+export const DISCOVER_FIELD_SEARCH = (tabId?: string) => {
+  if (tabId) {
+    return `${tabId} ${getDataTestSubjectSelector('fieldList')} ${getDataTestSubjectSelector(
+      'fieldListFiltersFieldSearch'
+    )}`;
+  } else {
+    return `${getDataTestSubjectSelector('fieldList')} ${getDataTestSubjectSelector(
+      'fieldListFiltersFieldSearch'
+    )}`;
+  }
+};
 
 export const DISCOVER_FIELD_LIST_LOADING = getDataTestSubjectSelector('fieldListLoading');
 

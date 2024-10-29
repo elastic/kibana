@@ -102,16 +102,16 @@ export const openAddDiscoverFilterPopover = () => {
   cy.get(DISCOVER_ADD_FILTER).click();
 };
 
-export const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).should('be.visible').type(fieldId);
+export const searchForField = (fieldId: string, tabId?: string) => {
+  cy.get(DISCOVER_FIELD_SEARCH(tabId)).should('be.visible').type(fieldId);
 };
 
-export const clearFieldSearch = () => {
-  cy.get(DISCOVER_FIELD_SEARCH).first().clear();
+export const clearFieldSearch = (tabId?: string) => {
+  cy.get(DISCOVER_FIELD_SEARCH(tabId)).first().clear();
 };
 
-export const addFieldToTable = (fieldId: string) => {
-  searchForField(fieldId);
+export const addFieldToTable = (fieldId: string, tabId?: string) => {
+  searchForField(fieldId, tabId);
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().should('exist');
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
   clearFieldSearch();

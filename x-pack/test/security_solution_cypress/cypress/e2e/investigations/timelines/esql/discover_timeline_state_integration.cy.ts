@@ -47,6 +47,7 @@ import {
   GET_SAVED_OBJECTS_TAGS_OPTION,
   SAVED_OBJECTS_ROW_TITLES,
 } from '../../../../screens/common/stack_management';
+import { TIMELINE_TAB_CONTENT_ESQL } from '../../../../screens/timeline';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
@@ -99,8 +100,8 @@ describe(
         const column1 = 'event.category';
         const column2 = 'ecs.version';
         assertFieldsAreLoaded();
-        addFieldToTable(column1);
-        addFieldToTable(column2);
+        addFieldToTable(column1, TIMELINE_TAB_CONTENT_ESQL);
+        addFieldToTable(column2, TIMELINE_TAB_CONTENT_ESQL);
 
         // create a custom timeline
         addNameToTimelineAndSave(timelineName);
@@ -131,8 +132,8 @@ describe(
         const column2 = 'ecs.version';
         addDiscoverEsqlQuery(esqlQuery);
         assertFieldsAreLoaded();
-        addFieldToTable(column1);
-        addFieldToTable(column2);
+        addFieldToTable(column1, TIMELINE_TAB_CONTENT_ESQL);
+        addFieldToTable(column2, TIMELINE_TAB_CONTENT_ESQL);
 
         // create a custom timeline
         addNameToTimelineAndSave(timelineName);

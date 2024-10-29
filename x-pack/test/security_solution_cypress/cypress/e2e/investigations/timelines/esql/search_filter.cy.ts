@@ -27,6 +27,7 @@ import {
   convertEditorNonBreakingSpaceToSpace,
   waitForDiscoverFieldsToLoad,
 } from '../../../../tasks/discover';
+import { TIMELINE_TAB_CONTENT_ESQL } from '../../../../screens/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -68,8 +69,8 @@ describe(
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       waitForDiscoverFieldsToLoad();
       cy.get(DISCOVER_CONTAINER).within(() => {
-        addFieldToTable('host.name');
-        addFieldToTable('user.name');
+        addFieldToTable('host.name', TIMELINE_TAB_CONTENT_ESQL);
+        addFieldToTable('user.name', TIMELINE_TAB_CONTENT_ESQL);
       });
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
