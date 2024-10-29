@@ -60,24 +60,18 @@ export const samlAuthentication = async (
     }
   };
 
+  const sessionManager = new SamlSessionManager({
+    hostOptions,
+    log,
+    isCloud: config.env.CLOUD_SERVERLESS,
+    cloudUsersFilePath,
+  });
+
   on('task', {
     getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
-      const sessionManager = new SamlSessionManager({
-        hostOptions,
-        log,
-        isCloud: config.env.CLOUD_SERVERLESS,
-        cloudUsersFilePath,
-      });
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
     getApiKeyForRole: async (role: string | SecurityRoleName): Promise<string> => {
-      const sessionManager = new SamlSessionManager({
-        hostOptions,
-        log,
-        isCloud: config.env.CLOUD_SERVERLESS,
-        cloudUsersFilePath,
-      });
-
       const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
 
       let roleDescriptor = {};
@@ -107,12 +101,6 @@ export const samlAuthentication = async (
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
-      const sessionManager = new SamlSessionManager({
-        hostOptions,
-        log,
-        isCloud: config.env.CLOUD_SERVERLESS,
-        cloudUsersFilePath,
-      });
       const { full_name: fullName } = await sessionManager.getUserData(role);
       return fullName;
     },
