@@ -117,7 +117,7 @@ export const EntitiesList: React.FC = () => {
   return (
     <PaginatedTable
       id={ENTITIES_LIST_TABLE_ID}
-      activePage={(data?.page ?? 1) - 1}
+      activePage={activePage}
       columns={columns}
       headerCount={data?.total ?? 0}
       titleSize="s"
