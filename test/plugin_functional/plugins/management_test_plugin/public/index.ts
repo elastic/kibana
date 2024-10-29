@@ -14,5 +14,9 @@ import {
   ManagementTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = () =>
-  new ManagementTestPlugin();
+// export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = () =>
+  // new ManagementTestPlugin();
+
+export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = function() {
+  return new ManagementTestPlugin();
+}
