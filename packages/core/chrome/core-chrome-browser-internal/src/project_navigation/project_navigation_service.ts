@@ -221,7 +221,7 @@ export class ProjectNavigationService {
       .pipe(
         takeUntil(this.stop$),
         map(([def, deepLinksMap, cloudLinks]) => {
-          return parseNavigationTree(def, {
+          return parseNavigationTree(id, def, {
             deepLinks: deepLinksMap,
             cloudLinks,
           });

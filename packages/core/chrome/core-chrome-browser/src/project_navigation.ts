@@ -416,6 +416,7 @@ export interface NavigationTreeDefinition<
  * with their corresponding "deepLink"...)
  */
 export interface NavigationTreeDefinitionUI {
+  id: SolutionId;
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
