@@ -613,22 +613,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAgentStatusForAgentPolicyHandler
     );
-  router.versioned
-    .get({
-      path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { readAgents: true },
-      },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentStatusRequestSchema },
-      },
-      getAgentStatusForAgentPolicyHandler
-    );
   // Agent data
   router.versioned
     .get({

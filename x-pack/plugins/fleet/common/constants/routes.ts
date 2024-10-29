@@ -157,8 +157,6 @@ export const AGENT_API_ROUTES = {
   AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
-  // deprecated since 8.0
-  STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
