@@ -77,11 +77,7 @@ export const getCypressBaseConfig = (
         // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
         baseUrl: 'http://localhost:5601',
         supportFile: 'public/management/cypress/support/e2e.ts',
-        // temp:
-        // x-pack/plugins/security_solution/public/management/cypress/e2e/artifacts/event_filters.cy.ts
-        // x-pack/plugins/security_solution/public/management/cypress/e2e/artifacts/artifacts_mocked_data.cy.ts
-        specPattern:
-          'public/management/cypress/e2e/artifacts/{event_filters,artifacts_mocked_data}.cy.{js,jsx,ts,tsx}',
+        specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
