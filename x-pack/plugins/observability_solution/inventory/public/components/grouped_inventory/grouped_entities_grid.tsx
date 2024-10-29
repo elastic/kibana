@@ -11,7 +11,11 @@ import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntitiesGrid } from '../entities_grid';
-import { entityPaginationRt, type EntityColumnIds } from '../../../common/entities';
+import {
+  entityPaginationRt,
+  type EntityColumnIds,
+  type EntityPagination,
+} from '../../../common/entities';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -26,7 +30,7 @@ export function GroupedEntitiesGrid({ field }: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
-  let pagination: Record<string, number> | undefined = {};
+  let pagination: EntityPagination | undefined = {};
   try {
     pagination = paginationDecoder(paginationQuery);
   } catch (error) {

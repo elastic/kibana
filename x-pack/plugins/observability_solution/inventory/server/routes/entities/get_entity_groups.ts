@@ -29,7 +29,7 @@ export async function getEntityGroupsBy({
   entityTypes?: string[];
 }) {
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
-  const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
+  const where = [getBuiltinEntityDefinitionIdESQLWhereClause()];
   const params: ScalarValue[] = [];
 
   if (entityTypes) {
@@ -37,8 +37,10 @@ export async function getEntityGroupsBy({
     params.push(...entityTypes);
   }
 
+  // STATS doesn't support parameterisation.
   const group = `STATS count = COUNT(*) by ${field}`;
   const sort = `SORT ${field} asc`;
+  // LIMIT doesn't support parameterisation.
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
   const query = [from, ...where, group, sort, limit].join(' | ');
 
@@ -46,7 +48,7 @@ export async function getEntityGroupsBy({
     query,
     filter: {
       bool: {
-        filter: [...kqlQuery(kuery)],
+        filter: kqlQuery(kuery),
       },
     },
     params,

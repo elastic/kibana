@@ -8,7 +8,11 @@ import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { type EntityColumnIds, entityPaginationRt } from '../../../common/entities';
+import {
+  type EntityColumnIds,
+  entityPaginationRt,
+  type EntityPagination,
+} from '../../../common/entities';
 import { EntitiesGrid } from '../entities_grid';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -26,7 +30,7 @@ export function UnifiedInventory() {
   const { refreshSubject$ } = useInventorySearchBarContext();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, kuery, entityTypes, pagination: paginationQuery } = query;
-  let pagination: Record<string, number> | undefined = {};
+  let pagination: EntityPagination | undefined = {};
   const inventoryRoute = useInventoryRouter();
   try {
     pagination = paginationDecoder(paginationQuery);
