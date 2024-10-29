@@ -66,6 +66,7 @@ function InternalAlertsPage() {
     share: {
       url: { locators },
     },
+    spaces,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       getAlertsSearchBar: AlertsSearchBar,
@@ -240,7 +241,17 @@ function InternalAlertsPage() {
               appName={ALERTS_SEARCH_BAR_ID}
               onEsQueryChange={setEsQuery}
               showFilterBar
-              services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
+              services={{
+                timeFilterService,
+                AlertsSearchBar,
+                http,
+                data,
+                dataViews,
+                notifications,
+                spaces,
+                useToasts,
+                uiSettings,
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>

@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
-
+import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
-import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
+import { DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
-import { AlertStatus } from '../../../common/typings';
+// import { AlertStatus } from '../../../common/typings';
 
-const getAlertStatusQuery = (status: string): Query[] => {
-  return ALERT_STATUS_QUERY[status]
-    ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
-    : [];
-};
+// const getAlertStatusQuery = (status: string): Query[] => {
+//   return ALERT_STATUS_QUERY[status]
+//     ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
+//     : [];
+// };
 const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
   defaultMessage: 'Invalid query string',
 });
@@ -35,60 +36,78 @@ export function ObservabilityAlertSearchBar({
   onKueryChange,
   onRangeFromChange,
   onRangeToChange,
-  onStatusChange,
+  onControlFiltersChange,
+  // onStatusChange,
   onFiltersChange,
   showFilterBar = false,
+  controlFilters = [],
+  controlConfigs,
   filters = defaultFilters,
   savedQuery,
   setSavedQuery,
   kuery,
   rangeFrom,
   rangeTo,
-  services: { AlertsSearchBar, timeFilterService, useToasts, uiSettings },
-  status,
-}: ObservabilityAlertSearchBarProps) {
+  services: {
+    AlertsSearchBar,
+    timeFilterService,
+    http,
+    notifications,
+    dataViews,
+    spaces,
+    useToasts,
+    uiSettings,
+  },
+}: // status,
+ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
+  const [spaceId, setSpaceId] = useState<string>();
 
   const clearSavedQuery = useCallback(
     () => (setSavedQuery ? setSavedQuery(undefined) : null),
     [setSavedQuery]
   );
-  const onAlertStatusChange = useCallback(
-    (alertStatus: AlertStatus) => {
-      try {
-        onEsQueryChange(
-          buildEsQuery({
-            timeRange: {
-              to: rangeTo,
-              from: rangeFrom,
-            },
-            kuery,
-            queries: [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries],
-            config: getEsQueryConfig(uiSettings),
-          })
-        );
-      } catch (error) {
-        toasts.addError(error, {
-          title: toastTitle,
-        });
-        onKueryChange(DEFAULT_QUERY_STRING);
-      }
-    },
-    [
-      onEsQueryChange,
-      rangeTo,
-      rangeFrom,
-      kuery,
-      defaultSearchQueries,
-      uiSettings,
-      toasts,
-      onKueryChange,
-    ]
-  );
+  // const onAlertStatusChange = useCallback(
+  //   (alertStatus: AlertStatus) => {
+  //     try {
+  //       onEsQueryChange(
+  //         buildEsQuery({
+  //           timeRange: {
+  //             to: rangeTo,
+  //             from: rangeFrom,
+  //           },
+  //           kuery,
+  //           queries: [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries],
+  //           config: getEsQueryConfig(uiSettings),
+  //         })
+  //       );
+  //     } catch (error) {
+  //       toasts.addError(error, {
+  //         title: toastTitle,
+  //       });
+  //       onKueryChange(DEFAULT_QUERY_STRING);
+  //     }
+  //   },
+  //   [
+  //     onEsQueryChange,
+  //     rangeTo,
+  //     rangeFrom,
+  //     kuery,
+  //     defaultSearchQueries,
+  //     uiSettings,
+  //     toasts,
+  //     onKueryChange,
+  //   ]
+  // );
 
-  useEffect(() => {
-    onAlertStatusChange(status);
-  }, [onAlertStatusChange, status]);
+  // useEffect(() => {
+  //   onAlertStatusChange(status);
+  // }, [onAlertStatusChange, status]);
+
+  const filterControlsStorageKey = useMemo(
+    () => ['observabilitySearchBar', spaceId, appName, 'filterControls'].filter(Boolean).join('.'),
+    [appName, spaceId]
+  );
 
   const submitQuery = useCallback(() => {
     try {
@@ -99,8 +118,8 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
-          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
-          filters,
+          queries: defaultSearchQueries,
+          filters: [...filters, ...controlFilters],
           config: getEsQueryConfig(uiSettings),
         })
       );
@@ -111,21 +130,27 @@ export function ObservabilityAlertSearchBar({
       onKueryChange(DEFAULT_QUERY_STRING);
     }
   }, [
+    onEsQueryChange,
+    rangeTo,
+    rangeFrom,
+    kuery,
     defaultSearchQueries,
     filters,
-    kuery,
-    onEsQueryChange,
-    onKueryChange,
-    rangeFrom,
-    rangeTo,
-    status,
+    controlFilters,
     uiSettings,
     toasts,
+    onKueryChange,
   ]);
 
   useEffect(() => {
     submitQuery();
   }, [submitQuery]);
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
 
   const onQuerySubmit = (
     {
@@ -176,11 +201,30 @@ export function ObservabilityAlertSearchBar({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <AlertsStatusFilter status={status} onChange={onStatusChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AlertFilterControls
+          dataViewSpec={{
+            id: 'unified-alerts-dv',
+            title: '.alerts-*',
+          }}
+          spaceId={spaceId}
+          chainingSystem="HIERARCHICAL"
+          controlsUrlState={controlConfigs}
+          filters={controlFilters}
+          onFiltersChange={onControlFiltersChange}
+          storageKey={filterControlsStorageKey}
+          services={{
+            http,
+            notifications,
+            dataViews,
+            storage: Storage,
+          }}
+          ControlGroupRenderer={ControlGroupRenderer}
+        />
+        {/* <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">*/}
+        {/*  <EuiFlexItem grow={false}>*/}
+        {/*    <AlertsStatusFilter status={status} onChange={onStatusChange} />*/}
+        {/*  </EuiFlexItem>*/}
+        {/* </EuiFlexGroup>*/}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
