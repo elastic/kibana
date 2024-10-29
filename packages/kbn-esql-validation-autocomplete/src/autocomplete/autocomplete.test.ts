@@ -31,6 +31,8 @@ import {
   TIME_PICKER_SUGGESTION,
   setup,
   attachTriggerCommand,
+  SuggestOptions,
+  fields,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
@@ -385,24 +387,56 @@ describe('autocomplete', () => {
           '```````round(doubleField) + 1```` + 1`` + 1`',
           '```````````````round(doubleField) + 1```````` + 1```` + 1`` + 1`',
           '```````````````````````````````round(doubleField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`',
+        ],
+        undefined,
+        [
+          [
+            ...fields,
+            // the following non-field columns will come over the wire as part of the response
+            {
+              name: 'round(doubleField) + 1',
+              type: 'double',
+            },
+            {
+              name: '`round(doubleField) + 1` + 1',
+              type: 'double',
+            },
+            {
+              name: '```round(doubleField) + 1`` + 1` + 1',
+              type: 'double',
+            },
+            {
+              name: '```````round(doubleField) + 1```` + 1`` + 1` + 1',
+              type: 'double',
+            },
+            {
+              name: '```````````````round(doubleField) + 1```````` + 1```` + 1`` + 1` + 1',
+              type: 'double',
+            },
+          ],
         ]
       );
 
       it('should not suggest already-used fields and variables', async () => {
         const { suggest: suggestTest } = await setup();
-        const getSuggestions = async (query: string) =>
-          (await suggestTest(query)).map((value) => value.text);
+        const getSuggestions = async (query: string, opts?: SuggestOptions) =>
+          (await suggestTest(query, opts)).map((value) => value.text);
 
-        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP /')).toContain('foo');
-        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP foo, /')).not.toContain(
-          'foo'
-        );
-        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP /')).toContain(
+        expect(
+          await getSuggestions('from a_index | EVAL foo = 1 | KEEP /', {
+            callbacks: { getColumnsFor: () => [...fields, { name: 'foo', type: 'integer' }] },
+          })
+        ).toContain('foo');
+        expect(
+          await getSuggestions('from a_index | EVAL foo = 1 | KEEP foo, /', {
+            callbacks: { getColumnsFor: () => [...fields, { name: 'foo', type: 'integer' }] },
+          })
+        ).not.toContain('foo');
+
+        expect(await getSuggestions('from a_index | KEEP /')).toContain('doubleField');
+        expect(await getSuggestions('from a_index | KEEP doubleField, /')).not.toContain(
           'doubleField'
         );
-        expect(
-          await getSuggestions('from a_index | EVAL foo = 1 | KEEP doubleField, /')
-        ).not.toContain('doubleField');
       });
     });
   }
@@ -504,7 +538,7 @@ describe('autocomplete', () => {
   });
 
   describe('callbacks', () => {
-    it('should send the fields query without the last command', async () => {
+    it('should send the columns query without the last command', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const statement = 'from a | drop keywordField | eval var0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf(' ');
@@ -516,7 +550,7 @@ describe('autocomplete', () => {
         async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
-      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
         query: 'from a | drop keywordField',
       });
     });
@@ -532,7 +566,7 @@ describe('autocomplete', () => {
         async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
-      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from a' });
     });
   });
 
@@ -1123,7 +1157,7 @@ describe('autocomplete', () => {
           { filterText: '_source', text: '_source, ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
         // no comma if there are no more fields
-        testSuggestions('FROM a METADATA _id, _ignored, _index, _source, _version/', [
+        testSuggestions('FROM a METADATA _id, _ignored, _index, _source, _index_mode, _version/', [
           { filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
       });
@@ -1262,41 +1296,33 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
-      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: { start: 36, end: 36 } },
       '!= $0',
-      '< $0',
-      '<= $0',
       '== $0',
-      '> $0',
-      '>= $0',
       'IN $0',
+      'AND $0',
+      'NOT',
+      'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
       { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
-      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
-      '< $0',
-      '<= $0',
+      { text: '!= $0', rangeToReplace: { start: 32, end: 32 } },
       '== $0',
-      '> $0',
-      '>= $0',
       'IN $0',
+      'AND $0',
+      'NOT',
+      'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
       'IS NULL',
-      '% $0',
-      '* $0',
-      '+ $0',
-      '- $0',
-      '/ $0',
       '!= $0',
-      '< $0',
-      '<= $0',
       '== $0',
-      '> $0',
-      '>= $0',
       'IN $0',
+      'AND $0',
+      'NOT',
+      'OR $0',
     ]);
     describe('dot-separated field names', () => {
       testSuggestions(

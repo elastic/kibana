@@ -25,14 +25,29 @@ import { FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 import type { GeoipDatabase } from '../../../../../../../common/types';
+import { getDatabaseText, getDatabaseValue } from '../../../../../sections/manage_processors/utils';
 import { getTypeLabel } from '../../../../../sections/manage_processors/constants';
+
+const extension = '.mmdb';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
   database_file: {
     type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
-    serializer: (v: string[]) => (v.length ? v[0] : undefined),
+    deserializer: (v: unknown) =>
+      to.arrayOfStrings(v).map((str) => {
+        const databaseName = str?.split(extension)[0];
+        // Use the translated text for this database, if it exists
+        return getDatabaseText(databaseName) ?? databaseName;
+      }),
+    serializer: (v: any[]) => {
+      if (v.length) {
+        const databaseName = v[0];
+        const databaseValue = getDatabaseValue(databaseName);
+        return databaseValue ? `${databaseValue}${extension}` : `${databaseName}${extension}`;
+      }
+      return undefined;
+    },
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.ipLocationForm.databaseFileLabel', {
       defaultMessage: 'Database file (optional)',
     }),
@@ -75,7 +90,8 @@ export const IpLocation: FunctionComponent = () => {
   const dataAsOptions = (data || []).map((item) => ({
     id: item.id,
     type: item.type,
-    label: item.name,
+    // Use the translated text for this database, if it exists
+    label: getDatabaseText(item.name) ?? item.name,
   }));
   const optionsByGroup = groupBy(dataAsOptions, 'type');
   const groupedOptions = map(optionsByGroup, (items, groupName) => ({

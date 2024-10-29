@@ -48,12 +48,12 @@ const VulnerabilitiesCount = ({
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1>{vulnerabilitiesTotal}</h1>
+            <h3>{vulnerabilitiesTotal}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
-            size="m"
+            size="xs"
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -162,8 +162,7 @@ export const VulnerabilitiesPreview = ({
       header={{
         iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
         title: (
-          <EuiText
-            size="xs"
+          <EuiTitle
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -172,7 +171,7 @@ export const VulnerabilitiesPreview = ({
               id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTitle"
               defaultMessage="Vulnerabilities"
             />
-          </EuiText>
+          </EuiTitle>
         ),
         link,
       }}

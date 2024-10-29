@@ -11,7 +11,7 @@ import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
-import { isColumnItem, isFunctionItem, getFunctionDefinition } from './helpers';
+import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
 
 function addToVariableOccurrences(variables: Map<string, ESQLVariable[]>, instance: ESQLVariable) {
   if (!variables.has(instance.name)) {
@@ -43,62 +43,6 @@ function addToVariables(
   }
 }
 
-/**
- * Determines the type of the expression
- *
- * TODO - this function needs a lot of work. For example, it needs to find the best-matching function signature
- * which it isn't currently doing. See https://github.com/elastic/kibana/issues/195682
- */
-function getExpressionType(
-  root: ESQLAstItem,
-  fields: Map<string, ESQLRealField>,
-  variables: Map<string, ESQLVariable[]>
-): string {
-  const fallback = 'double';
-
-  if (Array.isArray(root) || !root) {
-    return fallback;
-  }
-  if (root.type === 'literal') {
-    return root.literalType;
-  }
-  if (root.type === 'inlineCast') {
-    if (root.castType === 'int') {
-      return 'integer';
-    }
-    if (root.castType === 'bool') {
-      return 'boolean';
-    }
-    return root.castType;
-  }
-  if (isColumnItem(root)) {
-    const field = fields.get(root.parts.join('.'));
-    if (field) {
-      return field.type;
-    }
-    const variable = variables.get(root.parts.join('.'));
-    if (variable) {
-      return variable[0].type;
-    }
-  }
-  if (isFunctionItem(root)) {
-    const fnDefinition = getFunctionDefinition(root.name);
-    return fnDefinition?.signatures[0].returnType ?? fallback;
-  }
-  return fallback;
-}
-
-function getAssignRightHandSideType(
-  item: ESQLAstItem,
-  fields: Map<string, ESQLRealField>,
-  variables: Map<string, ESQLVariable[]>
-) {
-  if (Array.isArray(item)) {
-    const firstArg = item[0];
-    return getExpressionType(firstArg, fields, variables);
-  }
-}
-
 export function excludeVariablesFromCurrentCommand(
   commands: ESQLCommand[],
   currentCommand: ESQLCommand,
@@ -122,14 +66,10 @@ function addVariableFromAssignment(
   fields: Map<string, ESQLRealField>
 ) {
   if (isColumnItem(assignOperation.args[0])) {
-    const rightHandSideArgType = getAssignRightHandSideType(
-      assignOperation.args[1],
-      fields,
-      variables
-    );
+    const rightHandSideArgType = getExpressionType(assignOperation.args[1], fields, variables);
     addToVariableOccurrences(variables, {
       name: assignOperation.args[0].parts.join('.'),
-      type: rightHandSideArgType as string /* fallback to number */,
+      type: rightHandSideArgType /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }
@@ -138,14 +78,15 @@ function addVariableFromAssignment(
 function addVariableFromExpression(
   expressionOperation: ESQLFunction,
   queryString: string,
-  variables: Map<string, ESQLVariable[]>
+  variables: Map<string, ESQLVariable[]>,
+  fields: Map<string, ESQLRealField>
 ) {
   if (!expressionOperation.text.includes(EDITOR_MARKER)) {
     const expressionText = queryString.substring(
       expressionOperation.location.min,
       expressionOperation.location.max + 1
     );
-    const expressionType = 'double'; // TODO - use getExpressionType once it actually works
+    const expressionType = getExpressionType(expressionOperation, fields, variables);
     addToVariableOccurrences(variables, {
       name: expressionText,
       type: expressionType,
@@ -174,7 +115,7 @@ export function collectVariables(
       if (ctx.node.name === '=') {
         addVariableFromAssignment(ctx.node, variables, fields);
       } else {
-        addVariableFromExpression(ctx.node, queryString, variables);
+        addVariableFromExpression(ctx.node, queryString, variables, fields);
       }
     })
     .on('visitCommandOption', (ctx) => {

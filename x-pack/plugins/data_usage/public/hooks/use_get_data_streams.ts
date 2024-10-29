@@ -13,6 +13,7 @@ import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type GetDataUsageDataStreamsResponse = Array<{
   name: string;
+  storageSizeBytes: number;
   selected: boolean;
 }>;
 
@@ -22,11 +23,11 @@ const PAGING_PARAMS = Object.freeze({
 });
 
 export const useGetDataUsageDataStreams = ({
-  searchString,
   selectedDataStreams,
-  options = {},
+  options = {
+    enabled: false,
+  },
 }: {
-  searchString: string;
   selectedDataStreams?: string[];
   options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>;
 }): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
@@ -37,24 +38,26 @@ export const useGetDataUsageDataStreams = ({
     ...options,
     keepPreviousData: true,
     queryFn: async () => {
-      const dataStreamsResponse = await http.get<GetDataUsageDataStreamsResponse>(
-        DATA_USAGE_DATA_STREAMS_API_ROUTE,
-        {
+      const dataStreamsResponse = await http
+        .get<GetDataUsageDataStreamsResponse>(DATA_USAGE_DATA_STREAMS_API_ROUTE, {
           version: '1',
-          query: {},
-        }
-      );
+        })
+        .catch((error) => {
+          throw error.body;
+        });
 
       const augmentedDataStreamsBasedOnSelectedItems = dataStreamsResponse.reduce<{
         selected: GetDataUsageDataStreamsResponse;
         rest: GetDataUsageDataStreamsResponse;
       }>(
-        (acc, list) => {
+        (acc, ds) => {
           const item = {
-            name: list.name,
+            name: ds.name,
+            storageSizeBytes: ds.storageSizeBytes,
+            selected: ds.selected,
           };
 
-          if (selectedDataStreams?.includes(list.name)) {
+          if (selectedDataStreams?.includes(ds.name)) {
             acc.selected.push({ ...item, selected: true });
           } else {
             acc.rest.push({ ...item, selected: false });

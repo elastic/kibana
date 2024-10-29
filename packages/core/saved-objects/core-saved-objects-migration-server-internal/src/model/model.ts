@@ -1522,6 +1522,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             },
           ],
         };
+      } else if (isTypeof(left, 'types_added')) {
+        // compatible migration: ONLY new SO types have been introduced, skip directly to UPDATE_TARGET_MAPPINGS_META
+        return {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS_META',
+        };
       } else {
         throwBadResponse(stateP, res as never);
       }
