@@ -544,13 +544,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       const existingDocs = (result.hits?.total as SearchTotalHits).value;
 
       if (existingDocs !== expectedDocsCount) {
-        this.options.logger.error(
+        this.options.logger.debug(
           `Security Labs docs are not loaded, existing docs: ${existingDocs}, expected docs: ${expectedDocsCount}`
         );
       }
       return existingDocs === expectedDocsCount;
     } catch (e) {
-      this.options.logger.error(`Error checking if Security Labs docs are loaded: ${e.message}`);
+      this.options.logger.info(`Error checking if Security Labs docs are loaded: ${e.message}`);
       return false;
     }
   };
