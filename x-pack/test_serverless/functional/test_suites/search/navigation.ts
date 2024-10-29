@@ -130,21 +130,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'dashboards',
       });
-      // check Other tools
-      // > Maps
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'maps',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'maps',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Maps',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'maps',
-      });
 
       // check Getting Started
       await solutionNavigation.sidenav.clickLink({

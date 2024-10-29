@@ -22,6 +22,7 @@ describe('IndexEntryEditor', () => {
       { name: 'field-2', esTypes: ['text'] },
       { name: 'field-3', esTypes: ['semantic_text'] },
     ]),
+    getExistingIndices: jest.fn().mockResolvedValue(['index-1']),
   } as unknown as DataViewsContract;
 
   const defaultProps = {
@@ -146,5 +147,21 @@ describe('IndexEntryEditor', () => {
     waitFor(() => {
       expect(getByRole('combobox', { name: i18n.ENTRY_FIELD_PLACEHOLDER })).toBeDisabled();
     });
+  });
+
+  it('fetches index options and updates on selection 2', async () => {
+    (mockDataViews.getExistingIndices as jest.Mock).mockResolvedValue([]);
+    const { getByText } = render(
+      <IndexEntryEditor
+        {...defaultProps}
+        entry={{ ...defaultProps.entry, index: 'missing-index' }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockDataViews.getExistingIndices).toHaveBeenCalled();
+    });
+
+    expect(getByText("Index doesn't exist")).toBeInTheDocument();
   });
 });
