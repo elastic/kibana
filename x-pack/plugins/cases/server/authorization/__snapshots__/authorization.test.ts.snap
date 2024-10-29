@@ -100,7 +100,7 @@ Array [
     Object {
       "error": Object {
         "code": "Error",
-        "message": "Unauthorized to create case with owners: \\"a\\"",
+        "message": "Unauthorized to create, access case with owners: \\"a\\"",
       },
       "event": Object {
         "action": "case_create",
@@ -119,6 +119,31 @@ Array [
         },
       },
       "message": "Failed attempt to create cases [id=1] as owner \\"a\\"",
+    },
+  ],
+  Array [
+    Object {
+      "error": Object {
+        "code": "Error",
+        "message": "Unauthorized to create, access case with owners: \\"a\\"",
+      },
+      "event": Object {
+        "action": "case_get",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "failure",
+        "type": Array [
+          "access",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "Failed attempt to access cases [id=1] as owner \\"a\\"",
     },
   ],
 ]

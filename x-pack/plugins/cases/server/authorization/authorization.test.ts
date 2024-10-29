@@ -1511,7 +1511,7 @@ describe('authorization', () => {
           entities: [{ id: '1', owner: 'a' }],
           operation: [Operations.createCase, Operations.getCase],
         })
-      ).rejects.toThrow('Unauthorized to create case with owners: "a"');
+      ).rejects.toThrow('Unauthorized to create, access case with owners: "a"');
 
       expect(mockLogger.log.mock.calls).toMatchSnapshot();
     });
