@@ -165,7 +165,7 @@ export const CreateConnector: React.FC = () => {
     http,
     messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
       defaultMessage:
-        'Your connector is created but missing some details. You can complete setup later in the management area, but the guided flow offers more help.',
+        'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
     }),
     navigateToUrl: application.navigateToUrl,
     openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
