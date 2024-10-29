@@ -17,16 +17,6 @@ export interface DatasetQualitySupertestUser {
   clean: () => Promise<void>;
 }
 
-/**
- * Returns a Role Scoped Supertest User corresponding to Dataset Quality Monitor User privileges.
- *
- * @Note: Falls back to Admin Supertest User if custom role is not available.
- *
- * @param getService { DeploymentAgnosticFtrProviderContext['getService'] } The getService from the FTR Provider Context
- * @param requestHeaderOptions { RequestHeadersOptions } The request header options
- * @returns { user: SupertestWithRoleScopeType, clean: () => Promise<void> } The user and a clean function to clean up
- * the user after the test
- */
 export async function getDatasetQualityMonitorSupertestUser({
   getService,
   requestHeaderOptions = {
@@ -42,6 +32,32 @@ export async function getDatasetQualityMonitorSupertestUser({
         {
           names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
           privileges: ['monitor', 'view_index_metadata'],
+        },
+      ],
+    },
+  };
+
+  return getDatasetQualitySuperTestUserForRoleDescriptors(
+    { getService, requestHeaderOptions },
+    datasetQualityMonitorUserRoleDescriptors
+  );
+}
+
+export async function getDatasetQualityMonitorWithReadSupertestUser({
+  getService,
+  requestHeaderOptions = {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  },
+}: DeploymentAgnosticFtrProviderContext & {
+  userOptions?: RequestHeadersOptions;
+}): DatasetQualitySupertestUser {
+  const datasetQualityMonitorUserRoleDescriptors: KibanaRoleDescriptors = {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
+          privileges: ['read', 'monitor', 'view_index_metadata'],
         },
       ],
     },
@@ -79,6 +95,17 @@ export async function getDatasetQualityNoAccessSuperTestUser({
   );
 }
 
+/**
+ * Returns a Role Scoped Supertest User corresponding to the provided role descriptors.
+ *
+ * @Note: Falls back to Admin Supertest User if custom role is not available.
+ *
+ * @param getService { DeploymentAgnosticFtrProviderContext['getService'] } The getService from the FTR Provider Context
+ * @param requestHeaderOptions { RequestHeadersOptions } The request header options
+ * @param descriptors { KibanaRoleDescriptors } The role descriptors for the custom role
+ * @returns { user: SupertestWithRoleScopeType, isCustomRoleEnabled: boolean, clean: () => Promise<void> } The user,
+ * a flag indicating if the custom role is enabled, and a clean function to clean up the user after the test
+ */
 async function getDatasetQualitySuperTestUserForRoleDescriptors(
   {
     getService,
