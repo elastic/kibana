@@ -61,8 +61,20 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
 
     const config = setupConfig();
     const access = 'public';
-
-    registerBulkResolveRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerBulkResolveRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

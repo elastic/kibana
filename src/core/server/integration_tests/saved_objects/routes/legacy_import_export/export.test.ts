@@ -58,11 +58,19 @@ describe('POST /api/dashboards/export', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementLegacyDashboardsExport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
     registerLegacyExportRoute(router, {
       kibanaVersion: 'mockversion',
       coreUsageData,
       logger: loggerMock.create(),
       access: 'public',
+      legacyDeprecationInfo: deprecationMock,
     });
 
     handlerContext.savedObjects.client.bulkGet

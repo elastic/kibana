@@ -71,8 +71,20 @@ describe('GET /api/saved_objects/_find with allowApiAccess true', () => {
 
     const config = setupConfig(true);
     const access = 'public';
-
-    registerFindRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerFindRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

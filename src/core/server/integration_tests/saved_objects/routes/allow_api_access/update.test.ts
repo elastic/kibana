@@ -56,7 +56,20 @@ describe('PUT /api/saved_objects/{type}/{id?} with allowApiAccess true', () => {
 
     const config = setupConfig(true);
     const access = 'public';
-    registerUpdateRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerUpdateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

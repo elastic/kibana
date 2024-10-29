@@ -56,7 +56,20 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
     const logger = loggerMock.create();
     const config = setupConfig(true);
     const access = 'public';
-    registerBulkCreateRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerBulkCreateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

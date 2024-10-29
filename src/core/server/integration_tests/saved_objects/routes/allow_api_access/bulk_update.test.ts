@@ -52,7 +52,20 @@ describe('PUT /api/saved_objects/_bulk_update with allowApiAccess true', () => {
 
     const config = setupConfig(true);
     const access = 'public';
-    registerBulkUpdateRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerBulkUpdateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

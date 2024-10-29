@@ -81,8 +81,20 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
     const access = 'public';
-
-    registerResolveRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerResolveRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

@@ -126,11 +126,41 @@ export function registerRoutes({
     access: internalOnServerless,
     deprecationInfo,
   });
-  registerBulkGetRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerBulkCreateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerBulkResolveRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerBulkUpdateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
-  registerBulkDeleteRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerBulkGetRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerBulkCreateRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerBulkResolveRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerBulkUpdateRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
+  registerBulkDeleteRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+    deprecationInfo,
+  });
 
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });

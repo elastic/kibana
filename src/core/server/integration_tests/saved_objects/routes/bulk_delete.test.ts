@@ -62,8 +62,20 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
 
     const config = setupConfig();
     const access = 'public';
-
-    registerBulkDeleteRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerBulkDeleteRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

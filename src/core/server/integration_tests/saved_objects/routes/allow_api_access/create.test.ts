@@ -58,7 +58,20 @@ describe('POST /api/saved_objects/{type} with allowApiAccess true', () => {
     const logger = loggerMock.create();
     const config = setupConfig(true);
     const access = 'public';
-    registerCreateRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerCreateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes

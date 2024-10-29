@@ -60,8 +60,20 @@ describe('POST /api/saved_objects/_bulk_create', () => {
 
     const config = setupConfig();
     const access = 'public';
-
-    registerBulkCreateRoute(router, { config, coreUsageData, logger, access });
+    const deprecationMock = {
+      documentationUrl: 'http://elastic.co',
+      severity: 'warning' as const,
+      reason: {
+        type: 'remove' as const,
+      },
+    };
+    registerBulkCreateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
