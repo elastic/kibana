@@ -220,7 +220,7 @@ export const config: PluginConfigDescriptor = {
           retrySetupOnBoot: schema.boolean({ defaultValue: false }),
           registry: schema.object(
             {
-              kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
+              kibanaVersionCheckEnabled: schema.boolean({ defaultValue: false }),
               excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
               spec: schema.object(
                 {
