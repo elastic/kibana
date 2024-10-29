@@ -15,6 +15,7 @@ import {
   mergeResponseContent,
   prepareRoutes,
   getPathParameters,
+  getOpId,
 } from './util';
 import { assignToPaths, extractTags } from './util';
 
@@ -258,5 +259,32 @@ describe('getPathParameters', () => {
     ],
   ])('%s', (input, output) => {
     expect(getPathParameters(input)).toEqual(output);
+  });
+});
+
+describe('getOpId', () => {
+  test('empty', () => {
+    expect(() => getOpId({ method: '', path: '/asd' })).toThrow(/Must provide method and path/);
+    expect(() => getOpId({ method: 'get', path: '' })).toThrow(/Must provide method and path/);
+    expect(() => getOpId({ method: '', path: '' })).toThrow(/Must provide method and path/);
+  });
+  test.each([
+    { input: { method: 'GET', path: '/api/file' }, output: 'get-file' },
+    { input: { method: 'POST', path: '/internal/api/file' }, output: 'post-file' },
+    { input: { method: 'PUT', path: '/internal/file' }, output: 'put-file' },
+    { input: { method: 'Put', path: 'fOO/fILe' }, output: 'put-foo-file' },
+    {
+      input: { method: 'delete', path: '/api/my/really/cool/domain/resource' },
+      output: 'delete-my-really-cool-domain-resource',
+    },
+    {
+      input: {
+        method: 'delete',
+        path: '/api/my/really/cool/domain/resource',
+      },
+      output: 'delete-my-really-cool-domain-resource',
+    },
+  ])('$input.method $input.path -> $output', ({ input, output }) => {
+    expect(getOpId(input)).toBe(output);
   });
 });

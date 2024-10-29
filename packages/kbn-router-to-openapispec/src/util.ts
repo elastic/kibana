@@ -166,10 +166,10 @@ export const getXsrfHeaderForMethod = (
   ];
 };
 
-export function setXState(
+export const setXState = (
   availability: RouteConfigOptions<RouteMethod>['availability'],
   operation: CustomOperationObject
-): void {
+): void => {
   if (availability) {
     if (availability.stability === 'experimental') {
       operation['x-state'] = 'Technical Preview';
@@ -178,4 +178,28 @@ export function setXState(
       operation['x-state'] = 'Beta';
     }
   }
-}
+};
+
+/**
+ * Best effort to generate operation IDs from route values
+ */
+export const getOpId = ({ path, method }: { path: string; method: string }): string => {
+  path = path.trim().toLowerCase();
+
+  if (!method || !path) {
+    throw new Error(`Must provide method and path, received: method: "${method}", path: "${path}"`);
+  }
+
+  const removePrefixes = ['/internal/api/', '/internal/', '/api/']; // longest to shortest
+  for (const prefix of removePrefixes) {
+    if (path.startsWith(prefix)) {
+      path = path.substring(prefix.length - 1);
+      break;
+    }
+  }
+
+  return `${method.toLocaleLowerCase()}-${path
+    .replace(/^\//, '')
+    .replace(/\/$/, '')
+    .replace(/\//g, '-')}`;
+};
