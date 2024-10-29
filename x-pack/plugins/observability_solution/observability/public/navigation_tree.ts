@@ -326,6 +326,15 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                     ),
                   },
                   {
+                    link: 'ml:esqlDataVisualizer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.esql_data_visualizer',
+                      {
+                        defaultMessage: 'ES|QL data visualizer',
+                      }
+                    ),
+                  },
+                  {
                     link: 'ml:dataDrift',
                     title: i18n.translate(
                       'xpack.observability.obltNav.ml.data_visualizer.data_drift',
