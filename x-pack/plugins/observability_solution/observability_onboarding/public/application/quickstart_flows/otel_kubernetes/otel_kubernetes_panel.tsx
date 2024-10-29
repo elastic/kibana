@@ -226,7 +226,8 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                 />
                 <EuiSpacer />
                 <EuiCodeBlock paddingSize="m" language="yaml">
-                  {`apiVersion: apps/v1
+                  {`# To annotate specific deployment Pods modify its manifest
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
@@ -242,7 +243,15 @@ spec:
       - image: myapplication-image
         name: app
       ...
-`}
+
+# To annotate all resources in a namespace
+kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+
+# Restart your deployment
+kubectl rollout restart deployment myapp -n my-namespace
+
+# Check annotations have been applied correctly
+kubectl describe deployment myapp -n my-namespace`}
                 </EuiCodeBlock>
                 <EuiSpacer />
                 <CopyToClipboardButton
