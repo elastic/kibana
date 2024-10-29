@@ -53,20 +53,16 @@ export function initializeUnifiedSearchManager(
   const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | undefined>(undefined);
+  const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
+  // setAndSyncQuery method not needed since query synced with 2-way data binding
   function setQuery(query: Query) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
     }
   }
-  function setAndSyncQuery(query: Query | undefined) {
-    const queryOrDefault = query ?? queryString.getDefaultQuery();
-    setQuery(queryOrDefault);
-    if (creationOptions?.useUnifiedSearchIntegration) {
-      queryString.setQuery(queryOrDefault);
-    }
-  }
-  const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(undefined);
+  const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
+    initialState.refreshInterval
+  );
   function setRefreshInterval(refreshInterval: RefreshInterval) {
     if (!fastIsEqual(refreshInterval, refreshInterval$.value)) {
       refreshInterval$.next(refreshInterval);
@@ -80,7 +76,7 @@ export function initializeUnifiedSearchManager(
       timefilterService.setRefreshInterval(refreshIntervalOrDefault);
     }
   }
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
   function setTimeRange(timeRange: TimeRange) {
     if (!fastIsEqual(timeRange, timeRange$.value)) {
       timeRange$.next(timeRange);
@@ -100,32 +96,12 @@ export function initializeUnifiedSearchManager(
     if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
   }
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
+  // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[]) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
-  }
-  function setAndSyncUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
-    const filtersOrDefault = unifiedSearchFilters ?? [];
-    setUnifiedSearchFilters(filtersOrDefault);
-    if (creationOptions?.useUnifiedSearchIntegration) {
-      filterManager.setAppFilters(cloneDeep(filtersOrDefault));
-    }
-  }
-
-  setAndSyncQuery(initialState.query);
-  setAndSyncUnifiedSearchFilters(initialState.filters);
-  if (initialState.timeRestore) {
-    setAndSyncRefreshInterval(initialState.refreshInterval);
-    const urlOverrideTimeRange =
-      creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
-        GLOBAL_STATE_STORAGE_KEY
-      )?.time;
-    setAndSyncTimeRange(urlOverrideTimeRange ? urlOverrideTimeRange : initialState.timeRange);
-  } else {
-    setTimeRange(timefilterService.getTime());
-    setRefreshInterval(timefilterService.getRefreshInterval());
   }
 
   // --------------------------------------------------------------------------------------
@@ -162,6 +138,33 @@ export function initializeUnifiedSearchManager(
     creationOptions?.useUnifiedSearchIntegration &&
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
   ) {
+    // apply filters and query to the query service
+    filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
+    queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
+
+    /**
+     * Get initial time range, and set up dashboard time restore if applicable
+     */
+    const initialTimeRange: TimeRange = (() => {
+      // if there is an explicit time range in the URL it always takes precedence.
+      const urlOverrideTimeRange =
+        creationOptions.unifiedSearchSettings.kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
+          GLOBAL_STATE_STORAGE_KEY
+        )?.time;
+      if (urlOverrideTimeRange) return urlOverrideTimeRange;
+
+      // if this Dashboard has timeRestore return the time range that was saved with the dashboard.
+      if (timeRestore$.value && timeRange$.value) return timeRange$.value;
+
+      // otherwise fall back to the time range from the timefilterService.
+      return timefilterService.getTime();
+    })();
+    setTimeRange(initialTimeRange);
+    if (timeRestore$.value) {
+      if (timeRange$.value) timefilterService.setTime(timeRange$.value);
+      if (refreshInterval$.value) timefilterService.setRefreshInterval(refreshInterval$.value);
+    }
+
     // start syncing global query state with the URL.
     const { stop } = syncGlobalQueryStateWithUrl(
       dataService.query,
@@ -260,16 +263,16 @@ export function initializeUnifiedSearchManager(
       },
       query$,
       refreshInterval$,
-      setFilters: setAndSyncUnifiedSearchFilters,
-      setQuery: setAndSyncQuery,
+      setFilters: setUnifiedSearchFilters,
+      setQuery,
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
       unifiedSearchFilters$,
     },
     comparators: {
-      filters: [unifiedSearchFilters$, setAndSyncUnifiedSearchFilters, fastIsEqual],
-      query: [query$, setAndSyncQuery, fastIsEqual],
+      filters: [unifiedSearchFilters$, setUnifiedSearchFilters, fastIsEqual],
+      query: [query$, setQuery, fastIsEqual],
       refreshInterval: [
         refreshInterval$,
         (refreshInterval: RefreshInterval | undefined) => {
@@ -294,9 +297,9 @@ export function initializeUnifiedSearchManager(
       controlGroupReload$,
       panelsReload$,
       reset: (lastSavedState: DashboardState) => {
-        setAndSyncQuery(lastSavedState.query);
+        setUnifiedSearchFilters(lastSavedState.filters);
+        setQuery(lastSavedState.query);
         setTimeRestore(lastSavedState.timeRestore);
-        setAndSyncUnifiedSearchFilters(lastSavedState.filters);
         if (lastSavedState.timeRestore) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
