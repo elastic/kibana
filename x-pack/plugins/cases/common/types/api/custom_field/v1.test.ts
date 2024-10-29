@@ -121,13 +121,17 @@ describe('Custom Fields', () => {
     it('should not be more than Number.MAX_SAFE_INTEGER', () => {
       expect(
         PathReporter.report(numberCustomFieldValueType.decode(Number.MAX_SAFE_INTEGER + 1))[0]
-      ).toContain('The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.');
+      ).toContain(
+        'The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      );
     });
 
     it('should not be less than Number.MIN_SAFE_INTEGER', () => {
       expect(
         PathReporter.report(numberCustomFieldValueType.decode(Number.MIN_SAFE_INTEGER - 1))[0]
-      ).toContain('The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.');
+      ).toContain(
+        'The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      );
     });
   });
 });

@@ -587,7 +587,9 @@ describe('configure', () => {
             defaultValue: Number.MAX_SAFE_INTEGER + 1,
           })
         )[0]
-      ).toContain('The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.');
+      ).toContain(
+        'The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      );
     });
 
     it(`throws an error if the default value is less than ${Number.MIN_SAFE_INTEGER}`, () => {
@@ -598,7 +600,9 @@ describe('configure', () => {
             defaultValue: Number.MIN_SAFE_INTEGER - 1,
           })
         )[0]
-      ).toContain('The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.');
+      ).toContain(
+        'The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      );
     });
   });
 

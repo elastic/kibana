@@ -41,6 +41,8 @@ describe('getEuiTableColumn ', () => {
     appMockRender.render(<div>{column.render({ key, type: CustomFieldTypes.NUMBER, value })}</div>);
 
     expect(screen.getByTestId(`number-custom-field-column-view-${key}`)).toBeInTheDocument();
-    expect(screen.getByTestId(`number-custom-field-column-view-${key}`)).toHaveTextContent(String(value));
+    expect(screen.getByTestId(`number-custom-field-column-view-${key}`)).toHaveTextContent(
+      String(value)
+    );
   });
 });
