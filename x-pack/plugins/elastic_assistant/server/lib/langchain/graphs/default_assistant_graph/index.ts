@@ -90,7 +90,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const latestMessage = langChainMessages.slice(-1); // the last message
 
-  // Check if KB is available
+  // Check if KB is available (not feature flag related)
   const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
 
   // Fetch any applicable tools that the source plugin may have registered
@@ -114,7 +114,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   );
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
-  if (isEnabledKnowledgeBase && dataClients?.kbDataClient?.isV2KnowledgeBaseEnabled) {
+  if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
       assistantToolParams,
       esClient,

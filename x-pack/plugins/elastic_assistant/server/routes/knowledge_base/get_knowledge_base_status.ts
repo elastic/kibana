@@ -17,7 +17,6 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -49,12 +48,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
         const logger = ctx.elasticAssistant.logger;
 
         try {
-          // FF Check for V2 KB
-          const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
-
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-            v2KnowledgeBaseEnabled,
-          });
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
@@ -78,7 +72,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             return response.ok({
               body: {
                 ...body,
-                security_labs_exists: v2KnowledgeBaseEnabled ? securityLabsExists : true,
+                security_labs_exists: securityLabsExists,
               },
             });
           }

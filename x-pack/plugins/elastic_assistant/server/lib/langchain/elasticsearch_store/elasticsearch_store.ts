@@ -6,16 +6,11 @@
  */
 
 import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  MappingTypeMapping,
-  MlTrainedModelDeploymentNodesStats,
-  MlTrainedModelStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Callbacks } from '@langchain/core/callbacks/manager';
 import { Document } from 'langchain/document';
 import { VectorStore } from '@langchain/core/vectorstores';
-import * as uuid from 'uuid';
 
 import { Metadata } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -109,46 +104,6 @@ export class ElasticsearchStore extends VectorStore {
    * @returns Promise<string[]> of document IDs added to the store
    */
   addDocuments = async (
-    documents: Array<Document<Metadata>>,
-    options?: Record<string, never>
-  ): Promise<string[]> => {
-    // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
-    // Once removed replace addDocuments() w/ addDocumentsViaDataClient()
-    if (this.kbDataClient != null) {
-      return this.addDocumentsViaDataClient(documents, options);
-    }
-
-    const pipelineExists = await this.pipelineExists();
-    if (!pipelineExists) {
-      await this.createPipeline();
-    }
-
-    const operations = documents.flatMap(({ pageContent, metadata }) => [
-      { index: { _index: this.index, _id: uuid.v4() } },
-      { text: pageContent, metadata },
-    ]);
-
-    try {
-      const response = await this.esClient.bulk({ refresh: true, operations });
-      this.logger.debug(() => `Add Documents Response:\n ${JSON.stringify(response)}`);
-
-      const errorIds = response.items.filter((i) => i.index?.error != null);
-      operations.forEach((op, i) => {
-        if (errorIds.some((e) => e.index?._id === op.index?._id)) {
-          this.logger.error(`Error adding document to KB: ${JSON.stringify(operations?.[i + 1])}`);
-        }
-      });
-
-      return response.items.flatMap((i) =>
-        i.index?._id != null && i.index.error == null ? [i.index._id] : []
-      );
-    } catch (e) {
-      this.logger.error(`Error loading data into KB\n ${e}`);
-      return [];
-    }
-  };
-
-  addDocumentsViaDataClient = async (
     documents: Array<Document<Metadata>>,
     options?: Record<string, never>
   ): Promise<string[]> => {
@@ -344,27 +299,6 @@ export class ElasticsearchStore extends VectorStore {
   };
 
   /**
-   * Delete index for ELSER embeddings in Elasticsearch
-   * @param index Index to delete, otherwise uses the default index
-   *
-   * @returns Promise<boolean> indicating whether the index was created
-   */
-  deleteIndex = async (index?: string): Promise<boolean> => {
-    // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
-    // We won't be supporting delete operations for the KB data stream going forward, so this can be removed along with the FF
-    if (this.kbDataClient != null) {
-      const response = await this.esClient.indices.deleteDataStream({ name: index ?? this.index });
-      return response.acknowledged;
-    }
-
-    const response = await this.esClient.indices.delete({
-      index: index ?? this.index,
-    });
-
-    return response.acknowledged;
-  };
-
-  /**
    * Checks if the provided ingest pipeline exists in Elasticsearch
    *
    * @param pipelineId ID of the ingest pipeline to check
@@ -443,33 +377,10 @@ export class ElasticsearchStore extends VectorStore {
    * @param modelId ID of the model to check
    * @returns Promise<boolean> indicating whether the model is installed
    */
-  async isModelInstalled(modelId?: string): Promise<boolean> {
+  async isModelInstalled(): Promise<boolean> {
     try {
-      // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
-      if (this.kbDataClient != null) {
-        // esStore.isModelInstalled() is actually checking if the model is deployed, not installed, so do that instead
-        return this.kbDataClient.isModelDeployed();
-      }
-
-      const getResponse = await this.esClient.ml.getTrainedModelsStats({
-        model_id: modelId ?? this.model,
-      });
-
-      this.logger.debug(`modelId: ${modelId}`);
-
-      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
-      const isReadyESS = (stats: MlTrainedModelStats) =>
-        stats.deployment_stats?.state === 'started' &&
-        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
-
-      const isReadyServerless = (stats: MlTrainedModelStats) =>
-        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
-          (node) => node.routing_state.routing_state === 'started'
-        );
-
-      return getResponse.trained_model_stats.some(
-        (stats) => isReadyESS(stats) || isReadyServerless(stats)
-      );
+      // esStore.isModelInstalled() is actually checking if the model is deployed, not installed, so do that instead
+      return (await this.kbDataClient?.isModelDeployed()) ?? false;
     } catch (e) {
       // Returns 404 if it doesn't exist
       return false;

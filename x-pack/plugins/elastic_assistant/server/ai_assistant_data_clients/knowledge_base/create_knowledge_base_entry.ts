@@ -37,24 +37,15 @@ export const createKnowledgeBaseEntry = async ({
   knowledgeBaseEntry,
   logger,
   global = false,
-  isV2 = false,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = isV2
-    ? transformToCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
-        global,
-      })
-    : transformToLegacyCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as TransformToLegacyCreateSchemaProps['entry'],
-        global,
-      });
+  const body = transformToCreateSchema({
+    createdAt,
+    spaceId,
+    user,
+    entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
+    global,
+  });
   try {
     const response = await esClient.create({
       body,

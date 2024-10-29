@@ -373,8 +373,6 @@ export const langChainExecute = async ({
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
-  const v2KnowledgeBaseEnabled =
-    assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -388,9 +386,7 @@ export const langChainExecute = async ({
 
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
-    (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-      v2KnowledgeBaseEnabled,
-    })) ?? undefined;
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
 
   const dataClients: AssistantDataClients = {
     anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
@@ -624,29 +620,6 @@ export const performChecks = ({
   }
 
   return undefined;
-};
-
-/**
- * Returns whether the v2 KB is enabled
- *
- * @param context - Route context
- * @param request - Route KibanaRequest
-
- */
-export const isV2KnowledgeBaseEnabled = ({
-  context,
-  request,
-}: {
-  context: AwaitedProperties<
-    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
-  >;
-  request: KibanaRequest;
-}): boolean => {
-  const pluginName = getPluginNameFromRequest({
-    request,
-    defaultPluginName: DEFAULT_PLUGIN_NAME,
-  });
-  return context.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 };
 
 /**

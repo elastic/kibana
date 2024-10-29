@@ -93,15 +93,6 @@ describe('ElasticsearchStore', () => {
         settings: { default_pipeline: '.kibana-elastic-ai-assistant-kb-ingest-pipeline' },
       });
     });
-
-    it('Deletes an index', async () => {
-      mockEsClient.indices.delete.mockResolvedValue({ acknowledged: true });
-
-      const deleted = await esStore.deleteIndex();
-
-      expect(deleted).toBe(true);
-      expect(mockEsClient.indices.delete).toHaveBeenCalledWith({ index: KB_INDEX });
-    });
   });
 
   describe('Pipeline Management', () => {

@@ -19,7 +19,6 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Delete Knowledge Base index, pipeline, and resources (collection of documents)
@@ -51,14 +50,9 @@ export const deleteKnowledgeBaseRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger = ctx.elasticAssistant.logger;
 
-        // FF Check for V2 KB
-        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
-
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              v2KnowledgeBaseEnabled,
-            });
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
