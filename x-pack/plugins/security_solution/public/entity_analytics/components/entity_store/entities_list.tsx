@@ -94,6 +94,11 @@ export const EntitiesList: React.FC = () => {
     inspect: data?.inspect ?? null,
   });
 
+  // Reset the active page when the search criteria changes
+  useEffect(() => {
+    setActivePage(0);
+  }, [sorting, limit, filter]);
+
   const columns = useEntitiesListColumns();
 
   // Force a refetch when "refresh" button is clicked.
