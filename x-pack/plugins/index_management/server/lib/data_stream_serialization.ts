@@ -6,8 +6,8 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
+import { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
-import { IndexMode } from "@kbn/index-management-plugin/common/types/data_streams";
 
 export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
   const {

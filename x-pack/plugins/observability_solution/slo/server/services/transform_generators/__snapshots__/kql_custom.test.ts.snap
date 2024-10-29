@@ -140,7 +140,7 @@ Object {
             "goodEvents": "slo.numerator>_count",
             "totalEvents": "slo.denominator>_count",
           },
-          "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
+          "script": "if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0 }",
         },
       },
       "slo.numerator": Object {
@@ -242,7 +242,7 @@ Object {
             "goodEvents": "slo.numerator>_count",
             "totalEvents": "slo.denominator>_count",
           },
-          "script": "params.goodEvents / params.totalEvents > 0 ? 1 : 0",
+          "script": "if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents > 0 ? 1 : 0 }",
         },
       },
       "slo.numerator": Object {
