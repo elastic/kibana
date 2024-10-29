@@ -102,7 +102,7 @@ PUT _connector/${rawName}
 # 3. Create an API key
 POST /_security/api_key
 {
-  "name": "${selectedConnector?.serviceType}-api-key",
+  "name": "${rawName}-api-key",
   "role_descriptors": {
     "${selectedConnector?.serviceType}-api-key-role": {
       "cluster": [
