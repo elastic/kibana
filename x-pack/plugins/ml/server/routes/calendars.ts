@@ -48,8 +48,10 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/calendars`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetCalendars'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetCalendars'],
+        },
       },
       summary: 'Gets calendars',
       description: 'Gets calendars - size limit has been explicitly set to 10000',
@@ -76,8 +78,10 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarIds}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetCalendars'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetCalendars'],
+        },
       },
       summary: 'Gets a calendar',
       description: 'Gets a calendar by id',
@@ -115,8 +119,10 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/calendars`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateCalendar'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateCalendar'],
+        },
       },
       summary: 'Creates a calendar',
       description: 'Creates a calendar',
@@ -149,8 +155,10 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateCalendar'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateCalendar'],
+        },
       },
       summary: 'Updates a calendar',
       description: 'Updates a calendar',
@@ -185,8 +193,10 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteCalendar'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteCalendar'],
+        },
       },
       summary: 'Deletes a calendar',
       description: 'Deletes a calendar',

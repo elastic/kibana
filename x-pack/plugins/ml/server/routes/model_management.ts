@@ -29,13 +29,15 @@ export function modelManagementRoutes({
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/model_management/nodes_overview`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canViewMlNodes',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetJobs',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canViewMlNodes',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetJobs',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
       summary: 'Get node overview about the models allocation',
       description: 'Retrieves the list of ML nodes with memory breakdown and allocated models info',
@@ -62,13 +64,15 @@ export function modelManagementRoutes({
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/model_management/memory_usage`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canViewMlNodes',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetJobs',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canViewMlNodes',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetJobs',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
       summary: 'Get memory usage for jobs and trained models',
       description: 'Retrieves the memory usage for jobs and trained models',

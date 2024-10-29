@@ -29,12 +29,14 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/management/list/{listType}`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canCreateJob',
-          'access:ml:canCreateDataFrameAnalytics',
-          'access:ml:canCreateTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canCreateJob',
+            'ml:canCreateDataFrameAnalytics',
+            'ml:canCreateTrainedModels',
+          ],
+        },
       },
       summary: 'Gets management list',
       description:

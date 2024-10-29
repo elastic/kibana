@@ -46,8 +46,10 @@ export function annotationRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/annotations`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetAnnotations'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetAnnotations'],
+        },
       },
       summary: 'Gets annotations',
       description: 'Gets annotations.',
@@ -83,8 +85,10 @@ export function annotationRoutes(
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/annotations/index`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateAnnotation'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateAnnotation'],
+        },
       },
       summary: 'Indexes annotation',
       description: 'Indexes the annotation.',
@@ -127,8 +131,10 @@ export function annotationRoutes(
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/annotations/delete/{annotationId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteAnnotation'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteAnnotation'],
+        },
       },
       summary: 'Deletes annotation',
       description: 'Deletes the specified annotation.',

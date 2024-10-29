@@ -119,8 +119,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Gets data frame analytics',
       description: 'Returns the list of data frame analytics jobs.',
@@ -153,8 +155,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Gets data frame analytics by id',
       description: 'Returns the data frame analytics job by id.',
@@ -191,8 +195,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Gets data frame analytics stats',
       description: 'Returns the data frame analytics job statistics.',
@@ -218,8 +224,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Gets data frame analytics stats by id',
       description: 'Returns the data frame analytics job statistics by id.',
@@ -252,8 +260,10 @@ export function dataFrameAnalyticsRoutes(
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateDataFrameAnalytics'],
+        },
       },
       summary: 'Updates data frame analytics job',
       description:
@@ -329,8 +339,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/_evaluate`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Evaluates the data frame analytics',
       description: 'Evaluates the data frame analytics for an annotated index.',
@@ -366,8 +378,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/_explain`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateDataFrameAnalytics'],
+        },
       },
       summary: 'Explains a data frame analytics job config',
       description:
@@ -403,8 +417,10 @@ export function dataFrameAnalyticsRoutes(
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteDataFrameAnalytics'],
+        },
       },
       summary: 'Deletes data frame analytics job',
       description: 'Deletes specified data frame analytics job.',
@@ -506,8 +522,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_start`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDataFrameAnalytics'],
+        },
       },
       summary: 'Starts specified analytics job',
       description: 'Starts a data frame analytics job.',
@@ -540,8 +558,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_stop`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDataFrameAnalytics'],
+        },
       },
       summary: 'Stops specified analytics job',
       description: 'Stops a data frame analytics job.',
@@ -576,8 +596,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_update`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateDataFrameAnalytics'],
+        },
       },
       summary: 'Updates specified analytics job',
       description: 'Updates a data frame analytics job.',
@@ -615,8 +637,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/messages`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Gets data frame analytics messages',
       description: 'Returns the list of audit messages for data frame analytics jobs.',
@@ -649,8 +673,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/jobs_exist`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Checks if jobs exist',
       description:
@@ -700,8 +726,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/map/{analyticsId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Gets a data frame analytics jobs map',
       description: 'Returns map of objects leading up to analytics job.',
@@ -761,8 +789,10 @@ export function dataFrameAnalyticsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/new_job_caps/{indexPattern}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get fields for a pattern of indices used for analytics',
       description: 'Returns the fields for a pattern of indices used for analytics.',
@@ -809,8 +839,10 @@ export function dataFrameAnalyticsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/validate`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateDataFrameAnalytics'],
+        },
       },
       summary: 'Validates the data frame analytics job config',
       description: 'Validates the data frame analytics job config.',

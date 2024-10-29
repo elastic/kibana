@@ -27,8 +27,10 @@ export function systemRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetMlInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetMlInfo'],
+        },
       },
       summary: 'Check privileges',
       description: 'Checks if the user has required privileges',
@@ -129,8 +131,10 @@ export function systemRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/ml_node_count`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetMlInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetMlInfo'],
+        },
       },
       summary: 'Get the number of ML nodes',
       description: 'Returns the number of ML nodes',
@@ -155,8 +159,10 @@ export function systemRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/info`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetMlInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetMlInfo'],
+        },
       },
       summary: 'Get ML info',
       description: 'Returns defaults and limits used by machine learning',
@@ -199,8 +205,10 @@ export function systemRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/es_search`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'ES Search wrapper',
       // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
@@ -231,8 +239,10 @@ export function systemRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/index_exists`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFieldInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFieldInfo'],
+        },
       },
       summary: 'ES Field caps wrapper checks if index exists',
     })
@@ -274,8 +284,10 @@ export function systemRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
       summary: 'ES reindex wrapper to reindex with pipeline',
     })
