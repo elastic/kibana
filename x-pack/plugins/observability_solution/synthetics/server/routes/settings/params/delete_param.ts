@@ -34,11 +34,11 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   },
   handler: async ({ savedObjectsClient, request, response }) => {
     const { ids } = request.body;
-    const { id: queryId } = request;
+    const { id: paramId } = request.params ?? {};
 
-    if (ids && queryId) {
+    if (ids && paramId) {
       return response.badRequest({
-        body: 'Both query and body parameters cannot be provided',
+        body: `Both param id ${queryId} and body parameters cannot be provided`,
       });
     }
 

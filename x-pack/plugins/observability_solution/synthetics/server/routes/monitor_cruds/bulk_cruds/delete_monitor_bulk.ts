@@ -8,11 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { DeleteParamsResponse } from '../../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 
 export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
-  DeleteParamsResponse[],
+  Array<{ id: string; deleted: boolean }>,
   Record<string, string>,
   Record<string, string>,
   { ids: string[] }
@@ -29,15 +28,13 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async (routeContext): Promise<any> => {
+  handler: async (routeContext) => {
     const { request } = routeContext;
 
     const { ids: idsToDelete } = request.body || {};
-
-    const result: DeleteParamsResponse[] = [];
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    const { errors } = await deleteMonitorAPI.execute({
+    const { errors, result } = await deleteMonitorAPI.execute({
       monitorIds: idsToDelete,
     });
 
