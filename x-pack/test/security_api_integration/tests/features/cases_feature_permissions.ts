@@ -12,6 +12,8 @@ import { CaseSeverity, ConnectorTypes, FEATURE_ID, FEATURE_ID_V2 } from '@kbn/ca
 import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import type { Role } from '@kbn/security-plugin-types-common';
 
+import type { FtrProviderContext } from '../../ftr_provider_context';
+
 export default function ({ getService }: FtrProviderContext) {
   describe('cases feature migration', function () {
     const supertest = getService('supertest');
