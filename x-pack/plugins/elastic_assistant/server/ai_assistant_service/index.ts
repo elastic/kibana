@@ -26,7 +26,7 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { knowledgeBaseFieldMapV2 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -91,8 +91,8 @@ export class AIAssistantService {
     });
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
-      kibanaVersion: this.options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMapV2,
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: knowledgeBaseFieldMap,
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
