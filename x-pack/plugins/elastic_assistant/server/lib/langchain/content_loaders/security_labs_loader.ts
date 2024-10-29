@@ -69,11 +69,12 @@ export const loadSecurityLabs = async (
   }
 };
 
-export const getSecurityLabsDocsCount = async (): Promise<number> => {
+export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
     return (await globby(`${resolve(__dirname, '../../../knowledge_base/security_labs')}/**/*.md`))
-      .length;
+      ?.length;
   } catch (e) {
+    logger.error(`Failed to get Security Labs source docs count\n${e}`);
     return 0;
   }
 };

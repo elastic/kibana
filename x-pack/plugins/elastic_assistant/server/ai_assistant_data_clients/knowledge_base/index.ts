@@ -506,6 +506,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       return !!result.hits?.total;
     } catch (e) {
+      this.options.logger.error(`Error checking if user's KB docs exist: ${e.message}`);
       return false;
     }
   };
@@ -521,7 +522,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    const expectedDocsCount = await getSecurityLabsDocsCount();
+    const expectedDocsCount = await getSecurityLabsDocsCount({ logger: this.options.logger });
 
     const esClient = await this.options.elasticsearchClientPromise;
 
