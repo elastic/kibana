@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useMemo } from 'react';
-import { EuiSkeletonText } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -77,7 +77,13 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
         defaultMessage="An error is preventing this alert from being visualized."
       />
     ) : (
-      <React.Suspense fallback={<LoadingComponent />}>
+      <React.Suspense
+        fallback={
+          <EuiPanel>
+            <LoadingComponent />
+          </EuiPanel>
+        }
+      >
         <GraphLazy
           css={css`
             height: 300px;
