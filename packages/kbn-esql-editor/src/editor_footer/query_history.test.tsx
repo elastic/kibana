@@ -21,6 +21,7 @@ jest.mock('../history_local_storage', () => {
         timeZone: 'Browser',
         timeRan: 'Mar. 25, 24 08:45:27',
         queryRunning: false,
+        duration: '12ms',
         status: 'success',
       },
     ],
@@ -76,6 +77,16 @@ describe('QueryHistory', () => {
           width: '240px',
         },
         {
+          'data-test-subj': 'lastDuration',
+          field: 'duration',
+          name: 'Last duration',
+          sortable: false,
+          width: '120px',
+          css: {
+            justifyContent: 'flex-end',
+          },
+        },
+        {
           actions: [],
           'data-test-subj': 'actions',
           name: '',
@@ -112,6 +123,16 @@ describe('QueryHistory', () => {
         field: 'queryString',
         name: 'Recent queries',
         render: expect.anything(),
+      },
+      {
+        'data-test-subj': 'lastDuration',
+        field: 'duration',
+        name: 'Last duration',
+        sortable: false,
+        width: 'auto',
+        css: {
+          justifyContent: 'flex-end',
+        },
       },
       {
         actions: [],

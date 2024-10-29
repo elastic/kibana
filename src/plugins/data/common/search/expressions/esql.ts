@@ -335,6 +335,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             columns: allColumns,
             rows,
             warning,
+            queryTime: body.took,
           } as Datatable;
         })
       );

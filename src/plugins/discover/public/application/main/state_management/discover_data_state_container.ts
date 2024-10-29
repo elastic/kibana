@@ -70,6 +70,7 @@ export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
+  esqlQueryTime?: number;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
 

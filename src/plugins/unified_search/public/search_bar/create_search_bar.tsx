@@ -263,6 +263,7 @@ export function createSearchBar({
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
             textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
+            esqlQueryTime={props.esqlQueryTime}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}

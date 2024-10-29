@@ -258,6 +258,7 @@ export class ESQLSource
         resultsCount,
         areResultsTrimmed: resultsCount >= limit,
       },
+      queryTime: esqlSearchResponse.took,
     };
   }
 

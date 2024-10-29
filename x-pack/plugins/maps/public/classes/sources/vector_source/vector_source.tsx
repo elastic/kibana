@@ -53,6 +53,7 @@ export interface SourceStatus {
 export interface GeoJsonWithMeta {
   data: FeatureCollection;
   meta?: DataRequestMeta;
+  queryTime?: number;
 }
 
 export interface BoundsRequestMeta {

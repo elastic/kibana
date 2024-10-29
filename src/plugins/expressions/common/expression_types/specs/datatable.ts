@@ -141,6 +141,7 @@ export interface Datatable {
   meta?: DatatableMeta;
   rows: DatatableRow[];
   warning?: string;
+  queryTime?: number;
 }
 
 export interface SerializedDatatable extends Datatable {

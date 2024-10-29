@@ -64,6 +64,9 @@ export interface ESQLEditorProps {
 
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
+
+  /** Query took time, coming from ES **/
+  queryTime?: number;
 }
 
 export interface ESQLEditorDeps {

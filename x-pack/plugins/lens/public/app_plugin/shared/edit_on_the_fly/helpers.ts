@@ -27,6 +27,7 @@ export interface ESQLDataGridAttrs {
   rows: ESQLRow[];
   dataView: DataView;
   columns: DatatableColumn[];
+  queryTime?: number;
 }
 
 const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
@@ -76,6 +77,7 @@ export const getGridAttrs = async (
     rows: results.response.values,
     dataView,
     columns,
+    queryTime: results.response.took,
   };
 };
 
@@ -90,7 +92,7 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
 ) => {
   try {
-    const { dataView, columns, rows } = await getGridAttrs(
+    const { dataView, columns, rows, queryTime } = await getGridAttrs(
       query,
       adHocDataViews,
       deps,
@@ -101,6 +103,7 @@ export const getSuggestions = async (
       rows,
       dataView,
       columns,
+      queryTime,
     });
 
     const context = {
