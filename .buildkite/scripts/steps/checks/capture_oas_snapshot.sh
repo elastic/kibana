@@ -28,5 +28,8 @@ check_for_changed_files "$cmd" true
 .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
 .buildkite/scripts/steps/openapi_bundling/final_merge.sh
 
+echo --- Removing content type from stateful spec
+cd $KIBANA_DIR
+ls oas_docs/output # temp
 # For now, as a last step, we remove the versioning information from kibana bundle
 sed -i '' -e 's/; Elastic-Api-Version=[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}//g' oas_docs/output/kibana.yaml
