@@ -157,7 +157,7 @@ describe('processVersionedRouter', () => {
     expect(results.paths['/foo']!.get).toBeDefined();
 
     expect(results.paths['/foo']!.get!.description).toBe(
-      '[Authz] Route required privileges: ALL of [manage_spaces].'
+      '[Required authorization] Route required privileges: ALL of [manage_spaces].'
     );
   });
 });
