@@ -94,6 +94,7 @@ export default async () => {
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
+        'serverless.indices.validate_dot_prefixes=true',
       ],
       ssl: true, // SSL is required for SAML realm
     },
