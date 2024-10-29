@@ -20,8 +20,10 @@ export const applyDataViewIndicesEntityEngineRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/apply_dataview_indices',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

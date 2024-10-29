@@ -32,7 +32,12 @@ export function registerActionStateRoutes(
     .get({
       access: 'public',
       path: ACTION_STATE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

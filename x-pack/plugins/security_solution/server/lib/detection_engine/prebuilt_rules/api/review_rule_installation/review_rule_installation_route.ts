@@ -26,8 +26,12 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
     .post({
       access: 'internal',
       path: REVIEW_RULE_INSTALLATION_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
