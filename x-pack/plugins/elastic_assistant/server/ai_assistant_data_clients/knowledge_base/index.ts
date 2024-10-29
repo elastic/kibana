@@ -34,10 +34,7 @@ import {
 } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import {
-  ESQL_DOCS_LOADED_QUERY,
-  SECURITY_LABS_RESOURCE,
-} from '../../routes/knowledge_base/constants';
+import { SECURITY_LABS_RESOURCE } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
@@ -337,18 +334,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
-  };
-
-  /**
-   * Returns if ES|QL KB docs have been loaded
-   */
-  public isESQLDocsLoaded = async (): Promise<boolean> => {
-    const esqlDocs = await this.getKnowledgeBaseDocumentEntries({
-      query: ESQL_DOCS_LOADED_QUERY,
-      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
-      required: true,
-    });
-    return esqlDocs.length > 0;
   };
 
   /**
