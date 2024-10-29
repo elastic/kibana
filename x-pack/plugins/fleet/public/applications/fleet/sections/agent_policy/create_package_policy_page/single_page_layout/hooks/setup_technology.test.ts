@@ -135,9 +135,7 @@ describe('useAgentless', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/189038
-// FLAKY: https://github.com/elastic/kibana/issues/192126
-describe.skip('useSetupTechnology', () => {
+describe('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
@@ -298,7 +296,7 @@ describe.skip('useSetupTechnology', () => {
   });
 
   it('should fetch agentless policy if agentless feature is enabled and isServerless is true', async () => {
-    const { waitForNextUpdate } = renderHook(() =>
+    const { rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -308,7 +306,7 @@ describe.skip('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await rerender();
 
     expect(sendGetOneAgentPolicy).toHaveBeenCalled();
   });
@@ -356,7 +354,7 @@ describe.skip('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -372,13 +370,13 @@ describe.skip('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
-    waitForNextUpdate();
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-    expect(setNewAgentPolicy).toHaveBeenCalledWith({
-      name: 'Agentless policy for endpoint-1',
-      supports_agentless: true,
-      inactivity_timeout: 3600,
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        name: 'Agentless policy for endpoint-1',
+        supports_agentless: true,
+        inactivity_timeout: 3600,
+      });
     });
   });
 
@@ -451,7 +449,7 @@ describe.skip('useSetupTechnology', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -467,8 +465,9 @@ describe.skip('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
 
-    waitForNextUpdate();
-    expect(setNewAgentPolicy).toHaveBeenCalledTimes(0);
+    waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledTimes(0);
+    });
   });
 
   it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
@@ -493,7 +492,7 @@ describe.skip('useSetupTechnology', () => {
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -503,7 +502,7 @@ describe.skip('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await rerender();
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
@@ -514,7 +513,7 @@ describe.skip('useSetupTechnology', () => {
   });
 
   it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -524,7 +523,7 @@ describe.skip('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await rerender();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
@@ -569,7 +568,7 @@ describe.skip('useSetupTechnology', () => {
   });
 
   it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -579,7 +578,7 @@ describe.skip('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await rerender();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
