@@ -20,13 +20,12 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds, EntityType } from '../../../common/entities';
+import { EntityColumnIds } from '../../../common/entities';
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
-import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
@@ -39,7 +38,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
-  onFilterByType: (entityType: EntityType) => void;
+  onFilterByType: (entityType: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -85,17 +84,18 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
+      const entityType = entity[ENTITY_TYPE];
+
       switch (columnEntityTableId) {
         case 'alertsCount':
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case ENTITY_TYPE:
-          const entityType = entity[columnEntityTableId];
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
               value={entityType}
-              label={getEntityTypeLabel(entityType)}
+              label={entityType}
               onFilter={() => onFilterByType(entityType)}
             />
           );
