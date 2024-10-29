@@ -575,7 +575,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar');
+      // type stays the same as the columns remain the same
+      expect(await getCurrentVisTitle()).to.be('Treemap');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
