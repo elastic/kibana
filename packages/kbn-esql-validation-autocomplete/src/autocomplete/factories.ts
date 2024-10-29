@@ -64,7 +64,7 @@ function getSafeInsertSourceText(text: string) {
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
-    label: fullSignatures[0].declaration,
+    label: fn.name.toUpperCase(),
     text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
