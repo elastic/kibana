@@ -38,6 +38,10 @@ const ULTIMATE_PRIORITY_RULES = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+# CODEOWNERS reviews are not required on backports
+# Assign kibanamachine to avoid notifications
+* @kibanamachine
 `;
 
 export const CodeownersCommand: GenerateCommand = {
