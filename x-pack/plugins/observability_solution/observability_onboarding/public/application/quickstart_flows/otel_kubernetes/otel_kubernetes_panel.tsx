@@ -101,7 +101,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
-                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. For automatic certificate renewal, we recommend installing the {link}."
+                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. For automatic certificate renewal, we recommend installing the {link} , and customize the values.yaml file before the installation as described {doc}."
                     values={{
                       link: (
                         <EuiLink
@@ -112,6 +112,18 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                           {i18n.translate(
                             'xpack.observability_onboarding.otelKubernetesPanel.certmanagerLinkLabel',
                             { defaultMessage: 'cert-manager' }
+                          )}
+                        </EuiLink>
+                      ),
+                      doc: (
+                        <EuiLink
+                          href="https://ela.st/8-16-otel-cert-manager"
+                          target="_blank"
+                          data-test-subj="observabilityOnboardingOtelKubernetesPanelCertManagerDocsLink"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelKubernetesPanel.certmanagerDocsLinkLabel',
+                            { defaultMessage: 'in our documentation' }
                           )}
                         </EuiLink>
                       ),
@@ -175,7 +187,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                     {
                       defaultMessage:
-                        'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
+                        'Enable automatic instrumentation for your applications by annotating the resource that manages their pods, such as a deployment, or by annotating the entire namespace.',
                     }
                   )}
                 </p>
@@ -213,17 +225,18 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   ]}
                 />
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="yaml" lineNumbers={{ highlight: '5-6' }}>
-                  {`apiVersion: v1
-kind: Pod
-metadata:
-  name: my-app
-  annotations:
-    instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
-spec:
-  containers:
-  - name: my-app
-    image: my-app:latest`}
+                <EuiCodeBlock paddingSize="m" language="bash">
+                  {`# To annotate a specific deployment
+kubectl annotate deployment my-deployment -n my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
+
+# To annotate all resources in a namespace
+kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
+
+# Restart your deployment
+kubectl rollout restart deployment my-deployment -n my-namespace
+
+# Check whether annotations have been applied correctly
+kubectl describe deployment my-deployment -n my-namespace`}
                 </EuiCodeBlock>
                 <EuiSpacer />
                 <CopyToClipboardButton
@@ -239,7 +252,7 @@ spec:
                     values={{
                       link: (
                         <EuiLink
-                          href={`/path`}
+                          href="https://ela.st/8-16-otel-apm-instrumentation"
                           data-test-subj="observabilityOnboardingOtelKubernetesPanelReferToTheDocumentationLink"
                           target="_blank"
                         >
