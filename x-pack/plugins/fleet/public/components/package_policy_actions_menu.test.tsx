@@ -115,13 +115,15 @@ describe('PackagePolicyActionsMenu', () => {
   });
 
   it('Should disable upgrade button if package does not have upgrade', async () => {
-    const agentPolicies = createMockAgentPolicies();
-    const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).toBeDisabled();
-    });
+    for (let i = 0; i < 1000; i++) {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await act(async () => {
+        const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
+        expect(upgradeButton).toBeDisabled();
+      });
+    }
   });
 
   it('Should enable upgrade button if package has upgrade', async () => {
