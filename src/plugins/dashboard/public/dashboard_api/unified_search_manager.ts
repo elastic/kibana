@@ -14,7 +14,10 @@ import {
   Subject,
   Subscription,
   combineLatest,
+  debounceTime,
+  distinctUntilChanged,
   finalize,
+  map,
   of,
   switchMap,
   tap,
@@ -26,8 +29,10 @@ import { cloneDeep } from 'lodash';
 import {
   GlobalQueryStateFromUrl,
   RefreshInterval,
+  connectToQueryState,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
+import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { dataService } from '../services/kibana_services';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_constants';
@@ -152,6 +157,7 @@ export function initializeUnifiedSearchManager(
   // --------------------------------------------------------------------------------------
   const unifiedSearchSubscriptions: Subscription = new Subscription();
   let stopSyncingWithUrl: (() => void) | undefined;
+  let stopSyncingAppFilters: (() => void) | undefined;
   if (
     creationOptions?.useUnifiedSearchIntegration &&
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
@@ -163,16 +169,34 @@ export function initializeUnifiedSearchManager(
     );
     stopSyncingWithUrl = stop;
 
-    unifiedSearchSubscriptions.add(
-      filterManager.getUpdates$().subscribe(() => {
-        setUnifiedSearchFilters(filterManager.getFilters());
-      })
+    stopSyncingAppFilters = connectToQueryState(
+      dataService.query,
+      {
+        get: () => ({
+          filters: unifiedSearchFilters$.value ?? [],
+          query: query$.value ?? dataService.query.queryString.getDefaultQuery(),
+        }),
+        set: ({ filters: newFilters, query: newQuery }) => {
+          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters));
+          setQuery(newQuery);
+        },
+        state$: combineLatest([query$, unifiedSearchFilters$]).pipe(
+          debounceTime(0),
+          map(([query, unifiedSearchFilters]) => {
+            return {
+              query: query ?? dataService.query.queryString.getDefaultQuery(),
+              filters: unifiedSearchFilters ?? [],
+            };
+          }),
+          distinctUntilChanged()
+        ),
+      },
+      {
+        query: true,
+        filters: true,
+      }
     );
-    unifiedSearchSubscriptions.add(
-      queryString.getUpdates$().subscribe(() => {
-        setQuery(queryString.getQuery() as Query);
-      })
-    );
+
     unifiedSearchSubscriptions.add(
       timefilterService.getTimeUpdate$().subscribe(() => {
         const urlOverrideTimeRange =
@@ -295,6 +319,7 @@ export function initializeUnifiedSearchManager(
       controlGroupSubscriptions.unsubscribe();
       unifiedSearchSubscriptions.unsubscribe();
       stopSyncingWithUrl?.();
+      stopSyncingAppFilters?.();
     },
   };
 }
