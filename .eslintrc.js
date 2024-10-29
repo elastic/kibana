@@ -1980,43 +1980,29 @@ module.exports = {
     },
     {
       files: [
-        'packages/kbn-reporting/common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/pdf_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/pdf/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/png_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/png/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/public/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/server/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/shared-ux/page/analytics_no_data/types/**',
-        'scripts/create_observability_rules.js', // TODO - is importing "@kbn/observability-alerting-test-data" (observability/private)
-        'src/cli_setup/**', // TODO @kibana/operations - is importing "@kbn/interactive-setup-plugin" (platform/private)
-        'src/dev/build/tasks/install_chromium.ts', // TODO @kibana/operations - is importing "@kbn/screenshotting-plugin" (platform/private)
-        'src/plugins/ai_assistant_management/selection/**',
-        'src/plugins/dashboard/**',
-        'src/plugins/discover/**',
-        'test/**',
-        'x-pack/examples/exploratory_view_example/**',
-        'x-pack/examples/screenshotting_example/**',
-        'x-pack/examples/ui_actions_enhanced_examples/**',
-        'x-pack/packages/security-solution/data_table/**',
-        'x-pack/plugins/aiops/**',
-        'x-pack/plugins/data_quality/**',
-        'x-pack/plugins/ingest_pipelines/**',
-        'x-pack/plugins/ml/**',
-        'x-pack/plugins/monitoring/**',
+        // the following dependencies on AI-assistant will be solved when a proper Kibana AI assistant (platform) is created
         'x-pack/plugins/observability_solution/infra/**',
-        'x-pack/plugins/observability_solution/inventory/**',
         'x-pack/plugins/observability_solution/investigate_app/**',
-        'x-pack/plugins/observability_solution/investigate/**',
         'x-pack/plugins/observability_solution/logs_shared/**',
-        'x-pack/plugins/observability_solution/metrics_data_access/**',
-        'x-pack/plugins/observability_solution/observability_ai_assistant_app/**',
         'x-pack/plugins/observability_solution/observability_ai_assistant_management/**',
-        'x-pack/plugins/observability_solution/observability/**',
-        'x-pack/plugins/observability_solution/slo/**',
-        'x-pack/plugins/observability_solution/synthetics/e2e/**',
+
+        // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is gonna be removed
+        'x-pack/plugins/observability_solution/infra/**',
+
+        // TODO @kibana/operations
+        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
+
+        // FIXME Using MAX_FILE_SIZE ui setting which is private (internal to fileUpload plugin)
+        'x-pack/plugins/ingest_pipelines/**',
+
+        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
         'x-pack/plugins/osquery/**',
-        'x-pack/plugins/search_assistant/**',
+
+        // For now, we keep the exception to let tests depend on anythying.
+        // Ideally, we need to classify the solution specific ones to reduce CI times
+        'test/**',
         'x-pack/test_serverless/**',
         'x-pack/test/**',
         'x-pack/test/plugin_functional/plugins/resolver_test/**',

@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -79,7 +78,7 @@ export const render = (
 
   return testLibRender(
     // @ts-ignore
-    <IntlProvider locale="en-US" messages={translations.messages}>
+    <IntlProvider locale="en-US">
       <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock}>
         <KibanaContextProvider services={{ ...mergedCoreStartMock, ...startDeps }}>
           <AppContextProvider value={appContextValue}>
