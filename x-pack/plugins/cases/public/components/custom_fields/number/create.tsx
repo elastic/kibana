@@ -23,7 +23,9 @@ const CreateComponent: CustomFieldType<CaseCustomFieldNumber>['Create'] = ({
   const config = getNumberFieldConfig({
     required: setAsOptional ? false : required,
     label,
-    ...(defaultValue && setDefaultValue && { defaultValue: Number(defaultValue) }),
+    ...(defaultValue &&
+      setDefaultValue &&
+      !isNaN(Number(defaultValue)) && { defaultValue: Number(defaultValue) }),
   });
 
   return (

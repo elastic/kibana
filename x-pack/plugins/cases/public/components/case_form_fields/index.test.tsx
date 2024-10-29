@@ -225,7 +225,6 @@ describe('CaseFormFields', () => {
     );
 
     await user.clear(numberCustomField);
-    await user.click(numberCustomField);
     await user.paste('4321');
 
     await user.click(await screen.findByText('Submit'));

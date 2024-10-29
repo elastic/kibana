@@ -557,15 +557,7 @@ describe('configure', () => {
       });
     });
 
-    it('defaultValue fails if the type is not number', () => {
-      expect(
-        PathReporter.report(
-          NumberCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            defaultValue: false,
-          })
-        )[0]
-      ).toContain('Invalid value false supplied');
+    it('defaultValue fails if the type is string', () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({
@@ -576,7 +568,18 @@ describe('configure', () => {
       ).toContain('Invalid value "string" supplied');
     });
 
-    it(`throws an error if the default value is more than  Number.MAX_SAFE_INTEGER`, () => {
+    it('defaultValue fails if the type is boolean', () => {
+      expect(
+        PathReporter.report(
+          NumberCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
+    });
+
+    it(`throws an error if the default value is more than  ${Number.MAX_SAFE_INTEGER}`, () => {
       expect(
         PathReporter.report(
           NumberCustomFieldConfigurationRt.decode({

@@ -332,6 +332,44 @@ describe('CasePostRequestRt', () => {
     );
   });
 
+  it(`throws an error when a number customFields is more than ${Number.MAX_SAFE_INTEGER}`, () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.NUMBER,
+              value: Number.MAX_SAFE_INTEGER + 1,
+            },
+          ],
+        })
+      )
+    ).toContain(
+      `The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
+    );
+  });
+
+  it(`throws an error when a number customFields is less than ${Number.MIN_SAFE_INTEGER}`, () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.NUMBER,
+              value: Number.MIN_SAFE_INTEGER - 1,
+            },
+          ],
+        })
+      )
+    ).toContain(
+      `The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
+    );
+  });
+
   it('throws an error when a text customField is an empty string', () => {
     expect(
       PathReporter.report(
@@ -674,6 +712,11 @@ describe('CasePatchRequestRt', () => {
         key: 'second_custom_field_key',
         type: 'toggle',
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: 'number',
+        value: 123,
       },
     ],
   };

@@ -23,7 +23,7 @@ export const customFieldSerializer = (
     if (defaultValue !== null && Number.isSafeInteger(Number(defaultValue))) {
       return { ...field, defaultValue: Number(defaultValue) };
     } else {
-      return { ...field, defaultValue: null };
+      return otherProperties;
     }
   }
 
