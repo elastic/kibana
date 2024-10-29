@@ -34,7 +34,6 @@ import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
-  DRILLDOWN_ACTION_GROUP,
   DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
@@ -58,7 +57,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
-  public grouping = [DRILLDOWN_ACTION_GROUP];
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 

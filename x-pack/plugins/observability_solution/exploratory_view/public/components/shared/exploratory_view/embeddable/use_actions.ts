@@ -190,6 +190,5 @@ const getAddToCaseAction = ({ callback }: { callback: () => void }): Action => {
       return;
     },
     order: 48,
-    grouping: [{ id: 'observability', order: 5 }],
   };
 };

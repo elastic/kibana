@@ -13,17 +13,15 @@ import { ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
 describe('Expand panel action', () => {
   let action: ExpandPanelAction;
   let context: { embeddable: ExpandPanelActionApi };
-  let expandPanelIdSubject: BehaviorSubject<string | undefined>;
 
   beforeEach(() => {
-    expandPanelIdSubject = new BehaviorSubject<string | undefined>(undefined);
     action = new ExpandPanelAction();
     context = {
       embeddable: {
         uuid: 'superId',
         parentApi: {
           expandPanel: jest.fn(),
-          expandedPanelId: expandPanelIdSubject,
+          expandedPanelId: new BehaviorSubject<string | undefined>(undefined),
         },
       },
     };
@@ -40,22 +38,19 @@ describe('Expand panel action', () => {
     expect(await action.isCompatible(emptyContext)).toBe(false);
   });
 
-  it('calls onChange when expandedPanelId changes', async () => {
-    const onChange = jest.fn();
-    action.subscribeToCompatibilityChanges(context, onChange);
-    expandPanelIdSubject.next('superPanelId');
-    expect(onChange).toHaveBeenCalledWith(true, action);
-  });
-
   it('returns the correct icon based on expanded panel id', async () => {
     expect(await action.getIconType(context)).toBe('expand');
-    expandPanelIdSubject.next('superPanelId');
+    context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
+      'superPanelId'
+    );
     expect(await action.getIconType(context)).toBe('minimize');
   });
 
   it('returns the correct display name based on expanded panel id', async () => {
     expect(await action.getDisplayName(context)).toBe('Maximize');
-    expandPanelIdSubject.next('superPanelId');
+    context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
+      'superPanelId'
+    );
     expect(await action.getDisplayName(context)).toBe('Minimize');
   });
 

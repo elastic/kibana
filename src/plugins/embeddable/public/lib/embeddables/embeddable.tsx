@@ -148,8 +148,6 @@ export abstract class Embeddable<
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
       isCompatibleWithUnifiedSearch: this.isCompatibleWithUnifiedSearch,
       savedObjectId: this.savedObjectId,
-      hasLockedHoverActions$: this.hasLockedHoverActions$,
-      lockHoverActions: this.lockHoverActions,
     } = api);
 
     setTimeout(() => {
@@ -193,8 +191,6 @@ export abstract class Embeddable<
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
   public isCompatibleWithUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithUnifiedSearch'];
   public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
-  public hasLockedHoverActions$: LegacyEmbeddableAPI['hasLockedHoverActions$'];
-  public lockHoverActions: LegacyEmbeddableAPI['lockHoverActions'];
 
   public async getEditHref(): Promise<string | undefined> {
     return this.getOutput().editUrl ?? undefined;

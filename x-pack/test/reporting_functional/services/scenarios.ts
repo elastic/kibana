@@ -77,7 +77,7 @@ export function createScenarios(
   };
 
   const tryDashboardGenerateCsvFail = async (savedSearchTitle: string) => {
-    await dashboardPanelActions.clickPanelActionByTitle(
+    await dashboardPanelActions.clickContextMenuItemByTitle(
       GENERATE_CSV_DATA_TEST_SUBJ,
       savedSearchTitle
     );
@@ -94,7 +94,7 @@ export function createScenarios(
       GENERATE_CSV_DATA_TEST_SUBJ,
       savedSearchTitle
     );
-    await dashboardPanelActions.clickPanelActionByTitle(
+    await dashboardPanelActions.clickContextMenuItemByTitle(
       GENERATE_CSV_DATA_TEST_SUBJ,
       savedSearchTitle
     );

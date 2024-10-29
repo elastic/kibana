@@ -7,7 +7,7 @@
 
 import { partition, uniqBy } from 'lodash';
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -1034,8 +1034,6 @@ export class Embeddable
     this.activeData = newActiveData;
 
     this.renderUserMessages();
-
-    this.loadViewUnderlyingDataArgs();
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -1482,7 +1480,7 @@ export class Embeddable
     }
   }
 
-  private async loadViewUnderlyingDataArgs(): Promise<void> {
+  private async loadViewUnderlyingDataArgs(): Promise<boolean> {
     if (
       !this.savedVis ||
       !this.activeData ||
@@ -1491,15 +1489,13 @@ export class Embeddable
       !this.activeVisualization ||
       !this.activeVisualizationState
     ) {
-      this.canViewUnderlyingData$.next(false);
-      return;
+      return false;
     }
 
     const mergedSearchContext = this.getMergedSearchContext();
 
     if (!mergedSearchContext.timeRange) {
-      this.canViewUnderlyingData$.next(false);
-      return;
+      return false;
     }
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
@@ -1521,8 +1517,7 @@ export class Embeddable
     if (loaded) {
       this.viewUnderlyingDataArgs = viewUnderlyingDataArgs;
     }
-
-    this.canViewUnderlyingData$.next(loaded);
+    return loaded;
   }
 
   /**
@@ -1534,7 +1529,9 @@ export class Embeddable
     return this.viewUnderlyingDataArgs;
   }
 
-  public canViewUnderlyingData$ = new BehaviorSubject<boolean>(false);
+  public canViewUnderlyingData() {
+    return this.loadViewUnderlyingDataArgs();
+  }
 
   async initializeOutput() {
     if (!this.savedVis) {

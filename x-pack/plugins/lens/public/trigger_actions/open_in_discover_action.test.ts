@@ -22,7 +22,7 @@ describe('open in discover action', () => {
     query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
     getSavedVis: jest.fn(() => undefined),
-    canViewUnderlyingData$: new BehaviorSubject(true),
+    canViewUnderlyingData: () => Promise.resolve(true),
     getFullAttributes: jest.fn(() => undefined),
     getViewUnderlyingDataArgs: jest.fn(() => ({
       dataViewSpec: { id: 'index-pattern-id' },
@@ -78,7 +78,8 @@ describe('open in discover action', () => {
       // setup
       const embeddable = {
         ...compatibleEmbeddableApi,
-        canViewUnderlyingData$: { getValue: jest.fn(() => false) },
+        canViewUnderlyingData: jest.fn(() => Promise.resolve(false)),
+        getViewUnderlyingDataArgs: jest.fn(() => undefined),
       };
 
       // test false
@@ -92,11 +93,10 @@ describe('open in discover action', () => {
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
 
-      expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
 
       // test true
-      embeddable.canViewUnderlyingData$.getValue = jest.fn(() => true);
-
+      embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
       expect(
         await createOpenInDiscoverAction(
           {} as DiscoverAppLocator,
@@ -107,7 +107,7 @@ describe('open in discover action', () => {
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
-      expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
     });
   });
 

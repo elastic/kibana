@@ -9,6 +9,7 @@
 
 import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import {
   FiltersNotificationAction,
@@ -41,6 +42,7 @@ describe('filters notification action', () => {
 
   let updateFilters: (filters: Filter[]) => void;
   let updateQuery: (query: Query | AggregateQuery | undefined) => void;
+  let updateViewMode: (viewMode: ViewMode) => void;
 
   beforeEach(() => {
     const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
@@ -48,10 +50,14 @@ describe('filters notification action', () => {
     const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     updateQuery = (query) => querySubject.next(query);
 
+    const viewModeSubject = new BehaviorSubject<ViewMode>('edit');
+    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
+
     action = new FiltersNotificationAction();
     context = {
       embeddable: {
         uuid: 'testId',
+        viewMode: viewModeSubject,
         filters$: filtersSubject,
         query$: querySubject,
       },
@@ -75,6 +81,22 @@ describe('filters notification action', () => {
   it('is compatible when api has at least one local query', async () => {
     updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     expect(await action.isCompatible(context)).toBe(true);
+  });
+
+  it('is incompatible when api is in view mode', async () => {
+    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+    updateViewMode('view');
+    expect(await action.isCompatible(context)).toBe(false);
+  });
+
+  it('calls onChange when view mode changes', () => {
+    const onChange = jest.fn();
+    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+    action.subscribeToCompatibilityChanges(context, onChange);
+    updateViewMode('view');
+    expect(onChange).toHaveBeenCalledWith(false, action);
   });
 
   it('calls onChange when filters change', async () => {

@@ -48,6 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('are shown in edit mode', async function () {
       await dashboard.switchToEditMode();
 
+      const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
+      expect(isContextMenuIconVisible).to.equal(true);
+
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
       await dashboardPanelActions.expectExistsRemovePanelAction();
