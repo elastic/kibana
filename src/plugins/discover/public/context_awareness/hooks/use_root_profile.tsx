@@ -33,14 +33,12 @@ export const useRootProfile = () => {
         filter((id) => id !== undefined),
         tap(() => setRootProfileState({ rootProfileLoading: true })),
         switchMap((id) => profilesManager.resolveRootProfile({ solutionNavId: id })),
-        tap(({ getRenderAppWrapper }) => {
-          const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
-
+        tap(({ getRenderAppWrapper }) =>
           setRootProfileState({
             rootProfileLoading: false,
             AppWrapper: getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper,
-          });
-        })
+          })
+        )
       )
       .subscribe();
 
@@ -51,3 +49,5 @@ export const useRootProfile = () => {
 
   return rootProfileState;
 };
+
+const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
