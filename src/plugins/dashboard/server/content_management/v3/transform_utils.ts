@@ -9,6 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
+
+import type { Query } from '@kbn/es-query';
 import {
   type ControlGroupChainingSystem,
   type ControlLabelPosition,
@@ -21,7 +23,7 @@ import {
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-plugin/common';
-import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { SerializedSearchSourceFields, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
@@ -101,7 +103,13 @@ function kibanaSavedObjectMetaOut(
   if (!searchSourceJSON) {
     return {};
   }
-  return { searchSource: parseSearchSourceJSON(searchSourceJSON) };
+  // Dashboards do not yet support ES|QL (AggregateQuery) in the search source
+  return {
+    searchSource: parseSearchSourceJSON(searchSourceJSON) as Omit<
+      SerializedSearchSourceFields,
+      'query'
+    > & { query?: Query },
+  };
 }
 
 function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
