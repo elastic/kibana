@@ -45,10 +45,6 @@ export function registerAPIRoutes({
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
-  // TODO add usage collection
-
-  // TODO add authorization checks
-
   // Create API route
   const createRoute = versionedRouter.post({
     path: `${PUBLIC_API_PATH}/{id?}`,
