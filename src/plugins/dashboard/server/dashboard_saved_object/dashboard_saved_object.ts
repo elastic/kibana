@@ -17,14 +17,14 @@ import {
   DashboardSavedObjectTypeMigrationsDeps,
 } from './migrations/dashboard_saved_object_migrations';
 
-export const DASHBOARD_SAVED_OBJECT_ID = 'dashboard';
+export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 export const createDashboardSavedObjectType = ({
   migrationDeps,
 }: {
   migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
 }): SavedObjectsType => ({
-  name: DASHBOARD_SAVED_OBJECT_ID,
+  name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',

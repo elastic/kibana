@@ -17,7 +17,7 @@ import type { Logger } from '@kbn/logging';
 
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { StorageContext } from '@kbn/content-management-plugin/server';
-import { DASHBOARD_SAVED_OBJECT_ID } from '../dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
@@ -38,7 +38,7 @@ const searchArgsToSOFindOptions = (
   options: DashboardSearchOptions
 ): SavedObjectsFindOptions => {
   return {
-    type: DASHBOARD_SAVED_OBJECT_ID,
+    type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
     fields: options?.fields ?? ['title', 'description', 'timeRestore'],
     search: query.text,
@@ -69,7 +69,7 @@ export class DashboardStorage {
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
     this.mSearch = {
-      savedObjectType: DASHBOARD_SAVED_OBJECT_ID,
+      savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE,
       additionalSearchFields: [],
       toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): DashboardItem => {
         const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -129,7 +129,7 @@ export class DashboardStorage {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_ID, id);
+    } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
     const { item, error: itemError } = savedObjectToItem(savedObject, false);
     if (itemError) {
@@ -202,7 +202,7 @@ export class DashboardStorage {
 
     // Save data in DB
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_ID,
+      DASHBOARD_SAVED_OBJECT_TYPE,
       soAttributes,
       optionsToLatest
     );
@@ -271,7 +271,7 @@ export class DashboardStorage {
 
     // Save data in DB
     const partialSavedObject = await soClient.update<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_ID,
+      DASHBOARD_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
       optionsToLatest
@@ -315,7 +315,7 @@ export class DashboardStorage {
     options?: { force: boolean }
   ): Promise<DeleteResult> {
     const soClient = await savedObjectClientFromRequest(ctx);
-    await soClient.delete(DASHBOARD_SAVED_OBJECT_ID, id, { force: options?.force ?? false });
+    await soClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id, { force: options?.force ?? false });
     return { success: true };
   }
 

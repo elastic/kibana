@@ -9,6 +9,6 @@
 
 export {
   createDashboardSavedObjectType,
-  DASHBOARD_SAVED_OBJECT_ID,
+  DASHBOARD_SAVED_OBJECT_TYPE,
 } from './dashboard_saved_object';
 export type { DashboardSavedObjectAttributes, GridData, SavedDashboardPanel } from './schema';
