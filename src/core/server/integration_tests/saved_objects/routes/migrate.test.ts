@@ -10,7 +10,7 @@
 import { migratorInstanceMock } from './migrate.test.mocks';
 
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
-// @Tina TODO: Update to include mocked doc
+
 describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof createRoot>;
 
