@@ -92,7 +92,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
   const logger = createWrappedLogger({ logger: opts.logger, tags: [claimAvailableTasksMget.name] });
-  const initialCapacity = getCapacity();
+  let initialCapacity = getCapacity();
   const stopTaskTimer = startTaskTimer();
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
@@ -126,7 +126,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
   // filter out stale, missing and removed tasks
-  const currentTasks: ConcreteTaskInstance[] = [];
+  const tasksToClaim: ConcreteTaskInstance[] = [];
   const staleTasks: ConcreteTaskInstance[] = [];
   const missingTasks: ConcreteTaskInstance[] = [];
   const removedTasks: ConcreteTaskInstance[] = [];
@@ -148,7 +148,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       searchVersion.seqNo === latestVersion.seqNo &&
       searchVersion.primaryTerm === latestVersion.primaryTerm
     ) {
-      currentTasks.push(searchDoc);
+      tasksToClaim.push(searchDoc);
       continue;
     } else {
       staleTasks.push(searchDoc);
@@ -156,70 +156,83 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   }
 
-  // apply limited concurrency limits (TODO: can currently starve other tasks)
-  const candidateTasks = selectTasksByCapacity(currentTasks, batches);
-
-  // apply capacity constraint to candidate tasks
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
-
-  let capacityAccumulator = 0;
-  for (const task of candidateTasks) {
-    const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
-    if (capacityAccumulator + taskCost <= initialCapacity) {
-      tasksToRun.push(task);
-      capacityAccumulator += taskCost;
-    } else {
-      leftOverTasks.push(task);
-      capacityAccumulator = initialCapacity;
-    }
-  }
-
-  // build the updated task objects we'll claim
-  const now = new Date();
-  const taskUpdates: PartialConcreteTaskInstance[] = [];
-  for (const task of tasksToRun) {
-    taskUpdates.push({
-      id: task.id,
-      version: task.version,
-      scheduledAt:
-        task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-          ? task.retryAt
-          : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
-      ownerId: taskStore.taskManagerId,
-    });
-  }
-
-  // perform the task object updates, deal with errors
-  const updatedTaskIds: string[] = [];
+  const fullTasksToRun: ConcreteTaskInstance[] = [];
   let conflicts = staleTasks.length;
   let bulkUpdateErrors = 0;
   let bulkGetErrors = 0;
+  while (tasksToClaim.length) {
+    // Reset - for following loops
+    tasksToClaim.push(...leftOverTasks);
+    leftOverTasks.length = 0;
 
-  const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
-  for (const updateResult of updateResults) {
-    if (isOk(updateResult)) {
-      updatedTaskIds.push(updateResult.value.id);
-    } else {
-      const { id, type, error, status } = updateResult.error;
+    console.log('LOOP', JSON.stringify(tasksToClaim, null, 2));
 
-      // check for 409 conflict errors
-      if (status === 409) {
-        conflicts++;
+    // apply limited concurrency limits (TODO: can currently starve other tasks)
+    const candidateTasks = selectTasksByCapacity(tasksToClaim, batches);
+    console.log('candidateTasks', JSON.stringify(candidateTasks, null, 2));
+    if (candidateTasks.length === 0) {
+      tasksToClaim.length = 0;
+      break;
+    }
+
+    // apply capacity constraint to candidate tasks
+    let capacityAccumulator = 0;
+    for (const task of candidateTasks) {
+      const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
+      if (capacityAccumulator + taskCost <= initialCapacity) {
+        tasksToRun.push(task);
+        capacityAccumulator += taskCost;
       } else {
-        logger.error(`Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`);
-        bulkUpdateErrors++;
+        leftOverTasks.push(task);
+        capacityAccumulator = initialCapacity;
       }
     }
-  }
 
-  // perform an mget to get the full task instance for claiming
-  const fullTasksToRun = (await taskStore.bulkGet(updatedTaskIds)).reduce<ConcreteTaskInstance[]>(
-    (acc, task) => {
+    // build the updated task objects we'll claim
+    const now = new Date();
+    const taskUpdates: PartialConcreteTaskInstance[] = [];
+    for (const task of tasksToRun) {
+      taskUpdates.push({
+        id: task.id,
+        version: task.version,
+        scheduledAt:
+          task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
+            ? task.retryAt
+            : task.runAt,
+        status: TaskStatus.Running,
+        startedAt: now,
+        attempts: task.attempts + 1,
+        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+        ownerId: taskStore.taskManagerId,
+      });
+    }
+
+    // perform the task object updates, deal with errors
+    const updatedTaskIds: string[] = [];
+
+    const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
+    for (const updateResult of updateResults) {
+      if (isOk(updateResult)) {
+        updatedTaskIds.push(updateResult.value.id);
+      } else {
+        const { id, type, error, status } = updateResult.error;
+
+        // check for 409 conflict errors
+        if (status === 409) {
+          conflicts++;
+        } else {
+          logger.error(`Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`);
+          bulkUpdateErrors++;
+        }
+      }
+    }
+
+    // perform an mget to get the full task instance for claiming
+    const partialFullTasksToRun = (await taskStore.bulkGet(updatedTaskIds)).reduce<
+      ConcreteTaskInstance[]
+    >((acc, task) => {
       if (isOk(task)) {
         acc.push(task.value);
       } else {
@@ -228,17 +241,26 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         bulkGetErrors++;
       }
       return acc;
-    },
-    []
-  );
+    }, []);
+    fullTasksToRun.push(...partialFullTasksToRun);
 
-  // Look for tasks that have a null startedAt value, log them and manually set a startedAt field
-  for (const task of fullTasksToRun) {
-    if (task.startedAt == null) {
-      logger.warn(
-        `Task ${task.id} has a null startedAt value, setting to current time - ownerId ${task.ownerId}, status ${task.status}`
-      );
-      task.startedAt = now;
+    for (const task of partialFullTasksToRun) {
+      const index = tasksToClaim.findIndex((item) => item.id === task.id);
+      if (index !== -1) {
+        tasksToClaim.splice(index, 1);
+      }
+      const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
+      initialCapacity -= taskCost;
+    }
+
+    // Look for tasks that have a null startedAt value, log them and manually set a startedAt field
+    for (const task of fullTasksToRun) {
+      if (task.startedAt == null) {
+        logger.warn(
+          `Task ${task.id} has a null startedAt value, setting to current time - ownerId ${task.ownerId}, status ${task.status}`
+        );
+        task.startedAt = now;
+      }
     }
   }
 
