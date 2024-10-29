@@ -33,9 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data Stream', function () {
-    // see details: https://github.com/elastic/kibana/issues/197955
-    this.tags(['failsOnMKI']);
-
     const generatedReports = new Set<string>();
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -51,9 +48,45 @@ export default function ({ getService }: FtrProviderContext) {
           browserTimezone: 'UTC',
           objectType: 'search',
           searchSource: {
+            fields: [
+              { field: 'order_date', include_unmapped: true },
+              { field: 'order_id', include_unmapped: true },
+              { field: 'products.product_id', include_unmapped: true },
+            ],
+            filter: [
+              {
+                meta: {
+                  field: 'order_date',
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  params: {},
+                },
+                query: {
+                  range: {
+                    order_date: {
+                      format: 'strict_date_optional_time',
+                      gte: '2019-06-20T23:59:44.609Z',
+                      lte: '2019-06-21T00:01:06.957Z',
+                    },
+                  },
+                },
+              },
+              {
+                $state: { store: 'appState' },
+                meta: {
+                  alias: null,
+                  disabled: false,
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  key: 'products.product_id',
+                  negate: false,
+                  params: { query: 22599 },
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'products.product_id': 22599 } },
+              },
+            ],
             index: '5193f870-d861-11e9-a311-0fa548c5f953',
             query: { language: 'kuery', query: '' },
-            version: true,
+            sort: [{ order_date: { format: 'strict_date_optional_time', order: 'desc' } }],
           },
           title: 'Ecommerce Data',
           version: '8.15.0',
@@ -62,7 +95,6 @@ export default function ({ getService }: FtrProviderContext) {
         internalReqHeader
       );
       await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
-
       generatedReports.add(job.id);
     });
 
