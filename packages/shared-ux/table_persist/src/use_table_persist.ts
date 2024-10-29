@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Criteria } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import { DEFAULT_INITIAL_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from './constants';
 import { createStorage } from './storage';
 import { validatePersistData } from './validate_persist_data';
@@ -18,7 +18,7 @@ export interface EuiTablePersistProps<T> {
   /** A unique id that will be included in the local storage variable for this table. */
   tableId: string;
   /** (Optional) Specifies a custom onTableChange handler. */
-  customOnTableChange?: (change: Criteria<T>) => void;
+  customOnTableChange?: (change: CriteriaWithPagination<T>) => void;
   /** (Optional) Specifies a custom initial table sorting. */
   initialSort?: PropertySort<T>;
   /** (Optional) Specifies a custom initial page size for the table. Defaults to 50. */
@@ -55,7 +55,7 @@ export const useEuiTablePersist = <T extends object>({
   const sorting = sort ? { sort } : true; // If sort is undefined, return true to allow sorting
 
   const onTableChange = useCallback(
-    (nextValues: Criteria<T>) => {
+    (nextValues: CriteriaWithPagination<T>) => {
       if (customOnTableChange) {
         customOnTableChange(nextValues);
       }
