@@ -61,13 +61,24 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const userFilter = currentUser?.username
             ? `name: "${currentUser?.username}"`
             : `id: "${currentUser?.profile_uid}"`;
+
+          const MAX_CONVERSATION_TOTAL = query.per_page;
+          // TODO remove once we have pagination https://github.com/elastic/kibana/issues/192714
+          // do a separate search for default conversations and non-default conversations to ensure defaults always get included
+          // MUST MATCH THE LENGTH OF BASE_SECURITY_CONVERSATIONS from 'x-pack/plugins/security_solution/public/assistant/content/conversations/index.tsx'
+          const MAX_DEFAULT_CONVERSATION_TOTAL = 7;
+          const nonDefaultSize = MAX_CONVERSATION_TOTAL - MAX_DEFAULT_CONVERSATION_TOTAL;
           const result = await dataClient?.findDocuments<EsConversationSchema>({
-            perPage: query.per_page,
+            perPage: nonDefaultSize,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ ${userFilter} }${additionalFilter}`,
+            filter: `users:{ ${userFilter} }${additionalFilter} and not is_default: true`,
             fields: query.fields,
+            mSearch: {
+              filter: `users:{ ${userFilter} }${additionalFilter} and is_default: true`,
+              perPage: MAX_DEFAULT_CONVERSATION_TOTAL,
+            },
           });
 
           if (result) {
