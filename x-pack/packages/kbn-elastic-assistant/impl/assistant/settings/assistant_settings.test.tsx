@@ -38,7 +38,6 @@ const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
   http: {},
-  assistantFeatures: { assistantModelEvaluation: true, assistantKnowledgeBaseByDefault: false },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -127,7 +126,7 @@ describe('AssistantSettings', () => {
     fireEvent.click(getByTestId('cancel-button'));
     expect(onClose).toHaveBeenCalled();
   });
-
+  // TODO these tests will fail now
   describe.each([
     ANONYMIZATION_TAB,
     CONVERSATIONS_TAB,
