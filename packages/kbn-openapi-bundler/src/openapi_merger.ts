@@ -16,7 +16,10 @@ import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
 import { bundleDocument } from './bundler/bundle_document';
-import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
+import {
+  DEFAULT_MERGING_PROCESSORS,
+  withNamespaceComponentsProcessor,
+} from './bundler/processor_sets';
 import { PrototypeDocument } from './prototype_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
@@ -94,7 +97,10 @@ function logSchemas(schemaFilePaths: string[]): void {
 async function bundleDocuments(schemaFilePaths: string[]): Promise<ResolvedDocument[]> {
   return await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) =>
-      bundleDocument(schemaFilePath, withNamespaceComponentsProcessor([], '/info/title'))
+      bundleDocument(
+        schemaFilePath,
+        withNamespaceComponentsProcessor(DEFAULT_MERGING_PROCESSORS, '/info/title')
+      )
     )
   );
 }
