@@ -13,7 +13,7 @@ import { DeleteParamsResponse } from '../../../../common/runtime_types';
 
 export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
-  unknown,
+  { id?: string },
   unknown,
   { ids: string[] }
 > = () => ({
@@ -38,11 +38,11 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
     if (ids && paramId) {
       return response.badRequest({
-        body: `Both param id ${queryId} and body parameters cannot be provided`,
+        body: `Both param id  and body parameters cannot be provided`,
       });
     }
 
-    const idsToDelete = ids ?? [queryId];
+    const idsToDelete = ids ?? [paramId];
 
     if (idsToDelete.length === 0) {
       return response.badRequest({

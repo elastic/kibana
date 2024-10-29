@@ -28,7 +28,7 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async (routeContext) => {
+  handler: async (routeContext): Promise<any> => {
     const { request } = routeContext;
 
     const { ids: idsToDelete } = request.body || {};
