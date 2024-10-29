@@ -264,9 +264,6 @@ function processChangesByOwners(ownerFilesMap) {
         console.log(`Pushing the new branch: ${targetBranch} to remote`);
         runCommand(`git push origin ${targetBranch}`);
 
-        console.log(`Deleting temporary branch: ${tempBranch}`);
-        runCommand(`git branch -D ${tempBranch}`);
-
         const labels = [
           routeLabel,
           'enhancement',
