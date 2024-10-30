@@ -1412,13 +1412,6 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
-/test/api_integration/apis/saved_objects* @elastic/kibana-core
-/test/functional/apps/home @elastic/kibana-core
-/test/health_gateway @elastic/kibana-core
-/test/node_roles_functional @elastic/kibana-core
-/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
-/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
-/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 /x-pack/test/functional/apps/saved_objects_management @elastic/kibana-core
 /x-pack/test/usage_collection @elastic/kibana-core
 /x-pack/test/licensing_plugin @elastic/kibana-core
