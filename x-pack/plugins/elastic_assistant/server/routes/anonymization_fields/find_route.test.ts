@@ -12,7 +12,7 @@ import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
 import { findAnonymizationFieldsRoute } from './find_route';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Find user anonymization fields route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -33,13 +33,13 @@ describe('Find user anonymization fields route', () => {
     clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindAnonymizationFieldsResultWithSingleHit())
     );
-    clients.elasticAssistant.getCurrentUser.mockResolvedValue({
+    context.elasticAssistant.getCurrentUser.mockReturnValue({
       username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
       },
-    });
+    } as AuthenticatedUser);
     logger = loggingSystemMock.createLogger();
     context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     findAnonymizationFieldsRoute(server.router, logger);

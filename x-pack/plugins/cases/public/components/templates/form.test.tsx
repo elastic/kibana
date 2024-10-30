@@ -589,11 +589,14 @@ describe('TemplateForm', () => {
     expect(
       await within(customFieldsElement).findAllByTestId('form-optional-field-label')
     ).toHaveLength(
-      customFieldsConfigurationMock.filter((field) => field.type === CustomFieldTypes.TEXT).length
+      customFieldsConfigurationMock.filter(
+        (field) => field.type === CustomFieldTypes.TEXT || field.type === CustomFieldTypes.NUMBER
+      ).length
     );
 
     const textField = customFieldsConfigurationMock[0];
     const toggleField = customFieldsConfigurationMock[3];
+    const numberField = customFieldsConfigurationMock[4];
 
     const textCustomField = await screen.findByTestId(
       `${textField.key}-${textField.type}-create-custom-field`
@@ -607,6 +610,15 @@ describe('TemplateForm', () => {
     await user.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
+
+    const numberCustomField = await screen.findByTestId(
+      `${numberField.key}-${numberField.type}-create-custom-field`
+    );
+
+    await user.clear(numberCustomField);
+
+    await user.click(numberCustomField);
+    await user.paste('765');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
@@ -642,6 +654,16 @@ describe('TemplateForm', () => {
                 {
                   key: 'test_key_4',
                   type: 'toggle',
+                  value: true,
+                },
+                {
+                  key: 'test_key_5',
+                  type: 'number',
+                  value: 1234,
+                },
+                {
+                  key: 'test_key_6',
+                  type: 'number',
                   value: true,
                 },
               ],

@@ -164,17 +164,15 @@ export const bulkActionAnonymizationFieldsRoute = (
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
 
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
 
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
@@ -197,7 +195,7 @@ export const bulkActionAnonymizationFieldsRoute = (
           }
 
           const writer = await dataClient?.getWriter();
-          const changedAt = new Date().toISOString();
+          const createdAt = new Date().toISOString();
           const {
             errors,
             docs_created: docsCreated,
@@ -205,12 +203,12 @@ export const bulkActionAnonymizationFieldsRoute = (
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((f) =>
-              transformToCreateScheme(changedAt, f, authenticatedUser)
+            documentsToCreate: body.create?.map((doc) =>
+              transformToCreateScheme(authenticatedUser, createdAt, doc)
             ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: body.update?.map((f) =>
-              transformToUpdateScheme(authenticatedUser, changedAt, f)
+            documentsToUpdate: body.update?.map((doc) =>
+              transformToUpdateScheme(authenticatedUser, createdAt, doc)
             ),
             getUpdateScript: (document: UpdateAnonymizationFieldSchema) =>
               getUpdateScript({ anonymizationField: document, isPatch: true }),

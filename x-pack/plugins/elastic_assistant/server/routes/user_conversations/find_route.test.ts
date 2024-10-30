@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type AuthenticatedUser } from '@kbn/core/server';
 import { getCurrentUserFindRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
@@ -31,14 +31,14 @@ describe('Find user conversations route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindConversationsResultWithSingleHit())
     );
-    clients.elasticAssistant.getCurrentUser.mockResolvedValue({
+    context.elasticAssistant.getCurrentUser.mockReturnValue({
       username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
       },
-    });
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    } as AuthenticatedUser);
+
     findUserConversationsRoute(server.router);
   });
 
