@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, ActionsConfig } from './config';
@@ -51,36 +50,6 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
   exposeToBrowser: {
     email: { domain_allowlist: true },
   },
-  deprecations: () => [
-    (settings, fromPath, addDeprecation) => {
-      const actions = get(settings, fromPath);
-      if (Object.hasOwn(actions ?? {}, 'proxyRejectUnauthorizedCertificates')) {
-        addDeprecation({
-          level: 'warning',
-          configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,
-          message:
-            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.ssl.proxyVerificationMode" instead, ` +
-            `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
-            `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
-          correctiveActions: {
-            manualSteps: [
-              `Remove "xpack.actions.proxyRejectUnauthorizedCertificates" from your kibana configs.`,
-              `Use "xpack.actions.ssl.proxyVerificationMode" ` +
-                `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
-                `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
-            ],
-          },
-        });
-        return {
-          unset: [
-            {
-              path: `xpack.actions.proxyRejectUnauthorizedCertificates`,
-            },
-          ],
-        };
-      }
-    },
-  ],
 };
 
 export { urlAllowListValidator } from './sub_action_framework/helpers';

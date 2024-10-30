@@ -581,7 +581,6 @@ const BaseActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyUrl: undefined,
   proxyHeaders: undefined,
-  proxyRejectUnauthorizedCertificates: true,
   ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',

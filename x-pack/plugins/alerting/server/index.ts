@@ -84,7 +84,6 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
     rules: { run: { alerts: { max: true } } },
   },
   deprecations: ({ renameFromRoot, deprecate }) => [
-    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
       'xpack.alerting.invalidateApiKeysTask.interval',

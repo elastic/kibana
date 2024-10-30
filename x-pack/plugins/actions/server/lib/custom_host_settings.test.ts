@@ -74,7 +74,6 @@ describe('custom_host_settings', () => {
       enabledActionTypes: [],
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
-      proxyRejectUnauthorizedCertificates: true,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration(60000),
       enableFooterInEmail: true,

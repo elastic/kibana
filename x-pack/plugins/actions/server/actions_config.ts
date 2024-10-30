@@ -122,10 +122,7 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxySSLSettings: getSSLSettingsFromConfig(
-      config.ssl?.proxyVerificationMode,
-      config.proxyRejectUnauthorizedCertificates
-    ),
+    proxySSLSettings: getSSLSettingsFromConfig(config.ssl?.proxyVerificationMode),
   };
 }
 
