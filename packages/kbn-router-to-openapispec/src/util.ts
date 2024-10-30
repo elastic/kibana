@@ -204,7 +204,7 @@ export const createOpIdGenerator = (): GetOpId => {
       }
     }
 
-    const opId = `${method.toLocaleLowerCase()}-${path
+    const opId = `${method.toLowerCase()}-${path
       .replace(/^\//, '')
       .replace(/\/$/, '')
       .replace(/[\{\}\?\*]/g, '')
