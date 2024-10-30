@@ -10,8 +10,6 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
-xpack.fleet.enabled: false
-xpack.observabilityAIAssistant.enabled: false
 xpack.osquery.enabled: false
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
@@ -88,4 +86,15 @@ xpack.searchInferenceEndpoints.ui.enabled: false
 xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
-xpack.index_management.dev.enableSemanticText: false
+xpack.index_management.dev.enableSemanticText: true
+
+# AI Assistant config
+xpack.observabilityAIAssistant.enabled: true
+xpack.searchAssistant.enabled: true
+xpack.searchAssistant.ui.enabled: true
+xpack.observabilityAIAssistant.scope: "search"
+xpack.observabilityAIAssistant.enableKnowledgeBase: false
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
+xpack.observabilityAiAssistantManagement.spacesEnabled: false
+xpack.observabilityAiAssistantManagement.visibilityEnabled: false
