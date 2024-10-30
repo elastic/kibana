@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { forwardRef, useMemo, useRef } from 'react';
+
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { forwardRef, useMemo } from 'react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+
 import { GridPanel } from './grid_panel';
-import { GridRowData, PanelInteractionEvent, RuntimeGridSettings } from './types';
+import {
+  GridLayoutStateManager,
+  GridRowData,
+  PanelInteractionEvent,
+  RuntimeGridSettings,
+} from './types';
 
 const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
 const getGridBackgroundCSS = (settings: RuntimeGridSettings) => {
@@ -32,28 +40,31 @@ export const GridRow = forwardRef<
     rowIndex: number;
     rowData: GridRowData;
     toggleIsCollapsed: () => void;
-    activePanelId: string | undefined;
     targetRowIndex: number | undefined;
     runtimeSettings: RuntimeGridSettings;
     renderPanelContents: (panelId: string) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
+    gridLayoutStateManager: GridLayoutStateManager;
   }
 >(
   (
     {
       rowData,
       rowIndex,
-      activePanelId,
       targetRowIndex,
       runtimeSettings,
       toggleIsCollapsed,
       renderPanelContents,
       setInteractionEvent,
+      gridLayoutStateManager,
     },
     gridRef
   ) => {
+    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+    const activePanel = useStateFromPublishingSubject(gridLayoutStateManager.activePanel$);
+
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
-    const isGridTargeted = activePanelId && targetRowIndex === rowIndex;
+    const isGridTargeted = activePanel?.id && targetRowIndex === rowIndex;
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
@@ -107,20 +118,58 @@ export const GridRow = forwardRef<
               <GridPanel
                 key={panelData.id}
                 panelData={panelData}
-                activePanelId={activePanelId}
+                activePanelId={activePanel?.id}
                 renderPanelContents={renderPanelContents}
-                setInteractionEvent={(partialInteractionEvent) => {
-                  if (partialInteractionEvent) {
-                    setInteractionEvent({
-                      ...partialInteractionEvent,
-                      targetRowIndex: rowIndex,
-                    });
-                    return;
+                interactionStart={(type, e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelData.id];
+                  if (!panelRef) return;
+
+                  const panelRect = panelRef.getBoundingClientRect();
+                  setInteractionEvent({
+                    type,
+                    id: panelData.id,
+                    panelDiv: panelRef,
+                    targetRowIndex: rowIndex,
+                    mouseOffsets: {
+                      top: e.clientY - panelRect.top,
+                      left: e.clientX - panelRect.left,
+                      right: e.clientX - panelRect.right,
+                      bottom: e.clientY - panelRect.bottom,
+                    },
+                  });
+                }}
+                ref={(element) => {
+                  if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
+                    gridLayoutStateManager.panelRefs.current[rowIndex] = {};
                   }
-                  setInteractionEvent();
+                  gridLayoutStateManager.panelRefs.current[rowIndex][panelData.id] = element;
                 }}
               />
             ))}
+
+            {/* render the drag preview if this row is currently being targetted */}
+            {isGridTargeted && (
+              <div
+                ref={dragPreviewRef}
+                css={css`
+                  pointer-events: none;
+                  border-radius: ${euiThemeVars.euiBorderRadius};
+                  background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+                  transition: opacity 100ms linear;
+
+                  grid-column-start: ${rowData.panels[activePanel.id].column + 1};
+                  grid-column-end: ${rowData.panels[activePanel.id].column +
+                  1 +
+                  rowData.panels[activePanel.id].width};
+                  grid-row-start: ${rowData.panels[activePanel.id].row + 1};
+                  grid-row-end: ${rowData.panels[activePanel.id].row +
+                  1 +
+                  rowData.panels[activePanel.id].height};
+                `}
+              />
+            )}
           </div>
         )}
       </>
