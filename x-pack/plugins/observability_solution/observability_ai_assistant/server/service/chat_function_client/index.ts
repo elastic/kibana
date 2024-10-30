@@ -56,7 +56,7 @@ export class ChatFunctionClient {
       this.registerFunction(
         {
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
-          description: 'Retrieve the structured data of content currently visible on the user’s screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.',
+          description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
@@ -82,7 +82,9 @@ export class ChatFunctionClient {
       );
 
       this.registerAdhocInstruction({
-        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user’s screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(allData.map((data) => `${data.name}: ${data.description}`).join('\n'))}`,
+        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
+          allData.map((data) => `${data.name}: ${data.description}`).join('\n')
+        )}`,
         instruction_type: 'application_instruction',
       });
     }
