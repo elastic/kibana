@@ -2,9 +2,6 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".alerts-observability.apm.alerts-default": {
-        "is_write_index": true
-      }
     },
     "index": ".internal.alerts-observability.apm.alerts-default-000001",
     "mappings": {
@@ -277,9 +274,6 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".alerts-observability.logs.alerts-default": {
-        "is_write_index": true
-      }
     },
     "index": ".internal.alerts-observability.logs.alerts-default-000001",
     "mappings": {
@@ -528,9 +522,6 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".alerts-observability.metrics.alerts-default": {
-        "is_write_index": true
-      }
     },
     "index": ".internal.alerts-observability.metrics.alerts-default-000001",
     "mappings": {
