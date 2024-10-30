@@ -53,13 +53,19 @@ export async function __kbnBootstrap__() {
   };
 
   if (isDomStorageDisabled()) {
-    const defaultErrorText =
-      'Your browser needs to have session storage and local storage enabled.';
+    const defaultErrorTitle = `Couldn't load the page`;
+    const defaultErrorText = `Update your browser's settings to allow storage of cookies and site data, and reload the page.`;
     const defaultErrorReload = 'Reload';
-    const defaultErrorTitle = 'Elastic did not load properly';
+
+    const errorTitle = i18nError
+      ? defaultErrorTitle
+      : i18n.translate('core.ui.welcomeErrorCouldNotLoadPage', {
+          defaultMessage: defaultErrorTitle,
+        });
+
     const errorText = i18nError
       ? defaultErrorText
-      : i18n.translate('core.ui.domStorageDisabled', {
+      : i18n.translate('core.ui.welcomeErrorDomStorageDisabled', {
           defaultMessage: defaultErrorText,
         });
 
@@ -67,11 +73,6 @@ export async function __kbnBootstrap__() {
       ? defaultErrorReload
       : i18n.translate('core.ui.welcomeErrorReloadButton', {
           defaultMessage: defaultErrorReload,
-        });
-    const errorTitle = i18nError
-      ? defaultErrorTitle
-      : i18n.translate('core.ui.welcomeErrorMessageTitle', {
-          defaultMessage: defaultErrorTitle,
         });
 
     const err = document.createElement('div');
