@@ -45,14 +45,8 @@ export const defaultConfig: StorybookConfig = {
     '@kbn/storybook/preset',
     '@storybook/addon-a11y',
     '@storybook/addon-webpack5-compiler-babel',
-    {
-      // https://storybook.js.org/docs/essentials
-      name: '@storybook/addon-essentials',
-      options: {
-        // docs requires ESM support, disable
-        docs: false,
-      },
-    },
+    // https://storybook.js.org/docs/essentials
+    '@storybook/addon-essentials',
     {
       /**
        * This addon replaces rules in the default SB webpack config

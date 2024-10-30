@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { join } from 'path';
 import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
@@ -47,7 +48,16 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         config.outputDir = join(constants.ASSET_DIR, name);
       }
 
-      await build(config);
+      try {
+        // Some transitive deps of addon-docs are ESM and not loading properly
+        // See: https://github.com/storybookjs/storybook/issues/29467
+        require('fix-esm').require('rehype-external-links');
+        require('fix-esm').require('rehype-slug');
+        require('fix-esm').require('react-docgen');
+        await build(config);
+      } finally {
+        require('fix-esm').unregister();
+      }
 
       // Line is only reached when building the static version
       if (flags.site) process.exit();
