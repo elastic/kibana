@@ -1541,7 +1541,9 @@
         "type": "Function",
         "tags": [],
         "label": "useBreadcrumbs",
-        "description": [],
+        "description": [
+          "\n\nBy default the breadcrumbs will be passed to either serverless.setBreadcrumbs or chrome.setBreadcrumbs depending on the\nenvironment. The breadcrumbs will *also* be passed to the project style breadcrumbs for stateful project style. We will use \"project style\"\nhere to refer to serverless chrome and stateful project style chrome. Classic refers to stateful classic chrome.\n\nProject style breadcrumbs add a root crumb (\"deployment\" etc) and \"nav crumbs\" which are derived from the navigation structure. By default\nthe \"absolute\" mode is used which means the breadcrumbs passed here will omit the navigation derived \"nav crumbs\". You can pass\nabsoluteProjectStyleBreadcrumbs: false to include the 'smart' \"nav crumbs\".\n\nIn classic mode (not project style) the 'Observability' crumb is added.\n\nYou can also pass classicOnly to only set breadrumbs in the classic chrome context. This can be useful if your solution just wants to defer all project style crumbs to the \"nav crumbs\"."
+        ],
         "signature": [
           "(extraCrumbs: ",
           {
@@ -1567,7 +1569,7 @@
             "section": "def-public.ServerlessPluginStart",
             "text": "ServerlessPluginStart"
           },
-          " | undefined; } | undefined) => void"
+          " | undefined; absoluteProjectStyleBreadcrumbs?: boolean | undefined; classicOnly?: boolean | undefined; } | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
         "deprecated": false,
@@ -1657,6 +1659,34 @@
                     "text": "ServerlessPluginStart"
                   },
                   " | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useBreadcrumbs.$2.absoluteProjectStyleBreadcrumbs",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "absoluteProjectStyleBreadcrumbs",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useBreadcrumbs.$2.classicOnly",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "classicOnly",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
                 "deprecated": false,
