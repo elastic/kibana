@@ -141,7 +141,7 @@ const getAgentPolicyDataForUpdate = (
     'monitoring_http',
     'monitoring_diagnostics',
     'uploader',
-  ]);
+  ]) as UpdateAgentPolicyRequest['body'];
 };
 
 export const checkInFleetAgent = async (
