@@ -219,12 +219,43 @@ export const registerFieldForWildcard = (
   const configuredHandler = handler(isRollupsEnabled);
 
   // handler
-  router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
-  router.versioned.post({ path, access }).addVersion({ version, validate }, configuredHandler);
-  router.versioned
-    .get({ path, access })
-    .addVersion(
-      { version, validate: { request: { query: querySchema }, response: validate.response } },
-      configuredHandler
-    );
+  router.versioned.put({ path, access }).addVersion(
+    {
+      version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate,
+    },
+    configuredHandler
+  );
+  router.versioned.post({ path, access }).addVersion(
+    {
+      version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate,
+    },
+    configuredHandler
+  );
+  router.versioned.get({ path, access }).addVersion(
+    {
+      version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { request: { query: querySchema }, response: validate.response },
+    },
+    configuredHandler
+  );
 };

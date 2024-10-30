@@ -73,6 +73,12 @@ const manageDefaultIndexPatternRoutesFactory =
     router.versioned.get({ path, access: 'public', description: getDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
           response: {
@@ -110,6 +116,12 @@ const manageDefaultIndexPatternRoutesFactory =
     router.versioned.post({ path, access: 'public', description: postDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             body: schema.object({

@@ -70,6 +70,12 @@ export const swapReferencesRoute =
     router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             body: schema.object({

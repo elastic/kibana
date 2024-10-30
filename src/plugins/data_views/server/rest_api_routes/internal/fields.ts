@@ -146,10 +146,17 @@ export const registerFields = (
   >,
   isRollupsEnabled: () => boolean
 ) => {
-  router.versioned
-    .get({ path, access: 'internal', enableQueryVersion: true })
-    .addVersion(
-      { version: '1', validate: { request: { query: querySchema }, response: validate.response } },
-      handler(isRollupsEnabled)
-    );
+  router.versioned.get({ path, access: 'internal', enableQueryVersion: true }).addVersion(
+    {
+      version: '1',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { request: { query: querySchema }, response: validate.response },
+    },
+    handler(isRollupsEnabled)
+  );
 };

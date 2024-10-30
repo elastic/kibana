@@ -15,6 +15,12 @@ export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
     {
       path: '/internal/index-pattern-management/resolve_index/{query}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           query: schema.string(),

@@ -53,6 +53,12 @@ const deleteIndexPatternRouteFactory =
     router.versioned.delete({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object(
