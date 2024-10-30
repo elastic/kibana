@@ -192,7 +192,7 @@ function groupFilesByOwners(files) {
   const reversedCodeowners = getPathsWithOwnersReversed();
 
   files.forEach((file) => {
-    let owner = getCodeOwnersForFile(file, reversedCodeowners);
+    let owner = getCodeOwnersForFile(file, reversedCodeowners)?.replaceAll('elastic/', '');
 
     if (owner) {
       if (!ownerFilesMap[owner]) ownerFilesMap[owner] = [];
@@ -256,7 +256,7 @@ function processChangesByOwners(ownerFilesMap) {
             ? `Authorized route migration for routes owned by ${owner}`
             : `Unauthorized route migration for routes owned by ${owner}`;
         const routeLabel = 'Authz: API migration';
-        const teamLabel = teamLabels[owner];
+        const teamLabel = owner.split(',').map((o) => teamLabels[`@elastic/${o}`]);
         console.log(`Pushing the new branch: ${targetBranch} to remote`);
         runCommand(`git push origin ${targetBranch}`);
 
@@ -268,8 +268,8 @@ function processChangesByOwners(ownerFilesMap) {
           'Feature:Security/Authorization',
         ];
 
-        if (teamLabel) {
-          labels.push(teamLabel);
+        if (teamLabel.length) {
+          labels.push(...teamLabel);
         }
 
         console.log(`Creating pull request for branch: ${targetBranch}`);
