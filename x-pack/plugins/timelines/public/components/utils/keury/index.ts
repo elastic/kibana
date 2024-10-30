@@ -57,7 +57,7 @@ const escapeWhitespace = (val: string) =>
   val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 
 // See the SpecialCharacter rule in kuery.peg
-const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
+const escapeSpecialCharacters = (val: string) => val.replace(/["\\\(\)\:\<\>\*\{\}]/g, '\\$&'); // $& means the whole matched string
 
 // See the Keyword rule in kuery.peg
 // I do not think that we need that anymore since we are doing a full match_phrase all the time now => return `"${escapeKuery(val)}"`;

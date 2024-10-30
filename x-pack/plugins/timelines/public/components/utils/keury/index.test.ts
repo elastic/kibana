@@ -62,4 +62,28 @@ describe('Kuery escape', () => {
     const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
     expect(escapeKuery(value)).to.be(expected);
   });
+
+  it('should escape backslashes', () => {
+    const value = 'This\\has\\backslashes';
+    const expected = 'This\\\\has\\\\backslashes';
+    expect(escapeKuery(value)).to.be(expected);
+  });
+
+  it('should escape multiple backslashes and quotes', () => {
+    const value = 'This\\ has 2" quotes & \\ 2 "backslashes';
+    const expected = 'This\\\\ has 2\\" quotes & \\\\ 2 \\"backslashes';
+    expect(escapeKuery(value)).to.be(expected);
+  });
+
+  it('should escape all special character according to kuery.peg SpecialCharacter rule', () => {
+    /*
+     * Ref: packages/kbn-es-query/grammar/grammar.peggy
+     *
+     * SpecialCharacter
+     *  = [\\():<>"*{}]
+     */
+    const value = `\\():"*{}`;
+    const expected = `\\\\\\(\\)\\:\\"\\*\\{\\}`;
+    expect(escapeKuery(value)).to.be(expected);
+  });
 });
