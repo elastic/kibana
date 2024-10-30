@@ -28,6 +28,8 @@ import type {
   ReportAssetCriticalityCsvPreviewGeneratedParams,
   ReportAssetCriticalityFileSelectedParams,
   ReportAssetCriticalityCsvImportedParams,
+  ReportEntityStoreEnablementParams,
+  ReportEntityStoreInitParams,
 } from './events/entity_analytics/types';
 import type {
   ReportAssistantInvokedParams,
@@ -125,6 +127,8 @@ export enum TelemetryEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
+  EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
+  EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
   MLJobUpdate = 'ML Job Update',
   AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
@@ -186,6 +190,10 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> =
     ? ReportEntityAlertsClickedParams
     : T extends TelemetryEventTypes.EntityRiskFiltered
     ? ReportEntityRiskFilteredParams
+    : T extends TelemetryEventTypes.EntityStoreEnablementToggleClicked
+    ? ReportEntityStoreEnablementParams
+    : T extends TelemetryEventTypes.EntityStoreDashboardInitButtonClicked
+    ? ReportEntityStoreInitParams
     : T extends TelemetryEventTypes.MLJobUpdate
     ? ReportMLJobUpdateParams
     : T extends TelemetryEventTypes.AddRiskInputToTimelineClicked

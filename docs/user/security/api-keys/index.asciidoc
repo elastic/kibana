@@ -28,7 +28,7 @@ image:images/api-keys.png["API Keys UI"]
 * To create or update a *cross-cluster API key*, you must have the `manage_security` privilege and an Enterprise license.
 * To have a read-only view on the API keys, you must have access to the page and the `read_security` cluster privilege.
 
-To manage roles, open the main menu, then click  *Stack Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>.
+To manage roles, open the main menu, then click  *Stack Management > Security > Roles*, or use the {api-kibana}/group/endpoint-roles[role APIs].
 
 [float]
 [[create-api-key]]

@@ -94,8 +94,8 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
@@ -176,12 +176,12 @@ const RowActionComponent = ({
           showCheckboxes={showCheckboxes}
           tabType={tabType}
           timelineId={tableId}
-          toggleShowNotes={securitySolutionNotesEnabled ? toggleShowNotes : undefined}
+          toggleShowNotes={securitySolutionNotesDisabled ? undefined : toggleShowNotes}
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
           refetch={refetch}
-          showNotes={securitySolutionNotesEnabled ? true : false}
+          showNotes={!securitySolutionNotesDisabled}
         />
       )}
     </>
