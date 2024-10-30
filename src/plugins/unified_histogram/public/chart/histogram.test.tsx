@@ -101,7 +101,7 @@ describe('Histogram', () => {
       searchSessionId: props.request.searchSessionId,
       getTimeRange: props.getTimeRange,
       attributes: (await getMockLensAttributes())!.attributes,
-      onLoad: lensProps.onLoad,
+      onLoad: lensProps.onLoad!,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
