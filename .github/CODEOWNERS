@@ -945,6 +945,8 @@ x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
+x-pack/platform/packages/shared/ml/common_constants @elastic/ml-ui
+x-pack/platform/packages/shared/ml/common_types @elastic/ml-ui
 x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
