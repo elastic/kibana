@@ -108,8 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 name: 'lnsXY',
                 id: 'unifiedHistogramLensComponent',
                 description: 'Edit visualization',
-                // @TODO: ask @kibana/core about the URL
-                url: '#/edit_by_value',
+                url: '/app/lens#/edit_by_value',
               },
             }),
           });
@@ -195,8 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   name: 'lnsXY',
                   id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
                   description: '[Flights] Flight count',
-                  // @TODO: ask @kibana/core about the URL
-                  url: '#/edit_by_value',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -226,8 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   name: 'lnsMetric',
                   id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
                   description: '',
-                  // @TODO: ask @kibana/core about the URL
-                  url: '#/edit_by_value',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -259,8 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   name: 'lnsDatatable',
                   id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
                   description: 'Cities by delay, cancellation',
-                  // @TODO: ask @kibana/core about the URL
-                  url: '#/edit_by_value',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -290,8 +286,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   name: 'lnsPie',
                   id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
                   description: '[Flights] Delay Type',
-                  // @TODO: ask @kibana/core about the URL
-                  url: '#/edit_by_value',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });

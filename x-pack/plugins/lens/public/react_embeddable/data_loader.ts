@@ -142,7 +142,9 @@ export function loadEmbeddableData(
           name: lastState.attributes.visualizationType ?? '',
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
-          url: getEditPath(lastState.savedObjectId),
+          url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
+            lastState.savedObjectId
+          )}`,
         };
 
         return parentContext
