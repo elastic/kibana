@@ -28,6 +28,7 @@ import type {
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
+  AttachmentType,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -40,6 +41,7 @@ import type { CasesSearchParams } from './types';
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
   NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
 } from '../../common/constants';
@@ -60,6 +62,8 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
+import { FileJSON } from '@kbn/shared-ux-file-types';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
@@ -660,3 +664,30 @@ export const transformTemplateCustomFields = ({
     };
   });
 };
+
+export const buildAttachmentRequestFromFileJSON = ({
+  owner,
+  fileMetadata,
+}: {
+  owner: string;
+  fileMetadata: FileJSON;
+}): AttachmentRequest => ({
+  owner,
+  type: AttachmentType.externalReference,
+  externalReferenceId: fileMetadata.id,
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject,
+    soType: FILE_SO_TYPE,
+  },
+  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+  externalReferenceMetadata: {
+    files: [
+      {
+        name: fileMetadata.name,
+        extension: fileMetadata.extension ?? 'txt',
+        mimeType: fileMetadata.mimeType ?? 'text/plain',
+        created: fileMetadata.created,
+      },
+    ],
+  },
+});

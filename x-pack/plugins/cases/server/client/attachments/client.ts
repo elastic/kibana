@@ -28,6 +28,7 @@ import type {
   UpdateArgs,
   BulkGetArgs,
   BulkDeleteFileArgs,
+  AddFileArgs,
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
@@ -35,6 +36,7 @@ import { find, get, getAll, getAllAlertsAttachToCase } from './get';
 import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
+import { addFile } from './add_file';
 
 /**
  * API for interacting with the attachments to a case.
@@ -77,6 +79,10 @@ export interface AttachmentsSubClient {
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
   update(updateArgs: UpdateArgs): Promise<Case>;
+  /**
+   * Adds a file attachment to a case. Returns the case with comments.
+   */
+  addFile(params: AddFileArgs): Promise<Case>;
 }
 
 /**
@@ -102,6 +108,7 @@ export const createAttachmentsSubClient = (
     getAll: (params) => getAll(params, clientArgs),
     get: (params) => get(params, clientArgs),
     update: (params) => update(params, clientArgs),
+    addFile: (params: AddFileArgs) => addFile(params, clientArgs, casesClient),
   };
 
   return Object.freeze(attachmentSubClient);

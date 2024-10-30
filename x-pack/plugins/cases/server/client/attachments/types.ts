@@ -10,6 +10,7 @@ import type {
   AttachmentPatchRequest,
   AttachmentRequest,
   FindAttachmentsQueryParams,
+  PostFileAttachmentRequest,
 } from '../../../common/types/api';
 
 /**
@@ -131,4 +132,18 @@ export interface UpdateArgs {
    * The full attachment request with the fields updated with appropriate values
    */
   updateRequest: AttachmentPatchRequest;
+}
+
+/**
+ * The arguments needed for attaching a file to a case.
+ */
+export interface AddFileArgs {
+  /**
+   * The case ID that this attachment will be associated with
+   */
+  caseId: string;
+  /**
+   * The file to upload and its metadata.
+   */
+  fileRequest: PostFileAttachmentRequest;
 }

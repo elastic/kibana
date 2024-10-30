@@ -11,6 +11,7 @@ import {
   limitedArraySchema,
   limitedNumberSchema,
   limitedStringSchema,
+  mimeTypeString,
   NonEmptyString,
   paginationSchema,
 } from '.';
@@ -315,6 +316,24 @@ describe('schema', () => {
       ).toMatchInlineSnapshot(`
         Array [
           "The foo field cannot be more than 2.",
+        ]
+      `);
+    });
+  });
+
+  describe('mimeTypeString', () => {
+    it('works correctly when the value is an allowed mime type', () => {
+      expect(PathReporter.report(mimeTypeString.decode('image/jpx'))).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('fails when the value is not an allowed mime type', () => {
+      expect(PathReporter.report(mimeTypeString.decode('foo/bar'))).toMatchInlineSnapshot(`
+        Array [
+          "The mime type field value foo/bar is not allowed.",
         ]
       `);
     });

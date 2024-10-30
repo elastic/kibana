@@ -12,10 +12,12 @@ import {
   MAX_COMMENTS_PER_PAGE,
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
+  MAX_FILENAME_LENGTH,
 } from '../../../constants';
 import {
   limitedArraySchema,
   limitedStringSchema,
+  mimeTypeString,
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
@@ -47,7 +49,24 @@ export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
   }),
 });
 
+export const PostFileAttachmentRequestRt = rt.intersection([
+  rt.strict({
+    file: rt.unknown,
+    filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
+  }),
+  rt.exact(
+    rt.partial({
+      mimeType: mimeTypeString,
+    })
+  ),
+]);
+
 export type BulkDeleteFileAttachmentsRequest = rt.TypeOf<typeof BulkDeleteFileAttachmentsRequestRt>;
+export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentRequestRt>;
+
+/**
+ * Attachments
+ */
 
 const BasicAttachmentRequestRt = rt.union([
   UserCommentAttachmentPayloadRt,

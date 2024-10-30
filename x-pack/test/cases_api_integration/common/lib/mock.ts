@@ -20,7 +20,10 @@ import {
   PersistableStateAttachmentPayload,
   Attachment,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import type {
+  CasePostRequest,
+  PostFileAttachmentRequest,
+} from '@kbn/cases-plugin/common/types/api';
 import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
@@ -62,6 +65,12 @@ export const postCommentUserReq: UserCommentAttachmentPayload = {
   comment: 'This is a cool comment',
   type: AttachmentType.user,
   owner: 'securitySolutionFixture',
+};
+
+export const postFileReq: PostFileAttachmentRequest = {
+  file: 'This is a file, its a readable, its ok.',
+  filename: 'foobar',
+  mimeType: 'text/plain',
 };
 
 export const postCommentAlertReq: AlertAttachmentPayload = {
