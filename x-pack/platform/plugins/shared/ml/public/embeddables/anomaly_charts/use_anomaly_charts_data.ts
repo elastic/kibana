@@ -8,10 +8,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { combineLatest, tap, debounceTime, switchMap, skipWhile, of } from 'rxjs';
 import { Subject, catchError } from 'rxjs';
+
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
-import { fetch$ } from '@kbn/presentation-publishing';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
+
 import type { AnomalyChartsServices, AnomalyChartsApi } from '../types';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
