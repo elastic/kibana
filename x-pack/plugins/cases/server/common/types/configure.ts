@@ -13,6 +13,7 @@ import type {
   CaseCustomFields,
   CaseSeverity,
   ConfigurationAttributes,
+  CustomFieldDate,
 } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsRt,
@@ -39,7 +40,7 @@ type PersistedCustomFieldsConfiguration = Array<{
   type: string;
   label: string;
   required: boolean;
-  defaultValue?: string | boolean | null;
+  defaultValue?: string | CustomFieldDate | boolean | null;
 }>;
 
 type PersistedTemplatesConfiguration = Array<{

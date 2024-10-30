@@ -7,6 +7,7 @@
 
 import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { isString } from 'lodash';
+import { isMoment } from 'moment';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 
 export const customFieldSerializer = (
@@ -16,6 +17,11 @@ export const customFieldSerializer = (
 
   if (defaultValue === undefined || (isString(defaultValue) && isEmptyString(defaultValue))) {
     return otherProperties;
+  } else if (isMoment(defaultValue)) {
+    return {
+      ...otherProperties,
+      defaultValue: defaultValue.toISOString(),
+    } as CustomFieldConfiguration;
   }
 
   return field;

@@ -16,6 +16,7 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../common/constants';
+import type { CaseCustomFieldDate } from '../../../common/types/domain';
 import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import {
   connectorsMock,
@@ -589,7 +590,7 @@ describe('TemplateForm', () => {
     expect(
       await within(customFieldsElement).findAllByTestId('form-optional-field-label')
     ).toHaveLength(
-      customFieldsConfigurationMock.filter((field) => field.type === CustomFieldTypes.TEXT).length
+      customFieldsConfigurationMock.filter((field) => field.type !== CustomFieldTypes.TOGGLE).length
     );
 
     const textField = customFieldsConfigurationMock[0];
@@ -644,6 +645,16 @@ describe('TemplateForm', () => {
                   type: 'toggle',
                   value: true,
                 },
+                {
+                  key: 'date_test_key_1',
+                  type: 'date',
+                  value: '2024-10-16T12:39:21.533Z',
+                },
+                {
+                  key: 'date_test_key_2',
+                  type: 'date',
+                  value: null,
+                },
               ],
               settings: {
                 syncAlerts: true,
@@ -681,6 +692,11 @@ describe('TemplateForm', () => {
               key: 'test_key_2',
               value: false,
             },
+            {
+              key: 'date_test_key_1',
+              type: 'date',
+              value: '2020-02-30T12:39:21.533Z',
+            } as CaseCustomFieldDate,
           ],
         },
       },
@@ -742,6 +758,16 @@ describe('TemplateForm', () => {
                   key: 'test_key_4',
                   type: 'toggle',
                   value: false,
+                },
+                {
+                  key: 'date_test_key_1',
+                  type: 'date',
+                  value: '2020-02-30T12:39:21.533Z',
+                },
+                {
+                  key: 'date_test_key_2',
+                  type: 'date',
+                  value: null,
                 },
               ],
               settings: {

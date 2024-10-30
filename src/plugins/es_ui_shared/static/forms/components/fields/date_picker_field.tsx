@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 
+import { isEmpty } from 'lodash';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
@@ -35,9 +36,14 @@ export const DatePickerField = ({ field, euiFieldProps, idAria, ...rest }: Props
     >
       <EuiDatePicker
         fullWidth
-        selected={field.value as Moment}
+        selected={
+          Boolean(field?.value && !isEmpty(field.value)) ? moment(field.value as Moment) : null
+        }
         onChange={(e) => {
           field.setValue(e);
+        }}
+        onClear={() => {
+          field.setValue(null);
         }}
         data-test-subj="input"
         {...euiFieldProps}

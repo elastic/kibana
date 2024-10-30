@@ -42,6 +42,7 @@ import {
   CasesPatchRequestRt,
   CasesSearchRequestRt,
 } from './v1';
+import type { CustomFieldDate } from '../../domain/custom_field/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
 const basicCase: Case = {
@@ -148,6 +149,11 @@ describe('CasePostRequestRt', () => {
         key: 'second_custom_field_key',
         type: CustomFieldTypes.TOGGLE,
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: CustomFieldTypes.DATE,
+        value: '2024-10-07' as CustomFieldDate,
       },
     ],
   };
@@ -337,6 +343,40 @@ describe('CasePostRequestRt', () => {
         })
       )
     ).toContain('The value field cannot be an empty string.');
+  });
+
+  it('throws an error when a date customField is invalid', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: '202',
+            },
+          ],
+        })
+      )[0]
+    ).toContain('Invalid value "202" supplied');
+  });
+
+  it('throws an error when a date customField has text value', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: 'hello',
+            },
+          ],
+        })
+      )[0]
+    ).toContain('Invalid value "hello" supplied');
   });
 });
 
@@ -662,8 +702,13 @@ describe('CasePatchRequestRt', () => {
       },
       {
         key: 'second_custom_field_key',
-        type: 'toggle',
+        type: CustomFieldTypes.TOGGLE,
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: CustomFieldTypes.DATE,
+        value: '1970-01-01',
       },
     ],
   };
@@ -780,6 +825,40 @@ describe('CasePatchRequestRt', () => {
     ).toContain(
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
+  });
+
+  it('throws an error when a date customField is invalid', () => {
+    expect(
+      PathReporter.report(
+        CasePatchRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'third_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: '-1',
+            },
+          ],
+        })
+      )[0]
+    ).toContain('Invalid value "-1" supplied');
+  });
+
+  it('throws an error when a date customField is text', () => {
+    expect(
+      PathReporter.report(
+        CasePatchRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'third_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: 'text',
+            },
+          ],
+        })
+      )[0]
+    ).toContain('Invalid value "text" supplied');
   });
 });
 

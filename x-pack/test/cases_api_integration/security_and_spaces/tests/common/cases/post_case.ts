@@ -192,6 +192,12 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'valid_key_3',
+                  label: 'date',
+                  type: CustomFieldTypes.DATE,
+                  required: true,
+                },
               ],
             },
           })
@@ -211,6 +217,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
               },
+              {
+                key: 'valid_key_3',
+                type: CustomFieldTypes.DATE,
+                value: '1999-01-01',
+              },
             ],
           })
         );
@@ -225,6 +236,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'valid_key_2',
             type: CustomFieldTypes.TOGGLE,
             value: true,
+          },
+          {
+            key: 'valid_key_3',
+            type: CustomFieldTypes.DATE,
+            value: '1999-01-01',
           },
         ]);
       });
@@ -288,6 +304,13 @@ export default ({ getService }: FtrProviderContext): void => {
             defaultValue: false,
             required: true,
           },
+          {
+            key: 'date_custom_field',
+            label: 'date',
+            type: CustomFieldTypes.DATE,
+            defaultValue: '2020-11-11',
+            required: true,
+          },
         ];
 
         await createConfiguration(
@@ -315,6 +338,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: customFieldsConfiguration[1].key,
             type: customFieldsConfiguration[1].type,
             value: false,
+          },
+          {
+            key: customFieldsConfiguration[2].key,
+            type: customFieldsConfiguration[2].type,
+            value: '2020-11-11',
           },
         ]);
       });
@@ -335,6 +363,13 @@ export default ({ getService }: FtrProviderContext): void => {
             defaultValue: false,
             required: false,
           },
+          {
+            key: 'date_custom_field',
+            label: 'date',
+            type: CustomFieldTypes.DATE,
+            defaultValue: '2021-08',
+            required: false,
+          },
         ];
 
         await createConfiguration(
@@ -362,6 +397,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: customFieldsConfiguration[1].key,
             type: customFieldsConfiguration[1].type,
             value: false,
+          },
+          {
+            key: customFieldsConfiguration[2].key,
+            type: customFieldsConfiguration[2].type,
+            value: '2021-08',
           },
         ]);
       });
