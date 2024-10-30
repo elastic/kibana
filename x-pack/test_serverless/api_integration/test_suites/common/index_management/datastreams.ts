@@ -122,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           meteringDocsCount: 0,
           meteringStorageSize: '0b',
           meteringStorageSizeBytes: 0,
+          indexMode: 'standard',
         });
       });
     });
