@@ -16,8 +16,9 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
 > = async ({ http, application }) => {
   const allConnectors = await loadConnectors({ http });
-  const { capabilities } = application;
-  const { actions } = capabilities;
+  const {
+    capabilities: { actions },
+  } = application;
 
   const aiConnectors = allConnectors.reduce((acc: AIConnector[], connector) => {
     if (!connector.isMissingSecrets && AllowedActionTypeIds.includes(connector.actionTypeId)) {
