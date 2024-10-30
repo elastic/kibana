@@ -47,7 +47,7 @@ describe('createKnowledgeBaseEntry', () => {
     jest.useRealTimers();
   });
 
-  test('it creates a knowledge base entry with legacy create schema when isV2 = false', async () => {
+  test('it creates a knowledge base entry with create schema', async () => {
     const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
     (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
       ...getKnowledgeBaseEntryMock(),
@@ -66,55 +66,6 @@ describe('createKnowledgeBaseEntry', () => {
       user: mockUser,
       knowledgeBaseEntry,
       logger,
-    });
-    expect(esClient.create).toHaveBeenCalledWith({
-      body: {
-        '@timestamp': '2024-01-28T04:20:02.394Z',
-        created_at: '2024-01-28T04:20:02.394Z',
-        created_by: 'unknown',
-        updated_at: '2024-01-28T04:20:02.394Z',
-        updated_by: 'unknown',
-        namespace: 'test',
-        users: [{ id: undefined, name: 'my_username' }],
-        type: 'document',
-        source: 'test',
-        text: 'test',
-        name: 'test',
-        kbResource: 'test',
-        vector: undefined,
-      },
-      id: expect.any(String),
-      index: 'index-1',
-      refresh: 'wait_for',
-    });
-
-    const expected: KnowledgeBaseEntryResponse = {
-      ...getKnowledgeBaseEntryMock(),
-      id: 'elastic-id-123',
-    };
-
-    expect(createdEntry).toEqual(expected);
-  });
-  test('it creates a knowledge base entry with create schema when isV2 = true', async () => {
-    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
-    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
-      ...getKnowledgeBaseEntryMock(),
-      id: 'elastic-id-123',
-    });
-
-    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.create.mockResponse(
-      // @ts-expect-error not full response interface
-      { _id: 'elastic-id-123' }
-    );
-    const createdEntry = await createKnowledgeBaseEntry({
-      esClient,
-      knowledgeBaseIndex: 'index-1',
-      spaceId: 'test',
-      user: mockUser,
-      knowledgeBaseEntry,
-      logger,
-      isV2: true,
     });
     expect(esClient.create).toHaveBeenCalledWith({
       body: {

@@ -140,13 +140,11 @@ export const getKnowledgeBaseEntryMock = (
   params: KnowledgeBaseEntryCreateProps | KnowledgeBaseEntryUpdateProps = {
     name: 'test',
     namespace: 'default',
-    type: 'index',
-    index: 'test',
-    field: 'test',
-    description: 'test',
-    queryDescription: 'test',
-    inputSchema: [{ fieldName: 'test', fieldType: 'test', description: 'test' }],
-    outputFields: [],
+    type: 'document',
+    text: 'test',
+    source: 'test',
+    kbResource: 'test',
+    required: true,
   }
 ): KnowledgeBaseEntryResponse => ({
   id: '1',
