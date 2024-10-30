@@ -16,7 +16,7 @@ import type {
   DashboardLocatorParams,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getPanelTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_panel_title';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
