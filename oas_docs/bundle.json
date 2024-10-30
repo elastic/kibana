@@ -5628,7 +5628,7 @@
     },
     "/api/fleet/agent-status": {
       "get": {
-        "operationId": "get-fleet-agent-status",
+        "operationId": "get-fleet-agent-status-2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17396,7 +17396,7 @@
     },
     "/api/fleet/enrollment-api-keys": {
       "get": {
-        "operationId": "get-fleet-enrollment-api-keys",
+        "operationId": "get-fleet-enrollment-api-keys-2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17442,7 +17442,7 @@
         "tags": []
       },
       "post": {
-        "operationId": "post-fleet-enrollment-api-keys",
+        "operationId": "post-fleet-enrollment-api-keys-2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17498,7 +17498,7 @@
     },
     "/api/fleet/enrollment-api-keys/{keyId}": {
       "delete": {
-        "operationId": "delete-fleet-enrollment-api-keys-keyid",
+        "operationId": "delete-fleet-enrollment-api-keys-keyid-2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17536,7 +17536,7 @@
         "tags": []
       },
       "get": {
-        "operationId": "get-fleet-enrollment-api-keys-keyid",
+        "operationId": "get-fleet-enrollment-api-keys-keyid-2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39682,7 +39682,7 @@
     "/api/fleet/service-tokens": {
       "post": {
         "description": "Create a service token",
-        "operationId": "post-fleet-service-tokens",
+        "operationId": "post-fleet-service-tokens-2",
         "parameters": [
           {
             "description": "The version of the API to use",
