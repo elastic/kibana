@@ -120,7 +120,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
@@ -173,7 +173,7 @@ describe('Histogram', () => {
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
-    onLoad?.(true, undefined, dataLoading$);
+    onLoad(true, undefined, dataLoading$);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.loading,
       undefined
@@ -200,7 +200,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly when the request has a failure status', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     jest
       .spyOn(adapters.requests, 'getRequests')
@@ -216,7 +216,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly when the response has shard failures', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
@@ -249,7 +249,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
     const { component, props } = await mountComponent(true, false);
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.layerId = {
       meta: { type: 'es_ql' },
@@ -285,7 +285,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
     const { component, props } = await mountComponent(true, true);
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.layerId = {
       meta: { type: 'es_ql' },
