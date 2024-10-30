@@ -16,8 +16,8 @@ import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
-import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { getErrorLoadingPanel } from './presentation_panel_strings';
+import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -75,15 +75,19 @@ export const PresentationPanel = <
     );
   }
 
-  return shouldHavePanel && Panel ? (
-    <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
-  ) : (
-    <EuiErrorBoundary>
-      <UnwrappedComponent
-        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
-          typeof UnwrappedComponent
-        >)}
-      />
-    </EuiErrorBoundary>
+  return (
+    <>
+      {shouldHavePanel && Panel ? (
+        <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
+      ) : (
+        <EuiErrorBoundary>
+          <UnwrappedComponent
+            {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
+              typeof UnwrappedComponent
+            >)}
+          />
+        </EuiErrorBoundary>
+      )}
+    </>
   );
 };

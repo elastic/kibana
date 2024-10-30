@@ -58,6 +58,9 @@ export interface PresentationPanelInternalProps<
    * "title" when the panel has no title, i.e. "Panel {index}".
    */
   index?: number;
+
+  // TODO: Remove this
+  setDragHandles?: (refs: Array<React.MutableRefObject<HTMLElement | null>>) => void;
 }
 
 /**

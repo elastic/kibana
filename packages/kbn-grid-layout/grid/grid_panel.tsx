@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useEffect, useMemo } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import {
@@ -28,7 +28,10 @@ export const GridPanel = forwardRef<
   {
     panelId: string;
     rowIndex: number;
-    renderPanelContents: (panelId: string) => React.ReactNode;
+    renderPanelContents: (
+      panelId: string,
+      setDragHandles: (refs: Array<React.MutableRefObject<HTMLElement | null>>) => void
+    ) => React.ReactNode;
     interactionStart: (
       type: PanelInteractionEvent['type'],
       e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -40,7 +43,46 @@ export const GridPanel = forwardRef<
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
+    const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
+    const removeEventListenersRef = useRef<(() => void) | null>(null);
+    const [dragHandleCount, setDragHandleCount] = useState<number>(0);
+
     const { euiTheme } = useEuiTheme();
+
+    const setDragHandles = useCallback(
+      (dragHandles: Array<HTMLElement | null>) => {
+        dragHandleRefs.current = dragHandles;
+        setDragHandleCount(dragHandles.length);
+
+        const onMouseDown = (e: MouseEvent) => interactionStart('drag', e);
+        const onMouseUp = (e: MouseEvent) => interactionStart('drop', e);
+
+        for (const handle of dragHandles) {
+          console.log('handle', handle);
+          if (handle === null) return;
+          handle.addEventListener('mousedown', onMouseDown);
+          handle.addEventListener('mouseup', onMouseUp);
+        }
+
+        removeEventListenersRef.current = () => {
+          for (const handle of dragHandles) {
+            console.log('HANDLE', handle);
+            if (handle === null) return;
+            handle.removeEventListener('mousedown', onMouseDown);
+            handle.removeEventListener('mouseup', onMouseUp);
+          }
+        };
+      },
+      [interactionStart]
+    );
+
+    useEffect(() => {
+      return () => {
+        if (removeEventListenersRef.current) {
+          removeEventListenersRef.current();
+        }
+      };
+    }, []);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
@@ -104,7 +146,7 @@ export const GridPanel = forwardRef<
                 ref.style.gridRowEnd = ``;
               }
             } else {
-              ref.style.zIndex = '0';
+              ref.style.zIndex = `auto`;
 
               // if the panel is not being dragged and/or resized, undo any fixed position styles
               ref.style.position = '';
@@ -131,47 +173,54 @@ export const GridPanel = forwardRef<
 
     return (
       <div ref={panelRef} css={initialStyles}>
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={true}
+        <div
           css={css`
-            padding: 0;
             position: relative;
             height: 100%;
+
+            &:hover,
+            &:active {
+              & .dragHandle,
+              & .resizeHandle {
+                opacity: 1;
+              }
+            }
           `}
         >
           {/* drag handle */}
-          <div
-            className="dragHandle"
-            css={css`
-              opacity: 0;
-              display: flex;
-              cursor: move;
-              position: absolute;
-              align-items: center;
-              justify-content: center;
-              top: -${euiThemeVars.euiSizeL};
-              width: ${euiThemeVars.euiSizeL};
-              height: ${euiThemeVars.euiSizeL};
-              z-index: ${euiThemeVars.euiZLevel3};
-              margin-left: ${euiThemeVars.euiSizeS};
-              border: 1px solid ${euiTheme.border.color};
-              background-color: ${euiTheme.colors.emptyShade};
-              border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
-              &:hover {
-                cursor: grab;
-                opacity: 1 !important;
-              }
-              &:active {
-                cursor: grabbing;
-                opacity: 1 !important;
-              }
-            `}
-            onMouseDown={(e) => interactionStart('drag', e)}
-            onMouseUp={(e) => interactionStart('drop', e)}
-          >
-            <EuiIcon type="grabOmnidirectional" />
-          </div>
+          {!dragHandleCount && (
+            <div
+              className="dragHandle"
+              css={css`
+                opacity: 0;
+                display: flex;
+                cursor: move;
+                position: absolute;
+                align-items: center;
+                justify-content: center;
+                top: -${euiThemeVars.euiSizeL};
+                width: ${euiThemeVars.euiSizeL};
+                height: ${euiThemeVars.euiSizeL};
+                z-index: ${euiThemeVars.euiZLevel3};
+                margin-left: ${euiThemeVars.euiSizeS};
+                border: 1px solid ${euiTheme.border.color};
+                background-color: ${euiTheme.colors.emptyShade};
+                border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+                &:hover {
+                  cursor: grab;
+                  opacity: 1 !important;
+                }
+                &:active {
+                  cursor: grabbing;
+                  opacity: 1 !important;
+                }
+              `}
+              onMouseDown={(e) => interactionStart('drag', e)}
+              onMouseUp={(e) => interactionStart('drop', e)}
+            >
+              <EuiIcon type="grabOmnidirectional" />
+            </div>
+          )}
           {/* Resize handle */}
           <div
             className="resizeHandle"
@@ -182,6 +231,7 @@ export const GridPanel = forwardRef<
               bottom: 0;
               opacity: 0;
               margin: -2px;
+              z-index: 1000;
               position: absolute;
               width: ${euiThemeVars.euiSizeL};
               height: ${euiThemeVars.euiSizeL};
@@ -195,16 +245,9 @@ export const GridPanel = forwardRef<
               }
             `}
           />
-          <div
-            css={css`
-              ${euiFullHeight()}
-              ${useEuiOverflowScroll('y', false)}
-            ${useEuiOverflowScroll('x', false)}
-            `}
-          >
-            {renderPanelContents(panelId)}
-          </div>
-        </EuiPanel>
+
+          {renderPanelContents(panelId, setDragHandles)}
+        </div>
       </div>
     );
   }

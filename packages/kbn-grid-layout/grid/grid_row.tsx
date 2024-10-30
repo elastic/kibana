@@ -24,7 +24,10 @@ export const GridRow = forwardRef<
   {
     rowIndex: number;
     toggleIsCollapsed: () => void;
-    renderPanelContents: (panelId: string) => React.ReactNode;
+    renderPanelContents: (
+      panelId: string,
+      setDragHandles: (refs: Array<React.MutableRefObject<HTMLElement | null>>) => void
+    ) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }

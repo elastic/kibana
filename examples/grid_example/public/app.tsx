@@ -7,21 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
-import { AppMountParameters } from '@kbn/core-application-browser';
+
 import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { DragHandleContext, GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+
+import {
+  SearchApi,
+  SearchSerializedState,
+} from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
+import { TimeRange } from '@kbn/es-query';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export const GridExample = () => {
+  const parentApi = useMemo(() => {
+    return {
+      // behaviour subjeect for drag handle references?
+      viewMode: new BehaviorSubject('edit'),
+      reload$: new Subject<void>(),
+      getSerializedStateForChild: () => ({
+        rawState: {
+          title: 'test',
+          timeRange: undefined,
+        },
+        references: [],
+      }),
+      timeRange$: new BehaviorSubject<TimeRange>({
+        from: 'now-24h',
+        to: 'now',
+      }),
+    };
+    // only run onMount
+  }, []);
+
   return (
     <EuiProvider>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
         <EuiPageTemplate.Section color="subdued">
           <GridLayout
-            renderPanelContents={(id) => {
-              return <div style={{ padding: 8 }}>{id}</div>;
+            renderPanelContents={(id, setDragHandles) => {
+              // console.log('RENDER PANEL', id);
+              // return <div style={{ padding: 8 }}>{id}</div>;
+
+              return (
+                <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+                  type={'searchEmbeddableDemo'}
+                  getParentApi={() => parentApi}
+                  panelProps={{
+                    showBadges: true,
+                    showBorder: false,
+                    showNotifications: true,
+                    showShadow: false,
+                    setDragHandles,
+                  }}
+                />
+              );
             }}
             getCreationOptions={() => {
               const initialLayout: GridLayoutData = [

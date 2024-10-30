@@ -15,11 +15,12 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { nodeConfig } from '@kbn/core-node-server-internal';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -37,9 +38,24 @@ export const PresentationPanelInternal = <
 
   Component,
   componentProps,
+
+  setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
+  const dragHandleRefs = useRef(new Map<string, HTMLElement>());
+  // const [headerDragHandle, setHeaderDragHandle] = useState<HTMLElement | null>(null);
+
+  const setDragHandle = useCallback((dragHandleId: string, node: HTMLElement | null) => {
+    const map = dragHandleRefs.current;
+    if (node) {
+      map.set(dragHandleId, node);
+      // setDragHandles(Array.from(map.values));
+    } else {
+      map.delete(dragHandleId);
+    }
+    setDragHandles(Array.from(map.values()));
+  }, []);
 
   const viewModeSubject = (() => {
     if (apiPublishesViewMode(api)) return api.viewMode;
@@ -69,6 +85,18 @@ export const PresentationPanelInternal = <
   );
   const viewMode = rawViewMode ?? 'view';
 
+  // const setHeaderRef = useCallback((node: HTMLElement | null) => {
+  //   if (node !== null) {
+  //     console.log('node', node);
+  //     setHeaderDragHandle(node);
+  //     // setInternalDragHandles({ ...internalDragHandles, ['header']: node });
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   setDragHandles?.([headerDragHandle]);
+  // }, [setDragHandles, headerDragHandle]);
+
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
     setInitialLoadComplete(true);
@@ -92,7 +120,15 @@ export const PresentationPanelInternal = <
 
   return (
     <PresentationPanelHoverActions
-      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications }}
+      {...{
+        index,
+        api,
+        getActions,
+        actionPredicate,
+        viewMode,
+        showNotifications,
+        dragHandleRef: (node) => setDragHandle('hoverAction', node),
+      }}
     >
       <EuiPanel
         role="figure"
@@ -109,6 +145,7 @@ export const PresentationPanelInternal = <
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
+            dragHandleRef={(node) => setDragHandle('header', node)}
             headerId={headerId}
             viewMode={viewMode}
             hideTitle={hideTitle}

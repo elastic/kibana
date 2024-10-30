@@ -53,6 +53,7 @@ import {
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+import { useDragHandleContext } from '../presentation_panel_context_provider';
 
 const QUICK_ACTION_IDS = {
   edit: [
@@ -96,6 +97,7 @@ export const PresentationPanelHoverActions = ({
   api,
   index,
   getActions,
+  dragHandleRef,
   actionPredicate,
   children,
   className,
@@ -105,6 +107,7 @@ export const PresentationPanelHoverActions = ({
   index?: number;
   api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
+  dragHandleRef: React.Ref<HTMLElement>;
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
   className?: string;
@@ -474,7 +477,7 @@ export const PresentationPanelHoverActions = ({
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
-              ref={leftHoverActionsRef}
+              ref={dragHandleRef}
               data-test-subj="embPanel__hoverActions__left"
               className={classNames(
                 'embPanel__hoverActions',
