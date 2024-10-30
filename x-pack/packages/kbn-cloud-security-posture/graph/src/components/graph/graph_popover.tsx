@@ -44,7 +44,11 @@ export const GraphPopover: React.FC<GraphPopoverProps> = ({
         disabled: false,
         crossFrame: true,
         noIsolation: false,
-        returnFocus: false,
+        returnFocus: (el) => {
+          anchorElement.focus();
+          return false;
+        },
+        preventScrollOnFocus: true,
         onClickOutside: () => {
           closePopover();
         },

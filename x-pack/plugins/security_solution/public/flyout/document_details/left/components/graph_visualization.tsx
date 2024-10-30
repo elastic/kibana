@@ -9,8 +9,10 @@ import React, { memo, useMemo, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NodeViewModel } from '@kbn/cloud-security-posture-graph';
-import type { Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { css } from '@emotion/css';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useFetchGraphData } from '../../right/hooks/use_fetch_graph_data';
@@ -61,7 +63,10 @@ const useGraphData = (
   return { data, refresh, isFetching };
 };
 
-const useGraphPopovers = (setActorIds: React.Dispatch<React.SetStateAction<Set<string>>>) => {
+const useGraphPopovers = (
+  setActorIds: React.Dispatch<React.SetStateAction<Set<string>>>,
+  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>
+) => {
   const {
     services: { notifications },
   } = useKibana();
@@ -72,6 +77,29 @@ const useGraphPopovers = (setActorIds: React.Dispatch<React.SetStateAction<Set<s
     },
     onShowActionsByEntityClick: (node) => {
       setActorIds((prev) => new Set([...prev, node.id]));
+      setSearchFilters((prev) => [
+        ...prev,
+        {
+          meta: {
+            disabled: false,
+            key: 'actor.entity.id',
+            field: 'actor.entity.id',
+            negate: false,
+            params: {
+              query: node.id,
+            },
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              'actor.entity.id': node.id,
+            },
+          },
+          $state: {
+            store: 'appState',
+          } as Filter['$state'],
+        },
+      ]);
     },
     onShowActionsOnEntityClick: (node) => {
       notifications?.toasts.addInfo('Show actions on entity is not implemented yet');
@@ -114,6 +142,8 @@ const useGraphNodes = (
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
+  const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
   const { filters, updateFilters } = useGraphFilters();
   const { getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
   const { eventIds } = useGraphPreview({
@@ -122,7 +152,7 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const [actorIds, setActorIds] = useState(() => new Set<string>());
-  const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(setActorIds);
+  const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(setActorIds, setSearchFilters);
   const expandButtonClickHandler = (...args: unknown[]) =>
     popoverOpenWrapper(nodeExpandPopover.onNodeExpandButtonClick, ...args);
   const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
@@ -135,7 +165,7 @@ export const GraphVisualization: React.FC = memo(() => {
         {...{
           appName: 'graph-visualization',
           intl: null,
-          showFilterBar: false,
+          showFilterBar: true,
           showDatePicker: true,
           showAutoRefreshOnly: false,
           showSaveQuery: false,
@@ -145,12 +175,24 @@ export const GraphVisualization: React.FC = memo(() => {
           dateRangeFrom: filters.from.split('/')[0],
           dateRangeTo: filters.to.split('/')[0],
           query: { query: '', language: 'kuery' },
-          filters: [],
+          indexPatterns: [indexPattern],
+          filters: searchFilters,
           submitButtonStyle: 'iconOnly',
+          onFiltersUpdated: (newFilters) => {
+            setSearchFilters(newFilters);
+
+            setActorIds(
+              new Set(
+                newFilters
+                  .filter((filter) => filter.meta.key === 'actor.entity.id')
+                  .map((filter) => (filter.meta.params as { query: string })?.query)
+                  .filter((query) => typeof query === 'string')
+              )
+            );
+          },
           onQuerySubmit: (payload, isUpdate) => {
             if (isUpdate) {
               updateFilters({ from: payload.dateRange.from, to: payload.dateRange.to });
-              setActorIds(new Set<string>());
             } else {
               refresh();
             }

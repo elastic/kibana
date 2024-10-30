@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
@@ -15,7 +15,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, Node } from '@xyflow/react';
+import type { Edge, FitViewOptions, Node } from '@xyflow/react';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/styles';
 import {
@@ -89,6 +89,9 @@ export const Graph: React.FC<GraphProps> = ({
   ...rest
 }) => {
   const backgroundId = Math.random().toFixed(4); // TODO: use useId(); when available (react >=18)
+  const fitViewRef = useRef<
+    ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
+  >(null);
   const [prevNodes, setPrevNodes] = useState<NodeViewModel[]>([]);
   const [prevEdges, setPrevEdges] = useState<EdgeViewModel[]>([]);
   const [isGraphLocked, setIsGraphLocked] = useState(!interactive);
@@ -105,6 +108,9 @@ export const Graph: React.FC<GraphProps> = ({
       setEdges(initialEdges);
       setPrevNodes(nodes);
       setPrevEdges(edges);
+      setTimeout(() => {
+        fitViewRef.current?.();
+      }, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this effect when nodes or edges change
   }, [nodes, edges, setNodes, setEdges]);
@@ -132,6 +138,7 @@ export const Graph: React.FC<GraphProps> = ({
         fitView={true}
         onInit={(xyflow) => {
           window.requestAnimationFrame(() => xyflow.fitView());
+          fitViewRef.current = xyflow.fitView;
 
           // When the graph is not initialized as interactive, we need to fit the view on resize
           if (!interactive) {
