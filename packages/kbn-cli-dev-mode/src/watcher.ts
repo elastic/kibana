@@ -26,7 +26,7 @@ const packageMatcher = makeMatcher([
 /**
  * Any code that is outside of a package must match this in order to trigger a restart
  */
-const nonPackageMatcher = makeMatcher(['config/**/*.yml']);
+const nonPackageMatcher = makeMatcher(['config/**/*.yml', "plugins/**/server/**/*"]);
 
 export interface Options {
   enabled: boolean;
