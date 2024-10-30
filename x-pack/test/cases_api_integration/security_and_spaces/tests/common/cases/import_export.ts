@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'action', 'actions');
+      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'connector', 'actions');
 
       await expectImportToHaveOneCase(supertestService);
 
