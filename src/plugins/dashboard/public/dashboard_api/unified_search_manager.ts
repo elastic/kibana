@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+  compareFilters,
+  isFilterPinned,
+} from '@kbn/es-query';
 import {
   BehaviorSubject,
   Observable,
@@ -33,6 +40,7 @@ import {
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
+import moment, { Moment } from 'moment';
 import { dataService } from '../services/kibana_services';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_constants';
@@ -271,7 +279,17 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$,
     },
     comparators: {
-      filters: [unifiedSearchFilters$, setUnifiedSearchFilters, fastIsEqual],
+      filters: [
+        unifiedSearchFilters$,
+        setUnifiedSearchFilters,
+        // exclude pinned filters from comparision because pinned filters are not part of application state
+        (a, b) =>
+          compareFilters(
+            (a ?? []).filter((f) => !isFilterPinned(f)),
+            (b ?? []).filter((f) => !isFilterPinned(f)),
+            COMPARE_ALL_OPTIONS
+          ),
+      ],
       query: [query$, setQuery, fastIsEqual],
       refreshInterval: [
         refreshInterval$,
@@ -286,8 +304,15 @@ export function initializeUnifiedSearchManager(
         (timeRange: TimeRange | undefined) => {
           if (timeRestore$.value) setAndSyncTimeRange(timeRange);
         },
-        (a: TimeRange | undefined, b: TimeRange | undefined) =>
-          timeRestore$.value ? fastIsEqual(a, b) : true,
+        (a: TimeRange | undefined, b: TimeRange | undefined) => {
+          if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
+          if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
+            return false;
+          }
+          return true;
+          return false;
+          // timeRestore$.value ? fastIsEqual(a, b) : true
+        },
       ],
       timeRestore: [timeRestore$, setTimeRestore],
     } as StateComparators<
@@ -326,3 +351,20 @@ export function initializeUnifiedSearchManager(
     },
   };
 }
+
+const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
+  if (moment(time).isValid()) {
+    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+  } else {
+    // If it's not a valid moment date, then it should be a string representing a relative time
+    // like 'now' or 'now-15m'.
+    return time as string;
+  }
+};
+
+export const areTimesEqual = (
+  timeA?: string | Moment | undefined,
+  timeB?: string | Moment | undefined
+) => {
+  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
+};

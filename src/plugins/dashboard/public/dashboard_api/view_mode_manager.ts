@@ -51,7 +51,13 @@ export function initializeViewModeManager(
       setViewMode,
     },
     comparators: {
-      viewMode: [viewMode$, setViewMode],
+      viewMode: [
+        viewMode$,
+        setViewMode,
+        // When compared view mode is always considered unequal so that it gets backed up.
+        // view mode unsaved changes do not show unsaved badge
+        () => false,
+      ],
     } as StateComparators<Pick<DashboardState, 'viewMode'>>,
   };
 }

@@ -7,29 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment, { Moment } from 'moment';
 import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
-
-const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
-};
-
-export const areTimesEqual = (
-  timeA?: string | Moment | undefined,
-  timeB?: string | Moment | undefined
-) => {
-  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
-};
+import { areTimesEqual } from '../../../../dashboard_api/unified_search_manager';
 
 export function newSession$(api: unknown) {
   const observables: Array<Observable<unknown>> = [];
