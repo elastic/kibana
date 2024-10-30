@@ -26,8 +26,10 @@ export const telemetryDetectionRulesPreviewRoute = (
     .get({
       path: SECURITY_TELEMETRY_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
