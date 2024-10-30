@@ -28,7 +28,6 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
@@ -50,6 +49,7 @@ import type {
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
+import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;

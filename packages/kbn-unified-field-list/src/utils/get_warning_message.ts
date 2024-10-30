@@ -18,14 +18,12 @@ export const FIELD_DATA_LABEL = i18n.translate('unifiedFieldList.fieldStats.fiel
   defaultMessage: `Field data is`,
 });
 
-export const getReasonIfFieldStatsUnavailableForQuery = (
-  query?: AggregateQuery | Query | { [key: string]: any },
-  label: string = FIELD_STATISTICS_LABEL
+export const getReasonIfFieldDataUnavailableForQuery = (
+  query?: AggregateQuery | Query | { [key: string]: any }
 ): string | undefined => {
   if (queryCannotBeSampled(query)) {
     return i18n.translate('unifiedFieldList.fieldStats.notAvailableForMatchESQLQueryDescription', {
-      defaultMessage: `{label} not supported for ES|QL queries with 'MATCH' or 'QSTR' functions.`,
-      values: { label },
+      defaultMessage: `Field data is not available for ES|QL queries with 'MATCH' or 'QSTR' functions.`,
     });
   }
 };

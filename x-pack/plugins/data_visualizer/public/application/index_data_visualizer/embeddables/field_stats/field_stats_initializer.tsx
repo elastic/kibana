@@ -29,7 +29,6 @@ import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -39,6 +38,7 @@ import type {
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
+import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 
 export interface FieldStatsInitializerProps {
   initialInput?: Partial<FieldStatisticsTableEmbeddableState>;
@@ -261,9 +261,6 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               disableSubmitAction={!!unsupportedReason}
             />
           ) : null}
-          {unsupportedReason ? (
-            <EuiCallOut title={unsupportedReason} size="s" iconType="alert" color="warning" />
-          ) : null}
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
@@ -287,26 +284,39 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onCreate.bind(null, updatedProps)}
-              fill
-              aria-label={i18n.translate(
-                'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyFlyoutAriaLabel',
-                {
-                  defaultMessage: 'Apply changes',
-                }
-              )}
-              disabled={!isEsqlFormValid || !isDataViewFormValid || !!unsupportedReason}
-              iconType="check"
-              data-test-subj="applyFlyoutButton"
-            >
-              <FormattedMessage
-                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyAndCloseLabel"
-                defaultMessage="Apply and close"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+          >
+            {unsupportedReason ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip type="iInCircle" content={unsupportedReason} color="warning" />
+              </EuiFlexItem>
+            ) : null}
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onCreate.bind(null, updatedProps)}
+                fill
+                aria-label={i18n.translate(
+                  'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyFlyoutAriaLabel',
+                  {
+                    defaultMessage: 'Apply changes',
+                  }
+                )}
+                disabled={!isEsqlFormValid || !isDataViewFormValid || !!unsupportedReason}
+                iconType="check"
+                data-test-subj="applyFlyoutButton"
+              >
+                <FormattedMessage
+                  id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyAndCloseLabel"
+                  defaultMessage="Apply and close"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

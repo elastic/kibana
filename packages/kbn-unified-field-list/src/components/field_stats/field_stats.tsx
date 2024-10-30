@@ -53,10 +53,7 @@ import {
 import { FieldSummaryMessage } from './field_summary_message';
 import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
 import { ErrorBoundary } from '../error_boundary';
-import {
-  FIELD_DATA_LABEL,
-  getReasonIfFieldStatsUnavailableForQuery,
-} from '../../utils/get_warning_message';
+import { getReasonIfFieldDataUnavailableForQuery } from '../../utils/get_warning_message';
 
 export interface FieldStatsState {
   isLoading: boolean;
@@ -195,7 +192,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
        * If the ES|QL query is unsupported, we can exit early
        */
       const unsupportedReasonForQuery = isTextBased
-        ? getReasonIfFieldStatsUnavailableForQuery(query, FIELD_DATA_LABEL)
+        ? getReasonIfFieldDataUnavailableForQuery(query)
         : undefined;
 
       if (unsupportedReasonForQuery) {
@@ -352,10 +349,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
-  const unsupportedReasonForQuery = getReasonIfFieldStatsUnavailableForQuery(
-    query,
-    FIELD_DATA_LABEL
-  );
+  const unsupportedReasonForQuery = getReasonIfFieldDataUnavailableForQuery(query);
   if (unsupportedReasonForQuery) {
     const messageUnsupportedReason = <FieldSummaryMessage message={unsupportedReasonForQuery} />;
 

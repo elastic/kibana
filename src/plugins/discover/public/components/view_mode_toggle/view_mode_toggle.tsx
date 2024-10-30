@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
-import { getReasonIfFieldStatsUnavailableForQuery } from '@kbn/unified-field-list/src/utils/get_warning_message';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -49,8 +48,8 @@ export const DocumentViewModeToggle = ({
   );
   const state = stateContainer.appState.getState();
   const fieldStatsWarningMsgForQuery = useMemo(() => {
-    return getReasonIfFieldStatsUnavailableForQuery(state.query);
-  }, [state.query]);
+    return dataVisualizerService?.getReasonIfFieldStatsUnavailableForQuery(state.query);
+  }, [state.query, dataVisualizerService]);
 
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
