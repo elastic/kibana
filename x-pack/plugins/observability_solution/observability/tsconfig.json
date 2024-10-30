@@ -101,7 +101,6 @@
     "@kbn/serverless",
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
-    "@kbn/translations-plugin",
     "@kbn/config-schema",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server",
