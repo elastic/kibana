@@ -17,6 +17,7 @@ import { GraphPreviewContainer } from './graph_preview_container';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../hooks/use_graph_preview';
+import { GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE } from '../../shared/constants/feature_flags';
 
 const KEY = 'visualizations';
 
@@ -26,7 +27,7 @@ const KEY = 'visualizations';
 export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
   const graphVisualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'graphVisualizationInFlyoutEnabled'
+    GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE
   );
 
   const { dataAsNestedObject, getFieldsData } = useDocumentDetailsContext();

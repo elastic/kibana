@@ -11,6 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
@@ -30,6 +31,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_VISUALIZATION_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../right/hooks/use_graph_preview';
+import { GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE } from '../../shared/constants/feature_flags';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -100,6 +102,10 @@ export const VisualizeTab = memo(() => {
     }
   }, [panels.left?.path?.subTab]);
 
+  const graphVisualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE
+  );
+
   // Decide whether to show the graph preview or not
   const { isAuditLog: isGraphPreviewEnabled } = useGraphPreview({
     getFieldsData,
@@ -108,7 +114,8 @@ export const VisualizeTab = memo(() => {
 
   const options = [...visualizeButtons];
 
-  if (isGraphPreviewEnabled) options.push(graphVisualizationButton);
+  if (graphVisualizationInFlyoutEnabled && isGraphPreviewEnabled)
+    options.push(graphVisualizationButton);
 
   return (
     <>
