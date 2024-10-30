@@ -25,8 +25,10 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: NOTE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
