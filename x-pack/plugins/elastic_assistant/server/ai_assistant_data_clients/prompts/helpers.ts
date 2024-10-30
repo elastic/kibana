@@ -81,7 +81,7 @@ export const transformESSearchToPrompts = (
 };
 
 export const transformToUpdateScheme = (
-  user: AuthenticatedUser,
+  user: AuthenticatedUser | null,
   updatedAt: string,
   { content, isNewConversationDefault, categories, color, id }: PromptUpdateProps
 ): UpdatePromptSchema => {
@@ -92,17 +92,19 @@ export const transformToUpdateScheme = (
     is_new_conversation_default: isNewConversationDefault,
     categories,
     color,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
+    users: user
+      ? [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ]
+      : undefined,
   };
 };
 
 export const transformToCreateScheme = (
-  user: AuthenticatedUser,
+  user: AuthenticatedUser | null,
   updatedAt: string,
   {
     content,
@@ -126,12 +128,14 @@ export const transformToCreateScheme = (
     name,
     is_default: isDefault,
     prompt_type: promptType,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
+    users: user
+      ? [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ]
+      : undefined,
   };
 };
 

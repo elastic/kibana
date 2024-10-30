@@ -38,7 +38,7 @@ import {
   EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -162,22 +162,20 @@ export const bulkActionAnonymizationFieldsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
-          }
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            authenticatedUser: true,
+            context: ctx,
+            license: true,
+            request,
+            response,
+          });
 
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
+          if (checkResponse) {
+            return checkResponse;
           }
+
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
@@ -208,7 +206,7 @@ export const bulkActionAnonymizationFieldsRoute = (
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
             documentsToCreate: body.create?.map((f) =>
-              transformToCreateScheme(authenticatedUser, changedAt, f)
+              transformToCreateScheme(changedAt, f, authenticatedUser)
             ),
             documentsToDelete: body.delete?.ids,
             documentsToUpdate: body.update?.map((f) =>

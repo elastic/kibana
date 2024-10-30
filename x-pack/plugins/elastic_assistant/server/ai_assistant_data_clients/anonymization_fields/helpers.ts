@@ -62,30 +62,30 @@ export const transformESSearchToAnonymizationFields = (
 };
 
 export const transformToUpdateScheme = (
-  user: AuthenticatedUser,
+  user: AuthenticatedUser | null,
   updatedAt: string,
   { allowed, anonymized, id }: AnonymizationFieldUpdateProps
 ): UpdateAnonymizationFieldSchema => {
   return {
     id,
     updated_at: updatedAt,
-    updated_by: user.username,
+    updated_by: user?.username,
     allowed,
     anonymized,
   };
 };
 
 export const transformToCreateScheme = (
-  user: AuthenticatedUser,
   createdAt: string,
-  { allowed, anonymized, field }: AnonymizationFieldCreateProps
+  { allowed, anonymized, field }: AnonymizationFieldCreateProps,
+  user: AuthenticatedUser | null
 ): CreateAnonymizationFieldSchema => {
   return {
     '@timestamp': createdAt,
     updated_at: createdAt,
     field,
     created_at: createdAt,
-    created_by: user.username,
+    created_by: user?.username,
     allowed,
     anonymized,
   };

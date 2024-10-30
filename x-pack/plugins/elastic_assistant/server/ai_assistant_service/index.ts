@@ -11,6 +11,7 @@ import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/s
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
@@ -36,6 +37,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
+import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -56,6 +58,7 @@ export interface CreateAIAssistantClientParams {
   logger: Logger;
   spaceId: string;
   currentUser: AuthenticatedUser | null;
+  licensing: Promise<LicensingApiRequestHandlerContext>;
 }
 
 export type CreateDataStream = (params: {
@@ -237,7 +240,7 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
     } catch (error) {
-      this.options.logger.error(`Error initializing AI assistant resources: ${error.message}`);
+      this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
       this.isInitializing = false;
       return errorResult(error.message);
@@ -287,8 +290,9 @@ export class AIAssistantService {
       opts.spaceId
     );
 
+    const licensing = await opts.licensing;
     // If space level resources initialization failed, retry
-    if (!initialized && error) {
+    if (!initialized && error && hasAIAssistantLicense(licensing.license)) {
       let initRetryPromise: Promise<InitializationPromise> | undefined;
 
       // If !this.initialized, we know that resource initialization failed
@@ -502,7 +506,7 @@ export class AIAssistantService {
         await this.createDefaultAnonymizationFields(spaceId);
       }
     } catch (error) {
-      this.options.logger.error(
+      this.options.logger.warn(
         `Error initializing AI assistant namespace level resources: ${error.message}`
       );
       throw error;
