@@ -250,7 +250,7 @@ kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-
 # Restart your deployment
 kubectl rollout restart deployment myapp -n my-namespace
 
-# Check annotations have been applied correctly
+# Check annotations have been applied correctly and auto-instrumentation library is injected
 kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 </EuiCodeBlock>
                 <EuiSpacer />
