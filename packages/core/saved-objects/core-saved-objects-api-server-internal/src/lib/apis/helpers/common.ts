@@ -97,8 +97,7 @@ export class CommonHelper {
     type: string,
     id: string | undefined,
     version: string | undefined,
-    overwrite: boolean | undefined,
-    enforceRandomId: boolean | undefined
+    overwrite: boolean | undefined
   ) {
     if (!this.encryptionExtension?.isEncryptableType(type)) {
       return id || SavedObjectsUtils.generateId();
@@ -107,7 +106,7 @@ export class CommonHelper {
       return SavedObjectsUtils.generateId();
     }
 
-    const shouldEnforceRandomId = enforceRandomId !== false;
+    const shouldEnforceRandomId = this.encryptionExtension?.shouldEnforceRandomId(type);
 
     // Allow specified ID if:
     // 1. we're overwriting an existing ESO with a Version (this helps us ensure that the document really was previously created using ESO)

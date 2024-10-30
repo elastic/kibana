@@ -64,7 +64,6 @@ export const registerCreateRoute = (
             )
           ),
           initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          enforceRandomId: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -84,7 +83,6 @@ export const registerCreateRoute = (
         typeMigrationVersion,
         references,
         initialNamespaces,
-        enforceRandomId,
       } = request.body;
 
       const usageStatsClient = coreUsageData.getClient();
@@ -103,7 +101,6 @@ export const registerCreateRoute = (
         references,
         initialNamespaces,
         migrationVersionCompatibility: 'compatible' as const,
-        enforceRandomId,
       };
       const result = await savedObjects.client.create(type, attributes, options);
       return response.ok({ body: result });

@@ -33,6 +33,7 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToIncludeInAAD?: ReadonlySet<string>;
+  readonly enforceRandomId?: boolean;
 }
 
 /**
@@ -150,6 +151,11 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
+  }
+
+  public shouldEnforceRandomId(type: string) {
+    const typeDefinition = this.typeDefinitions.get(type);
+    return typeDefinition?.enforceRandomId ?? true;
   }
 
   /**
