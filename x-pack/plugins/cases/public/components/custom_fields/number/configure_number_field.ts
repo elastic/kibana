@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CustomFieldFactory } from '../types';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
+import type { CaseCustomFieldNumber } from '../../../../common/types/domain';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import * as i18n from '../translations';
@@ -15,9 +15,9 @@ import { View } from './view';
 import { Configure } from './configure';
 import { Create } from './create';
 
-export const configureTextCustomFieldFactory: CustomFieldFactory<CaseCustomFieldText> = () => ({
-  id: CustomFieldTypes.TEXT,
-  label: i18n.TEXT_LABEL,
+export const configureNumberCustomFieldFactory: CustomFieldFactory<CaseCustomFieldNumber> = () => ({
+  id: CustomFieldTypes.NUMBER,
+  label: i18n.NUMBER_LABEL,
   getEuiTableColumn,
   build: () => ({
     Configure,
@@ -25,6 +25,4 @@ export const configureTextCustomFieldFactory: CustomFieldFactory<CaseCustomField
     View,
     Create,
   }),
-  convertNullToEmpty: (value: string | number | boolean | null) =>
-    value == null ? '' : String(value),
 });
