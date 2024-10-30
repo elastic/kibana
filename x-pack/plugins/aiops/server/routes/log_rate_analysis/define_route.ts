@@ -38,6 +38,12 @@ export const defineRoute = (
     .addVersion(
       {
         version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             body: aiopsLogRateAnalysisSchemaV2,
@@ -49,6 +55,12 @@ export const defineRoute = (
     .addVersion(
       {
         version: '3',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             body: aiopsLogRateAnalysisSchemaV3,

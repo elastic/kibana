@@ -43,6 +43,12 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .addVersion<TransformIdParamSchema, DataViewCreateQuerySchema, PutTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: transformIdParamSchema,

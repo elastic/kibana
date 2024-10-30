@@ -35,6 +35,12 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .addVersion<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: transformIdParamSchema,
