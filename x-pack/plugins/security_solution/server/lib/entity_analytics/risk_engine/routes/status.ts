@@ -20,8 +20,10 @@ export const riskEngineStatusRoute = (
     .get({
       access: 'internal',
       path: RISK_ENGINE_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
