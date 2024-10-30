@@ -117,16 +117,6 @@ describe('AddFile', () => {
     expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
   });
 
-  it('AddFile is not rendered if user has no update permission', async () => {
-    appMockRender = createAppMockRenderer({
-      permissions: buildCasesPermissions({ update: false }),
-    });
-
-    appMockRender.render(<AddFile caseId={'foobar'} />);
-
-    expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
-  });
-
   it('clicking button renders modal', async () => {
     appMockRender.render(<AddFile caseId={'foobar'} />);
 

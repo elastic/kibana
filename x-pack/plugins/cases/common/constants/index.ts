@@ -193,6 +193,8 @@ export const BULK_GET_USER_PROFILES_API_TAG = 'bulkGetUserProfiles';
  */
 export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 
+export const CREATE_COMMENT_API_TAG = 'casesCreateComment';
+
 /**
  * User profiles
  */

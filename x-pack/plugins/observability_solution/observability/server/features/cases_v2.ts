@@ -125,6 +125,7 @@ export const getCasesFeatureV2 = (
           groupType: 'independent',
           privileges: [
             {
+              api: casesApiTags.createComment,
               id: 'create_comment',
               name: i18n.translate(
                 'xpack.observability.featureRegistry.addCommentsSubFeatureDetails',

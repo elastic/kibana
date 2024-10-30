@@ -144,7 +144,7 @@ export const getV2 = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                api: apiTags.all,
+                api: apiTags.createComment,
                 id: CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
                 name: i18n.translate('xpack.cases.features.addCommentsSubFeatureDetails', {
                   defaultMessage: 'Add comments to cases',

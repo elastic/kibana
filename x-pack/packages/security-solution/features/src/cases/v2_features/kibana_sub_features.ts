@@ -111,7 +111,7 @@ export const getCasesSubFeaturesMapV2 = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.all,
+            api: apiTags.createComment,
             id: 'create_comment',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureDetails',
