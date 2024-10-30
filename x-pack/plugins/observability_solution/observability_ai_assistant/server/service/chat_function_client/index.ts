@@ -56,7 +56,7 @@ export class ChatFunctionClient {
       this.registerFunction(
         {
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
-          description: dedent('Get data that is on the screen'),
+          description: 'Retrieve the structured data of content currently visible on the user’s screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.',
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
