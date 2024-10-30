@@ -42,18 +42,14 @@ describe('index', () => {
         proxyRejectUnauthorizedCertificates: false,
       });
       expect(changedPaths.unset).toStrictEqual([
-        'xpack.actions.customHostSettings.ssl.rejectUnauthorized',
         'xpack.actions.rejectUnauthorized',
         'xpack.actions.proxyRejectUnauthorizedCertificates',
       ]);
-      expect(messages.length).toBe(3);
+      expect(messages.length).toBe(2);
       expect(messages[0]).toBe(
-        '"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" instead, with the setting "verificationMode:full" eql to "rejectUnauthorized:true", and "verificationMode:none" eql to "rejectUnauthorized:false".'
-      );
-      expect(messages[1]).toBe(
         '"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.ssl.verificationMode" instead, with the setting "verificationMode:full" eql to "rejectUnauthorized:true", and "verificationMode:none" eql to "rejectUnauthorized:false".'
       );
-      expect(messages[2]).toBe(
+      expect(messages[1]).toBe(
         '"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.ssl.proxyVerificationMode" instead, with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".'
       );
     });
