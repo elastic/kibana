@@ -428,13 +428,13 @@ export function mlApiProvider(httpService: HttpService) {
         })
       ).then((responses) => {
         // Merge responses
-        return responses.reduce(
+        return responses.reduce<estypes.MlGetOverallBucketsResponse>(
           (acc, response) => {
             acc.count += response.count;
             acc.overall_buckets.push(...response.overall_buckets);
             return acc;
           },
-          { count: 0, overall_buckets: [] } as estypes.MlGetOverallBucketsResponse
+          { count: 0, overall_buckets: [] }
         );
       });
     },
