@@ -78,7 +78,7 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   it('should render notes section if experimental flag is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
 
     const { getByTestId } = renderHeader(mockContextValue);
     expect(getByTestId(NOTES_TITLE_TEST_ID)).toBeInTheDocument();
