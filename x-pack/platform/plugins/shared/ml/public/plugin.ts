@@ -18,7 +18,7 @@ import type {
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -65,10 +65,9 @@ import {
   type NLPSettings,
 } from '@kbn/ml-common-constants/app';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
-import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import type { MlLocatorParams } from './locator/ml_locator';
-import { MlLocatorDefinition, type MlLocator } from './locator/ml_locator';
+import { getElasticModels } from './application/services/get_elastic_models';
+import { getMlLocator } from './locator/get_ml_locator';
 import { isFullLicense } from '../common/license/is_full_license';
 import { isMlEnabled } from '../common/license/is_ml_enabled';
 import type { ElasticModels } from './application/services/elastic_models_service';
@@ -129,9 +128,8 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  private locator: undefined | MlLocator;
-
-  private managementLocator: undefined | MlManagementLocatorInternal;
+  private getLocator: undefined | (() => ReturnType<typeof getMlLocator>);
+  private getManagementLocator: undefined | (() => ReturnType<typeof getManagementLocator>);
 
   private sharedMlServices: MlSharedServices | undefined;
 
@@ -159,8 +157,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     core: MlCoreSetup,
     pluginsSetup: MlSetupDependencies
   ): {
-    locator?: LocatorPublic<MlLocatorParams>;
-    managementLocator?: MlManagementLocatorInternal;
+    getLocator?: () => ReturnType<typeof getMlLocator>;
+    getManagementLocator?: () => ReturnType<typeof getManagementLocator>;
     elasticModels?: ElasticModels;
   } {
     this.sharedMlServices = getMlSharedServices(core.http);
@@ -226,8 +224,21 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     if (pluginsSetup.share) {
-      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
-      this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
+      this.getLocator = async () => await getMlLocator(pluginsSetup.share);
+      this.getManagementLocator = async () =>
+        await new MlManagementLocatorInternal(pluginsSetup.share);
+    }
+
+    if (pluginsSetup.management) {
+      registerManagementSection(
+        pluginsSetup.management,
+        core,
+        {
+          usageCollection: pluginsSetup.usageCollection,
+        },
+        this.isServerless,
+        this.enabledFeatures
+      ).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -327,9 +338,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       .subscribe();
 
     return {
-      locator: this.locator,
-      managementLocator: this.managementLocator,
-      elasticModels: this.sharedMlServices.elasticModels,
+      getLocator: this.getLocator,
+      getManagementLocator: this.getManagementLocator,
+      elasticModels: getElasticModels(core.http),
     };
   }
 
@@ -337,17 +348,18 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     core: CoreStart,
     deps: MlStartDependencies
   ): {
+    getLocator?: () => ReturnType<typeof getMlLocator>;
     locator?: LocatorPublic<MlLocatorParams>;
-    managementLocator?: MlManagementLocatorInternal;
+    getManagementLocator?: () => ReturnType<typeof getManagementLocator>;
     elasticModels?: ElasticModels;
-    mlApi?: MlApi;
+    getMlApi: () => Promise<MlApi>;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
-      locator: this.locator,
-      managementLocator: this.managementLocator,
-      elasticModels: this.sharedMlServices?.elasticModels,
-      mlApi: this.sharedMlServices?.mlApi,
+      getLocator: this.getLocator,
+      elasticModels: getElasticModels(core.http),
+      getMlApi: async () => await getMlSharedServices(core.http),
+      getManagementLocator: this.getManagementLocator,
       components: {
         AnomalySwimLane,
       },
