@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   GraphRequest,
   GraphResponse,
@@ -30,6 +30,16 @@ export interface UseFetchGraphDataParams {
      * Defaults to true.
      */
     enabled?: boolean;
+    /**
+     * If true, the query will refetch on window focus.
+     * Defaults to true.
+     */
+    refetchOnWindowFocus?: boolean;
+    /**
+     * If true, the query will keep previous data till new data received.
+     * Defaults to false.
+     */
+    keepPreviousData?: boolean;
   };
 }
 
@@ -42,6 +52,10 @@ export interface UseFetchGraphDataResult {
    */
   isLoading: boolean;
   /**
+   * Indicates if the query is currently fetching.
+   */
+  isFetching: boolean;
+  /**
    * Indicates if there was an error during the query.
    */
   isError: boolean;
@@ -49,6 +63,10 @@ export interface UseFetchGraphDataResult {
    * The data returned from the query.
    */
   data?: GraphResponse;
+  /**
+   * Function to manually refresh the query.
+   */
+  refresh: () => void;
 }
 
 /**
@@ -61,23 +79,33 @@ export const useFetchGraphData = ({
   req,
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
+  const queryClient = useQueryClient();
   const { actorIds, eventIds, start, end } = req.query;
   const http = useHttp();
+  const QUERY_KEY = ['useFetchGraphData', actorIds, eventIds, start, end];
 
-  const { isLoading, isError, data } = useQuery<GraphResponse>(
-    ['useFetchGraphData', actorIds, eventIds, start, end],
+  const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(
+    QUERY_KEY,
     () => {
       return http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
         version: '1',
         body: JSON.stringify(req),
       });
     },
-    options
+    {
+      enabled: options?.enabled ?? true,
+      refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
+      keepPreviousData: options?.keepPreviousData ?? false,
+    }
   );
 
   return {
     isLoading,
+    isFetching,
     isError,
     data,
+    refresh: () => {
+      queryClient.invalidateQueries(QUERY_KEY);
+    },
   };
 };

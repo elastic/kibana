@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+import { GraphPopover } from '@kbn/cloud-security-posture-graph';
+import { EuiHorizontalRule, EuiListGroup, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ExpandPopoverListItem } from '@kbn/cloud-security-posture-graph/src/components/styles';
+import { css } from '@emotion/react';
+
+interface GraphNodeExpandPopoverProps {
+  isOpen: boolean;
+  anchorElement: HTMLElement | null;
+  closePopover: () => void;
+  onExploreRelatedEntitiesClick?: () => void;
+  onShowActionsByEntityClick?: () => void;
+  onShowActionsOnEntityClick?: () => void;
+  onViewEntityDetailsClick?: () => void;
+}
+
+export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = memo(
+  ({
+    isOpen,
+    anchorElement,
+    closePopover,
+    onExploreRelatedEntitiesClick,
+    onShowActionsByEntityClick,
+    onShowActionsOnEntityClick,
+    onViewEntityDetailsClick,
+  }) => {
+    const { euiTheme } = useEuiTheme();
+
+    return (
+      <GraphPopover
+        panelPaddingSize="s"
+        panelProps={{
+          css: css`
+            .euiPopover__arrow:before {
+              border-inline-end-color: ${euiTheme.colors?.body};
+            }
+            background-color: ${euiTheme.colors?.body};
+          `,
+        }}
+        anchorPosition="rightCenter"
+        isOpen={isOpen}
+        anchorElement={anchorElement}
+        closePopover={closePopover}
+      >
+        <EuiListGroup gutterSize="none" bordered={false} flush={true}>
+          {onExploreRelatedEntitiesClick && (
+            <ExpandPopoverListItem
+              iconType="visTagCloud"
+              label={i18n.translate(
+                'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.exploreRelatedEntities',
+                { defaultMessage: 'Explore related entities' }
+              )}
+              onClick={onExploreRelatedEntitiesClick}
+            />
+          )}
+          {onShowActionsByEntityClick && (
+            <ExpandPopoverListItem
+              iconType="users"
+              label={i18n.translate(
+                'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsByEntity',
+                { defaultMessage: 'Show actions by this entity' }
+              )}
+              onClick={onShowActionsByEntityClick}
+            />
+          )}
+          {onShowActionsOnEntityClick && (
+            <ExpandPopoverListItem
+              iconType="storage"
+              label={i18n.translate(
+                'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsOnEntity',
+                { defaultMessage: 'Show actions on this entity' }
+              )}
+              onClick={onShowActionsOnEntityClick}
+            />
+          )}
+          {onViewEntityDetailsClick && (
+            <>
+              <EuiHorizontalRule margin="xs" />
+              <ExpandPopoverListItem
+                iconType="expand"
+                label={i18n.translate(
+                  'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.viewEntityDetails',
+                  { defaultMessage: 'View entity details' }
+                )}
+                onClick={onViewEntityDetailsClick}
+              />
+            </>
+          )}
+        </EuiListGroup>
+      </GraphPopover>
+    );
+  }
+);
+
+GraphNodeExpandPopover.displayName = 'GraphNodeExpandPopover';
