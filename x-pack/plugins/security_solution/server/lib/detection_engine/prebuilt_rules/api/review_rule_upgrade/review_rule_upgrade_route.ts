@@ -35,8 +35,12 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
     .post({
       access: 'internal',
       path: REVIEW_RULE_UPGRADE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
