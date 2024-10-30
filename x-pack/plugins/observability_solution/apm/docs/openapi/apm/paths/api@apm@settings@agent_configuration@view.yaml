@@ -8,13 +8,11 @@ get:
     - name: name
       in: query
       description: Service name
-      required: true
       schema:
         type: string
     - name: environment
       in: query
       description: Service environment
-      required: true
       schema:
         type: string
   responses:
@@ -30,6 +28,12 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
     '404':
       description: Not found response
       content:

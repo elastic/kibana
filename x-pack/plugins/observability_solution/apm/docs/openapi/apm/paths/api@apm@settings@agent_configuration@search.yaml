@@ -27,6 +27,12 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
     '404':
       description: Not found response
       content:

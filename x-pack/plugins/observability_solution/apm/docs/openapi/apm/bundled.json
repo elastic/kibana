@@ -40,7 +40,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -70,6 +70,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
                 }
               }
             }
@@ -146,6 +176,26 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
           }
         }
       }
@@ -163,7 +213,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
             "name": "serviceName",
@@ -205,6 +255,36 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
           }
         }
       }
@@ -243,6 +323,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -266,7 +356,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -300,6 +390,26 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -323,7 +433,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
             "name": "overwrite",
@@ -365,6 +475,26 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -393,7 +523,6 @@
             "name": "name",
             "in": "query",
             "description": "Service name",
-            "required": true,
             "schema": {
               "type": "string"
             }
@@ -402,7 +531,6 @@
             "name": "environment",
             "in": "query",
             "description": "Service environment",
-            "required": true,
             "schema": {
               "type": "string"
             }
@@ -425,6 +553,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
                 }
               }
             }
@@ -455,7 +593,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -485,6 +623,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
                 }
               }
             }
@@ -543,6 +691,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -595,6 +753,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
                 }
               }
             }
@@ -660,6 +828,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error response",
             "content": {
@@ -694,7 +872,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -724,6 +902,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
                 }
               }
             }
@@ -764,7 +962,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
             "name": "id",
@@ -792,6 +990,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
                 }
               }
             }
@@ -831,7 +1049,7 @@
             "$ref": "#/components/parameters/elastic_api_version"
           },
           {
-            "$ref": "#/components/parameters/kbn-xsrf"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -876,6 +1094,26 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -905,7 +1143,7 @@
           "type": "string"
         }
       },
-      "kbn-xsrf": {
+      "kbn_xsrf": {
         "description": "A required header to protect against CSRF attacks",
         "in": "header",
         "name": "kbn-xsrf",
@@ -919,6 +1157,10 @@
     "schemas": {
       "agent_keys_object": {
         "type": "object",
+        "required": [
+          "name",
+          "privileges"
+        ],
         "properties": {
           "name": {
             "type": "string"
@@ -938,21 +1180,23 @@
       "agent_keys_response": {
         "type": "object",
         "properties": {
-          "api_key": {
-            "type": "string"
-          },
-          "expiration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "encoded": {
-            "type": "string"
+          "agentKey": {
+            "type": "object",
+            "properties": {
+              "expiration": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "encoded": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -970,6 +1214,54 @@
           "message": {
             "type": "string",
             "example": "Not Found"
+          }
+        }
+      },
+      "401_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 401
+          },
+          "error": {
+            "type": "string",
+            "example": "Unauthorized"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "403_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 403
+          },
+          "error": {
+            "type": "string",
+            "example": "Forbidden"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "500_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 500
+          },
+          "error": {
+            "type": "string",
+            "example": "Internal Server Error"
+          },
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -1082,6 +1374,23 @@
           }
         }
       },
+      "404_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 404
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Found"
+          }
+        }
+      },
       "service_object": {
         "type": "object",
         "properties": {
@@ -1136,23 +1445,6 @@
             "items": {
               "$ref": "#/components/schemas/agent_configuration_object"
             }
-          }
-        }
-      },
-      "404_response": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "number",
-            "example": 404
-          },
-          "error": {
-            "type": "string",
-            "example": "Not Found"
-          },
-          "message": {
-            "type": "string",
-            "example": "Not Found"
           }
         }
       },
@@ -1353,22 +1645,6 @@
                 }
               ]
             }
-          }
-        }
-      },
-      "500_response": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "number",
-            "example": 500
-          },
-          "error": {
-            "type": "string",
-            "example": "Internal Server Error"
-          },
-          "message": {
-            "type": "string"
           }
         }
       },

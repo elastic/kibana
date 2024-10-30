@@ -27,6 +27,12 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
     '500':
       description: Internal Server Error response
       content:
@@ -67,6 +73,18 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
     '500':
       description: Internal Server Error response
       content:

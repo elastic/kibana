@@ -1,0 +1,10 @@
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 403
+  error:
+    type: string
+    example: Forbidden
+  message:
+    type: string

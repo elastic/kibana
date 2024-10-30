@@ -26,7 +26,7 @@ paths:
         - APM agent keys
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -46,6 +46,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '500':
+          description: Internal Server Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500_response'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       summary: Search for annotations
@@ -92,6 +110,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '500':
+          description: Internal Server Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500_response'
   /api/apm/services/{serviceName}/annotation:
     post:
       summary: Create a service annotation
@@ -101,7 +131,7 @@ paths:
         - APM annotations
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
         - name: serviceName
           in: path
           required: true
@@ -127,6 +157,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /api/apm/settings/agent-configuration:
     get:
       summary: List of agent configurations
@@ -149,6 +197,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Not found response
           content:
@@ -162,7 +216,7 @@ paths:
         - APM agent configuration
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -182,6 +236,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -195,7 +261,7 @@ paths:
         - APM agent configuration
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
         - name: overwrite
           in: query
           schema:
@@ -220,6 +286,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -237,13 +315,11 @@ paths:
         - name: name
           in: query
           description: Service name
-          required: true
           schema:
             type: string
         - name: environment
           in: query
           description: Service environment
-          required: true
           schema:
             type: string
       responses:
@@ -259,6 +335,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Not found response
           content:
@@ -275,7 +357,7 @@ paths:
         - APM agent configuration
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -295,6 +377,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Not found response
           content:
@@ -327,6 +415,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Not found response
           content:
@@ -361,6 +455,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
         '404':
           description: Not found response
           content:
@@ -397,6 +497,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
         '500':
           description: Internal Server Error response
           content:
@@ -417,7 +523,7 @@ paths:
         - APM sourcemaps
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -437,6 +543,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '500':
           description: Internal Server Error response
           content:
@@ -458,7 +576,7 @@ paths:
         - APM sourcemaps
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
         - name: id
           in: path
           schema:
@@ -477,6 +595,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '500':
           description: Internal Server Error response
           content:
@@ -497,7 +627,7 @@ paths:
         - APM server schema
       parameters:
         - $ref: '#/components/parameters/elastic_api_version'
-        - $ref: '#/components/parameters/kbn-xsrf'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -525,6 +655,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -543,7 +685,7 @@ components:
         enum:
           - '2023-10-31'
         type: string
-    kbn-xsrf:
+    kbn_xsrf:
       description: A required header to protect against CSRF attacks
       in: header
       name: kbn-xsrf
@@ -554,6 +696,9 @@ components:
   schemas:
     agent_keys_object:
       type: object
+      required:
+        - name
+        - privileges
       properties:
         name:
           type: string
@@ -567,17 +712,18 @@ components:
     agent_keys_response:
       type: object
       properties:
-        api_key:
-          type: string
-        expiration:
-          type: integer
-          format: int64
-        id:
-          type: string
-        name:
-          type: string
-        encoded:
-          type: string
+        agentKey:
+          type: object
+          properties:
+            expiration:
+              type: integer
+              format: int64
+            id:
+              type: string
+            name:
+              type: string
+            encoded:
+              type: string
     400_response:
       type: object
       properties:
@@ -590,6 +736,39 @@ components:
         message:
           type: string
           example: Not Found
+    401_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+    403_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 403
+        error:
+          type: string
+          example: Forbidden
+        message:
+          type: string
+    500_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 500
+        error:
+          type: string
+          example: Internal Server Error
+        message:
+          type: string
     annotation_search_response:
       type: object
       properties:
@@ -660,6 +839,18 @@ components:
                   type: string
             '@timestamp':
               type: string
+    404_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Not Found
     service_object:
       type: object
       properties:
@@ -698,18 +889,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/agent_configuration_object'
-    404_response:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          example: 404
-        error:
-          type: string
-          example: Not Found
-        message:
-          type: string
-          example: Not Found
     agent_configuration_intake_object:
       type: object
       required:
@@ -837,17 +1016,6 @@ components:
                       sourceRoot:
                         type: string
               - $ref: '#/components/schemas/base_source_map_object'
-    500_response:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          example: 500
-        error:
-          type: string
-          example: Internal Server Error
-        message:
-          type: string
     501_response:
       type: object
       properties:
