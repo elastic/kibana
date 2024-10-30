@@ -68,7 +68,7 @@ import {
   buildFieldsDefinitions,
   buildPoliciesDefinitions,
   buildSourcesDefinitions,
-  buildNewVarDefinition,
+  getNewVariableSuggestion,
   buildNoPoliciesAvailableDefinition,
   getFunctionSuggestions,
   buildMatchingFieldsDefinition,
@@ -471,8 +471,12 @@ async function getSuggestionsWithinCommand(
   const references = { fields: fieldsMap, variables: anyVariables };
   if (commandDef.suggest) {
     // The new path.
-    return commandDef.suggest(innerText, command, getColumnsByType, (col: string) =>
-      Boolean(getColumnByName(col, references))
+    return commandDef.suggest(
+      innerText,
+      command,
+      getColumnsByType,
+      (col: string) => Boolean(getColumnByName(col, references)),
+      () => findNewVariable(anyVariables)
     );
   } else {
     // The deprecated path.
@@ -631,7 +635,7 @@ async function getExpressionSuggestionsByType(
           // ... | STATS ..., <suggest>
           // ... | EVAL <suggest>
           // ... | EVAL ..., <suggest>
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
+          suggestions.push(getNewVariableSuggestion(findNewVariable(anyVariables)));
         }
       }
     }
@@ -1575,7 +1579,7 @@ async function getOptionArgsSuggestions(
         );
 
         if (isNewExpression || noCaseCompare(findPreviousWord(innerText), 'WITH')) {
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
+          suggestions.push(getNewVariableSuggestion(findNewVariable(anyEnhancedVariables)));
         }
 
         // make sure to remove the marker arg from the assign fn
@@ -1814,7 +1818,7 @@ async function getOptionArgsSuggestions(
         }
 
         if (command.name === 'stats' && isNewExpression && canHaveAssignment) {
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
+          suggestions.push(getNewVariableSuggestion(findNewVariable(anyVariables)));
         }
       }
     }

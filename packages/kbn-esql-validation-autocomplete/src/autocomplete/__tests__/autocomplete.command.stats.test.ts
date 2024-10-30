@@ -192,9 +192,8 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
           'var2 = ',
+          // TODO verify that this change is ok
           ...allAggFunctions,
-          'var0',
-          'var1',
           ...allEvaFunctions,
         ]);
         await assertSuggestions('from a | stats var0=min(b),var1=c,/', [

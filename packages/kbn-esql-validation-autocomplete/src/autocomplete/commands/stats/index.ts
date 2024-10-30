@@ -9,7 +9,11 @@
 
 import type { ESQLCommand } from '@kbn/esql-ast';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND, getFunctionSuggestions } from '../../factories';
+import {
+  TRIGGER_SUGGESTION_COMMAND,
+  getNewVariableSuggestion,
+  getFunctionSuggestions,
+} from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
 import { byCompleteItem, getDateHistogramCompleteItem, getPosition } from './util';
@@ -18,13 +22,17 @@ export async function suggest(
   innerText: string,
   command: ESQLCommand<'stats'>,
   getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean
+  _columnExists: (column: string) => boolean,
+  getSuggestedVariableName: () => string
 ): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
   switch (pos) {
     case 'expression':
-      return getFunctionSuggestions({ command: 'stats' });
+      return [
+        ...getFunctionSuggestions({ command: 'stats' }),
+        getNewVariableSuggestion(getSuggestedVariableName()),
+      ];
 
     case 'expression_complete':
       return [
@@ -42,6 +50,7 @@ export async function suggest(
         ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
         getDateHistogramCompleteItem(),
         ...columnSuggestions,
+        getNewVariableSuggestion(getSuggestedVariableName()),
       ];
 
     case 'grouping_expression_complete':

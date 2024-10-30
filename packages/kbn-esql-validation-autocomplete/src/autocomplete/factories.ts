@@ -267,7 +267,7 @@ export const buildValueDefinitions = (
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
-export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
+export const getNewVariableSuggestion = (label: string): SuggestionRawDefinition => {
   return {
     label,
     text: `${label} = `,
