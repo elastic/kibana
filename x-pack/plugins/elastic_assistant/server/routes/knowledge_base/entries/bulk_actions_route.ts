@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { AuthenticatedUser, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -179,8 +179,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             v2KnowledgeBaseEnabled: true,
           });
           const spaceId = ctx.elasticAssistant.getSpaceId();
-          // Authenticated user null check completed in `performChecks()` above
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
+          const authenticatedUser = checkResponse.currentUser;
           const userFilter = getKBUserFilter(authenticatedUser);
           const manageGlobalKnowledgeBaseAIAssistant =
             kbDataClient?.options.manageGlobalKnowledgeBaseAIAssistant;

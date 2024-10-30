@@ -28,6 +28,7 @@ import {
   getPluginNameFromRequest,
   getSystemPromptFromUserConversation,
   langChainExecute,
+  performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 
@@ -66,12 +67,17 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         try {
-          const authenticatedUser = assistantContext.getCurrentUser();
-          if (authenticatedUser == null) {
-            return response.unauthorized({
-              body: `Authenticated user not found`,
-            });
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
+
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
             latestReplacements = { ...latestReplacements, ...newReplacements };
