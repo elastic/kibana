@@ -5626,63 +5626,6 @@
         ]
       }
     },
-    "/api/fleet/agent-status": {
-      "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "policyId",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "policyIds",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "kuery",
-            "required": false,
-            "schema": {
-              "deprecated": true,
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
     "/api/fleet/agent_download_sources": {
       "get": {
         "description": "List agent binary download sources",
@@ -16602,7 +16545,7 @@
     "/api/fleet/agents/{agentId}/reassign": {
       "post": {
         "description": "Reassign agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#1",
+        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -16695,62 +16638,6 @@
         "tags": [
           "Elastic Agent actions"
         ]
-      },
-      "put": {
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "agentId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
       }
     },
     "/api/fleet/agents/{agentId}/request_diagnostics": {
@@ -39677,39 +39564,6 @@
         "tags": [
           "Fleet proxies"
         ]
-      }
-    },
-    "/api/fleet/service-tokens": {
-      "post": {
-        "description": "Create a service token",
-        "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
       }
     },
     "/api/fleet/service_tokens": {
