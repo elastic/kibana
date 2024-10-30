@@ -212,8 +212,8 @@ Dashboards and visualizations::
 Data ingestion and Fleet::
 * Update max supported package version ({kibana-pull}196551[#196551]).
 * Adds additional columns to Agent Logs UI ({kibana-pull}192262[#192262]).
-* Allow +build agent upgrade versions ({kibana-pull}192171[#192171]).
-* Added format parameter to agent_policies APIs ({kibana-pull}191811[#191811]).
+* Show `+build` versions for Elastic Agent upgrades ({kibana-pull}192171[#192171]).
+* Added format parameter to `agent_policies` APIs ({kibana-pull}191811[#191811]).
 * Adds toggles for `agent.monitoring.http.enabled` and `agent.monitoring.http.buffer.enabled` to agent policy advanced settings ({kibana-pull}190984[#190984]).
 * Support integration policies without agent policy references (aka orphaned integration policies) ({kibana-pull}190649[#190649]).
 * Change UX of edit integration policy agent policies ({kibana-pull}190583[#190583]).
@@ -353,8 +353,8 @@ Dashboards and visualizations::
 * Removes unnecessary index pattern references from Lens charts ({kibana-pull}190296[#190296]).
 * Fixes several accessibility issues ({kibana-pull}188624[#188624]).
 Data ingestion and Fleet::
-* Revert " Fix client-side validation for agent policy timeout fields " ({kibana-pull}194338[#194338]).
-* Adds proxy args to install snippets ({kibana-pull}193922[#193922]).
+* Revert "Fix client-side validation for agent policy timeout fields" ({kibana-pull}194338[#194338]).
+* Adds proxy arguments to install snippets ({kibana-pull}193922[#193922]).
 * Rollover if dimension mappings changed in dynamic templates ({kibana-pull}192098[#192098]).
 Discover::
 * Fixes an issue with search highlighting ({kibana-pull}197607[#197607]).
@@ -394,7 +394,7 @@ Elastic Observability solution::
 * Adds settings to serverless allowlist ({kibana-pull}190098[#190098]).
 * Set missing group to false by default and show checkbox value in disable mode ({kibana-pull}188402[#188402]).
 Elastic Search solution::
-* Fixes an issue with the https://www.elastic.co/guide/en/enterprise-search/current/connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected.
+* Fixes an issue with the {ref}/es-connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected.
 Elastic Security solution::
 For the Elastic Security 8.16.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
