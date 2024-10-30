@@ -21,8 +21,15 @@ import {
   MetricsExplorerLocatorParams,
   ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, from, of, switchMap } from 'rxjs';
-import { map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  from,
+  of,
+  switchMap,
+  map,
+} from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -132,7 +139,7 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndAccessibilityFlags$ = combineLatest([from(core.getStartServices())]).pipe(
+    const startDep$AndAccessibilityFlag$ = combineLatest([from(core.getStartServices())]).pipe(
       switchMap(([[{ application }]]) =>
         combineLatest([of(application), getLogsExplorerAccessibility$(application)])
       )
@@ -142,7 +149,7 @@ export class Plugin implements InfraClientPluginClass {
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndAccessibilityFlags$.pipe(
+      startDep$AndAccessibilityFlag$.pipe(
         map(([application, isLogsExplorerAccessible]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
@@ -314,7 +321,7 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-    startDep$AndAccessibilityFlags$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
+    startDep$AndAccessibilityFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
       this.appUpdater$.next(() => ({
         deepLinks: getInfraDeepLinks({
           metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
