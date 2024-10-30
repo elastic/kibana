@@ -21,7 +21,7 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
-    showInactive: boolean;
+    showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
   };
@@ -199,7 +199,6 @@ export interface PostBulkUpdateAgentTagsRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    kuery?: string;
     policyId?: string;
   };
 }
@@ -207,8 +206,6 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
-    // deprecated
-    total: number;
     online: number;
     error: number;
     offline: number;

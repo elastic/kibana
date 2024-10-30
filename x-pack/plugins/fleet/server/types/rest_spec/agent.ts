@@ -501,30 +501,12 @@ export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
     policyIds: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
-    kuery: schema.maybe(
-      schema.string({
-        validate: (value: string) => {
-          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
-          if (validationObj?.error) {
-            return validationObj?.error;
-          }
-        },
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
   }),
 };
 
 export const GetAgentStatusResponseSchema = schema.object({
   results: schema.object({
     events: schema.number(),
-    total: schema.number({
-      meta: {
-        deprecated: true,
-      },
-    }),
     online: schema.number(),
     error: schema.number(),
     offline: schema.number(),

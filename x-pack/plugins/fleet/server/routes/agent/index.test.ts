@@ -366,7 +366,6 @@ describe('schema validation', () => {
     const expectedResponse: GetAgentStatusResponse = {
       results: {
         events: 1,
-        total: 1,
         online: 1,
         error: 1,
         offline: 1,

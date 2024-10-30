@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { omit, uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -311,12 +311,12 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
       esClient,
       soClient,
       request.query.policyId,
-      request.query.kuery,
+      undefined,
       coreContext.savedObjects.client.getCurrentNamespace(),
       parsePolicyIds(request.query.policyIds)
     );
 
-    const body: GetAgentStatusResponse = { results };
+    const body: GetAgentStatusResponse = { results: omit(results, 'total') };
 
     return response.ok({ body });
   } catch (error) {
