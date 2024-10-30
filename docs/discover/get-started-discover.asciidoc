@@ -187,6 +187,19 @@ image:images/discover-compare-rows.png[Comparison view in Discover]
 . Exit the comparison view at any time using the **Exit comparison mode** button.
 
 [float]
+[[copy-row-content]]
+==== Copy rows as text or JSON
+
+You can quickly copy the content currently displayed in the table for one or several rows to your clipboard.
+
+. Select the rows you want to copy.
+
+. Open the **Selected** menu at the top of the table, and select **Copy selection as text** or **Copy documents as JSON**.
+
+The content is copied to your clipboard in the selected format.
+Fields that are not currently added to the table are ignored.
+
+[float]
 [[look-inside-a-document]]
 ==== Explore individual result or document details in depth
 
@@ -201,8 +214,11 @@ to show document details.
 [role="screenshot"]
 image:images/document-table-expanded.png[Table view with document expanded]
 
-. Scan through the fields and their values. If you find a field of interest,
-hover your mouse over the *Field* or *Value* columns for filters and additional options.
+. Scan through the fields and their values. You can filter the table in several ways:
+** If you find a field of interest,
+hover your mouse over the *Field* or *Value* columns for filters and additional options. 
+** Use the search above the table to filter for specific fields or values, or filter by field type using the options to the right of the search field.
+** You can pin some fields by clicking the left column to keep them displayed even if you filter the table.
 +
 TIP: You can restrict the fields listed in the detailed view to just the fields that you explicitly added to the **Discover** table, using the **Selected only** toggle. In ES|QL mode, you also have an option to hide fields with null values.
 
