@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './constants';
-export * as fieldConstants from './field_constants';
-export * from './hooks';
-export * from './utils';
-export * from './data_types';
+import type { AppMenuExtensionParams } from '../../../../../context_awareness/types';
 
-export * from './components/custom_control_columns';
-export { AppMenuRegistry } from './components/app_menu/app_menu_registry';
+export type AppMenuDiscoverParams = AppMenuExtensionParams;
