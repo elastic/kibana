@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('upgrade assistant', function () {
-    loadTestFile(require.resolve('./reindexing'));
-  });
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
+
+export function getKqlFieldsWithFallback(kuery: string): string[] {
+  try {
+    return getKqlFieldNamesFromExpression(kuery);
+  } catch (e) {
+    return [];
+  }
 }
