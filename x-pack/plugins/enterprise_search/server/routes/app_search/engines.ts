@@ -21,6 +21,12 @@ export function registerEnginesRoutes({
   router.get(
     {
       path: '/internal/app_search/engines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           type: schema.oneOf([schema.literal('indexed'), schema.literal('meta')]),
@@ -41,6 +47,12 @@ export function registerEnginesRoutes({
   router.post(
     {
       path: '/internal/app_search/engines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -58,6 +70,12 @@ export function registerEnginesRoutes({
   router.post(
     {
       path: '/internal/app_search/elasticsearch/engines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -78,6 +96,12 @@ export function registerEnginesRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -91,6 +115,12 @@ export function registerEnginesRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -104,6 +134,12 @@ export function registerEnginesRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/overview',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

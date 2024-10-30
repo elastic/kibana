@@ -16,6 +16,12 @@ export function registerSettingsRoutes({
   router.get(
     {
       path: '/internal/app_search/log_settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -26,6 +32,12 @@ export function registerSettingsRoutes({
   router.put(
     {
       path: '/internal/app_search/log_settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           api: schema.maybe(

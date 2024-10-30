@@ -13,6 +13,12 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
   router.get(
     {
       path: '/internal/serverless_search/api_keys',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -46,6 +52,12 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
   router.post(
     {
       path: '/internal/serverless_search/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.any(),
       },

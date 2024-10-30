@@ -14,6 +14,12 @@ export function registerOverviewRoute({
   router.get(
     {
       path: '/internal/workplace_search/overview',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({

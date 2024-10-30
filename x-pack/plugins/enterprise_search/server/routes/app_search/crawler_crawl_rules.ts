@@ -16,6 +16,12 @@ export function registerCrawlerCrawlRulesRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -39,6 +45,12 @@ export function registerCrawlerCrawlRulesRoutes({
   router.put(
     {
       path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -64,6 +76,12 @@ export function registerCrawlerCrawlRulesRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

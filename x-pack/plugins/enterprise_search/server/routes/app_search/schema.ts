@@ -17,6 +17,12 @@ export function registerSchemaRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/schema',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -45,6 +51,12 @@ export function registerSchemaRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/reindex_job/{reindexJobId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

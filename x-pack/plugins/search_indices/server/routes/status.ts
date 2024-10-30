@@ -15,6 +15,12 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: GET_STATUS_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',
@@ -35,6 +41,12 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: GET_USER_PRIVILEGES_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

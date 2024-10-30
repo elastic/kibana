@@ -16,6 +16,12 @@ export function registerGatedFormRoute({
   router.post(
     {
       path: '/internal/workplace_search/ws_gate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           ws_gate_data: schema.object({

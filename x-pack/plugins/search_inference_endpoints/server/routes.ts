@@ -17,6 +17,12 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
   router.get(
     {
       path: APIRoutes.GET_INFERENCE_ENDPOINTS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -38,6 +44,12 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
   router.delete(
     {
       path: APIRoutes.DELETE_INFERENCE_ENDPOINT,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

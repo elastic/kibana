@@ -16,6 +16,12 @@ export function registerOnboardingRoutes({
   router.post(
     {
       path: '/internal/app_search/onboarding_complete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           seed_sample_engine: schema.maybe(schema.boolean()),
