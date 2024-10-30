@@ -12,7 +12,7 @@ import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, allFunctions, getFunctionSuggestion } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
-import { byCompleteItem, dateHistogramCompleteItem, getPosition } from './util';
+import { byCompleteItem, getDateHistogramCompleteItem, getPosition } from './util';
 
 export async function suggest(
   innerText: string,
@@ -36,12 +36,15 @@ export async function suggest(
       ];
 
     case 'grouping_expression':
-      const columnSuggestions = pushItUpInTheList(await getColumnsByType('any'), true);
+      const columnSuggestions = pushItUpInTheList(
+        await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
+        true
+      );
       return [
         ...allFunctions()
           .filter((func) => func.supportedOptions?.includes('by'))
           .map(getFunctionSuggestion),
-        dateHistogramCompleteItem,
+        getDateHistogramCompleteItem(),
         ...columnSuggestions,
       ];
 

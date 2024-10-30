@@ -15,10 +15,8 @@ import {
   isOptionItem,
   noCaseCompare,
 } from '../../../shared/helpers';
-import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { SuggestionRawDefinition } from '../../types';
-
-// STATS <expression>
+import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
 /**
  * Position of the caret in the sort command:
@@ -71,7 +69,7 @@ export const byCompleteItem: SuggestionRawDefinition = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
-export const dateHistogramCompleteItem: SuggestionRawDefinition = {
+export const getDateHistogramCompleteItem: () => SuggestionRawDefinition = () => ({
   label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram', {
     defaultMessage: 'Add date histogram',
   }),
@@ -87,4 +85,4 @@ export const dateHistogramCompleteItem: SuggestionRawDefinition = {
   ),
   sortText: '1A',
   command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
