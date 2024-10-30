@@ -11,12 +11,10 @@ import { i18n } from '@kbn/i18n';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
-import {
-  apiHasExecutionContext,
-  initializeTimeRange,
-  initializeTitles,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { initializeTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/initialize_time_range';
+import { initializeTitles } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
