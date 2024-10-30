@@ -16,7 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const { getCodeOwnersForFile, getPathsWithOwnersReversed } = require('@kbn/code-owners');
 
-process.env.ROUTE_TYPE = 'unauthorized';
+process.env.ROUTE_TYPE = 'authorized';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
 console.log('DRY_RUN:', DRY_RUN);
@@ -238,7 +238,7 @@ function processChangesByOwners(ownerFilesMap) {
     for (const [owner] of Object.entries(ownerFilesMap)) {
       const rawOwner = owner.replaceAll(',', '_');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
-      const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
+      const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-${rawOwner}`;
 
       if (havePrs.includes(targetBranch)) {
         console.log(`PR already exists for ${targetBranch}. Skipping.`);
@@ -336,8 +336,12 @@ function runESLint() {
     // runCommand(
     //   `grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/ ./x-pack/packages/ | xargs env ${eslintRuleFlag} npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     // );
-    const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
-    // const directories = ['./x-pack/plugins/security_solution', './x-pack/plugins/spaces']; // For testing purposes
+    // const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
+    const directories = [
+      './x-pack/plugins/security_solution',
+      './x-pack/plugins/spaces',
+      './x-pack/plugins/security',
+    ]; // For testing purposes
 
     for (const directory of directories) {
       console.log(`Running ESLint autofix for ${directory}`);
