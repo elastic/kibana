@@ -70,7 +70,7 @@ import {
   buildSourcesDefinitions,
   buildNewVarDefinition,
   buildNoPoliciesAvailableDefinition,
-  getCompatibleFunctionDefinition,
+  getFunctionSuggestions,
   buildMatchingFieldsDefinition,
   getCompatibleLiterals,
   buildConstantsDefinitions,
@@ -1348,12 +1348,14 @@ async function getFunctionArgsSuggestions(
 
     // Functions
     suggestions.push(
-      ...getCompatibleFunctionDefinition(
-        command.name,
-        option?.name,
-        canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
-        fnToIgnore
-      ).map((suggestion) => ({
+      ...getFunctionSuggestions({
+        command: command.name,
+        option: option?.name,
+        returnTypes: canBeBooleanCondition
+          ? ['any']
+          : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+        ignored: fnToIgnore,
+      }).map((suggestion) => ({
         ...suggestion,
         text: addCommaIf(shouldAddComma, suggestion.text),
       }))

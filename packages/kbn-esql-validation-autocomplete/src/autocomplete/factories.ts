@@ -28,7 +28,7 @@ import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 
-export const allFunctions = memoize(
+const allFunctions = memoize(
   () =>
     aggregationFunctionDefinitions
       .concat(scalarFunctionDefinitions)
@@ -91,31 +91,49 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   };
 }
 
-export const getCompatibleFunctionDefinition = (
-  command: string,
-  option: string | undefined,
-  returnTypes?: string[],
-  ignored: string[] = []
-): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions()
-    .filter(
-      ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
-        (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-        !ignored.includes(name) &&
-        !ignoreAsSuggestion
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
-  if (!returnTypes) {
-    return fnSupportedByCommand.map(getFunctionSuggestion);
-  }
-  return fnSupportedByCommand
-    .filter((mathDefinition) =>
-      mathDefinition.signatures.some(
-        (signature) =>
-          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
-      )
-    )
-    .map(getFunctionSuggestion);
+/**
+ * Builds suggestions for functions based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for a function to be included in the suggestions
+ * @returns
+ */
+export const getFunctionSuggestions = (predicates?: {
+  command?: string;
+  option?: string | undefined;
+  returnTypes?: string[];
+  ignored?: string[];
+}): SuggestionRawDefinition[] => {
+  const functions = allFunctions();
+  const { command, option, returnTypes, ignored = [] } = predicates ?? {};
+  const filteredFunctions: FunctionDefinition[] = functions.filter(
+    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) => {
+      if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (ignored.includes(name)) {
+        return false;
+      }
+
+      if (option && !supportedOptions?.includes(option)) {
+        return false;
+      }
+
+      if (command && !supportedCommands.includes(command)) {
+        return false;
+      }
+
+      if (returnTypes && !returnTypes.includes('any')) {
+        return functions.some((fn) =>
+          fn.signatures.some((signature) => returnTypes.includes(signature.returnType as string))
+        );
+      }
+
+      return true;
+    }
+  );
+
+  return filteredFunctions.map(getFunctionSuggestion);
 };
 
 export function getSuggestionCommandDefinition(

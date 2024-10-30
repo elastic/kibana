@@ -9,7 +9,7 @@
 
 import type { ESQLCommand } from '@kbn/esql-ast';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND, allFunctions, getFunctionSuggestion } from '../../factories';
+import { TRIGGER_SUGGESTION_COMMAND, getFunctionSuggestions } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
 import { byCompleteItem, getDateHistogramCompleteItem, getPosition } from './util';
@@ -24,9 +24,7 @@ export async function suggest(
 
   switch (pos) {
     case 'expression':
-      return allFunctions()
-        .filter((func) => func.supportedCommands.includes('stats'))
-        .map(getFunctionSuggestion);
+      return getFunctionSuggestions({ command: 'stats' });
 
     case 'expression_complete':
       return [
@@ -41,9 +39,7 @@ export async function suggest(
         true
       );
       return [
-        ...allFunctions()
-          .filter((func) => func.supportedOptions?.includes('by'))
-          .map(getFunctionSuggestion),
+        ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
         getDateHistogramCompleteItem(),
         ...columnSuggestions,
       ];
