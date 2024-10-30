@@ -82,9 +82,7 @@ export class ChatFunctionClient {
       );
 
       this.registerAdhocInstruction({
-        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will ${dedent(`Get data that is on the screen:
-          ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
-        `)}`,
+        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user’s screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(allData.map((data) => `${data.name}: ${data.description}`).join('\n'))}`,
         instruction_type: 'application_instruction',
       });
     }
