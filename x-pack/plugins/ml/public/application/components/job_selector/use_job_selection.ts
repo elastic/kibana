@@ -29,13 +29,14 @@ function getInvalidJobIds(jobs: MlJobWithTimeRange[], ids: string[]) {
 const getJobIdsFromGroups = (jobIds: string[], jobs: MlJobWithTimeRange[]) => {
   const result = new Set<string>();
 
-  jobs.forEach((job) => {
-    if (jobIds.includes(job.job_id)) {
-      result.add(job.job_id);
-    }
+  jobIds.forEach((id) => {
+    const jobsInGroup = jobs.filter((job) => job.groups?.includes(id));
 
-    if (job.groups?.some((group) => jobIds.includes(group))) {
-      result.add(job.job_id);
+    if (jobsInGroup.length > 0) {
+      jobsInGroup.forEach((job) => result.add(job.job_id));
+    } else {
+      // If it's not a group ID, keep it (regardless of whether it's valid or not)
+      result.add(id);
     }
   });
 
