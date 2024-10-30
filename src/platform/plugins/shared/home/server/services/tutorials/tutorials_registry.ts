@@ -81,7 +81,16 @@ export class TutorialsRegistry {
 
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/kibana/home/tutorials', validate: false },
+      {
+        path: '/api/kibana/home/tutorials',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const initialContext = this.baseTutorialContext;
         const scopedContext = this.scopedTutorialContextFactories.reduce(

@@ -17,6 +17,12 @@ export const registerGetGuideStateRoute = (router: IRouter) => {
   router.get(
     {
       path: `${API_BASE_PATH}/guides`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {

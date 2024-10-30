@@ -12,6 +12,12 @@ export const registerGetTagRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/api/saved_objects_tagging/tags/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),

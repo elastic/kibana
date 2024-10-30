@@ -26,6 +26,12 @@ export function createUninstallRoute(
   router.delete(
     {
       path: '/api/sample_data/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({ id: schema.string() }),
       },

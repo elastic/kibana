@@ -12,6 +12,12 @@ export const registerInternalBulkDeleteRoute = (router: TagsPluginRouter) => {
   router.post(
     {
       path: '/internal/saved_objects_tagging/tags/_bulk_delete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
