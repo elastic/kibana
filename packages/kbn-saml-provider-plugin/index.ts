@@ -18,4 +18,4 @@ export const pluginMetadataPath = path.resolve(resourcesPath, 'metadata.xml');
 
 export const pluginPath = path.resolve(__dirname);
 
-export * from './saml_tools';
+export * from './helpers/saml_tools';
