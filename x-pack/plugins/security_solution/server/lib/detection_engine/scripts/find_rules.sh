@@ -12,5 +12,6 @@ set -e
 
 # Example: ./find_rules.sh
 curl -s -k \
+ -H 'elastic-api-version: 2023-10-31' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find | jq .
