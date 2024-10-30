@@ -115,25 +115,18 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
-        map(
-          ([
-            [
-              {
-                application,
-              },
-            ],
-            isInfrastructureHostsViewEnabled,
-          ]) => {
-            const { infrastructure, logs } = application.capabilities;
-            return [
-              ...(logs.show
-                ? [
-                    {
-                      label: 'Logs',
-                      sortKey: 200,
-                      entries: [
-                        ...(getLogsExplorerAccessibility$(application).subscribe((isAccessible) =>
-                          isAccessible ? [
+        map(([[{ application }], isInfrastructureHostsViewEnabled]) => {
+          const { infrastructure, logs } = application.capabilities;
+          return [
+            ...(logs.show
+              ? [
+                  {
+                    label: 'Logs',
+                    sortKey: 200,
+                    entries: [
+                      ...getLogsExplorerAccessibility$(application).subscribe((isAccessible) =>
+                        isAccessible
+                          ? [
                               {
                                 label: 'Explorer',
                                 app: 'observability-logs-explorer',
@@ -141,45 +134,45 @@ export class Plugin implements InfraClientPluginClass {
                                 isBetaFeature: true,
                               },
                             ]
-                          : [])),
-                        ...(this.config.featureFlags.logsUIEnabled
-                          ? [
-                              { label: 'Stream', app: 'logs', path: '/stream' },
-                              { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                              { label: 'Categories', app: 'logs', path: '/log-categories' },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ]
-                : []),
-              ...(infrastructure.show
-                ? [
-                    {
-                      label: 'Infrastructure',
-                      sortKey: 300,
-                      entries: [
-                        { label: 'Inventory', app: 'metrics', path: '/inventory' },
-                        ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
-                          : []),
-                        ...(isInfrastructureHostsViewEnabled
-                          ? [
-                              {
-                                label: 'Hosts',
-                                isBetaFeature: true,
-                                app: 'metrics',
-                                path: '/hosts',
-                              },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ]
-                : []),
-            ];
-          }
-        )
+                          : []
+                      ),
+                      ...(this.config.featureFlags.logsUIEnabled
+                        ? [
+                            { label: 'Stream', app: 'logs', path: '/stream' },
+                            { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+                            { label: 'Categories', app: 'logs', path: '/log-categories' },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+            ...(infrastructure.show
+              ? [
+                  {
+                    label: 'Infrastructure',
+                    sortKey: 300,
+                    entries: [
+                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                        : []),
+                      ...(isInfrastructureHostsViewEnabled
+                        ? [
+                            {
+                              label: 'Hosts',
+                              isBetaFeature: true,
+                              app: 'metrics',
+                              path: '/hosts',
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+          ];
+        })
       )
     );
 
