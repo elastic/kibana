@@ -11,14 +11,12 @@ import React from 'react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { Subscription, map } from 'rxjs';
-import { fetch$ } from '@kbn/presentation-publishing';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  apiHasExecutionContext,
-  initializeTimeRange,
-  initializeTitles,
-} from '@kbn/presentation-publishing';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { initializeTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/initialize_time_range';
+import { initializeTitles } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
