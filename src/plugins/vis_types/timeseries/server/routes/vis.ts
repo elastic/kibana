@@ -21,6 +21,12 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
   router.post<{}, {}, VisPayload>(
     {
       path: ROUTES.VIS_DATA,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: escapeHatch,
       },
