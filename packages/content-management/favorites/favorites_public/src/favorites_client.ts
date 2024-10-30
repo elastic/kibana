@@ -42,14 +42,14 @@ export class FavoritesClient implements FavoritesClientPublic {
   }: {
     id: string;
     metadata?: object;
-  }): Promise<GetFavoritesResponse> {
+  }): Promise<AddFavoriteResponse> {
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/favorite`,
       { body: metadata ? JSON.stringify(metadata) : undefined }
     );
   }
 
-  public async removeFavorite({ id }: { id: string }): Promise<GetFavoritesResponse> {
+  public async removeFavorite({ id }: { id: string }): Promise<RemoveFavoriteResponse> {
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/unfavorite`
     );
