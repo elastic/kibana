@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import { ProductDocBasePlugin } from './plugin';
 
@@ -51,7 +52,9 @@ describe('ProductDocBasePlugin', () => {
   describe('#start', () => {
     it('returns a contract with the expected shape', () => {
       plugin.setup(coreMock.createSetup(), {});
-      const startContract = plugin.start(coreMock.createStart(), {});
+      const startContract = plugin.start(coreMock.createStart(), {
+        licensing: licensingMock.createStart(),
+      });
       expect(startContract).toEqual({
         isInstalled: expect.any(Function),
         search: expect.any(Function),
