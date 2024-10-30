@@ -31,6 +31,8 @@ export interface Statuses {
   createDataView: boolean;
   createPipeline: boolean;
   permissionCheckStatus: IMPORT_STATUS;
+  initializeDeployment: boolean;
+  initializeDeploymentStatus: IMPORT_STATUS;
 }
 
 export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
@@ -45,6 +47,8 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     uploadStatus,
     createDataView,
     createPipeline,
+    initializeDeployment,
+    initializeDeploymentStatus,
   } = statuses;
 
   let statusInfo = null;
@@ -58,33 +62,48 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   ) {
     completedStep = 0;
   }
+
+  if (
+    readStatus === IMPORT_STATUS.COMPLETE &&
+    initializeDeployment === true &&
+    initializeDeploymentStatus === IMPORT_STATUS.INCOMPLETE
+  ) {
+    completedStep = 1;
+  }
+
   if (
     readStatus === IMPORT_STATUS.COMPLETE &&
     indexCreatedStatus === IMPORT_STATUS.INCOMPLETE &&
     ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE
   ) {
-    completedStep = 1;
+    completedStep = 2;
   }
   if (indexCreatedStatus === IMPORT_STATUS.COMPLETE) {
-    completedStep = 2;
+    completedStep = 3;
   }
   if (
     ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE ||
     (createPipeline === false && indexCreatedStatus === IMPORT_STATUS.COMPLETE)
   ) {
-    completedStep = 3;
-  }
-  if (uploadStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 4;
   }
-  if (dataViewCreatedStatus === IMPORT_STATUS.COMPLETE) {
+  if (uploadStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 5;
+  }
+  if (dataViewCreatedStatus === IMPORT_STATUS.COMPLETE) {
+    completedStep = 6;
   }
 
   let processFileTitle = i18n.translate(
     'xpack.dataVisualizer.file.importProgress.processFileTitle',
     {
       defaultMessage: 'Process file',
+    }
+  );
+  let initializeDeploymentTitle = i18n.translate(
+    'xpack.dataVisualizer.file.importProgress.createIndexTitle',
+    {
+      defaultMessage: 'Initialize deployment',
     }
   );
   let createIndexTitle = i18n.translate(
@@ -146,7 +165,31 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       </p>
     );
   }
-  if (completedStep >= 1) {
+  if (initializeDeployment) {
+    if (completedStep >= 1) {
+      processFileTitle = i18n.translate(
+        'xpack.dataVisualizer.file.importProgress.fileProcessedTitle',
+        {
+          defaultMessage: 'File processed',
+        }
+      );
+      initializeDeploymentTitle = i18n.translate(
+        'xpack.dataVisualizer.file.importProgress.creatingIndexTitle',
+        {
+          defaultMessage: 'Initializing deployment',
+        }
+      );
+      statusInfo = (
+        <p>
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.importProgress.processingImportedFileDescription"
+            defaultMessage="Initializing deployment"
+          />
+        </p>
+      );
+    }
+  }
+  if (completedStep >= 2) {
     processFileTitle = i18n.translate(
       'xpack.dataVisualizer.file.importProgress.fileProcessedTitle',
       {
@@ -162,7 +205,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     statusInfo =
       createPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
-  if (completedStep >= 2) {
+  if (completedStep >= 3) {
     createIndexTitle = i18n.translate(
       'xpack.dataVisualizer.file.importProgress.indexCreatedTitle',
       {
@@ -178,7 +221,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     statusInfo =
       createPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
-  if (completedStep >= 3) {
+  if (completedStep >= 4) {
     createIngestPipelineTitle = i18n.translate(
       'xpack.dataVisualizer.file.importProgress.ingestPipelineCreatedTitle',
       {
@@ -193,7 +236,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     );
     statusInfo = <UploadFunctionProgress progress={uploadProgress} />;
   }
-  if (completedStep >= 4) {
+  if (completedStep >= 5) {
     uploadingDataTitle = i18n.translate(
       'xpack.dataVisualizer.file.importProgress.dataUploadedTitle',
       {
@@ -219,7 +262,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       statusInfo = null;
     }
   }
-  if (completedStep >= 5) {
+  if (completedStep >= 6) {
     createDataViewTitle = i18n.translate(
       'xpack.dataVisualizer.file.importProgress.dataViewCreatedTitle',
       {
@@ -239,44 +282,58 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
         : 'selected') as EuiStepStatus,
       onClick: () => {},
     },
-    {
-      title: createIndexTitle,
-      status: (indexCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
-        ? indexCreatedStatus
-        : completedStep === 1 // Then show selected/incomplete states
-        ? 'selected'
-        : 'incomplete') as EuiStepStatus,
-      onClick: () => {},
-    },
-    {
-      title: uploadingDataTitle,
-      status: (uploadStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
-        ? uploadStatus
-        : completedStep === 3 // Then show selected/incomplete states
-        ? 'selected'
-        : 'incomplete') as EuiStepStatus,
-      onClick: () => {},
-    },
   ];
 
-  if (createPipeline === true) {
-    steps.splice(2, 0, {
-      title: createIngestPipelineTitle,
-      status: (ingestPipelineCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
-        ? ingestPipelineCreatedStatus
-        : completedStep === 2 // Then show selected/incomplete states
+  if (initializeDeployment === true) {
+    steps.push({
+      title: initializeDeploymentTitle,
+      status: (initializeDeploymentStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? initializeDeploymentStatus
+        : completedStep === 1 // Then show selected/incomplete states
         ? 'selected'
         : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     });
   }
+
+  steps.push({
+    title: createIndexTitle,
+    status: (indexCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+      ? indexCreatedStatus
+      : completedStep === 2 // Then show selected/incomplete states
+      ? 'selected'
+      : 'incomplete') as EuiStepStatus,
+    onClick: () => {},
+  });
+
+  if (createPipeline === true) {
+    steps.push({
+      title: createIngestPipelineTitle,
+      status: (ingestPipelineCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? ingestPipelineCreatedStatus
+        : completedStep === 3 // Then show selected/incomplete states
+        ? 'selected'
+        : 'incomplete') as EuiStepStatus,
+      onClick: () => {},
+    });
+  }
+
+  steps.push({
+    title: uploadingDataTitle,
+    status: (uploadStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+      ? uploadStatus
+      : completedStep === 4 // Then show selected/incomplete states
+      ? 'selected'
+      : 'incomplete') as EuiStepStatus,
+    onClick: () => {},
+  });
 
   if (createDataView === true) {
     steps.push({
       title: createDataViewTitle,
       status: (dataViewCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? dataViewCreatedStatus
-        : completedStep === 4 // Then show selected/incomplete states
+        : completedStep === 5 // Then show selected/incomplete states
         ? 'selected'
         : 'incomplete') as EuiStepStatus,
       onClick: () => {},
@@ -284,21 +341,21 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
 
   return (
-    <React.Fragment>
+    <>
       <EuiStepsHorizontal steps={steps} style={{ backgroundColor: 'transparent' }} />
       {statusInfo && (
-        <React.Fragment>
+        <>
           <EuiSpacer size="m" />
           {statusInfo}
-        </React.Fragment>
+        </>
       )}
-    </React.Fragment>
+    </>
   );
 };
 
 const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
   return (
-    <React.Fragment>
+    <>
       <p>
         <FormattedMessage
           id="xpack.dataVisualizer.file.importProgress.uploadingDataDescription"
@@ -306,11 +363,11 @@ const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
         />
       </p>
       {progress < 100 && (
-        <React.Fragment>
+        <>
           <EuiSpacer size="s" />
           <EuiProgress value={progress} max={100} color="primary" size="s" />
-        </React.Fragment>
+        </>
       )}
-    </React.Fragment>
+    </>
   );
 };
