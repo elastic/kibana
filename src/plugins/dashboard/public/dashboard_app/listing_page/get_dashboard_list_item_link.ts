@@ -39,6 +39,7 @@ export const getDashboardListItemLink = (
     }
 
     const latestPanels = JSON.parse(sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) || '{}');
+    const latestPanelsSpaceId = latestPanels?.spaceId ?? {};
     const modifiedPanels = panelModifications
       ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
           if (unsavedPanel && latestPanels?.[panelId]) {
@@ -56,7 +57,7 @@ export const getDashboardListItemLink = (
       : {};
 
     const allUnsavedPanelsMap = {
-      ...latestPanels.spaceId,
+      ...latestPanelsSpaceId,
       ...modifiedPanels,
     };
     return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
