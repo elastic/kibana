@@ -27,7 +27,7 @@ import { startTransforms } from '../../lib/entities/start_transforms';
 
 /**
  * @openapi
- * /internal/entities/managed/enablement:
+ * /api/entities/managed/enablement:
  *   put:
  *     description: Enable managed (built-in) entity discovery.
  *     tags:
@@ -62,7 +62,7 @@ import { startTransforms } from '../../lib/entities/start_transforms';
  *         description: The current user does not have the required permissions to enable entity discovery
  */
 export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
-  endpoint: 'PUT /internal/entities/managed/enablement',
+  endpoint: 'PUT /api/entities/managed/enablement',
   params: z.object({
     query: createEntityDefinitionQuerySchema,
   }),

@@ -15,7 +15,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
 
 /**
  * @openapi
- * /internal/entities/managed/enablement:
+ * /api/entities/managed/enablement:
  *   delete:
  *     description: Disable managed (built-in) entity discovery. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition, as well as the stored API key for entity discovery management.
  *     tags:
@@ -43,7 +43,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *         description: The current user does not have the required permissions to disable entity discovery
  */
 export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
-  endpoint: 'DELETE /internal/entities/managed/enablement',
+  endpoint: 'DELETE /api/entities/managed/enablement',
   params: z.object({
     query: z.object({
       deleteData: z.optional(BooleanFromString).default(false),
