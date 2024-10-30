@@ -79,7 +79,7 @@ export class SamlSessionManager {
   /**
    * Validates if the 'kbnHost' points to Cloud, even if 'isCloud' was set to false
    */
-  private validateCloudSetting(): boolean {
+  private validateCloudSetting() {
     const cloudSubDomains = ['elastic.cloud', 'foundit.no', 'cloud.es.io', 'elastic-cloud.com'];
     const isCloudHost = cloudSubDomains.some((domain) => this.kbnHost.endsWith(domain));
 
